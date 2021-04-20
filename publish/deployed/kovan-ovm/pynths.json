@@ -1,0 +1,18 @@
+[
+	{
+		"name": "pUSD",
+		"asset": "USD"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH"
+	},
+	{
+		"name": "pBTC",
+		"asset": "BTC"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
+	}
+]

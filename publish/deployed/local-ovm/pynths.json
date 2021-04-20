@@ -1,0 +1,11 @@
+[
+	{
+		"name": "pUSD",
+		"asset": "USD"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH",
+		"subclass": "MultiCollateralPynth"
+	}
+]

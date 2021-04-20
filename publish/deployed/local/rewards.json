@@ -1,0 +1,27 @@
+[
+	{
+		"name": "pETHUniswapV1",
+		"stakingToken": "0xe9cf7887b93150d4f2da7dfc6d502b216438f244",
+		"rewardsToken": "PeriFinance"
+	},
+	{
+		"name": "pXAUUniswapV2",
+		"stakingToken": "0x34a0216C5057bC18e5d34D4405284564eFd759b2",
+		"rewardsToken": "PeriFinance"
+	},
+	{
+		"name": "pUSDCurve",
+		"stakingToken": "0xc25a3a3b969415c80451098fa907ec722572917f",
+		"rewardsToken": "PeriFinance"
+	},
+	{
+		"name": "iETH",
+		"stakingToken": "ProxyiETH",
+		"rewardsToken": "PeriFinance"
+	},
+	{
+		"name": "SNXBalancer",
+		"stakingToken": "0x815f8ef4863451f4faf34fbc860034812e7377d9",
+		"rewardsToken": "PeriFinance"
+	}
+]

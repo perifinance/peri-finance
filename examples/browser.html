@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Example for browser envionments</title>
+  </head>
+
+  <body>
+    <p>
+      Open the console and check the window object. Run
+      <code>npm run pack</code> first to generate browser.js
+    </p>
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"
+      type="text/javascript"
+    ></script>
+    <script type="text/javascript" src="../browser.js"></script>
+    <script>
+      const network = "mainnet";
+      const sources = pynthetix.getSource({ network });
+      console.log("sources", sources);
+      const targets = pynthetix.getTarget({ network });
+      console.log("targets", targets);
+      const pynths = pynthetix.getPynths({ network });
+      console.log("pynths", pynths);
+      const users = pynthetix.getUsers({ network });
+      console.log("users", users);
+      console.log(
+        "pynthetix.toBytes32 correct?",
+        pynthetix.toBytes32("PERI") ===
+          "0x534e580000000000000000000000000000000000000000000000000000000000"
+      );
+      const pETHContract = new ethers.Contract(
+        targets.PynthpETH.address,
+        sources[targets.PynthpETH.source].abi,
+        ethers.getDefaultProvider(network)
+      );
+      pETHContract.totalSupply().then(unformattedTotalSupply => {
+        console.log(
+          "pETH supply",
+          ethers.utils.formatEther(unformattedTotalSupply)
+        );
+      });
+    </script>
+  </body>
+</html>

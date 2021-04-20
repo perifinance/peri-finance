@@ -1,0 +1,6 @@
+working_directory: ~/repo
+docker:
+  - image: financePeri-Team/docker-node
+    auth:
+      username: $DOCKERHUB_USERNAME
+      password: $DOCKERHUB_TOKEN

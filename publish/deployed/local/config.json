@@ -1,0 +1,455 @@
+{
+	"SystemSettings": {
+		"deploy": true
+	},
+	"PeriFinanceBridgeToOptimism": {
+		"deploy": true
+	},
+	"AddressResolver": {
+		"deploy": true
+	},
+	"ReadProxyAddressResolver": {
+		"deploy": true
+	},
+	"BinaryOptionMarketFactory": {
+		"deploy": true
+	},
+	"BinaryOptionMarketManager": {
+		"deploy": true
+	},
+	"BinaryOptionMarketData": {
+		"deploy": true
+	},
+	"CollateralManager": {
+		"deploy": true
+	},
+	"CollateralManagerState": {
+		"deploy": true
+	},
+	"CollateralEth": {
+		"deploy": true
+	},
+	"CollateralErc20": {
+		"deploy": true
+	},
+	"CollateralShort": {
+		"deploy": true
+	},
+	"CollateralStateErc20": {
+		"deploy": true
+	},
+	"CollateralStateEth": {
+		"deploy": true
+	},
+	"CollateralStateShort": {
+		"deploy": true
+	},
+	"DebtCache": {
+		"deploy": true
+	},
+	"Depot": {
+		"deploy": true
+	},
+	"TradingRewards": {
+		"deploy": true
+	},
+	"EscrowChecker": {
+		"deploy": true
+	},
+	"ExchangeRates": {
+		"deploy": true
+	},
+	"Exchanger": {
+		"deploy": true
+	},
+	"ExchangeState": {
+		"deploy": true
+	},
+	"EtherCollateral": {
+		"deploy": true
+	},
+	"EtherCollateralpUSD": {
+		"deploy": true
+	},
+	"FeePool": {
+		"deploy": true
+	},
+	"FeePoolState": {
+		"deploy": true
+	},
+	"FeePoolEternalStorage": {
+		"deploy": true
+	},
+	"FlexibleStorage": {
+		"deploy": true
+	},
+	"DelegateApprovals": {
+		"deploy": true
+	},
+	"DelegateApprovalsEternalStorage": {
+		"deploy": true
+	},
+	"Issuer": {
+		"deploy": true
+	},
+	"EternalStorageLiquidations": {
+		"deploy": true
+	},
+	"Liquidations": {
+		"deploy": true
+	},
+	"SupplySchedule": {
+		"deploy": true
+	},
+	"PeriFinance": {
+		"deploy": true
+	},
+	"PeriFinanceEscrow": {
+		"deploy": true
+	},
+	"RewardEscrow": {
+		"deploy": true
+	},
+	"RewardEscrowV2": {
+		"deploy": true
+	},
+	"RewardsDistribution": {
+		"deploy": true
+	},
+	"PeriFinanceState": {
+		"deploy": true
+	},
+	"SystemStatus": {
+		"deploy": true
+	},
+	"PynthUtil": {
+		"deploy": true
+	},
+	"DappMaintenance": {
+		"deploy": true
+	},
+	"PynthpUSD": {
+		"deploy": true
+	},
+	"PynthpEUR": {
+		"deploy": true
+	},
+	"PynthpJPY": {
+		"deploy": true
+	},
+	"PynthpAUD": {
+		"deploy": true
+	},
+	"PynthpGBP": {
+		"deploy": true
+	},
+	"PynthpCHF": {
+		"deploy": true
+	},
+	"PynthpXAU": {
+		"deploy": true
+	},
+	"PynthpXAG": {
+		"deploy": true
+	},
+	"PynthpBTC": {
+		"deploy": true
+	},
+	"ProxyERC20": {
+		"deploy": true
+	},
+	"ProxyERC20pUSD": {
+		"deploy": true
+	},
+	"ProxyFeePool": {
+		"deploy": true
+	},
+	"ProxyPeriFinance": {
+		"deploy": true
+	},
+	"ProxypUSD": {
+		"deploy": true
+	},
+	"ProxypEUR": {
+		"deploy": true
+	},
+	"ProxypJPY": {
+		"deploy": true
+	},
+	"ProxypAUD": {
+		"deploy": true
+	},
+	"ProxypGBP": {
+		"deploy": true
+	},
+	"ProxypCHF": {
+		"deploy": true
+	},
+	"ProxypXAU": {
+		"deploy": true
+	},
+	"ProxypXAG": {
+		"deploy": true
+	},
+	"ProxypBTC": {
+		"deploy": true
+	},
+	"SafeDecimalMath": {
+		"deploy": true
+	},
+	"Math": {
+		"deploy": true
+	},
+	"TokenStatePeriFinance": {
+		"deploy": true
+	},
+	"TokenStatepUSD": {
+		"deploy": true
+	},
+	"TokenStatepEUR": {
+		"deploy": true
+	},
+	"TokenStatepJPY": {
+		"deploy": true
+	},
+	"TokenStatepAUD": {
+		"deploy": true
+	},
+	"TokenStatepGBP": {
+		"deploy": true
+	},
+	"TokenStatepCHF": {
+		"deploy": true
+	},
+	"TokenStatepXAU": {
+		"deploy": true
+	},
+	"TokenStatepXAG": {
+		"deploy": true
+	},
+	"TokenStatepBTC": {
+		"deploy": true
+	},
+	"TokenStatepETH": {
+		"deploy": true
+	},
+	"ProxypETH": {
+		"deploy": true
+	},
+	"PynthpETH": {
+		"deploy": true
+	},
+	"TokenStatepBNB": {
+		"deploy": true
+	},
+	"ProxypBNB": {
+		"deploy": true
+	},
+	"PynthpBNB": {
+		"deploy": true
+	},
+	"TokenStatepTRX": {
+		"deploy": true
+	},
+	"ProxypTRX": {
+		"deploy": true
+	},
+	"PynthpTRX": {
+		"deploy": true
+	},
+	"TokenStatepXTZ": {
+		"deploy": true
+	},
+	"ProxypXTZ": {
+		"deploy": true
+	},
+	"PynthpXTZ": {
+		"deploy": true
+	},
+	"TokenStateiBTC": {
+		"deploy": true
+	},
+	"ProxyiBTC": {
+		"deploy": true
+	},
+	"PynthiBTC": {
+		"deploy": true
+	},
+	"TokenStateiETH": {
+		"deploy": true
+	},
+	"ProxyiETH": {
+		"deploy": true
+	},
+	"PynthiETH": {
+		"deploy": true
+	},
+	"TokenStateiBNB": {
+		"deploy": true
+	},
+	"ProxyiBNB": {
+		"deploy": true
+	},
+	"PynthiBNB": {
+		"deploy": true
+	},
+	"TokenStateiTRX": {
+		"deploy": true
+	},
+	"ProxyiTRX": {
+		"deploy": true
+	},
+	"PynthiTRX": {
+		"deploy": true
+	},
+	"TokenStateiXTZ": {
+		"deploy": true
+	},
+	"ProxyiXTZ": {
+		"deploy": true
+	},
+	"PynthiXTZ": {
+		"deploy": true
+	},
+	"TokenStatepCEX": {
+		"deploy": true
+	},
+	"ProxypCEX": {
+		"deploy": true
+	},
+	"PynthpCEX": {
+		"deploy": true
+	},
+	"TokenStateiCEX": {
+		"deploy": true
+	},
+	"ProxyiCEX": {
+		"deploy": true
+	},
+	"PynthiCEX": {
+		"deploy": true
+	},
+	"TokenStatepXRP": {
+		"deploy": true
+	},
+	"ProxypXRP": {
+		"deploy": true
+	},
+	"PynthpXRP": {
+		"deploy": true
+	},
+	"TokenStatepLTC": {
+		"deploy": true
+	},
+	"ProxypLTC": {
+		"deploy": true
+	},
+	"PynthpLTC": {
+		"deploy": true
+	},
+	"TokenStatepLINK": {
+		"deploy": true
+	},
+	"ProxypLINK": {
+		"deploy": true
+	},
+	"PynthpLINK": {
+		"deploy": true
+	},
+	"TokenStatepEOS": {
+		"deploy": true
+	},
+	"ProxypEOS": {
+		"deploy": true
+	},
+	"PynthpEOS": {
+		"deploy": true
+	},
+	"TokenStatesBCH": {
+		"deploy": true
+	},
+	"ProxysBCH": {
+		"deploy": true
+	},
+	"PynthsBCH": {
+		"deploy": true
+	},
+	"TokenStatepETC": {
+		"deploy": true
+	},
+	"ProxypETC": {
+		"deploy": true
+	},
+	"PynthpETC": {
+		"deploy": true
+	},
+	"TokenStatesDASH": {
+		"deploy": true
+	},
+	"ProxysDASH": {
+		"deploy": true
+	},
+	"PynthsDASH": {
+		"deploy": true
+	},
+	"TokenStatesXMR": {
+		"deploy": true
+	},
+	"ProxysXMR": {
+		"deploy": true
+	},
+	"PynthsXMR": {
+		"deploy": true
+	},
+	"TokenStatesADA": {
+		"deploy": true
+	},
+	"ProxysADA": {
+		"deploy": true
+	},
+	"PynthsADA": {
+		"deploy": true
+	},
+	"TokenStatepDEFI": {
+		"deploy": true
+	},
+	"ProxypDEFI": {
+		"deploy": true
+	},
+	"PynthpDEFI": {
+		"deploy": true
+	},
+	"TokenStateiDEFI": {
+		"deploy": true
+	},
+	"ProxyiDEFI": {
+		"deploy": true
+	},
+	"PynthiDEFI": {
+		"deploy": true
+	},
+	"TokenStatesFTSE": {
+		"deploy": true
+	},
+	"ProxysFTSE": {
+		"deploy": true
+	},
+	"PynthsFTSE": {
+		"deploy": true
+	},
+	"TokenStatesNIKKEI": {
+		"deploy": true
+	},
+	"ProxysNIKKEI": {
+		"deploy": true
+	},
+	"PynthsNIKKEI": {
+		"deploy": true
+	},
+	"MockToken": {
+		"deploy": true
+	},
+	"StakeStateUSDC": {
+		"deploy": true
+	}
+}

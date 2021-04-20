@@ -1,0 +1,10 @@
+[
+	{
+		"name": "pETH",
+		"rewardsToken": "ProxyERC20"
+	},
+	{
+		"name": "pBTC",
+		"rewardsToken": "ProxyERC20"
+	}
+]

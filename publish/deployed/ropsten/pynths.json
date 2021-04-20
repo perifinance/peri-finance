@@ -1,0 +1,335 @@
+[
+	{
+		"name": "pUSD",
+		"asset": "USD"
+	},
+	{
+		"name": "pEUR",
+		"asset": "EUR"
+	},
+	{
+		"name": "pJPY",
+		"asset": "JPY"
+	},
+	{
+		"name": "pAUD",
+		"asset": "AUD"
+	},
+	{
+		"name": "pGBP",
+		"asset": "GBP"
+	},
+	{
+		"name": "pCHF",
+		"asset": "CHF"
+	},
+	{
+		"name": "pXAU",
+		"asset": "XAU"
+	},
+	{
+		"name": "pXAG",
+		"asset": "XAG"
+	},
+	{
+		"name": "pBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB",
+		"subclass": "PurgeablePynth"
+	},
+	{
+		"name": "pTRX",
+		"asset": "TRX"
+	},
+	{
+		"name": "pXTZ",
+		"asset": "XTZ",
+		"subclass": "PurgeablePynth"
+	},
+	{
+		"name": "pXRP",
+		"asset": "XRP"
+	},
+	{
+		"name": "pLTC",
+		"asset": "LTC",
+		"subclass": "PurgeablePynth"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
+	},
+	{
+		"name": "pEOS",
+		"asset": "EOS"
+	},
+	{
+		"name": "sBCH",
+		"asset": "BCH"
+	},
+	{
+		"name": "pETC",
+		"asset": "ETC"
+	},
+	{
+		"name": "sDASH",
+		"asset": "DASH"
+	},
+	{
+		"name": "sXMR",
+		"asset": "XMR"
+	},
+	{
+		"name": "sADA",
+		"asset": "ADA"
+	},
+	{
+		"name": "sFTSE",
+		"asset": "FTSE100"
+	},
+	{
+		"name": "sNIKKEI",
+		"asset": "NIKKEI225"
+	},
+	{
+		"name": "pCEX",
+		"asset": "CEX",
+		"index": [
+			{
+				"asset": "BNB",
+				"units": 17.88
+			},
+			{
+				"asset": "LEO",
+				"units": 153.85
+			},
+			{
+				"asset": "HT",
+				"units": 20.51
+			},
+			{
+				"asset": "OKB",
+				"units": 32.52
+			},
+			{
+				"asset": "KCS",
+				"units": 59.82
+			}
+		],
+		"subclass": "PurgeablePynth"
+	},
+	{
+		"name": "pDEFI",
+		"asset": "DEFI",
+		"index": [
+			{
+				"asset": "LINK",
+				"units": 92.583
+			},
+			{
+				"asset": "MKR",
+				"units": 0.432
+			},
+			{
+				"asset": "ZRX",
+				"units": 502.718
+			},
+			{
+				"asset": "SNX",
+				"units": 107.686
+			},
+			{
+				"asset": "REN",
+				"units": 1222.393
+			},
+			{
+				"asset": "LRC",
+				"units": 2164.709
+			},
+			{
+				"asset": "KNC",
+				"units": 357.085
+			},
+			{
+				"asset": "BNT",
+				"units": 119.197
+			},
+			{
+				"asset": "MLN",
+				"units": 6.495
+			}
+		],
+		"subclass": "PurgeablePynth"
+	},
+	{
+		"name": "iBTC",
+		"asset": "BTC",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 10600,
+			"upperLimit": 15900,
+			"lowerLimit": 5300
+		}
+	},
+	{
+		"name": "iETH",
+		"asset": "ETH",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 314.54,
+			"upperLimit": 550.445,
+			"lowerLimit": 78.635
+		}
+	},
+	{
+		"name": "iBNB",
+		"asset": "BNB",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 22.258,
+			"upperLimit": 33.387,
+			"lowerLimit": 11.129
+		}
+	},
+	{
+		"name": "iTRX",
+		"asset": "TRX",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 0.0299,
+			"upperLimit": 0.04485,
+			"lowerLimit": 0.01495
+		}
+	},
+	{
+		"name": "iXTZ",
+		"asset": "XTZ",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 4.1915,
+			"upperLimit": 6.28725,
+			"lowerLimit": 2.09575
+		}
+	},
+	{
+		"name": "iXRP",
+		"asset": "XRP",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 0.3042,
+			"upperLimit": 0.4563,
+			"lowerLimit": 0.1521
+		}
+	},
+	{
+		"name": "iLINK",
+		"asset": "LINK",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 19.54,
+			"upperLimit": 29.31,
+			"lowerLimit": 9.77
+		}
+	},
+	{
+		"name": "iLTC",
+		"asset": "LTC",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 35.66,
+			"upperLimit": 53.49,
+			"lowerLimit": 17.83
+		}
+	},
+	{
+		"name": "iEOS",
+		"asset": "EOS",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 3.8502,
+			"upperLimit": 5.7753,
+			"lowerLimit": 1.9251
+		}
+	},
+	{
+		"name": "iBCH",
+		"asset": "BCH",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 314.4821,
+			"upperLimit": 471.72315,
+			"lowerLimit": 157.24105
+		}
+	},
+	{
+		"name": "iETC",
+		"asset": "ETC",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 6.16,
+			"upperLimit": 9.24,
+			"lowerLimit": 3.08
+		}
+	},
+	{
+		"name": "iDASH",
+		"asset": "DASH",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 98.6231,
+			"upperLimit": 147.93465,
+			"lowerLimit": 49.31155
+		}
+	},
+	{
+		"name": "iXMR",
+		"asset": "XMR",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 91.2236,
+			"upperLimit": 136.8354,
+			"lowerLimit": 45.6118
+		}
+	},
+	{
+		"name": "iADA",
+		"asset": "ADA",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 0.08,
+			"upperLimit": 0.12,
+			"lowerLimit": 0.04
+		}
+	},
+	{
+		"name": "iCEX",
+		"asset": "CEX",
+		"index": "pCEX",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 943.4772,
+			"upperLimit": 1415.2158,
+			"lowerLimit": 471.7386
+		}
+	},
+	{
+		"name": "iDEFI",
+		"asset": "DEFI",
+		"index": "pDEFI",
+		"subclass": "PurgeablePynth",
+		"inverted": {
+			"entryPoint": 4249.0685,
+			"upperLimit": 6373.60275,
+			"lowerLimit": 2124.53425
+		}
+	}
+]
