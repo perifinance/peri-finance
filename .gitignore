@@ -1,0 +1,51 @@
+/**/__pycache__/*
+test_settings.py
+deploy_settings.py
+*.pyc
+
+# gitignore - Truffle proj
+.idea/
+build
+bin/
+node_modules
+yarn-error.log
+
+# mkdocs
+site/
+
+# Our environment settings
+.env
+
+# Build artifacts
+flattened-contracts/
+
+# For eth-gas-reporter in tests
+test-gas-used.log
+test-gas-used-prod.log
+
+# vscode
+.vscode/
+
+.DS_Store
+coverage.json
+coverage
+browser.js
+.coverage_*
+
+# CircleCI local artifacts
+process.yml
+
+# Temp files
+.tmp/
+
+# CSV files
+*.csv
+
+.db
+
+# npm 
+node_modules
+
+#Buidler files
+cache
+artifacts
