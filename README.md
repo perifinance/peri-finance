@@ -9,16 +9,16 @@ It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USD
 
 
 
-## Future Plan
+## Upcoming
 
-### Exchange
+### PERI Exchange
 Users will be able to converting one Pynth to another without worrying about how deep the liquidity nor slippage. Users will also be able to be benefited by taking short or long positions of Pynths with 20x leverage.  
 Prices will be committed on chain by a trusted oracle. Moving to a decentralised oracle will be phased in with the first phase completed for all forex prices using [Chainlink](https://feeds.chain.link/).
 
-### DAO
+### PERI DAO
 PERI tokens are also used for governance. We have created a PIP (PERI Improvement Proposals) system to collect community opinions.
 
-### Peri Embraces NFTs
+### Pynths NFTs
 Artists and investors are both greatly rewarded and monetized by minting Peri token.  
 
 ---
