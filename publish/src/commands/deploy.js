@@ -1147,6 +1147,25 @@ const deploy = async ({
 		}
 	}
 
+	console.log(gray(`\n------ DEPLOY StakeState CONTRACTS ------\n`));
+
+	await deployer.deployContract({
+		name: `StakeStateUsdc`,
+		source: 'StakeStateUSDC',
+		args: [account, ZERO_ADDRESS],
+		force: addNewPynths,
+	});
+
+	if (network === 'local') {
+		console.log(gray(`\n------ DEPLOY MockTokens ------\n`));
+
+		await deployer.deployContract({
+			name: 'USDC',
+			source: 'MockToken',
+			args: ['USDC', 'USDC', 6],
+		});
+	}
+
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
 	await deployer.deployContract({

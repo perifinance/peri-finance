@@ -498,7 +498,7 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		'goerli-ovm': Object.assign({}, base),
 		local: Object.assign({}, base, {
 			// Deterministic account #0 when using `npx hardhat node`
-			owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+			owner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 		}),
 	};
 
