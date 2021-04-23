@@ -410,33 +410,6 @@
 	"PynthpETC": {
 		"deploy": false
 	},
-	"TokenStatesDASH": {
-		"deploy": false
-	},
-	"ProxysDASH": {
-		"deploy": false
-	},
-	"PynthsDASH": {
-		"deploy": false
-	},
-	"TokenStatesXMR": {
-		"deploy": false
-	},
-	"ProxysXMR": {
-		"deploy": false
-	},
-	"PynthsXMR": {
-		"deploy": false
-	},
-	"TokenStatesADA": {
-		"deploy": false
-	},
-	"ProxysADA": {
-		"deploy": false
-	},
-	"PynthsADA": {
-		"deploy": false
-	},
 	"TokenStateiEOS": {
 		"deploy": false
 	},

@@ -365,15 +365,6 @@
 	"PynthpEOS": {
 		"deploy": true
 	},
-	"TokenStatesBCH": {
-		"deploy": true
-	},
-	"ProxysBCH": {
-		"deploy": true
-	},
-	"PynthsBCH": {
-		"deploy": true
-	},
 	"TokenStatepETC": {
 		"deploy": true
 	},
@@ -381,33 +372,6 @@
 		"deploy": true
 	},
 	"PynthpETC": {
-		"deploy": true
-	},
-	"TokenStatesDASH": {
-		"deploy": true
-	},
-	"ProxysDASH": {
-		"deploy": true
-	},
-	"PynthsDASH": {
-		"deploy": true
-	},
-	"TokenStatesXMR": {
-		"deploy": true
-	},
-	"ProxysXMR": {
-		"deploy": true
-	},
-	"PynthsXMR": {
-		"deploy": true
-	},
-	"TokenStatesADA": {
-		"deploy": true
-	},
-	"ProxysADA": {
-		"deploy": true
-	},
-	"PynthsADA": {
 		"deploy": true
 	},
 	"TokenStatepDEFI": {
@@ -426,24 +390,6 @@
 		"deploy": true
 	},
 	"PynthiDEFI": {
-		"deploy": true
-	},
-	"TokenStatesFTSE": {
-		"deploy": true
-	},
-	"ProxysFTSE": {
-		"deploy": true
-	},
-	"PynthsFTSE": {
-		"deploy": true
-	},
-	"TokenStatesNIKKEI": {
-		"deploy": true
-	},
-	"ProxysNIKKEI": {
-		"deploy": true
-	},
-	"PynthsNIKKEI": {
 		"deploy": true
 	},
 	"MockToken": {

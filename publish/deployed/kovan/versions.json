@@ -5228,19 +5228,6 @@
 				"status": "replaced",
 				"replaced_in": "v2.35.1-alpha"
 			},
-			"TokenStatesBCH": {
-				"address": "0x78e7395Df87D890199d147AFb347351004aD5956",
-				"status": "deleted"
-			},
-			"ProxysBCH": {
-				"address": "0x76c04f5025aae63cDf8b40c4296122d61572c353",
-				"status": "deleted"
-			},
-			"PynthsBCH": {
-				"address": "0x62f43AA89b3050bBf080BbCA4b0ef798bf3cE0d5",
-				"status": "replaced",
-				"replaced_in": "v2.35.1-alpha"
-			},
 			"TokenStatepETC": {
 				"address": "0xcc1fb912786Ca8447235d3c5Ab7c253f98AD4E22",
 				"status": "current"
@@ -5251,45 +5238,6 @@
 			},
 			"PynthpETC": {
 				"address": "0x4A73356315E965724ee030d8AF1852C62647b786",
-				"status": "replaced",
-				"replaced_in": "v2.35.1-alpha"
-			},
-			"TokenStatesDASH": {
-				"address": "0x2fe02b9445F20d2Aa49Bef93Ca201f81FD8A7461",
-				"status": "current"
-			},
-			"ProxysDASH": {
-				"address": "0xE4bC13C29513e5D0BdD68258325f2D01a4B641A0",
-				"status": "current"
-			},
-			"PynthsDASH": {
-				"address": "0x9c388A263889440033c18d92c6E15f6Ff2878A75",
-				"status": "replaced",
-				"replaced_in": "v2.35.1-alpha"
-			},
-			"TokenStatesXMR": {
-				"address": "0x195721A55507bd3dfA65Ad1A8026A51Ad5aAD33D",
-				"status": "current"
-			},
-			"ProxysXMR": {
-				"address": "0x4708C998e2979f77766258bE94526BAfa84b1270",
-				"status": "current"
-			},
-			"PynthsXMR": {
-				"address": "0x62687aC6BA9260Af5A979D773aC674f883f71450",
-				"status": "replaced",
-				"replaced_in": "v2.35.1-alpha"
-			},
-			"TokenStatesADA": {
-				"address": "0xb645c8c6ebfc1EE3B178998b780cEde91ca2f8Bf",
-				"status": "current"
-			},
-			"ProxysADA": {
-				"address": "0xBA939808928b7a823D6F1Fc6522FC57A8000694b",
-				"status": "current"
-			},
-			"PynthsADA": {
-				"address": "0xe15132582Bc814EAa4505B67A1965f29617fFD7B",
 				"status": "replaced",
 				"replaced_in": "v2.35.1-alpha"
 			},
@@ -6113,28 +6061,8 @@
 				"status": "current",
 				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
 			},
-			"PynthsBCH": {
-				"address": "0xFc7E3fb8e54e11798a16403aeF0152651708B902",
-				"status": "deleted",
-				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
-			},
 			"PynthpETC": {
 				"address": "0xD62933a82cDBba32b4CA51309CA2D7000445d0c5",
-				"status": "current",
-				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
-			},
-			"PynthsDASH": {
-				"address": "0xCC200785cea662a7fA66E033AA1a4a054022a197",
-				"status": "current",
-				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
-			},
-			"PynthsXMR": {
-				"address": "0xfFd76a5fE92Cfe681aEFDEA9FA5C22372D72B510",
-				"status": "current",
-				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
-			},
-			"PynthsADA": {
-				"address": "0xEca41030226Ace8F54D0AF5DbD37C276E100055A",
 				"status": "current",
 				"keccak256": "0x9afb6e2a0d5f2579a2445f381c82c673c722edd212334b17eec51a4f67a5597e"
 			},

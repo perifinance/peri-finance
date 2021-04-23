@@ -33,10 +33,6 @@
 		"asset": "XAG"
 	},
 	{
-		"name": "sOIL",
-		"asset": "OIL"
-	},
-	{
 		"name": "pBTC",
 		"asset": "BTC",
 		"subclass": "MultiCollateralPynth"
@@ -80,50 +76,6 @@
 	{
 		"name": "pETC",
 		"asset": "ETC"
-	},
-	{
-		"name": "sDASH",
-		"asset": "DASH"
-	},
-	{
-		"name": "sXMR",
-		"asset": "XMR"
-	},
-	{
-		"name": "sADA",
-		"asset": "ADA"
-	},
-	{
-		"name": "sAAVE",
-		"asset": "AAVE"
-	},
-	{
-		"name": "sUNI",
-		"asset": "UNI"
-	},
-	{
-		"name": "sYFI",
-		"asset": "YFI"
-	},
-	{
-		"name": "sDOT",
-		"asset": "DOT"
-	},
-	{
-		"name": "sREN",
-		"asset": "REN"
-	},
-	{
-		"name": "sCOMP",
-		"asset": "COMP"
-	},
-	{
-		"name": "sFTSE",
-		"asset": "FTSE100"
-	},
-	{
-		"name": "sNIKKEI",
-		"asset": "NIKKEI225"
 	},
 	{
 		"name": "pTSLA",

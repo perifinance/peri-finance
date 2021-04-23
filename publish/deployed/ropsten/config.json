@@ -368,15 +368,6 @@
 	"PynthpEOS": {
 		"deploy": false
 	},
-	"TokenStatesBCH": {
-		"deploy": false
-	},
-	"ProxysBCH": {
-		"deploy": false
-	},
-	"PynthsBCH": {
-		"deploy": false
-	},
 	"TokenStatepETC": {
 		"deploy": false
 	},
@@ -384,51 +375,6 @@
 		"deploy": false
 	},
 	"PynthpETC": {
-		"deploy": false
-	},
-	"TokenStatesDASH": {
-		"deploy": false
-	},
-	"ProxysDASH": {
-		"deploy": false
-	},
-	"PynthsDASH": {
-		"deploy": false
-	},
-	"TokenStatesXMR": {
-		"deploy": false
-	},
-	"ProxysXMR": {
-		"deploy": false
-	},
-	"PynthsXMR": {
-		"deploy": false
-	},
-	"TokenStatesADA": {
-		"deploy": false
-	},
-	"ProxysADA": {
-		"deploy": false
-	},
-	"PynthsADA": {
-		"deploy": false
-	},
-	"TokenStatesFTSE": {
-		"deploy": false
-	},
-	"ProxysFTSE": {
-		"deploy": false
-	},
-	"PynthsFTSE": {
-		"deploy": false
-	},
-	"TokenStatesNIKKEI": {
-		"deploy": false
-	},
-	"ProxysNIKKEI": {
-		"deploy": false
-	},
-	"PynthsNIKKEI": {
 		"deploy": false
 	},
 	"TokenStateiEOS": {

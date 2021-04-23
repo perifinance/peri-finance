@@ -1035,33 +1035,6 @@
 			"txn": "",
 			"network": "rinkeby"
 		},
-		"TokenStatesBCH": {
-			"name": "TokenStatesBCH",
-			"address": "0x0e039eF52a2A664cC9B719737138418Eea40DC88",
-			"source": "TokenState",
-			"link": "https://rinkeby.etherscan.io/address/0x0e039eF52a2A664cC9B719737138418Eea40DC88",
-			"timestamp": "2020-04-02T04:56:46.515Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"ProxysBCH": {
-			"name": "ProxysBCH",
-			"address": "0xfa654f3295667c96364c8637aF27C774D4432B4F",
-			"source": "ProxyERC20",
-			"link": "https://rinkeby.etherscan.io/address/0xfa654f3295667c96364c8637aF27C774D4432B4F",
-			"timestamp": "2020-04-02T04:57:00.494Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"PynthsBCH": {
-			"name": "PynthsBCH",
-			"address": "0x87DEA15ED660b986f6375D77De838a0418AaC526",
-			"source": "Pynth",
-			"link": "https://rinkeby.etherscan.io/address/0x87DEA15ED660b986f6375D77De838a0418AaC526",
-			"timestamp": "2020-12-22T20:57:53.497Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
 		"TokenStatepETC": {
 			"name": "TokenStatepETC",
 			"address": "0xB9c0784d1F32f549B3b9eE33924eAc2281B78B43",
@@ -1086,87 +1059,6 @@
 			"source": "Pynth",
 			"link": "https://rinkeby.etherscan.io/address/0xFD5f2aA5031E6D8AEe78Be5e83cfe33A94e50C12",
 			"timestamp": "2020-12-22T20:58:38.858Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"TokenStatesDASH": {
-			"name": "TokenStatesDASH",
-			"address": "0xB27C283AD83835bD783E3E0183c5f2A46489d6Dc",
-			"source": "TokenState",
-			"link": "https://rinkeby.etherscan.io/address/0xB27C283AD83835bD783E3E0183c5f2A46489d6Dc",
-			"timestamp": "2020-04-02T04:59:44.689Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"ProxysDASH": {
-			"name": "ProxysDASH",
-			"address": "0x189Dc0B0B3CE656777B18d2d17b7F5b4B413BA59",
-			"source": "ProxyERC20",
-			"link": "https://rinkeby.etherscan.io/address/0x189Dc0B0B3CE656777B18d2d17b7F5b4B413BA59",
-			"timestamp": "2020-04-02T05:00:00.600Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"PynthsDASH": {
-			"name": "PynthsDASH",
-			"address": "0x53d5CD879525c261Cf151F594016c8E0cB82B636",
-			"source": "Pynth",
-			"link": "https://rinkeby.etherscan.io/address/0x53d5CD879525c261Cf151F594016c8E0cB82B636",
-			"timestamp": "2020-12-22T20:59:24.022Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"TokenStatesXMR": {
-			"name": "TokenStatesXMR",
-			"address": "0x2e3cFf1aA8AF2EA3fe752cE45d4F802267568582",
-			"source": "TokenState",
-			"link": "https://rinkeby.etherscan.io/address/0x2e3cFf1aA8AF2EA3fe752cE45d4F802267568582",
-			"timestamp": "2020-04-02T05:01:16.025Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"ProxysXMR": {
-			"name": "ProxysXMR",
-			"address": "0x9266CD4A69E62208F02E761f70A8F0dE411ed553",
-			"source": "ProxyERC20",
-			"link": "https://rinkeby.etherscan.io/address/0x9266CD4A69E62208F02E761f70A8F0dE411ed553",
-			"timestamp": "2020-04-02T05:01:30.436Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"PynthsXMR": {
-			"name": "PynthsXMR",
-			"address": "0x8012dc8c2ee5294e26899e5b50A1dAe694151c9a",
-			"source": "Pynth",
-			"link": "https://rinkeby.etherscan.io/address/0x8012dc8c2ee5294e26899e5b50A1dAe694151c9a",
-			"timestamp": "2020-12-22T21:00:11.153Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"TokenStatesADA": {
-			"name": "TokenStatesADA",
-			"address": "0x8423A960C19991D5c6d3c9aC6147224bAcb8bF56",
-			"source": "TokenState",
-			"link": "https://rinkeby.etherscan.io/address/0x8423A960C19991D5c6d3c9aC6147224bAcb8bF56",
-			"timestamp": "2020-04-02T05:02:46.506Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"ProxysADA": {
-			"name": "ProxysADA",
-			"address": "0x09F73351647f1BE44f2ddc00f9631B66b99A3af0",
-			"source": "ProxyERC20",
-			"link": "https://rinkeby.etherscan.io/address/0x09F73351647f1BE44f2ddc00f9631B66b99A3af0",
-			"timestamp": "2020-04-02T05:03:00.267Z",
-			"txn": "",
-			"network": "rinkeby"
-		},
-		"PynthsADA": {
-			"name": "PynthsADA",
-			"address": "0x63B69E63Eec4978E1E3A887dCEf5ADAfA42c9635",
-			"source": "Pynth",
-			"link": "https://rinkeby.etherscan.io/address/0x63B69E63Eec4978E1E3A887dCEf5ADAfA42c9635",
-			"timestamp": "2020-12-22T21:00:56.240Z",
 			"txn": "",
 			"network": "rinkeby"
 		},

@@ -74,24 +74,8 @@
 		"asset": "EOS"
 	},
 	{
-		"name": "sBCH",
-		"asset": "BCH"
-	},
-	{
 		"name": "pETC",
 		"asset": "ETC"
-	},
-	{
-		"name": "sDASH",
-		"asset": "DASH"
-	},
-	{
-		"name": "sXMR",
-		"asset": "XMR"
-	},
-	{
-		"name": "sADA",
-		"asset": "ADA"
 	},
 	{
 		"name": "pCEX",

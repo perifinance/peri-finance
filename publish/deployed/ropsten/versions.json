@@ -2322,18 +2322,6 @@
 				"address": "0x5033D14F95d372CC2eEeD522bFfDEF4Fa00C774a",
 				"status": "current"
 			},
-			"TokenStatesBCH": {
-				"address": "0x92636FE52f6dBE6Fd5986b096ed41CA7A0AAcB70",
-				"status": "current"
-			},
-			"ProxysBCH": {
-				"address": "0x412673a136A71BB17aE8c3A59f11141f6De61370",
-				"status": "current"
-			},
-			"PynthsBCH": {
-				"address": "0x483Ee887110920336f0a628E2659Aa9929cf2257",
-				"status": "current"
-			},
 			"TokenStatepETC": {
 				"address": "0x57004C35b6d775921D69C4372d62fc2269DB1088",
 				"status": "current"
@@ -2344,66 +2332,6 @@
 			},
 			"PynthpETC": {
 				"address": "0x460e56Cf6d4EdcC5Bb47043Ca7F54f50A5416106",
-				"status": "current"
-			},
-			"TokenStatesDASH": {
-				"address": "0x0A1E5cD9405f10F29Fcc739A338bCb18245001ac",
-				"status": "current"
-			},
-			"ProxysDASH": {
-				"address": "0xdDB882a06EbC7Dc4Abb93AD4bBbA83644A33dD88",
-				"status": "current"
-			},
-			"PynthsDASH": {
-				"address": "0x3Cc79dA9bF8f7e320Ae4927063b4275B83B815a2",
-				"status": "current"
-			},
-			"TokenStatesXMR": {
-				"address": "0x852A0b903F87DcA73b8350F838dED96738CE5bcf",
-				"status": "current"
-			},
-			"ProxysXMR": {
-				"address": "0x70287F4abde5AE17A7EF9453761d693B7e4D5539",
-				"status": "current"
-			},
-			"PynthsXMR": {
-				"address": "0xf11CF84aa509De91DaCf44cF47c607d91CB6DCA4",
-				"status": "current"
-			},
-			"TokenStatesADA": {
-				"address": "0xf5d085F6F522dC19E66f224eE0d59aAFea6bc17D",
-				"status": "current"
-			},
-			"ProxysADA": {
-				"address": "0x44d2402Ed7BcA41Fc32970Fc443Be6eb397CAcAD",
-				"status": "current"
-			},
-			"PynthsADA": {
-				"address": "0x2Ac193C213294BB00ebAd239B936891A7b5E8B86",
-				"status": "current"
-			},
-			"TokenStatesFTSE": {
-				"address": "0xC3ACe9e3c54c80fC634ab3BC26988eb4fE2Ca183",
-				"status": "current"
-			},
-			"ProxysFTSE": {
-				"address": "0x147E9Bbb3AB147C6e3237a2959Ac22aC436FCeC0",
-				"status": "current"
-			},
-			"PynthsFTSE": {
-				"address": "0xD0C85fa41E5800cEefc00b1185A2076DC02817B2",
-				"status": "current"
-			},
-			"TokenStatesNIKKEI": {
-				"address": "0xE06bF53daF878972031E92ecEF8F6DAAD9a1c627",
-				"status": "current"
-			},
-			"ProxysNIKKEI": {
-				"address": "0xa757Ff9F478df93127316E00D9eaeEe6cBb51f85",
-				"status": "current"
-			},
-			"PynthsNIKKEI": {
-				"address": "0xB8266b75262B5F6995fe3E0e894ab2e56EbB4428",
 				"status": "current"
 			},
 			"TokenStateiEOS": {

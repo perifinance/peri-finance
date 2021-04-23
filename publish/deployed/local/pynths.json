@@ -75,24 +75,8 @@
 		"asset": "EOS"
 	},
 	{
-		"name": "sBCH",
-		"asset": "BCH"
-	},
-	{
 		"name": "pETC",
 		"asset": "ETC"
-	},
-	{
-		"name": "sDASH",
-		"asset": "DASH"
-	},
-	{
-		"name": "sXMR",
-		"asset": "XMR"
-	},
-	{
-		"name": "sADA",
-		"asset": "ADA"
 	},
 	{
 		"name": "pCEX",
@@ -274,13 +258,5 @@
 			"upperLimit": 4135.5,
 			"lowerLimit": 1378.5
 		}
-	},
-	{
-		"name": "sFTSE",
-		"asset": "FTSE100"
-	},
-	{
-		"name": "sNIKKEI",
-		"asset": "NIKKEI225"
 	}
 ]

@@ -389,51 +389,6 @@
 	"PynthpETC": {
 		"deploy": false
 	},
-	"TokenStatesDASH": {
-		"deploy": false
-	},
-	"ProxysDASH": {
-		"deploy": false
-	},
-	"PynthsDASH": {
-		"deploy": false
-	},
-	"TokenStatesXMR": {
-		"deploy": false
-	},
-	"ProxysXMR": {
-		"deploy": false
-	},
-	"PynthsXMR": {
-		"deploy": false
-	},
-	"TokenStatesADA": {
-		"deploy": false
-	},
-	"ProxysADA": {
-		"deploy": false
-	},
-	"PynthsADA": {
-		"deploy": false
-	},
-	"TokenStatesFTSE": {
-		"deploy": false
-	},
-	"ProxysFTSE": {
-		"deploy": false
-	},
-	"PynthsFTSE": {
-		"deploy": false
-	},
-	"TokenStatesNIKKEI": {
-		"deploy": false
-	},
-	"ProxysNIKKEI": {
-		"deploy": false
-	},
-	"PynthsNIKKEI": {
-		"deploy": false
-	},
 	"TokenStateiEOS": {
 		"deploy": false
 	},
@@ -491,15 +446,6 @@
 	"EtherCollateralpUSD": {
 		"deploy": false
 	},
-	"TokenStatesOIL": {
-		"deploy": false
-	},
-	"ProxysOIL": {
-		"deploy": false
-	},
-	"PynthsOIL": {
-		"deploy": false
-	},
 	"TokenStateiOIL": {
 		"deploy": false
 	},
@@ -543,60 +489,6 @@
 		"deploy": false
 	},
 	"ShortingRewardspETH": {
-		"deploy": false
-	},
-	"TokenStatesAAVE": {
-		"deploy": false
-	},
-	"ProxysAAVE": {
-		"deploy": false
-	},
-	"PynthsAAVE": {
-		"deploy": false
-	},
-	"TokenStatesUNI": {
-		"deploy": false
-	},
-	"ProxysUNI": {
-		"deploy": false
-	},
-	"PynthsUNI": {
-		"deploy": false
-	},
-	"TokenStatesYFI": {
-		"deploy": false
-	},
-	"ProxysYFI": {
-		"deploy": false
-	},
-	"PynthsYFI": {
-		"deploy": false
-	},
-	"TokenStatesDOT": {
-		"deploy": false
-	},
-	"ProxysDOT": {
-		"deploy": false
-	},
-	"PynthsDOT": {
-		"deploy": false
-	},
-	"TokenStatesREN": {
-		"deploy": false
-	},
-	"ProxysREN": {
-		"deploy": false
-	},
-	"PynthsREN": {
-		"deploy": false
-	},
-	"TokenStatesCOMP": {
-		"deploy": false
-	},
-	"ProxysCOMP": {
-		"deploy": false
-	},
-	"PynthsCOMP": {
 		"deploy": false
 	},
 	"TokenStateiAAVE": {
