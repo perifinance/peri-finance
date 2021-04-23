@@ -194,13 +194,18 @@ contract('AddressResolver', accounts => {
 		describe('when a PeriFinance is created with a few added pynths', () => {
 			let pETHContract;
 			let pUSDContract;
+			let USDCContract;
 			beforeEach(async () => {
-				({ PynthpETH: pETHContract, PynthpUSD: pUSDContract } = await setupAllContracts({
+				({
+					PynthpETH: pETHContract,
+					PynthpUSD: pUSDContract,
+					USDC: USDCContract,
+				} = await setupAllContracts({
 					accounts,
 					existing: {
 						AddressResolver: resolver,
 					},
-					pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD'],
+					pynths: ['pUSD', 'pETH'],
 					contracts: ['PeriFinance'],
 				}));
 			});
