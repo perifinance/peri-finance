@@ -9761,7 +9761,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRewards",
+							"name": "periRewards",
 							"type": "uint256"
 						}
 					],
@@ -12659,7 +12659,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRedeemed",
+							"name": "periRedeemed",
 							"type": "uint256"
 						},
 						{
@@ -13084,7 +13084,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -16133,7 +16133,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -20446,7 +20446,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -21920,7 +21920,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -22074,7 +22074,7 @@
 				{
 					"constant": false,
 					"inputs": [],
-					"name": "cacheSNXIssuedDebt",
+					"name": "cachePERIIssuedDebt",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -22090,11 +22090,11 @@
 							"type": "bytes32[]"
 						}
 					],
-					"name": "cachedSNXIssuedDebtForCurrencies",
+					"name": "cachedPERIIssuedDebtForCurrencies",
 					"outputs": [
 						{
 							"internalType": "uint256[]",
-							"name": "snxIssuedDebts",
+							"name": "periIssuedDebts",
 							"type": "uint256[]"
 						}
 					],
@@ -22106,7 +22106,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "cachedSNXIssuedDebtInfo",
+					"name": "cachedPERIIssuedDebtInfo",
 					"outputs": [
 						{
 							"internalType": "uint256",
@@ -22225,11 +22225,11 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "currentSNXIssuedDebt",
+					"name": "currentPERIIssuedDebt",
 					"outputs": [
 						{
 							"internalType": "uint256",
-							"name": "snxIssuedDebt",
+							"name": "periIssuedDebt",
 							"type": "uint256"
 						},
 						{
@@ -22252,11 +22252,11 @@
 							"type": "bytes32[]"
 						}
 					],
-					"name": "currentSNXIssuedDebtForCurrencies",
+					"name": "currentPERIIssuedDebtForCurrencies",
 					"outputs": [
 						{
 							"internalType": "uint256[]",
-							"name": "snxIssuedDebts",
+							"name": "periIssuedDebts",
 							"type": "uint256[]"
 						},
 						{
@@ -22842,7 +22842,7 @@
 							"type": "bytes32[]"
 						}
 					],
-					"name": "updateSNXIssuedDebtForCurrencies",
+					"name": "updatePERIIssuedDebtForCurrencies",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",
@@ -22863,7 +22863,7 @@
 							"type": "uint256[2]"
 						}
 					],
-					"name": "updateSNXIssuedDebtOnExchange",
+					"name": "updatePERIIssuedDebtOnExchange",
 					"outputs": [],
 					"payable": false,
 					"stateMutability": "nonpayable",

@@ -2170,7 +2170,7 @@
 		"date": "2020-07-24T12:27:23+10:00",
 		"commit": "c4dd4413cbbd3c0b40dfee2f9119af2dcb6a82e5",
 		"contracts": {
-			"StakingRewardsSNXBalancer": {
+			"StakingRewardsPERIBalancer": {
 				"address": "0xFBaEdde70732540cE2B11A8AC58Eb2dC0D69dE10",
 				"status": "current"
 			},

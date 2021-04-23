@@ -35,7 +35,7 @@
 		"rewardsToken": "ProxyERC20"
 	},
 	{
-		"name": "SNXBalancer",
+		"name": "PERIBalancer",
 		"stakingToken": "0x815f8ef4863451f4faf34fbc860034812e7377d9",
 		"rewardsToken": "ProxyERC20"
 	},

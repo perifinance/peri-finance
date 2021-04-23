@@ -3282,9 +3282,9 @@ contract('Exchanger (spec tests)', async accounts => {
 					});
 
 					describe('suspension invoked by anyone via suspendPynthWithInvalidRate()', () => {
-						// sTRX relies on the fact that sTRX is a valid pynth but never given a rate in the setup code
+						// pTRX relies on the fact that pTRX is a valid pynth but never given a rate in the setup code
 						// above
-						const pynthWithNoRate = toBytes32('sTRX');
+						const pynthWithNoRate = toBytes32('pTRX');
 						it('when called with invalid pynth, then reverts', async () => {
 							await assert.revert(
 								exchanger.suspendPynthWithInvalidRate(toBytes32('XYZ')),
@@ -3758,7 +3758,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				FlexibleStorage: flexibleStorage,
 			} = await setupAllContracts({
 				accounts,
-				pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD', 'pBTC', 'iBTC', 'sTRX'],
+				pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD', 'pBTC', 'iBTC', 'pTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeState',
@@ -3859,7 +3859,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				FlexibleStorage: flexibleStorage,
 			} = await setupAllContracts({
 				accounts,
-				pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD', 'pBTC', 'iBTC', 'sTRX'],
+				pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD', 'pBTC', 'iBTC', 'pTRX'],
 				contracts: [
 					'Exchanger',
 					'ExchangeState',

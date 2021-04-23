@@ -624,7 +624,7 @@ contract('CollateralEth', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if they request a currency that is not supported', async () => {
 				await assert.revert(
-					ceth.open(onepUSD, toBytes32('sJPY'), { value: twoETH, from: account1 }),
+					ceth.open(onepUSD, toBytes32('pJPY'), { value: twoETH, from: account1 }),
 					'Not allowed to issue this pynth'
 				);
 			});

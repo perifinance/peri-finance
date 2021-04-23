@@ -538,7 +538,7 @@ describe('publish scripts', () => {
 				beforeEach(async () => {
 					const rewardsToDeploy = [
 						'pETHUniswapV1',
-						'sXAUUniswapV2',
+						'pXAUUniswapV2',
 						'pUSDCurve',
 						'iETH',
 						'iETH2',

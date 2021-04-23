@@ -3264,7 +3264,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRewards",
+							"name": "periRewards",
 							"type": "uint256"
 						}
 					],
@@ -4822,7 +4822,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRedeemed",
+							"name": "periRedeemed",
 							"type": "uint256"
 						},
 						{
@@ -5186,7 +5186,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -7958,7 +7958,7 @@
 				{
 					"constant": false,
 					"inputs": [],
-					"name": "exchangeEtherForSNX",
+					"name": "exchangeEtherForPERI",
 					"outputs": [
 						{
 							"name": "",
@@ -8292,7 +8292,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangeEtherForSNXAtRate",
+					"name": "exchangeEtherForPERIAtRate",
 					"outputs": [
 						{
 							"name": "",
@@ -8400,7 +8400,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangePynthsForSNXAtRate",
+					"name": "exchangePynthsForPERIAtRate",
 					"outputs": [
 						{
 							"name": "",
@@ -8560,7 +8560,7 @@
 							"type": "uint256"
 						}
 					],
-					"name": "exchangePynthsForSNX",
+					"name": "exchangePynthsForPERI",
 					"outputs": [
 						{
 							"name": "",
@@ -15224,7 +15224,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -27698,7 +27698,7 @@
 					"outputs": [
 						{
 							"internalType": "uint256[]",
-							"name": "snxIssuedDebts",
+							"name": "periIssuedDebts",
 							"type": "uint256[]"
 						}
 					],

@@ -737,7 +737,7 @@ contract('SystemStatus', async accounts => {
 							reason
 						);
 						await assert.revert(
-							systemStatus.requireExchangeBetweenPynthsAllowed(pBTC, toBytes32('sTRX')),
+							systemStatus.requireExchangeBetweenPynthsAllowed(pBTC, toBytes32('pTRX')),
 							reason
 						);
 						await systemStatus.requireExchangeBetweenPynthsAllowed(
@@ -1030,7 +1030,7 @@ contract('SystemStatus', async accounts => {
 					it('and requirePynthsActive() reverts if one is the given pynth', async () => {
 						const reason = 'Pynth is suspended. Operation prohibited';
 						await assert.revert(systemStatus.requirePynthsActive(toBytes32('pETH'), pBTC), reason);
-						await assert.revert(systemStatus.requirePynthsActive(pBTC, toBytes32('sTRX')), reason);
+						await assert.revert(systemStatus.requirePynthsActive(pBTC, toBytes32('pTRX')), reason);
 						await systemStatus.requirePynthsActive(toBytes32('pETH'), toBytes32('pUSD')); // no issues
 						await systemStatus.requirePynthsActive(toBytes32('iTRX'), toBytes32('iBTC')); // no issues
 					});
@@ -1041,7 +1041,7 @@ contract('SystemStatus', async accounts => {
 							reason
 						);
 						await assert.revert(
-							systemStatus.requireExchangeBetweenPynthsAllowed(pBTC, toBytes32('sTRX')),
+							systemStatus.requireExchangeBetweenPynthsAllowed(pBTC, toBytes32('pTRX')),
 							reason
 						);
 						await systemStatus.requireExchangeBetweenPynthsAllowed(

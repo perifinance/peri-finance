@@ -11345,7 +11345,7 @@
 						{
 							"indexed": false,
 							"internalType": "uint256",
-							"name": "snxRewards",
+							"name": "periRewards",
 							"type": "uint256"
 						}
 					],
@@ -14186,7 +14186,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",
@@ -17754,7 +17754,7 @@
 				{
 					"constant": true,
 					"inputs": [],
-					"name": "anyPynthOrSNXRateIsInvalid",
+					"name": "anyPynthOrPERIRateIsInvalid",
 					"outputs": [
 						{
 							"internalType": "bool",

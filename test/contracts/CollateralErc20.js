@@ -724,7 +724,7 @@ contract('CollateralErc20', async accounts => {
 		describe('revert conditions', async () => {
 			it('should revert if they request a currency that is not supported', async () => {
 				await assert.revert(
-					cerc20.open(oneRenBTC, onepUSD, toBytes32('sJPY'), { from: account1 }),
+					cerc20.open(oneRenBTC, onepUSD, toBytes32('pJPY'), { from: account1 }),
 					'Not allowed to issue this pynth'
 				);
 			});
