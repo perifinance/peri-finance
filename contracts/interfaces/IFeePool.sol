@@ -30,7 +30,8 @@ interface IFeePool {
     function appendAccountIssuanceRecord(
         address account,
         uint lockedAmount,
-        uint debtEntryIndex
+        uint debtEntryIndex,
+        bytes32 currencyKey
     ) external;
 
     function recordFeePaid(uint pUSDAmount) external;

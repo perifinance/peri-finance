@@ -11,6 +11,8 @@ import "./interfaces/IFeePool.sol";
 contract PeriFinanceStateWithLimitedSetup is PeriFinanceState, LimitedSetup {
     IFeePool public feePool;
 
+    bytes32 internal constant PERI = "PERI";
+
     // Import state
     uint public importedDebtAmount;
 
@@ -89,7 +91,8 @@ contract PeriFinanceStateWithLimitedSetup is PeriFinanceState, LimitedSetup {
         feePool.appendAccountIssuanceRecord(
             account,
             issuanceData[account].initialDebtOwnership,
-            issuanceData[account].debtEntryIndex
+            issuanceData[account].debtEntryIndex,
+            PERI
         );
     }
 
