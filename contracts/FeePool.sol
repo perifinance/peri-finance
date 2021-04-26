@@ -35,6 +35,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     // Where fees are pooled in pUSD.
     address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
 
+    bytes32 internal constant PERI = "PERI";
+    bytes32 internal constant USDC = "USDC";
+
     // pUSD currencyKey. Fees stored and paid in pUSD
     bytes32 private pUSD = "pUSD";
 
@@ -73,6 +76,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
+    bytes32 private constant CONTRACT_FEEPOOLSTATE_USDC = "FeePoolStateUsdc";
 
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
 
@@ -91,7 +95,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](12);
+        bytes32[] memory newAddresses = new bytes32[](13);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_PERIFINANCE;
         newAddresses[2] = CONTRACT_FEEPOOLSTATE;
@@ -104,6 +108,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[9] = CONTRACT_ETH_COLLATERAL_PUSD;
         newAddresses[10] = CONTRACT_REWARDSDISTRIBUTION;
         newAddresses[11] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[12] = CONTRACT_FEEPOOLSTATE_USDC;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -117,6 +122,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function feePoolState() internal view returns (FeePoolState) {
         return FeePoolState(requireAndGetAddress(CONTRACT_FEEPOOLSTATE));
+    }
+
+    function feePoolStateUsdc() internal view returns (FeePoolState) {
+        return FeePoolState(requireAndGetAddress(CONTRACT_FEEPOOLSTATE_USDC));
     }
 
     function feePoolEternalStorage() internal view returns (FeePoolEternalStorage) {
@@ -209,16 +218,34 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function appendAccountIssuanceRecord(
         address account,
         uint debtRatio,
-        uint debtEntryIndex
+        uint debtEntryIndex,
+        bytes32 currencyKey
     ) external onlyIssuerAndPeriFinanceState {
-        feePoolState().appendAccountIssuanceRecord(
-            account,
-            debtRatio,
-            debtEntryIndex,
-            _recentFeePeriodsStorage(0).startingDebtIndex
-        );
+        if(currencyKey == PERI) {
+            feePoolState().appendAccountIssuanceRecord(
+                account,
+                debtRatio,
+                debtEntryIndex,
+                _recentFeePeriodsStorage(0).startingDebtIndex
+            );
+        } else if(currencyKey == USDC) {
+            feePoolStateUsdc().appendAccountIssuanceRecord(
+                account,
+                debtRatio,
+                debtEntryIndex,
+                _recentFeePeriodsStorage(0).startingDebtIndex
+            );
+        } else {
+            revert("Invalid currency key");
+        }
 
-        emitIssuanceDebtRatioEntry(account, debtRatio, debtEntryIndex, _recentFeePeriodsStorage(0).startingDebtIndex);
+        emitIssuanceDebtRatioEntry(
+            account, 
+            debtRatio, 
+            debtEntryIndex, 
+            _recentFeePeriodsStorage(0).startingDebtIndex, 
+            currencyKey
+        );
     }
 
     /**
@@ -749,19 +776,21 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         address indexed account,
         uint debtRatio,
         uint debtEntryIndex,
-        uint feePeriodStartingDebtIndex
+        uint feePeriodStartingDebtIndex,
+        bytes32 currencyKey
     );
     bytes32 private constant ISSUANCEDEBTRATIOENTRY_SIG =
-        keccak256("IssuanceDebtRatioEntry(address,uint256,uint256,uint256)");
+        keccak256("IssuanceDebtRatioEntry(address,uint256,uint256,uint256,bytes32)");
 
     function emitIssuanceDebtRatioEntry(
         address account,
         uint debtRatio,
         uint debtEntryIndex,
-        uint feePeriodStartingDebtIndex
+        uint feePeriodStartingDebtIndex,
+        bytes32 currencyKey
     ) internal {
         proxy._emit(
-            abi.encode(debtRatio, debtEntryIndex, feePeriodStartingDebtIndex),
+            abi.encode(debtRatio, debtEntryIndex, feePeriodStartingDebtIndex, currencyKey),
             2,
             ISSUANCEDEBTRATIOENTRY_SIG,
             bytes32(uint256(uint160(account))),

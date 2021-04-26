@@ -18,7 +18,7 @@ import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IVirtualPynth.sol";
-import "./interfaces/IStakeStateUSDC.sol";
+import "./interfaces/IStakeState.sol";
 
 contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinance {
     using SafeMath for uint;
@@ -103,8 +103,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
     }
 
-    function usdcState() internal view returns (IStakeStateUSDC) {
-        return IStakeStateUSDC(requireAndGetAddress(CONTRACT_STAKESTATE_USDC));
+    function stakeStateUsdc() internal view returns (IStakeState) {
+        return IStakeState(requireAndGetAddress(CONTRACT_STAKESTATE_USDC));
     }
 
     function rewardsDistribution() internal view returns (IRewardsDistribution) {
@@ -184,14 +184,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
         (uint initialDebtOwnership, ) = periFinanceState().issuanceData(account);
 
-        (uint usdcStakedAmount, ) = usdcState().getStakeState(account);
-        uint issuedAmountByUsdc = usdcStakedAmount.multiplyDecimalRound(issuer().issuanceRatio());
-
         if (initialDebtOwnership > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferablePeriFinanceAndAnyRateIsInvalid(
                     account,
-                    tokenState.balanceOf(account).sub(issuedAmountByUsdc)
+                    tokenState.balanceOf(account)
                 );
             require(value <= transferable, "Cannot transfer staked or escrowed PERI");
             require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
