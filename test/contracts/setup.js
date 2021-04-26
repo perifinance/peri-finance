@@ -885,9 +885,6 @@ const setupAllContracts = async ({
 		pynthsToAdd.push(token.address);
 	}
 
-	const StakeStateUsdc = await artifacts.require('StakeStateUSDC').new(owner, ZERO_ADDRESS);
-	returnObj[`StakeStateUsdc`] = StakeStateUsdc;
-
 	const { token: USDC } = await mockToken({
 		accounts,
 		supply: 6,
@@ -897,6 +894,9 @@ const setupAllContracts = async ({
 	});
 
 	returnObj[`USDC`] = USDC;
+
+	const StakeStateUsdc = await artifacts.require('StakeState').new(owner, USDC.address);
+	returnObj[`StakeStateUsdc`] = StakeStateUsdc;
 
 	// now invoke AddressResolver to set all addresses
 	if (returnObj['AddressResolver']) {

@@ -95,9 +95,12 @@ contract('BasePeriFinance', async accounts => {
 				'issueMaxPynthsOnBehalf',
 				'issuePynths',
 				'issuePynthsOnBehalf',
+				'issuePynthsUsdc',
 				'mint',
 				'mintSecondary',
 				'mintSecondaryRewards',
+				'resetLock',
+				'setLock',
 				'settle',
 				'transfer',
 				'transferFrom',
@@ -381,32 +384,32 @@ contract('BasePeriFinance', async accounts => {
 		});
 	});
 
-	describe('isWaitingPeriod()', () => {
-		it('returns false by default', async () => {
-			assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-		});
-		describe('when a user has exchanged into pETH', () => {
-			beforeEach(async () => {
-				await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
+	// describe('isWaitingPeriod()', () => {
+	// 	it('returns false by default', async () => {
+	// 		assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 	});
+	// 	describe('when a user has exchanged into pETH', () => {
+	// 		beforeEach(async () => {
+	// 			await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
 
-				await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
-				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
-					from: owner,
-				});
-			});
-			it('then waiting period is true', async () => {
-				assert.isTrue(await basePeriFinance.isWaitingPeriod(pETH));
-			});
-			describe('when the waiting period expires', () => {
-				beforeEach(async () => {
-					await fastForward(await systemSettings.waitingPeriodSecs());
-				});
-				it('returns false by default', async () => {
-					assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-				});
-			});
-		});
-	});
+	// 			await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
+	// 			await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
+	// 				from: owner,
+	// 			});
+	// 		});
+	// 		it('then waiting period is true', async () => {
+	// 			assert.isTrue(await basePeriFinance.isWaitingPeriod(pETH));
+	// 		});
+	// 		describe('when the waiting period expires', () => {
+	// 			beforeEach(async () => {
+	// 				await fastForward(await systemSettings.waitingPeriodSecs());
+	// 			});
+	// 			it('returns false by default', async () => {
+	// 				assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 			});
+	// 		});
+	// 	});
+	// });
 
 	describe('anyPynthOrPERIRateIsInvalid()', () => {
 		it('should have stale rates initially', async () => {
