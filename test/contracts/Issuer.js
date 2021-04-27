@@ -11,10 +11,10 @@ const MockEtherCollateral = artifacts.require('MockEtherCollateral');
 const { currentTime, multiplyDecimal, divideDecimal, toUnit, fastForward } = require('../utils')();
 
 const {
-	setExchangeWaitingPeriod,
+	// setExchangeWaitingPeriod,
 	setExchangeFeeRateForPynths,
-	getDecodedLogs,
-	decodedEventEqual,
+	// getDecodedLogs,
+	// decodedEventEqual,
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
@@ -29,10 +29,8 @@ const {
 contract('Issuer (via PeriFinance)', async accounts => {
 	const WEEK = 604800;
 
-	const [pUSD, pAUD, pEUR, PERI, pETH, ETH] = ['pUSD', 'pAUD', 'pEUR', 'PERI', 'pETH', 'ETH'].map(
-		toBytes32
-	);
-	const pynthKeys = [pUSD, pAUD, pEUR, pETH, PERI];
+	const [pUSD, PERI] = ['pUSD', 'PERI'].map(toBytes32);
+	const pynthKeys = [pUSD, PERI];
 
 	const [, owner, oracle, account1, account2, account3, account6] = accounts;
 
@@ -44,9 +42,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		exchangeRates,
 		feePool,
 		pUSDContract,
-		pETHContract,
-		pEURContract,
-		pAUDContract,
+		// pETHContract,
+		// pEURContract,
+		// pAUDContract,
 		escrow,
 		rewardEscrowV2,
 		timestamp,
@@ -61,7 +59,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		pynths = ['pUSD', 'pAUD', 'pEUR', 'pETH'];
+		pynths = ['pUSD', 'PERI'];
 		({
 			PeriFinance: periFinance,
 			PeriFinanceState: periFinanceState,
@@ -71,9 +69,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			PeriFinanceEscrow: escrow,
 			RewardEscrowV2: rewardEscrowV2,
 			PynthpUSD: pUSDContract,
-			PynthpETH: pETHContract,
-			PynthpAUD: pAUDContract,
-			PynthpEUR: pEURContract,
+			// PynthpETH: pETHContract,
+			// PynthpAUD: pAUDContract,
+			// PynthpEUR: pEURContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,
@@ -97,6 +95,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'DelegateApprovals', // necessary for *OnBehalf functions
 				'FlexibleStorage',
 				'CollateralManager',
+				'FeePoolStateUsdc',
 			],
 		}));
 	});
@@ -106,12 +105,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	beforeEach(async () => {
 		timestamp = await currentTime();
 
-		await exchangeRates.updateRates(
-			[pAUD, pEUR, PERI, pETH],
-			['0.5', '1.25', '0.1', '200'].map(toUnit),
-			timestamp,
-			{ from: oracle }
-		);
+		await exchangeRates.updateRates([pUSD, PERI], ['0.5', '2'].map(toUnit), timestamp, {
+			from: oracle,
+		});
 
 		// set a 0.3% default exchange fee rate
 		const exchangeFeeRate = toUnit('0.003');
@@ -133,6 +129,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'addPynths',
 				'issuePynths',
 				'issuePynthsOnBehalf',
+				'issuePynthsUsdc',
 				'issueMaxPynths',
 				'issueMaxPynthsOnBehalf',
 				'burnPynths',
@@ -158,6 +155,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		it('issuePynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.issuePynths,
+				args: [account1, toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('issuePynthsUsdc() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.issuePynthsUsdc,
 				args: [account1, toUnit('1')],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
@@ -259,6 +264,15 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
+				it('should issue pynthsUsdc and store issue timestamp after now', async () => {
+					// issue pynths
+					await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+
+					// issue timestamp should be greater than now in future
+					const issueTimestamp = await issuer.lastIssueEvent(owner);
+					assert.ok(issueTimestamp.gte(now));
+				});
+
 				describe('require wait time on next burn pynth after minting', async () => {
 					it('should revert when burning any pynths within minStakeTime', async () => {
 						// set minimumStakeTime
@@ -272,6 +286,21 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							'Minimum stake time not reached'
 						);
 					});
+
+					// ** burning, currently not implemented for Usdc
+					// it('should revert when burning any pynthsUsdc within minStakeTime', async () => {
+					// 	// set minimumStakeTime
+					// 	await systemSettings.setMinimumStakeTime(60 * 60 * 8, { from: owner });
+
+					// 	// issue pynths first
+					// 	await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+
+					// 	await assert.revert(
+					// 		periFinance.burnPynthsUsdc(web3.utils.toBN('5'), { from: account1 }),
+					// 		'Minimum stake time not reached'
+					// 	);
+					// });
+
 					it('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
 						// set minimumStakeTime
 						await systemSettings.setMinimumStakeTime(120, { from: owner });
@@ -293,6 +322,29 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						// burn pynths
 						await periFinance.burnPynths(web3.utils.toBN('5'), { from: account1 });
 					});
+
+					// ** burning, currently not implemented for Usdc
+					// it('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
+					// 	// set minimumStakeTime
+					// 	await systemSettings.setMinimumStakeTime(120, { from: owner });
+
+					// 	// issue pynths first
+					// 	await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+
+					// 	// fastForward 30 seconds
+					// 	await fastForward(10);
+
+					// 	await assert.revert(
+					// 		periFinance.burnPynthsUsdc(web3.utils.toBN('5'), { from: account1 }),
+					// 		'Minimum stake time not reached'
+					// 	);
+
+					// 	// fastForward 115 seconds
+					// 	await fastForward(125);
+
+					// 	// burn pynths
+					// 	await periFinance.burnPynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+					// });
 				});
 			});
 
@@ -302,8 +354,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						await fastForward(10);
 						// Send a price update to give the pynth rates
 						await exchangeRates.updateRates(
-							[pAUD, pEUR, pETH, ETH, PERI],
-							['0.5', '1.25', '100', '100', '2'].map(toUnit),
+							[pUSD, PERI],
+							['0.5', '2'].map(toUnit),
 							await currentTime(),
 							{ from: oracle }
 						);
@@ -325,17 +377,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						it('then totalIssuedPynths in should correctly calculate the total issued pynths in pUSD', async () => {
 							assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('1111'));
 						});
-						it('and in another pynth currency', async () => {
-							assert.bnEqual(await periFinance.totalIssuedPynths(pAUD), toUnit('2222'));
-						});
 						it('and in PERI', async () => {
 							assert.bnEqual(await periFinance.totalIssuedPynths(PERI), divideDecimal('1111', '2'));
-						});
-						it('and in a non-pynth currency', async () => {
-							assert.bnEqual(
-								await periFinance.totalIssuedPynths(ETH),
-								divideDecimal('1111', '100')
-							);
 						});
 						it('and in an unknown currency, reverts', async () => {
 							await assert.revert(
@@ -350,13 +393,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							// as our pynths are mocks, let's issue some amount to users
 							await pUSDContract.issue(account1, toUnit('1000'));
 
-							await pAUDContract.issue(account1, toUnit('1000')); // 500 pUSD worth
-							await pAUDContract.issue(account2, toUnit('1000')); // 500 pUSD worth
-
-							await pEURContract.issue(account3, toUnit('80')); // 100 pUSD worth
-
-							await pETHContract.issue(account1, toUnit('1')); // 100 pUSD worth
-
 							// and since we are are bypassing the usual issuance flow here, we must cache the debt snapshot
 							assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('0'));
 							await debtCache.takeDebtSnapshot();
@@ -364,17 +400,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						it('then totalIssuedPynths in should correctly calculate the total issued pynths in pUSD', async () => {
 							assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('2200'));
 						});
-						it('and in another pynth currency', async () => {
-							assert.bnEqual(await periFinance.totalIssuedPynths(pAUD), toUnit('4400', '2'));
-						});
 						it('and in PERI', async () => {
 							assert.bnEqual(await periFinance.totalIssuedPynths(PERI), divideDecimal('2200', '2'));
-						});
-						it('and in a non-pynth currency', async () => {
-							assert.bnEqual(
-								await periFinance.totalIssuedPynths(ETH),
-								divideDecimal('2200', '100')
-							);
 						});
 						it('and in an unknown currency, reverts', async () => {
 							await assert.revert(
@@ -388,9 +415,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 			describe('debtBalance()', () => {
 				it('should not change debt balance % if exchange rates change', async () => {
-					let newAUDRate = toUnit('0.5');
+					let newUSDRate = toUnit('0.5');
 					let timestamp = await currentTime();
-					await exchangeRates.updateRates([pAUD], [newAUDRate], timestamp, { from: oracle });
+					await exchangeRates.updateRates([pUSD], [newUSDRate], timestamp, { from: oracle });
 					await debtCache.takeDebtSnapshot();
 
 					await periFinance.transfer(account1, toUnit('20000'), {
@@ -405,7 +432,10 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await periFinance.issuePynths(amountIssuedAcc1, { from: account1 });
 					await periFinance.issuePynths(amountIssuedAcc2, { from: account2 });
 
-					await periFinance.exchange(pUSD, amountIssuedAcc2, pAUD, { from: account2 });
+					await periFinance.issuePynthsUsdc(amountIssuedAcc1, { from: account1 });
+					await periFinance.issuePynthsUsdc(amountIssuedAcc2, { from: account2 });
+
+					await periFinance.exchange(pUSD, amountIssuedAcc2, PERI, { from: account2 });
 
 					const PRECISE_UNIT = web3.utils.toWei(web3.utils.toBN('1'), 'gether');
 					let totalIssuedPynthpUSD = await periFinance.totalIssuedPynths(pUSD);
@@ -421,8 +451,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					);
 
 					timestamp = await currentTime();
-					newAUDRate = toUnit('1.85');
-					await exchangeRates.updateRates([pAUD], [newAUDRate], timestamp, { from: oracle });
+					newUSDRate = toUnit('1.85');
+					await exchangeRates.updateRates([pUSD], [newUSDRate], timestamp, { from: oracle });
 					await debtCache.takeDebtSnapshot();
 
 					totalIssuedPynthpUSD = await periFinance.totalIssuedPynths(pUSD);
@@ -665,10 +695,10 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					it('should be able to query multiple pynth addresses', async () => {
-						const pynthAddresses = await issuer.getPynths([currencyKey, pETH, pUSD]);
+						const pynthAddresses = await issuer.getPynths([currencyKey, pUSD, PERI]);
 						assert.equal(pynthAddresses[0], pynth.address);
-						assert.equal(pynthAddresses[1], pETHContract.address);
-						assert.equal(pynthAddresses[2], pUSDContract.address);
+						assert.equal(pynthAddresses[1], pUSDContract.address);
+						// assert.equal(pynthAddresses[2], PERIContract.address);
 						assert.equal(pynthAddresses.length, 3);
 					});
 
@@ -716,7 +746,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				it('should disallow removing a Pynth contract when requested by a non-owner', async () => {
 					// Note: This test depends on state in the migration script, that there are hooked up pynths
 					// without balances
-					await assert.revert(issuer.removePynth(pEUR, { from: account1 }));
+					await assert.revert(issuer.removePynth(pUSD, { from: account1 }));
 				});
 
 				it('should revert when requesting to remove a non-existent pynth', async () => {
@@ -980,7 +1010,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							});
 						});
 					});
-					['PERI', 'pAUD', ['PERI', 'pAUD'], 'none'].forEach(type => {
+					['PERI', 'pUSD', ['PERI', 'pUSD'], 'none'].forEach(type => {
 						describe(`when ${type} is stale`, () => {
 							beforeEach(async () => {
 								await fastForward(
@@ -1212,7 +1242,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 					});
 
-					['PERI', 'pAUD', ['PERI', 'pAUD'], 'none'].forEach(type => {
+					['PERI', 'pUSD', ['PERI', 'pUSD'], 'none'].forEach(type => {
 						describe(`when ${type} is stale`, () => {
 							beforeEach(async () => {
 								await fastForward(
@@ -1662,6 +1692,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 				});
 
+				/**
 				describe('burnPynths() after exchange()', () => {
 					describe('given the waiting period is set to 60s', () => {
 						let amount;
@@ -1678,147 +1709,149 @@ contract('Issuer (via PeriFinance)', async accounts => {
 								exchangeFeeRates: pynthKeys.map(() => exchangeFeeRate),
 							});
 						});
-						describe('and a user has 1250 pUSD issued', () => {
-							beforeEach(async () => {
-								await periFinance.transfer(account1, toUnit('1000000'), { from: owner });
-								await periFinance.issuePynths(amount, { from: account1 });
-							});
-							describe('and is has been exchanged into pEUR at a rate of 1.25:1 and the waiting period has expired', () => {
-								beforeEach(async () => {
-									await periFinance.exchange(pUSD, amount, pEUR, { from: account1 });
-									await fastForward(90); // make sure the waiting period is expired on this
-								});
-								describe('and they have exchanged all of it back into pUSD', () => {
-									beforeEach(async () => {
-										await periFinance.exchange(pEUR, toUnit('1000'), pUSD, { from: account1 });
-									});
-									describe('when they attempt to burn the pUSD', () => {
-										it('then it fails as the waiting period is ongoing', async () => {
-											await assert.revert(
-												periFinance.burnPynths(amount, { from: account1 }),
-												'Cannot settle during waiting period'
-											);
-										});
-									});
-									describe('and 60s elapses with no change in the pEUR rate', () => {
-										beforeEach(async () => {
-											fastForward(60);
-										});
-										describe('when they attempt to burn the pUSD', () => {
-											let txn;
-											beforeEach(async () => {
-												txn = await periFinance.burnPynths(amount, { from: account1 });
-											});
-											it('then it succeeds and burns the entire pUSD amount', async () => {
-												const logs = await getDecodedLogs({
-													hash: txn.tx,
-													contracts: [periFinance, pUSDContract],
-												});
 
-												decodedEventEqual({
-													event: 'Burned',
-													emittedFrom: pUSDContract.address,
-													args: [account1, amount],
-													log: logs.find(({ name } = {}) => name === 'Burned'),
-												});
-
-												const pUSDBalance = await pUSDContract.balanceOf(account1);
-												assert.equal(pUSDBalance, '0');
-
-												const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-												assert.equal(debtBalance, '0');
-											});
-										});
-									});
-									describe('and the pEUR price decreases by 20% to 1', () => {
-										beforeEach(async () => {
-											await exchangeRates.updateRates([pEUR], ['1'].map(toUnit), timestamp, {
-												from: oracle,
-											});
-											await debtCache.takeDebtSnapshot();
-										});
-										describe('and 60s elapses', () => {
-											beforeEach(async () => {
-												fastForward(60);
-											});
-											describe('when they attempt to burn the entire amount pUSD', () => {
-												let txn;
-												beforeEach(async () => {
-													txn = await periFinance.burnPynths(amount, { from: account1 });
-												});
-												it('then it succeeds and burns their pUSD minus the reclaim amount from settlement', async () => {
-													const logs = await getDecodedLogs({
-														hash: txn.tx,
-														contracts: [periFinance, pUSDContract],
-													});
-
-													decodedEventEqual({
-														event: 'Burned',
-														emittedFrom: pUSDContract.address,
-														args: [account1, amount.sub(toUnit('250'))],
-														log: logs
-															.reverse()
-															.filter(l => !!l)
-															.find(({ name }) => name === 'Burned'),
-													});
-
-													const pUSDBalance = await pUSDContract.balanceOf(account1);
-													assert.equal(pUSDBalance, '0');
-												});
-												it('and their debt balance is now 0 because they are the only debt holder in the system', async () => {
-													// the debt balance remaining is what was reclaimed from the exchange
-													const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-													// because this user is the only one holding debt, when we burn 250 pUSD in a reclaim,
-													// it removes it from the totalIssuedPynths and
-													assert.equal(debtBalance, '0');
-												});
-											});
-											describe('when another user also has the same amount of debt', () => {
-												beforeEach(async () => {
-													await periFinance.transfer(account2, toUnit('1000000'), { from: owner });
-													await periFinance.issuePynths(amount, { from: account2 });
-												});
-												describe('when the first user attempts to burn the entire amount pUSD', () => {
-													let txn;
-													beforeEach(async () => {
-														txn = await periFinance.burnPynths(amount, { from: account1 });
-													});
-													it('then it succeeds and burns their pUSD minus the reclaim amount from settlement', async () => {
-														const logs = await getDecodedLogs({
-															hash: txn.tx,
-															contracts: [periFinance, pUSDContract],
-														});
-
-														decodedEventEqual({
-															event: 'Burned',
-															emittedFrom: pUSDContract.address,
-															args: [account1, amount.sub(toUnit('250'))],
-															log: logs
-																.reverse()
-																.filter(l => !!l)
-																.find(({ name }) => name === 'Burned'),
-														});
-
-														const pUSDBalance = await pUSDContract.balanceOf(account1);
-														assert.equal(pUSDBalance, '0');
-													});
-													it('and their debt balance is now half of the reclaimed balance because they owe half of the pool', async () => {
-														// the debt balance remaining is what was reclaimed from the exchange
-														const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-														// because this user is holding half the debt, when we burn 250 pUSD in a reclaim,
-														// it removes it from the totalIssuedPynths and so both users have half of 250
-														// in owing pynths
-														assert.bnEqual(debtBalance, divideDecimal('250', 2));
-													});
-												});
-											});
-										});
-									});
-								});
-							});
+						 describe('and a user has 1250 pUSD issued', () => {
+							 beforeEach(async () => {
+								 await periFinance.transfer(account1, toUnit('1000000'), { from: owner });
+								 await periFinance.issuePynths(amount, { from: account1 });
+							 });
+							 describe('and is has been exchanged into pEUR at a rate of 1.25:1 and the waiting period has expired', () => {
+								 beforeEach(async () => {
+									 await periFinance.exchange(pUSD, amount, pEUR, { from: account1 });
+									 await fastForward(90); // make sure the waiting period is expired on this
+								 });
+								 describe('and they have exchanged all of it back into pUSD', () => {
+									 beforeEach(async () => {
+										 await periFinance.exchange(pEUR, toUnit('1000'), pUSD, { from: account1 });
+									 });
+									 describe('when they attempt to burn the pUSD', () => {
+										 it('then it fails as the waiting period is ongoing', async () => {
+											 await assert.revert(
+												 periFinance.burnPynths(amount, { from: account1 }),
+												 'Cannot settle during waiting period'
+											 );
+										 });
+									 });
+									 describe('and 60s elapses with no change in the pEUR rate', () => {
+										 beforeEach(async () => {
+											 fastForward(60);
+										 });
+										 describe('when they attempt to burn the pUSD', () => {
+											 let txn;
+											 beforeEach(async () => {
+												 txn = await periFinance.burnPynths(amount, { from: account1 });
+											 });
+											 it('then it succeeds and burns the entire pUSD amount', async () => {
+												 const logs = await getDecodedLogs({
+													 hash: txn.tx,
+													 contracts: [periFinance, pUSDContract],
+												 });
+ 
+												 decodedEventEqual({
+													 event: 'Burned',
+													 emittedFrom: pUSDContract.address,
+													 args: [account1, amount],
+													 log: logs.find(({ name } = {}) => name === 'Burned'),
+												 });
+ 
+												 const pUSDBalance = await pUSDContract.balanceOf(account1);
+												 assert.equal(pUSDBalance, '0');
+ 
+												 const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
+												 assert.equal(debtBalance, '0');
+											 });
+										 });
+									 });
+									 describe('and the pEUR price decreases by 20% to 1', () => {
+										 beforeEach(async () => {
+											 await exchangeRates.updateRates([pEUR], ['1'].map(toUnit), timestamp, {
+												 from: oracle,
+											 });
+											 await debtCache.takeDebtSnapshot();
+										 });
+										 describe('and 60s elapses', () => {
+											 beforeEach(async () => {
+												 fastForward(60);
+											 });
+											 describe('when they attempt to burn the entire amount pUSD', () => {
+												 let txn;
+												 beforeEach(async () => {
+													 txn = await periFinance.burnPynths(amount, { from: account1 });
+												 });
+												 it('then it succeeds and burns their pUSD minus the reclaim amount from settlement', async () => {
+													 const logs = await getDecodedLogs({
+														 hash: txn.tx,
+														 contracts: [periFinance, pUSDContract],
+													 });
+ 
+													 decodedEventEqual({
+														 event: 'Burned',
+														 emittedFrom: pUSDContract.address,
+														 args: [account1, amount.sub(toUnit('250'))],
+														 log: logs
+															 .reverse()
+															 .filter(l => !!l)
+															 .find(({ name }) => name === 'Burned'),
+													 });
+ 
+													 const pUSDBalance = await pUSDContract.balanceOf(account1);
+													 assert.equal(pUSDBalance, '0');
+												 });
+												 it('and their debt balance is now 0 because they are the only debt holder in the system', async () => {
+													 // the debt balance remaining is what was reclaimed from the exchange
+													 const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
+													 // because this user is the only one holding debt, when we burn 250 pUSD in a reclaim,
+													 // it removes it from the totalIssuedPynths and
+													 assert.equal(debtBalance, '0');
+												 });
+											 });
+											 describe('when another user also has the same amount of debt', () => {
+												 beforeEach(async () => {
+													 await periFinance.transfer(account2, toUnit('1000000'), { from: owner });
+													 await periFinance.issuePynths(amount, { from: account2 });
+												 });
+												 describe('when the first user attempts to burn the entire amount pUSD', () => {
+													 let txn;
+													 beforeEach(async () => {
+														 txn = await periFinance.burnPynths(amount, { from: account1 });
+													 });
+													 it('then it succeeds and burns their pUSD minus the reclaim amount from settlement', async () => {
+														 const logs = await getDecodedLogs({
+															 hash: txn.tx,
+															 contracts: [periFinance, pUSDContract],
+														 });
+ 
+														 decodedEventEqual({
+															 event: 'Burned',
+															 emittedFrom: pUSDContract.address,
+															 args: [account1, amount.sub(toUnit('250'))],
+															 log: logs
+																 .reverse()
+																 .filter(l => !!l)
+																 .find(({ name }) => name === 'Burned'),
+														 });
+ 
+														 const pUSDBalance = await pUSDContract.balanceOf(account1);
+														 assert.equal(pUSDBalance, '0');
+													 });
+													 it('and their debt balance is now half of the reclaimed balance because they owe half of the pool', async () => {
+														 // the debt balance remaining is what was reclaimed from the exchange
+														 const debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
+														 // because this user is holding half the debt, when we burn 250 pUSD in a reclaim,
+														 // it removes it from the totalIssuedPynths and so both users have half of 250
+														 // in owing pynths
+														 assert.bnEqual(debtBalance, divideDecimal('250', 2));
+													 });
+												 });
+											 });
+										 });
+									 });
+								 });
+							 });
+						 });
 						});
 					});
-				});
+					*/
 			});
 
 			describe('debt calculation in multi-issuance scenarios', () => {
@@ -2054,7 +2087,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			});
 
 			// ****************************************
-
+			/**
 			it("should prevent more issuance if the user's collaterisation changes to be insufficient", async () => {
 				// Set pEUR for purposes of this test
 				const timestamp1 = await currentTime();
@@ -2086,6 +2119,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					'Amount too large'
 				);
 			});
+			*/
 
 			// Check user's collaterisation ratio
 
@@ -2568,6 +2602,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 					});
 
+					/**
 					it('should be able to exclude pETH issued by ether Collateral from totalIssuedPynths', async () => {
 						const totalSupplyBefore = await periFinance.totalIssuedPynths(pETH);
 
@@ -2588,17 +2623,17 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							totalSupplyBefore.add(amountToIssue)
 						);
 					});
-
+					
 					it('should exclude pETH issued by ether Collateral from debtBalanceOf', async () => {
 						// account1 should own 100% of the debt.
 						const debtBefore = await periFinance.debtBalanceOf(account1, pUSD);
 						assert.bnEqual(debtBefore, toUnit('10'));
-
+						
 						// issue pETH to mimic loan
 						const amountToIssue = toUnit('10');
 						await pETHContract.issue(account1, amountToIssue, { from: owner });
 						await etherCollateral.openLoan(amountToIssue, { from: owner });
-
+						
 						// After account1 owns 100% of pUSD debt.
 						assert.bnEqual(
 							await periFinance.totalIssuedPynthsExcludeEtherCollateral(pUSD),
@@ -2606,6 +2641,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						);
 						assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), debtBefore);
 					});
+					*/
 				});
 			});
 		});

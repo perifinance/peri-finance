@@ -238,6 +238,7 @@ const setupContract = async ({
 			0,
 			0,
 		],
+		FeePoolStateUsdc: [owner, tryGetAddressOf('FeePool')],
 	};
 
 	let instance;
@@ -782,6 +783,11 @@ const setupAllContracts = async ({
 		{
 			contract: 'CollateralManager',
 			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
+		},
+		{
+			contract: 'FeePoolStateUsdc',
+			source: 'FeePoolState',
+			deps: ['FeePool'],
 		},
 	];
 
