@@ -690,6 +690,25 @@ const deploy = async ({
 		});
 	}
 
+	const feePoolStateUsdc = await deployer.deployContract({
+		name: 'FeePoolStateUsdc',
+		source: 'FeePoolState',
+		deps: ['FeePool'],
+		args: [account, addressOf(feePool)],
+	});
+
+	if (feePool && feePoolStateUsdc) {
+		// Rewire feePoolState if there is a feePool upgrade
+		await runStep({
+			contract: 'FeePoolStateUsdc',
+			target: feePoolStateUsdc,
+			read: 'feePool',
+			expected: input => input === addressOf(feePool),
+			write: 'setFeePool',
+			writeArg: addressOf(feePool),
+		});
+	}
+
 	const rewardsDistribution = await deployer.deployContract({
 		name: 'RewardsDistribution',
 		deps: useOvm ? ['RewardEscrowV2', 'ProxyFeePool'] : ['RewardEscrowV2', 'ProxyFeePool'],
@@ -1152,7 +1171,7 @@ const deploy = async ({
 	await deployer.deployContract({
 		name: `StakeStateUsdc`,
 		source: 'StakeState',
-		args: [account, ZERO_ADDRESS],
+		args: [account, issuerAddress],
 		force: addNewPynths,
 	});
 

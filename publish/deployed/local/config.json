@@ -400,5 +400,8 @@
 	},
 	"USDC": {
 		"deploy": true
+	},
+	"FeePoolStateUsdc": {
+		"deploy": true
 	}
 }
