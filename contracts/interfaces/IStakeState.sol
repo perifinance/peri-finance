@@ -14,6 +14,10 @@ contract IStakeState {
   external view 
   returns(uint _initialDebtOwnership, uint _debtEntryIndex);
   
+  function debtLedger(uint index) 
+  external view 
+  returns (uint);
+
   function totalStakerCount() 
   external view 
   returns(uint);
@@ -62,6 +66,10 @@ contract IStakeState {
   returns(uint);
 
   function getDebtLedger(uint _index)
+  external view
+  returns(uint);
+
+  function collateralisationRatio(address _account)
   external view
   returns(uint);
 
