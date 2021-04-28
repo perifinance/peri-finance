@@ -136,7 +136,11 @@ contract StakeState is Owned, State {
   function lastDebtLedgerEntry()
   external view
   returns(uint) {
-    return debtLedger[debtLedger.length <= 0 ? 0 : debtLedger.length];
+    if(debtLedger.length <= 0) {
+      return 0;
+    }
+
+    return debtLedger[debtLedger.length - 1];
   }
 
   function collateralisationRatio(address _account)
