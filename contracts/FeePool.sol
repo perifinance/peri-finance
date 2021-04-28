@@ -235,7 +235,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint debtEntryIndex,
         bytes32 currencyKey
     ) external onlyIssuerAndPeriFinanceState {
-        FeePoolState(requireAndGetAddress(currencyKey))
+        FeePoolState state = currencyKey == PERI ? feePoolState() : feePoolStateUsdc();
+        state
             .appendAccountIssuanceRecord(
                 account,
                 debtRatio,
