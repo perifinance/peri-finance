@@ -4,9 +4,7 @@ import "./SafeDecimalMath.sol";
 import "./State.sol";
 import "./Owned.sol";
 
-import "./interfaces/IStakeState.sol";
-
-contract StakeState is Owned, State, IStakeState {
+contract StakeState is Owned, State {
 
   using SafeMath for uint;
   using SafeDecimalMath for uint;
