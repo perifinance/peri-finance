@@ -1151,7 +1151,7 @@ const deploy = async ({
 
 	await deployer.deployContract({
 		name: `StakeStateUsdc`,
-		source: 'StakeStateUSDC',
+		source: 'StakeState',
 		args: [account, ZERO_ADDRESS],
 		force: addNewPynths,
 	});

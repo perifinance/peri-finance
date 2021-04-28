@@ -6,39 +6,39 @@ const { assert } = require('./common');
 
 const {
 	constants: { ZERO_ADDRESS },
-} = require('../../.');
+} = require('../..');
 
 const { setupContract, setupAllContracts } = require('./setup');
 
-contract('StakeStateUSDC', async accounts => {
-	let stakeStateUSDC;
+contract('StakeStateUsdc', async accounts => {
+	let stakeStateUsdc;
 	const [deployerAccount, owner, account1, account2, account3] = accounts;
 
 	before(async () => {
-		stakeStateUSDC = await setupContract({
+		stakeStateUsdc = await setupContract({
 			accounts,
-			contract: 'StakeStateUSDC',
+			contract: 'StakeStateUsdc',
 			args: [owner, deployerAccount],
 		});
 	});
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
-			assert.equal(owner, await stakeStateUSDC.owner());
-			assert.isNotEmpty(await stakeStateUSDC.associatedContract());
+			assert.equal(owner, await stakeStateUsdc.owner());
+			assert.isNotEmpty(await stakeStateUsdc.associatedContract());
 		});
 	});
 
 	describe('stake', () => {
 		it('Zero address is not allowed', async () => {
 			await truffleAssert.reverts(
-				stakeStateUSDC.stake(ZERO_ADDRESS, 100, { from: deployerAccount })
+				stakeStateUsdc.stake(ZERO_ADDRESS, 100, { from: deployerAccount })
 			);
 		});
 
 		it('expect successfully staked', async () => {
 			await truffleAssert.passes(
-				stakeStateUSDC.stake(deployerAccount, 100, { from: deployerAccount })
+				stakeStateUsdc.stake(deployerAccount, 100, { from: deployerAccount })
 			);
 		});
 	});
@@ -46,38 +46,38 @@ contract('StakeStateUSDC', async accounts => {
 	describe('unstake', () => {
 		it('Zero address is not allowed', async () => {
 			await truffleAssert.reverts(
-				stakeStateUSDC.unstake(ZERO_ADDRESS, 100, { from: deployerAccount })
+				stakeStateUsdc.unstake(ZERO_ADDRESS, 100, { from: deployerAccount })
 			);
 		});
 
 		it('Exceeds staked amount', async () => {
 			await truffleAssert.reverts(
-				stakeStateUSDC.unstake(deployerAccount, 1000, { from: deployerAccount })
+				stakeStateUsdc.unstake(deployerAccount, 1000, { from: deployerAccount })
 			);
 		});
 
 		it('Successfully unstaked', async () => {
 			await truffleAssert.passes(
-				stakeStateUSDC.unstake(deployerAccount, 100, { from: deployerAccount })
+				stakeStateUsdc.unstake(deployerAccount, 100, { from: deployerAccount })
 			);
 		});
 
 		it('Not enough total stake amount', async () => {
 			await truffleAssert.reverts(
-				stakeStateUSDC.unstake(deployerAccount, 100, { from: deployerAccount })
+				stakeStateUsdc.unstake(deployerAccount, 100, { from: deployerAccount })
 			);
 		});
 	});
 
 	describe('getStakeState', () => {
 		it('get users stake state', async () => {
-			await truffleAssert.passes(stakeStateUSDC.getStakeState(deployerAccount));
+			await truffleAssert.passes(stakeStateUsdc.getStakeState(deployerAccount));
 		});
 	});
 
 	describe('getTotalStake', () => {
 		it('should return totalStake', async () => {
-			await truffleAssert.passes(stakeStateUSDC.getTotalStake({ from: deployerAccount }));
+			await truffleAssert.passes(stakeStateUsdc.getTotalStake({ from: deployerAccount }));
 		});
 	});
 });
