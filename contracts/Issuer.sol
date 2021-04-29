@@ -849,7 +849,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // the change for the rest of the debt holders. The debt ledger holds high precision integers.
             if (state.debtLedgerLength() > 0) {
                 state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else if(delta == 0) {
+            } else if(delta == 0 || state.debtLedgerLength() <= 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
             } else {
                 revert("Invalid debt percentage");
@@ -872,7 +872,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             if(state.debtLedgerLength() > 0 && delta > 0) {
                 state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else if(delta == 0) {
+            } else if(delta == 0 || state.debtLedgerLength() <= 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
             } else {
                 revert("Invalid debt percentage");
