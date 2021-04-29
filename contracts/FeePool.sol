@@ -244,13 +244,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
                 _recentFeePeriodsStorage(0).startingDebtIndex
             );
 
-        emitIssuanceDebtRatioEntry(
-            account, 
-            debtRatio, 
-            debtEntryIndex, 
-            _recentFeePeriodsStorage(0).startingDebtIndex, 
-            currencyKey
-        );
+        // emitIssuanceDebtRatioEntry(
+        //     account, 
+        //     debtRatio, 
+        //     debtEntryIndex, 
+        //     _recentFeePeriodsStorage(0).startingDebtIndex, 
+        //     currencyKey
+        // );
     }
 
     /**

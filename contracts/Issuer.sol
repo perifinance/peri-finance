@@ -726,11 +726,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _issuePynthsUsdc(address from, uint amount) internal {
-        uint usdcAmountToStake = amount.divideDecimalRound(getIssuanceRatio());
+        // Applying issuance ratio with adjusting pUSD / USDC decimals deriving transferring amount
+        // Issuer must approve the protocol prior to sending their token
+        uint usdcAmountToStake = amount.divideDecimalRound(getIssuanceRatio()).div(10**12);
 
         require(usdc().transferFrom(from, address(this), usdcAmountToStake), "transferring usdc has been failed");
-
-        // (uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(from, pUSD);
 
         uint existingDebt = stakeStateUsdc().issuedAmountOf(from);
         uint totalSystemDebt = stakeStateUsdc().totalDebtIssued();
@@ -860,8 +860,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 state.incrementTotalStakerCount();
             }
 
+            // Write issuer's current debt share
             state.setCurrentStakingData(from, debtPercentage);
-            state.addStakeAmount(from, amount.divideDecimalRound(getIssuanceRatio()));
+            // Write issuer's transferred amount
+            state.addStakeAmount(from, amount.divideDecimalRound(getIssuanceRatio()).div(10**12));
+            // Write issuer's debt amount (issued pUSD amount)
             state.addIssuedAmount(from, amount);
 
             if(state.debtLedgerLength() > 0) {
