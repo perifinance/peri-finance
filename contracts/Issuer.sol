@@ -847,10 +847,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
             // the change for the rest of the debt holders. The debt ledger holds high precision integers.
-            if (state.debtLedgerLength() > 0) {
-                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else if(delta == 0 || state.debtLedgerLength() <= 0) {
+            if(delta == 0 || state.debtLedgerLength() <= 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
+            } else if (state.debtLedgerLength() > 0) {
+                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
             } else {
                 revert("Invalid debt percentage");
             }
@@ -870,10 +870,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Write issuer's debt amount (issued pUSD amount)
             state.addIssuedAmount(from, amount);
 
-            if(state.debtLedgerLength() > 0 && delta > 0) {
-                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else if(delta == 0 || state.debtLedgerLength() <= 0) {
+            if(delta == 0 || state.debtLedgerLength() <= 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
+            } else if(state.debtLedgerLength() > 0 && delta > 0) {
+                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
             } else {
                 revert("Invalid debt percentage");
             }
