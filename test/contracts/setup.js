@@ -239,6 +239,7 @@ const setupContract = async ({
 			0,
 		],
 		FeePoolStateUsdc: [owner, tryGetAddressOf('FeePool')],
+		TempKovanOracle: [],
 	};
 
 	let instance;
@@ -788,6 +789,10 @@ const setupAllContracts = async ({
 			contract: 'FeePoolStateUsdc',
 			source: 'FeePoolState',
 			deps: ['FeePool'],
+		},
+		{
+			contract: 'TempKovanOracle',
+			source: 'TempExchangeRateStorageKovan',
 		},
 	];
 

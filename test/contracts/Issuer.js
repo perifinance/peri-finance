@@ -48,7 +48,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		debtCache,
 		issuer,
 		pynths,
-		addressResolver;
+		addressResolver,
+		tempKovanOracle;
 
 	const getRemainingIssuablePynths = async account =>
 		(await periFinance.remainingIssuablePynths(account))[0];
@@ -71,6 +72,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			Issuer: issuer,
 			DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
+			TempKovanOracle: tempKovanOracle,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -90,6 +92,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'FeePoolStateUsdc',
+				'TempKovanOracle',
 			],
 		}));
 	});
@@ -111,6 +114,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			pynthKeys,
 			exchangeFeeRates: pynthKeys.map(() => exchangeFeeRate),
 		});
+
+		await exchangeRates.setOracleKovan(tempKovanOracle.address);
+
 		await debtCache.takeDebtSnapshot();
 	});
 

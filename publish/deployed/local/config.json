@@ -403,5 +403,8 @@
 	},
 	"FeePoolStateUsdc": {
 		"deploy": true
+	},
+	"TempKovanOracle": {
+		"deploy": true
 	}
 }
