@@ -42,9 +42,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		exchangeRates,
 		feePool,
 		pUSDContract,
-		// pETHContract,
-		// pEURContract,
-		// pAUDContract,
 		escrow,
 		rewardEscrowV2,
 		timestamp,
@@ -69,9 +66,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			PeriFinanceEscrow: escrow,
 			RewardEscrowV2: rewardEscrowV2,
 			PynthpUSD: pUSDContract,
-			// PynthpETH: pETHContract,
-			// PynthpAUD: pAUDContract,
-			// PynthpEUR: pEURContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,
@@ -105,7 +99,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	beforeEach(async () => {
 		timestamp = await currentTime();
 
-		await exchangeRates.updateRates([pUSD, PERI], ['0.5', '2'].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([PERI], ['2'].map(toUnit), timestamp, {
 			from: oracle,
 		});
 
