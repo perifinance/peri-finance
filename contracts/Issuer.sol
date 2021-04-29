@@ -244,6 +244,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint totalIssuedByUsdc = stakeStateUsdc().totalDebtIssued();
 
+        // Excludes USDC debt from total system debt cache
         if(currencyKey == USDC || currencyKey == pUSD) {
             totalSystemValue = totalSystemValue.sub(totalIssuedByUsdc);
         } else {
@@ -848,8 +849,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // the change for the rest of the debt holders. The debt ledger holds high precision integers.
             if (state.debtLedgerLength() > 0) {
                 state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else {
+            } else if(delta == 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
+            } else {
+                revert("Invalid debt percentage");
             }
         } else if(currencyKey == USDC) {
             IStakeState state = stakeStateUsdc();
@@ -867,10 +870,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Write issuer's debt amount (issued pUSD amount)
             state.addIssuedAmount(from, amount);
 
-            if(state.debtLedgerLength() > 0) {
+            if(state.debtLedgerLength() > 0 && delta > 0) {
                 state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else {
+            } else if(delta == 0) {
                 state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
+            } else {
+                revert("Invalid debt percentage");
             }
         } else {
             revert("Invalid currency key");
