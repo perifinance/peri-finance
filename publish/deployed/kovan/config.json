@@ -480,9 +480,9 @@
 		"deploy": false
 	},
 	"StakeStateUsdc": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePoolStateUsdc": {
-		"deploy": true
+		"deploy": false
 	}
 }
