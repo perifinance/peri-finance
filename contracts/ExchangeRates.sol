@@ -632,14 +632,14 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         // Test Purpose...
         ///////////////////
         if (oracle_kovan == address(0)) {
-            return RateAndUpdatedTime(0, uint40(block.timestamp));
+            return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
         }
 
         TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
 
         (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
 
-        return RateAndUpdatedTime(_rate, _time);
+        return RateAndUpdatedTime({rate: _rate, time: _time});
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
