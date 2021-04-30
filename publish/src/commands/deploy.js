@@ -1175,7 +1175,7 @@ const deploy = async ({
 		force: addNewPynths,
 	});
 
-	if (network === 'local') {
+	if (network !== 'mainnet') {
 		console.log(gray(`\n------ DEPLOY MockTokens ------\n`));
 
 		await deployer.deployContract({

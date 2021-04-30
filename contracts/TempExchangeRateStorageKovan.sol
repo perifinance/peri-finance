@@ -13,7 +13,7 @@ contract TempExchangeRateStorageKovan {
 
     function getRate(bytes32 _currencyKey) public view returns (uint216, uint40) {
         return (
-            rates[_currencyKey].rate > 0 ? rates[_currencyKey].rate : 1,
+            rates[_currencyKey].rate > 0 ? rates[_currencyKey].rate : 10**18,
             rates[_currencyKey].time > 0 ? rates[_currencyKey].time : uint40(block.timestamp)
         );
     }

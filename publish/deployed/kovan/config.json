@@ -123,25 +123,25 @@
 		"deploy": false
 	},
 	"PynthpEUR": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpJPY": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpAUD": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpGBP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpCHF": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpXAU": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpXAG": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpBTC": {
 		"deploy": false
@@ -159,25 +159,25 @@
 		"deploy": false
 	},
 	"ProxypEUR": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypJPY": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypAUD": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypGBP": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypCHF": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypXAU": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypXAG": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypBTC": {
 		"deploy": false
@@ -195,25 +195,25 @@
 		"deploy": false
 	},
 	"TokenStatepEUR": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepJPY": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepAUD": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepGBP": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepCHF": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepXAU": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepXAG": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepBTC": {
 		"deploy": false
@@ -228,31 +228,31 @@
 		"deploy": false
 	},
 	"TokenStatepBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiBTC": {
 		"deploy": false
@@ -273,187 +273,187 @@
 		"deploy": false
 	},
 	"TokenStateiBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiBNB": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiTRX": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiXTZ": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiCEX": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
 	"TokenStatepXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiXRP": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiLINK": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiLTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiDEFI": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiEOS": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiETC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiDASH": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiDASH": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiDASH": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiXMR": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiXMR": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiXMR": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiADA": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiADA": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiADA": {
-		"deploy": false
+		"deploy": true
 	},
 	"TradingRewards": {
 		"deploy": false
@@ -465,24 +465,27 @@
 		"deploy": false
 	},
 	"ShortingRewardspETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"ShortingRewardspBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepTSLA": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxypTSLA": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthpTSLA": {
-		"deploy": false
+		"deploy": true
 	},
 	"StakeStateUsdc": {
 		"deploy": false
 	},
 	"FeePoolStateUsdc": {
+		"deploy": false
+	},
+	"USDC": {
 		"deploy": false
 	}
 }
