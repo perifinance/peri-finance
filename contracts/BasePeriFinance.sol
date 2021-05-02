@@ -18,7 +18,6 @@ import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IVirtualPynth.sol";
-import "./interfaces/IStakeStateUSDC.sol";
 
 contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinance {
     using SafeMath for uint;
@@ -58,7 +57,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
-    bytes32 private constant CONTRACT_STAKESTATE_USDC = "StakeStateUsdc";
 
     // ========== CONSTRUCTOR ==========
 
@@ -78,13 +76,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](6);
+        addresses = new bytes32[](5);
         addresses[0] = CONTRACT_PERIFINANCESTATE;
         addresses[1] = CONTRACT_SYSTEMSTATUS;
         addresses[2] = CONTRACT_EXCHANGER;
         addresses[3] = CONTRACT_ISSUER;
         addresses[4] = CONTRACT_REWARDSDISTRIBUTION;
-        addresses[5] = CONTRACT_STAKESTATE_USDC;
     }
 
     function periFinanceState() internal view returns (IPeriFinanceState) {
@@ -101,10 +98,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function issuer() internal view returns (IIssuer) {
         return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
-    }
-
-    function usdcState() internal view returns (IStakeStateUSDC) {
-        return IStakeStateUSDC(requireAndGetAddress(CONTRACT_STAKESTATE_USDC));
     }
 
     function rewardsDistribution() internal view returns (IRewardsDistribution) {
@@ -184,14 +177,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
         (uint initialDebtOwnership, ) = periFinanceState().issuanceData(account);
 
-        (uint usdcStakedAmount, ) = usdcState().getStakeState(account);
-        uint issuedAmountByUsdc = usdcStakedAmount.multiplyDecimalRound(issuer().issuanceRatio());
-
         if (initialDebtOwnership > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferablePeriFinanceAndAnyRateIsInvalid(
                     account,
-                    tokenState.balanceOf(account).sub(issuedAmountByUsdc)
+                    tokenState.balanceOf(account)
                 );
             require(value <= transferable, "Cannot transfer staked or escrowed PERI");
             require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
@@ -395,8 +385,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function issuePynthsUsdc(uint amount) external issuanceActive optionalProxy {
-        return issuer().issuePynthsUsdc(messageSender, amount);
+    function stakeUSDCAndIssuePynths(address from, uint amount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssuePynths(from, amount);
+    }
+
+    function stakeUSDCAndIssueMaxPynths(address from, uint amount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssueMaxPynths(from, amount);
     }
 
     function burnPynths(uint amount) external issuanceActive optionalProxy {
@@ -413,6 +407,14 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
+    }
+
+    function unstakeUSDCAndBurnPynths(address from, uint amount) external issuanceActive optionalProxy {
+        return issuer().unstakeUSDCAndBurnPynths(from, amount);
+    }
+
+    function unstakeUSDCToMaxAndBurnPynths(address from) external issuanceActive optionalProxy {
+        return issuer().unstakeUSDCToMaxAndBurnPynths(from);
     }
 
     function exchangeWithVirtual(

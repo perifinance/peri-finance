@@ -26,6 +26,7 @@ import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/ICollateralManager.sol";
+import "./interfaces/IStakingStateUSDC.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/feepool
 contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePool {
@@ -73,7 +74,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
-
+    bytes32 private constant CONTRACT_STAKINGSTATE_USDC = "StakingStateUSDC";
+    
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
 
     bytes32 private constant LAST_FEE_WITHDRAWAL = "last_fee_withdrawal";
@@ -91,7 +93,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](12);
+        bytes32[] memory newAddresses = new bytes32[](13);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_PERIFINANCE;
         newAddresses[2] = CONTRACT_FEEPOOLSTATE;
@@ -104,6 +106,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[9] = CONTRACT_ETH_COLLATERAL_PUSD;
         newAddresses[10] = CONTRACT_REWARDSDISTRIBUTION;
         newAddresses[11] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[12] = CONTRACT_STAKINGSTATE_USDC;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -113,6 +116,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function periFinance() internal view returns (IPeriFinance) {
         return IPeriFinance(requireAndGetAddress(CONTRACT_PERIFINANCE));
+    }
+
+    function stakingStateUSDC() internal view returns (IStakingStateUSDC) {
+        return IStakingStateUSDC(requireAndGetAddress(CONTRACT_STAKINGSTATE_USDC));
     }
 
     function feePoolState() internal view returns (FeePoolState) {
