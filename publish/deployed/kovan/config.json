@@ -479,10 +479,7 @@
 	"PynthpTSLA": {
 		"deploy": true
 	},
-	"StakeStateUsdc": {
-		"deploy": false
-	},
-	"FeePoolStateUsdc": {
+	"StakingStateUSDC": {
 		"deploy": false
 	},
 	"USDC": {

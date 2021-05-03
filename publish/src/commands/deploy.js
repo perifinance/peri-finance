@@ -1166,12 +1166,12 @@ const deploy = async ({
 		}
 	}
 
-	console.log(gray(`\n------ DEPLOY StakeState CONTRACTS ------\n`));
+	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
 	await deployer.deployContract({
-		name: `StakeStateUsdc`,
-		source: 'StakeState',
-		args: [account, issuerAddress],
+		name: `StakingStateUSDC`,
+		source: 'StakingStateUSDC',
+		args: [account, ZERO_ADDRESS],
 		force: addNewPynths,
 	});
 

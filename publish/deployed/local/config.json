@@ -395,7 +395,7 @@
 	"MockToken": {
 		"deploy": true
 	},
-	"StakeStateUsdc": {
+	"StakingStateUSDC": {
 		"deploy": true
 	},
 	"USDC": {
