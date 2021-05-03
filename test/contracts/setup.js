@@ -906,8 +906,8 @@ const setupAllContracts = async ({
 
 	returnObj[`USDC`] = USDC;
 
-	const StakeStateUsdc = await artifacts.require('StakeState').new(owner, USDC.address);
-	returnObj[`StakeStateUsdc`] = StakeStateUsdc;
+	const stakingStateUSDC = await artifacts.require('StakingStateUSDC').new(owner, USDC.address);
+	returnObj[`StakingStateUSDC`] = stakingStateUSDC;
 
 	// now invoke AddressResolver to set all addresses
 	if (returnObj['AddressResolver']) {
