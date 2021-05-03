@@ -7,11 +7,11 @@ interface IFeePool {
     // solhint-disable-next-line func-name-mixedcase
     function FEE_ADDRESS() external view returns (address);
 
-    function feesAvailable(address account, bytes32 currencyKey) external view returns (uint, uint);
+    function feesAvailable(address account) external view returns (uint, uint);
 
     function feePeriodDuration() external view returns (uint);
 
-    function isFeesClaimable(address account) external view returns (bool, bool);
+    function isFeesClaimable(address account) external view returns (bool);
 
     function targetThreshold() external view returns (uint);
 
@@ -30,8 +30,7 @@ interface IFeePool {
     function appendAccountIssuanceRecord(
         address account,
         uint lockedAmount,
-        uint debtEntryIndex,
-        bytes32 currencyKey
+        uint debtEntryIndex
     ) external;
 
     function recordFeePaid(uint pUSDAmount) external;

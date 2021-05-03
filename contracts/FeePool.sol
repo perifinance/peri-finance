@@ -36,9 +36,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     // Where fees are pooled in pUSD.
     address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
 
-    bytes32 internal constant PERI = "PERI";
-    bytes32 internal constant USDC = "USDC";
-
     // pUSD currencyKey. Fees stored and paid in pUSD
     bytes32 private pUSD = "pUSD";
 
@@ -60,10 +57,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     // public function closeCurrentFeePeriod() is called closing the
     // current weeks collected fees. [1] is last weeks feeperiod
     uint8 public constant FEE_PERIOD_LENGTH = 2;
-
-    uint256 public PERI_REWARD_RATIO = 80;
-    uint256 public USDC_REWARD_RATIO = 20;
-    uint256 public constant ONE_HUNDRED = 100;
 
     FeePeriod[FEE_PERIOD_LENGTH] private _recentFeePeriods;
     uint256 private _currentFeePeriod;
@@ -134,14 +127,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return FeePoolState(requireAndGetAddress(CONTRACT_FEEPOOLSTATE));
     }
 
-    function feePoolStateUsdc() internal view returns (FeePoolState) {
-        return FeePoolState(requireAndGetAddress(CONTRACT_FEEPOOLSTATE_USDC));
-    }
-
-    function stakeStateUsdc() internal view returns (IStakeState) {
-        return IStakeState(requireAndGetAddress(CONTRACT_STAKESTATE_USDC));
-    }
-
     function feePoolEternalStorage() internal view returns (FeePoolEternalStorage) {
         return FeePoolEternalStorage(requireAndGetAddress(CONTRACT_FEEPOOLETERNALSTORAGE));
     }
@@ -196,7 +181,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         returns (
             uint64 feePeriodId,
             uint64 startingDebtIndex,
-            uint64 startingUsdcDebtIndex,
             uint64 startTime,
             uint feesToDistribute,
             uint feesClaimed,
@@ -208,7 +192,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return (
             feePeriod.feePeriodId,
             feePeriod.startingDebtIndex,
-            feePeriod.startingUsdcDebtIndex,
             feePeriod.startTime,
             feePeriod.feesToDistribute,
             feePeriod.feesClaimed,
@@ -234,19 +217,16 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function appendAccountIssuanceRecord(
         address account,
         uint debtRatio,
-        uint debtEntryIndex,
-        bytes32 currencyKey
+        uint debtEntryIndex
     ) external onlyIssuerAndPeriFinanceState {
-        FeePoolState state = currencyKey == PERI ? feePoolState() : feePoolStateUsdc();
-        state.appendAccountIssuanceRecord(account, debtRatio, debtEntryIndex, _recentFeePeriodsStorage(0).startingDebtIndex);
+        feePoolState().appendAccountIssuanceRecord(
+            account,
+            debtRatio,
+            debtEntryIndex,
+            _recentFeePeriodsStorage(0).startingDebtIndex
+        );
 
-        // emitIssuanceDebtRatioEntry(
-        //     account,
-        //     debtRatio,
-        //     debtEntryIndex,
-        //     _recentFeePeriodsStorage(0).startingDebtIndex,
-        //     currencyKey
-        // );
+        emitIssuanceDebtRatioEntry(account, debtRatio, debtEntryIndex, _recentFeePeriodsStorage(0).startingDebtIndex);
     }
 
     /**
@@ -336,28 +316,14 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // Address won't be able to claim fees if it is too far below the target c-ratio.
         // It will need to burn pynths then try claiming again.
-        (bool periFeesClaimable, bool usdcFeesClaimable, bool anyRateIsInvalid) =
-            _isFeesClaimableAndAnyRatesInvalid(claimingAddress);
+        (bool feesClaimable, bool anyRateIsInvalid) = _isFeesClaimableAndAnyRatesInvalid(claimingAddress);
 
-        require(periFeesClaimable || usdcFeesClaimable, "C-Ratio below penalty threshold");
+        require(feesClaimable, "C-Ratio below penalty threshold");
 
         require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
 
         // Get the claimingAddress available fees and rewards
-        uint availableFeesPeri;
-        uint availableRewardsPeri;
-        if (periFeesClaimable) {
-            (availableFeesPeri, availableRewardsPeri) = feesAvailable(claimingAddress, PERI);
-        }
-
-        uint availableFeesUsdc;
-        uint availableRewardsUsdc;
-        if (usdcFeesClaimable) {
-            (availableFeesUsdc, availableRewardsUsdc) = feesAvailable(claimingAddress, USDC);
-        }
-
-        availableFees = availableFeesPeri.add(availableFeesUsdc);
-        availableRewards = availableRewardsPeri.add(availableRewardsUsdc);
+        (availableFees, availableRewards) = feesAvailable(claimingAddress);
 
         require(
             availableFees > 0 || availableRewards > 0,
@@ -561,9 +527,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * @notice The fees available to be withdrawn by a specific account, priced in pUSD
      * @dev Returns two amounts, one for fees and one for PERI rewards
      */
-    function feesAvailable(address account, bytes32 currencyKey) public view returns (uint, uint) {
+    function feesAvailable(address account) public view returns (uint, uint) {
         // Add up the fees
-        uint[2][FEE_PERIOD_LENGTH] memory userFees = feesByPeriod(account, currencyKey);
+        uint[2][FEE_PERIOD_LENGTH] memory userFees = feesByPeriod(account);
 
         uint totalFees = 0;
         uint totalRewards = 0;
@@ -579,61 +545,42 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return (totalFees, totalRewards);
     }
 
-    function _isFeesClaimableAndAnyRatesInvalid(address account)
-        internal
-        view
-        returns (
-            bool periClaimable,
-            bool usdcClaimable,
-            bool anyRateIsInvalid
-        )
-    {
+    function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
         //  0  <  10%:   Claimable
         // 10% > above:  Unable to claim
-        (uint ratio, bool _anyRateIsInvalid) = issuer().collateralisationRatioAndAnyRatesInvalid(account);
-        uint ratioUsdc = stakeStateUsdc().collateralisationRatio(account);
+        (uint ratio, bool anyRateIsInvalid) = issuer().collateralisationRatioAndAnyRatesInvalid(account);
         uint targetRatio = getIssuanceRatio();
-
-        periClaimable = true;
-        usdcClaimable = true;
-        anyRateIsInvalid = _anyRateIsInvalid;
 
         // Claimable if collateral ratio below target ratio
         if (ratio < targetRatio) {
-            periClaimable = true;
-        } else {
-            // Calculate the threshold for collateral ratio before fees can't be claimed.
-            uint ratio_threshold = targetRatio.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
-
-            // Not claimable if collateral ratio above threshold
-            if (ratio > ratio_threshold) {
-                periClaimable = false;
-            }
+            return (true, anyRateIsInvalid);
         }
 
-        if (ratioUsdc > targetRatio) {
-            usdcClaimable = false;
+        // Calculate the threshold for collateral ratio before fees can't be claimed.
+        uint ratio_threshold = targetRatio.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
+
+        // Not claimable if collateral ratio above threshold
+        if (ratio > ratio_threshold) {
+            return (false, anyRateIsInvalid);
         }
+
+        return (true, anyRateIsInvalid);
     }
 
-    function isFeesClaimable(address account) external view returns (bool periFeesClaimable, bool usdcFeesClaimable) {
-        (periFeesClaimable, usdcFeesClaimable, ) = _isFeesClaimableAndAnyRatesInvalid(account);
+    function isFeesClaimable(address account) external view returns (bool feesClaimable) {
+        (feesClaimable, ) = _isFeesClaimableAndAnyRatesInvalid(account);
     }
 
     /**
      * @notice Calculates fees by period for an account, priced in pUSD
      * @param account The address you want to query the fees for
      */
-    function feesByPeriod(address account, bytes32 currencyKey)
-        public
-        view
-        returns (uint[2][FEE_PERIOD_LENGTH] memory results)
-    {
+    function feesByPeriod(address account) public view returns (uint[2][FEE_PERIOD_LENGTH] memory results) {
         // What's the user's debt entry index and the debt they owe to the system at current feePeriod
         uint userOwnershipPercentage;
         uint debtEntryIndex;
-        FeePoolState _feePoolState = currencyKey == PERI ? feePoolState() : feePoolStateUsdc();
+        FeePoolState _feePoolState = feePoolState();
 
         (userOwnershipPercentage, debtEntryIndex) = _feePoolState.getAccountsDebtEntry(account, 0);
 
@@ -649,12 +596,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // fees owing for, so we need to report on it anyway.
         uint feesFromPeriod;
         uint rewardsFromPeriod;
-        (feesFromPeriod, rewardsFromPeriod) = _feesAndRewardsFromPeriod(
-            0,
-            userOwnershipPercentage,
-            debtEntryIndex,
-            currencyKey
-        );
+        (feesFromPeriod, rewardsFromPeriod) = _feesAndRewardsFromPeriod(0, userOwnershipPercentage, debtEntryIndex);
 
         results[0][0] = feesFromPeriod;
         results[0][1] = rewardsFromPeriod;
@@ -666,10 +608,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // Condition checks for periods > 0
         for (uint i = FEE_PERIOD_LENGTH - 1; i > 0; i--) {
             uint next = i - 1;
-            uint nextPeriodStartingDebtIndex =
-                currencyKey == PERI
-                    ? _recentFeePeriodsStorage(next).startingDebtIndex
-                    : _recentFeePeriodsStorage(next).startingUsdcDebtIndex;
+            uint nextPeriodStartingDebtIndex = _recentFeePeriodsStorage(next).startingDebtIndex;
 
             // We can skip the period, as no debt minted during period (next period's startingDebtIndex is still 0)
             if (nextPeriodStartingDebtIndex > 0 && lastFeeWithdrawal < _recentFeePeriodsStorage(i).feePeriodId) {
@@ -683,12 +622,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
                 // return if userOwnershipPercentage = 0)
                 (userOwnershipPercentage, debtEntryIndex) = _feePoolState.applicableIssuanceData(account, closingDebtIndex);
 
-                (feesFromPeriod, rewardsFromPeriod) = _feesAndRewardsFromPeriod(
-                    i,
-                    userOwnershipPercentage,
-                    debtEntryIndex,
-                    currencyKey
-                );
+                (feesFromPeriod, rewardsFromPeriod) = _feesAndRewardsFromPeriod(i, userOwnershipPercentage, debtEntryIndex);
 
                 results[i][0] = feesFromPeriod;
                 results[i][1] = rewardsFromPeriod;
@@ -707,8 +641,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function _feesAndRewardsFromPeriod(
         uint period,
         uint ownershipPercentage,
-        uint debtEntryIndex,
-        bytes32 currencyKey
+        uint debtEntryIndex
     ) internal view returns (uint, uint) {
         // If it's zero, they haven't issued, and they have no fees OR rewards.
         if (ownershipPercentage == 0) return (0, 0);
@@ -717,26 +650,16 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // If period has closed we want to calculate debtPercentage for the period
         if (period > 0) {
-            uint closingDebtIndex =
-                currencyKey == PERI
-                    ? uint256(_recentFeePeriodsStorage(period - 1).startingDebtIndex).sub(1)
-                    : uint256(_recentFeePeriodsStorage(period - 1).startingUsdcDebtIndex).sub(1);
-            debtOwnershipForPeriod = _effectiveDebtRatioForPeriod(
-                closingDebtIndex,
-                ownershipPercentage,
-                debtEntryIndex,
-                currencyKey
-            );
+            uint closingDebtIndex = uint256(_recentFeePeriodsStorage(period - 1).startingDebtIndex).sub(1);
+            debtOwnershipForPeriod = _effectiveDebtRatioForPeriod(closingDebtIndex, ownershipPercentage, debtEntryIndex);
         }
 
         // Calculate their percentage of the fees / rewards in this period
         // This is a high precision integer.
-        uint ratio = currencyKey == PERI ? PERI_REWARD_RATIO : USDC_REWARD_RATIO;
-        uint feesToDistribute = _recentFeePeriodsStorage(period).feesToDistribute.mul(ratio).div(ONE_HUNDRED);
-        uint feesFromPeriod = feesToDistribute.multiplyDecimal(debtOwnershipForPeriod);
+        uint feesFromPeriod = _recentFeePeriodsStorage(period).feesToDistribute.multiplyDecimal(debtOwnershipForPeriod);
 
-        uint rewardsToDistribute = _recentFeePeriodsStorage(period).rewardsToDistribute.mul(ratio).div(ONE_HUNDRED);
-        uint rewardsFromPeriod = rewardsToDistribute.multiplyDecimal(debtOwnershipForPeriod);
+        uint rewardsFromPeriod =
+            _recentFeePeriodsStorage(period).rewardsToDistribute.multiplyDecimal(debtOwnershipForPeriod);
 
         return (feesFromPeriod.preciseDecimalToDecimal(), rewardsFromPeriod.preciseDecimalToDecimal());
     }
@@ -744,54 +667,35 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function _effectiveDebtRatioForPeriod(
         uint closingDebtIndex,
         uint ownershipPercentage,
-        uint debtEntryIndex,
-        bytes32 currencyKey
+        uint debtEntryIndex
     ) internal view returns (uint) {
         // Figure out their global debt percentage delta at end of fee Period.
         // This is a high precision integer.
-        uint feePeriodDebtOwnership;
-        if (currencyKey == PERI) {
-            IPeriFinanceState _periFinanceState = periFinanceState();
-            feePeriodDebtOwnership = _periFinanceState
+        IPeriFinanceState _periFinanceState = periFinanceState();
+        uint feePeriodDebtOwnership =
+            _periFinanceState
                 .debtLedger(closingDebtIndex)
                 .divideDecimalRoundPrecise(_periFinanceState.debtLedger(debtEntryIndex))
                 .multiplyDecimalRoundPrecise(ownershipPercentage);
-        } else if (currencyKey == USDC) {
-            IStakeState _usdcStakeState = stakeStateUsdc();
-            feePeriodDebtOwnership = _usdcStakeState
-                .debtLedger(closingDebtIndex)
-                .divideDecimalRoundPrecise(_usdcStakeState.debtLedger(debtEntryIndex))
-                .multiplyDecimalRoundPrecise(ownershipPercentage);
-        } else {
-            revert("Invalid currency key");
-        }
 
         return feePeriodDebtOwnership;
     }
 
-    function effectiveDebtRatioForPeriod(
-        address account,
-        uint period,
-        bytes32 currencyKey
-    ) external view returns (uint) {
+    function effectiveDebtRatioForPeriod(address account, uint period) external view returns (uint) {
         require(period != 0, "Current period is not closed yet");
         require(period < FEE_PERIOD_LENGTH, "Exceeds the FEE_PERIOD_LENGTH");
 
-        uint startingDebtIndex =
-            currencyKey == PERI
-                ? uint256(_recentFeePeriodsStorage(period - 1).startingDebtIndex)
-                : uint256(_recentFeePeriodsStorage(period - 1).startingUsdcDebtIndex);
         // If the period being checked is uninitialised then return 0. This is only at the start of the system.
-        if (startingDebtIndex == 0) return 0;
+        if (_recentFeePeriodsStorage(period - 1).startingDebtIndex == 0) return 0;
 
-        uint closingDebtIndex = startingDebtIndex.sub(1);
+        uint closingDebtIndex = uint256(_recentFeePeriodsStorage(period - 1).startingDebtIndex).sub(1);
 
         uint ownershipPercentage;
         uint debtEntryIndex;
         (ownershipPercentage, debtEntryIndex) = feePoolState().applicableIssuanceData(account, closingDebtIndex);
 
         // internal function will check closingDebtIndex has corresponding debtLedger entry
-        return _effectiveDebtRatioForPeriod(closingDebtIndex, ownershipPercentage, debtEntryIndex, currencyKey);
+        return _effectiveDebtRatioForPeriod(closingDebtIndex, ownershipPercentage, debtEntryIndex);
     }
 
     /**
@@ -856,21 +760,19 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         address indexed account,
         uint debtRatio,
         uint debtEntryIndex,
-        uint feePeriodStartingDebtIndex,
-        bytes32 currencyKey
+        uint feePeriodStartingDebtIndex
     );
     bytes32 private constant ISSUANCEDEBTRATIOENTRY_SIG =
-        keccak256("IssuanceDebtRatioEntry(address,uint256,uint256,uint256,bytes32)");
+        keccak256("IssuanceDebtRatioEntry(address,uint256,uint256,uint256)");
 
     function emitIssuanceDebtRatioEntry(
         address account,
         uint debtRatio,
         uint debtEntryIndex,
-        uint feePeriodStartingDebtIndex,
-        bytes32 currencyKey
+        uint feePeriodStartingDebtIndex
     ) internal {
         proxy._emit(
-            abi.encode(debtRatio, debtEntryIndex, feePeriodStartingDebtIndex, currencyKey),
+            abi.encode(debtRatio, debtEntryIndex, feePeriodStartingDebtIndex),
             2,
             ISSUANCEDEBTRATIOENTRY_SIG,
             bytes32(uint256(uint160(account))),
