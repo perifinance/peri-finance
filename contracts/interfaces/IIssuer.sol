@@ -59,8 +59,6 @@ interface IIssuer {
     // Restricted: used internally to PeriFinance
     function issuePynths(address from, uint amount) external;
 
-    function issuePynthsUsdc(address from, uint amount) external;
-
     function issuePynthsOnBehalf(
         address issueFor,
         address from,
@@ -70,6 +68,10 @@ interface IIssuer {
     function issueMaxPynths(address from) external;
 
     function issueMaxPynthsOnBehalf(address issueFor, address from) external;
+
+    function stakeUSDCAndIssuePynths(address from, uint amount) external;
+
+    function stakeUSDCAndIssueMaxPynths(address from, uint amount) external;
 
     function burnPynths(address from, uint amount) external;
 
@@ -82,6 +84,10 @@ interface IIssuer {
     function burnPynthsToTarget(address from) external;
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
+
+    function unstakeUSDCAndBurnPynths(address from, uint amount) external;
+
+    function unstakeUSDCToMaxAndBurnPynths(address from) external;
 
     function liquidateDelinquentAccount(
         address account,

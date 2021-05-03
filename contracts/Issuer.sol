@@ -23,7 +23,7 @@ import "./interfaces/IHasBalance.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IStakeState.sol";
+import "./interfaces/IStakingStateUSDC.sol";
 
 interface IRewardEscrowV2 {
     // Views
@@ -86,7 +86,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_LIQUIDATIONS = "Liquidations";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_USDC = "USDC";
-    bytes32 private constant CONTRACT_STAKESTATE_USDC = "StakeStateUsdc";
+    bytes32 private constant CONTRACT_STAKINGSTATE_USDC = "StakingStateUSDC";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -108,7 +108,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[11] = CONTRACT_DEBTCACHE;
         newAddresses[12] = CONTRACT_COLLATERALMANAGER;
         newAddresses[13] = CONTRACT_USDC;
-        newAddresses[14] = CONTRACT_STAKESTATE_USDC;
+        newAddresses[14] = CONTRACT_STAKINGSTATE_USDC;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -116,8 +116,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return IPeriFinance(requireAndGetAddress(CONTRACT_PERIFINANCE));
     }
 
-    function stakeStateUsdc() internal view returns (IStakeState) {
-        return IStakeState(requireAndGetAddress(CONTRACT_STAKESTATE_USDC));
+    function stakingStateUSDC() internal view returns (IStakingStateUSDC) {
+        return IStakingStateUSDC(requireAndGetAddress(CONTRACT_STAKINGSTATE_USDC));
     }
 
     function usdc() internal view returns (IERC20) {
@@ -242,19 +242,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
         (totalSystemValue, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, true);
 
-        uint totalIssuedByUsdc = stakeStateUsdc().totalDebtIssued();
-
-        // Excludes USDC debt from total system debt cache
-        if(currencyKey == USDC || currencyKey == pUSD) {
-            totalSystemValue = totalSystemValue.sub(totalIssuedByUsdc);
-        } else {
-            (uint currencyRate, bool currencyRateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
-
-            anyRateIsInvalid = currencyRateInvalid;
-            
-            totalSystemValue = totalSystemValue.sub(totalIssuedByUsdc.divideDecimalRound(currencyRate));
-        }
-
         // If it's zero, they haven't issued, and they have no debt.
         // Note: it's more gas intensive to put this check here rather than before _totalIssuedPynths
         // if they have 0 PERI, but it's a necessary trade-off
@@ -272,6 +259,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 .divideDecimalRoundPrecise(state.debtLedger(debtEntryIndex))
                 .multiplyDecimalRoundPrecise(initialDebtOwnership);
         }
+
+        // uint currentDebtOwnership = state
+        //     .lastDebtLedgerEntry()
+        //     .divideDecimalRoundPrecise(state.debtLedger(debtEntryIndex))
+        //     .multiplyDecimalRoundPrecise(initialDebtOwnership);
 
         // Their debt balance is their portion of the total system value.
         uint highPrecisionBalance =
@@ -299,9 +291,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint totalSystemDebt,
             bool anyRateIsInvalid
         )
-    {   
+    {
         (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
-
         (uint issuable, bool isInvalid) = _maxIssuablePynths(_issuer);
         maxIssuable = issuable;
         anyRateIsInvalid = anyRateIsInvalid || isInvalid;
@@ -321,10 +312,23 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return amount.divideDecimalRound(periRate);
     }
 
+    function _usdcToUSD(uint amount) internal pure returns (uint) {
+        return amount.mul(10**12);
+    }
+
+    function _usdToUSDC(uint amount) internal pure returns (uint) {
+        return amount.div(10**12);
+    }
+
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
         // What is the value of their PERI balance in pUSD
         (uint periRate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint destinationValue = _periToUSD(_collateral(_issuer), periRate);
+        uint periValue = _periToUSD(_collateral(_issuer), periRate);
+
+        // What is the value of their USDC staked balance in pUSD
+        uint usdcValue = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer));
+
+        uint destinationValue = periValue.add(usdcValue);
 
         // They're allowed to issue up to issuanceRatio of that value
         return (destinationValue.multiplyDecimal(getIssuanceRatio()), isInvalid);
@@ -333,12 +337,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
         uint totalOwnedPeriFinance = _collateral(_issuer);
 
+        (uint periRate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint stakedUSDCAmountToPeri = _usdToPeri(_usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer)), periRate);
+        uint usdcDebtBalance = stakedUSDCAmountToPeri.multiplyDecimal(getIssuanceRatio());
+
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, PERI);
+        uint debtBalanceWithoutUSDCDebt = debtBalance.sub(usdcDebtBalance);
 
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
         if (totalOwnedPeriFinance == 0) return (0, anyRateIsInvalid);
 
-        return (debtBalance.divideDecimalRound(totalOwnedPeriFinance), anyRateIsInvalid);
+        return (debtBalanceWithoutUSDCDebt.divideDecimalRound(totalOwnedPeriFinance), anyRateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
@@ -443,7 +452,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // The locked periFinance value can exceed their balance.
         uint debtBalance;
         (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
-        uint lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+
+        (uint periRate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint stakedUSDCAmountToPeri = _usdToPeri(_usdcToUSD(stakingStateUSDC().stakedAmountOf(account)), periRate);
+        uint usdcDebtBalance = stakedUSDCAmountToPeri.multiplyDecimal(getIssuanceRatio());
+
+        uint debtBalanceWithoutUSDCDebt = debtBalance.sub(usdcDebtBalance);
+        uint lockedPeriFinanceValue = debtBalanceWithoutUSDCDebt.divideDecimalRound(getIssuanceRatio());
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
         if (lockedPeriFinanceValue >= balance) {
@@ -555,10 +570,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _issuePynths(from, amount, false);
     }
 
-    function issuePynthsUsdc(address from, uint amount) external onlyPeriFinance {
-        _issuePynthsUsdc(from, amount);
-    }
-
     function issueMaxPynths(address from) external onlyPeriFinance {
         _issuePynths(from, 0, true);
     }
@@ -575,6 +586,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function issueMaxPynthsOnBehalf(address issueForAddress, address from) external onlyPeriFinance {
         _requireCanIssueOnBehalf(issueForAddress, from);
         _issuePynths(issueForAddress, 0, true);
+    }
+
+    function stakeUSDCAndIssuePynths(address from, uint amount) external onlyPeriFinance {
+        _stakeUSDCAndIssuePynths(from, amount, false);
+    }
+
+    function stakeUSDCAndIssueMaxPynths(address from, uint amount) external onlyPeriFinance {
+        _stakeUSDCAndIssuePynths(from, amount, true);
     }
 
     function burnPynths(address from, uint amount) external onlyPeriFinance {
@@ -597,6 +616,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external onlyPeriFinance {
         _requireCanBurnOnBehalf(burnForAddress, from);
         _voluntaryBurnPynths(burnForAddress, 0, true);
+    }
+
+    function unstakeUSDCAndBurnPynths(address from, uint amount) external onlyPeriFinance {
+        _unstakeUSDCAndBurnPynths(from, amount, false);
+    }
+
+    function unstakeUSDCToMaxAndBurnPynths(address from) external onlyPeriFinance {
+        _unstakeUSDCAndBurnPynths(from, 0, true);
     }
 
     function liquidateDelinquentAccount(
@@ -685,7 +712,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         // Keep track of the debt they're about to create
-        _addToDebtRegister(from, amount, existingDebt, totalSystemDebt, PERI);
+        _addToDebtRegister(from, amount, existingDebt, totalSystemDebt);
 
         // record issue timestamp
         _setLastIssueEvent(from);
@@ -697,7 +724,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
         // Store their locked PERI amount to determine their fee % for the period
-        _appendAccountIssuanceRecord(from, PERI);
+        _appendAccountIssuanceRecord(from);
     }
 
     function _burnPynths(
@@ -723,35 +750,22 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
-        _appendAccountIssuanceRecord(debtAccount, PERI);
+        _appendAccountIssuanceRecord(debtAccount);
     }
 
-    function _issuePynthsUsdc(address from, uint amount) internal {
-        // Applying issuance ratio with adjusting pUSD / USDC decimals deriving transferring amount
-        // Issuer must approve the protocol prior to sending their token
-        uint usdcAmountToStake = amount.divideDecimalRound(getIssuanceRatio()).div(10**12);
+    function _stakeUSDCAndIssuePynths(
+        address from,
+        uint amount,
+        bool issueMax
+    ) internal {
+        // converted to USDC's 6 decimals
+        uint stakingUSDCAmount = _usdToUSDC(amount.divideDecimalRound(getIssuanceRatio()));
 
-        require(usdc().transferFrom(from, address(this), usdcAmountToStake), "transferring usdc has been failed");
+        require(usdc().transferFrom(from, address(this), stakingUSDCAmount), "Transferring USDC has been failed");
 
-        uint existingDebt = stakeStateUsdc().issuedAmountOf(from);
-        uint totalSystemDebt = stakeStateUsdc().totalDebtIssued();
+        stakingStateUSDC().stake(from, amount);
 
-        _addToDebtRegister(
-            from, 
-            amount, 
-            existingDebt, 
-            totalSystemDebt, 
-            USDC
-        );
-
-        _setLastIssueEvent(from);
-
-        pynths[pUSD].issue(from, amount);
-
-        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
-
-        // Store their locked PERI amount to determine their fee % for the period
-        _appendAccountIssuanceRecord(from, USDC);
+        _issuePynths(from, amount, issueMax);
     }
 
     // If burning to target, `amount` is ignored, and the correct quantity of pUSD is burnt to reach the target
@@ -790,6 +804,56 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+    function _unstakeUSDCAndBurnPynths(
+        address from,
+        uint amount,
+        bool burnMax
+    ) internal {
+        uint stakedUSDCAmount = stakingStateUSDC().stakedAmountOf(from);
+        require(stakedUSDCAmount > 0, "No USDC staked");
+
+        // Not yet needs to settlement since exchange is not implemented
+        /*
+        if (!burnToTarget) {
+            // If not burning to target, then burning requires that the minimum stake time has elapsed.
+            require(_canBurnPynths(from), "Minimum stake time not reached");
+            // First settle anything pending into pUSD as burning or issuing impacts the size of the debt pool
+            (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, pUSD);
+            if (numEntriesSettled > 0) {
+                amount = exchanger().calculateAmountAfterSettlement(from, pUSD, amount, refunded);
+            }
+        }
+        */
+
+        (uint existingDebt, uint totalSystemValue, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(from, pUSD);
+        (uint maxIssuablePynthsForAccount, bool periRateInvalid) = _maxIssuablePynths(from);
+        _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
+        require(existingDebt > 0, "No debt to forgive");
+
+        if (burnMax) {
+            amount = _usdcToUSD(stakedUSDCAmount).multiplyDecimalRound(getIssuanceRatio());
+        }
+
+        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+
+        uint amountToUnstakeUSDC;
+        if (burnMax) {
+            amountToUnstakeUSDC = stakedUSDCAmount;
+        } else {
+            amountToUnstakeUSDC = _usdToUSDC(amountBurnt.divideDecimalRound(getIssuanceRatio()));
+        }
+
+        stakingStateUSDC().unstake(from, amount);
+
+        usdc().transfer(from, amountToUnstakeUSDC);
+
+        // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
+        // Issuance ratio is fixed so should remove any liquidations
+        if (existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
+            liquidations().removeAccountInLiquidation(from);
+        }
+    }
+
     function _setLastIssueEvent(address account) internal {
         // Set the timestamp of the last issuePynths
         flexibleStorage().setUIntValue(
@@ -799,26 +863,21 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         );
     }
 
-    function _appendAccountIssuanceRecord(address from, bytes32 currencyKey) internal {
+    function _appendAccountIssuanceRecord(address from) internal {
         uint initialDebtOwnership;
         uint debtEntryIndex;
-        if(currencyKey == PERI) {
-            (initialDebtOwnership, debtEntryIndex) = periFinanceState().issuanceData(from);
-        } else if(currencyKey == USDC) {
-            (initialDebtOwnership, debtEntryIndex) = stakeStateUsdc().stakingData(from);
-        } else {
-            revert("Invalid currency key");
-        }
-        feePool().appendAccountIssuanceRecord(from, initialDebtOwnership, debtEntryIndex, currencyKey);
+        (initialDebtOwnership, debtEntryIndex) = periFinanceState().issuanceData(from);
+        feePool().appendAccountIssuanceRecord(from, initialDebtOwnership, debtEntryIndex);
     }
 
     function _addToDebtRegister(
         address from,
         uint amount,
         uint existingDebt,
-        uint totalDebtIssued,
-        bytes32 currencyKey
+        uint totalDebtIssued
     ) internal {
+        IPeriFinanceState state = periFinanceState();
+
         // What will the new total be including the new value?
         uint newTotalDebtIssued = amount.add(totalDebtIssued);
 
@@ -831,54 +890,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // The delta is a high precision integer.
         uint delta = SafeDecimalMath.preciseUnit().sub(debtPercentage);
 
-        if(currencyKey == PERI) {
-            IPeriFinanceState state = periFinanceState();
-            
-            // And what does their debt ownership look like including this previous stake?
-            if (existingDebt > 0) {
-                debtPercentage = amount.add(existingDebt).divideDecimalRoundPrecise(newTotalDebtIssued);
-            } else {
-                // If they have no debt, they're a new issuer; record this.
-                state.incrementTotalIssuerCount();
-            }
-
-            // Save the debt entry parameters
-            state.setCurrentIssuanceData(from, debtPercentage);
-
-            // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
-            // the change for the rest of the debt holders. The debt ledger holds high precision integers.
-            if(delta == 0 || state.debtLedgerLength() <= 0) {
-                state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
-            } else if (state.debtLedgerLength() > 0) {
-                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else {
-                revert("Invalid debt percentage");
-            }
-        } else if(currencyKey == USDC) {
-            IStakeState state = stakeStateUsdc();
-
-            if(existingDebt > 0) {
-                debtPercentage = amount.add(existingDebt).divideDecimalRoundPrecise(newTotalDebtIssued);
-            } else {
-                state.incrementTotalStakerCount();
-            }
-
-            // Write issuer's current debt share
-            state.setCurrentStakingData(from, debtPercentage);
-            // Write issuer's transferred amount
-            state.addStakeAmount(from, amount.divideDecimalRound(getIssuanceRatio()).div(10**12));
-            // Write issuer's debt amount (issued pUSD amount)
-            state.addIssuedAmount(from, amount);
-
-            if(delta == 0 || state.debtLedgerLength() <= 0) {
-                state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
-            } else if(state.debtLedgerLength() > 0 && delta > 0) {
-                state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-            } else {
-                revert("Invalid debt percentage");
-            }
+        // And what does their debt ownership look like including this previous stake?
+        if (existingDebt > 0) {
+            debtPercentage = amount.add(existingDebt).divideDecimalRoundPrecise(newTotalDebtIssued);
         } else {
-            revert("Invalid currency key");
+            // If they have no debt, they're a new issuer; record this.
+            state.incrementTotalIssuerCount();
+        }
+
+        // Save the debt entry parameters
+        state.setCurrentIssuanceData(from, debtPercentage);
+
+        // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
+        // the change for the rest of the debt holders. The debt ledger holds high precision integers.
+        if (delta == 0 || state.debtLedgerLength() <= 0) {
+            state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
+        } else if (state.debtLedgerLength() > 0) {
+            state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
+        } else {
+            revert("Invalid debt percentage");
         }
     }
 
