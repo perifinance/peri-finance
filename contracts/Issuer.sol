@@ -345,9 +345,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint debtBalanceWithoutUSDCDebt = debtBalance.sub(usdcDebtBalance);
 
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
-        if (totalOwnedPeriFinance == 0) return (0, anyRateIsInvalid);
+        if (totalOwnedPeriFinance == 0) return (0, anyRateIsInvalid && isInvalid);
 
-        return (debtBalanceWithoutUSDCDebt.divideDecimalRound(totalOwnedPeriFinance), anyRateIsInvalid);
+        return (debtBalanceWithoutUSDCDebt.divideDecimalRound(totalOwnedPeriFinance), anyRateIsInvalid && isInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
