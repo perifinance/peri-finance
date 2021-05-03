@@ -46,7 +46,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     struct FeePeriod {
         uint64 feePeriodId;
         uint64 startingDebtIndex;
-        uint64 startingUsdcDebtIndex;
+        uint64 startingUSDCDebtIndex;
         uint64 startTime;
         uint feesToDistribute;
         uint feesClaimed;
@@ -303,7 +303,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // Increment periodId from the recent closed period feePeriodId
         _recentFeePeriodsStorage(0).feePeriodId = uint64(uint256(_recentFeePeriodsStorage(1).feePeriodId).add(1));
         _recentFeePeriodsStorage(0).startingDebtIndex = uint64(periFinanceState().debtLedgerLength());
-        _recentFeePeriodsStorage(0).startingUsdcDebtIndex = uint64(stakeStateUsdc().debtLedgerLength());
+        _recentFeePeriodsStorage(0).startingUSDCDebtIndex = uint64(stakingStateUSDC().debtLedgerLength());
         _recentFeePeriodsStorage(0).startTime = uint64(now);
 
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
@@ -395,7 +395,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint feePeriodIndex,
         uint feePeriodId,
         uint startingDebtIndex,
-        uint startingUsdcDebtIndex,
+        uint startingUSDCDebtIndex,
         uint startTime,
         uint feesToDistribute,
         uint feesClaimed,
@@ -407,7 +407,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _recentFeePeriods[_currentFeePeriod.add(feePeriodIndex).mod(FEE_PERIOD_LENGTH)] = FeePeriod({
             feePeriodId: uint64(feePeriodId),
             startingDebtIndex: uint64(startingDebtIndex),
-            startingUsdcDebtIndex: uint64(startingUsdcDebtIndex),
+            startingUSDCDebtIndex: uint64(startingUSDCDebtIndex),
             startTime: uint64(startTime),
             feesToDistribute: feesToDistribute,
             feesClaimed: feesClaimed,
