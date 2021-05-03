@@ -9,15 +9,24 @@ contract StakingStateUSDC is Owned, State {
   using SafeMath for uint;
   using SafeDecimalMath for uint;
 
+  struct IssuanceData {
+        uint initialDebtOwnership;
+        uint debtEntryIndex;
+  }
+
+  mapping(address => IssuanceData) public issuanceData;
+
   mapping(address => uint) public stakedAmountOf;
 
   uint public totalStakerCount;
 
   uint public totalStakedAmount;
 
-  event Staking(address indexed account, uint amount);
+  uint[] public debtLedger;
 
-  event Unstaking(address indexed account, uint amount);
+  event Staking(address indexed account, uint amount, uint debtPercentage);
+
+  event Unstaking(address indexed account, uint amount, uint debtPercentage);
 
   constructor(address _owner, address _associatedContract) 
   Owned(_owner) 
@@ -35,7 +44,20 @@ contract StakingStateUSDC is Owned, State {
     stakedAmountOf[_account] = stakedAmountOf[_account].add(_amount);
     totalStakedAmount = totalStakedAmount.add(_amount);
 
-    emit Staking(_account, _amount);
+    uint debtPercentage = stakedAmountOf[_account].divideDecimalRoundPrecise(totalStakedAmount);
+    uint delta = SafeDecimalMath.preciseUnit().sub(debtPercentage);
+
+    _setCurrentIssuanceData(_account, debtPercentage);
+
+    if(delta == 0 || debtLedger.length <= 0) {
+      debtLedger.push(SafeDecimalMath.preciseUnit());
+    } else if (debtLedger.length > 0) {
+      debtLedger.push(debtLedger[debtLedger.length - 1].multiplyDecimalRoundPrecise(delta));
+    } else {
+      revert("Invalid debt percentage");
+    }
+
+    emit Staking(_account, _amount, debtPercentage);
   }
 
   function unstake(address _account, uint _amount)
@@ -53,7 +75,26 @@ contract StakingStateUSDC is Owned, State {
     stakedAmountOf[_account] = stakedAmountOf[_account].sub(_amount);
     totalStakedAmount = totalStakedAmount.sub(_amount);
 
-    emit Unstaking(_account, _amount);
+    uint delta = 0;
+    uint debtPercentage = 0;
+
+    if(totalStakedAmount > 0) {
+      debtPercentage = _amount.divideDecimalRoundPrecise(totalStakedAmount);
+
+      delta = SafeDecimalMath.preciseUnit().add(debtPercentage);
+    }
+
+    if(stakedAmountOf[_account] == 0) {
+      _setCurrentIssuanceData(_account, 0);
+    } else {
+      debtPercentage = stakedAmountOf[_account].divideDecimalRoundPrecise(totalStakedAmount);
+
+      _setCurrentIssuanceData(_account, debtPercentage);
+    }
+
+    debtLedger.push(debtLedger[debtLedger.length - 1].multiplyDecimalRoundPrecise(delta));
+
+    emit Unstaking(_account, _amount, debtPercentage);
   }
 
   function userStakingShare(address _account)
@@ -68,6 +109,12 @@ contract StakingStateUSDC is Owned, State {
   returns(uint8) {
     return 6;
   }
+
+  function debtLedgerLength()
+  external view
+  returns(uint) {
+    return debtLedger.length;
+  }
   
   function _incrementTotalStaker()
   internal {
@@ -79,5 +126,10 @@ contract StakingStateUSDC is Owned, State {
     totalStakerCount = totalStakerCount.sub(1);
   }
 
+  function _setCurrentIssuanceData(address _account, uint _debtPercentage)
+  internal {
+    issuanceData[_account].initialDebtOwnership = _debtPercentage;
+    issuanceData[_account].debtEntryIndex = debtLedger.length; 
+  }
   
 }
