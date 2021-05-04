@@ -39,5 +39,9 @@ interface IStakingStateUSDC {
   function debtLedgerLength()
   external view
   returns(uint);
+
+  function hasIssued(address _account)
+  external view
+  returns(bool);
   
 }

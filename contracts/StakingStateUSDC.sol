@@ -115,6 +115,12 @@ contract StakingStateUSDC is Owned, State {
   returns(uint) {
     return debtLedger.length;
   }
+
+  function hasIssued(address _account)
+  external view
+  returns(bool) {
+    return issuanceData[_account].initialDebtOwnership > 0;
+  }
   
   function _incrementTotalStaker()
   internal {
