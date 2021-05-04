@@ -23,4 +23,26 @@ interface IPeriFinanceState {
     function appendDebtLedgerValue(uint value) external;
 
     function clearIssuanceData(address account) external;
+
+    // Views
+    function periDebtLedger(uint index) external view returns (uint);
+
+    function periIssuanceData(address account) external view returns (uint initialDebtOwnership, uint debtEntryIndex);
+
+    function periDebtLedgerLength() external view returns (uint);
+
+    function hasPeriIssued(address account) external view returns (bool);
+
+    function lastPeriDebtLedgerEntry() external view returns (uint);
+
+    // Mutative functions
+    function incrementTotalPeriIssuerCount() external;
+
+    function decrementTotalPeriIssuerCount() external;
+
+    function setCurrentPeriIssuanceData(address account, uint initialDebtOwnership) external;
+
+    function appendPeriDebtLedgerValue(uint value) external;
+
+    function clearPeriIssuanceData(address account) external;
 }

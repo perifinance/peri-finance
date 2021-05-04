@@ -567,11 +567,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function issuePynths(address from, uint amount) external onlyPeriFinance {
-        _issuePynths(from, amount, false);
+        _issuePynths(from, amount, false, PERI);
     }
 
     function issueMaxPynths(address from) external onlyPeriFinance {
-        _issuePynths(from, 0, true);
+        _issuePynths(from, 0, true, PERI);
     }
 
     function issuePynthsOnBehalf(
@@ -580,12 +580,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint amount
     ) external onlyPeriFinance {
         _requireCanIssueOnBehalf(issueForAddress, from);
-        _issuePynths(issueForAddress, amount, false);
+        _issuePynths(issueForAddress, amount, false, PERI);
     }
 
     function issueMaxPynthsOnBehalf(address issueForAddress, address from) external onlyPeriFinance {
         _requireCanIssueOnBehalf(issueForAddress, from);
-        _issuePynths(issueForAddress, 0, true);
+        _issuePynths(issueForAddress, 0, true, PERI);
     }
 
     function stakeUSDCAndIssuePynths(address from, uint amount) external onlyPeriFinance {
@@ -597,7 +597,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function burnPynths(address from, uint amount) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, amount, false);
+        _voluntaryBurnPynths(from, amount, false, PERI);
     }
 
     function burnPynthsOnBehalf(
@@ -606,16 +606,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint amount
     ) external onlyPeriFinance {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, amount, false);
+        _voluntaryBurnPynths(burnForAddress, amount, false, PERI);
     }
 
     function burnPynthsToTarget(address from) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, 0, true);
+        _voluntaryBurnPynths(from, 0, true, PERI);
     }
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external onlyPeriFinance {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, 0, true);
+        _voluntaryBurnPynths(burnForAddress, 0, true, PERI);
     }
 
     function unstakeUSDCAndBurnPynths(address from, uint amount) external onlyPeriFinance {
@@ -674,7 +674,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         // burn pUSD from messageSender (liquidator) and reduce account's debt
-        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);
+        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued, PERI);
 
         // Remove liquidation flag if amount liquidated fixes ratio
         if (amountToLiquidate == amountToFixRatio) {
@@ -700,7 +700,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _issuePynths(
         address from,
         uint amount,
-        bool issueMax
+        bool issueMax,
+        bytes32 lockCurrencyKey
     ) internal {
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _remainingIssuablePynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid);
@@ -714,6 +715,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Keep track of the debt they're about to create
         _addToDebtRegister(from, amount, existingDebt, totalSystemDebt);
 
+        if (lockCurrencyKey == PERI) {
+            _addToPeriDebtRegister(from, amount, existingDebt, totalSystemDebt);
+        }
+
         // record issue timestamp
         _setLastIssueEvent(from);
 
@@ -724,7 +729,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
         // Store their locked PERI amount to determine their fee % for the period
-        _appendAccountIssuanceRecord(from);
+        _appendAccountIssuanceRecord(from, lockCurrencyKey);
     }
 
     function _burnPynths(
@@ -732,7 +737,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         address burnAccount,
         uint amount,
         uint existingDebt,
-        uint totalDebtIssued
+        uint totalDebtIssued,
+        bytes32 unlockCurrencyKey
     ) internal returns (uint amountBurnt) {
         // liquidation requires pUSD to be already settled / not in waiting period
 
@@ -743,6 +749,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
 
+        if (unlockCurrencyKey == PERI) {
+            _removeFromPeriDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
+        }
+
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
 
@@ -750,7 +760,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
-        _appendAccountIssuanceRecord(debtAccount);
+        _appendAccountIssuanceRecord(debtAccount, unlockCurrencyKey);
     }
 
     function _stakeUSDCAndIssuePynths(
@@ -765,7 +775,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         stakingStateUSDC().stake(from, amount);
 
-        _issuePynths(from, amount, issueMax);
+        _issuePynths(from, amount, issueMax, USDC);
     }
 
     // If burning to target, `amount` is ignored, and the correct quantity of pUSD is burnt to reach the target
@@ -774,7 +784,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _voluntaryBurnPynths(
         address from,
         uint amount,
-        bool burnToTarget
+        bool burnToTarget,
+        bytes32 unlockCurrencyKey
     ) internal {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
@@ -795,7 +806,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             amount = existingDebt.sub(maxIssuablePynthsForAccount);
         }
 
-        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue, unlockCurrencyKey);
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
@@ -811,6 +822,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) internal {
         uint stakedUSDCAmount = stakingStateUSDC().stakedAmountOf(from);
         require(stakedUSDCAmount > 0, "No USDC staked");
+
+        require(_canBurnPynths(from), "Minimum stake time not reached");
 
         // Not yet needs to settlement since exchange is not implemented
         /*
@@ -834,7 +847,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             amount = _usdcToUSD(stakedUSDCAmount).multiplyDecimalRound(getIssuanceRatio());
         }
 
-        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue, USDC);
 
         uint amountToUnstakeUSDC;
         if (burnMax) {
@@ -863,11 +876,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         );
     }
 
-    function _appendAccountIssuanceRecord(address from) internal {
+    function _appendAccountIssuanceRecord(address from, bytes32 currencyKey) internal {
         uint initialDebtOwnership;
         uint debtEntryIndex;
-        (initialDebtOwnership, debtEntryIndex) = periFinanceState().issuanceData(from);
-        feePool().appendAccountIssuanceRecord(from, initialDebtOwnership, debtEntryIndex);
+        if (currencyKey == PERI) {
+            (initialDebtOwnership, debtEntryIndex) = periFinanceState().periIssuanceData(from);
+        } else if (currencyKey == USDC) {
+            (initialDebtOwnership, debtEntryIndex) = stakingStateUSDC().issuanceData(from);
+        }
+
+        feePool().appendAccountIssuanceRecord(from, initialDebtOwnership, debtEntryIndex, currencyKey);
     }
 
     function _addToDebtRegister(
@@ -907,6 +925,58 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
         } else if (state.debtLedgerLength() > 0) {
             state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
+        } else {
+            revert("Invalid debt percentage");
+        }
+    }
+
+    function _addToPeriDebtRegister(
+        address from,
+        uint amount,
+        uint existingDebt,
+        uint totalDebtIssued
+    ) internal {
+        IPeriFinanceState state = periFinanceState();
+        IStakingStateUSDC stateUsdc = stakingStateUSDC();
+
+        // Total system USDC debt to pUSD decimals
+        uint usdcTotalDebtAmount = _usdcToUSD(stateUsdc.totalStakedAmount().multiplyDecimalRound(getIssuanceRatio()));
+
+        // Derive total PERI debt by excluding total USDC debt from total system debt
+        uint totalPeriDebtBalance = totalDebtIssued.sub(usdcTotalDebtAmount);
+
+        // New total PERI debt balane
+        uint newTotalPeriDebtBalance = totalPeriDebtBalance.add(amount);
+
+        uint currentPeriDebtBalance;
+        if (stateUsdc.hasIssued(from)) {
+            // User USDC debt to pUSD decimals
+            uint usdcDebtAmount = _usdcToUSD(stateUsdc.stakedAmountOf(from).multiplyDecimalRound(getIssuanceRatio()));
+
+            if (existingDebt > usdcDebtAmount) {
+                currentPeriDebtBalance = existingDebt.sub(usdcDebtAmount);
+            }
+        } else {
+            currentPeriDebtBalance = existingDebt;
+        }
+
+        // New Peri debt balance
+        uint newPeriDebtBalance = amount.add(currentPeriDebtBalance);
+
+        if (currentPeriDebtBalance == 0) {
+            state.incrementTotalPeriIssuerCount();
+        }
+
+        uint periDebtPercentage = newPeriDebtBalance.divideDecimalRoundPrecise(newTotalPeriDebtBalance);
+
+        state.setCurrentPeriIssuanceData(from, periDebtPercentage);
+
+        uint delta = SafeDecimalMath.preciseUnit().sub(periDebtPercentage);
+
+        if (delta == 0 || state.periDebtLedgerLength() <= 0) {
+            state.appendPeriDebtLedgerValue(SafeDecimalMath.preciseUnit());
+        } else if (state.debtLedgerLength() > 0) {
+            state.appendPeriDebtLedgerValue(state.lastPeriDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
         } else {
             revert("Invalid debt percentage");
         }
@@ -952,6 +1022,58 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Update our cumulative ledger. This is also a high precision integer.
         state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
+    }
+
+    function _removeFromPeriDebtRegister(
+        address from,
+        uint debtToRemove,
+        uint existingDebt,
+        uint totalDebtIssued
+    ) internal {
+        IPeriFinanceState state = periFinanceState();
+        IStakingStateUSDC stateUsdc = stakingStateUSDC();
+
+        // Total system USDC debt to pUSD decimals
+        uint usdcTotalDebtAmount = _usdcToUSD(stateUsdc.totalStakedAmount().multiplyDecimalRound(getIssuanceRatio()));
+
+        // Derive total PERI debt by excluding total USDC debt from total system debt
+        uint totalPeriDebtBalance = totalDebtIssued.sub(usdcTotalDebtAmount);
+
+        // New total PERI debt balane
+        uint newTotalPeriDebtBalance = totalPeriDebtBalance.sub(debtToRemove);
+
+        uint delta = 0;
+
+        if (newTotalPeriDebtBalance > 0) {
+            uint debtPercentage = debtToRemove.divideDecimalRoundPrecise(newTotalPeriDebtBalance);
+
+            delta = SafeDecimalMath.preciseUnit().add(debtPercentage);
+        }
+
+        uint currentPeriDebtBalance;
+        if (stateUsdc.hasIssued(from)) {
+            // User USDC debt to pUSD decimals
+            uint usdcStakedAmountToUSD = _usdcToUSD(stateUsdc.stakedAmountOf(from));
+            uint usdcDebtAmount = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+
+            if (existingDebt > usdcDebtAmount) {
+                currentPeriDebtBalance = existingDebt.sub(usdcDebtAmount);
+            }
+        } else {
+            currentPeriDebtBalance = existingDebt;
+        }
+
+        if (currentPeriDebtBalance == debtToRemove) {
+            state.setCurrentPeriIssuanceData(from, 0);
+            state.decrementTotalPeriIssuerCount();
+        } else {
+            uint newPeriDebtBalance = currentPeriDebtBalance.sub(debtToRemove);
+            uint newDebtPercentage = newPeriDebtBalance.divideDecimalRoundPrecise(newTotalPeriDebtBalance);
+
+            state.setCurrentIssuanceData(from, newDebtPercentage);
+        }
+
+        state.appendPeriDebtLedgerValue(state.lastPeriDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
     }
 
     /* ========== MODIFIERS ========== */
