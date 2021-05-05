@@ -385,12 +385,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function stakeUSDCAndIssuePynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssuePynths(messageSender, amount);
+    function stakeUSDCAndIssuePynths(uint usdcStakeAmount, uint issueAmount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssuePynths(messageSender, usdcStakeAmount, issueAmount);
     }
 
-    function stakeUSDCAndIssueMaxPynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssueMaxPynths(messageSender, amount);
+    function stakeUSDCAndIssueMaxPynths(uint usdcStakeAmount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssueMaxPynths(messageSender, usdcStakeAmount);
     }
 
     function burnPynths(uint amount) external issuanceActive optionalProxy {

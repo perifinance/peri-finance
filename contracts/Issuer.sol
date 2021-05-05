@@ -588,12 +588,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _issuePynths(issueForAddress, 0, true, PERI);
     }
 
-    function stakeUSDCAndIssuePynths(address from, uint amount) external onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(from, amount, false);
+    function stakeUSDCAndIssuePynths(address from, uint usdcStakeAmount, uint issueAmount) external onlyPeriFinance {
+        _stakeUSDCAndIssuePynths(from, usdcStakeAmount, issueAmount, false);
     }
 
-    function stakeUSDCAndIssueMaxPynths(address from, uint amount) external onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(from, amount, true);
+    function stakeUSDCAndIssueMaxPynths(address from, uint usdcStakeAmount) external onlyPeriFinance {
+        _stakeUSDCAndIssuePynths(from, usdcStakeAmount, 0, true);
     }
 
     function burnPynths(address from, uint amount) external onlyPeriFinance {
@@ -765,18 +765,23 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _stakeUSDCAndIssuePynths(
         address from,
-        uint amount,
+        uint usdcStakeAmount,
+        uint issueAmount,
         bool issueMax
     ) internal {
-        // converted to USDC's 6 decimals
-        uint stakingUSDCAmount = _usdToUSDC(amount.divideDecimalRound(getIssuanceRatio()));
-        
-        require(usdc().transferFrom(from, address(this), stakingUSDCAmount),
+        require(usdc().transferFrom(from, address(this), usdcStakeAmount),
             "Transferring USDC has been failed");
         
-        stakingStateUSDC().stake(from, amount);
+        stakingStateUSDC().stake(from, issueAmount);
         
-        _issuePynths(from, amount, issueMax, USDC);
+        // There is no amount to issue debt request
+        // Reset burn timeout, and update USDC share percentage for their reward
+        if(!issueMax && issueAmount == 0) {
+            _setLastIssueEvent(from);
+            _appendAccountIssuanceRecord(from, USDC);
+        } else {
+            _issuePynths(from, issueAmount, issueMax, USDC);
+        }
     }
 
     // If burning to target, `amount` is ignored, and the correct quantity of pUSD is burnt to reach the target

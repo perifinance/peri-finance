@@ -69,9 +69,9 @@ interface IIssuer {
 
     function issueMaxPynthsOnBehalf(address issueFor, address from) external;
 
-    function stakeUSDCAndIssuePynths(address from, uint amount) external;
+    function stakeUSDCAndIssuePynths(address from, uint usdcStakeAmount, uint issueAmount) external;
 
-    function stakeUSDCAndIssueMaxPynths(address from, uint amount) external;
+    function stakeUSDCAndIssueMaxPynths(address from, uint usdcStakeAmount) external;
 
     function burnPynths(address from, uint amount) external;
 
