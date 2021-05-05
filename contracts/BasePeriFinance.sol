@@ -275,7 +275,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {        
+        _notImplemented();
         return exchanger().exchange(messageSender, sourceCurrencyKey, sourceAmount, destinationCurrencyKey, messageSender);
     }
 
@@ -285,6 +286,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         uint sourceAmount,
         bytes32 destinationCurrencyKey
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeOnBehalf(
                 exchangeForAddress,
@@ -304,6 +306,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
             uint numEntriesSettled
         )
     {
+        _notImplemented();
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -314,6 +317,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address originator,
         bytes32 trackingCode
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeWithTracking(
                 messageSender,
@@ -334,6 +338,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address originator,
         bytes32 trackingCode
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeOnBehalfWithTracking(
                 exchangeForAddress,

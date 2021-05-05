@@ -61,6 +61,7 @@ contract PeriFinance is BasePeriFinance {
         optionalProxy
         returns (uint amountReceived, IVirtualPynth vPynth)
     {
+        _notImplemented();
         return
             exchanger().exchangeWithVirtual(
                 messageSender,
@@ -81,6 +82,7 @@ contract PeriFinance is BasePeriFinance {
             uint numEntriesSettled
         )
     {
+        _notImplemented();
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -127,6 +129,7 @@ contract PeriFinance is BasePeriFinance {
         optionalProxy
         returns (bool)
     {
+        _notImplemented();
         (uint totalRedeemed, uint amountLiquidated) =
             issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
 
