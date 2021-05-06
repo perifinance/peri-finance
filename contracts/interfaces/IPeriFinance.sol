@@ -97,13 +97,13 @@ interface IPeriFinance {
 
     function issueMaxPynthsOnBehalf(address issueForAddress) external;
 
-    function stakeUSDCAndIssuePynths(uint amount) external;
+    function stakeUSDCAndIssuePynths(uint usdcStakeAmount, uint issueAmount) external;
 
-    function stakeUSDCAndIssueMaxPynths(uint amount) external;
+    function stakeUSDCAndIssueMaxPynths(uint usdcStakingAmount) external;
 
-    function unstakeUSDCAndBurnPynths(address from, uint amount) external;
+    function unstakeUSDCAndBurnPynths(uint usdcUnstakeAmount, uint burnAmount) external;
 
-    function unstakeUSDCToMaxAndBurnPynths(address from) external;
+    function unstakeUSDCToMaxAndBurnPynths(uint burnAmount) external;
 
     function mint() external returns (bool);
 

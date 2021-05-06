@@ -273,6 +273,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         uint sourceAmount,
         bytes32 destinationCurrencyKey
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return exchanger().exchange(messageSender, sourceCurrencyKey, sourceAmount, destinationCurrencyKey, messageSender);
     }
 
@@ -282,6 +283,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         uint sourceAmount,
         bytes32 destinationCurrencyKey
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeOnBehalf(
                 exchangeForAddress,
@@ -301,6 +303,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
             uint numEntriesSettled
         )
     {
+        _notImplemented();
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -311,6 +314,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address originator,
         bytes32 trackingCode
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeWithTracking(
                 messageSender,
@@ -331,6 +335,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address originator,
         bytes32 trackingCode
     ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        _notImplemented();
         return
             exchanger().exchangeOnBehalfWithTracking(
                 exchangeForAddress,
@@ -382,12 +387,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function stakeUSDCAndIssuePynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssuePynths(messageSender, amount);
+    function stakeUSDCAndIssuePynths(uint usdcStakeAmount, uint issueAmount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssuePynths(messageSender, usdcStakeAmount, issueAmount);
     }
 
-    function stakeUSDCAndIssueMaxPynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssueMaxPynths(messageSender, amount);
+    function stakeUSDCAndIssueMaxPynths(uint usdcStakeAmount) external issuanceActive optionalProxy {
+        return issuer().stakeUSDCAndIssueMaxPynths(messageSender, usdcStakeAmount);
     }
 
     function burnPynths(uint amount) external issuanceActive optionalProxy {
@@ -406,12 +411,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
     }
 
-    function unstakeUSDCAndBurnPynths(address from, uint amount) external issuanceActive optionalProxy {
-        return issuer().unstakeUSDCAndBurnPynths(from, amount);
+    function unstakeUSDCAndBurnPynths(uint usdcUnstakeAmount, uint burnAmount) external issuanceActive optionalProxy {
+        return issuer().unstakeUSDCAndBurnPynths(messageSender, usdcUnstakeAmount, burnAmount);
     }
 
-    function unstakeUSDCToMaxAndBurnPynths(address from) external issuanceActive optionalProxy {
-        return issuer().unstakeUSDCToMaxAndBurnPynths(from);
+    function unstakeUSDCToMaxAndBurnPynths(uint burnAmount) external issuanceActive optionalProxy {
+        return issuer().unstakeUSDCToMaxAndBurnPynths(messageSender, burnAmount);
     }
 
     function exchangeWithVirtual(
