@@ -618,12 +618,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _voluntaryBurnPynths(burnForAddress, 0, true, PERI);
     }
 
-    function unstakeUSDCAndBurnPynths(address from, uint amount) external onlyPeriFinance {
-        _unstakeUSDCAndBurnPynths(from, amount, false);
+    function unstakeUSDCAndBurnPynths(
+        address from, 
+        uint usdcUnstakeAmount, 
+        uint burnAmount
+    ) external onlyPeriFinance {
+        _unstakeUSDCAndBurnPynths(from, usdcUnstakeAmount, burnAmount, false);
     }
 
-    function unstakeUSDCToMaxAndBurnPynths(address from) external onlyPeriFinance {
-        _unstakeUSDCAndBurnPynths(from, 0, true);
+    function unstakeUSDCToMaxAndBurnPynths(address from, uint burnAmount) external onlyPeriFinance {
+        _unstakeUSDCAndBurnPynths(from, 0, burnAmount, true);
     }
 
     function liquidateDelinquentAccount(
@@ -823,8 +827,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _unstakeUSDCAndBurnPynths(
         address from,
-        uint amount,
-        bool burnMax
+        uint usdcUnstakeAmount,
+        uint burnAmount,
+        bool unstakeMax
     ) internal {
         uint stakedUSDCAmount = stakingStateUSDC().stakedAmountOf(from);
         require(stakedUSDCAmount > 0,
@@ -832,7 +837,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
              
         require(_canBurnPynths(from), "Minimum stake time not reached");
 
-        // Not yet needs to settlement since exchange is not implemented
+        // Not yet needs to settle since exchange is not implemented
         /*
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
@@ -845,26 +850,26 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
         */
 
+        uint amountToUnstakeUSDC;
+        if(unstakeMax) {
+            amountToUnstakeUSDC = stakedUSDCAmount;
+        } else {
+            amountToUnstakeUSDC = usdcUnstakeAmount;
+        }
+
+        stakingStateUSDC().unstake(from, amountToUnstakeUSDC);
+
         (uint existingDebt, uint totalSystemValue, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(from, pUSD);
         (uint maxIssuablePynthsForAccount, bool periRateInvalid) = _maxIssuablePynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
 
-        if(burnMax) {
-            amount = _usdcToUSD(stakedUSDCAmount).multiplyDecimalRound(getIssuanceRatio());
-        }
-
-        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue, USDC);
-
-        uint amountToUnstakeUSDC;
-        if(burnMax) {
-            amountToUnstakeUSDC = stakedUSDCAmount;
+        uint amountBurnt;
+        if(burnAmount > 0) {
+            amountBurnt = _burnPynths(from, from, burnAmount, existingDebt, totalSystemValue, USDC);
         } else {
-            amountToUnstakeUSDC = _usdToUSDC(amountBurnt.divideDecimalRound(getIssuanceRatio()));
-
+            _appendAccountIssuanceRecord(from, USDC);
         }
-
-        stakingStateUSDC().unstake(from, amount);
 
         usdc().transfer(from, amountToUnstakeUSDC);
 

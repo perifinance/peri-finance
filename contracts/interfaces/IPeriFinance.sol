@@ -101,9 +101,9 @@ interface IPeriFinance {
 
     function stakeUSDCAndIssueMaxPynths(uint usdcStakingAmount) external;
 
-    function unstakeUSDCAndBurnPynths(address from, uint amount) external;
+    function unstakeUSDCAndBurnPynths(uint usdcUnstakeAmount, uint burnAmount) external;
 
-    function unstakeUSDCToMaxAndBurnPynths(address from) external;
+    function unstakeUSDCToMaxAndBurnPynths(uint burnAmount) external;
 
     function mint() external returns (bool);
 
