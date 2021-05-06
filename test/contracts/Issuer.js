@@ -35,12 +35,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	const [, owner, oracle, account1, account2, account3, account6] = accounts;
 
 	let periFinance,
+		exchangeRates,
+		periFinanceState,
+		feePool,
+		delegateApprovals,
 		systemStatus,
 		systemSettings,
-		periFinanceState,
-		delegateApprovals,
-		exchangeRates,
-		feePool,
 		pUSDContract,
 		escrow,
 		rewardEscrowV2,
@@ -51,7 +51,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		addressResolver,
 		stakingStateUSDC,
 		feePoolStateUSDC,
-		tempKovanOracle;
+		tempKovanOracle,
+		usdc;
 
 	const getRemainingIssuablePynths = async account =>
 		(await periFinance.remainingIssuablePynths(account))[0];
@@ -77,6 +78,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			TempKovanOracle: tempKovanOracle,
 			StakingStateUSDC: stakingStateUSDC,
 			FeePoolStateUSDC: feePoolStateUSDC,
+			USDC: usdc,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -134,13 +136,16 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'addPynths',
 				'issuePynths',
 				'issuePynthsOnBehalf',
-				'issuePynthsUsdc',
 				'issueMaxPynths',
 				'issueMaxPynthsOnBehalf',
+				'stakeUSDCAndIssuePynths',
+				'stakeUSDCAndIssueMaxPynths',
 				'burnPynths',
 				'burnPynthsOnBehalf',
 				'burnPynthsToTarget',
 				'burnPynthsToTargetOnBehalf',
+				'unstakeUSDCAndBurnPynths',
+				'unstakeUSDCToMaxAndBurnPynths',
 				'removePynth',
 				'removePynths',
 				'liquidateDelinquentAccount',
@@ -165,9 +170,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				reason: 'Only the periFinance contract can perform this action',
 			});
 		});
-		it('issuePynthsUsdc() cannot be invoked directly by a user', async () => {
+		it('stakeUSDCAndIssuePynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issuePynthsUsdc,
+				fnc: issuer.stakeUSDCAndIssuePynths,
 				args: [account1, toUnit('1')],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
@@ -256,6 +261,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				beforeEach(async () => {
 					// Give some PERI to account1
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
+					// Give some USDC to owner
+					await usdc.transfer(owner, '1000000');
+
+					// approve USDC allowance
+					await usdc.approve(oracle, '1000000', { from: owner });
+
+					// transfer some usdc from owner to account1
+					await usdc.transferFrom(owner, account1, '100000', { from: oracle });
 
 					now = await currentTime();
 				});
@@ -269,9 +282,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
-				it('should issue pynthsUsdc and store issue timestamp after now', async () => {
+				it('should stake USDC And Issue Pynths and store issue timestamp after now', async () => {
 					// issue pynths
-					await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+					await periFinance.stakeUSDCAndIssuePynths(web3.utils.toBN('5'), {
+						from: account1,
+					});
 
 					// issue timestamp should be greater than now in future
 					const issueTimestamp = await issuer.lastIssueEvent(owner);
@@ -292,21 +307,27 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						);
 					});
 
-					// ** burning, currently not implemented for Usdc
-					// it('should revert when burning any pynthsUsdc within minStakeTime', async () => {
-					// 	// set minimumStakeTime
-					// 	await systemSettings.setMinimumStakeTime(60 * 60 * 8, { from: owner });
+					it('should revert when burning any pynthsUsdc within minStakeTime', async () => {
+						// set minimumStakeTime
+						await systemSettings.setMinimumStakeTime(60 * 60 * 8, { from: owner });
 
-					// 	// issue pynths first
-					// 	await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+						// issue pynths first
+						await periFinance.stakeUSDCAndIssuePynths(web3.utils.toBN('5'), {
+							from: account1,
+						});
 
-					// 	await assert.revert(
-					// 		periFinance.burnPynthsUsdc(web3.utils.toBN('5'), { from: account1 }),
-					// 		'Minimum stake time not reached'
-					// 	);
-					// });
+						// burning pynths needs to take debtsnapshot before executing it
+						await debtCache.takeDebtSnapshot();
 
-					it('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
+						await assert.revert(
+							periFinance.unstakeUSDCAndBurnPynths(web3.utils.toBN('5'), {
+								from: account1,
+							}),
+							'Minimum stake time not reached'
+						);
+					});
+
+					it.only('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
 						// set minimumStakeTime
 						await systemSettings.setMinimumStakeTime(120, { from: owner });
 
@@ -334,7 +355,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// 	await systemSettings.setMinimumStakeTime(120, { from: owner });
 
 					// 	// issue pynths first
-					// 	await periFinance.issuePynthsUsdc(web3.utils.toBN('5'), { from: account1 });
+					// 	await periFinance.stakeUSDCAndIssuePynths(web3.utils.toBN('5'), { from: account1 });
 
 					// 	// fastForward 30 seconds
 					// 	await fastForward(10);
@@ -437,8 +458,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await periFinance.issuePynths(amountIssuedAcc1, { from: account1 });
 					await periFinance.issuePynths(amountIssuedAcc2, { from: account2 });
 
-					await periFinance.issuePynthsUsdc(amountIssuedAcc1, { from: account1 });
-					await periFinance.issuePynthsUsdc(amountIssuedAcc2, { from: account2 });
+					await periFinance.stakeUSDCAndIssuePynths(amountIssuedAcc1, { from: account1 });
+					await periFinance.stakeUSDCAndIssuePynths(amountIssuedAcc2, { from: account2 });
 
 					await periFinance.exchange(pUSD, amountIssuedAcc2, PERI, { from: account2 });
 

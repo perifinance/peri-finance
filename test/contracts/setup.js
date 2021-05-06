@@ -240,7 +240,7 @@ const setupContract = async ({
 		],
 		FeePoolStateUSDC: [owner, tryGetAddressOf('FeePool')],
 		TempKovanOracle: [],
-		StakingStateUSDC: [owner, tryGetAddressOf('USDC')],
+		StakingStateUSDC: [owner, tryGetAddressOf('Issuer')],
 	};
 
 	let instance;
@@ -901,13 +901,11 @@ const setupAllContracts = async ({
 		pynthsToAdd.push(token.address);
 	}
 
-	const { token: USDC } = await mockToken({
-		accounts,
-		supply: 6,
-		name: 'USDC',
-		symbol: 'USDC',
-		skipInitialAllocation: true,
-	});
+	const USDC = await artifacts.require('MockToken').new(
+		...['USDC', 'USDC', '6'].concat({
+			from: accounts[0],
+		})
+	);
 
 	returnObj[`USDC`] = USDC;
 
