@@ -49,6 +49,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		issuer,
 		pynths,
 		addressResolver,
+		stakingStateUSDC,
+		feePoolStateUSDC,
 		tempKovanOracle;
 
 	const getRemainingIssuablePynths = async account =>
@@ -73,6 +75,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
 			TempKovanOracle: tempKovanOracle,
+			StakingStateUSDC: stakingStateUSDC,
+			FeePoolStateUSDC: feePoolStateUSDC,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -91,8 +95,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'DelegateApprovals', // necessary for *OnBehalf functions
 				'FlexibleStorage',
 				'CollateralManager',
-				'FeePoolStateUsdc',
+				'FeePoolStateUSDC',
 				'TempKovanOracle',
+				'StakingStateUSDC',
 			],
 		}));
 	});

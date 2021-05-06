@@ -238,8 +238,9 @@ const setupContract = async ({
 			0,
 			0,
 		],
-		FeePoolStateUsdc: [owner, tryGetAddressOf('FeePool')],
+		FeePoolStateUSDC: [owner, tryGetAddressOf('FeePool')],
 		TempKovanOracle: [],
+		StakingStateUSDC: [owner, tryGetAddressOf('USDC')],
 	};
 
 	let instance;
@@ -786,13 +787,17 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
 		},
 		{
-			contract: 'FeePoolStateUsdc',
+			contract: 'FeePoolStateUSDC',
 			source: 'FeePoolState',
 			deps: ['FeePool'],
 		},
 		{
 			contract: 'TempKovanOracle',
 			source: 'TempExchangeRateStorageKovan',
+		},
+		{
+			contract: 'StakingStateUSDC',
+			source: 'StakingStateUSDC',
 		},
 	];
 
@@ -905,9 +910,6 @@ const setupAllContracts = async ({
 	});
 
 	returnObj[`USDC`] = USDC;
-
-	const stakingStateUSDC = await artifacts.require('StakingStateUSDC').new(owner, USDC.address);
-	returnObj[`StakingStateUSDC`] = stakingStateUSDC;
 
 	// now invoke AddressResolver to set all addresses
 	if (returnObj['AddressResolver']) {
