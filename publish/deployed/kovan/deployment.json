@@ -632,11 +632,11 @@
 		},
 		"ProxyERC20": {
 			"name": "ProxyERC20",
-			"address": "0x2260F1055E6be34CF863Eb3CCed26A29381cDd4c",
+			"address": "0xee6C8BC31516a40a9C707c8de50a663d4a4944CA",
 			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0x2260F1055E6be34CF863Eb3CCed26A29381cDd4c",
-			"timestamp": "2021-05-04T08:46:28.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0xa151185da81257ad60cbfca4d6e423f01608d657417803cc176a2b092d4070be",
+			"link": "https://kovan.etherscan.io/address/0xee6C8BC31516a40a9C707c8de50a663d4a4944CA",
+			"timestamp": "2021-05-06T09:57:09.286Z",
+			"txn": "",
 			"network": "kovan"
 		},
 		"TokenStatepCEX": {

@@ -173,6 +173,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		it('stakeUSDCAndIssuePynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.stakeUSDCAndIssuePynths,
+				args: [account1, toUnit('1'), toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('stakeUSDCAndIssueMaxPynths() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.stakeUSDCAndIssueMaxPynths,
 				args: [account1, toUnit('1')],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
@@ -242,6 +250,22 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				reason: 'Only the periFinance contract can perform this action',
 			});
 		});
+		it('unstakeUSDCAndBurnPynths() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.unstakeUSDCAndBurnPynths,
+				args: [account1, toUnit('1'), toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('unstakeUSDCToMaxAndBurnPynths() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.unstakeUSDCToMaxAndBurnPynths,
+				args: [account1, toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
 	});
 
 	describe('when minimum stake time is set to 0', () => {
@@ -266,9 +290,10 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// approve USDC allowance
 					await usdc.approve(oracle, '1000000', { from: owner });
+					await usdc.approve(account1, '1000000', { from: owner });
 
 					// transfer some usdc from owner to account1
-					await usdc.transferFrom(owner, account1, '100000', { from: oracle });
+					await usdc.transferFrom(owner, account1, '1000000', { from: oracle });
 
 					now = await currentTime();
 				});
@@ -282,9 +307,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
-				it('should stake USDC And Issue Pynths and store issue timestamp after now', async () => {
+				it.only('should stake USDC And Issue Pynths and store issue timestamp after now', async () => {
 					// issue pynths
-					await periFinance.stakeUSDCAndIssuePynths(web3.utils.toBN('5'), {
+
+					console.log(await usdc.balanceOf(account1).toString());
+					await periFinance.stakeUSDCAndIssuePynths('1000000', '1000000', {
 						from: account1,
 					});
 
@@ -327,7 +354,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						);
 					});
 
-					it.only('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
+					it('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
 						// set minimumStakeTime
 						await systemSettings.setMinimumStakeTime(120, { from: owner });
 
