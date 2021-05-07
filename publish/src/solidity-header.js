@@ -39,8 +39,9 @@ module.exports = {
     
 * PeriFinance: ${contract}
 *
-* Latest source (may be newer): https://github.com/PeriFinance/periFinance/blob/master/contracts/${contract}
-* Docs: Will be added in the future. /contracts/${contract.split(/\./)[0]}
+* Latest source (may be newer): https://github.com/perifinance/peri-finance/blob/master/contracts/${contract}
+* Docs: Will be added in the future. 
+* https://docs.peri.finance/contracts/source/contracts/${contract.split(/\./)[0]}
 *
 * Contract Dependencies: ${deps.length ? '\n*\t- ' + deps.join('\n*\t- ') : '(none)'}
 * Libraries: ${libraries.length ? '\n*\t- ' + libraries.join('\n*\t- ') : '(none)'}
