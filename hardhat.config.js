@@ -2,15 +2,17 @@
 require('dotenv').config();
 
 const path = require('path');
-
 require('./hardhat');
 require('@nomiclabs/hardhat-truffle5');
 require('@nomiclabs/hardhat-ethers');
 require('@nomiclabs/hardhat-web3');
+require('@nomiclabs/hardhat-etherscan');
 
 require('solidity-coverage');
 require('hardhat-gas-reporter');
 
+const PROVIDER_URL_MAINNET = process.env.PROVIDER_URL_MAINNET;
+const DEPLOY_PRIVATE_KEY = process.env.DEPLOY_PRIVATE_KEY;
 const {
 	constants: { inflationStartTimestampInSecs, AST_FILENAME, AST_FOLDER, BUILD_FOLDER },
 } = require('.');
@@ -46,6 +48,11 @@ module.exports = {
 	},
 	defaultNetwork: 'hardhat',
 	networks: {
+		mainnet: {
+			chainId: 1,
+			url: `${PROVIDER_URL_MAINNET}`,
+			accounts: [`0x${DEPLOY_PRIVATE_KEY}`],
+		},
 		hardhat: {
 			chainId: 1337,
 			gas: 12e6,
@@ -67,5 +74,10 @@ module.exports = {
 		currency: 'USD',
 		maxMethodDiff: 25, // CI will fail if gas usage is > than this %
 		outputFile: 'test-gas-used.log',
+	},
+	etherscan: {
+		// Your API key for Etherscan
+		// Obtain one at https://etherscan.io/
+		apiKey: 'TXDQM39SQYQ17TC5PP6U2N4I1BGF6TVE6Z',
 	},
 };

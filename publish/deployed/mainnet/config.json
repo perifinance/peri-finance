@@ -11,16 +11,40 @@
 	"BinaryOptionMarketData": {
 		"deploy": false
 	},
-	"ReadProxyAddressResolver": {
+	"CollateralManager": {
 		"deploy": false
 	},
-	"DebtCache": {
+	"CollateralManagerState": {
+		"deploy": false
+	},
+	"CollateralEth": {
+		"deploy": false
+	},
+	"CollateralErc20": {
+		"deploy": false
+	},
+	"CollateralShort": {
+		"deploy": false
+	},
+	"CollateralStateErc20": {
+		"deploy": false
+	},
+	"CollateralStateEth": {
+		"deploy": false
+	},
+	"CollateralStateShort": {
+		"deploy": false
+	},
+	"ReadProxyAddressResolver": {
 		"deploy": false
 	},
 	"DelegateApprovals": {
 		"deploy": false
 	},
 	"DelegateApprovalsEternalStorage": {
+		"deploy": false
+	},
+	"DebtCache": {
 		"deploy": false
 	},
 	"Depot": {
@@ -30,6 +54,9 @@
 		"deploy": false
 	},
 	"EtherCollateral": {
+		"deploy": false
+	},
+	"EtherCollateralpUSD": {
 		"deploy": false
 	},
 	"ExchangeRates": {
@@ -50,6 +77,9 @@
 	"FeePoolEternalStorage": {
 		"deploy": false
 	},
+	"FlexibleStorage": {
+		"deploy": false
+	},
 	"Issuer": {
 		"deploy": false
 	},
@@ -62,6 +92,9 @@
 	"RewardEscrow": {
 		"deploy": false
 	},
+	"RewardEscrowV2": {
+		"deploy": false
+	},
 	"RewardsDistribution": {
 		"deploy": false
 	},
@@ -71,10 +104,16 @@
 	"PeriFinance": {
 		"deploy": false
 	},
+	"Perifi": {
+		"deploy": false
+	},
 	"PeriFinanceEscrow": {
 		"deploy": false
 	},
 	"PeriFinanceState": {
+		"deploy": false
+	},
+	"SystemSettings": {
 		"deploy": false
 	},
 	"SystemStatus": {
@@ -83,43 +122,10 @@
 	"PynthUtil": {
 		"deploy": false
 	},
-	"StakingRewardsiBTC": {
-		"deploy": false
-	},
-	"StakingRewardsiETH": {
-		"deploy": false
-	},
-	"StakingRewardspEURCurve": {
-		"deploy": false
-	},
-	"StakingRewardspTSLABalancer": {
-		"deploy": false
-	},
 	"DappMaintenance": {
 		"deploy": false
 	},
 	"PynthpUSD": {
-		"deploy": false
-	},
-	"PynthpEUR": {
-		"deploy": false
-	},
-	"PynthpJPY": {
-		"deploy": false
-	},
-	"PynthpAUD": {
-		"deploy": false
-	},
-	"PynthpGBP": {
-		"deploy": false
-	},
-	"PynthpCHF": {
-		"deploy": false
-	},
-	"PynthpXAU": {
-		"deploy": false
-	},
-	"PynthpXAG": {
 		"deploy": false
 	},
 	"PynthpBTC": {
@@ -137,27 +143,6 @@
 	"ProxypUSD": {
 		"deploy": false
 	},
-	"ProxypEUR": {
-		"deploy": false
-	},
-	"ProxypJPY": {
-		"deploy": false
-	},
-	"ProxypAUD": {
-		"deploy": false
-	},
-	"ProxypGBP": {
-		"deploy": false
-	},
-	"ProxypCHF": {
-		"deploy": false
-	},
-	"ProxypXAU": {
-		"deploy": false
-	},
-	"ProxypXAG": {
-		"deploy": false
-	},
 	"ProxypBTC": {
 		"deploy": false
 	},
@@ -173,27 +158,6 @@
 	"TokenStatepUSD": {
 		"deploy": false
 	},
-	"TokenStatepEUR": {
-		"deploy": false
-	},
-	"TokenStatepJPY": {
-		"deploy": false
-	},
-	"TokenStatepAUD": {
-		"deploy": false
-	},
-	"TokenStatepGBP": {
-		"deploy": false
-	},
-	"TokenStatepCHF": {
-		"deploy": false
-	},
-	"TokenStatepXAU": {
-		"deploy": false
-	},
-	"TokenStatepXAG": {
-		"deploy": false
-	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -206,31 +170,13 @@
 	"PynthpETH": {
 		"deploy": false
 	},
-	"TokenStatepBNB": {
+	"TokenStateiETH": {
 		"deploy": false
 	},
-	"ProxypBNB": {
+	"ProxyiETH": {
 		"deploy": false
 	},
-	"PynthpBNB": {
-		"deploy": false
-	},
-	"TokenStatepTRX": {
-		"deploy": false
-	},
-	"ProxypTRX": {
-		"deploy": false
-	},
-	"PynthpTRX": {
-		"deploy": false
-	},
-	"TokenStatepXTZ": {
-		"deploy": false
-	},
-	"ProxypXTZ": {
-		"deploy": false
-	},
-	"PynthpXTZ": {
+	"PynthiETH": {
 		"deploy": false
 	},
 	"TokenStateiBTC": {
@@ -242,316 +188,7 @@
 	"PynthiBTC": {
 		"deploy": false
 	},
-	"TokenStateiETH": {
-		"deploy": false
-	},
-	"ProxyiETH": {
-		"deploy": false
-	},
-	"PynthiETH": {
-		"deploy": false
-	},
-	"TokenStateiBNB": {
-		"deploy": false
-	},
-	"ProxyiBNB": {
-		"deploy": false
-	},
-	"PynthiBNB": {
-		"deploy": false
-	},
-	"TokenStateiTRX": {
-		"deploy": false
-	},
-	"ProxyiTRX": {
-		"deploy": false
-	},
-	"PynthiTRX": {
-		"deploy": false
-	},
-	"TokenStateiXTZ": {
-		"deploy": false
-	},
-	"ProxyiXTZ": {
-		"deploy": false
-	},
-	"PynthiXTZ": {
-		"deploy": false
-	},
-	"TokenStatepCEX": {
-		"deploy": false
-	},
-	"ProxypCEX": {
-		"deploy": false
-	},
-	"PynthpCEX": {
-		"deploy": false
-	},
-	"TokenStateiCEX": {
-		"deploy": false
-	},
-	"ProxyiCEX": {
-		"deploy": false
-	},
-	"PynthiCEX": {
-		"deploy": false
-	},
-	"ProxyERC20pUSD": {
-		"deploy": false
-	},
-	"TokenStatepXRP": {
-		"deploy": false
-	},
-	"ProxypXRP": {
-		"deploy": false
-	},
-	"PynthpXRP": {
-		"deploy": false
-	},
-	"TokenStatepLTC": {
-		"deploy": false
-	},
-	"ProxypLTC": {
-		"deploy": false
-	},
-	"PynthpLTC": {
-		"deploy": false
-	},
-	"TokenStatepLINK": {
-		"deploy": false
-	},
-	"ProxypLINK": {
-		"deploy": false
-	},
-	"PynthpLINK": {
-		"deploy": false
-	},
-	"TokenStatepDEFI": {
-		"deploy": false
-	},
-	"ProxypDEFI": {
-		"deploy": false
-	},
-	"PynthpDEFI": {
-		"deploy": false
-	},
-	"TokenStateiXRP": {
-		"deploy": false
-	},
-	"ProxyiXRP": {
-		"deploy": false
-	},
-	"PynthiXRP": {
-		"deploy": false
-	},
-	"TokenStateiLINK": {
-		"deploy": false
-	},
-	"ProxyiLINK": {
-		"deploy": false
-	},
-	"PynthiLINK": {
-		"deploy": false
-	},
-	"TokenStateiLTC": {
-		"deploy": false
-	},
-	"ProxyiLTC": {
-		"deploy": false
-	},
-	"PynthiLTC": {
-		"deploy": false
-	},
-	"TokenStateiDEFI": {
-		"deploy": false
-	},
-	"ProxyiDEFI": {
-		"deploy": false
-	},
-	"PynthiDEFI": {
-		"deploy": false
-	},
-	"TokenStatepEOS": {
-		"deploy": false
-	},
-	"ProxypEOS": {
-		"deploy": false
-	},
-	"PynthpEOS": {
-		"deploy": false
-	},
-	"TokenStatepETC": {
-		"deploy": false
-	},
-	"ProxypETC": {
-		"deploy": false
-	},
-	"PynthpETC": {
-		"deploy": false
-	},
-	"TokenStateiEOS": {
-		"deploy": false
-	},
-	"ProxyiEOS": {
-		"deploy": false
-	},
-	"PynthiEOS": {
-		"deploy": false
-	},
-	"TokenStateiETC": {
-		"deploy": false
-	},
-	"ProxyiETC": {
-		"deploy": false
-	},
-	"PynthiETC": {
-		"deploy": false
-	},
-	"TokenStateiDASH": {
-		"deploy": false
-	},
-	"ProxyiDASH": {
-		"deploy": false
-	},
-	"PynthiDASH": {
-		"deploy": false
-	},
-	"TokenStateiXMR": {
-		"deploy": false
-	},
-	"ProxyiXMR": {
-		"deploy": false
-	},
-	"PynthiXMR": {
-		"deploy": false
-	},
-	"TokenStateiADA": {
-		"deploy": false
-	},
-	"ProxyiADA": {
-		"deploy": false
-	},
-	"PynthiADA": {
-		"deploy": false
-	},
-	"FlexibleStorage": {
-		"deploy": false
-	},
-	"SystemSettings": {
-		"deploy": false
-	},
 	"TradingRewards": {
-		"deploy": false
-	},
-	"EtherCollateralpUSD": {
-		"deploy": false
-	},
-	"TokenStateiOIL": {
-		"deploy": false
-	},
-	"ProxyiOIL": {
-		"deploy": false
-	},
-	"PynthiOIL": {
-		"deploy": false
-	},
-	"CollateralErc20": {
-		"deploy": false
-	},
-	"CollateralEth": {
-		"deploy": false
-	},
-	"CollateralManager": {
-		"deploy": false
-	},
-	"CollateralManagerState": {
-		"deploy": false
-	},
-	"CollateralStateErc20": {
-		"deploy": false
-	},
-	"CollateralStateEth": {
-		"deploy": false
-	},
-	"CollateralStateShort": {
-		"deploy": false
-	},
-	"CollateralShort": {
-		"deploy": false
-	},
-	"RewardEscrowV2": {
-		"deploy": false
-	},
-	"PeriFinanceBridgeToOptimism": {
-		"deploy": false
-	},
-	"ShortingRewardspBTC": {
-		"deploy": false
-	},
-	"ShortingRewardspETH": {
-		"deploy": false
-	},
-	"TokenStateiAAVE": {
-		"deploy": false
-	},
-	"ProxyiAAVE": {
-		"deploy": false
-	},
-	"PynthiAAVE": {
-		"deploy": false
-	},
-	"TokenStateiUNI": {
-		"deploy": false
-	},
-	"ProxyiUNI": {
-		"deploy": false
-	},
-	"PynthiUNI": {
-		"deploy": false
-	},
-	"TokenStateiYFI": {
-		"deploy": false
-	},
-	"ProxyiYFI": {
-		"deploy": false
-	},
-	"PynthiYFI": {
-		"deploy": false
-	},
-	"TokenStateiDOT": {
-		"deploy": false
-	},
-	"ProxyiDOT": {
-		"deploy": false
-	},
-	"PynthiDOT": {
-		"deploy": false
-	},
-	"TokenStateiREN": {
-		"deploy": false
-	},
-	"ProxyiREN": {
-		"deploy": false
-	},
-	"PynthiREN": {
-		"deploy": false
-	},
-	"TokenStateiCOMP": {
-		"deploy": false
-	},
-	"ProxyiCOMP": {
-		"deploy": false
-	},
-	"PynthiCOMP": {
-		"deploy": false
-	},
-	"TokenStatepTSLA": {
-		"deploy": false
-	},
-	"ProxypTSLA": {
-		"deploy": false
-	},
-	"PynthpTSLA": {
 		"deploy": false
 	}
 }
