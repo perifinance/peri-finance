@@ -289,11 +289,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await usdc.transfer(owner, '1000000');
 
 					// approve USDC allowance
-					await usdc.approve(oracle, '1000000', { from: owner });
-					await usdc.approve(account1, '1000000', { from: owner });
+					await usdc.approve(issuer.address, '1000000', { from: owner });
 
-					// transfer some usdc from owner to account1
-					await usdc.transferFrom(owner, account1, '1000000', { from: oracle });
+					// transfer some usdc to account1
+					await usdc.transfer(account1, '1000000');
+					await usdc.approve(issuer.address, '1000000', { from: account1 });
 
 					now = await currentTime();
 				});
@@ -307,11 +307,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
-				it.only('should stake USDC And Issue Pynths and store issue timestamp after now', async () => {
+				it('should stake USDC And Issue Pynths and store issue timestamp after now', async () => {
 					// issue pynths
+					const account1_allowance = await usdc.allowance(account1, issuer.address);
+					console.log(account1_allowance.toString());
 
-					console.log(await usdc.balanceOf(account1).toString());
-					await periFinance.stakeUSDCAndIssuePynths('1000000', '1000000', {
+					await periFinance.stakeUSDCAndIssuePynths('1000', '1000000000000000000000', {
 						from: account1,
 					});
 
