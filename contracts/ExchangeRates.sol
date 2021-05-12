@@ -598,8 +598,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        /**
-        
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
         if (aggregator != AggregatorV2V3Interface(0)) {
@@ -627,19 +625,18 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
         }
 
-        */
 
         // Test Purpose...
         ///////////////////
-        if (oracle_kovan == address(0)) {
-            return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
-        }
+        // if (oracle_kovan == address(0)) {
+        //     return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
+        // }
 
-        TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
+        // TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
 
-        (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
+        // (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
 
-        return RateAndUpdatedTime({rate: _rate, time: _time});
+        // return RateAndUpdatedTime({rate: _rate, time: _time});
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
