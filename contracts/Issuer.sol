@@ -277,6 +277,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return now >= _lastIssueEvent(account).add(getMinimumStakeTime());
     }
 
+    function _currentUSDCDebtQuota(address _account)
+    internal view
+    returns(uint, bool) {
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
+        uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+
+        return (debtByUSDC.divideDecimalRound(debtBalance), anyRateIsInvalid || isUSDCInvalid);
+    }
+
     function _canStakeUSDC(address _account)
     internal view
     returns(bool) {
@@ -300,15 +312,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     returns(uint) {
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
 
-        if(anyRateIsInvalid) return 0;
-
         uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
 
         (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
 
-        if(isUSDCInvalid) return 0;
-        
         uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
+
+        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
 
         if(maxUSDCQuotaAmount <= usdcStakedAmountToUSD) {
             return 0;
@@ -527,6 +537,28 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         return addresses;
+    }
+
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint) {
+        (uint usdcDebtQuota, bool anyRateIsInvalid) = _currentUSDCDebtQuota(_account);
+
+        _requireRatesNotInvalid(anyRateIsInvalid);
+
+        return usdcDebtQuota;
+    }
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool) {
+        return _canStakeUSDC(_account);
+    }
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint) {
+        return _availableUSDCStakeAmount(_account);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -772,7 +804,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
-        //require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
+        require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
     }
 
     function _requireCanIssueOnBehalf(address issueForAddress, address from) internal view {
