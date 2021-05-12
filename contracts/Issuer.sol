@@ -337,7 +337,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         maxIssuable = issuable;
         anyRateIsInvalid = anyRateIsInvalid || isInvalid;
 
-        if (!_canStakeUSDC(_issuer) || alreadyIssued >= maxIssuable) {
+        if (alreadyIssued >= maxIssuable) {
             maxIssuable = 0;
         } else {
             maxIssuable = maxIssuable.sub(alreadyIssued);
@@ -368,18 +368,23 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return _amount.mul(10**12).divideDecimalRound(_usdcRate);
     }
 
-    function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
+    function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {        
         // What is the value of their PERI balance in pUSD
-        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+        (uint periRate, bool anyRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
         uint periCollateral = _periToUSD(_collateral(_issuer), periRate);
 
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer), usdcRate);
+        uint usdcStakedAmountToUSD;
+        if(stakingStateUSDC().hasStaked(_issuer)) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+            usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer), usdcRate);
+
+            anyRateIsInvalid = anyRateIsInvalid || isUSDCInvalid;
+        }
 
         uint destinationValue = periCollateral.add(usdcStakedAmountToUSD);
 
         // They're allowed to issue up to issuanceRatio of that value
-        return (destinationValue.multiplyDecimal(getIssuanceRatio()), isPeriInvalid || isUSDCInvalid);
+        return (destinationValue.multiplyDecimal(getIssuanceRatio()), anyRateIsInvalid);
     }
 
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
