@@ -284,7 +284,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         if(anyRateIsInvalid) return false;
 
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota());
+        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
 
         (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
 
@@ -302,7 +302,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         if(anyRateIsInvalid) return 0;
 
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota());
+        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
 
         (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
 
@@ -711,6 +711,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _voluntaryBurnPynths(burnForAddress, 0, true);
     }
 
+
     function liquidateDelinquentAccount(
         address account,
         uint pusdAmount,
@@ -837,6 +838,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if(_issueMax || _issueAmount > 0) {
             _issuePynths(_issuer, _issueAmount, _issueMax);
         }
+    }
+
+    /**
+     * @param _amount 6 decimals USDC amount to unstake and refund
+     */
+    function _unstakeAndRefundUSDC(address _account, uint _amount)
+    internal {
+        stakingStateUSDC().unstake(_account, _amount);
+
+        require(usdc().transfer(_account, _amount),
+            "refunding USDC has been failed");
     }
 
     function _burnPynths(
