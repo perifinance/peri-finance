@@ -68,14 +68,21 @@ interface IIssuer {
     function issueMaxPynths(address from) external;
 
     function issueMaxPynthsOnBehalf(address issueFor, address from) external;
-
+    
     function stakeUSDCAndIssuePynths(
-        address from,
-        uint usdcStakeAmount,
-        uint issueAmount
+        address _issuer,
+        uint _usdcStakeAmount,
+        uint _issueAmount
     ) external;
 
-    function stakeUSDCAndIssueMaxPynths(address from, uint usdcStakeAmount) external;
+    function stakeMaxUSDCAndIssuePynths(address _issuer, uint _issueAmount)
+    external;
+
+    function stakeUSDCAndIssueMaxPynths(address _issuer, uint _usdcStakeAmount)
+    external;
+
+    function stakeMaxUSDCAndIssueMaxPynths(address _issuer)
+    external;
 
     function burnPynths(address from, uint amount) external;
 
@@ -88,14 +95,6 @@ interface IIssuer {
     function burnPynthsToTarget(address from) external;
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
-
-    function unstakeUSDCAndBurnPynths(
-        address from,
-        uint usdcUnstakeAmount,
-        uint burnAmount
-    ) external;
-
-    function unstakeUSDCToMaxAndBurnPynths(address from, uint burnAmount) external;
 
     function liquidateDelinquentAccount(
         address account,

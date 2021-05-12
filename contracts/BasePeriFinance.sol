@@ -387,12 +387,28 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function stakeUSDCAndIssuePynths(uint usdcStakeAmount, uint issueAmount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssuePynths(messageSender, usdcStakeAmount, issueAmount);
+    function stakeUSDCAndIssuePynths(uint _usdcStakeAmount, uint _issueAmount) 
+    external
+    issuanceActive optionalProxy {
+        issuer().stakeUSDCAndIssuePynths(messageSender, _usdcStakeAmount, _issueAmount);
     }
 
-    function stakeUSDCAndIssueMaxPynths(uint usdcStakeAmount) external issuanceActive optionalProxy {
-        return issuer().stakeUSDCAndIssueMaxPynths(messageSender, usdcStakeAmount);
+    function stakeMaxUSDCAndIssuePynths(uint _issueAmount)
+    external
+    issuanceActive optionalProxy {
+        issuer().stakeMaxUSDCAndIssuePynths(messageSender, _issueAmount);
+    }
+
+    function stakeUSDCAndIssueMaxPynths(uint _usdcStakeAmount)
+    external
+    issuanceActive optionalProxy {
+        issuer().stakeUSDCAndIssueMaxPynths(messageSender, _usdcStakeAmount);
+    }
+
+    function stakeMaxUSDCAndIssueMaxPynths()
+    external
+    issuanceActive optionalProxy {
+        issuer().stakeMaxUSDCAndIssueMaxPynths(messageSender);
     }
 
     function burnPynths(uint amount) external issuanceActive optionalProxy {
@@ -409,14 +425,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
-    }
-
-    function unstakeUSDCAndBurnPynths(uint usdcUnstakeAmount, uint burnAmount) external issuanceActive optionalProxy {
-        return issuer().unstakeUSDCAndBurnPynths(messageSender, usdcUnstakeAmount, burnAmount);
-    }
-
-    function unstakeUSDCToMaxAndBurnPynths(uint burnAmount) external issuanceActive optionalProxy {
-        return issuer().unstakeUSDCToMaxAndBurnPynths(messageSender, burnAmount);
     }
 
     function exchangeWithVirtual(

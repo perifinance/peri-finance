@@ -129,7 +129,6 @@ contract PeriFinance is BasePeriFinance {
         optionalProxy
         returns (bool)
     {
-        _notImplemented();
         (uint totalRedeemed, uint amountLiquidated) =
             issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
 

@@ -14,8 +14,6 @@ contract PeriFinanceStateWithLimitedSetup is PeriFinanceState, LimitedSetup {
     // Import state
     uint public importedDebtAmount;
 
-    bytes32 private constant PERI = "PERI";
-
     constructor(address _owner, address _associatedContract)
         public
         PeriFinanceState(_owner, _associatedContract)
@@ -91,8 +89,7 @@ contract PeriFinanceStateWithLimitedSetup is PeriFinanceState, LimitedSetup {
         feePool.appendAccountIssuanceRecord(
             account,
             issuanceData[account].initialDebtOwnership,
-            issuanceData[account].debtEntryIndex,
-            PERI
+            issuanceData[account].debtEntryIndex
         );
     }
 

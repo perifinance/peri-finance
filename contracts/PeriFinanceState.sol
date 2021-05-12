@@ -36,15 +36,6 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
     // Global debt pool tracking
     uint[] public debtLedger;
 
-    // Issued pynth balances by Peri for individual fee entitlements and exit price calculations
-    mapping(address => IssuanceData) public periIssuanceData;
-
-    // The totla count of people staked Peri
-    uint public totalPeriIssuerCount;
-
-    // Peri debt pool tracking
-    uint[] public periDebtLedger;
-
     constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {}
 
     /* ========== SETTERS ========== */
@@ -94,28 +85,6 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
         debtLedger.push(value);
     }
 
-    // PERI Debt Data
-    function setCurrentPeriIssuanceData(address account, uint initialDebtOwnership) external onlyAssociatedContract {
-        periIssuanceData[account].initialDebtOwnership = initialDebtOwnership;
-        periIssuanceData[account].debtEntryIndex = periDebtLedger.length;
-    }
-
-    function clearPeriIssuanceData(address account) external onlyAssociatedContract {
-        delete periIssuanceData[account];
-    }
-
-    function incrementTotalPeriIssuerCount() external {
-        totalPeriIssuerCount = totalPeriIssuerCount.add(1);
-    }
-
-    function decrementTotalPeriIssuerCount() external {
-        totalPeriIssuerCount = totalPeriIssuerCount.sub(1);
-    }
-
-    function appendPeriDebtLedgerValue(uint value) external onlyAssociatedContract {
-        periDebtLedger.push(value);
-    }
-
     /* ========== VIEWS ========== */
 
     /**
@@ -142,21 +111,5 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      */
     function hasIssued(address account) external view returns (bool) {
         return issuanceData[account].initialDebtOwnership > 0;
-    }
-
-    function periDebtLedgerLength() external view returns (uint) {
-        return periDebtLedger.length;
-    }
-
-    function lastPeriDebtLedgerEntry() external view returns (uint) {
-        if (periDebtLedger.length <= 0) {
-            return 0;
-        }
-
-        return periDebtLedger[periDebtLedger.length - 1];
-    }
-
-    function hasPeriIssued(address account) external view returns (bool) {
-        return periIssuanceData[account].initialDebtOwnership > 0;
     }
 }
