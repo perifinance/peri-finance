@@ -172,6 +172,24 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint) {
+        return issuer().currentUSDCDebtQuota(_account);
+    }
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool) {
+        return issuer().canStakeUSDC(_account);
+    }
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint) {
+        return issuer().availableUSDCStakeAmount(_account);
+    }
+
     function _canTransfer(address account, uint value) internal view returns (bool) {
         require(!_isLocked(account, value), "PERI : Locked balance");
 

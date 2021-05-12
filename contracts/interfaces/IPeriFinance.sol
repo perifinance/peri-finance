@@ -43,6 +43,18 @@ interface IPeriFinance {
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint);
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool);
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint);
+
     // Mutative Functions
     function burnPynths(uint amount) external;
 
