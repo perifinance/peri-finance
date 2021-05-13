@@ -125,7 +125,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	});
 
-	it.only('ensure only known functions are mutative', () => {
+	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: issuer.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
