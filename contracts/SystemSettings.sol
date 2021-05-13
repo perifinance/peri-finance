@@ -128,6 +128,12 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getCrossDomainMessageGasLimit(gasLimitType);
     }
 
+    function usdcQuota()
+    external view
+    returns(uint) {
+        return getUSDCQuota();
+    }
+
     // ========== RESTRICTED ==========
 
     function setCrossDomainMessageGasLimit(CrossDomainMessageGasLimits _gasLimitType, uint _crossDomainMessageGasLimit)
