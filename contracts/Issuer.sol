@@ -375,7 +375,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     returns(uint) {
         if(_amount == 0) return 0;
         
-        return _amount.mul(10**12).divideDecimalRound(_usdcRate);
+        return _amount.divideDecimalRound(_usdcRate).div(10**12);
     }
 
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {        
@@ -875,14 +875,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool _stakeMax,
         bool _issueMax
     ) internal {
-        uint availableUSDCStakeAmount = _availableUSDCStakeAmount(_issuer);
+        uint availableUSDCAmountToStake = _availableUSDCStakeAmount(_issuer);
 
-        require(availableUSDCStakeAmount > 0,
+        require(availableUSDCAmountToStake > 0,
             "no available USDC stake amount");
 
         uint stakeAmount;
-        if(_stakeMax || availableUSDCStakeAmount <= _usdcStakeAmount) {
-            stakeAmount = availableUSDCStakeAmount;
+        if(_stakeMax || availableUSDCAmountToStake <= _usdcStakeAmount) {
+            stakeAmount = availableUSDCAmountToStake;
         } else {
             stakeAmount = _usdcStakeAmount;
         }
