@@ -59,7 +59,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		pynths = ['pUSD', 'PERI'];
+		pynths = ['pUSD', 'PERI', 'USDC'];
 		({
 			PeriFinance: periFinance,
 			PeriFinanceState: periFinanceState,
@@ -1078,11 +1078,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							});
 						});
 					});
-					['PERI', 'pUSD', ['PERI', 'pUSD'], 'none'].forEach(type => {
+					['PERI', 'USDC', 'pUSD', ['PERI', 'USDC'], 'none'].forEach(type => {
 						describe(`when ${type} is stale`, () => {
 							beforeEach(async () => {
 								await fastForward(
-									(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300'))
+									(await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('3000'))
 								);
 
 								// set all rates minus those to ignore
@@ -1103,7 +1103,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 								await debtCache.takeDebtSnapshot();
 							});
 
-							if (type === 'none') {
+							if (type === 'none' || type === 'pUSD') {
 								it('then calling issuePynths succeeds', async () => {
 									await periFinance.issuePynths(toUnit('1'), { from: account1 });
 								});
@@ -1286,6 +1286,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						// ensure user has pynths to burb
 						await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 						await periFinance.issueMaxPynths({ from: account1 });
+						await debtCache.takeDebtSnapshot();
 					});
 					['System', 'Issuance'].forEach(section => {
 						describe(`when ${section} is suspended`, () => {
@@ -1318,7 +1319,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 					});
 
-					['PERI', 'pUSD', ['PERI', 'pUSD'], 'none'].forEach(type => {
+					['PERI', 'pUSD', 'USDC', ['PERI', 'USDC'], 'none'].forEach(type => {
 						describe(`when ${type} is stale`, () => {
 							beforeEach(async () => {
 								await fastForward(
@@ -1343,7 +1344,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 								await debtCache.takeDebtSnapshot();
 							});
 
-							if (type === 'none') {
+							if (type === 'none' || type === 'pUSD') {
 								it('then calling burnPynths() succeeds', async () => {
 									await periFinance.burnPynths(toUnit('1'), { from: account1 });
 								});
@@ -1376,15 +1377,17 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// Issue
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 
-					// account1 should now have 200 pUSD of debt.
-					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('200'));
+					// account1 should now have 400 pUSD of debt.
+					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('400'));
 
 					// Burn 100 pUSD
 					await periFinance.burnPynths(toUnit('100'), { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// account1 should now have 100 pUSD of debt.
-					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('100'));
+					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('300'));
 				});
 
 				it('should disallow an issuer without outstanding debt from burning pynths', async () => {
@@ -1421,14 +1424,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// Issue
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// Transfer all newly issued pynths to account2
-					await pUSDContract.transfer(account2, toUnit('200'), {
+					await pUSDContract.transfer(account2, toUnit('400'), {
 						from: account1,
 					});
 
 					const debtBefore = await periFinance.debtBalanceOf(account1, pUSD);
-
 					assert.ok(!debtBefore.isNeg());
 
 					// Burning any amount of pUSD beyond what is owned will cause a revert
@@ -1448,28 +1451,30 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					// Issue
-					const fullAmount = toUnit('210');
-					const account1Payment = toUnit('10');
+					const fullAmount = toUnit('400');
+					const account1Payment = toUnit('100');
 					const account2Payment = fullAmount.sub(account1Payment);
 					await periFinance.issuePynths(account1Payment, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(account2Payment, { from: account2 });
+					await debtCache.takeDebtSnapshot();
 
 					// Transfer all of account2's pynths to account1
 					const amountTransferred = toUnit('200');
 					await pUSDContract.transfer(account1, amountTransferred, {
 						from: account2,
 					});
-					// return;
 
 					const balanceOfAccount1 = await pUSDContract.balanceOf(account1);
 
 					// Then try to burn them all. Only 10 pynths (and fees) should be gone.
 					await periFinance.burnPynths(balanceOfAccount1, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const balanceOfAccount1AfterBurn = await pUSDContract.balanceOf(account1);
 
 					// Recording debts in the debt ledger reduces accuracy.
-					//   Let's allow for a 1000 margin of error.
-					assert.bnClose(balanceOfAccount1AfterBurn, amountTransferred, '1000');
+					//   Let's allow for a 0 margin of error.
+					assert.bnClose(balanceOfAccount1AfterBurn, amountTransferred, '0');
 				});
 
 				it("should successfully burn all user's pynths @gasprofile", async () => {
@@ -1480,11 +1485,13 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// Issue
 					await periFinance.issuePynths(toUnit('199'), { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// Then try to burn them all. Only 10 pynths (and fees) should be gone.
 					await periFinance.burnPynths(await pUSDContract.balanceOf(account1), {
 						from: account1,
 					});
+					await debtCache.takeDebtSnapshot();
 
 					assert.bnEqual(await pUSDContract.balanceOf(account1), web3.utils.toBN(0));
 				});
@@ -1500,11 +1507,13 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// Issue
 					await periFinance.issuePynths(toUnit('199'), { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// Then try to burn them all. Only 10 pynths (and fees) should be gone.
 					await periFinance.burnPynths(await pUSDContract.balanceOf(account1), {
 						from: account1,
 					});
+					await debtCache.takeDebtSnapshot();
 
 					assert.bnEqual(await pUSDContract.balanceOf(account1), web3.utils.toBN(0));
 				});
@@ -1522,8 +1531,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const issuedPynthsPt1 = toUnit('2000');
 					const issuedPynthsPt2 = toUnit('2000');
 					await periFinance.issuePynths(issuedPynthsPt1, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(issuedPynthsPt2, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(toUnit('1000'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 
 					const debt = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debt, toUnit('4000'));
@@ -1551,12 +1563,18 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						const burnAllPynths = toUnit('2050');
 
 						await periFinance.issuePynths(issuedPynths1, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.issuePynths(issuedPynths2, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.issuePynths(issuedPynths3, { from: account3 });
+						await debtCache.takeDebtSnapshot();
 
 						await periFinance.burnPynths(burnAllPynths, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.burnPynths(burnAllPynths, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.burnPynths(burnAllPynths, { from: account3 });
+						await debtCache.takeDebtSnapshot();
 
 						const debtBalance1After = await periFinance.debtBalanceOf(account1, pUSD);
 						const debtBalance2After = await periFinance.debtBalanceOf(account2, pUSD);
@@ -1585,11 +1603,15 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						const issuedPynths3 = toUnit('2000');
 
 						await periFinance.issuePynths(issuedPynths1, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.issuePynths(issuedPynths2, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.issuePynths(issuedPynths3, { from: account3 });
+						await debtCache.takeDebtSnapshot();
 
 						const debtBalanceBefore = await periFinance.debtBalanceOf(account1, pUSD);
 						await periFinance.burnPynths(debtBalanceBefore, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						const debtBalanceAfter = await periFinance.debtBalanceOf(account1, pUSD);
 
 						assert.bnEqual(debtBalanceAfter, '0');
@@ -1605,9 +1627,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						const issuedPynths1 = toUnit('10');
 
 						await periFinance.issuePynths(issuedPynths1, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.burnPynths(issuedPynths1.add(toUnit('9000')), {
 							from: account1,
 						});
+						await debtCache.takeDebtSnapshot();
 						const debtBalanceAfter = await periFinance.debtBalanceOf(account1, pUSD);
 
 						assert.bnEqual(debtBalanceAfter, '0');
@@ -1627,7 +1651,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						const issuedPynths2 = toUnit('50000');
 
 						await periFinance.issuePynths(issuedPynths1, { from: account1 });
+						await debtCache.takeDebtSnapshot();
 						await periFinance.issuePynths(issuedPynths2, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 
 						let debtBalance1After = await periFinance.debtBalanceOf(account1, pUSD);
 						let debtBalance2After = await periFinance.debtBalanceOf(account2, pUSD);
@@ -1638,6 +1664,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 						// Account 1 burns 100,000
 						await periFinance.burnPynths(toUnit('100000'), { from: account1 });
+						await debtCache.takeDebtSnapshot();
 
 						debtBalance1After = await periFinance.debtBalanceOf(account1, pUSD);
 						debtBalance2After = await periFinance.debtBalanceOf(account2, pUSD);
@@ -1667,9 +1694,9 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, {
 							from: oracle,
 						});
-						await debtCache.takeDebtSnapshot();
 						// Issue
 						await periFinance.issueMaxPynths({ from: account1 });
+						await debtCache.takeDebtSnapshot();
 						assert.bnClose(await periFinance.debtBalanceOf(account1, pUSD), toUnit('8000'));
 
 						// Set minimumStakeTime to 1 hour
@@ -1682,8 +1709,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.5'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							await debtCache.takeDebtSnapshot();
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							await debtCache.takeDebtSnapshot();
 							assert.equal(await feePool.isFeesClaimable(account1), false);
 						});
 
@@ -1692,10 +1719,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.bnClose(await periFinance.debtBalanceOf(account1, pUSD), toUnit('4000'));
 						});
 						it('then fees are claimable', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.equal(await feePool.isFeesClaimable(account1), true);
 						});
 					});
@@ -1706,8 +1735,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.9'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							await debtCache.takeDebtSnapshot();
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							await debtCache.takeDebtSnapshot();
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
@@ -1715,10 +1744,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('7200'));
 						});
 						it('then fees are claimable', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.equal(await feePool.isFeesClaimable(account1), true);
 						});
 					});
@@ -1729,8 +1760,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.1'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							await debtCache.takeDebtSnapshot();
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							await debtCache.takeDebtSnapshot();
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
@@ -1738,10 +1769,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('800'));
 						});
 						it('then fees are claimable', async () => {
 							await periFinance.burnPynthsToTarget({ from: account1 });
+							await debtCache.takeDebtSnapshot();
 							assert.equal(await feePool.isFeesClaimable(account1), true);
 						});
 					});
@@ -1752,8 +1785,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['2'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							await debtCache.takeDebtSnapshot();
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							await debtCache.takeDebtSnapshot();
 						});
 
 						it('then the maxIssuablePynths increases 100%', async () => {
@@ -1944,8 +1977,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const issuedPynthsPt1 = toUnit('2000');
 					const issuedPynthsPt2 = toUnit('2000');
 					await periFinance.issuePynths(issuedPynthsPt1, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(issuedPynthsPt2, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(toUnit('1000'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 
 					const debt = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debt, toUnit('4000'));
@@ -1967,12 +2003,18 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const burntPynthsPt2 = toUnit('500');
 
 					await periFinance.issuePynths(issuedPynthsPt1, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.burnPynths(burntPynthsPt1, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(issuedPynthsPt2, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					await periFinance.issuePynths(toUnit('100'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.issuePynths(toUnit('51'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 					await periFinance.burnPynths(burntPynthsPt2, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					const debt = await periFinance.debtBalanceOf(account1, toBytes32('pUSD'));
 					const expectedDebt = issuedPynthsPt1
@@ -1998,13 +2040,16 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Issue from account1
 					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
 
 					// Issue and burn from account 2 all debt
 					await periFinance.issuePynths(toUnit('43'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 					let debt = await periFinance.debtBalanceOf(account2, pUSD);
 					await periFinance.burnPynths(toUnit('43'), { from: account2 });
+					await debtCache.takeDebtSnapshot();
 					debt = await periFinance.debtBalanceOf(account2, pUSD);
 
 					assert.bnEqual(debt, 0);
@@ -2038,6 +2083,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
 
@@ -2047,6 +2093,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						// Seems that in this case, issuing 43 each time leads to increasing the variance regularly each time.
 						const amount = toUnit('43');
 						await periFinance.issuePynths(amount, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						expectedDebtForAccount2 = expectedDebtForAccount2.add(amount);
 
 						const desiredAmountToBurn = toUnit(web3.utils.toBN(getRandomInt(4, 14)));
@@ -2054,6 +2101,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							? desiredAmountToBurn
 							: expectedDebtForAccount2;
 						await periFinance.burnPynths(amountToBurn, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						expectedDebtForAccount2 = expectedDebtForAccount2.sub(amountToBurn);
 
 						// Useful debug logging
@@ -2090,6 +2138,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
 
@@ -2099,6 +2148,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						// Seems that in this case, issuing 43 each time leads to increasing the variance regularly each time.
 						const amount = toUnit(web3.utils.toBN(getRandomInt(40, 49)));
 						await periFinance.issuePynths(amount, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						expectedDebtForAccount2 = expectedDebtForAccount2.add(amount);
 
 						const desiredAmountToBurn = toUnit(web3.utils.toBN(getRandomInt(37, 46)));
@@ -2106,6 +2156,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							? desiredAmountToBurn
 							: expectedDebtForAccount2;
 						await periFinance.burnPynths(amountToBurn, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						expectedDebtForAccount2 = expectedDebtForAccount2.sub(amountToBurn);
 
 						// Useful debug logging
@@ -2142,6 +2193,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnEqual(debtBalance1, account1AmountToIssue);
 
@@ -2150,6 +2202,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					for (let i = 0; i < totalTimesToIssue; i++) {
 						const amount = toUnit('0.000000000000000002');
 						await periFinance.issuePynths(amount, { from: account2 });
+						await debtCache.takeDebtSnapshot();
 						expectedDebtForAccount2 = expectedDebtForAccount2.add(amount);
 					}
 					const debtBalance2 = await periFinance.debtBalanceOf(account2, pUSD);
@@ -2224,6 +2277,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Issue
 					const issuedPynths = toUnit(web3.utils.toBN('6400'));
 					await periFinance.issuePynths(issuedPynths, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					await periFinance.collateralisationRatio(account1, { from: account2 });
 				});
@@ -2247,9 +2301,13 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Issue
 					const issuedPynths = toUnit(web3.utils.toBN('6400'));
 					await periFinance.issuePynths(issuedPynths, { from: account1 });
+					await debtCache.takeDebtSnapshot();
+
+					const debtBalanceOf = await periFinance.debtBalanceOf(account1, pUSD);
+					console.log(debtBalanceOf.toString());
 
 					const ratio = await periFinance.collateralisationRatio(account1, { from: account2 });
-					assert.unitEqual(ratio, '0.2');
+					assert.unitEqual(ratio, '0.1');
 				});
 
 				it("should include escrowed periFinance when calculating a user's collaterisation ratio", async () => {
@@ -2279,6 +2337,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Issue
 					const maxIssuable = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issuePynths(maxIssuable, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// Compare
 					const collaterisationRatio = await periFinance.collateralisationRatio(account1);
@@ -2622,6 +2681,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					const pUSDBalanceBefore = await pUSDContract.balanceOf(account1);
 					await periFinance.burnPynthsOnBehalf(authoriser, pUSDBalanceBefore, { from: delegate });
+					await debtCache.takeDebtSnapshot();
 
 					const pUSDBalance = await pUSDContract.balanceOf(account1);
 					assert.bnEqual(pUSDBalance, toUnit('0'));
@@ -2636,6 +2696,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
 
 					await periFinance.burnPynthsToTargetOnBehalf(authoriser, { from: delegate });
+					await debtCache.takeDebtSnapshot();
 
 					const pUSDBalanceAfter = await pUSDContract.balanceOf(account1);
 					assert.bnEqual(pUSDBalanceAfter, toUnit('40'));
