@@ -43,6 +43,18 @@ interface IIssuer {
             uint totalSystemDebt
         );
 
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint);
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool);
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint);
+
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory);
@@ -84,6 +96,12 @@ interface IIssuer {
     function stakeMaxUSDCAndIssueMaxPynths(address _issuer)
     external;
 
+    function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
+    external;
+
+    function unstakeToTargetAndRefundUSDC(address _account)
+    external;
+
     function burnPynths(address from, uint amount) external;
 
     function burnPynthsOnBehalf(
@@ -95,6 +113,12 @@ interface IIssuer {
     function burnPynthsToTarget(address from) external;
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
+
+    function burnPynthsAndUnstakeUSDCToTarget(address from, uint burnAmount)
+    external;
+
+    function burnPynthsToTargetAndUnstakeUSDCToTarget(address from)
+    external;
 
     function liquidateDelinquentAccount(
         address account,

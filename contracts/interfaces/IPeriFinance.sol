@@ -43,6 +43,18 @@ interface IPeriFinance {
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint);
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool);
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint);
+
     // Mutative Functions
     function burnPynths(uint amount) external;
 
@@ -107,6 +119,18 @@ interface IPeriFinance {
     external;
 
     function stakeMaxUSDCAndIssueMaxPynths()
+    external;
+
+    function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
+    external;
+
+    function unstakeToTargetAndRefundUSDC()
+    external;
+
+    function burnPynthsAndUnstakeUSDCToTarget(uint _burnAmount)
+    external;
+
+    function burnPynthsToTargetAndUnstakeUSDCToTarget()
     external;
 
     function mint() external returns (bool);

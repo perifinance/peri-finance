@@ -172,6 +172,24 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
+    function currentUSDCDebtQuota(address _account)
+    external view
+    returns(uint) {
+        return issuer().currentUSDCDebtQuota(_account);
+    }
+
+    function canStakeUSDC(address _account)
+    external view
+    returns(bool) {
+        return issuer().canStakeUSDC(_account);
+    }
+
+    function availableUSDCStakeAmount(address _account)
+    external view
+    returns(uint) {
+        return issuer().availableUSDCStakeAmount(_account);
+    }
+
     function _canTransfer(address account, uint value) internal view returns (bool) {
         require(!_isLocked(account, value), "PERI : Locked balance");
 
@@ -411,6 +429,18 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         issuer().stakeMaxUSDCAndIssueMaxPynths(messageSender);
     }
 
+    function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
+    external
+    issuanceActive optionalProxy {
+        issuer().unstakeAndRefundUSDC(messageSender, _usdcUnstakeAmount);
+    }
+
+    function unstakeToTargetAndRefundUSDC()
+    external
+    issuanceActive optionalProxy {
+        issuer().unstakeToTargetAndRefundUSDC(messageSender);
+    }
+
     function burnPynths(uint amount) external issuanceActive optionalProxy {
         return issuer().burnPynths(messageSender, amount);
     }
@@ -425,6 +455,18 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
+    }
+
+    function burnPynthsAndUnstakeUSDCToTarget(uint _burnAmount)
+    external
+    issuanceActive optionalProxy {
+        return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender, _burnAmount);
+    }
+
+    function burnPynthsToTargetAndUnstakeUSDCToTarget()
+    external
+    issuanceActive optionalProxy {
+        return issuer().burnPynthsToTargetAndUnstakeUSDCToTarget(messageSender);
     }
 
     function exchangeWithVirtual(
