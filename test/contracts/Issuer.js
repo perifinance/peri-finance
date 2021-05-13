@@ -140,10 +140,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'stakeUSDCAndIssueMaxPynths',
 				'stakeMaxUSDCAndIssuePynths',
 				'stakeMaxUSDCAndIssueMaxPynths',
+				'unstakeAndRefundUSDC',
+				'unstakeToTargetAndRefundUSDC',
 				'burnPynths',
 				'burnPynthsOnBehalf',
 				'burnPynthsToTarget',
 				'burnPynthsToTargetOnBehalf',
+				'burnPynthsAndUnstakeUSDCToTarget',
+				'burnPynthsToTargetAndUnstakeUSDCToTarget',
 				'removePynth',
 				'removePynths',
 				'liquidateDelinquentAccount',
@@ -164,6 +168,30 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.issuePynths,
 				args: [account1, toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('issuePynthsOnBehalf() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.issuePynthsOnBehalf,
+				args: [account1, account2, toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('issueMaxPynths() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.issueMaxPynths,
+				args: [account1],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('issueMaxPynthsOnBehalf() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.issueMaxPynthsOnBehalf,
+				args: [account1, account2],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
 			});
@@ -200,26 +228,18 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				reason: 'Only the periFinance contract can perform this action',
 			});
 		});
-		it('issuePynthsOnBehalf() cannot be invoked directly by a user', async () => {
+		it('unstakeAndRefundUSDC() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issuePynthsOnBehalf,
-				args: [account1, account2, toUnit('1')],
+				fnc: issuer.unstakeAndRefundUSDC,
+				args: [account1, '1000000'],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
 			});
 		});
-		it('issueMaxPynths() cannot be invoked directly by a user', async () => {
+		it('unstakeToTargetAndRefundUSDC() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issueMaxPynths,
+				fnc: issuer.unstakeToTargetAndRefundUSDC,
 				args: [account1],
-				accounts,
-				reason: 'Only the periFinance contract can perform this action',
-			});
-		});
-		it('issueMaxPynthsOnBehalf() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issueMaxPynthsOnBehalf,
-				args: [account1, account2],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
 			});
@@ -260,6 +280,22 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.burnPynthsToTargetOnBehalf,
 				args: [account1, account2],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('burnPynthsAndUnstakeUSDCToTarget() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.burnPynthsAndUnstakeUSDCToTarget,
+				args: [account1, toUnit('1')],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('burnPynthsToTargetAndUnstakeUSDCToTarget() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.burnPynthsToTargetAndUnstakeUSDCToTarget,
+				args: [account1],
 				accounts,
 				reason: 'Only the periFinance contract can perform this action',
 			});
@@ -527,7 +563,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await periFinance.issuePynths(issuedPynths, { from: account1 });
 					await debtCache.takeDebtSnapshot();
 
-					const debt = await periFinance.debtBalanceOf(account1, toBytes32('PERI'));
+					const debt = await periFinance.debtBalanceOf(account1, toBytes32('pUSD'));
 					assert.bnEqual(debt, issuedPynths);
 				});
 			});
