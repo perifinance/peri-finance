@@ -411,7 +411,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool rateIsInvalid = anyRateIsInvalid || isUSDCInvalid || isPeriInvalid;
         if (totalOwnedPeriFinance == 0 && usdcStakedAmountToUSD == 0) return (0, rateIsInvalid);
 
-        uint totalOwned = usdcStakedAmountToUSD.add(usdcStakedAmountToPeri);
+        uint totalOwned = totalOwnedPeriFinance.add(usdcStakedAmountToPeri);
 
         return (debtBalance.divideDecimalRound(totalOwned), rateIsInvalid);
     }
