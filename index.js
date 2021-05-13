@@ -131,6 +131,10 @@ const defaults = {
 		.mul(w3utils.toBN(1e18))
 		.div(w3utils.toBN(6))
 		.toString(), // 1/6 = 0.16666666667
+	USDC_QUOTA: w3utils
+		.toBN(2)
+		.mul(w3utils.toBN(1e17))
+		.toString(),
 	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (3600 * 24 * 3).toString(), // 3 days

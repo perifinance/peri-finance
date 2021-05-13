@@ -12,6 +12,7 @@ const {
 		WAITING_PERIOD_SECS,
 		PRICE_DEVIATION_THRESHOLD_FACTOR,
 		ISSUANCE_RATIO,
+		USDC_QUOTA,
 		FEE_PERIOD_DURATION,
 		TARGET_THRESHOLD,
 		LIQUIDATION_DELAY,
@@ -238,7 +239,6 @@ const setupContract = async ({
 			0,
 			0,
 		],
-		FeePoolStateUSDC: [owner, tryGetAddressOf('FeePool')],
 		TempKovanOracle: [],
 		StakingStateUSDC: [owner, tryGetAddressOf('Issuer')],
 	};
@@ -787,11 +787,6 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
 		},
 		{
-			contract: 'FeePoolStateUSDC',
-			source: 'FeePoolState',
-			deps: ['FeePool'],
-		},
-		{
 			contract: 'TempKovanOracle',
 			source: 'TempExchangeRateStorageKovan',
 		},
@@ -961,6 +956,7 @@ const setupAllContracts = async ({
 				{ from: owner }
 			),
 			returnObj['SystemSettings'].setIssuanceRatio(ISSUANCE_RATIO, { from: owner }),
+			returnObj['SystemSettings'].setUSDCQuota(USDC_QUOTA, { from: owner }),
 			returnObj['SystemSettings'].setCrossDomainMessageGasLimit(0, CROSS_DOMAIN_DEPOSIT_GAS_LIMIT, {
 				from: owner,
 			}),
