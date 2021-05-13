@@ -2049,7 +2049,7 @@ const deploy = async ({
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
-			read: 'getUSDCQuota',
+			read: 'usdcQuota',
 			expected: input => input !== '0', // only change if zero
 			write: 'setUSDCQuota',
 			writeArg: await getDeployParameter('USDC_QUOTA'),
