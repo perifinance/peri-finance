@@ -1763,177 +1763,177 @@ const deploy = async ({
 
 	// now after resolvers have been set
 
-	// console.log(gray(`\n------ ADD PYNTHS TO ISSUER ------\n`));
+	console.log(gray(`\n------ ADD PYNTHS TO ISSUER ------\n`));
 
-	// // Set up the connection to the Issuer for each Pynth (requires FlexibleStorage to have been configured)
+	// Set up the connection to the Issuer for each Pynth (requires FlexibleStorage to have been configured)
 
-	// // First filter out all those pynths which are already properly imported
-	// console.log(gray('Filtering pynths to add to the issuer.'));
-	// const filteredPynths = [];
-	// for (const pynth of pynthsToAdd) {
-	// 	const issuerPynthAddress = await issuer.methods.pynths(pynth.currencyKeyInBytes).call();
-	// 	const currentPynthAddress = addressOf(pynth.pynth);
-	// 	if (issuerPynthAddress === currentPynthAddress) {
-	// 		console.log(gray(`${currentPynthAddress} requires no action`));
-	// 	} else {
-	// 		console.log(gray(`${currentPynthAddress} will be added to the issuer.`));
-	// 		filteredPynths.push(pynth);
-	// 	}
-	// }
+	// First filter out all those pynths which are already properly imported
+	console.log(gray('Filtering pynths to add to the issuer.'));
+	const filteredPynths = [];
+	for (const pynth of pynthsToAdd) {
+		const issuerPynthAddress = await issuer.methods.pynths(pynth.currencyKeyInBytes).call();
+		const currentPynthAddress = addressOf(pynth.pynth);
+		if (issuerPynthAddress === currentPynthAddress) {
+			console.log(gray(`${currentPynthAddress} requires no action`));
+		} else {
+			console.log(gray(`${currentPynthAddress} will be added to the issuer.`));
+			filteredPynths.push(pynth);
+		}
+	}
 
-	// const pynthChunkSize = 15;
-	// for (let i = 0; i < filteredPynths.length; i += pynthChunkSize) {
-	// 	const chunk = filteredPynths.slice(i, i + pynthChunkSize);
-	// 	await runStep({
-	// 		contract: 'Issuer',
-	// 		target: issuer,
-	// 		read: 'getPynths',
-	// 		readArg: [chunk.map(pynth => pynth.currencyKeyInBytes)],
-	// 		expected: input =>
-	// 			input.length === chunk.length &&
-	// 			input.every((cur, idx) => cur === addressOf(chunk[idx].pynth)),
-	// 		write: 'addPynths',
-	// 		writeArg: [chunk.map(pynth => addressOf(pynth.pynth))],
-	// 		gasLimit: 1e5 * pynthChunkSize,
-	// 	});
-	// }
+	const pynthChunkSize = 15;
+	for (let i = 0; i < filteredPynths.length; i += pynthChunkSize) {
+		const chunk = filteredPynths.slice(i, i + pynthChunkSize);
+		await runStep({
+			contract: 'Issuer',
+			target: issuer,
+			read: 'getPynths',
+			readArg: [chunk.map(pynth => pynth.currencyKeyInBytes)],
+			expected: input =>
+				input.length === chunk.length &&
+				input.every((cur, idx) => cur === addressOf(chunk[idx].pynth)),
+			write: 'addPynths',
+			writeArg: [chunk.map(pynth => addressOf(pynth.pynth))],
+			gasLimit: 1e5 * pynthChunkSize,
+		});
+	}
 
-	// console.log(gray(`\n------ CONFIGURE INVERSE PYNTHS ------\n`));
+	console.log(gray(`\n------ CONFIGURE INVERSE PYNTHS ------\n`));
 
-	// for (const { name: currencyKey, inverted } of pynths) {
-	// 	if (inverted) {
-	// 		const { entryPoint, upperLimit, lowerLimit } = inverted;
+	for (const { name: currencyKey, inverted } of pynths) {
+		if (inverted) {
+			const { entryPoint, upperLimit, lowerLimit } = inverted;
 
-	// 		// helper function
-	// 		const setInversePricing = ({ freezeAtUpperLimit, freezeAtLowerLimit }) =>
-	// 			runStep({
-	// 				contract: 'ExchangeRates',
-	// 				target: exchangeRates,
-	// 				write: 'setInversePricing',
-	// 				writeArg: [
-	// 					toBytes32(currencyKey),
-	// 					w3utils.toWei(entryPoint.toString()),
-	// 					w3utils.toWei(upperLimit.toString()),
-	// 					w3utils.toWei(lowerLimit.toString()),
-	// 					freezeAtUpperLimit,
-	// 					freezeAtLowerLimit,
-	// 				],
-	// 			});
+			// helper function
+			const setInversePricing = ({ freezeAtUpperLimit, freezeAtLowerLimit }) =>
+				runStep({
+					contract: 'ExchangeRates',
+					target: exchangeRates,
+					write: 'setInversePricing',
+					writeArg: [
+						toBytes32(currencyKey),
+						w3utils.toWei(entryPoint.toString()),
+						w3utils.toWei(upperLimit.toString()),
+						w3utils.toWei(lowerLimit.toString()),
+						freezeAtUpperLimit,
+						freezeAtLowerLimit,
+					],
+				});
 
-	// 		// when the oldExrates exists - meaning there is a valid ExchangeRates in the existing deployment.json
-	// 		// for this environment (true for all environments except the initial deploy in 'local' during those tests)
-	// 		if (oldExrates) {
-	// 			// get inverse pynth's params from the old exrates, if any exist
-	// 			const oldInversePricing = await oldExrates.methods
-	// 				.inversePricing(toBytes32(currencyKey))
-	// 				.call();
+			// when the oldExrates exists - meaning there is a valid ExchangeRates in the existing deployment.json
+			// for this environment (true for all environments except the initial deploy in 'local' during those tests)
+			if (oldExrates) {
+				// get inverse pynth's params from the old exrates, if any exist
+				const oldInversePricing = await oldExrates.methods
+					.inversePricing(toBytes32(currencyKey))
+					.call();
 
-	// 			const {
-	// 				entryPoint: oldEntryPoint,
-	// 				upperLimit: oldUpperLimit,
-	// 				lowerLimit: oldLowerLimit,
-	// 				frozenAtUpperLimit: currentRateIsFrozenUpper,
-	// 				frozenAtLowerLimit: currentRateIsFrozenLower,
-	// 			} = oldInversePricing;
+				const {
+					entryPoint: oldEntryPoint,
+					upperLimit: oldUpperLimit,
+					lowerLimit: oldLowerLimit,
+					frozenAtUpperLimit: currentRateIsFrozenUpper,
+					frozenAtLowerLimit: currentRateIsFrozenLower,
+				} = oldInversePricing;
 
-	// 			const currentRateIsFrozen = currentRateIsFrozenUpper || currentRateIsFrozenLower;
-	// 			// and the last rate if any exists
-	// 			const currentRateForCurrency = await oldExrates.methods
-	// 				.rateForCurrency(toBytes32(currencyKey))
-	// 				.call();
+				const currentRateIsFrozen = currentRateIsFrozenUpper || currentRateIsFrozenLower;
+				// and the last rate if any exists
+				const currentRateForCurrency = await oldExrates.methods
+					.rateForCurrency(toBytes32(currencyKey))
+					.call();
 
-	// 			// and total supply, if any
-	// 			const pynth = deployer.deployedContracts[`Pynth${currencyKey}`];
-	// 			const totalPynthSupply = await pynth.methods.totalSupply().call();
-	// 			console.log(gray(`totalSupply of ${currencyKey}: ${Number(totalPynthSupply)}`));
+				// and total supply, if any
+				const pynth = deployer.deployedContracts[`Pynth${currencyKey}`];
+				const totalPynthSupply = await pynth.methods.totalSupply().call();
+				console.log(gray(`totalSupply of ${currencyKey}: ${Number(totalPynthSupply)}`));
 
-	// 			const inversePricingOnCurrentExRates = await exchangeRates.methods
-	// 				.inversePricing(toBytes32(currencyKey))
-	// 				.call();
+				const inversePricingOnCurrentExRates = await exchangeRates.methods
+					.inversePricing(toBytes32(currencyKey))
+					.call();
 
-	// 			// ensure that if it's a newer exchange rates deployed, then skip reinserting the inverse pricing if
-	// 			// already done
-	// 			if (
-	// 				oldExrates.options.address !== exchangeRates.options.address &&
-	// 				JSON.stringify(inversePricingOnCurrentExRates) === JSON.stringify(oldInversePricing) &&
-	// 				+w3utils.fromWei(inversePricingOnCurrentExRates.entryPoint) === entryPoint &&
-	// 				+w3utils.fromWei(inversePricingOnCurrentExRates.upperLimit) === upperLimit &&
-	// 				+w3utils.fromWei(inversePricingOnCurrentExRates.lowerLimit) === lowerLimit
-	// 			) {
-	// 				console.log(
-	// 					gray(
-	// 						`Current ExchangeRates.inversePricing(${currencyKey}) is the same as the previous. Nothing to do.`
-	// 					)
-	// 				);
-	// 			}
-	// 			// When there's an inverted pynth with matching parameters
-	// 			else if (
-	// 				entryPoint === +w3utils.fromWei(oldEntryPoint) &&
-	// 				upperLimit === +w3utils.fromWei(oldUpperLimit) &&
-	// 				lowerLimit === +w3utils.fromWei(oldLowerLimit)
-	// 			) {
-	// 				if (oldExrates.options.address !== addressOf(exchangeRates)) {
-	// 					const freezeAtUpperLimit = +w3utils.fromWei(currentRateForCurrency) === upperLimit;
-	// 					const freezeAtLowerLimit = +w3utils.fromWei(currentRateForCurrency) === lowerLimit;
-	// 					console.log(
-	// 						gray(
-	// 							`Detected an existing inverted pynth for ${currencyKey} with identical parameters and a newer ExchangeRates. ` +
-	// 								`Persisting its frozen status (${currentRateIsFrozen}) and if frozen, then freeze rate at upper (${freezeAtUpperLimit}) or lower (${freezeAtLowerLimit}).`
-	// 						)
-	// 					);
+				// ensure that if it's a newer exchange rates deployed, then skip reinserting the inverse pricing if
+				// already done
+				if (
+					oldExrates.options.address !== exchangeRates.options.address &&
+					JSON.stringify(inversePricingOnCurrentExRates) === JSON.stringify(oldInversePricing) &&
+					+w3utils.fromWei(inversePricingOnCurrentExRates.entryPoint) === entryPoint &&
+					+w3utils.fromWei(inversePricingOnCurrentExRates.upperLimit) === upperLimit &&
+					+w3utils.fromWei(inversePricingOnCurrentExRates.lowerLimit) === lowerLimit
+				) {
+					console.log(
+						gray(
+							`Current ExchangeRates.inversePricing(${currencyKey}) is the same as the previous. Nothing to do.`
+						)
+					);
+				}
+				// When there's an inverted pynth with matching parameters
+				else if (
+					entryPoint === +w3utils.fromWei(oldEntryPoint) &&
+					upperLimit === +w3utils.fromWei(oldUpperLimit) &&
+					lowerLimit === +w3utils.fromWei(oldLowerLimit)
+				) {
+					if (oldExrates.options.address !== addressOf(exchangeRates)) {
+						const freezeAtUpperLimit = +w3utils.fromWei(currentRateForCurrency) === upperLimit;
+						const freezeAtLowerLimit = +w3utils.fromWei(currentRateForCurrency) === lowerLimit;
+						console.log(
+							gray(
+								`Detected an existing inverted pynth for ${currencyKey} with identical parameters and a newer ExchangeRates. ` +
+									`Persisting its frozen status (${currentRateIsFrozen}) and if frozen, then freeze rate at upper (${freezeAtUpperLimit}) or lower (${freezeAtLowerLimit}).`
+							)
+						);
 
-	// 					// then ensure it gets set to the same frozen status and frozen rate
-	// 					// as the old exchange rates
-	// 					await setInversePricing({
-	// 						freezeAtUpperLimit,
-	// 						freezeAtLowerLimit,
-	// 					});
-	// 				} else {
-	// 					console.log(
-	// 						gray(
-	// 							`Detected an existing inverted pynth for ${currencyKey} with identical parameters and no new ExchangeRates. Skipping check of frozen status.`
-	// 						)
-	// 					);
-	// 				}
-	// 			} else if (Number(currentRateForCurrency) === 0) {
-	// 				console.log(gray(`Detected a new inverted pynth for ${currencyKey}. Proceeding to add.`));
-	// 				// Then a new inverted pynth is being added (as there's no previous rate for it)
-	// 				await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-	// 			} else if (Number(totalPynthSupply) === 0) {
-	// 				console.log(
-	// 					gray(
-	// 						`Inverted pynth at ${currencyKey} has 0 total supply and its inverted parameters have changed. ` +
-	// 							`Proceeding to reconfigure its parameters as instructed, unfreezing it if currently frozen.`
-	// 					)
-	// 				);
-	// 				// Then a new inverted pynth is being added (as there's no existing supply)
-	// 				await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-	// 			} else if (network !== 'mainnet' && forceUpdateInversePynthsOnTestnet) {
-	// 				// as we are on testnet and the flag is enabled, allow a mutative pricing change
-	// 				console.log(
-	// 					redBright(
-	// 						`⚠⚠⚠ WARNING: The parameters for the inverted pynth ${currencyKey} ` +
-	// 							`have changed and it has non-zero totalSupply. This is allowed only on testnets`
-	// 					)
-	// 				);
-	// 				await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-	// 			} else {
-	// 				// Then an existing pynth's inverted parameters have changed.
-	// 				// For safety sake, let's inform the user and skip this step
-	// 				console.log(
-	// 					redBright(
-	// 						`⚠⚠⚠ WARNING: The parameters for the inverted pynth ${currencyKey} ` +
-	// 							`have changed and it has non-zero totalSupply. This use-case is not supported by the deploy script. ` +
-	// 							`This should be done as a purge() and setInversePricing() separately`
-	// 					)
-	// 				);
-	// 			}
-	// 		} else {
-	// 			// When no exrates, then totally fresh deploy (local deployment)
-	// 			await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-	// 		}
-	// 	}
-	// }
+						// then ensure it gets set to the same frozen status and frozen rate
+						// as the old exchange rates
+						await setInversePricing({
+							freezeAtUpperLimit,
+							freezeAtLowerLimit,
+						});
+					} else {
+						console.log(
+							gray(
+								`Detected an existing inverted pynth for ${currencyKey} with identical parameters and no new ExchangeRates. Skipping check of frozen status.`
+							)
+						);
+					}
+				} else if (Number(currentRateForCurrency) === 0) {
+					console.log(gray(`Detected a new inverted pynth for ${currencyKey}. Proceeding to add.`));
+					// Then a new inverted pynth is being added (as there's no previous rate for it)
+					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
+				} else if (Number(totalPynthSupply) === 0) {
+					console.log(
+						gray(
+							`Inverted pynth at ${currencyKey} has 0 total supply and its inverted parameters have changed. ` +
+								`Proceeding to reconfigure its parameters as instructed, unfreezing it if currently frozen.`
+						)
+					);
+					// Then a new inverted pynth is being added (as there's no existing supply)
+					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
+				} else if (network !== 'mainnet' && forceUpdateInversePynthsOnTestnet) {
+					// as we are on testnet and the flag is enabled, allow a mutative pricing change
+					console.log(
+						redBright(
+							`⚠⚠⚠ WARNING: The parameters for the inverted pynth ${currencyKey} ` +
+								`have changed and it has non-zero totalSupply. This is allowed only on testnets`
+						)
+					);
+					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
+				} else {
+					// Then an existing pynth's inverted parameters have changed.
+					// For safety sake, let's inform the user and skip this step
+					console.log(
+						redBright(
+							`⚠⚠⚠ WARNING: The parameters for the inverted pynth ${currencyKey} ` +
+								`have changed and it has non-zero totalSupply. This use-case is not supported by the deploy script. ` +
+								`This should be done as a purge() and setInversePricing() separately`
+						)
+					);
+				}
+			} else {
+				// When no exrates, then totally fresh deploy (local deployment)
+				await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
+			}
+		}
+	}
 
 	// then ensure the defaults of SystemSetting
 	// are set (requires FlexibleStorage to have been correctly configured)
@@ -1951,20 +1951,20 @@ const deploy = async ({
 
 		// override individual currencyKey / pynths exchange rates
 		const pynthExchangeRateOverride = {
-			// pETH: w3utils.toWei('0.0025'),
-			// iETH: w3utils.toWei('0.004'),
-			// pBTC: w3utils.toWei('0.003'),
-			// iBTC: w3utils.toWei('0.003'),
-			// iBNB: w3utils.toWei('0.021'),
-			// pXTZ: w3utils.toWei('0.0085'),
-			// iXTZ: w3utils.toWei('0.0085'),
-			// pEOS: w3utils.toWei('0.0085'),
-			// iEOS: w3utils.toWei('0.009'),
-			// pETC: w3utils.toWei('0.0085'),
-			// pLINK: w3utils.toWei('0.0085'),
-			// pDASH: w3utils.toWei('0.009'),
-			// iDASH: w3utils.toWei('0.009'),
-			// pXRP: w3utils.toWei('0.009'),
+			pETH: w3utils.toWei('0.0025'),
+			iETH: w3utils.toWei('0.004'),
+			pBTC: w3utils.toWei('0.003'),
+			iBTC: w3utils.toWei('0.003'),
+			iBNB: w3utils.toWei('0.021'),
+			pXTZ: w3utils.toWei('0.0085'),
+			iXTZ: w3utils.toWei('0.0085'),
+			pEOS: w3utils.toWei('0.0085'),
+			iEOS: w3utils.toWei('0.009'),
+			pETC: w3utils.toWei('0.0085'),
+			pLINK: w3utils.toWei('0.0085'),
+			pDASH: w3utils.toWei('0.009'),
+			iDASH: w3utils.toWei('0.009'),
+			pXRP: w3utils.toWei('0.009'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -1985,27 +1985,27 @@ const deploy = async ({
 		console.log(gray(`Found ${pynthsRatesToUpdate.length} pynths needs exchange rate pricing`));
 
 		if (pynthsRatesToUpdate.length) {
-			// console.log(
-			// 	gray(
-			// 		'Setting the following:',
-			// 		pynthsRatesToUpdate
-			// 			.map(
-			// 				({ name, targetRate, currentRate }) =>
-			// 					`\t${name} from ${currentRate * 100}% to ${w3utils.fromWei(targetRate) * 100}%`
-			// 			)
-			// 			.join('\n')
-			// 	)
-			// );
-			// await runStep({
-			// 	gasLimit: Math.max(methodCallGasLimit, 150e3 * pynthsRatesToUpdate.length), // higher gas required, 150k per pynth is sufficient (in OVM)
-			// 	contract: 'SystemSettings',
-			// 	target: systemSettings,
-			// 	write: 'setExchangeFeeRateForPynths',
-			// 	writeArg: [
-			// 		pynthsRatesToUpdate.map(({ name }) => toBytes32(name)),
-			// 		pynthsRatesToUpdate.map(({ targetRate }) => targetRate),
-			// 	],
-			// });
+			console.log(
+				gray(
+					'Setting the following:',
+					pynthsRatesToUpdate
+						.map(
+							({ name, targetRate, currentRate }) =>
+								`\t${name} from ${currentRate * 100}% to ${w3utils.fromWei(targetRate) * 100}%`
+						)
+						.join('\n')
+				)
+			);
+			await runStep({
+				gasLimit: Math.max(methodCallGasLimit, 150e3 * pynthsRatesToUpdate.length), // higher gas required, 150k per pynth is sufficient (in OVM)
+				contract: 'SystemSettings',
+				target: systemSettings,
+				write: 'setExchangeFeeRateForPynths',
+				writeArg: [
+					pynthsRatesToUpdate.map(({ name }) => toBytes32(name)),
+					pynthsRatesToUpdate.map(({ targetRate }) => targetRate),
+				],
+			});
 		}
 
 		// setup initial values if they are unset

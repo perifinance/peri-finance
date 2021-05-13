@@ -146,6 +146,24 @@
 	"TokenStatepUSD": {
 		"deploy": false
 	},
+	"TokenStateiBTC": {
+		"deploy": false
+	},
+	"ProxyiBTC": {
+		"deploy": false
+	},
+	"PynthiBTC": {
+		"deploy": false
+	},
+	"TokenStateiETH": {
+		"deploy": false
+	},
+	"ProxyiETH": {
+		"deploy": false
+	},
+	"PynthiETH": {
+		"deploy": false
+	},
 	"TradingRewards": {
 		"deploy": false
 	},
