@@ -721,8 +721,20 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         );
     }
 
+    function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
+    external
+    onlyPeriFinance {
+        _unstakeAndRefundUSDC(_account, _usdcUnstakeAmount);
+    }
+
+    function unstakeToTargetAndRefundUSDC(address _account)
+    external
+    onlyPeriFinance {
+        _unstakeUSDCToTargetQuota(_account);
+    }
+
     function burnPynths(address from, uint amount) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, amount, false);
+        _voluntaryBurnPynths(from, amount, false, false);
     }
 
     function burnPynthsOnBehalf(
@@ -731,18 +743,29 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint amount
     ) external onlyPeriFinance {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, amount, false);
+        _voluntaryBurnPynths(burnForAddress, amount, false, false);
     }
 
     function burnPynthsToTarget(address from) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, 0, true);
+        _voluntaryBurnPynths(from, 0, true, false);
     }
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external onlyPeriFinance {
         _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, 0, true);
+        _voluntaryBurnPynths(burnForAddress, 0, true, false);
     }
 
+    function burnPynthsAndUnstakeUSDCToTarget(address from, uint burnAmount)
+    external
+    onlyPeriFinance {
+        _voluntaryBurnPynths(from, burnAmount, false, true);
+    }
+
+    function burnPynthsToTargetAndUnstakeUSDCToTarget(address from)
+    external
+    onlyPeriFinance {
+        _voluntaryBurnPynths(from, 0, true, true);
+    }
 
     function liquidateDelinquentAccount(
         address account,
@@ -792,7 +815,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         // burn pUSD from messageSender (liquidator) and reduce account's debt
-        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);
+        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued, true);
 
         // Remove liquidation flag if amount liquidated fixes ratio
         if (amountToLiquidate == amountToFixRatio) {
@@ -883,12 +906,33 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             "refunding USDC has been failed");
     }
 
+
+    function _unstakeUSDCToTargetQuota(address _account)
+    internal {
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+
+        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
+
+        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
+        
+        if(maxUSDCQuotaAmount >= usdcStakedAmountToUSD) {
+            return ;
+        } else {
+            _unstakeAndRefundUSDC(_account, usdcStakedAmountToUSD.sub(maxUSDCQuotaAmount));
+        }
+    }
+
     function _burnPynths(
         address debtAccount,
         address burnAccount,
         uint amount,
         uint existingDebt,
-        uint totalDebtIssued
+        uint totalDebtIssued,
+        bool unstakeUSDCToTargetQuota
     ) internal returns (uint amountBurnt) {
         // liquidation requires pUSD to be already settled / not in waiting period
 
@@ -907,6 +951,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
         _appendAccountIssuanceRecord(debtAccount);
+
+        if(unstakeUSDCToTargetQuota) {
+            _unstakeUSDCToTargetQuota(debtAccount);
+        }
     }
 
     // If burning to target, `amount` is ignored, and the correct quantity of pUSD is burnt to reach the target
@@ -915,7 +963,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _voluntaryBurnPynths(
         address from,
         uint amount,
-        bool burnToTarget
+        bool burnToTarget,
+        bool unstakeUSDCToTargetQuota
     ) internal {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
@@ -936,7 +985,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             amount = existingDebt.sub(maxIssuablePynthsForAccount);
         }
 
-        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+        uint amountBurnt = _burnPynths(
+            from, 
+            from, 
+            amount, 
+            existingDebt, 
+            totalSystemValue,
+            unstakeUSDCToTargetQuota
+        );
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations

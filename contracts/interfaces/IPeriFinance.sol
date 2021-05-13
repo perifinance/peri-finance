@@ -121,6 +121,18 @@ interface IPeriFinance {
     function stakeMaxUSDCAndIssueMaxPynths()
     external;
 
+    function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
+    external;
+
+    function unstakeToTargetAndRefundUSDC()
+    external;
+
+    function burnPynthsAndUnstakeUSDCToTarget(uint _burnAmount)
+    external;
+
+    function burnPynthsToTargetAndUnstakeUSDCToTarget()
+    external;
+
     function mint() external returns (bool);
 
     function settle(bytes32 currencyKey)
