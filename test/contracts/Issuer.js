@@ -290,8 +290,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await usdc.approve(issuer.address, '1000000', { from: owner });
 
 					// transfer some usdc to account1
-					await usdc.transfer(account1, '1000000');
-					await usdc.approve(issuer.address, '1000000', { from: account1 });
+					await usdc.transfer(account1, '10000000000');
+					await usdc.approve(issuer.address, '1000000000000000', { from: account1 });
 
 					// issue pynths
 					await periFinance.issuePynths(toUnit('10'), { from: account1 });
@@ -331,7 +331,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
-				it.only('should stake MAX USDC And Issue Pynths and store issue timestamp after now', async () => {
+				it('should stake MAX USDC And Issue Pynths and store issue timestamp after now', async () => {
 					// issue pynths
 					await periFinance.stakeMaxUSDCAndIssuePynths(toUnit('1'), {
 						from: account1,
@@ -342,7 +342,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.ok(issueTimestamp.gte(now));
 				});
 
-				it.only('should stake MAX USDC And Issue MAX Pynths and store issue timestamp after now', async () => {
+				it('should stake MAX USDC And Issue MAX Pynths and store issue timestamp after now', async () => {
 					// issue pynths
 					await periFinance.stakeMaxUSDCAndIssueMaxPynths({
 						from: account1,
