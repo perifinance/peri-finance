@@ -517,8 +517,21 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // 100 PERI to be locked in their wallet to maintain their collateralisation ratio
         // The locked periFinance value can exceed their balance.
         uint debtBalance;
-        (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
-        uint lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+        bool rateIsInvalid;
+        (debtBalance, , rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(account), usdcRate);
+        uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+
+        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
+
+        uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
+
+        uint lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+
+        anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
         if (lockedPeriFinanceValue >= balance) {
