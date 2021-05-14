@@ -887,7 +887,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             stakeAmount = _usdcStakeAmount;
         }
 
-        require(usdc().transferFrom(_issuer, address(this), stakeAmount),
+        require(usdc().transferFrom(_issuer, address(stakingStateUSDC()), stakeAmount),
             "transferring USDC has been failed");
 
         if(_issueMax || _issueAmount > 0) {
@@ -902,7 +902,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     internal {
         stakingStateUSDC().unstake(_account, _amount);
 
-        require(usdc().transfer(_account, _amount),
+        require(stakingStateUSDC().refund(_account, _amount),
             "refunding USDC has been failed");
     }
 

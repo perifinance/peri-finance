@@ -3,11 +3,14 @@ pragma solidity ^0.5.16;
 import "./SafeDecimalMath.sol";
 import "./State.sol";
 import "./Owned.sol";
+import "./interfaces/IERC20.sol";
 
 contract StakingStateUSDC is Owned, State {
 
   using SafeMath for uint;
   using SafeDecimalMath for uint;
+
+  address private USDC_ADDRESS;
 
   mapping(address => uint) public stakedAmountOf;
 
@@ -17,12 +20,26 @@ contract StakingStateUSDC is Owned, State {
 
   event Staking(address indexed account, uint amount, uint percentage);
 
-  event Unstaking(address indexed account, uint amount, uint percentage);  
+  event Unstaking(address indexed account, uint amount, uint percentage);
 
-  constructor(address _owner, address _associatedContract) 
+  constructor(
+    address _owner, 
+    address _associatedContract,
+    address _usdcAddress
+  )
   Owned(_owner) 
   State(_associatedContract) 
   public {
+    USDC_ADDRESS = _usdcAddress;
+  }
+
+  function setUSDCAddress(address _usdcAddress)
+  external
+  onlyOwner {
+    require(_usdcAddress != address(0),
+      "Address should not be empty");
+    
+    USDC_ADDRESS = _usdcAddress;
   }
 
   function stake(address _account, uint _amount)
@@ -56,6 +73,12 @@ contract StakingStateUSDC is Owned, State {
     emit Unstaking(_account, _amount, userStakingShare(_account));
   }
 
+  function refund(address _account, uint _amount)
+  external
+  onlyAssociatedAcontract {
+    usdc().transfer(_account, _amount);
+  }
+
   function userStakingShare(address _account)
   public view 
   returns(uint) {
@@ -75,6 +98,21 @@ contract StakingStateUSDC is Owned, State {
   external view
   returns(bool) {
     return stakedAmountOf[_account] > 0;
+  }
+
+  function usdc()
+  internal view 
+  returns(IERC20) {
+    require(USDC_ADDRESS != address(0),
+      "USDC address is empty");
+    
+    return IERC20(USDC_ADDRESS);
+  }
+
+  function usdcAddress()
+  internal view
+  returns(address) {
+    return USDC_ADDRESS;
   }
   
   function _incrementTotalStaker()
