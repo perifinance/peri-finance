@@ -13,5 +13,6 @@
 	"PeriFinanceEscrow",
 	"PeriFinanceState",
 	"TokenState",
-	"ReadProxyAddressResolver"
+	"ReadProxyAddressResolver",
+	"StakingStateUSDC"
 ]

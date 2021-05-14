@@ -1159,24 +1159,26 @@ const deploy = async ({
 		}
 	}
 
+	let USDC;
 	if (network !== 'mainnet') {
-		console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
-
-		await deployer.deployContract({
-			name: `StakingStateUSDC`,
-			source: 'StakingStateUSDC',
-			args: [account, issuerAddress],
-			force: addNewPynths,
-		});
-
 		console.log(gray(`\n------ DEPLOY MockTokens ------\n`));
 
-		await deployer.deployContract({
+		USDC = await deployer.deployContract({
 			name: 'USDC',
 			source: 'MockToken',
 			args: ['USDC', 'USDC', 6],
 		});
+		console.dir(deployer);
 	}
+
+	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
+
+	await deployer.deployContract({
+		name: `StakingStateUSDC`,
+		source: 'StakingStateUSDC',
+		args: [account, issuerAddress, network !== 'mainnet' ? addressOf(USDC) : ZERO_ADDRESS],
+		force: addNewPynths,
+	});
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
