@@ -401,7 +401,7 @@
 	"USDC": {
 		"deploy": true
 	},
-	"TempKovanOracle": {
+	"TempExchangeRateStorageKovan": {
 		"deploy": true
 	}
 }

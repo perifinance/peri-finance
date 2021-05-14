@@ -694,25 +694,6 @@ const deploy = async ({
 		});
 	}
 
-	const feePoolStateUsdc = await deployer.deployContract({
-		name: 'FeePoolStateUsdc',
-		source: 'FeePoolState',
-		deps: ['FeePool'],
-		args: [account, addressOf(feePool)],
-	});
-
-	if (feePool && feePoolStateUsdc) {
-		// Rewire feePoolState if there is a feePool upgrade
-		await runStep({
-			contract: 'FeePoolStateUsdc',
-			target: feePoolStateUsdc,
-			read: 'feePool',
-			expected: input => input === addressOf(feePool),
-			write: 'setFeePool',
-			writeArg: addressOf(feePool),
-		});
-	}
-
 	const rewardsDistribution = await deployer.deployContract({
 		name: 'RewardsDistribution',
 		deps: useOvm ? ['RewardEscrowV2', 'ProxyFeePool'] : ['RewardEscrowV2', 'ProxyFeePool'],
@@ -1161,14 +1142,13 @@ const deploy = async ({
 
 	let USDC;
 	if (network !== 'mainnet') {
-		console.log(gray(`\n------ DEPLOY MockTokens ------\n`));
+		console.log(gray(`\n------ DEPLOY USDC MockToken ------\n`));
 
 		USDC = await deployer.deployContract({
 			name: 'USDC',
 			source: 'MockToken',
 			args: ['USDC', 'USDC', 6],
 		});
-		console.dir(deployer);
 	}
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
@@ -1179,6 +1159,30 @@ const deploy = async ({
 		args: [account, issuerAddress, network !== 'mainnet' ? addressOf(USDC) : ZERO_ADDRESS],
 		force: addNewPynths,
 	});
+
+	if (network !== 'mainnet') {
+		console.log(gray(`\n------ DEPLOY TempExchangeRateStorageKovan ------\n`));
+
+		const tempExchangeRateStorageKovan = await deployer.deployContract({
+			name: 'TempExchangeRateStorageKovan',
+			source: 'TempExchangeRateStorageKovan',
+			args: [account],
+		});
+
+		await runStep({
+			contract: `TempExchangeRateStorageKovan`,
+			target: tempExchangeRateStorageKovan,
+			write: 'setRate',
+			writeArg: [toBytes32('PERI'), w3utils.toBN('19940000000000000000')],
+		});
+
+		await runStep({
+			contract: `TempExchangeRateStorageKovan`,
+			target: tempExchangeRateStorageKovan,
+			write: 'setRate',
+			writeArg: [toBytes32('USDC'), w3utils.toBN('980000000000000000')],
+		});
+	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 

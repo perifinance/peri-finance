@@ -178,5 +178,8 @@
 	},
 	"USDC": {
 		"deploy": false
+	},
+	"TempExchangeRateStorageKovan": {
+		"deploy": true
 	}
 }
