@@ -896,11 +896,19 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool _stakeMax,
         bool _issueMax
     ) internal {
-        uint availableUSDCAmountToStake = _availableUSDCStakeAmount(_issuer);
+        (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
-        require(availableUSDCAmountToStake > 0,
+        uint afterDebtBalance = debtBalance.add(_issueAmount);
+
+        (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
+        uint _maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtBalance, usdcRate).multiplyDecimalRound(getUSDCQuota());
+        uint maxUSDCQuotaAfterIssue = _maxUSDCQuotaAfterIssue.divideDecimalRound(getIssuanceRatio());
+        uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
+
+        require(maxUSDCQuotaAfterIssue > userStakedAmount,
             "no available USDC stake amount");
 
+        uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
         uint stakeAmount;
         if(_stakeMax || availableUSDCAmountToStake <= _usdcStakeAmount) {
             stakeAmount = availableUSDCAmountToStake;
