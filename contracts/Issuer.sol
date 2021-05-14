@@ -517,8 +517,29 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // 100 PERI to be locked in their wallet to maintain their collateralisation ratio
         // The locked periFinance value can exceed their balance.
         uint debtBalance;
-        (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
-        uint lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+        bool rateIsInvalid;
+        (debtBalance, , rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
+
+        uint lockedPeriFinanceValue;
+
+        if(stakingStateUSDC().hasStaked(account)) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+            uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(account), usdcRate);
+            uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+
+            (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+            uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
+
+            uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
+
+            lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+
+            anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
+        } else {
+            lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+    
+            anyRateIsInvalid = rateIsInvalid;
+        }
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
         if (lockedPeriFinanceValue >= balance) {
@@ -887,7 +908,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             stakeAmount = _usdcStakeAmount;
         }
 
-        require(usdc().transferFrom(_issuer, address(this), stakeAmount),
+        require(usdc().transferFrom(_issuer, address(stakingStateUSDC()), stakeAmount),
             "transferring USDC has been failed");
 
         if(_issueMax || _issueAmount > 0) {
@@ -902,7 +923,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     internal {
         stakingStateUSDC().unstake(_account, _amount);
 
-        require(usdc().transfer(_account, _amount),
+        require(stakingStateUSDC().refund(_account, _amount),
             "refunding USDC has been failed");
     }
 
