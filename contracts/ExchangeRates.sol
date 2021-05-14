@@ -598,45 +598,45 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
+        // AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
-        if (aggregator != AggregatorV2V3Interface(0)) {
-            // this view from the aggregator is the most gas efficient but it can throw when there's no data,
-            // so let's call it low-level to suppress any reverts
-            bytes memory payload = abi.encodeWithSignature("latestRoundData()");
-            // solhint-disable avoid-low-level-calls
-            (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
+        // if (aggregator != AggregatorV2V3Interface(0)) {
+        //     // this view from the aggregator is the most gas efficient but it can throw when there's no data,
+        //     // so let's call it low-level to suppress any reverts
+        //     bytes memory payload = abi.encodeWithSignature("latestRoundData()");
+        //     // solhint-disable avoid-low-level-calls
+        //     (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
-            if (success) {
-                (uint80 roundId, int256 answer, , uint256 updatedAt, ) = abi.decode(
-                    returnData,
-                    (uint80, int256, uint256, uint256, uint80)
-                );
-                return
-                    RateAndUpdatedTime({
-                        rate: uint216(_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId)),
-                        time: uint40(updatedAt)
-                    });
-            }
-        } else {
-            uint roundId = currentRoundForRate[currencyKey];
-            RateAndUpdatedTime memory entry = _rates[currencyKey][roundId];
+        //     if (success) {
+        //         (uint80 roundId, int256 answer, , uint256 updatedAt, ) = abi.decode(
+        //             returnData,
+        //             (uint80, int256, uint256, uint256, uint80)
+        //         );
+        //         return
+        //             RateAndUpdatedTime({
+        //                 rate: uint216(_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId)),
+        //                 time: uint40(updatedAt)
+        //             });
+        //     }
+        // } else {
+        //     uint roundId = currentRoundForRate[currencyKey];
+        //     RateAndUpdatedTime memory entry = _rates[currencyKey][roundId];
 
-            return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
-        }
+        //     return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
+        // }
 
 
         // Test Purpose...
         ///////////////////
-        // if (oracle_kovan == address(0)) {
-        //     return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
-        // }
+        if (oracle_kovan == address(0)) {
+            return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
+        }
 
-        // TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
+        TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
 
-        // (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
+        (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
 
-        // return RateAndUpdatedTime({rate: _rate, time: _time});
+        return RateAndUpdatedTime({rate: _rate, time: _time});
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
