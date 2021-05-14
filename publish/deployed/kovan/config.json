@@ -180,6 +180,6 @@
 		"deploy": false
 	},
 	"TempExchangeRateStorageKovan": {
-		"deploy": true
+		"deploy": false
 	}
 }
