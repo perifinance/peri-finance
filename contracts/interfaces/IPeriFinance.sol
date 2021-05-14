@@ -55,6 +55,22 @@ interface IPeriFinance {
     external view
     returns(uint);
 
+    function usdcStakedAmountOf(address _account)
+    external view
+    returns(uint);
+
+    function usdcTotalStakedAmount()
+    external view
+    returns(uint);
+
+    function userUSDCStakingShare(address _account)
+    external view
+    returns(uint);
+
+    function totalUSDCStakerCount()
+    external view
+    returns(uint);
+
     // Mutative Functions
     function burnPynths(uint amount) external;
 
