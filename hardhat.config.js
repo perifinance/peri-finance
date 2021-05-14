@@ -50,8 +50,8 @@ module.exports = {
 	networks: {
 		mainnet: {
 			chainId: 1,
-			url: `${PROVIDER_URL_MAINNET}`,
-			accounts: [`0x${DEPLOY_PRIVATE_KEY}`],
+			url: PROVIDER_URL_MAINNET,
+			accounts: [DEPLOY_PRIVATE_KEY],
 		},
 		hardhat: {
 			chainId: 1337,
