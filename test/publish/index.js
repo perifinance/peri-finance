@@ -33,7 +33,7 @@ const {
 		STAKING_REWARDS_FILENAME,
 		CONFIG_FILENAME,
 		DEPLOYMENT_FILENAME,
-		pynths_FILENAME,
+		PYNTHS_FILENAME,
 		FEEDS_FILENAME,
 	},
 	defaults: {
@@ -78,7 +78,7 @@ describe('publish scripts', () => {
 	// track these files to revert them later on
 	const rewardsJSONPath = path.join(deploymentPath, STAKING_REWARDS_FILENAME);
 	const rewardsJSON = fs.readFileSync(rewardsJSONPath);
-	const pynthsJSONPath = path.join(deploymentPath, pynths_FILENAME);
+	const pynthsJSONPath = path.join(deploymentPath, PYNTHS_FILENAME);
 	const pynthsJSON = fs.readFileSync(pynthsJSONPath);
 	const configJSONPath = path.join(deploymentPath, CONFIG_FILENAME);
 	const configJSON = fs.readFileSync(configJSONPath);
