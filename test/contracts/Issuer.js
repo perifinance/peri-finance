@@ -2304,7 +2304,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await debtCache.takeDebtSnapshot();
 
 					const debtBalanceOf = await periFinance.debtBalanceOf(account1, pUSD);
-					console.log(debtBalanceOf.toString());
 
 					const ratio = await periFinance.collateralisationRatio(account1, { from: account2 });
 					assert.unitEqual(ratio, '0.1');
@@ -2366,6 +2365,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Issue
 					const maxIssuable = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issuePynths(maxIssuable, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 
 					// Compare
 					const collaterisationRatio = await periFinance.collateralisationRatio(account1);
@@ -2407,11 +2407,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					collateral = await periFinance.collateral(account1, { from: account1 });
 					assert.bnEqual(collateral, escrowedAmount);
 
-					// Issue max pynths. (300 pUSD)
+					// Issue max pynths. (600 pUSD)
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 
-					// There should be 300 pUSD of value for account1
-					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('300'));
+					// There should be 600 pUSD of value for account1
+					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('600'));
 				});
 
 				it('should permit user to issue pUSD debt with only reward escrow as collateral (no PERI in wallet)', async () => {
@@ -2436,11 +2437,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					collateral = await periFinance.collateral(account1, { from: account1 });
 					assert.bnEqual(collateral, escrowedAmount);
 
-					// Issue max pynths. (300 pUSD)
+					// Issue max pynths. (600 pUSD)
 					await periFinance.issueMaxPynths({ from: account1 });
+					await debtCache.takeDebtSnapshot();
 
-					// There should be 300 pUSD of value for account1
-					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('300'));
+					// There should be 600 pUSD of value for account1
+					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('600'));
 				});
 
 				it("should permit anyone checking another user's collateral", async () => {
@@ -2497,6 +2499,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const maxIssuable = await periFinance.maxIssuablePynths(account1);
 					const issued = maxIssuable.div(web3.utils.toBN(3));
 					await periFinance.issuePynths(issued, { from: account1 });
+					await debtCache.takeDebtSnapshot();
 					const expectedRemaining = maxIssuable.sub(issued);
 					const remaining = await getRemainingIssuablePynths(account1);
 					assert.bnEqual(expectedRemaining, remaining);
@@ -2591,6 +2594,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						beforeEach(async () => {
 							// ensure user has pynths to burn
 							await periFinance.issuePynths(toUnit('1000'), { from: authoriser });
+							await debtCache.takeDebtSnapshot();
 							await delegateApprovals.approveIssueOnBehalf(delegate, { from: authoriser });
 							await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
 							await setStatus({ owner, systemStatus, section, suspend: true });
@@ -2678,6 +2682,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				it('should approveBurnOnBehalf and BurnPynths', async () => {
 					await periFinance.issueMaxPynths({ from: authoriser });
 					await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
+					await debtCache.takeDebtSnapshot();
 
 					const pUSDBalanceBefore = await pUSDContract.balanceOf(account1);
 					await periFinance.burnPynthsOnBehalf(authoriser, pUSDBalanceBefore, { from: delegate });
