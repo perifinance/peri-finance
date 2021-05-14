@@ -240,7 +240,7 @@ const setupContract = async ({
 			0,
 		],
 		TempKovanOracle: [],
-		StakingStateUSDC: [owner, tryGetAddressOf('Issuer')],
+		StakingStateUSDC: [owner, tryGetAddressOf('Issuer'), tryGetAddressOf('USDC')],
 	};
 
 	let instance;
