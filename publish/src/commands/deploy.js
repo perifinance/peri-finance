@@ -1153,10 +1153,11 @@ const deploy = async ({
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
+	const usdcAddress = network !== 'mainnet' ? addressOf(USDC) : ZERO_ADDRESS;
 	await deployer.deployContract({
 		name: `StakingStateUSDC`,
 		source: 'StakingStateUSDC',
-		args: [account, issuerAddress, network !== 'mainnet' ? addressOf(USDC) : ZERO_ADDRESS],
+		args: [account, issuerAddress, usdcAddress],
 		force: addNewPynths,
 	});
 
