@@ -520,18 +520,26 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool rateIsInvalid;
         (debtBalance, , rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
 
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(account), usdcRate);
-        uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+        uint lockedPeriFinanceValue;
 
-        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
+        if(stakingStateUSDC().hasStaked(account)) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+            uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(account), usdcRate);
+            uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
 
-        uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
+            (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+            uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
 
-        uint lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+            uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
 
-        anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
+            lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+
+            anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
+        } else {
+            lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
+    
+            anyRateIsInvalid = rateIsInvalid;
+        }
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
         if (lockedPeriFinanceValue >= balance) {
