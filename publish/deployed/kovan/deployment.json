@@ -146,10 +146,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0x9d0d029B6EfbC878C2f4ca0354582F3B643B59e7",
+			"address": "0xD7f41E6622f9CB3B6A96b6484358ABeD0492B7F6",
 			"source": "PeriFinance",
-			"link": "https://kovan.etherscan.io/address/0x9d0d029B6EfbC878C2f4ca0354582F3B643B59e7",
-			"timestamp": "2021-05-14T11:24:45.205Z",
+			"link": "https://kovan.etherscan.io/address/0xD7f41E6622f9CB3B6A96b6484358ABeD0492B7F6",
+			"timestamp": "2021-05-14T13:00:45.968Z",
 			"txn": "",
 			"network": "kovan"
 		},
