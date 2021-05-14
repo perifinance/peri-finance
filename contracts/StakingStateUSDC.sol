@@ -75,8 +75,9 @@ contract StakingStateUSDC is Owned, State {
 
   function refund(address _account, uint _amount)
   external
-  onlyAssociatedAcontract {
-    usdc().transfer(_account, _amount);
+  onlyAssociatedContract 
+  returns(bool) {
+    return usdc().transfer(_account, _amount);
   }
 
   function userStakingShare(address _account)
@@ -89,7 +90,7 @@ contract StakingStateUSDC is Owned, State {
   }
 
   function decimals()
-  external view
+  external pure
   returns(uint8) {
     return 6;
   }

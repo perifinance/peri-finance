@@ -9,6 +9,10 @@ interface IStakingStateUSDC {
   function unstake(address _account, uint _amount)
   external;
 
+  function refund(address _account, uint _amount)
+  external
+  returns(bool);
+
   // Admin
   function setUSDCAddress(address _usdcAddress)
   external;
