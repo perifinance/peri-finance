@@ -25,6 +25,7 @@ const {
 	constants: { ZERO_ADDRESS },
 	defaults: { ISSUANCE_RATIO, MINIMUM_STAKE_TIME },
 } = require('../..');
+const { ContractFunctionVisibility } = require('hardhat/internal/hardhat-network/stack-traces/model');
 
 contract('Issuer (via PeriFinance)', async accounts => {
 	const WEEK = 604800;
@@ -1238,12 +1239,24 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 				});
 
-				it('should allow an issuer to issue max pynths via the standard issue call', async () => {
+				beforeEach(async () => {
+					// Setting USD/PERI exchange rate to 10
+					// await tempKovanOracle.setRate(PERI, toUnit('10'));
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates(
+						[PERI], 
+						[toUnit("10")], 
+						timestamp,
+						{ from: oracle }
+					);
+
 					// Give some PERI to account1
 					await periFinance.transfer(account1, toUnit('10000'), {
 						from: owner,
-					});
+					});					
+				});
 
+				it.only('should allow an issuer to issue max pynths via the standard issue call', async () => {
 					// Determine maximum amount that can be issued.
 					const maxIssuable = await periFinance.maxIssuablePynths(account1);
 
@@ -1251,22 +1264,25 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await periFinance.issuePynths(maxIssuable, { from: account1 });
 					await debtCache.takeDebtSnapshot();
 
-					// There should be 200 pUSD of value in the system
-					assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('400'));
+					// There should be 20000 pUSD of value in the system
+					// USD/PERI = 10, PERI Balance = 10^4, IssuanceRatio = 0.2
+					// MaxIssuable = 20000 = 10^4 * 10 * 0.2
+					assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('20000'));
 
 					// And account1 should own all of it.
-					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('400'));
+					assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('20000'));
+
+					const remainingIssuableResult_after = await periFinance.remainingIssuablePynths(account1);
+
+					assert.bnEqual(remainingIssuableResult_after.maxIssuable, toUnit("0"));
+					assert.bnEqual(remainingIssuableResult_after.alreadyIssued, toUnit("20000"));
+					assert.bnEqual(remainingIssuableResult_after.totalSystemDebt, toUnit("20000"));
 				});
 
-				it('should disallow an issuer from issuing pynths beyond their remainingIssuablePynths', async () => {
-					// Give some PERI to account1
-					await periFinance.transfer(account1, toUnit('10000'), {
-						from: owner,
-					});
-
+				it.only('should disallow an issuer from issuing pynths beyond their remainingIssuablePynths', async () => {
 					// They should now be able to issue pUSD
 					const issuablePynths = await getRemainingIssuablePynths(account1);
-					assert.bnEqual(issuablePynths, toUnit('400'));
+					assert.bnEqual(issuablePynths, toUnit('20000'));
 
 					// Issue that amount.
 					await periFinance.issuePynths(issuablePynths, { from: account1 });
@@ -1277,6 +1293,154 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					// And trying to issue the smallest possible unit of one should fail.
 					await assert.revert(periFinance.issuePynths('1', { from: account1 }), 'Amount too large');
+				});
+			});
+
+			describe('issuance USDC staking', () => {
+				beforeEach(async () => {
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates(
+						[PERI, USDC], 
+						[toUnit("10"), toUnit("0.9")], 
+						timestamp,
+						{ from: oracle }
+					);
+
+					await periFinance.transfer(account1, toUnit('10000'), { from: owner });
+					await usdc.transfer(account1, '100000'+'0'.repeat(6), { from: accounts[0] });
+					await usdc.approve(issuer.address, '100000'+'0'.repeat(6), { from: account1 });
+				});
+
+				it.only("should initiate properly", async () => {
+					const usdcBalance = await usdc.balanceOf(account1);
+					const usdcAllowance = await usdc.allowance(account1, issuer.address);
+					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
+
+					assert.equal(usdcBalance.toString(), '100000'+'0'.repeat(6));
+					assert.equal(usdcAllowance.toString(), '100000'+'0'.repeat(6));
+					assert.equal(usdcExRate.toString(), "9"+"0".repeat(17));
+				});
+
+				it.only("should NOT stake if there is no debt (no locked Peri)", async () => {
+					const remainingIssuableResult = await periFinance.remainingIssuablePynths(account1);
+					const canStakeUSDC = await periFinance.canStakeUSDC(account1);
+					const availableUSDCStakeAmount = await periFinance.availableUSDCStakeAmount(account1);
+
+					assert.bnEqual(remainingIssuableResult.maxIssuable, toUnit("20000"));
+					assert.bnEqual(remainingIssuableResult.alreadyIssued, toUnit("0"));
+					assert.bnEqual(remainingIssuableResult.totalSystemDebt, toUnit("0"));
+					assert.equal(canStakeUSDC, false);
+					assert.bnEqual(availableUSDCStakeAmount , "0");
+
+					await assert.revert(
+						periFinance.stakeUSDCAndIssuePynths("100000", "1", { from: account1 }),
+						"no available USDC stake amount");
+				});
+
+				it.only("should stake USDC", async () => {
+					// debt will be 10000 USD
+					await periFinance.issuePynths(toUnit("10000"), { from: account1 });
+					await debtCache.takeDebtSnapshot();
+
+					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
+					const remainingIssuableResult_before = await periFinance.remainingIssuablePynths(account1);
+					const canStakeUSDC_before = await periFinance.canStakeUSDC(account1);
+					const availableUSDCStakeAmount_before = await periFinance.availableUSDCStakeAmount(account1);
+					const issuanceRatio = await issuer.issuanceRatio();
+
+					assert.bnEqual(remainingIssuableResult_before.maxIssuable, toUnit("10000"));
+					assert.bnEqual(remainingIssuableResult_before.alreadyIssued, toUnit("10000"));
+					assert.bnEqual(remainingIssuableResult_before.totalSystemDebt, toUnit("10000"));
+					assert.equal(canStakeUSDC_before, true);
+					// debt * 0.2 / exRate / issuanceRatio
+					assert.bnEqual(availableUSDCStakeAmount_before, 
+						divideDecimal(
+							divideDecimal(
+								multiplyDecimal(remainingIssuableResult_before.alreadyIssued, toUnit("0.2")),
+								usdcExRate
+							), issuanceRatio
+						).div(web3.utils.toBN(10**12))
+					);
+
+					const usdcBalance_1_before = await usdc.balanceOf(account1);
+					const usdcBalance_state_before = await usdc.balanceOf(stakingStateUSDC.address);
+
+					// only stake, not issue pUSD
+					const stakingAmount = web3.utils.toBN("1111111111")
+					await periFinance.stakeUSDCAndIssuePynths("1111111111", 0, { from: account1 });
+					await debtCache.takeDebtSnapshot();
+
+					const stakedAmount = await periFinance.usdcStakedAmountOf(account1);
+					const totalStaked = await periFinance.usdcTotalStakedAmount();
+					const numOfStaker = await periFinance.totalUSDCStakerCount();
+					const availableUSDCStakeAmount_after = await periFinance.availableUSDCStakeAmount(account1);
+					const usdcBalance_1_after = await usdc.balanceOf(account1);
+					const usdcBalance_state_after = await usdc.balanceOf(stakingStateUSDC.address);
+					const canStakeUSDC_after = await periFinance.canStakeUSDC(account1);
+					const remainingIssuableResult_after = await periFinance.remainingIssuablePynths(account1);
+
+					assert.bnEqual(stakedAmount, stakingAmount);
+					assert.bnEqual(totalStaked, stakingAmount);
+					assert.bnEqual(numOfStaker, "1");
+					assert.bnEqual(usdcBalance_1_before.sub(stakingAmount), usdcBalance_1_after);
+					assert.bnEqual(usdcBalance_state_before.add(stakingAmount), usdcBalance_state_after);
+					assert.bnEqual(availableUSDCStakeAmount_after, availableUSDCStakeAmount_before.sub(stakingAmount));
+					assert.equal(canStakeUSDC_after, true);
+					// maxIssuable = (PERI * exRate(USD/PERI) + USDC Stake * 10**12 * exRate(USD/USDC)) * issuanceRatio - alreadyIssued
+					const maxIssuable = multiplyDecimal(
+						multiplyDecimal(toUnit("10000"), toUnit("10")).add(multiplyDecimal(stakingAmount.mul(web3.utils.toBN(10**12)), usdcExRate)),
+						issuanceRatio
+					).sub(remainingIssuableResult_after.alreadyIssued);
+					
+					assert.bnEqual(remainingIssuableResult_after.maxIssuable, maxIssuable);
+					assert.bnEqual(remainingIssuableResult_after.alreadyIssued, toUnit("10000"));
+					assert.bnEqual(remainingIssuableResult_after.totalSystemDebt, toUnit("10000"));
+				});
+
+				it.only("should stake USDC and issue pynths", async () => {
+					// debt will be 10000 USD
+					await periFinance.issuePynths(toUnit("10000"), { from: account1 });
+					await debtCache.takeDebtSnapshot();
+					
+					// 0.9 (USD/USDC). And issuance ratio is 0.2.
+					// Current debt is 10000 USD and available USDC staking amount is about 11111 USDC (2000 * exRate / issuanceRatio).
+					// If account1 issues additional 10000 pUSD, new debt will be 20000 USD, 
+					// then available USDC staking amount is 20000 * 0.2 * exRate / issuanceRatio = 22222.222222222....
+					const stakingAmount = "22222" + "2".repeat(6)
+					await periFinance.stakeUSDCAndIssuePynths(stakingAmount, toUnit("10000"), { from: account1 });
+					await debtCache.takeDebtSnapshot();
+
+					const [
+						canStakeUSDC,
+						stakedAmount,
+						totalStaked,
+						numOfStaker,
+						pUSDBalance_1,
+						debtBalance_1,
+						totalIssuedPUSD
+					] = await Promise.all([
+						periFinance.canStakeUSDC(account1),
+						periFinance.usdcStakedAmountOf(account1),
+						periFinance.usdcTotalStakedAmount(),
+						periFinance.totalUSDCStakerCount(),
+						pUSDContract.balanceOf(account1),
+						periFinance.debtBalanceOf(account1, pUSD),
+						periFinance.totalIssuedPynths(pUSD)
+					]);
+
+					assert.equal(canStakeUSDC, false);
+					assert.bnEqual(stakedAmount, stakingAmount);
+					assert.bnEqual(totalStaked, stakingAmount);
+					assert.bnEqual(numOfStaker, "1");
+					assert.bnEqual(pUSDBalance_1, toUnit("20000"));
+					assert.bnEqual(debtBalance_1, toUnit("20000"));
+					assert.bnEqual(totalIssuedPUSD, toUnit("20000"));
+
+					// It should not allow stake more
+					await assert.revert(
+						periFinance.stakeUSDCAndIssuePynths(1, 0, { from: account1 }),
+						"no available USDC stake amount"
+					);
 				});
 			});
 
