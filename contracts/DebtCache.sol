@@ -38,12 +38,12 @@ contract DebtCache is BaseDebtCache {
         _updateDebtCacheValidity(isInvalid);
     }
 
-    function updateCachedpynthDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
+    function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
         (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
         _updateCachedPynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     }
 
-    function updateCachedpynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
+    function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
         bytes32[] memory pynthKeyArray = new bytes32[](1);
         pynthKeyArray[0] = currencyKey;
         uint[] memory pynthRateArray = new uint[](1);
