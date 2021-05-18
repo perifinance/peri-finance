@@ -414,7 +414,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint totalOwned = totalOwnedPeriFinance.add(usdcStakedAmountToPeri);
 
-        return (debtBalance.divideDecimalRound(totalOwned), rateIsInvalid);
+        return (debtBalance.divideDecimal(totalOwned), rateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
