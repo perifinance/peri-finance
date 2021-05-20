@@ -302,9 +302,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         if(isUSDCInvalid) return false;
         
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
+        // add 100 for calculation offset
+        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account).add(100), usdcRate);
 
-        return maxUSDCQuotaAmount > usdcStakedAmountToUSD;
+        return maxUSDCQuotaAmount > usdcStakedAmountToUSD;  
     }
 
     function _availableUSDCStakeAmount(address _account)
@@ -413,7 +414,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint totalOwned = totalOwnedPeriFinance.add(usdcStakedAmountToPeri);
 
-        return (debtBalance.divideDecimalRound(totalOwned), rateIsInvalid);
+        return (debtBalance.divideDecimal(totalOwned), rateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
@@ -899,10 +900,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
         uint afterDebtBalance = debtBalance.add(_issueAmount);
+        uint afterDebtWithIssuanceRatio = afterDebtBalance.divideDecimalRound(getIssuanceRatio());
 
         (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
-        uint _maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtBalance, usdcRate).multiplyDecimalRound(getUSDCQuota());
-        uint maxUSDCQuotaAfterIssue = _maxUSDCQuotaAfterIssue.divideDecimalRound(getIssuanceRatio());
+        uint maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
+        // uint maxUSDCQuotaAfterIssue = _maxUSDCQuotaAfterIssue.divideDecimalRound(getIssuanceRatio());
         uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
         require(maxUSDCQuotaAfterIssue > userStakedAmount,
@@ -916,12 +918,19 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             stakeAmount = _usdcStakeAmount;
         }
 
-        require(usdc().transferFrom(_issuer, address(stakingStateUSDC()), stakeAmount),
-            "transferring USDC has been failed");
+        _transferAndStakeUSDC(_issuer, stakeAmount);
 
         if(_issueMax || _issueAmount > 0) {
             _issuePynths(_issuer, _issueAmount, _issueMax);
         }
+    }
+
+    function _transferAndStakeUSDC(address _account, uint _amount)
+    internal {
+        require(usdc().transferFrom(_account, address(stakingStateUSDC()), _amount),
+            "transferring USDC has been failed");
+
+        stakingStateUSDC().stake(_account, _amount);
     }
 
     /**
@@ -934,7 +943,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(stakingStateUSDC().refund(_account, _amount),
             "refunding USDC has been failed");
     }
-
 
     function _unstakeUSDCToTargetQuota(address _account)
     internal {
