@@ -1440,6 +1440,58 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						"no available USDC stake amount"
 					);
 				});
+
+				it.only("should stake USDC and issue max pynths", async () => {
+					// debt will be 10000 USD
+					await periFinance.issuePynths(toUnit("10000"), { from: account1 });
+
+					const stakingAmount = "10000" + "0".repeat(6);
+					await periFinance.stakeUSDCAndIssueMaxPynths(stakingAmount, { from: account1 });
+
+					// account1 owned 10000 PERI and staked 10000 USDC.
+					// To convert those to USD amount, account1 totally owning 109000 USD
+					// IssuanceRatio is 0.2, max issuable pUSD is 21800.
+					const [
+						canStakeUSDC,
+						stakedAmount,
+						totalStaked,
+						numOfStaker,
+						pUSDBalance_1,
+						debtBalance_1,
+						totalIssuedPUSD
+					] = await Promise.all([
+						periFinance.canStakeUSDC(account1),
+						periFinance.usdcStakedAmountOf(account1),
+						periFinance.usdcTotalStakedAmount(),
+						periFinance.totalUSDCStakerCount(),
+						pUSDContract.balanceOf(account1),
+						periFinance.debtBalanceOf(account1, pUSD),
+						periFinance.totalIssuedPynths(pUSD)
+					]);
+
+					assert.equal(canStakeUSDC, true);
+					assert.bnEqual(stakedAmount, stakingAmount);
+					assert.bnEqual(totalStaked, stakingAmount);
+					assert.bnEqual(numOfStaker, "1");
+					assert.bnEqual(pUSDBalance_1, toUnit("21800"));
+					assert.bnEqual(debtBalance_1, toUnit("21800"));
+					assert.bnEqual(totalIssuedPUSD, toUnit("21800"));
+
+					// It should not allow stake more
+					await assert.revert(
+						periFinance.stakeUSDCAndIssuePynths(0, 1, { from: account1 }),
+						"Amount too large"
+					);
+					
+					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
+					const issuanceRatio = await issuer.issuanceRatio();
+					const availableUSDCStakeAmount = await periFinance.availableUSDCStakeAmount(account1);
+
+					// available amount = (debt / issuanceRatio / usdcExRate) * USDCQuota / 10^12 - stakedAmount
+					assert.bnEqual(
+						availableUSDCStakeAmount, 
+						multiplyDecimal(divideDecimal(divideDecimal(debtBalance_1, issuanceRatio), usdcExRate), toUnit("0.2")).div(web3.utils.toBN(10**12)).sub(stakedAmount).toString()					);
+				});
 			});
 
 			describe('burning', () => {
@@ -2083,6 +2135,25 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						});
 					});
 					*/
+			});
+
+			describe('burning and unstake USDC', () => {
+				beforeEach(async () => {
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates(
+						[PERI, USDC], 
+						[toUnit("10"), toUnit("0.9")], 
+						timestamp,
+						{ from: oracle }
+					);
+
+					// Give some PERI to account1
+					await periFinance.transfer(account1, toUnit('10000'), { from: owner });
+					await usdc.transfer(account1, '100000'+'0'.repeat(6), { from: accounts[0] });
+					await usdc.approve(issuer.address, '100000'+'0'.repeat(6), { from: account1 });
+				});
+
+				it("should initiate")
 			});
 
 			describe('debt calculation in multi-issuance scenarios', () => {
