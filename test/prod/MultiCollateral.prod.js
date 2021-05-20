@@ -221,9 +221,9 @@ contract('MultiCollateral (prod tests)', accounts => {
 					issueFeeRate = await CollateralContract.issueFeeRate();
 					totalLoansBefore = await CollateralManagerState.totalLoans();
 					longBefore = await CollateralManager.long(borrowCurrencyBytes);
-					totalLongBefore = (await CollateralManager.totalLong()).susdValue;
+					totalLongBefore = (await CollateralManager.totalLong()).pusdValue;
 					shortBefore = await CollateralManager.short(borrowCurrencyBytes);
-					totalShortBefore = (await CollateralManager.totalShort()).susdValue;
+					totalShortBefore = (await CollateralManager.totalShort()).pusdValue;
 					systemDebtBefore = (await DebtCache.currentDebt()).debt;
 				});
 
@@ -314,13 +314,13 @@ contract('MultiCollateral (prod tests)', accounts => {
 				it('updates the managers short/long values', async () => {
 					if (type === 'CollateralShort') {
 						const shortAfter = await CollateralManager.short(borrowCurrencyBytes);
-						const totalShortAfter = (await CollateralManager.totalShort()).susdValue;
+						const totalShortAfter = (await CollateralManager.totalShort()).pusdValue;
 
 						assert.bnGt(shortAfter, shortBefore);
 						assert.bnGt(totalShortAfter, totalShortBefore);
 					} else {
 						const longAfter = await CollateralManager.long(borrowCurrencyBytes);
-						const totalLongAfter = (await CollateralManager.totalLong()).susdValue;
+						const totalLongAfter = (await CollateralManager.totalLong()).pusdValue;
 
 						assert.bnEqual(longAfter, longBefore.add(amountToBorrow));
 						assert.bnEqual(totalLongAfter, totalLongBefore.add(amountToBorrow));

@@ -19,6 +19,7 @@ contract('BinaryOptionMarketData @gas-skip', accounts => {
 				'ExchangeRates',
 				'FeePool',
 				'PeriFinance',
+				'StakingStateUSDC',
 			],
 		});
 
