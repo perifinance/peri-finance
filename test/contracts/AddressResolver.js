@@ -192,22 +192,20 @@ contract('AddressResolver', accounts => {
 			});
 		});
 		describe('when a PeriFinance is created with a few added pynths', () => {
-			let pETHContract;
 			let pUSDContract;
 			beforeEach(async () => {
-				({ PynthpETH: pETHContract, PynthpUSD: pUSDContract } = await setupAllContracts({
+				({ PynthpUSD: pUSDContract } = await setupAllContracts({
 					accounts,
 					existing: {
 						AddressResolver: resolver,
 					},
-					pynths: ['pUSD', 'pETH'],
-					contracts: ['PeriFinance'],
+					pynths: ['pUSD'],
+					contracts: ['PeriFinance', 'StakingStateUSDC'],
 				}));
 			});
 
 			it('when getPynth() is invoked with these pynth keys, they are returned correctly', async () => {
 				assert.equal(await resolver.getPynth(toBytes32('pUSD')), pUSDContract.address);
-				assert.equal(await resolver.getPynth(toBytes32('pETH')), pETHContract.address);
 			});
 		});
 	});

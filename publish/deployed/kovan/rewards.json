@@ -1,17 +1,7 @@
 [
 	{
-		"name": "iETH",
-		"stakingToken": "ProxyiETH",
-		"rewardsToken": "ProxyERC20"
-	},
-	{
-		"name": "iETH2",
-		"stakingToken": "ProxyiETH",
-		"rewardsToken": "ProxyERC20"
-	},
-	{
-		"name": "iBTC",
-		"stakingToken": "ProxyiBTC",
+		"name": "PERI",
+		"stakingToken": "PeriFinance",
 		"rewardsToken": "ProxyERC20"
 	}
 ]
