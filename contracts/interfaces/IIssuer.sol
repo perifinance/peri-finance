@@ -47,7 +47,7 @@ interface IIssuer {
     external view
     returns(uint);
 
-    function canStakeUSDC(address _account)
+    function canStakeUSDC(address _account, uint _usdcAmount)
     external view
     returns(bool);
 

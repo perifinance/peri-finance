@@ -289,24 +289,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return (debtByUSDC.divideDecimalRound(debtBalance), anyRateIsInvalid || isUSDCInvalid);
     }
 
-    function _canStakeUSDC(address _account)
-    internal view
-    returns(bool) {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        if(anyRateIsInvalid) return false;
-
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        if(isUSDCInvalid) return false;
-        
-        // add 100 for calculation offset
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account).add(100), usdcRate);
-
-        return maxUSDCQuotaAmount > usdcStakedAmountToUSD;  
-    }
 
     function _availableUSDCStakeAmount(address _account)
     internal view
@@ -326,6 +308,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             return _usdToUSDC(maxUSDCQuotaAmount.sub(usdcStakedAmountToUSD), usdcRate);
         }
+    }
+    
+    /**
+     * @param _stakingAmount 6 decimal USDC amount
+     */
+    function _canStakeUSDC(address _account, uint _stakingAmount)
+    internal view
+    returns(bool) {
+        uint availableAmount = _availableUSDCStakeAmount(_account);
+
+        return availableAmount > _stakingAmount;  
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {
@@ -571,10 +564,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return usdcDebtQuota;
     }
 
-    function canStakeUSDC(address _account)
+    function canStakeUSDC(address _account, uint _stakingAmount)
     external view
     returns(bool) {
-        return _canStakeUSDC(_account);
+        return _canStakeUSDC(_account, _stakingAmount);
     }
 
     function availableUSDCStakeAmount(address _account)
@@ -989,8 +982,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
         _appendAccountIssuanceRecord(debtAccount);
 
-        if(unstakeUSDCToTargetQuota) {
-            _unstakeUSDCToTargetQuota(debtAccount);
+        if(stakingStateUSDC().hasStaked(debtAccount)) {
+            (uint currentUSDCDebtQuota, ) = _currentUSDCDebtQuota(debtAccount);
+            
+            if(unstakeUSDCToTargetQuota || currentUSDCDebtQuota > getUSDCQuota()) {
+                _unstakeUSDCToTargetQuota(debtAccount);
+            }            
         }
     }
 
