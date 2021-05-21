@@ -23,8 +23,8 @@ const {
 } = require('../..');
 
 contract('DebtCache', async accounts => {
-	const [pUSD, pAUD, pEUR, PERI, pETH] = ['pUSD', 'pAUD', 'pEUR', 'PERI', 'pETH'].map(toBytes32);
-	const pynthKeys = [pUSD, pAUD, pEUR, pETH, PERI];
+	const [pUSD, PERI, USDC] = ['pUSD', 'PERI', 'USDC'].map(toBytes32);
+	const pynthKeys = [pUSD, PERI, USDC];
 
 	const [, owner, oracle, account1, account2] = accounts;
 
@@ -34,9 +34,8 @@ contract('DebtCache', async accounts => {
 		exchangeRates,
 		feePool,
 		pUSDContract,
-		pETHContract,
-		pEURContract,
-		pAUDContract,
+		USDCContract,
+		PERIContract,
 		timestamp,
 		debtCache,
 		issuer,
@@ -47,16 +46,15 @@ contract('DebtCache', async accounts => {
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
-		pynths = ['pUSD', 'pAUD', 'pEUR', 'pETH'];
+		pynths = ['pUSD', 'PERI', 'USDC'];
 		({
 			PeriFinance: periFinance,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
 			PynthpUSD: pUSDContract,
-			PynthpETH: pETHContract,
-			PynthpAUD: pAUDContract,
-			PynthpEUR: pEURContract,
+			USDC: USDCContract,
+			PERI: PERIContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,
@@ -81,6 +79,7 @@ contract('DebtCache', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
+				'StakingStateUSDC',
 			],
 		}));
 	});
@@ -90,12 +89,9 @@ contract('DebtCache', async accounts => {
 	beforeEach(async () => {
 		timestamp = await currentTime();
 
-		await exchangeRates.updateRates(
-			[pAUD, pEUR, PERI, pETH],
-			['0.5', '1.25', '0.1', '200'].map(toUnit),
-			timestamp,
-			{ from: oracle }
-		);
+		await exchangeRates.updateRates([PERI, USDC], ['0.2', '0.98'].map(toUnit), timestamp, {
+			from: oracle,
+		});
 
 		// set a 0.3% default exchange fee rate
 		const exchangeFeeRate = toUnit('0.003');
@@ -131,7 +127,7 @@ contract('DebtCache', async accounts => {
 		it('updateCachedPynthDebtWithRate() can only be invoked by the issuer', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: debtCache.updateCachedPynthDebtWithRate,
-				args: [pAUD, toUnit('1')],
+				args: [USDC, toUnit('1')],
 				accounts,
 				reason: 'Sender is not Issuer',
 			});
@@ -141,8 +137,8 @@ contract('DebtCache', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: debtCache.updateCachedPynthDebtsWithRates,
 				args: [
-					[pAUD, pEUR],
-					[toUnit('1'), toUnit('2')],
+					[PERI, USDC],
+					[toUnit('0.98'), toUnit('0.2')],
 				],
 				accounts,
 				reason: 'Sender is not Issuer or Exchanger',
@@ -162,7 +158,7 @@ contract('DebtCache', async accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: debtCache.purgeCachedPynthDebt,
 				accounts,
-				args: [pAUD],
+				args: [PERI],
 				address: owner,
 				skipPassCheck: true,
 				reason: 'Only the contract owner may perform this action',
@@ -178,18 +174,18 @@ contract('DebtCache', async accounts => {
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 			// set up initial prices
 			await exchangeRates.updateRates(
-				[pAUD, pEUR, pETH],
-				['0.5', '2', '100'].map(toUnit),
+				[PERI, USDC],
+				['0.2', '0.98'].map(toUnit),
 				await currentTime(),
 				{ from: oracle }
 			);
 			await debtCache.takeDebtSnapshot();
 
 			// Issue 1000 pUSD worth of tokens to a user
-			await pUSDContract.issue(account1, toUnit(100));
-			await pAUDContract.issue(account1, toUnit(100));
-			await pEURContract.issue(account1, toUnit(100));
-			await pETHContract.issue(account1, toUnit(2));
+			await pUSDContract.issue(account1, toUnit(100)); // arbitrary issued pynth doesnt calculate exchange rates
+			await periFinance.transfer(account1, toUnit(100), { from: owner });
+			await USDCContract.transfer(account1, '1000000');
+			await USDCContract.approve(issuer.address, '1000000000000', { from: account1 });
 		});
 
 		describe('Current issued debt', () => {
@@ -198,18 +194,15 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(0));
 
 				const result = await debtCache.currentDebt();
-				assert.bnEqual(result[0], toUnit(550));
+				assert.bnEqual(result[0], toUnit(100));
 				assert.isFalse(result[1]);
 			});
 
 			it('Live debt is reported accurately for individual currencies', async () => {
-				const result = await debtCache.currentPynthDebts([pUSD, pEUR, pAUD, pETH]);
+				const result = await debtCache.currentPynthDebts([pUSD]);
 				const debts = result[0];
 
 				assert.bnEqual(debts[0], toUnit(100));
-				assert.bnEqual(debts[1], toUnit(200));
-				assert.bnEqual(debts[2], toUnit(50));
-				assert.bnEqual(debts[3], toUnit(200));
 
 				assert.isFalse(result[1]);
 			});
@@ -227,19 +220,20 @@ contract('DebtCache', async accounts => {
 				time = await currentTime();
 			});
 
-			it('accurately resynchronises the debt after prices have changed', async () => {
-				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(550));
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('accurately resynchronises the debt after prices have changed', async () => {
+				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(100));
 				let result = await debtCache.currentDebt();
-				assert.bnEqual(result[0], toUnit(550));
+				assert.bnEqual(result[0], toUnit(100));
 				assert.isFalse(result[1]);
 
-				await exchangeRates.updateRates([pAUD, pEUR], ['1', '3'].map(toUnit), await currentTime(), {
+				await exchangeRates.updateRates([pBTC, pETH], ['1', '3'].map(toUnit), await currentTime(), {
 					from: oracle,
 				});
 				await debtCache.takeDebtSnapshot();
-				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(700));
+				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(100));
 				result = await debtCache.currentDebt();
-				assert.bnEqual(result[0], toUnit(700));
+				assert.bnEqual(result[0], toUnit(100));
 				assert.isFalse(result[1]);
 			});
 
@@ -250,33 +244,23 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('properly emits debt cache updated and synchronised events', async () => {
-				assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(550)]);
+				assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(100)]);
 				assert.eventEqual(tx.logs[1], 'DebtCacheSnapshotTaken', [
 					(await debtCache.cacheInfo()).timestamp,
 				]);
 			});
 
-			it('updates the cached values for all individual pynths', async () => {
-				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('updates the cached values for all individual pynths', async () => {
+				await exchangeRates.updateRates([PERI, USDC], ['1', '3'].map(toUnit), await currentTime(), {
+					from: oracle,
+				});
 				await debtCache.takeDebtSnapshot();
-				let debts = await debtCache.currentPynthDebts([pUSD, pEUR, pAUD, pETH]);
+				let debts = await debtCache.currentPynthDebts([pUSD]);
 				assert.bnEqual(debts[0][0], toUnit(100));
-				assert.bnEqual(debts[0][1], toUnit(300));
-				assert.bnEqual(debts[0][2], toUnit(100));
-				assert.bnEqual(debts[0][3], toUnit(400));
 
-				debts = await debtCache.cachedPynthDebts([pUSD, pEUR, pAUD, pETH]);
+				debts = await debtCache.cachedPynthDebts([pUSD]);
 				assert.bnEqual(debts[0], toUnit(100));
-				assert.bnEqual(debts[1], toUnit(300));
-				assert.bnEqual(debts[2], toUnit(100));
-				assert.bnEqual(debts[3], toUnit(400));
 			});
 
 			it('is able to invalidate and revalidate the debt cache when required.', async () => {
@@ -292,8 +276,8 @@ contract('DebtCache', async accounts => {
 
 				// Revalidate the cache once rates are no longer stale
 				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['0.5', '2', '100'].map(toUnit),
+					[PERI, USDC],
+					['0.2', '0.98'].map(toUnit),
 					await currentTime(),
 					{ from: oracle }
 				);
@@ -313,8 +297,8 @@ contract('DebtCache', async accounts => {
 
 				// ensure no actual rates are stale.
 				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH, PERI],
-					['0.5', '2', '100', '1'].map(toUnit),
+					[PERI, USDC],
+					['0.2', '0.98'].map(toUnit),
 					await currentTime(),
 					{ from: oracle }
 				);
@@ -375,14 +359,15 @@ contract('DebtCache', async accounts => {
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 				await periFinance.transfer(account2, toUnit('1000'), { from: owner });
 				await periFinance.issuePynths(toUnit('10'), { from: account1 });
+				await periFinance.stakeUSDCAndIssuePynths('1000000', toUnit('10'), { from: account1 });
 
 				// Stale the debt snapshot
 				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
 				await fastForward(snapshotStaleTime + 10);
 				// ensure no actual rates are stale.
 				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH, PERI],
-					['0.5', '2', '100', '1'].map(toUnit),
+					[PERI, USDC],
+					['0.5', '0.5'].map(toUnit),
 					await currentTime(),
 					{ from: oracle }
 				);
@@ -420,78 +405,66 @@ contract('DebtCache', async accounts => {
 		});
 
 		describe('updateCachedPynthDebts()', () => {
-			it('allows resynchronisation of subsets of pynths', async () => {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('allows resynchronisation of subsets of pynths', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await exchangeRates.updateRates([pUSD, pETH], ['2', '5'].map(toUnit), await currentTime(), {
+					from: oracle,
+				});
 
 				// First try a single currency, ensuring that the others have not been altered.
-				const expectedDebts = (await debtCache.currentPynthDebts([pAUD, pEUR, pETH]))[0];
+				const expectedDebts = (await debtCache.currentPynthDebts([pUSD]))[0];
 
-				await debtCache.updateCachedPynthDebts([pAUD]);
-				assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(600));
-				let debts = await debtCache.cachedPynthDebts([pAUD, pEUR, pETH]);
+				await debtCache.updateCachedPynthDebts([pUSD]);
+				assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(100));
+				let debts = await debtCache.cachedPynthDebts([pUSD]);
 
 				assert.bnEqual(debts[0], expectedDebts[0]);
-				assert.bnEqual(debts[1], toUnit(200));
-				assert.bnEqual(debts[2], toUnit(200));
 
 				// Then a subset
-				await debtCache.updateCachedPynthDebts([pEUR, pETH]);
-				assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(900));
-				debts = await debtCache.cachedPynthDebts([pEUR, pETH]);
+				await debtCache.updateCachedPynthDebts([pUSD]);
+				assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(100));
+				debts = await debtCache.cachedPynthDebts([pUSD]);
 				assert.bnEqual(debts[0], expectedDebts[1]);
-				assert.bnEqual(debts[1], expectedDebts[2]);
 			});
 
-			it('can invalidate the debt cache for individual currencies with invalid rates', async () => {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('can invalidate the debt cache for individual currencies with invalid rates', async () => {
 				// Wait until the exchange rates are stale in order to invalidate the cache.
 				const rateStalePeriod = await systemSettings.rateStalePeriod();
-				await fastForward(rateStalePeriod + 1000);
+				await fastForward(rateStalePeriod + 10);
 
 				assert.isFalse((await debtCache.cacheInfo()).isInvalid);
 
 				// individual stale rates invalidate the cache
-				const tx1 = await debtCache.updateCachedPynthDebts([pAUD]);
+				const tx1 = await debtCache.updateCachedPynthDebts([pUSD]);
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 
 				// But even if we update all rates, we can't revalidate the cache using the partial update function
-				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['0.5', '2', '100'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
-				);
-				const tx2 = await debtCache.updateCachedPynthDebts([pAUD, pEUR, pETH]);
+				await exchangeRates.updateRates([pBTC, pETH], ['2', '5'].map(toUnit), await currentTime(), {
+					from: oracle,
+				});
+				const tx2 = await debtCache.updateCachedPynthDebts([pUSD]);
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 				assert.eventEqual(tx1.logs[1], 'DebtCacheValidityChanged', [true]);
 				assert.isTrue(tx2.logs.find(log => log.event === 'DebtCacheValidityChanged') === undefined);
 			});
 
-			it('properly emits events', async () => {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('properly emits events', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await exchangeRates.updateRates([pBTC, pETH], ['2', '5'].map(toUnit), await currentTime(), {
+					from: oracle,
+				});
 
-				const tx = await debtCache.updateCachedPynthDebts([pAUD]);
+				const tx = await debtCache.updateCachedPynthDebts([pUSD]);
 				assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(600)]);
 			});
 
-			it('reverts when attempting to synchronise non-existent pynths or PERI', async () => {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('reverts when attempting to synchronise non-existent pynths or PERI', async () => {
 				await assert.revert(debtCache.updateCachedPynthDebts([PERI]));
 				const fakePynth = toBytes32('FAKE');
 				await assert.revert(debtCache.updateCachedPynthDebts([fakePynth]));
@@ -501,10 +474,10 @@ contract('DebtCache', async accounts => {
 			it('will not operate if the system is paused except for the owner', async () => {
 				await setStatus({ owner, systemStatus, section: 'System', suspend: true });
 				await assert.revert(
-					debtCache.updateCachedPynthDebts([pAUD, pEUR], { from: account1 }),
+					debtCache.updateCachedPynthDebts([PERI, USDC], { from: account1 }),
 					'PeriFinance is suspended'
 				);
-				await debtCache.updateCachedPynthDebts([pAUD, pEUR], { from: owner });
+				await debtCache.updateCachedPynthDebts([PERI, USDC], { from: owner });
 			});
 		});
 
@@ -556,9 +529,10 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('exchanging between pynths updates the debt totals for those pynths', async () => {
+			// exchange doesnt work at this time
+			it.skip('exchanging between pynths updates the debt totals for those pynths', async () => {
 				// Zero exchange fees so that we can neglect them.
-				await systemSettings.setExchangeFeeRateForPynths([pAUD, pUSD], [toUnit(0), toUnit(0)], {
+				await systemSettings.setExchangeFeeRateForPynths([pUSD], [toUnit(0), toUnit(0)], {
 					from: owner,
 				});
 
@@ -566,9 +540,9 @@ contract('DebtCache', async accounts => {
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 				await periFinance.issuePynths(toUnit('10'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
-				const debts = await debtCache.cachedPynthDebts([pUSD, pAUD]);
-				const tx = await periFinance.exchange(pUSD, toUnit('5'), pAUD, { from: account1 });
-				const postDebts = await debtCache.cachedPynthDebts([pUSD, pAUD]);
+				const debts = await debtCache.cachedPynthDebts([pUSD]);
+				const tx = await periFinance.exchange(pUSD, toUnit('5'), pBTC, { from: account1 });
+				const postDebts = await debtCache.cachedPynthDebts([pUSD, pBTC]);
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
 				assert.bnEqual(postDebts[0], debts[0].sub(toUnit(5)));
 				assert.bnEqual(postDebts[1], debts[1].add(toUnit(5)));
@@ -582,21 +556,22 @@ contract('DebtCache', async accounts => {
 				assert.isUndefined(logs.find(({ name } = {}) => name === 'DebtCacheUpdated'));
 			});
 
-			it('exchanging between pynths updates pUSD debt total due to fees', async () => {
+			// exchange doesnt work at this time
+			it.skip('exchanging between pynths updates pUSD debt total due to fees', async () => {
 				await systemSettings.setExchangeFeeRateForPynths(
-					[pAUD, pUSD, pEUR],
+					[pBTC, pUSD, pETH],
 					[toUnit(0.1), toUnit(0.1), toUnit(0.1)],
 					{ from: owner }
 				);
 
-				await pEURContract.issue(account1, toUnit(20));
+				await pETHContract.issue(account1, toUnit(20));
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
 
-				const debts = await debtCache.cachedPynthDebts([pUSD, pAUD, pEUR]);
+				const debts = await debtCache.cachedPynthDebts([pUSD, pBTC, pETH]);
 
-				await periFinance.exchange(pEUR, toUnit(10), pAUD, { from: account1 });
-				const postDebts = await debtCache.cachedPynthDebts([pUSD, pAUD, pEUR]);
+				await periFinance.exchange(pETH, toUnit(10), pBTC, { from: account1 });
+				const postDebts = await debtCache.cachedPynthDebts([pUSD, pBTC, pETH]);
 
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued);
 				assert.bnEqual(postDebts[0], debts[0].add(toUnit(2)));
@@ -604,23 +579,24 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(postDebts[2], debts[2].sub(toUnit(20)));
 			});
 
-			it('exchanging between pynths updates debt properly when prices have changed', async () => {
-				await systemSettings.setExchangeFeeRateForPynths([pAUD, pUSD], [toUnit(0), toUnit(0)], {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('exchanging between pynths updates debt properly when prices have changed', async () => {
+				await systemSettings.setExchangeFeeRateForPynths([pBTC, pETH], [toUnit(0), toUnit(0)], {
 					from: owner,
 				});
 
-				await pEURContract.issue(account1, toUnit(20));
+				await pBTCContract.issue(account1, toUnit(20));
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
 
-				const debts = await debtCache.cachedPynthDebts([pAUD, pEUR]);
+				const debts = await debtCache.cachedPynthDebts([pBTC, pETH]);
 
-				await exchangeRates.updateRates([pAUD, pEUR], ['1', '1'].map(toUnit), await currentTime(), {
+				await exchangeRates.updateRates([pBTC, pETH], ['1', '1'].map(toUnit), await currentTime(), {
 					from: oracle,
 				});
 
-				await periFinance.exchange(pEUR, toUnit(10), pAUD, { from: account1 });
-				const postDebts = await debtCache.cachedPynthDebts([pAUD, pEUR]);
+				await periFinance.exchange(pBTC, toUnit(10), pETH, { from: account1 });
+				const postDebts = await debtCache.cachedPynthDebts([pBTC, pETH]);
 
 				// 120 eur @ $2 = $240 and 100 aud @ $0.50 = $50 becomes:
 				// 110 eur @ $1 = $110 (-$130) and 110 aud @ $1 = $110 (+$60)
@@ -630,20 +606,21 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(postDebts[1], debts[1].sub(toUnit(130)));
 			});
 
-			it('settlement updates debt totals', async () => {
-				await systemSettings.setExchangeFeeRateForPynths([pAUD, pEUR], [toUnit(0), toUnit(0)], {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('settlement updates debt totals', async () => {
+				await systemSettings.setExchangeFeeRateForPynths([pBTC, pETH], [toUnit(0), toUnit(0)], {
 					from: owner,
 				});
-				await pAUDContract.issue(account1, toUnit(100));
+				await pBTCContract.issue(account1, toUnit(100));
 				await debtCache.takeDebtSnapshot();
 
-				await periFinance.exchange(pAUD, toUnit(50), pEUR, { from: account1 });
+				await periFinance.exchange(pBTC, toUnit(50), pETH, { from: account1 });
 
-				await exchangeRates.updateRates([pAUD, pEUR], ['2', '1'].map(toUnit), await currentTime(), {
+				await exchangeRates.updateRates([pBTC, pETH], ['2', '1'].map(toUnit), await currentTime(), {
 					from: oracle,
 				});
 
-				const tx = await exchanger.settle(account1, pAUD);
+				const tx = await exchanger.settle(account1, pBTC);
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
 					contracts: [debtCache],
@@ -653,7 +630,7 @@ contract('DebtCache', async accounts => {
 				// But the EUR debt does not change due to settlement,
 				// and remains at $200 + $25 from the exchange
 
-				const results = await debtCache.cachedPynthDebts([pAUD, pEUR]);
+				const results = await debtCache.cachedPynthDebts([pBTC, pETH]);
 				assert.bnEqual(results[0], toUnit(300));
 				assert.bnEqual(results[1], toUnit(225));
 
@@ -667,15 +644,16 @@ contract('DebtCache', async accounts => {
 		});
 
 		describe('Pynth removal and addition', () => {
-			it('Removing pynths zeroes out the debt snapshot for that currency', async () => {
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('Removing pynths zeroes out the debt snapshot for that currency', async () => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
-				const pEURValue = (await debtCache.cachedPynthDebts([pEUR]))[0];
-				await pEURContract.setTotalSupply(toUnit(0));
-				const tx = await issuer.removePynth(pEUR, { from: owner });
-				const result = (await debtCache.cachedPynthDebts([pEUR]))[0];
+				const pETHValue = (await debtCache.cachedPynthDebts([pETH]))[0];
+				await pETHContract.setTotalSupply(toUnit(0));
+				const tx = await issuer.removePynth(pETH, { from: owner });
+				const result = (await debtCache.cachedPynthDebts([pETH]))[0];
 				const newIssued = (await debtCache.cacheInfo())[0];
-				assert.bnEqual(newIssued, issued.sub(pEURValue));
+				assert.bnEqual(newIssued, issued.sub(pETHValue));
 				assert.bnEqual(result, toUnit(0));
 
 				const logs = await getDecodedLogs({
@@ -691,8 +669,9 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('Pynth snapshots cannot be purged while the pynth exists', async () => {
-				await assert.revert(debtCache.purgeCachedPynthDebt(pAUD, { from: owner }), 'Pynth exists');
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('Pynth snapshots cannot be purged while the pynth exists', async () => {
+				await assert.revert(debtCache.purgeCachedPynthDebt(pBTC, { from: owner }), 'Pynth exists');
 			});
 
 			it('Pynth snapshots can be purged without updating the snapshot', async () => {
@@ -724,10 +703,11 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual((await newDebtCache.cacheInfo())[0], issued);
 			});
 
-			it('Removing a pynth invalidates the debt cache', async () => {
-				await pEURContract.setTotalSupply(toUnit('0'));
+			// TODO : currently we only have pUSD, we need to test again after adding more pynths in the future
+			it.skip('Removing a pynth invalidates the debt cache', async () => {
+				await pETHContract.setTotalSupply(toUnit('0'));
 				assert.isFalse((await debtCache.cacheInfo())[2]);
-				const tx = await issuer.removePynth(pEUR, { from: owner });
+				const tx = await issuer.removePynth(pETH, { from: owner });
 				assert.isTrue((await debtCache.cacheInfo())[2]);
 
 				const logs = await getDecodedLogs({
@@ -773,7 +753,7 @@ contract('DebtCache', async accounts => {
 			it('Adding multiple pynths invalidates the debt cache', async () => {
 				const { token: pynth1 } = await mockToken({
 					accounts,
-					pynth: 'sXYZ',
+					pynth: 'pXYZ',
 					skipInitialAllocation: true,
 					supply: 0,
 					name: 'XYZ',
@@ -781,7 +761,7 @@ contract('DebtCache', async accounts => {
 				});
 				const { token: pynth2 } = await mockToken({
 					accounts,
-					pynth: 'sABC',
+					pynth: 'pABC',
 					skipInitialAllocation: true,
 					supply: 0,
 					name: 'ABC',
@@ -805,12 +785,13 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('Removing multiple pynths invalidates the debt cache', async () => {
-				await pAUDContract.setTotalSupply(toUnit('0'));
-				await pEURContract.setTotalSupply(toUnit('0'));
+			// we dont have other pynths except for pUSD at this time,
+			it.skip('Removing multiple pynths invalidates the debt cache', async () => {
+				await pBTCContract.setTotalSupply(toUnit('0'));
+				await pETHContract.setTotalSupply(toUnit('0'));
 
 				assert.isFalse((await debtCache.cacheInfo())[2]);
-				const tx = await issuer.removePynths([pEUR, pAUD], { from: owner });
+				const tx = await issuer.removePynths([pETH, pBTC], { from: owner });
 				assert.isTrue((await debtCache.cacheInfo())[2]);
 
 				const logs = await getDecodedLogs({
@@ -826,17 +807,18 @@ contract('DebtCache', async accounts => {
 				});
 			});
 
-			it('Removing multiple pynths zeroes the debt cache for those currencies', async () => {
+			// we dont have other pynths except for pUSD at this time,
+			it.skip('Removing multiple pynths zeroes the debt cache for those currencies', async () => {
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
-				const pEURValue = (await debtCache.cachedPynthDebts([pEUR]))[0];
-				const pAUDValue = (await debtCache.cachedPynthDebts([pAUD]))[0];
-				await pEURContract.setTotalSupply(toUnit(0));
-				await pAUDContract.setTotalSupply(toUnit(0));
-				const tx = await issuer.removePynths([pEUR, pAUD], { from: owner });
-				const result = await debtCache.cachedPynthDebts([pEUR, pAUD]);
+				const pETHValue = (await debtCache.cachedPynthDebts([pETH]))[0];
+				const pBTCValue = (await debtCache.cachedPynthDebts([pBTC]))[0];
+				await pETHContract.setTotalSupply(toUnit(0));
+				await pBTCContract.setTotalSupply(toUnit(0));
+				const tx = await issuer.removePynths([pETH, pBTC], { from: owner });
+				const result = await debtCache.cachedPynthDebts([pETH, pBTC]);
 				const newIssued = (await debtCache.cacheInfo())[0];
-				assert.bnEqual(newIssued, issued.sub(pEURValue.add(pAUDValue)));
+				assert.bnEqual(newIssued, issued.sub(pETHValue.add(pBTCValue)));
 				assert.bnEqual(result[0], toUnit(0));
 				assert.bnEqual(result[1], toUnit(0));
 
