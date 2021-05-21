@@ -78,7 +78,8 @@ contract('FeePool', async accounts => {
 		delegateApprovals,
 		pUSDContract,
 		addressResolver,
-		pynths;
+		pynths,
+		stakingStateUSDC;
 
 	before(async () => {
 		pynths = ['pUSD', 'pAUD'];
@@ -94,6 +95,7 @@ contract('FeePool', async accounts => {
 			SystemSettings: systemSettings,
 			PynthpUSD: pUSDContract,
 			SystemStatus: systemStatus,
+			StakingStateUSDC: stakingStateUSDC
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -112,6 +114,7 @@ contract('FeePool', async accounts => {
 				'RewardEscrowV2',
 				'DelegateApprovals',
 				'CollateralManager',
+				'StakingStateUSDC'
 			],
 		}));
 
