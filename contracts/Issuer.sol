@@ -740,6 +740,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     external
     onlyPeriFinance {
         _unstakeAndRefundUSDC(_account, _usdcUnstakeAmount);
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+        _requireRatesNotInvalid(isUSDCInvalid);
+
+        uint burnAmount = _usdcToUSD(_usdcUnstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
+
+        _voluntaryBurnPynths(_account, burnAmount, false, false);
     }
 
     function unstakeToTargetAndRefundUSDC(address _account)
@@ -983,9 +991,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _appendAccountIssuanceRecord(debtAccount);
 
         if(stakingStateUSDC().hasStaked(debtAccount)) {
-            (uint currentUSDCDebtQuota, ) = _currentUSDCDebtQuota(debtAccount);
+            (uint usdcDebtQuota, ) = _currentUSDCDebtQuota(debtAccount);
             
-            if(unstakeUSDCToTargetQuota || currentUSDCDebtQuota > getUSDCQuota()) {
+            if(unstakeUSDCToTargetQuota || usdcDebtQuota > getUSDCQuota()) {
                 _unstakeUSDCToTargetQuota(debtAccount);
             }            
         }
