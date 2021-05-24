@@ -28,6 +28,7 @@ const {
 const {
 	ContractFunctionVisibility,
 } = require('hardhat/internal/hardhat-network/stack-traces/model');
+const { AssertionError } = require('chai');
 
 contract('Issuer (via PeriFinance)', async accounts => {
 	const WEEK = 604800;
@@ -2254,6 +2255,55 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(debtBalance_1_before.sub(toUnit("100")), debtBalance_1_after);
 					assert.bnEqual(usdcStakedAmount_1_before, usdcStakedAmount_1_after);
 					assert.bnEqual(usdcBalance_1_before, usdcBalance_1_after);
+				});
+
+				it.only("should unstake and burn", async () => {
+					await periFinance.stakeUSDCAndIssuePynths('10000' + '0'.repeat(6), toUnit('10000'), {
+						from: account1,
+					});
+
+					await fastForward(86400 + 1);
+					
+					await debtCache.takeDebtSnapshot();
+					
+					const pUSDBalance_1_before = await pUSDContract.balanceOf(account1);
+					const usdcStakedAmount_1_before = await stakingStateUSDC.stakedAmountOf(account1);
+					const debtBalance_1_before = await periFinance.debtBalanceOf(account1, pUSD);
+					const usdcBalance_1_before = await usdc.balanceOf(account1);
+
+					await periFinance.unstakeAndRefundUSDC("100" + "0".repeat(6), { from: account1 });
+
+					const pUSDBalance_1_after = await pUSDContract.balanceOf(account1);
+					const usdcStakedAmount_1_after = await stakingStateUSDC.stakedAmountOf(account1);
+					const debtBalance_1_after = await periFinance.debtBalanceOf(account1, pUSD);
+					const usdcBalance_1_after = await usdc.balanceOf(account1);
+					
+					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
+					const issuanceRatio = await issuer.issuanceRatio();
+					const expectedBurnAmount = multiplyDecimal(
+							multiplyDecimal(
+							toUnit("100"),
+							issuanceRatio
+						),
+						usdcExRate
+					);
+
+					assert.bnClose(pUSDBalance_1_before.sub(expectedBurnAmount), pUSDBalance_1_after, "10");
+					assert.bnEqual(usdcStakedAmount_1_before.sub(web3.utils.toBN("100" + "0".repeat(6))), usdcStakedAmount_1_after);
+					assert.bnEqual(debtBalance_1_before.sub(expectedBurnAmount), debtBalance_1_after, "10");
+					assert.bnEqual(usdcBalance_1_before.add(web3.utils.toBN("100" + "0".repeat(6))), usdcBalance_1_after, "10");
+				});
+
+				it.only("should NOT unstake more than the amount of user staked", async () => {
+					await usdc.transfer(stakingStateUSDC.address, '100000' + '0'.repeat(6), { from: accounts[0] }),
+
+					await periFinance.stakeUSDCAndIssuePynths('100' + '0'.repeat(6), toUnit('10000'), {
+						from: account1,
+					});
+	
+					await assert.revert(
+						periFinance.unstakeAndRefundUSDC("1000" + "0".repeat(6), { from: account1 }),
+						"User doesn't have enough staked amount");
 				});
 			});
 
