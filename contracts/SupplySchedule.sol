@@ -32,7 +32,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // 75e6 * SafeDecimalMath.unit() / 52
     uint public constant INITIAL_WEEKLY_SUPPLY = 1442307692307692307692307;
 
-    // Address of the PynthetixProxy for the onlyPynthetix modifier
+    // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
 
     // Max PERI rewards for minter

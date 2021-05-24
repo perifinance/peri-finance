@@ -185,10 +185,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().currentUSDCDebtQuota(_account);
     }
 
-    function canStakeUSDC(address _account)
+    function canStakeUSDC(address _account, uint _stakingAmount)
     external view
     returns(bool) {
-        return issuer().canStakeUSDC(_account);
+        return issuer().canStakeUSDC(_account, _stakingAmount);
     }
 
     function availableUSDCStakeAmount(address _account)

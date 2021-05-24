@@ -47,7 +47,7 @@ interface IPeriFinance {
     external view
     returns(uint);
 
-    function canStakeUSDC(address _account)
+    function canStakeUSDC(address _account, uint _stakingAmount)
     external view
     returns(bool);
 
