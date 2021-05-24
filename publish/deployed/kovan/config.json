@@ -3,10 +3,10 @@
 		"deploy": false
 	},
 	"BinaryOptionMarketFactory": {
-		"deploy": false
+		"deploy": true
 	},
 	"BinaryOptionMarketManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"BinaryOptionMarketData": {
 		"deploy": false
@@ -147,22 +147,22 @@
 		"deploy": false
 	},
 	"TokenStateiBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiBTC": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStateiETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"ProxyiETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"PynthiETH": {
-		"deploy": false
+		"deploy": true
 	},
 	"TradingRewards": {
 		"deploy": false
