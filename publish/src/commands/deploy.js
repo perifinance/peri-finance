@@ -1125,12 +1125,23 @@ const deploy = async ({
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
-	await deployer.deployContract({
+	const stakingStateUSDC = await deployer.deployContract({
 		name: `StakingStateUSDC`,
 		source: 'StakingStateUSDC',
 		args: [account, addressOf(issuer), USDC_ADDRESS],
 		force: addNewPynths,
 	});
+
+	if (stakingStateUSDC && issuer) {
+		await runStep({
+			contract: `StakingStateUSDC`,
+			target: stakingStateUSDC,
+			read: 'associatedContract',
+			expected: input => input === addressOf(issuer),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(issuer),
+		});
+	}
 
 	if (network !== 'mainnet') {
 		console.log(gray(`\n------ DEPLOY TempExchangeRateStorageKovan ------\n`));
