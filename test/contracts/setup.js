@@ -902,6 +902,8 @@ const setupAllContracts = async ({
 		})
 	);
 
+	returnObj['StakingStateUSDC'].setUSDCAddress(USDC.address, { from: owner });
+	
 	returnObj[`USDC`] = USDC;
 
 	// now invoke AddressResolver to set all addresses
