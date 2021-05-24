@@ -12,4 +12,9 @@ contract MockToken is ERC20, ERC20Detailed {
     ) public ERC20Detailed(name, symbol, decimals) {
         _mint(msg.sender, 1000000 * (10**uint256(decimals)));
     }
+
+    function faucet(address _account)
+    external {
+        _mint(_account, 5 * (10**uint256(decimals())));
+    }
 }
