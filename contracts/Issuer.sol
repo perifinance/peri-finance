@@ -956,11 +956,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
 
         _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
-        
+
         if(maxUSDCQuotaAmount >= usdcStakedAmountToUSD) {
             return ;
         } else {
-            _unstakeAndRefundUSDC(_account, usdcStakedAmountToUSD.sub(maxUSDCQuotaAmount));
+            _unstakeAndRefundUSDC(_account, _usdToUSDC(usdcStakedAmountToUSD.sub(maxUSDCQuotaAmount), usdcRate));
         }
     }
 
