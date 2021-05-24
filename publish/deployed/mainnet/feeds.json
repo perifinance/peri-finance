@@ -114,5 +114,9 @@
 	"OIL": {
 		"asset": "OIL",
 		"feed": "0xf3584F4dd3b467e73C2339EfD008665a70A4185c"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"
 	}
 }

@@ -846,8 +846,6 @@ const deploy = async ({
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
-	const issuerAddress = addressOf(issuer);
-
 	await deployer.deployContract({
 		name: 'TradingRewards',
 		deps: ['AddressResolver', 'Exchanger'],
@@ -860,9 +858,9 @@ const deploy = async ({
 			contract: 'PeriFinanceState',
 			target: periFinanceState,
 			read: 'associatedContract',
-			expected: input => input === issuerAddress,
+			expected: input => input === addressOf(issuer),
 			write: 'setAssociatedContract',
-			writeArg: issuerAddress,
+			writeArg: addressOf(issuer),
 		});
 	}
 
@@ -993,29 +991,12 @@ const deploy = async ({
 			force: addNewPynths,
 		});
 
-		// Legacy proxy will be around until May 30, 2020
-		// https://docs.peri.finance/integrations/guide/#proxy-deprecation
-		// Until this time, on mainnet we will still deploy ProxyERC20pUSD and ensure that
-		// PynthpUSD.proxy is ProxyERC20pUSD, PynthpUSD.integrationProxy is ProxypUSD
-		const pynthProxyIsLegacy = currencyKey === 'pUSD' && network === 'mainnet';
-
 		const proxyForPynth = await deployer.deployContract({
 			name: `Proxy${currencyKey}`,
-			source: pynthProxyIsLegacy ? 'Proxy' : 'ProxyERC20',
+			source: 'ProxyERC20',
 			args: [account],
 			force: addNewPynths,
 		});
-
-		// additionally deploy an ERC20 proxy for the pynth if it's legacy (pUSD)
-		let proxyERC20ForPynth;
-		if (currencyKey === 'pUSD') {
-			proxyERC20ForPynth = await deployer.deployContract({
-				name: `ProxyERC20${currencyKey}`,
-				source: `ProxyERC20`,
-				args: [account],
-				force: addNewPynths,
-			});
-		}
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
@@ -1059,7 +1040,7 @@ const deploy = async ({
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'PeriFinance', 'FeePool'],
 			args: [
-				proxyERC20ForPynth ? addressOf(proxyERC20ForPynth) : addressOf(proxyForPynth),
+				addressOf(proxyForPynth),
 				addressOf(tokenStateForPynth),
 				`Pynth ${currencyKey}`,
 				currencyKey,
@@ -1093,27 +1074,14 @@ const deploy = async ({
 				writeArg: addressOf(pynth),
 			});
 
-			// Migration Phrase 2: if there's a ProxyERC20pUSD then the Pynth's proxy must use it
 			await runStep({
 				contract: `Pynth${currencyKey}`,
 				target: pynth,
 				read: 'proxy',
-				expected: input => input === addressOf(proxyERC20ForPynth || proxyForPynth),
+				expected: input => input === addressOf(proxyForPynth),
 				write: 'setProxy',
-				writeArg: addressOf(proxyERC20ForPynth || proxyForPynth),
+				writeArg: addressOf(proxyForPynth),
 			});
-
-			if (proxyERC20ForPynth) {
-				// and make sure this new proxy has the target of the pynth
-				await runStep({
-					contract: `ProxyERC20${currencyKey}`,
-					target: proxyERC20ForPynth,
-					read: 'target',
-					expected: input => input === addressOf(pynth),
-					write: 'setTarget',
-					writeArg: addressOf(pynth),
-				});
-			}
 		}
 
 		// Save the pynth to be added once the AddressResolver has been synced.
@@ -1140,24 +1108,27 @@ const deploy = async ({
 		}
 	}
 
-	let USDC;
-	if (network !== 'mainnet') {
-		console.log(gray(`\n------ DEPLOY USDC MockToken ------\n`));
+	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
+	if (!USDC_ADDRESS) {
+		if (network === 'mainnet') {
+			throw new Error('USDC address is not known');
+		}
 
-		USDC = await deployer.deployContract({
+		const USDC = await deployer.deployContract({
 			name: 'USDC',
 			source: 'MockToken',
 			args: ['USDC', 'USDC', 6],
 		});
+
+		USDC_ADDRESS = USDC.options.address;
 	}
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
-	const usdcAddress = network !== 'mainnet' ? addressOf(USDC) : ZERO_ADDRESS;
 	await deployer.deployContract({
 		name: `StakingStateUSDC`,
 		source: 'StakingStateUSDC',
-		args: [account, issuerAddress, usdcAddress],
+		args: [account, addressOf(issuer), USDC_ADDRESS],
 		force: addNewPynths,
 	});
 
