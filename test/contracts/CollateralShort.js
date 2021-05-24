@@ -107,6 +107,7 @@ contract('CollateralShort', async accounts => {
 				'SystemStatus',
 				'Issuer',
 				'DebtCache',
+				'StakingStateUSDC',
 			],
 		}));
 

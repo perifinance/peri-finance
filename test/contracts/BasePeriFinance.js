@@ -62,6 +62,7 @@ contract('BasePeriFinance', async accounts => {
 				'RewardsDistribution',
 				'CollateralManager',
 				'RewardEscrowV2', // required for collateral check in issuer
+				'StakingStateUSDC',
 			],
 		}));
 
@@ -82,6 +83,10 @@ contract('BasePeriFinance', async accounts => {
 				'burnPynthsOnBehalf',
 				'burnPynthsToTarget',
 				'burnPynthsToTargetOnBehalf',
+				'burnPynthsAndUnstakeUSDCToTarget',
+				'burnPynthsToTargetAndUnstakeUSDCToTarget',
+				'unstakeAndRefundUSDC',
+				'unstakeToTargetAndRefundUSDC',
 				'emitPynthExchange',
 				'emitExchangeRebate',
 				'emitExchangeReclaim',
@@ -95,7 +100,10 @@ contract('BasePeriFinance', async accounts => {
 				'issueMaxPynthsOnBehalf',
 				'issuePynths',
 				'issuePynthsOnBehalf',
-				'issuePynthsUsdc',
+				'stakeUSDCAndIssuePynths',
+				'stakeMaxUSDCAndIssuePynths',
+				'stakeUSDCAndIssueMaxPynths',
+				'stakeMaxUSDCAndIssueMaxPynths',
 				'mint',
 				'mintSecondary',
 				'mintSecondaryRewards',
@@ -302,7 +310,8 @@ contract('BasePeriFinance', async accounts => {
 		});
 	});
 
-	describe('Exchanger calls', () => {
+	// currently exchange does not support
+	describe.skip('Exchanger calls', () => {
 		let smockExchanger;
 		beforeEach(async () => {
 			smockExchanger = await smockit(artifacts.require('Exchanger').abi);
@@ -626,7 +635,8 @@ contract('BasePeriFinance', async accounts => {
 			);
 		});
 
-		describe('when the user has issued some pUSD and exchanged for other pynths', () => {
+		// currently exchange doesn`t support
+		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
 				await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
@@ -864,7 +874,8 @@ contract('BasePeriFinance', async accounts => {
 			);
 		});
 
-		it("should lock newly received periFinance if the user's collaterisation is too high", async () => {
+		// currently exchange does not support
+		it.skip("should lock newly received periFinance if the user's collaterisation is too high", async () => {
 			// Set pEUR for purposes of this test
 			const timestamp1 = await currentTime();
 			await exchangeRates.updateRates([pEUR], [toUnit('0.75')], timestamp1, {
@@ -912,7 +923,8 @@ contract('BasePeriFinance', async accounts => {
 			await assert.revert(basePeriFinance.transfer(account2, toUnit('10000'), { from: account1 }));
 		});
 
-		it('should unlock periFinance when collaterisation ratio changes', async () => {
+		// currently exchange does not support
+		it.skip('should unlock periFinance when collaterisation ratio changes', async () => {
 			// prevent circuit breaker from firing by upping the threshold to factor 5
 			await systemSettings.setPriceDeviationThresholdFactor(toUnit('5'), {
 				from: owner,
@@ -957,7 +969,8 @@ contract('BasePeriFinance', async accounts => {
 			assert.equal(transferable2.gt(toUnit('1000')), true);
 		});
 
-		describe('when the user has issued some pUSD and exchanged for other pynths', () => {
+		// currently exchange does not support
+		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
 				await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {

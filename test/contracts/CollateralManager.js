@@ -147,6 +147,7 @@ contract('CollateralManager', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'Exchanger',
+				'StakingStateUSDC',
 			],
 		}));
 
@@ -386,11 +387,11 @@ contract('CollateralManager', async accounts => {
 	describe('default values for totalLong and totalShort', async () => {
 		it('totalLong should be 0', async () => {
 			const long = await manager.totalLong();
-			assert.bnEqual(long.susdValue, toUnit('0'));
+			assert.bnEqual(long.pusdValue, toUnit('0'));
 		});
 		it('totalShort should be 0', async () => {
 			const short = await manager.totalShort();
-			assert.bnEqual(short.susdValue, toUnit('0'));
+			assert.bnEqual(short.pusdValue, toUnit('0'));
 		});
 	});
 
@@ -437,14 +438,14 @@ contract('CollateralManager', async accounts => {
 
 		it('should get the total long balance in pUSD correctly', async () => {
 			const total = await manager.totalLong();
-			const debt = total.susdValue;
+			const debt = total.pusdValue;
 
 			assert.bnEqual(debt, toUnit(400));
 		});
 
 		it('should get the total short balance in pUSD correctly', async () => {
 			const total = await manager.totalShort();
-			const debt = total.susdValue;
+			const debt = total.pusdValue;
 
 			assert.bnEqual(debt, toUnit(100));
 		});
@@ -453,11 +454,11 @@ contract('CollateralManager', async accounts => {
 			await fastForward(await exchangeRates.rateStalePeriod());
 
 			const long = await manager.totalLong();
-			const debt = long.susdValue;
+			const debt = long.pusdValue;
 			const invalid = long.anyRateIsInvalid;
 
 			const short = await manager.totalShort();
-			const shortDebt = short.susdValue;
+			const shortDebt = short.pusdValue;
 			const shortInvalid = short.anyRateIsInvalid;
 
 			assert.bnEqual(debt, toUnit(400));
@@ -480,7 +481,7 @@ contract('CollateralManager', async accounts => {
 			await ceth.close(id, { from: account1 });
 
 			const total = await manager.totalLong();
-			const debt = total.susdValue;
+			const debt = total.pusdValue;
 
 			assert.bnEqual(debt, toUnit(300));
 		});

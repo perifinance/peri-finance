@@ -40,7 +40,7 @@ contract('FeePool', async accounts => {
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
 
-		await exchangeRates.updateRates([pAUD, PERI], ['0.5', '0.1'].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([pBTC, pETH], ['2', '1'].map(toUnit), timestamp, {
 			from: oracle,
 		});
 		await debtCache.takeDebtSnapshot();
@@ -64,7 +64,7 @@ contract('FeePool', async accounts => {
 	};
 
 	// CURRENCIES
-	const [pUSD, pAUD, PERI] = ['pUSD', 'pAUD', 'PERI'].map(toBytes32);
+	const [pUSD, pBTC, pETH, PERI, USDC] = ['pUSD', 'pBTC', 'pETH', 'PERI', 'USDC'].map(toBytes32);
 
 	let feePool,
 		debtCache,
@@ -77,12 +77,16 @@ contract('FeePool', async accounts => {
 		feePoolState,
 		delegateApprovals,
 		pUSDContract,
+		pBTCContract,
+		pETHContract,
+		USDCContract,
 		addressResolver,
-		pynths,
-		stakingStateUSDC;
+		stakingStateUSDC,
+		tempKovanOracle,
+		pynths;
 
 	before(async () => {
-		pynths = ['pUSD', 'pAUD'];
+		pynths = ['pUSD', 'pBTC', 'pETH'];
 		({
 			AddressResolver: addressResolver,
 			DelegateApprovals: delegateApprovals,
@@ -94,8 +98,12 @@ contract('FeePool', async accounts => {
 			PeriFinance: periFinance,
 			SystemSettings: systemSettings,
 			PynthpUSD: pUSDContract,
+			PynthpBTC: pBTCContract,
+			PynthpETH: pETHContract,
 			SystemStatus: systemStatus,
-			StakingStateUSDC: stakingStateUSDC
+			USDC: USDCContract,
+			StakingStateUSDC: stakingStateUSDC,
+			TempKovanOracle: tempKovanOracle,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -114,7 +122,8 @@ contract('FeePool', async accounts => {
 				'RewardEscrowV2',
 				'DelegateApprovals',
 				'CollateralManager',
-				'StakingStateUSDC'
+				'StakingStateUSDC',
+				'TempKovanOracle',
 			],
 		}));
 
@@ -129,7 +138,7 @@ contract('FeePool', async accounts => {
 
 		// set a 0.3% default exchange fee rate                                                                                 │        { contract: 'ExchangeState' },
 		const exchangeFeeRate = toUnit('0.003');
-		const pynthKeys = [pAUD, pUSD];
+		const pynthKeys = [pBTC, pETH];
 		await setExchangeFeeRateForPynths({
 			owner,
 			systemSettings,
@@ -216,27 +225,36 @@ contract('FeePool', async accounts => {
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 		});
 
-		it('should track fee withdrawals correctly', async () => {
+		it.only('should track fee withdrawals correctly', async () => {
 			const amount = toUnit('10000');
 
 			// Issue pUSD for two different accounts.
 			await periFinance.transfer(account1, toUnit('1000000'), {
 				from: owner,
 			});
+			await periFinance.transfer(account2, toUnit('1000000'), {
+				from: owner,
+			});
 
-			await periFinance.issuePynths(amount, { from: owner });
 			await periFinance.issuePynths(amount, { from: account1 });
+			await periFinance.issuePynths(amount, { from: account2 });
 
 			await closeFeePeriod();
 
 			// Generate a fee.
-			const exchange = toUnit('10000');
-			await periFinance.exchange(pUSD, exchange, pAUD, { from: owner });
+			const exchange = toUnit('10');
+			await periFinance.exchange(pUSD, exchange, pBTC, { from: account1 });
 
 			await closeFeePeriod();
 
+			// await tempKovanOracle.setRate(PERI, '19940000000000000000');
+			// await tempKovanOracle.setRate(USDC, '980000000000000000');
+			// await tempKovanOracle.setRate(pBTC, '1000000000000000000');
+			// await tempKovanOracle.setRate(pETH, '1000000000000000000');
+			await debtCache.takeDebtSnapshot();
+
 			// Then claim the owner's fees
-			await feePool.claimFees({ from: owner });
+			await feePool.claimFees({ from: account1 });
 
 			// At this stage there should be a single pending period, one that's half claimed, and an empty one.
 			const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
@@ -302,7 +320,7 @@ contract('FeePool', async accounts => {
 			await periFinance.issuePynths(amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Generate a fee.
-			await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
+			await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
 
 			// Should be no fees available yet because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
@@ -328,7 +346,7 @@ contract('FeePool', async accounts => {
 			await periFinance.issuePynths(amount2, { from: account1 });
 
 			// Generate a fee.
-			await periFinance.exchange(pUSD, amount1, pAUD, { from: owner });
+			await periFinance.exchange(pUSD, amount1, pBTC, { from: owner });
 
 			// Should be no fees available yet because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
@@ -343,7 +361,7 @@ contract('FeePool', async accounts => {
 			const fee2 = amount2.sub(amountReceivedFromExchange(amount2));
 
 			// Generate a fee.
-			await periFinance.exchange(pUSD, amount2, pAUD, { from: account1 });
+			await periFinance.exchange(pUSD, amount2, pBTC, { from: account1 });
 
 			// Should be only the previous fees available because the period is still pending.
 			assert.bnEqual(await feePool.totalFeesAvailable(), fee1);
@@ -371,7 +389,7 @@ contract('FeePool', async accounts => {
 			await closeFeePeriod();
 
 			// Generate a fee.
-			await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
+			await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
 
 			// Should be no fees available yet because the period is still pending.
 			let feesAvailable;
@@ -423,7 +441,7 @@ contract('FeePool', async accounts => {
 			await closeFeePeriod();
 
 			// Generate a fee.
-			await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
+			await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
 
 			let feesAvailable;
 			// Should be no fees available yet because the period is still pending.
@@ -782,7 +800,7 @@ contract('FeePool', async accounts => {
 				beforeEach(async () => {
 					// ensure claimFees() can succeed by default (generate fees and close period)
 					await periFinance.issuePynths(toUnit('10000'), { from: owner });
-					await periFinance.exchange(pUSD, toUnit('10'), pAUD, { from: owner });
+					await periFinance.exchange(pUSD, toUnit('10'), pBTC, { from: owner });
 					await closeFeePeriod();
 				});
 				['System', 'Issuance'].forEach(section => {
@@ -803,7 +821,7 @@ contract('FeePool', async accounts => {
 						});
 					});
 				});
-				['PERI', 'pAUD', ['PERI', 'pAUD'], 'none'].forEach(type => {
+				['PERI', 'pBTC', ['PERI', 'pBTC'], 'none'].forEach(type => {
 					describe(`when ${type} is stale`, () => {
 						beforeEach(async () => {
 							await fastForward(
@@ -860,8 +878,8 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 					const exchange2 = toUnit(((i + 1) * 15).toString());
 
-					await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
-					await periFinance.exchange(pUSD, exchange2, pAUD, { from: account1 });
+					await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
+					await periFinance.exchange(pUSD, exchange2, pBTC, { from: account1 });
 
 					await closeFeePeriod();
 				}
@@ -896,7 +914,7 @@ contract('FeePool', async accounts => {
 
 				const exchange1 = toUnit((10).toString());
 
-				await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
+				await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
@@ -920,7 +938,7 @@ contract('FeePool', async accounts => {
 				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
 
 				// Generate fees
-				await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
+				await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
 				await closeFeePeriod();
@@ -957,8 +975,8 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 					const exchange2 = toUnit(((i + 1) * 15).toString());
 
-					await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
-					await periFinance.exchange(pUSD, exchange2, pAUD, { from: account1 });
+					await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
+					await periFinance.exchange(pUSD, exchange2, pBTC, { from: account1 });
 
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 					totalFees = totalFees.add(exchange2.sub(amountReceivedFromExchange(exchange2)));
@@ -1009,7 +1027,7 @@ contract('FeePool', async accounts => {
 
 				// Do a single exchange of all our pynths to generate a fee.
 				const exchange1 = toUnit(100);
-				await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
+				await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 
 				// Assert that the correct fee is in the fee pool.
 				const fee = await pUSDContract.balanceOf(FEE_ADDRESS);
@@ -1152,7 +1170,7 @@ contract('FeePool', async accounts => {
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
-				await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
+				await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
 				const fee = amount.sub(amountReceivedFromExchange(amount));
 
 				// We should have zero fees available because the period is still open.
@@ -1195,7 +1213,7 @@ contract('FeePool', async accounts => {
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
-				await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
+				await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
 				const fee = amount.sub(amountReceivedFromExchange(amount));
 
 				// We should have zero fees available because the period is still open.
@@ -1267,7 +1285,7 @@ contract('FeePool', async accounts => {
 				const exchange1 = toUnit((10).toString());
 
 				// generate fee
-				await periFinance.exchange(pUSD, exchange1, pAUD, { from: account1 });
+				await periFinance.exchange(pUSD, exchange1, pBTC, { from: account1 });
 
 				await closeFeePeriod();
 			}
@@ -1302,7 +1320,7 @@ contract('FeePool', async accounts => {
 						});
 					});
 				});
-				['PERI', 'pAUD', ['PERI', 'pAUD'], 'none'].forEach(type => {
+				['PERI', 'pBTC', ['PERI', 'pBTC'], 'none'].forEach(type => {
 					describe(`when ${type} is stale`, () => {
 						beforeEach(async () => {
 							await fastForward(
@@ -1412,7 +1430,7 @@ contract('FeePool', async accounts => {
 					await periFinance.issuePynths(toUnit('1000'), { from: owner });
 					await periFinance.issuePynths(toUnit('1000'), { from: account1 });
 
-					await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
+					await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 

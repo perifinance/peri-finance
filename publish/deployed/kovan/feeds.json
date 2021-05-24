@@ -77,5 +77,9 @@
 	"TSLA": {
 		"asset": "TSLA",
 		"feed": "0xb31357d152638fd1ae0853d24b9Ea81dF29E3EF2"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60"
 	}
 }
