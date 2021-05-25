@@ -1310,7 +1310,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.equal(usdcExRate.toString(), '9' + '0'.repeat(17));
 				});
 
-				it('should NOT stake if try to stake more than issue', async () => {
+				it.only('should NOT stake if try to stake more than issue', async () => {
 					const remainingIssuableResult = await periFinance.remainingIssuablePynths(account1);
 					const canStakeUSDC = await periFinance.canStakeUSDC(account1, "0");
 					const availableUSDCStakeAmount = await periFinance.availableUSDCStakeAmount(account1);
@@ -1327,7 +1327,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					);
 				});
 
-				it('should NOT stake USDC if there is no issue amount', async () => {
+				it.only('should NOT stake USDC if there is no issue amount', async () => {
 					// debt will be 10000 USD
 					await periFinance.issuePynths(toUnit('10000'), { from: account1 });
 
@@ -2045,7 +2045,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					
 				});
 
-				it("should burn and unstake", async () => {					
+				it.only("should burn and unstake", async () => {					
 					await periFinance.stakeUSDCAndIssuePynths('22222' + '2'.repeat(6), toUnit('10000'), {
 						from: account1,
 					});
@@ -2091,7 +2091,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnClose(usdcBalance_1_after.sub(usdcBalance_1_before), expectedUnstakeAmount, "10");
 				});
 
-				it("should burn and NOT unstake", async () => {
+				it.only("should burn and NOT unstake", async () => {
 					await periFinance.stakeUSDCAndIssuePynths('10000' + '0'.repeat(6), toUnit('10000'), {
 						from: account1,
 					});
@@ -2121,7 +2121,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(usdcBalance_1_before, usdcBalance_1_after);
 				});
 
-				it("should unstake and burn", async () => {
+				it.only("should unstake and burn", async () => {
 					await periFinance.stakeUSDCAndIssuePynths('10000' + '0'.repeat(6), toUnit('10000'), {
 						from: account1,
 					});
@@ -2158,7 +2158,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(usdcBalance_1_before.add(web3.utils.toBN("100" + "0".repeat(6))), usdcBalance_1_after, "10");
 				});
 
-				it("should NOT unstake more than the amount of user staked", async () => {
+				it.only("should NOT unstake more than the amount of user staked", async () => {
 					await usdc.transfer(stakingStateUSDC.address, '100000' + '0'.repeat(6), { from: accounts[0] }),
 
 					await periFinance.stakeUSDCAndIssuePynths('100' + '0'.repeat(6), toUnit('10000'), {
@@ -2168,27 +2168,76 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await assert.revert(
 						periFinance.unstakeAndRefundUSDC("1000" + "0".repeat(6), { from: account1 }),
 						"User doesn't have enough staked amount");
-debtBalance_1_after = await periFinance.debtBalanceOf(account1, pUSD);
-					const usdcBalance_1_after = await usdc.balanceOf(account1);
-					
-					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
-					const issuanceRatio = await issuer.issuanceRatio();
-					const expectedBurnAmount = multiplyDecimal(
-							multiplyDecimal(
-							toUnit("100"),
-							issuanceRatio
-						),
-						usdcExRate
-					);
+				});
+			});
 
-					assert.bnClose(pUSDBalance_1_before.sub(expectedBurnAmount), pUSDBalance_1_after, "10");
-					assert.bnEqual(usdcStakedAmount_1_before.sub(web3.utils.toBN("100" + "0".repeat(6))), usdcStakedAmount_1_after);
-					assert.bnEqual(debtBalance_1_before.sub(expectedBurnAmount), debtBalance_1_after, "10");
-					assert.bnEqual(usdcBalance_1_before.add(web3.utils.toBN("100" + "0".repeat(6))), usdcBalance_1_after, "10");
+			describe('debt calculation in multi-issuance scenarios', () => {
+				it('should correctly calculate debt in a multi-issuance scenario', async () => {
+					// Give some PERI to account1
+					await periFinance.transfer(account1, toUnit('200000'), {
+						from: owner,
+					});
+					await periFinance.transfer(account2, toUnit('200000'), {
+						from: owner,
+					});
+
+					// Issue
+					const issuedPynthsPt1 = toUnit('2000');
+					const issuedPynthsPt2 = toUnit('2000');
+					await periFinance.issuePynths(issuedPynthsPt1, { from: account1 });
+					await periFinance.issuePynths(issuedPynthsPt2, { from: account1 });
+					await periFinance.issuePynths(toUnit('1000'), { from: account2 });
+
+					const debt = await periFinance.debtBalanceOf(account1, pUSD);
+					assert.bnClose(debt, toUnit('4000'));
 				});
 
-				it.only("should NOT unstake more than the amount of user staked", async () => {
-ue = await periFinance.maxIssuablePynths(account1);
+				it('should correctly calculate debt in a multi-issuance multi-burn scenario', async () => {
+					// Give some PERI to account1
+					await periFinance.transfer(account1, toUnit('500000'), {
+						from: owner,
+					});
+					await periFinance.transfer(account2, toUnit('14000'), {
+						from: owner,
+					});
+
+					// Issue
+					const issuedPynthsPt1 = toUnit('2000');
+					const burntPynthsPt1 = toUnit('1500');
+					const issuedPynthsPt2 = toUnit('1600');
+					const burntPynthsPt2 = toUnit('500');
+
+					await periFinance.issuePynths(issuedPynthsPt1, { from: account1 });
+					await periFinance.burnPynths(burntPynthsPt1, { from: account1 });
+					await periFinance.issuePynths(issuedPynthsPt2, { from: account1 });
+
+					await periFinance.issuePynths(toUnit('100'), { from: account2 });
+					await periFinance.issuePynths(toUnit('51'), { from: account2 });
+					await periFinance.burnPynths(burntPynthsPt2, { from: account1 });
+
+					const debt = await periFinance.debtBalanceOf(account1, toBytes32('pUSD'));
+					const expectedDebt = issuedPynthsPt1
+						.add(issuedPynthsPt2)
+						.sub(burntPynthsPt1)
+						.sub(burntPynthsPt2);
+
+					assert.bnClose(debt, expectedDebt);
+				});
+
+				it("should allow me to burn all pynths I've issued when there are other issuers", async () => {
+					const totalSupply = await periFinance.totalSupply();
+					const account2PeriFinances = toUnit('120000');
+					const account1PeriFinances = totalSupply.sub(account2PeriFinances);
+
+					await periFinance.transfer(account1, account1PeriFinances, {
+						from: owner,
+					}); // Issue the massive majority to account1
+					await periFinance.transfer(account2, account2PeriFinances, {
+						from: owner,
+					}); // Issue a small amount to account2
+
+					// Issue from account1
+					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
