@@ -43,9 +43,14 @@ contract('FeePool', async accounts => {
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
 
-		await exchangeRates.updateRates([pBTC, pETH, PERI, USDC], ['4000', '2000', '10', '0.9'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await exchangeRates.updateRates(
+			[pBTC, pETH, PERI, USDC],
+			['4000', '2000', '10', '0.9'].map(toUnit),
+			timestamp,
+			{
+				from: oracle,
+			}
+		);
 		await debtCache.takeDebtSnapshot();
 	};
 
@@ -248,7 +253,7 @@ contract('FeePool', async accounts => {
 			await closeFeePeriod();
 
 			await debtCache.takeDebtSnapshot();
-			
+
 			// Then claim the owner's fees
 			await feePool.claimFees({ from: account1 });
 
@@ -1113,7 +1118,7 @@ contract('FeePool', async accounts => {
 				assert.equal(await feePool.isFeesClaimable(owner), true);
 			});
 
-			it.only('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
+			it('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
 				const step = toUnit('0.01');
 				await periFinance.issueMaxPynths({ from: owner });
 

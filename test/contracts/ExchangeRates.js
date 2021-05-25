@@ -75,7 +75,7 @@ contract('Exchange Rates', async accounts => {
 			AddressResolver: resolver,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['ExchangeRates', 'SystemSettings', 'AddressResolver'],
+			contracts: ['ExchangeRates', 'SystemSettings', 'AddressResolver', 'StakingStateUSDC'],
 		}));
 
 		aggregatorJPY = await MockAggregator.new({ from: owner });
@@ -109,6 +109,7 @@ contract('Exchange Rates', async accounts => {
 				'setInversePricing',
 				'setOracle',
 				'updateRates',
+				'setOracleKovan',
 			],
 		});
 	});
@@ -1554,7 +1555,7 @@ contract('Exchange Rates', async accounts => {
 			describe('when updateRates is called with a lower out-of-bounds update', () => {
 				let txn;
 				beforeEach(async () => {
-					const rates = [8050, 400, 1.12, 8050].map(toUnit);
+					const rates = [8050, 400, 1.12].map(toUnit);
 					const timeSent = await currentTime();
 					txn = await instance.updateRates([iBTC, iETH, pEUR], rates, timeSent, {
 						from: oracle,

@@ -138,7 +138,7 @@ const defaults = {
 	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (3600 * 24 * 3).toString(), // 3 days
-	LIQUIDATION_RATIO: w3utils.toWei('0.5'), // 200% cratio
+	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
