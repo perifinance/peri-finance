@@ -129,8 +129,8 @@ const defaults = {
 	ISSUANCE_RATIO: w3utils
 		.toBN(1)
 		.mul(w3utils.toBN(1e18))
-		.div(w3utils.toBN(6))
-		.toString(), // 1/6 = 0.16666666667
+		.div(w3utils.toBN(4))
+		.toString(), // 1/4 = 0.25
 	USDC_QUOTA: w3utils
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
