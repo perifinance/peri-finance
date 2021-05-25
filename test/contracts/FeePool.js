@@ -34,13 +34,16 @@ const {
 } = require('../..');
 
 contract('FeePool', async accounts => {
+	// CURRENCIES
+	const [pUSD, pBTC, pETH, PERI, USDC] = ['pUSD', 'pBTC', 'pETH', 'PERI', 'USDC'].map(toBytes32);
+
 	const [deployerAccount, owner, oracle, account1, account2] = accounts;
 
 	// Updates rates with defaults so they're not stale.
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
 
-		await exchangeRates.updateRates([pBTC, pETH], ['2', '1'].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([pBTC, pETH, PERI, USDC], ['4000', '2000', '10', '0.9'].map(toUnit), timestamp, {
 			from: oracle,
 		});
 		await debtCache.takeDebtSnapshot();
@@ -62,9 +65,6 @@ contract('FeePool', async accounts => {
 	const amountReceivedFromExchange = amountToExchange => {
 		return multiplyDecimal(amountToExchange, toUnit('1').sub(exchangeFeeRate));
 	};
-
-	// CURRENCIES
-	const [pUSD, pBTC, pETH, PERI, USDC] = ['pUSD', 'pBTC', 'pETH', 'PERI', 'USDC'].map(toBytes32);
 
 	let feePool,
 		debtCache,
@@ -225,7 +225,7 @@ contract('FeePool', async accounts => {
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 		});
 
-		it.only('should track fee withdrawals correctly', async () => {
+		it('should track fee withdrawals correctly', async () => {
 			const amount = toUnit('10000');
 
 			// Issue pUSD for two different accounts.
@@ -247,12 +247,8 @@ contract('FeePool', async accounts => {
 
 			await closeFeePeriod();
 
-			// await tempKovanOracle.setRate(PERI, '19940000000000000000');
-			// await tempKovanOracle.setRate(USDC, '980000000000000000');
-			// await tempKovanOracle.setRate(pBTC, '1000000000000000000');
-			// await tempKovanOracle.setRate(pETH, '1000000000000000000');
 			await debtCache.takeDebtSnapshot();
-
+			
 			// Then claim the owner's fees
 			await feePool.claimFees({ from: account1 });
 
@@ -829,7 +825,7 @@ contract('FeePool', async accounts => {
 							);
 
 							// set all rates minus those to ignore
-							const ratesToUpdate = ['PERI']
+							const ratesToUpdate = ['PERI', 'USDC']
 								.concat(pynths)
 								.filter(key => key !== 'pUSD' && ![].concat(type).includes(key));
 
@@ -1117,7 +1113,7 @@ contract('FeePool', async accounts => {
 				assert.equal(await feePool.isFeesClaimable(owner), true);
 			});
 
-			it('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
+			it.only('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
 				const step = toUnit('0.01');
 				await periFinance.issueMaxPynths({ from: owner });
 
@@ -1328,7 +1324,7 @@ contract('FeePool', async accounts => {
 							);
 
 							// set all rates minus those to ignore
-							const ratesToUpdate = ['PERI']
+							const ratesToUpdate = ['PERI', 'USDC']
 								.concat(pynths)
 								.filter(key => key !== 'pUSD' && ![].concat(type).includes(key));
 

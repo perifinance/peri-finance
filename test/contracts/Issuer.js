@@ -1476,6 +1476,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						pUSDBalance_1,
 						debtBalance_1,
 						totalIssuedPUSD,
+						cRatio
 					] = await Promise.all([
 						periFinance.canStakeUSDC(account1, "0"),
 						periFinance.usdcStakedAmountOf(account1),
@@ -1484,6 +1485,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						pUSDContract.balanceOf(account1),
 						periFinance.debtBalanceOf(account1, pUSD),
 						periFinance.totalIssuedPynths(pUSD),
+						periFinance.collateralisationRatio(account1)
 					]);
 
 					assert.equal(canStakeUSDC, true);
@@ -1493,6 +1495,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(pUSDBalance_1, toUnit('21800'));
 					assert.bnEqual(debtBalance_1, toUnit('21800'));
 					assert.bnEqual(totalIssuedPUSD, toUnit('21800'));
+					assert.bnClose(cRatio, toUnit("0.2"), "10");
 
 					// It should not allow stake more
 					await assert.revert(
