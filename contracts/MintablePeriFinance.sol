@@ -5,7 +5,7 @@ import "./BasePeriFinance.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/mintableperiFinance
 contract MintablePeriFinance is BasePeriFinance {
-    bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE = "PeriFinaneBridgeToBase";
+    bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE = "PeriFinanceBridgeToBase";
 
     constructor(
         address payable _proxy,
