@@ -47,7 +47,7 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [pUSD, pAUD, pEUR, pBTC, PERI, iBTC, pETH, ETH] = [
+	const [pUSD, pAUD, pEUR, pBTC, PERI, iBTC, pETH, ETH, USDC] = [
 		'pUSD',
 		'pAUD',
 		'pEUR',
@@ -56,6 +56,7 @@ contract('Rewards Integration Tests', accounts => {
 		'iBTC',
 		'pETH',
 		'ETH',
+		'USDC'
 	].map(toBytes32);
 
 	const pynthKeys = [pUSD, pAUD, pEUR, pBTC, iBTC, pETH, ETH];
@@ -65,8 +66,8 @@ contract('Rewards Integration Tests', accounts => {
 		const timestamp = await currentTime();
 
 		await exchangeRates.updateRates(
-			[pAUD, pEUR, PERI, pBTC, iBTC, pETH, ETH],
-			['0.5', '1.25', '0.1', '5000', '4000', '172', '172'].map(toUnit),
+			[pAUD, pEUR, PERI, pBTC, iBTC, pETH, ETH, USDC],
+			['0.5', '1.25', '0.1', '5000', '4000', '172', '172', '0.9'].map(toUnit),
 			timestamp,
 			{
 				from: oracle,
@@ -143,6 +144,7 @@ contract('Rewards Integration Tests', accounts => {
 		rewardEscrow,
 		periodOneMintableSupplyMinusMinterReward,
 		pUSDContract,
+		stakingStateUSDC,
 		MINTER_PERI_REWARD;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
@@ -161,6 +163,7 @@ contract('Rewards Integration Tests', accounts => {
 			PeriFinance: periFinance,
 			PynthpUSD: pUSDContract,
 			SystemSettings: systemSettings,
+			StakingStateUSDC: stakingStateUSDC
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD', 'pAUD', 'pEUR', 'pBTC', 'iBTC', 'pETH'],
@@ -178,6 +181,7 @@ contract('Rewards Integration Tests', accounts => {
 				'PeriFinance',
 				'SystemSettings',
 				'CollateralManager',
+				'StakingStateUSDC'
 			],
 		}));
 
