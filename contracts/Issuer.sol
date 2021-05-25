@@ -923,6 +923,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         if(_issueMax || _issueAmount > 0) {
             _issuePynths(_issuer, _issueAmount, _issueMax);
+        } else {
+            _setLastIssueEvent(_issuer);
         }
     }
 
