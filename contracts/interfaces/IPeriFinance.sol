@@ -128,15 +128,6 @@ interface IPeriFinance {
     function stakeUSDCAndIssuePynths(uint _usdcStakeAmount, uint _issueAmount) 
     external;
 
-    function stakeMaxUSDCAndIssuePynths(uint _issueAmount)
-    external;
-
-    function stakeUSDCAndIssueMaxPynths(uint _usdcStakeAmount)
-    external;
-
-    function stakeMaxUSDCAndIssueMaxPynths()
-    external;
-
     function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
     external;
 

@@ -87,15 +87,6 @@ interface IIssuer {
         uint _issueAmount
     ) external;
 
-    function stakeMaxUSDCAndIssuePynths(address _issuer, uint _issueAmount)
-    external;
-
-    function stakeUSDCAndIssueMaxPynths(address _issuer, uint _usdcStakeAmount)
-    external;
-
-    function stakeMaxUSDCAndIssueMaxPynths(address _issuer)
-    external;
-
     function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
     external;
 

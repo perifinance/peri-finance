@@ -309,6 +309,27 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             return _usdToUSDC(maxUSDCQuotaAmount.sub(usdcStakedAmountToUSD), usdcRate);
         }
     }
+
+    function _exceededUSDCStakeAmount(address _account)
+    internal view
+    returns(uint) {
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+
+        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+        uint maxUSDCQuotaAmountToUSDC = _usdToUSDC(maxUSDCQuotaAmount, usdcRate);
+        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_account);
+
+        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
+        
+        if(maxUSDCQuotaAmountToUSDC >= usdcStakedAmount) {
+            return 0;
+        } else {
+            return usdcStakedAmount.sub(maxUSDCQuotaAmountToUSDC);
+        }
+    }
     
     /**
      * @param _stakingAmount 6 decimal USDC amount
@@ -691,49 +712,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _issueAmount
     ) external
     onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(
-            _issuer,
-            _usdcStakeAmount,
-            _issueAmount,
-            false,
-            false
-        );
-    }
-
-    function stakeMaxUSDCAndIssuePynths(address _issuer, uint _issueAmount)
-    external
-    onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(
-            _issuer,
-            0,
-            _issueAmount,
-            true,
-            false
-        );
-    }
-
-    function stakeUSDCAndIssueMaxPynths(address _issuer, uint _usdcStakeAmount)
-    external
-    onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(
-            _issuer,
-            _usdcStakeAmount,
-            0,
-            false,
-            true
-        );
-    }
-
-    function stakeMaxUSDCAndIssueMaxPynths(address _issuer)
-    external
-    onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(
-            _issuer,
-            0,
-            0,
-            true,
-            true
-        );
+        _stakeUSDCAndIssuePynths(_issuer, _usdcStakeAmount, _issueAmount);
     }
 
     function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
@@ -788,6 +767,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     external
     onlyPeriFinance {
         _voluntaryBurnPynths(from, 0, true, true);
+    }
+
+    function burnPynthsAndUnstakeUSDC(
+        address _from, 
+        uint _burnAmount, 
+        uint _unstakeAmount
+    ) external
+    onlyPeriFinance {
+        
     }
 
     function liquidateDelinquentAccount(
@@ -894,9 +882,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _stakeUSDCAndIssuePynths(
         address _issuer,
         uint _usdcStakeAmount,
-        uint _issueAmount,
-        bool _stakeMax,
-        bool _issueMax
+        uint _issueAmount
     ) internal {
         (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
@@ -904,16 +890,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint afterDebtWithIssuanceRatio = afterDebtBalance.divideDecimalRound(getIssuanceRatio());
 
         (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
+        require(_issueAmount >= _usdcToUSD(_usdcStakeAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio()),
+            "staking amount exceeds issueing amount");
+
         uint maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
-        // uint maxUSDCQuotaAfterIssue = _maxUSDCQuotaAfterIssue.divideDecimalRound(getIssuanceRatio());
         uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
         require(maxUSDCQuotaAfterIssue > userStakedAmount,
-            "no available USDC stake amount");
+            "staking is not available");
 
         uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
         uint stakeAmount;
-        if(_stakeMax || availableUSDCAmountToStake <= _usdcStakeAmount) {
+        if(availableUSDCAmountToStake <= _usdcStakeAmount) {
             stakeAmount = availableUSDCAmountToStake;
         } else {
             stakeAmount = _usdcStakeAmount;
@@ -921,11 +909,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         _transferAndStakeUSDC(_issuer, stakeAmount);
 
-        if(_issueMax || _issueAmount > 0) {
-            _issuePynths(_issuer, _issueAmount, _issueMax);
-        } else {
-            _setLastIssueEvent(_issuer);
-        }
+        _issuePynths(_issuer, _issueAmount, false);
     }
 
     function _transferAndStakeUSDC(address _account, uint _amount)
