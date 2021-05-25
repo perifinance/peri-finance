@@ -24,7 +24,12 @@ contract('PeriFinanceBridgeToBase (spec tests)', accounts => {
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				contracts: ['MintablePeriFinance', 'PeriFinanceBridgeToBase', 'SystemSettings'],
+				contracts: [
+					'MintablePeriFinance',
+					'PeriFinanceBridgeToBase',
+					'SystemSettings',
+					'StakingStateUSDC',
+				],
 			}));
 		});
 

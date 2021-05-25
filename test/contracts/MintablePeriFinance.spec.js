@@ -28,6 +28,7 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 					'MintablePeriFinance',
 					'RewardsDistribution',
 					'RewardEscrowV2',
+					'StakingStateUSDC',
 				],
 			}));
 			// update resolver

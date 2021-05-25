@@ -104,6 +104,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 				'Exchanger',
 				'FeePool',
 				'CollateralManager',
+				'StakingStateUSDC',
 			],
 		}));
 

@@ -32,6 +32,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 				'initiateRewardDeposit',
 				'migrateBridge',
 				'notifyRewardAmount',
+				'StakingStateUSDC',
 			],
 		});
 	});

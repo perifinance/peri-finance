@@ -149,6 +149,7 @@ contract('EtherCollateralpUSD', async accounts => {
 				'EtherCollateralpUSD',
 				'CollateralManager',
 				'PeriFinance',
+				'StakingStateUSDC',
 			],
 		}));
 

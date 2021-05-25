@@ -24,7 +24,7 @@ contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
-				contracts: ['PeriFinance', 'Issuer', 'PeriFinanceBridgeToOptimism'],
+				contracts: ['PeriFinance', 'Issuer', 'PeriFinanceBridgeToOptimism', 'StakingStateUSDC'],
 			}));
 		});
 

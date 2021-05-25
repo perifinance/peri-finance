@@ -71,6 +71,7 @@ contract('Depot', async accounts => {
 				'SystemStatus',
 				'PeriFinance',
 				'Issuer',
+				'StakingStateUSDC',
 			],
 		}));
 	});

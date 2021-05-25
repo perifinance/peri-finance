@@ -74,6 +74,7 @@ contract('Liquidations', accounts => {
 				'PeriFinanceState',
 				'CollateralManager',
 				'RewardEscrowV2', // required for Issuer._collateral() to load balances
+				'StakingStateUSDC',
 			],
 		}));
 	});

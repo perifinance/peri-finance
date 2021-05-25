@@ -28,6 +28,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 		let proxy;
 		let rewardsDistribution;
 		let systemStatus;
+		let stakingStateUSDC;
 		const PERIFINANCE_TOTAL_SUPPLY = toWei('100000000');
 
 		beforeEach(async () => {
@@ -36,6 +37,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 			rewardsDistribution = await smockit(artifacts.require('IRewardsDistribution').abi);
 			resolver = await artifacts.require('AddressResolver').new(owner);
 			systemStatus = await artifacts.require('SystemStatus').new(owner);
+			stakingStateUSDC = await smockit(artifacts.require('StakingStateUSDC').abi);
 			await resolver.importAddresses(
 				[
 					'PeriFinanceBridgeToBase',
@@ -45,6 +47,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 					'Issuer',
 					'SupplySchedule',
 					'RewardsDistribution',
+					'StakingStateUSDC',
 				].map(toBytes32),
 				[
 					periFinanceBridgeToBase,
@@ -54,6 +57,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 					mockAddress,
 					mockAddress,
 					rewardsDistribution.address,
+					stakingStateUSDC.address,
 				],
 				{ from: owner }
 			);
@@ -72,7 +76,13 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 			beforeEach(async () => {
 				instance = await artifacts
 					.require('MintablePeriFinance')
-					.new(proxy.address, tokenState.address, owner, PERIFINANCE_TOTAL_SUPPLY, resolver.address);
+					.new(
+						proxy.address,
+						tokenState.address,
+						owner,
+						PERIFINANCE_TOTAL_SUPPLY,
+						resolver.address
+					);
 				await instance.rebuildCache();
 			});
 

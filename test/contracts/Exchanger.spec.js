@@ -3773,6 +3773,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					'DelegateApprovals',
 					'FlexibleStorage',
 					'CollateralManager',
+					'StakingStateUSDC',
 				],
 			}));
 
@@ -3874,6 +3875,7 @@ contract('Exchanger (spec tests)', async accounts => {
 					'DelegateApprovals',
 					'FlexibleStorage',
 					'CollateralManager',
+					'StakingStateUSDC',
 				],
 			}));
 
