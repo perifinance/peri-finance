@@ -80,6 +80,9 @@ interface IPeriFinance {
 
     function burnPynthsToTargetOnBehalf(address burnForAddress) external;
 
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
+    external;
+
     function exchange(
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
@@ -126,9 +129,6 @@ interface IPeriFinance {
     function issuePynthsOnBehalf(address issueForAddress, uint amount) external;
 
     function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
-    external;
-
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
     external;
 
     function mint() external returns (bool);
