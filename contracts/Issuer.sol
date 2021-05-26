@@ -743,8 +743,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _unstakeAmount
     ) external
     onlyPeriFinance {
-        _voluntaryBurnPynths(_from, _burnAmount, false);
-
         if(_unstakeAmount > 0) {
             (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
 
@@ -757,6 +755,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             
             _unstakeAndRefundUSDC(_from, _unstakeAmount);
         }
+
+        _voluntaryBurnPynths(_from, _burnAmount, false);
     }
 
     function liquidateDelinquentAccount(
@@ -941,6 +941,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // If they're trying to burn more debt than they actually owe, rather than fail the transaction, let's just
         // clear their debt and leave them be.
         amountBurnt = existingDebt < amount ? existingDebt : amount;
+
+        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(debtAccount);
+        if(usdcStakedAmount > 0) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+            _requireRatesNotInvalid(isUSDCInvalid);
+
+            uint usdcStakedAmountToUSDWithIssuanceRatio = _usdcToUSD(usdcStakedAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio());
+
+            require(existingDebt.sub(amountBurnt) >= usdcStakedAmountToUSDWithIssuanceRatio,
+                "Burn amount exceeds available amount");
+        }
 
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
