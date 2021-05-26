@@ -839,7 +839,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            require(amount <= maxIssuable, "Amount too large");
+            if(amount > maxIssuable) {
+                if(amount <= maxIssuable.multiplyDecimal(1.05 ether)) {
+                    amount = maxIssuable;
+                } else {
+                    revert("Amount too large");
+                }
+            }
         } else {
             amount = maxIssuable;
         }
