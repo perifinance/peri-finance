@@ -25,6 +25,8 @@ import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IStakingStateUSDC.sol";
 
+import "hardhat/console.sol";
+
 interface IRewardEscrowV2 {
     // Views
     function balanceOf(address account) external view returns (uint);
@@ -706,33 +708,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _issuePynths(issueForAddress, 0, true);
     }
 
-    function stakeUSDCAndIssuePynths(
+    function issuePynthsAndStakeUSDC(
         address _issuer,
-        uint _usdcStakeAmount,
-        uint _issueAmount
+        uint _issueAmount,
+        uint _usdcStakeAmount
     ) external
     onlyPeriFinance {
-        _stakeUSDCAndIssuePynths(_issuer, _usdcStakeAmount, _issueAmount);
-    }
-
-    function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
-    external
-    onlyPeriFinance {
-        _unstakeAndRefundUSDC(_account, _usdcUnstakeAmount);
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        _requireRatesNotInvalid(isUSDCInvalid);
-
-        uint burnAmount = _usdcToUSD(_usdcUnstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
-
-        _voluntaryBurnPynths(_account, burnAmount, false);
-    }
-
-    function unstakeToTargetAndRefundUSDC(address _account)
-    external
-    onlyPeriFinance {
-        _unstakeUSDCToTargetQuota(_account);
+        _issuePynthsAndStakeUSDC(_issuer, _issueAmount, _usdcStakeAmount);
     }
 
     function burnPynths(address from, uint amount) external onlyPeriFinance {
@@ -757,25 +739,24 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _voluntaryBurnPynths(burnForAddress, 0, true);
     }
 
-    function burnPynthsAndUnstakeUSDCToTarget(address from, uint burnAmount)
-    external
-    onlyPeriFinance {
-        _voluntaryBurnPynths(from, burnAmount, false);
-    }
-
-    function burnPynthsToTargetAndUnstakeUSDCToTarget(address from)
-    external
-    onlyPeriFinance {
-        _voluntaryBurnPynths(from, 0, true);
-    }
-
     function burnPynthsAndUnstakeUSDC(
         address _from, 
         uint _burnAmount, 
         uint _unstakeAmount
     ) external
     onlyPeriFinance {
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+        _requireRatesNotInvalid(isUSDCInvalid);
+
+        uint unstakeAmountToUSDWithIssuanceRatio = _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
         
+        require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio,
+            "Unstake amount exceeds burn amount");
+        
+        _voluntaryBurnPynths(_from, _burnAmount, false);
+
+        _unstakeAndRefundUSDC(_from, _unstakeAmount);
     }
 
     function liquidateDelinquentAccount(
@@ -879,10 +860,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _appendAccountIssuanceRecord(from);
     }
 
-    function _stakeUSDCAndIssuePynths(
+    function _issuePynthsAndStakeUSDC(
         address _issuer,
-        uint _usdcStakeAmount,
-        uint _issueAmount
+        uint _issueAmount,
+        uint _usdcStakeAmount
     ) internal {
         (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
@@ -891,23 +872,20 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
         require(_issueAmount >= _usdcToUSD(_usdcStakeAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio()),
-            "staking amount exceeds issueing amount");
+            "Staking amount exceeds issueing amount");
 
         uint maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
         uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
         require(maxUSDCQuotaAfterIssue > userStakedAmount,
-            "staking is not available");
+            "No availalbe USDC staking amount remains");
 
         uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
-        uint stakeAmount;
-        if(availableUSDCAmountToStake <= _usdcStakeAmount) {
-            stakeAmount = availableUSDCAmountToStake;
-        } else {
-            stakeAmount = _usdcStakeAmount;
-        }
 
-        _transferAndStakeUSDC(_issuer, stakeAmount);
+        require(availableUSDCAmountToStake >= _usdcStakeAmount,
+            "Input amount exceeds available staking amount");
+
+        _transferAndStakeUSDC(_issuer, _usdcStakeAmount);
 
         _issuePynths(_issuer, _issueAmount, false);
     }

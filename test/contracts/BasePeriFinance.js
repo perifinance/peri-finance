@@ -100,7 +100,7 @@ contract('BasePeriFinance', async accounts => {
 				'issueMaxPynthsOnBehalf',
 				'issuePynths',
 				'issuePynthsOnBehalf',
-				'stakeUSDCAndIssuePynths',
+				'issuePynthsAndStakeUSDC',
 				'stakeMaxUSDCAndIssuePynths',
 				'stakeUSDCAndIssueMaxPynths',
 				'stakeMaxUSDCAndIssueMaxPynths',

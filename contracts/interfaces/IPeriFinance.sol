@@ -125,19 +125,10 @@ interface IPeriFinance {
 
     function issuePynthsOnBehalf(address issueForAddress, uint amount) external;
 
-    function stakeUSDCAndIssuePynths(uint _usdcStakeAmount, uint _issueAmount) 
+    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
     external;
 
-    function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
-    external;
-
-    function unstakeToTargetAndRefundUSDC()
-    external;
-
-    function burnPynthsAndUnstakeUSDCToTarget(uint _burnAmount)
-    external;
-
-    function burnPynthsToTargetAndUnstakeUSDCToTarget()
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
     external;
 
     function mint() external returns (bool);

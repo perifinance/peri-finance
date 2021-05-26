@@ -436,22 +436,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function stakeUSDCAndIssuePynths(uint _usdcStakeAmount, uint _issueAmount) 
+    function issuePynthsAndStakeUSDC(uint _usdcStakeAmount, uint _issueAmount) 
     external
     issuanceActive optionalProxy {
-        issuer().stakeUSDCAndIssuePynths(messageSender, _usdcStakeAmount, _issueAmount);
-    }
-
-    function unstakeAndRefundUSDC(uint _usdcUnstakeAmount)
-    external
-    issuanceActive optionalProxy {
-        issuer().unstakeAndRefundUSDC(messageSender, _usdcUnstakeAmount);
-    }
-
-    function unstakeToTargetAndRefundUSDC()
-    external
-    issuanceActive optionalProxy {
-        issuer().unstakeToTargetAndRefundUSDC(messageSender);
+        issuer().issuePynthsAndStakeUSDC(messageSender, _usdcStakeAmount, _issueAmount);
     }
 
     function burnPynths(uint amount) external issuanceActive optionalProxy {
@@ -470,16 +458,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
     }
 
-    function burnPynthsAndUnstakeUSDCToTarget(uint _burnAmount)
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
     external
     issuanceActive optionalProxy {
-        return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender, _burnAmount);
-    }
-
-    function burnPynthsToTargetAndUnstakeUSDCToTarget()
-    external
-    issuanceActive optionalProxy {
-        return issuer().burnPynthsToTargetAndUnstakeUSDCToTarget(messageSender);
+        return issuer().burnPynthsAndUnstakeUSDC(messageSender, _burnAmount, _unstakeAmount);
     }
 
     function exchangeWithVirtual(

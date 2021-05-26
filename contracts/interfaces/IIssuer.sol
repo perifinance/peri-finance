@@ -81,17 +81,11 @@ interface IIssuer {
 
     function issueMaxPynthsOnBehalf(address issueFor, address from) external;
     
-    function stakeUSDCAndIssuePynths(
+    function issuePynthsAndStakeUSDC(
         address _issuer,
-        uint _usdcStakeAmount,
-        uint _issueAmount
+        uint _issueAmount,
+        uint _usdcStakeAmount
     ) external;
-
-    function unstakeAndRefundUSDC(address _account, uint _usdcUnstakeAmount)
-    external;
-
-    function unstakeToTargetAndRefundUSDC(address _account)
-    external;
 
     function burnPynths(address from, uint amount) external;
 
@@ -105,11 +99,11 @@ interface IIssuer {
 
     function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
 
-    function burnPynthsAndUnstakeUSDCToTarget(address from, uint burnAmount)
-    external;
-
-    function burnPynthsToTargetAndUnstakeUSDCToTarget(address from)
-    external;
+    function burnPynthsAndUnstakeUSDC(
+        address _from,
+        uint _burnAmount,
+        uint _unstakeAmount
+    ) external;
 
     function liquidateDelinquentAccount(
         address account,

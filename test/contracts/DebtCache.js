@@ -359,7 +359,7 @@ contract('DebtCache', async accounts => {
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 				await periFinance.transfer(account2, toUnit('1000'), { from: owner });
 				await periFinance.issuePynths(toUnit('10'), { from: account1 });
-				await periFinance.stakeUSDCAndIssuePynths('1000000', toUnit('10'), { from: account1 });
+				await periFinance.issuePynthsAndStakeUSDC( toUnit('10'), '1000000', { from: account1 });
 
 				// Stale the debt snapshot
 				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
