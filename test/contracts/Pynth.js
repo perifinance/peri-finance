@@ -37,7 +37,8 @@ contract('Pynth', async accounts => {
 		systemSettings,
 		exchanger,
 		debtCache,
-		issuer;
+		issuer,
+		stakingStateUSDC;
 
 	before(async () => {
 		({
@@ -51,6 +52,7 @@ contract('Pynth', async accounts => {
 			DebtCache: debtCache,
 			Issuer: issuer,
 			SystemSettings: systemSettings,
+			StakingStateUSDC: stakingStateUSDC,
 		} = await setupAllContracts({
 			accounts,
 			contracts: [
@@ -68,6 +70,7 @@ contract('Pynth', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'RewardEscrowV2', // required for issuer._collateral() to read collateral
+				'StakingStateUSDC',
 			],
 		}));
 
@@ -729,6 +732,7 @@ contract('Pynth', async accounts => {
 						Exchanger: exchanger,
 						FeePool: feePool,
 						PeriFinance: periFinance,
+						StakingStateUSDC: stakingStateUSDC,
 					},
 					contracts: [{ contract: 'Pynth', properties: { currencyKey: pEUR } }],
 				}));

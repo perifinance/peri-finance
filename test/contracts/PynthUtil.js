@@ -41,6 +41,7 @@ contract('PynthUtil', accounts => {
 				'Issuer',
 				'CollateralManager',
 				'RewardEscrowV2', // required for issuer._collateral to read collateral
+				'StakingStateUSDC',
 			],
 		}));
 	});

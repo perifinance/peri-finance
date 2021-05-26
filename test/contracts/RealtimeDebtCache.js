@@ -71,6 +71,7 @@ contract('RealtimeDebtCache', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
+				'StakingStateUSDC',
 			],
 		}));
 	});

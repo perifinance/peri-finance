@@ -68,6 +68,7 @@ contract('PurgeablePynth', accounts => {
 				'SystemStatus',
 				'SystemSettings',
 				'CollateralManager',
+				'StakingStateUSDC',
 			],
 		}));
 
