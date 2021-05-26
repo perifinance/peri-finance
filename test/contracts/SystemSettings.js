@@ -34,6 +34,7 @@ contract('SystemSettings', async accounts => {
 			abi: systemSettings.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
+				'setUSDCQuota',
 				'setWaitingPeriodSecs',
 				'setPriceDeviationThresholdFactor',
 				'setIssuanceRatio',
@@ -397,13 +398,6 @@ contract('SystemSettings', async accounts => {
 		describe('given liquidation penalty is 10%', () => {
 			beforeEach(async () => {
 				await systemSettings.setLiquidationPenalty(toUnit('0.1'), { from: owner });
-			});
-			it('owner can change liquidationRatio to 300%', async () => {
-				const ratio = divideDecimal(toUnit('1'), toUnit('3'));
-				await systemSettings.setLiquidationRatio(ratio, {
-					from: owner,
-				});
-				assert.bnClose(await systemSettings.liquidationRatio(), ratio);
 			});
 			it('owner can change liquidationRatio to 200%', async () => {
 				const ratio = toUnit('.5');
