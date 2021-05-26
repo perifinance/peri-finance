@@ -25,8 +25,6 @@ import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IStakingStateUSDC.sol";
 
-import "hardhat/console.sol";
-
 interface IRewardEscrowV2 {
     // Views
     function balanceOf(address account) external view returns (uint);
@@ -745,18 +743,20 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _unstakeAmount
     ) external
     onlyPeriFinance {
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        _requireRatesNotInvalid(isUSDCInvalid);
-
-        uint unstakeAmountToUSDWithIssuanceRatio = _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
-        
-        require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio,
-            "Unstake amount exceeds burn amount");
-        
         _voluntaryBurnPynths(_from, _burnAmount, false);
 
-        _unstakeAndRefundUSDC(_from, _unstakeAmount);
+        if(_unstakeAmount > 0) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+            _requireRatesNotInvalid(isUSDCInvalid);
+            
+            uint unstakeAmountToUSDWithIssuanceRatio = _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
+            
+            require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio,
+                "Unstake amount exceeds burn amount");
+            
+            _unstakeAndRefundUSDC(_from, _unstakeAmount);
+        }
     }
 
     function liquidateDelinquentAccount(
@@ -865,27 +865,28 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _issueAmount,
         uint _usdcStakeAmount
     ) internal {
-        (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
+        if(_usdcStakeAmount > 0) {
+            (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
-        uint afterDebtBalance = debtBalance.add(_issueAmount);
-        uint afterDebtWithIssuanceRatio = afterDebtBalance.divideDecimalRound(getIssuanceRatio());
+            uint afterDebtBalanceWithIssuanceRatio = debtBalance.add(_issueAmount).divideDecimalRound(getIssuanceRatio());
 
-        (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
-        require(_issueAmount >= _usdcToUSD(_usdcStakeAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio()),
-            "Staking amount exceeds issueing amount");
+            (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
+            require(_issueAmount >= _usdcToUSD(_usdcStakeAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio()),
+                "Staking amount exceeds issueing amount");
 
-        uint maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
-        uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
+            uint maxUSDCQuotaAfterIssue = _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
+            uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
-        require(maxUSDCQuotaAfterIssue > userStakedAmount,
-            "No availalbe USDC staking amount remains");
+            require(maxUSDCQuotaAfterIssue > userStakedAmount,
+                "No availalbe USDC staking amount remains");
 
-        uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
+            uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
 
-        require(availableUSDCAmountToStake >= _usdcStakeAmount,
-            "Input amount exceeds available staking amount");
+            require(availableUSDCAmountToStake >= _usdcStakeAmount,
+                "Input amount exceeds available staking amount");
 
-        _transferAndStakeUSDC(_issuer, _usdcStakeAmount);
+            _transferAndStakeUSDC(_issuer, _usdcStakeAmount);
+        }
 
         _issuePynths(_issuer, _issueAmount, false);
     }
