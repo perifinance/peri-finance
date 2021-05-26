@@ -1155,6 +1155,9 @@ const deploy = async ({
 		await runStep({
 			contract: `TempExchangeRateStorageKovan`,
 			target: tempExchangeRateStorageKovan,
+			read: 'getRate',
+			readArg: toBytes32('PERI'),
+			expected: input => input !== '0',
 			write: 'setRate',
 			writeArg: [toBytes32('PERI'), w3utils.toBN('19940000000000000000')],
 		});
@@ -1162,6 +1165,9 @@ const deploy = async ({
 		await runStep({
 			contract: `TempExchangeRateStorageKovan`,
 			target: tempExchangeRateStorageKovan,
+			read: 'getRate',
+			readArg: toBytes32('USDC'),
+			expected: input => input !== '0',
 			write: 'setRate',
 			writeArg: [toBytes32('USDC'), w3utils.toBN('980000000000000000')],
 		});
