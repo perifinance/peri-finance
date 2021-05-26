@@ -18,10 +18,6 @@ contract StakingStateUSDC is Owned, State {
 
   uint public totalStakedAmount;
 
-  event Staking(address indexed account, uint amount, uint percentage);
-
-  event Unstaking(address indexed account, uint amount, uint percentage);
-
   constructor(
     address _owner, 
     address _associatedContract,
@@ -33,52 +29,8 @@ contract StakingStateUSDC is Owned, State {
     USDC_ADDRESS = _usdcAddress;
   }
 
-  function setUSDCAddress(address _usdcAddress)
-  external
-  onlyOwner {
-    require(_usdcAddress != address(0),
-      "Address should not be empty");
-    
-    USDC_ADDRESS = _usdcAddress;
-  }
 
-  function stake(address _account, uint _amount)
-  external
-  onlyAssociatedContract {
-    if(stakedAmountOf[_account] <= 0) {
-      _incrementTotalStaker();
-    }
-    
-    stakedAmountOf[_account] = stakedAmountOf[_account].add(_amount);
-    totalStakedAmount = totalStakedAmount.add(_amount);
-
-    emit Staking(_account, _amount, userStakingShare(_account));
-  }
-
-  function unstake(address _account, uint _amount)
-  external
-  onlyAssociatedContract {
-    require(stakedAmountOf[_account] >= _amount,
-      "User doesn't have enough staked amount");
-    require(totalStakedAmount >= _amount,
-      "Not enough staked amount to withdraw");
-
-    if(stakedAmountOf[_account].sub(_amount) == 0) {
-      _decrementTotalStaker();
-    }
-
-    stakedAmountOf[_account] = stakedAmountOf[_account].sub(_amount);
-    totalStakedAmount = totalStakedAmount.sub(_amount);
-
-    emit Unstaking(_account, _amount, userStakingShare(_account));
-  }
-
-  function refund(address _account, uint _amount)
-  external
-  onlyAssociatedContract 
-  returns(bool) {
-    return usdc().transfer(_account, _amount);
-  }
+  /* ========== VIEWER FUNCTIONS ========== */
 
   function userStakingShare(address _account)
   public view 
@@ -115,7 +67,60 @@ contract StakingStateUSDC is Owned, State {
   returns(address) {
     return USDC_ADDRESS;
   }
-  
+
+
+  /* ========== MUTATIVE FUNCTIONS ========== */
+
+  function setUSDCAddress(address _usdcAddress)
+  external
+  onlyOwner {
+    require(_usdcAddress != address(0),
+      "Address should not be empty");
+    
+    USDC_ADDRESS = _usdcAddress;
+  }
+
+  function stake(address _account, uint _amount)
+  external
+  onlyAssociatedContract {
+    if(stakedAmountOf[_account] <= 0 && _amount > 0) {
+      _incrementTotalStaker();
+    }
+    
+    stakedAmountOf[_account] = stakedAmountOf[_account].add(_amount);
+    totalStakedAmount = totalStakedAmount.add(_amount);
+
+    emit Staking(_account, _amount, userStakingShare(_account));
+  }
+
+  function unstake(address _account, uint _amount)
+  external
+  onlyAssociatedContract {
+    require(stakedAmountOf[_account] >= _amount,
+      "User doesn't have enough staked amount");
+    require(totalStakedAmount >= _amount,
+      "Not enough staked amount to withdraw");
+
+    if(stakedAmountOf[_account].sub(_amount) == 0) {
+      _decrementTotalStaker();
+    }
+
+    stakedAmountOf[_account] = stakedAmountOf[_account].sub(_amount);
+    totalStakedAmount = totalStakedAmount.sub(_amount);
+
+    emit Unstaking(_account, _amount, userStakingShare(_account));
+  }
+
+  function refund(address _account, uint _amount)
+  external
+  onlyAssociatedContract 
+  returns(bool) {
+    return usdc().transfer(_account, _amount);
+  }
+
+
+  /* ========== INTERNAL FUNCTIONS ========== */
+
   function _incrementTotalStaker()
   internal {
     totalStakerCount = totalStakerCount.add(1);
@@ -125,5 +130,11 @@ contract StakingStateUSDC is Owned, State {
   internal {
     totalStakerCount = totalStakerCount.sub(1);
   }
+  
+
+  /* ========== EVENTS ========== */
+
+  event Staking(address indexed account, uint amount, uint percentage);
+  event Unstaking(address indexed account, uint amount, uint percentage);
   
 }
