@@ -757,6 +757,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         _voluntaryBurnPynths(_from, _burnAmount, false);
+
+        (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
+        require(usdcQuota <= getUSDCQuota(),
+            "USDC staked exceeds quota");
     }
 
     function liquidateDelinquentAccount(
@@ -840,8 +844,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         if (!issueMax) {
             if(amount > maxIssuable) {
-                if(amount <= maxIssuable.multiplyDecimal(1.05 ether)) {
-                    amount = maxIssuable;
+                if(amount.multiplyDecimal(0.995 ether) <= maxIssuable) {
+                    amount = amount.multiplyDecimal(0.995 ether);
                 } else {
                     revert("Amount too large");
                 }
