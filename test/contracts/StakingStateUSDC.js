@@ -145,24 +145,21 @@ contract('StakingStateUSDC', async accounts => {
 			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
 			// provide USDC to account1 for test
 			await USDCContract.transfer(account1, '1000', { from: deployerAccount });
+			// set USDC allowance for account1 and issuer
+			await USDCContract.approve(tempIssuer, toUnit('1'), { from: account1 });
+			await USDCContract.approve(tempIssuer, toUnit('1'), { from: tempIssuer });
 		});
 
-		it.only('should refund', async () => {
-			const stakedAmount0 = await stakingStateUSDC.stakedAmountOf(account1);
-			console.log(stakedAmount0.toString());
-			console.log('-------0-------');
+		it('should refund after unstake', async () => {
+			// initial stake
 			await stakingStateUSDC.stake(account1, '1000', { from: tempIssuer });
-			const stakedAmount1 = await stakingStateUSDC.stakedAmountOf(account1);
-			console.log(stakedAmount1.toString());
-			console.log('-------1-------');
-			await stakingStateUSDC.unstake(account1, '300', { from: tempIssuer });
-			const stakedAmount2 = await stakingStateUSDC.stakedAmountOf(account1);
-			console.log(stakedAmount2.toString());
-			console.log('-------2-------');
 
-			const USDCBALANCE = await USDCContract.balanceOf(account1);
-			console.log(USDCBALANCE.toString());
-			await stakingStateUSDC.refund(account1, '100', { from: tempIssuer });
+			// unstake and transfer USDC to stakingStateUSDC contract
+			await stakingStateUSDC.unstake(account1, '300', { from: tempIssuer });
+			await USDCContract.transfer(stakingStateUSDC.address, '300', { from: account1 });
+
+			// try refund
+			await stakingStateUSDC.refund(account1, '300', { from: tempIssuer });
 		});
 	});
 });
