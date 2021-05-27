@@ -90,7 +90,7 @@ contract('FeePool', async accounts => {
 		tempKovanOracle,
 		pynths;
 
-	before(async () => {
+	beforeEach(async () => {
 		pynths = ['pUSD', 'pBTC', 'pETH'];
 		({
 			AddressResolver: addressResolver,
@@ -224,10 +224,10 @@ contract('FeePool', async accounts => {
 		});
 	});
 
-	describe('when the issuanceRatio is 0.2', () => {
+	describe('when the issuanceRatio is 0.25', () => {
 		beforeEach(async () => {
 			// set default issuance ratio of 0.2
-			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
+			await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
 		});
 
 		it('should track fee withdrawals correctly', async () => {
@@ -1085,21 +1085,21 @@ contract('FeePool', async accounts => {
 				);
 			});
 
-			it('should set the targetThreshold buffer to 5%, at issuanceRatio 0.2 getPenaltyThresholdRatio returns 0.21', async () => {
+			it('should set the targetThreshold buffer to 5%, at issuanceRatio 0.25 getPenaltyThresholdRatio returns 0.21', async () => {
 				const thresholdPercent = 5;
 
 				await systemSettings.setTargetThreshold(thresholdPercent, { from: owner });
 
 				const issuanceRatio = await feePool.issuanceRatio();
 
-				assert.bnEqual(issuanceRatio, toUnit('0.2'));
+				assert.bnEqual(issuanceRatio, toUnit('0.25'));
 
 				const penaltyThreshold = await feePool.targetThreshold();
 
 				assert.bnEqual(penaltyThreshold, toUnit(thresholdPercent / 100));
 
 				// add the 5% buffer to the issuanceRatio to calculate penalty threshold would be at
-				const expectedPenaltyThreshold = toUnit('0.21');
+				const expectedPenaltyThreshold = toUnit('0.2625');
 
 				assert.bnEqual(expectedPenaltyThreshold, await feePool.getPenaltyThresholdRatio());
 			});
@@ -1119,7 +1119,7 @@ contract('FeePool', async accounts => {
 			});
 
 			it('should correctly calculate the 10% buffer for penalties at specific issuance ratios', async () => {
-				const step = toUnit('0.01');
+				const step = toUnit('0.25');
 				await periFinance.issueMaxPynths({ from: owner });
 
 				// Increase the price so we start well and truly within our 20% ratio.
