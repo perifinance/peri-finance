@@ -545,9 +545,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
             uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
 
-            uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
+            if(debtBalance > debtByUSDCToPeri) {
+                uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
 
-            lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+                lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
+            } else {
+                lockedPeriFinanceValue = 0;
+            }
 
             anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
         } else {
@@ -761,6 +765,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
         require(usdcQuota <= getUSDCQuota(),
             "USDC staked exceeds quota");
+    }
+
+    function burnPynthsAndUnstakeUSDCToTarget(address _from)
+    external
+    onlyPeriFinance {
+        
     }
 
     function liquidateDelinquentAccount(
