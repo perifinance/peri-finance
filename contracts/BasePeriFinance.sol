@@ -111,6 +111,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
     }
 
+    function getRequiredAddress(bytes32 _contractName)
+    external view
+    returns(address) {
+        return requireAndGetAddress(_contractName);
+    }
+
     function debtBalanceOf(address account, bytes32 currencyKey) external view returns (uint) {
         return issuer().debtBalanceOf(account, currencyKey);
     }
@@ -462,6 +468,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     external
     issuanceActive optionalProxy {
         return issuer().burnPynthsAndUnstakeUSDC(messageSender, _burnAmount, _unstakeAmount);
+    }
+
+    function burnPynthsAndUnstakeUSDCToTarget()
+    external
+    issuanceActive optionalProxy {
+        return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender);
     }
 
     function exchangeWithVirtual(

@@ -105,6 +105,9 @@ interface IIssuer {
         uint _unstakeAmount
     ) external;
 
+    function burnPynthsAndUnstakeUSDCToTarget(address _from)
+    external;
+
     function liquidateDelinquentAccount(
         address account,
         uint pusdAmount,

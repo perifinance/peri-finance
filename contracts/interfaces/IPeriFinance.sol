@@ -5,7 +5,11 @@ import "./IVirtualPynth.sol";
 
 // https://docs.peri.finance/contracts/source/interfaces/iperiFinance
 interface IPeriFinance {
-    // Views
+    // Views    
+    function getRequiredAddress(bytes32 contractName)
+    external view
+    returns(address);
+
     function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
@@ -81,6 +85,9 @@ interface IPeriFinance {
     function burnPynthsToTargetOnBehalf(address burnForAddress) external;
 
     function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
+    external;
+
+    function burnPynthsAndUnstakeUSDCToTarget()
     external;
 
     function exchange(
