@@ -310,27 +310,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function _exceededUSDCStakeAmount(address _account)
-    internal view
-    returns(uint) {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        uint maxUSDCQuotaAmountToUSDC = _usdToUSDC(maxUSDCQuotaAmount, usdcRate);
-        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_account);
-
-        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
-        
-        if(maxUSDCQuotaAmountToUSDC >= usdcStakedAmount) {
-            return 0;
-        } else {
-            return usdcStakedAmount.sub(maxUSDCQuotaAmountToUSDC);
-        }
-    }
-    
     /**
      * @param _stakingAmount 6 decimal USDC amount
      */
@@ -443,6 +422,41 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         return balance;
+    }
+
+    function _amountsToFitClaimable(
+        uint _currentDebt,
+        uint _stakedUSDCAmount,
+        uint _periCollateral
+    ) internal view 
+    returns(uint burnAmount, uint usdcAmountToUnstake) {
+        uint targetRatio = getIssuanceRatio();
+        uint usdcQuota = getUSDCQuota();
+
+        uint initialCRatio = _currentDebt.divideDecimal(_stakedUSDCAmount.add(_periCollateral));
+        // it doesn't satisfy defined c-ratio
+        if(initialCRatio > targetRatio) {
+            uint maxAllowedUSDCStakeAmountByPeriCollateral = 
+                _periCollateral.multiplyDecimal(
+                    usdcQuota.divideDecimal(SafeDecimalMath.unit().sub(usdcQuota))
+                );
+            usdcAmountToUnstake = _stakedUSDCAmount > maxAllowedUSDCStakeAmountByPeriCollateral ? 
+                _stakedUSDCAmount.sub(maxAllowedUSDCStakeAmountByPeriCollateral) : 0;
+            burnAmount = _currentDebt.sub(
+                _periCollateral.add(_stakedUSDCAmount).sub(usdcAmountToUnstake).multiplyDecimal(targetRatio)
+            );
+
+        // it satisfies defined c-ratio but violates USDC quota
+        } else { 
+            uint currentUSDCQuota = _stakedUSDCAmount.divideDecimal(_currentDebt);
+            require(currentUSDCQuota < usdcQuota,
+                "Account is already claimable");
+
+            burnAmount = (
+                _stakedUSDCAmount.multiplyDecimal(targetRatio).sub(_currentDebt.multiplyDecimal(usdcQuota))
+            ).multiplyDecimal(SafeDecimalMath.unit().sub(usdcQuota));
+            usdcAmountToUnstake = burnAmount.divideDecimal(targetRatio);
+        }
     }
 
     function minimumStakeTime() external view returns (uint) {
@@ -747,30 +761,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _unstakeAmount
     ) external
     onlyPeriFinance {
-        if(_unstakeAmount > 0) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-            _requireRatesNotInvalid(isUSDCInvalid);
-            
-            uint unstakeAmountToUSDWithIssuanceRatio = _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
-            
-            require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio,
-                "Unstake amount exceeds burn amount");
-            
-            _unstakeAndRefundUSDC(_from, _unstakeAmount);
-        }
-
-        _voluntaryBurnPynths(_from, _burnAmount, false);
-
-        (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
-        require(usdcQuota <= getUSDCQuota(),
-            "USDC staked exceeds quota");
+        _burnPynthsAndUnstakeUSDC(_from, _burnAmount, _unstakeAmount);
     }
 
     function burnPynthsAndUnstakeUSDCToTarget(address _from)
     external
     onlyPeriFinance {
-        
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
+
+        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_from), usdcRate);
+
+        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint periCollateralToUSD = _periToUSD(_collateral(_from), periRate);
+
+        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid || isPeriInvalid);
+
+        (uint burnAmount, uint usdcAmountToUnstake) = _amountsToFitClaimable(debtBalance, usdcStakedAmountToUSD, periCollateralToUSD);
+
+        _burnPynthsAndUnstakeUSDC(_from, burnAmount, usdcAmountToUnstake);
     }
 
     function liquidateDelinquentAccount(
@@ -1027,6 +1036,32 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
             liquidations().removeAccountInLiquidation(from);
         }
+    }
+
+    function _burnPynthsAndUnstakeUSDC(
+        address _from,
+        uint _burnAmount,
+        uint _unstakeAmount
+    ) internal {
+        if(_unstakeAmount > 0) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+
+            _requireRatesNotInvalid(isUSDCInvalid);
+            
+            uint unstakeAmountToUSDWithIssuanceRatio = _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
+            
+            require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio,
+                "Unstake amount exceeds burn amount");
+            
+            _unstakeAndRefundUSDC(_from, _unstakeAmount);
+        }
+
+        _voluntaryBurnPynths(_from, _burnAmount, false);
+
+        (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
+        
+        require(usdcQuota <= getUSDCQuota(),
+            "USDC staked exceeds quota");
     }
 
     function _setLastIssueEvent(address account) internal {
