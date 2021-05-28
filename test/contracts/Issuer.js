@@ -2209,9 +2209,60 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// assert.bnEqual(usdcStakedAmount_1_afterUnstakePortion, usdcStakedAmount_1_afterBurn.sub(unstakeAmountFor10));
 				});
 
-				it("should fix it to claimable", async () => {
+				it.only("should fit to claimable if C-Ratio < threshhold, exceeds quota", async () => {
+					// Set issued max
+					const stakingAmount = '22222' + '2'.repeat(6);
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), stakingAmount, {
+						from: account1,
+					});
 
+					const [
+						canStakeUSDC,
+						stakedAmount,
+						totalStaked,
+						numOfStaker,
+						pUSDBalance_1,
+						debtBalance_1,
+						totalIssuedPUSD,
+						usdcQuota
+					] = await Promise.all([
+						periFinance.canStakeUSDC(account1, "0"),
+						periFinance.usdcStakedAmountOf(account1),
+						periFinance.usdcTotalStakedAmount(),
+						periFinance.totalUSDCStakerCount(),
+						pUSDContract.balanceOf(account1),
+						periFinance.debtBalanceOf(account1, pUSD),
+						periFinance.totalIssuedPynths(pUSD),
+						periFinance.currentUSDCDebtQuota(account1)
+					]);
+
+					assert.equal(canStakeUSDC, false);
+					assert.bnEqual(stakedAmount, stakingAmount);
+					assert.bnEqual(totalStaked, stakingAmount);
+					assert.bnEqual(numOfStaker, '1');
+					assert.bnEqual(pUSDBalance_1, toUnit('20000'));
+					assert.bnEqual(debtBalance_1, toUnit('20000'));
+					assert.bnEqual(totalIssuedPUSD, toUnit('20000'));
+					assert.bnClose(usdcQuota, toUnit("0.2"), 10**7);
+
+					const bal = await periFinance.balanceOf(account1);
+					console.log("PeriBALL??: ", bal.toString());
+
+					
+					const cRatio_before = await periFinance.collateralisationRatio(account1);
+					console.log("Current CRatio:: ", cRatio_before.toString());
+
+					await fastForward(86400 + 1);
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates([PERI, USDC], ['5', '0.9'].map(toUnit), timestamp, {
+						from: oracle,
+					});
+					await debtCache.takeDebtSnapshot();
+
+					const cRatio_beforeFit = await periFinance.collateralisationRatio(account1);
+					console.log("Current CRatio:: ", cRatio_beforeFit.toString());
 				});
+
 			});
 
 			describe('debt calculation in multi-issuance scenarios', () => {
