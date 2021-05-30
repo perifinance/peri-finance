@@ -779,7 +779,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint burnAmount, uint usdcAmountToUnstake) = _amountsToFitClaimable(debtBalance, usdcStakedAmountToUSD, periCollateralToUSD);
 
-        _burnPynthsAndUnstakeUSDC(_from, burnAmount, usdcAmountToUnstake);
+        _burnPynthsAndUnstakeUSDC(_from, burnAmount, _usdToUSDC(usdcAmountToUnstake, usdcRate));
     }
 
     function liquidateDelinquentAccount(
