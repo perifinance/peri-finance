@@ -361,7 +361,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     returns(uint) {
         if(_amount == 0) return 0;
         
-        return _amount.mul(10**12).multiplyDecimalRound(_usdcRate);
+        return _amount.multiplyDecimalRound(_usdcRate);
     }
 
     function _usdToUSDC(uint _amount, uint _usdcRate)
@@ -369,7 +369,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     returns(uint) {
         if(_amount == 0) return 0;
         
-        return _amount.divideDecimalRound(_usdcRate).div(10**12);
+        return _amount.divideDecimalRound(_usdcRate);
     }
 
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {        
@@ -448,13 +448,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // it satisfies defined c-ratio but violates USDC quota
         } else { 
-            uint currentUSDCQuota = _stakedUSDCAmount.divideDecimal(_currentDebt);
-            require(currentUSDCQuota < usdcQuota,
+            uint currentUSDCQuota = _stakedUSDCAmount.multiplyDecimal(targetRatio).divideDecimal(_currentDebt);
+            require(currentUSDCQuota > usdcQuota,
                 "Account is already claimable");
 
             burnAmount = (
                 _stakedUSDCAmount.multiplyDecimal(targetRatio).sub(_currentDebt.multiplyDecimal(usdcQuota))
-            ).multiplyDecimal(SafeDecimalMath.unit().sub(usdcQuota));
+            ).divideDecimal(SafeDecimalMath.unit().sub(usdcQuota));
             usdcAmountToUnstake = burnAmount.divideDecimal(targetRatio);
         }
     }
@@ -862,13 +862,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            if(amount > maxIssuable) {
-                if(amount.multiplyDecimal(0.995 ether) <= maxIssuable) {
-                    amount = amount.multiplyDecimal(0.995 ether);
-                } else {
-                    revert("Amount too large");
-                }
-            }
+            require(amount <= maxIssuable, "Amount too large");
         } else {
             amount = maxIssuable;
         }
@@ -922,7 +916,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _transferAndStakeUSDC(address _account, uint _amount)
     internal {
-        require(usdc().transferFrom(_account, address(stakingStateUSDC()), _amount),
+        require(usdc().transferFrom(_account, address(stakingStateUSDC()), _amount.div(10**12)),
             "transferring USDC has been failed");
 
         stakingStateUSDC().stake(_account, _amount);
@@ -937,25 +931,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         require(stakingStateUSDC().refund(_account, _amount),
             "refunding USDC has been failed");
-    }
-
-    function _unstakeUSDCToTargetQuota(address _account)
-    internal {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
-
-        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
-
-        if(maxUSDCQuotaAmount >= usdcStakedAmountToUSD) {
-            return ;
-        } else {
-            _unstakeAndRefundUSDC(_account, _usdToUSDC(usdcStakedAmountToUSD.sub(maxUSDCQuotaAmount), usdcRate));
-        }
     }
 
     function _burnPynths(
@@ -1033,7 +1008,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
-        if (existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
+        if (existingDebt >= amountBurnt && existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
             liquidations().removeAccountInLiquidation(from);
         }
     }

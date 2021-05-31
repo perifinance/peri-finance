@@ -36,7 +36,7 @@ contract StakingStateUSDC is Owned, State {
   public view 
   returns(uint) {
     uint _percentage = stakedAmountOf[_account] == 0 || totalStakedAmount == 0 ? 
-      0 : (stakedAmountOf[_account].mul(10**12)).multiplyDecimalRound(totalStakedAmount.mul(10**12));
+      0 : (stakedAmountOf[_account]).multiplyDecimalRound(totalStakedAmount);
 
     return _percentage;
   }
@@ -115,7 +115,7 @@ contract StakingStateUSDC is Owned, State {
   external
   onlyAssociatedContract 
   returns(bool) {
-    return usdc().transfer(_account, _amount);
+    return usdc().transfer(_account, _amount.div(10**12));
   }
 
 
