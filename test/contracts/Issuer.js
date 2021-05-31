@@ -1230,9 +1230,34 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					);
 				});
 
+				it.only("should NOT stake USDC if there is no PERI locked amount", async () => {
+					const debtBalance_1 = await periFinance.debtBalanceOf(account1, pUSD);
+					const pUSDBalance_1 = await pUSDContract.balanceOf(account1);
+					const usdcStakedAmount_1 = await stakingStateUSDC.stakedAmountOf(account1);
+
+					// Be sure there is no staking data
+					assert.bnEqual(debtBalance_1, 0);
+					assert.bnEqual(pUSDBalance_1, 0);
+					assert.bnEqual(usdcStakedAmount_1, 0);
+
+					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
+					const issuanceRatio = await issuer.issuanceRatio();
+					await assert.revert(
+						periFinance.issuePynthsAndStakeUSDC(toUnit("1"), multiplyDecimal(divideDecimal(toUnit("1"), issuanceRatio), usdcExRate)),
+						"Input amount exceeds available staking amount"
+					);
+
+					// There is a few amount debt existing and try to stake exceeding this amount
+					await periFinance.issuePynthsAndStakeUSDC(123456, 0, { from: account1 });
+					await assert.revert(
+						periFinance.issuePynthsAndStakeUSDC(toUnit("1"), multiplyDecimal(divideDecimal(toUnit("1"), issuanceRatio), usdcExRate)),
+						"Input amount exceeds available staking amount"
+					);
+				});
+
 				it.only('should NOT stake USDC if there is no issue amount', async () => {
 					// debt will be 10000 USD
-					await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), 0, { from: account1 });
 
 					// only stake, not issue pUSD
 					await assert.revert(
@@ -1982,7 +2007,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						usdc.approve(issuer.address, '100000' + '0'.repeat(6), { from: account1 })
 					]);
 
-					await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), 0, { from: account1 });
 
 					await fastForward(86400 + 1);
 
