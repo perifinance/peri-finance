@@ -51,10 +51,6 @@ interface IPeriFinance {
     external view
     returns(uint);
 
-    function canStakeUSDC(address _account, uint _stakingAmount)
-    external view
-    returns(bool);
-
     function availableUSDCStakeAmount(address _account)
     external view
     returns(uint);
@@ -76,14 +72,6 @@ interface IPeriFinance {
     returns(uint);
 
     // Mutative Functions
-    function burnPynths(uint amount) external;
-
-    function burnPynthsOnBehalf(address burnForAddress, uint amount) external;
-
-    function burnPynthsToTarget() external;
-
-    function burnPynthsToTargetOnBehalf(address burnForAddress) external;
-
     function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
     external;
 
@@ -126,14 +114,6 @@ interface IPeriFinance {
         bytes32 destinationCurrencyKey,
         bytes32 trackingCode
     ) external returns (uint amountReceived, IVirtualPynth vPynth);
-
-    function issueMaxPynths() external;
-
-    function issueMaxPynthsOnBehalf(address issueForAddress) external;
-
-    function issuePynths(uint amount) external;
-
-    function issuePynthsOnBehalf(address issueForAddress, uint amount) external;
 
     function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
     external;

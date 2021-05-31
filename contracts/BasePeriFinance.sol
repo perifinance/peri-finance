@@ -191,12 +191,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().currentUSDCDebtQuota(_account);
     }
 
-    function canStakeUSDC(address _account, uint _stakingAmount)
-    external view
-    returns(bool) {
-        return issuer().canStakeUSDC(_account, _stakingAmount);
-    }
-
     function availableUSDCStakeAmount(address _account)
     external view
     returns(uint) {
@@ -426,42 +420,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().issuePynths(messageSender, amount);
-    }
-
-    function issuePynthsOnBehalf(address issueForAddress, uint amount) external issuanceActive optionalProxy {
-        return issuer().issuePynthsOnBehalf(issueForAddress, messageSender, amount);
-    }
-
-    function issueMaxPynths() external issuanceActive optionalProxy {
-        return issuer().issueMaxPynths(messageSender);
-    }
-
-    function issueMaxPynthsOnBehalf(address issueForAddress) external issuanceActive optionalProxy {
-        return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
-    }
-
     function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
     external
     issuanceActive optionalProxy {
         issuer().issuePynthsAndStakeUSDC(messageSender, _issueAmount, _usdcStakeAmount);
-    }
-
-    function burnPynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().burnPynths(messageSender, amount);
-    }
-
-    function burnPynthsOnBehalf(address burnForAddress, uint amount) external issuanceActive optionalProxy {
-        return issuer().burnPynthsOnBehalf(burnForAddress, messageSender, amount);
-    }
-
-    function burnPynthsToTarget() external issuanceActive optionalProxy {
-        return issuer().burnPynthsToTarget(messageSender);
-    }
-
-    function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
-        return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
     }
 
     function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)

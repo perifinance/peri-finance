@@ -310,17 +310,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    /**
-     * @param _stakingAmount 6 decimal USDC amount
-     */
-    function _canStakeUSDC(address _account, uint _stakingAmount)
-    internal view
-    returns(bool) {
-        uint availableAmount = _availableUSDCStakeAmount(_account);
-
-        return availableAmount > _stakingAmount;  
-    }
-
     function _lastIssueEvent(address account) internal view returns (uint) {
         //  Get the timestamp of the last issue this account made
         return flexibleStorage().getUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)));
@@ -603,12 +592,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return usdcDebtQuota;
     }
 
-    function canStakeUSDC(address _account, uint _stakingAmount)
-    external view
-    returns(bool) {
-        return _canStakeUSDC(_account, _stakingAmount);
-    }
-
     function availableUSDCStakeAmount(address _account)
     external view
     returns(uint) {
@@ -702,28 +685,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function issuePynths(address from, uint amount) external onlyPeriFinance {
-        _issuePynths(from, amount, false);
-    }
-
-    function issueMaxPynths(address from) external onlyPeriFinance {
-        _issuePynths(from, 0, true);
-    }
-
-    function issuePynthsOnBehalf(
-        address issueForAddress,
-        address from,
-        uint amount
-    ) external onlyPeriFinance {
-        _requireCanIssueOnBehalf(issueForAddress, from);
-        _issuePynths(issueForAddress, amount, false);
-    }
-
-    function issueMaxPynthsOnBehalf(address issueForAddress, address from) external onlyPeriFinance {
-        _requireCanIssueOnBehalf(issueForAddress, from);
-        _issuePynths(issueForAddress, 0, true);
-    }
-
     function issuePynthsAndStakeUSDC(
         address _issuer,
         uint _issueAmount,
@@ -731,28 +692,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) external
     onlyPeriFinance {
         _issuePynthsAndStakeUSDC(_issuer, _issueAmount, _usdcStakeAmount);
-    }
-
-    function burnPynths(address from, uint amount) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, amount, false);
-    }
-
-    function burnPynthsOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external onlyPeriFinance {
-        _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, amount, false);
-    }
-
-    function burnPynthsToTarget(address from) external onlyPeriFinance {
-        _voluntaryBurnPynths(from, 0, true);
-    }
-
-    function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external onlyPeriFinance {
-        _requireCanBurnOnBehalf(burnForAddress, from);
-        _voluntaryBurnPynths(burnForAddress, 0, true);
     }
 
     function burnPynthsAndUnstakeUSDC(

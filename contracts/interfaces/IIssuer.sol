@@ -47,10 +47,6 @@ interface IIssuer {
     external view
     returns(uint);
 
-    function canStakeUSDC(address _account, uint _usdcAmount)
-    external view
-    returns(bool);
-
     function availableUSDCStakeAmount(address _account)
     external view
     returns(uint);
@@ -69,35 +65,11 @@ interface IIssuer {
         returns (uint transferable, bool anyRateIsInvalid);
 
     // Restricted: used internally to PeriFinance
-    function issuePynths(address from, uint amount) external;
-
-    function issuePynthsOnBehalf(
-        address issueFor,
-        address from,
-        uint amount
-    ) external;
-
-    function issueMaxPynths(address from) external;
-
-    function issueMaxPynthsOnBehalf(address issueFor, address from) external;
-    
     function issuePynthsAndStakeUSDC(
         address _issuer,
         uint _issueAmount,
         uint _usdcStakeAmount
     ) external;
-
-    function burnPynths(address from, uint amount) external;
-
-    function burnPynthsOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external;
-
-    function burnPynthsToTarget(address from) external;
-
-    function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
 
     function burnPynthsAndUnstakeUSDC(
         address _from,

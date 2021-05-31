@@ -1217,13 +1217,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 				it.only('should NOT stake if try to stake more than issue', async () => {
 					const remainingIssuableResult = await periFinance.remainingIssuablePynths(account1);
-					const canStakeUSDC = await periFinance.canStakeUSDC(account1, "0");
 					const availableUSDCStakeAmount = await periFinance.availableUSDCStakeAmount(account1);
 
 					assert.bnEqual(remainingIssuableResult.maxIssuable, toUnit('20000'));
 					assert.bnEqual(remainingIssuableResult.alreadyIssued, toUnit('0'));
 					assert.bnEqual(remainingIssuableResult.totalSystemDebt, toUnit('0'));
-					assert.equal(canStakeUSDC, false);
 					assert.bnEqual(availableUSDCStakeAmount, '0');
 
 					await assert.revert(
@@ -1247,7 +1245,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), 0, { from: account1 });
 
 					const [
-						canStakeUSDC,
 						stakedAmount,
 						totalStaked,
 						numOfStaker,
@@ -1256,7 +1253,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						totalIssuedPUSD,
 						usdcQuota
 					] = await Promise.all([
-						periFinance.canStakeUSDC(account1, "0"),
 						periFinance.usdcStakedAmountOf(account1),
 						periFinance.usdcTotalStakedAmount(),
 						periFinance.totalUSDCStakerCount(),
@@ -1266,7 +1262,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						periFinance.currentUSDCDebtQuota(account1)
 					]);
 
-					assert.equal(canStakeUSDC, true);
 					assert.equal(stakedAmount.toString(), "0");
 					assert.equal(totalStaked.toString(), "0");
 					assert.equal(numOfStaker.toString(), "0");
