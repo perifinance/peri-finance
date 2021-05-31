@@ -70,8 +70,9 @@ module.exports = {
 	async updateRatesWithDefaults({ exchangeRates, oracle, debtCache }) {
 		const timestamp = await currentTime();
 
-		const [PERI, pAUD, pEUR, pBTC, iBTC, pETH, ETH] = [
+		const [PERI, USDC, pAUD, pEUR, pBTC, iBTC, pETH, ETH] = [
 			'PERI',
+			'USDC',
 			'pAUD',
 			'pEUR',
 			'pBTC',
@@ -81,8 +82,8 @@ module.exports = {
 		].map(toBytes32);
 
 		await exchangeRates.updateRates(
-			[PERI, pAUD, pEUR, pBTC, iBTC, pETH, ETH],
-			['0.1', '0.5', '1.25', '5000', '4000', '172', '172'].map(toUnit),
+			[PERI, USDC, pAUD, pEUR, pBTC, iBTC, pETH, ETH],
+			['0.1', '0.98', '0.5', '1.25', '5000', '4000', '172', '172'].map(toUnit),
 			timestamp,
 			{
 				from: oracle,

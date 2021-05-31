@@ -56,7 +56,7 @@ contract('Rewards Integration Tests', accounts => {
 		'iBTC',
 		'pETH',
 		'ETH',
-		'USDC'
+		'USDC',
 	].map(toBytes32);
 
 	const pynthKeys = [pUSD, pAUD, pEUR, pBTC, iBTC, pETH, ETH];
@@ -163,13 +163,13 @@ contract('Rewards Integration Tests', accounts => {
 			PeriFinance: periFinance,
 			PynthpUSD: pUSDContract,
 			SystemSettings: systemSettings,
-			StakingStateUSDC: stakingStateUSDC
+			StakingStateUSDC: stakingStateUSDC,
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD', 'pAUD', 'pEUR', 'pBTC', 'iBTC', 'pETH'],
 			contracts: [
 				'AddressResolver',
-				'Exchanger', // necessary for burnPynths to check settlement of pUSD
+				'Exchanger', // necessary for burnPynthsAndUnstakeUSDC to check settlement of pUSD
 				'ExchangeRates',
 				'FeePool',
 				'FeePoolEternalStorage', // necessary to claimFees()
@@ -181,7 +181,7 @@ contract('Rewards Integration Tests', accounts => {
 				'PeriFinance',
 				'SystemSettings',
 				'CollateralManager',
-				'StakingStateUSDC'
+				'StakingStateUSDC',
 			],
 		}));
 
@@ -233,9 +233,9 @@ contract('Rewards Integration Tests', accounts => {
 			FEE_PERIOD_LENGTH = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 			CLAIMABLE_PERIODS = FEE_PERIOD_LENGTH - 1;
 
-			await periFinance.issueMaxPynths({ from: account1 });
-			await periFinance.issueMaxPynths({ from: account2 });
-			await periFinance.issueMaxPynths({ from: account3 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account2 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account3 });
 		});
 
 		it('should allocate the 3 accounts a third of the rewards for 1 period', async () => {
@@ -479,11 +479,11 @@ contract('Rewards Integration Tests', accounts => {
 
 			// Account 1 leaves the system in week 2
 			const burnableTotal = await periFinance.debtBalanceOf(account1, pUSD);
-			await periFinance.burnPynths(burnableTotal, { from: account1 });
+			await periFinance.burnPynthsAndUnstakeUSDC(burnableTotal, { from: account1 });
 			// await logFeesByPeriod(account1);
 
 			// Account 1 comes back into the system
-			await periFinance.issueMaxPynths({ from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account1 });
 
 			// Only Account 1 claims rewards
 			const rewardsAmount = third(periodOneMintableSupplyMinusMinterReward);
@@ -531,7 +531,7 @@ contract('Rewards Integration Tests', accounts => {
 
 			// Account 1 leaves the system
 			const burnableTotal = await periFinance.debtBalanceOf(account1, pUSD);
-			await periFinance.burnPynths(burnableTotal, { from: account1 });
+			await periFinance.burnPynthsAndUnstakeUSDC(burnableTotal, { from: account1 });
 
 			// FastForward into the second mintable week
 			await fastForwardAndUpdateRates(WEEK + MINUTE);
@@ -548,7 +548,7 @@ contract('Rewards Integration Tests', accounts => {
 			fastForwardAndCloseFeePeriod();
 
 			// Account1 Reenters in current unclosed period so no rewards yet
-			// await periFinance.issueMaxPynths({ from: account1 });
+			// await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account1 });
 
 			// Accounts 2 & 3 now have 33% of period 1 and 50% of period 2
 			// console.log('33% of p1', third(periodOneMintableSupplyMinusMinterReward).toString());
@@ -589,8 +589,8 @@ contract('Rewards Integration Tests', accounts => {
 	describe('Exchange Rate Shift tests', async () => {
 		it('should assign accounts (1,2,3) to have (40%,40%,20%) of the debt/rewards', async () => {
 			// Account 1&2 issue 10K USD and exchange in pBTC each, holding 50% of the total debt.
-			await periFinance.issuePynths(tenK, { from: account1 });
-			await periFinance.issuePynths(tenK, { from: account2 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account2 });
 
 			await periFinance.exchange(pUSD, tenK, pBTC, { from: account1 });
 			await periFinance.exchange(pUSD, tenK, pBTC, { from: account2 });
@@ -640,7 +640,7 @@ contract('Rewards Integration Tests', accounts => {
 			// Account 3 (enters the system and) mints 10K pUSD (minus half of an exchange fee - to balance the fact
 			// that the other two holders have doubled their pBTC holdings) and should have 20% of the debt not 33.33%
 			const potentialFee = exchangeFeeIncurred(toUnit('10000'));
-			await periFinance.issuePynths(tenK.sub(half(potentialFee)), { from: account3 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK.sub(half(potentialFee)), { from: account3 });
 
 			// Get the PERI mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -725,7 +725,7 @@ contract('Rewards Integration Tests', accounts => {
 			// 	pUSD
 			// );
 
-			// await periFinance.burnPynths(amountAfterExchangeInUSD, { from: account1 });
+			// await periFinance.burnPynthsAndUnstakeUSDC(amountAfterExchangeInUSD, { from: account1 });
 
 			// // Get the PERI mintableSupply for week 3
 			// // const periodThreeMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -771,7 +771,7 @@ contract('Rewards Integration Tests', accounts => {
 			// assert.bnClose(account3Escrow2[1], oneFifth(periodThreeMintableSupply), 15);
 
 			// // Acc1 mints 20K (40%) close p (40,40,20)');
-			// await periFinance.issuePynths(twentyK, { from: account1 });
+			// await periFinance.issuePynthsAndStakeUSDC(twentyK, { from: account1 });
 
 			// // Get the PERI mintableSupply for week 4
 			// const periodFourMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -809,14 +809,14 @@ contract('Rewards Integration Tests', accounts => {
 
 	describe('3 Accounts issue 10K pUSD each in week 1', async () => {
 		beforeEach(async () => {
-			await periFinance.issuePynths(tenK, { from: account1 });
-			await periFinance.issuePynths(tenK, { from: account2 });
-			await periFinance.issuePynths(tenK, { from: account3 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account2 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account3 });
 		});
 
 		it('Acc1 issues and burns multiple times and should have accounts 1,2,3 rewards 50%,25%,25%', async () => {
 			// Acc 1 Issues 20K pUSD
-			await periFinance.issuePynths(tenK, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account1 });
 
 			// Close week 2
 			await fastForwardAndCloseFeePeriod();
@@ -862,11 +862,11 @@ contract('Rewards Integration Tests', accounts => {
 			);
 
 			// Acc1 Burns all
-			await periFinance.burnPynths(twentyK, { from: account1 });
+			await periFinance.burnPynthsAndUnstakeUSDC(twentyK, { from: account1 });
 			// Acc 1 Issues 10K pUSD
-			await periFinance.issuePynths(tenK, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account1 });
 			// Acc 1 Issues 10K pUSD again
-			await periFinance.issuePynths(tenK, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(tenK, { from: account1 });
 
 			// Get the PERI mintableSupply for week 2
 			const periodTwoMintableSupply = (await supplySchedule.mintableSupply()).sub(
@@ -910,10 +910,10 @@ contract('Rewards Integration Tests', accounts => {
 
 	describe('Collateralisation Ratio Penalties', async () => {
 		beforeEach(async () => {
-			// console.log('3 accounts issueMaxPynths in p1');
-			await periFinance.issueMaxPynths({ from: account1 });
-			await periFinance.issueMaxPynths({ from: account2 });
-			await periFinance.issueMaxPynths({ from: account3 });
+			// console.log('3 accounts issuePynthsAndStakeUSDC toUnit('1000'), toUnit('10'), in p1');
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account2 });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('10'), { from: account3 });
 
 			// We should have zero rewards available because the period is still open.
 			const rewardsBefore = await feePool.feesAvailable(account1);
@@ -973,8 +973,8 @@ contract('Rewards Integration Tests', accounts => {
 	describe('When user is the last to call claimFees()', () => {
 		beforeEach(async () => {
 			const oneThousand = toUnit('10000');
-			await periFinance.issuePynths(oneThousand, { from: account2 });
-			await periFinance.issuePynths(oneThousand, { from: account1 });
+			await periFinance.issuePynthsAndStakeUSDC(oneThousand, { from: account2 });
+			await periFinance.issuePynthsAndStakeUSDC(oneThousand, { from: account1 });
 
 			await periFinance.exchange(pUSD, oneThousand, pAUD, { from: account2 });
 			await periFinance.exchange(pUSD, oneThousand, pAUD, { from: account1 });
