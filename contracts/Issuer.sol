@@ -282,8 +282,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     returns(uint, bool) {
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
 
+        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_account);
+        if(usdcStakedAmount == 0 || debtBalance == 0) {
+            return (0, anyRateIsInvalid);
+        }
+
         (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
+        uint usdcStakedAmountToUSD = _usdcToUSD(usdcStakedAmount, usdcRate);
         uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
 
         return (debtByUSDC.divideDecimalRound(debtBalance), anyRateIsInvalid || isUSDCInvalid);
@@ -385,14 +390,21 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, PERI);
 
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer), usdcRate);
-        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint usdcStakedAmountToPeri = _usdToPeri(usdcStakedAmountToUSD, periRate);
+        uint usdcStakedAmountToPeri;
+        bool rateIsInvalid;
+        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
+        if(usdcStakedAmount > 0) {
+            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
+            uint usdcStakedAmountToUSD = _usdcToUSD(usdcStakedAmount, usdcRate);
+            (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+            usdcStakedAmountToPeri = _usdToPeri(usdcStakedAmountToUSD, periRate);
+
+            rateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
+        }
 
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
-        bool rateIsInvalid = anyRateIsInvalid || isUSDCInvalid || isPeriInvalid;
-        if (totalOwnedPeriFinance == 0 && usdcStakedAmountToUSD == 0) return (0, rateIsInvalid);
+        rateIsInvalid = rateIsInvalid || anyRateIsInvalid;
+        if (totalOwnedPeriFinance == 0 && usdcStakedAmount == 0) return (0, rateIsInvalid);
 
         uint totalOwned = totalOwnedPeriFinance.add(usdcStakedAmountToPeri);
 
