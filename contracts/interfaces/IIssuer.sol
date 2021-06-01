@@ -71,6 +71,12 @@ interface IIssuer {
         uint _usdcStakeAmount
     ) external;
 
+    function issueMaxPynths(address _issuer)
+    external;
+
+    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount)
+    external;
+
     function burnPynthsAndUnstakeUSDC(
         address _from,
         uint _burnAmount,

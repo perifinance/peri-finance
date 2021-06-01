@@ -703,7 +703,29 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _usdcStakeAmount
     ) external
     onlyPeriFinance {
-        _issuePynthsAndStakeUSDC(_issuer, _issueAmount, _usdcStakeAmount);
+        _issuePynthsAndStakeUSDC(
+            _issuer, 
+            _issueAmount, 
+            _usdcStakeAmount,
+            false
+        );
+    }
+
+    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount)
+    external
+    onlyPeriFinance {
+        _issuePynthsAndStakeUSDC(
+            _issuer, 
+            _issueAmount, 
+            0,
+            true
+        );        
+    }
+
+    function issueMaxPynths(address _issuer)
+    external
+    onlyPeriFinance {
+        _issuePynths(_issuer, 0, true);
     }
 
     function burnPynthsAndUnstakeUSDC(
@@ -837,9 +859,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _issuePynthsAndStakeUSDC(
         address _issuer,
         uint _issueAmount,
-        uint _usdcStakeAmount
+        uint _usdcStakeAmount,
+        bool _stakeMax
     ) internal {
-        if(_usdcStakeAmount > 0) {
+        if(_stakeMax || _usdcStakeAmount > 0) {
             (uint debtBalance, ,) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
             uint afterDebtBalanceWithIssuanceRatio = debtBalance.add(_issueAmount).divideDecimalRound(getIssuanceRatio());
@@ -855,9 +878,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 "No availalbe USDC staking amount remains");
 
             uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
-
-            require(availableUSDCAmountToStake >= _usdcStakeAmount,
-                "Input amount exceeds available staking amount");
+            if(_stakeMax) {
+                uint usdcBalance = usdc().balanceOf(_issuer).mul(10**12);
+                _usdcStakeAmount = usdcBalance >= availableUSDCAmountToStake ? availableUSDCAmountToStake : usdcBalance;
+            } else {
+                require(availableUSDCAmountToStake >= _usdcStakeAmount,
+                    "Input amount exceeds available staking amount");
+            }
 
             _transferAndStakeUSDC(_issuer, _usdcStakeAmount);
         }

@@ -72,6 +72,15 @@ interface IPeriFinance {
     returns(uint);
 
     // Mutative Functions
+    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
+    external;
+
+    function issueMaxPynths()
+    external;
+
+    function issuePynthsAndStakeMaxUSDC(uint _issueAmount)
+    external;
+
     function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
     external;
 
@@ -114,9 +123,6 @@ interface IPeriFinance {
         bytes32 destinationCurrencyKey,
         bytes32 trackingCode
     ) external returns (uint amountReceived, IVirtualPynth vPynth);
-
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
-    external;
 
     function mint() external returns (bool);
 
