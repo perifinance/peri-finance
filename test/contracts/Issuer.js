@@ -1290,6 +1290,68 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(totalIssuedPUSD, toUnit('20000'));
 					assert.bnClose(usdcQuota, toUnit('0.2'), '10');
 				});
+
+				it.only("should issue pynths when USDC quota exceeds threshold", async () => {
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
+						from: oracle,
+					});
+					
+					const targetRatio = await issuer.issuanceRatio();
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), divideDecimal(toUnit("200"), (targetRatio)), { from: account1 });
+
+					assert.bnEqual(await periFinance.currentUSDCDebtQuota(account1), toUnit("0.2"));
+
+					const timestamp2 = await currentTime();
+					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
+						from: oracle,
+					});
+
+					const quota_beforeIssue = await periFinance.currentUSDCDebtQuota(account1);
+					const cratio_beforeIssue = await periFinance.collateralisationRatio(account1);
+					assert.bnGt(quota_beforeIssue, toUnit("0.2"));
+					assert.bnLt(cratio_beforeIssue, targetRatio);
+
+					// should throw error for it cannot stake than its issue amount * targetRatio
+					await assert.revert(
+						periFinance.issuePynthsAndStakeUSDC(toUnit("1000"), divideDecimal(multiplyDecimal(toUnit("200"), toUnit("1.2")), (targetRatio)), { from: account1 }),
+						"Input amount exceeds available staking amount"
+					);
+
+					// Max USDC Quota = 2000 * 0.2
+					// availableStakingAmount = TargetRatio * (Max USDC Quota * Quota - StakedAmount * usdcExRate) / IR / usdcExRate
+					// = 666.666666.....  => It makes quota 20%
+					await periFinance.issuePynthsAndStakeUSDC(toUnit("1000"), "666" + "6".repeat(18), { from: account1 });
+
+					const quota_afterIssue = await periFinance.currentUSDCDebtQuota(account1);
+					const cratio_afterIssue = await periFinance.collateralisationRatio(account1);
+					assert.bnEqual(quota_afterIssue, toUnit("0.2"));
+					assert.bnLt(cratio_afterIssue, targetRatio);
+				});
+
+				it.only("should issue max pynths when USDC quota exceeds threshold", async () => {
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
+						from: oracle,
+					});
+					
+					const targetRatio = await issuer.issuanceRatio();
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), divideDecimal(toUnit("200"), (targetRatio)), { from: account1 });
+
+					assert.bnEqual(await periFinance.currentUSDCDebtQuota(account1), toUnit("0.2"));
+
+					const timestamp2 = await currentTime();
+					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
+						from: oracle,
+					});
+
+					await periFinance.issueMaxPynths({ from: account1 });
+
+					const quota_afterIssue = await periFinance.currentUSDCDebtQuota(account1);
+					const cratio_afterIssue = await periFinance.collateralisationRatio(account1);
+					assert.bnLt(quota_afterIssue, toUnit("0.2"));
+					assert.bnEqual(cratio_afterIssue, targetRatio);
+				});
 			});
 
 			describe('issuance USDC max staking', () => {
@@ -1305,7 +1367,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await usdc.approve(issuer.address, '100000' + '0'.repeat(6), { from: account1 });
 				});
 
-				it.only('should initiate correctly', async () => {
+				it('should initiate correctly', async () => {
 					const usdcBalance = await usdc.balanceOf(account1);
 					const usdcAllowance = await usdc.allowance(account1, issuer.address);
 
@@ -1313,7 +1375,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.equal(usdcAllowance.toString(), '100000' + '0'.repeat(6));
 				});
 
-				it.only("should stake issue amount x issuance ratio", async () => {
+				it("should stake issue amount x issuance ratio", async () => {
 					const [
 						stakedAmount_before,
 						usdcBalance_1_before,
@@ -1365,7 +1427,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					assert.bnEqual(usdcQuota_after, toUnit("0.2"));
 				});
 
-				it.only("should stake less than amount x issuance ratio if usdc balance is not enough", async () => {
+				it("should stake less than amount x issuance ratio if usdc balance is not enough", async () => {
 					// It is going to stake all USDC balance
 					await periFinance.issuePynthsAndStakeMaxUSDC(toUnit("10000"), { from: account1 });
 
