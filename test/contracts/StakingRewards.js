@@ -26,7 +26,8 @@ contract('StakingRewards', accounts => {
 		stakingRewards,
 		rewardsDistribution,
 		systemSettings,
-		feePool;
+		feePool,
+		stakingStateUSDC;
 
 	const DAY = 86400;
 	const ZERO_BN = toBN(0);
@@ -68,9 +69,10 @@ contract('StakingRewards', accounts => {
 			PeriFinance: rewardsToken,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
+			StakingStateUSDC: stakingStateUSDC
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['RewardsDistribution', 'PeriFinance', 'FeePool', 'SystemSettings'],
+			contracts: ['RewardsDistribution', 'PeriFinance', 'FeePool', 'SystemSettings', 'StakingStateUSDC'],
 		}));
 
 		stakingRewards = await setupContract({
