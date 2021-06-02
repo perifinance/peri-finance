@@ -23,7 +23,8 @@ const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = requi
 const BN = require('bn.js');
 
 contract('SupplySchedule', async accounts => {
-	const initialWeeklySupply = divideDecimal(75000000, 52); // 75,000,000 / 52 weeks
+	// const initialWeeklySupply = divideDecimal(75000000, 52); // 75,000,000 / 52 weeks
+	const initialWeeklySupply = toUnit('1000000'); // 1000000 ether.
 	const inflationStartDate = inflationStartTimestampInSecs;
 
 	const [, owner, periFinance, account1, account2] = accounts;
@@ -68,7 +69,8 @@ contract('SupplySchedule', async accounts => {
 			args: [account1, lastMintEvent, weekCounter],
 		});
 
-		const weeklyIssuance = divideDecimal(75e6, 52);
+		// const weeklyIssuance = divideDecimal(75e6, 52);
+		const weeklyIssuance = toUnit('1000000');
 		assert.equal(await instance.owner(), account1);
 		assert.bnEqual(await instance.lastMintEvent(), 0);
 		assert.bnEqual(await instance.weekCounter(), 0);
@@ -477,7 +479,7 @@ contract('SupplySchedule', async accounts => {
 				let instance, lastMintEvent;
 				beforeEach(async () => {
 					// constructor(address _owner, uint _lastMintEvent, uint _currentWeek) //
-					lastMintEvent = 1575552876; // Thursday, 5 December 2019 13:34:36
+					lastMintEvent = 1622508240; //  2021년 June 1일 Tuesday AM 12:44:00
 					const weekCounter = 39; // latest week
 					instance = await setupContract({
 						accounts,
@@ -557,7 +559,7 @@ contract('SupplySchedule', async accounts => {
 				let instance, lastMintEvent;
 				beforeEach(async () => {
 					// constructor(address _owner, uint _lastMintEvent, uint _currentWeek) //
-					lastMintEvent = inflationStartDate + 233 * WEEK; // 2019-03-06 + 233 weeks = 23 August 2023 00:00:00
+					lastMintEvent = inflationStartDate + 233 * WEEK; // 2021-06-01 + 233 weeks = 2021년 11월 9일 화요일 오전 9:44:00 GMT+09:00
 					const weekCounter = 233; // latest week
 					instance = await setupContract({
 						accounts,

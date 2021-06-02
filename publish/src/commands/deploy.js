@@ -288,20 +288,18 @@ const deploy = async ({
 		currentPeriFinanceSupply = w3utils.toWei('20000000');
 
 		// inflationSupplyToDate = total supply - 100m
-		// const inflationSupplyToDate = w3utils
-		// 	.toBN(currentPeriFinanceSupply)
-		// 	.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
+		const inflationSupplyToDate = w3utils
+			.toBN(currentPeriFinanceSupply)
+			.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
 
 		// current weekly inflation 75m / 52
-		// const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
-		// currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
+		const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
+		currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
 
 		// Check result is > 0 else set to 0 for currentWeek
-		currentWeekOfInflation =
-			// currentWeekOfInflation.gt(w3utils.toBN('0'))
-			// 	? currentWeekOfInflation.toNumber()
-			// :
-			0;
+		currentWeekOfInflation = currentWeekOfInflation.gt(w3utils.toBN('0'))
+			? currentWeekOfInflation.toNumber()
+			: 0;
 
 		// Calculate lastMintEvent as Inflation start date + number of weeks issued * secs in weeks
 		const mintingBuffer = 86400;
@@ -309,6 +307,8 @@ const deploy = async ({
 		const inflationStartDate = inflationStartTimestampInSecs;
 		currentLastMintEvent =
 			inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
+		currentWeekOfInflation = 0;
+		currentLastMintEvent = 0;
 	} catch (err) {
 		console.log(err);
 		if (freshDeploy) {
