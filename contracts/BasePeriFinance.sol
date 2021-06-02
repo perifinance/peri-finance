@@ -26,31 +26,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     // ========== STATE VARIABLES ==========
 
-    struct LockState {
-        address account;
-        uint startTime;
-        uint iterations;
-        uint totalAmount;
-        uint unitTime;
-        uint endTime;
-    }
-
     // Available Pynths which can be used with the system
     string public constant TOKEN_NAME = "Peri Finance Token";
     string public constant TOKEN_SYMBOL = "PERI";
     uint8 public constant DECIMALS = 18;
     bytes32 public constant pUSD = "pUSD";
-
-    mapping(address => LockState) public lockStates;
-
-    event LockChanged(
-        address indexed account,
-        uint startTime,
-        uint iterations,
-        uint totalAmount,
-        uint unitTime,
-        uint endTime
-    );
 
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_PERIFINANCESTATE = "PeriFinanceState";
@@ -222,8 +202,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _canTransfer(address account, uint value) internal view returns (bool) {
-        require(!_isLocked(account, value), "PERI : Locked balance");
-
         (uint initialDebtOwnership, ) = periFinanceState().issuanceData(account);
 
         if (initialDebtOwnership > 0) {
@@ -233,86 +211,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
             require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
         }
         return true;
-    }
-
-    function setLock(
-        address account,
-        uint delay,
-        uint iterations,
-        uint totalLockAmount,
-        uint interval
-    ) external onlyOwner {
-        uint _startTime = delay.add(block.timestamp);
-        uint _endTime = _startTime.add(iterations.mul(interval));
-
-        lockStates[account] = LockState(account, _startTime, iterations, totalLockAmount, interval, _endTime);
-
-        emit LockChanged(account, _startTime, iterations, totalLockAmount, interval, _endTime);
-    }
-
-    function resetLock(address account) external onlyOwner {
-        delete lockStates[account];
-        emit LockChanged(account, 0, 0, 0, 0, 0);
-    }
-
-    function getLock(address account)
-        public
-        view
-        returns (
-            address,
-            uint,
-            uint,
-            uint,
-            uint,
-            uint
-        )
-    {
-        return (
-            lockStates[account].account,
-            lockStates[account].startTime,
-            lockStates[account].iterations,
-            lockStates[account].totalAmount,
-            lockStates[account].unitTime,
-            lockStates[account].endTime
-        );
-    }
-
-    function getLockCalculation(address account) public view returns (uint, uint) {
-        LockState memory userLockInfo = lockStates[account];
-
-        // Releasing is not started yet, or user is not locked
-        if (userLockInfo.startTime > block.timestamp || userLockInfo.startTime == 0) {
-            return (userLockInfo.iterations, userLockInfo.totalAmount);
-        }
-
-        uint iterRemains = (userLockInfo.endTime.sub(block.timestamp)).div(userLockInfo.unitTime);
-        uint lockAmount = userLockInfo.totalAmount.mul(iterRemains).div(userLockInfo.iterations);
-
-        return (iterRemains, lockAmount);
-    }
-
-    function _isLocked(address account, uint amount) internal view returns (bool) {
-        LockState memory userLockInfo = lockStates[account];
-
-        // Account is not locked
-        if (userLockInfo.startTime == 0 || userLockInfo.endTime < block.timestamp) {
-            return false;
-        }
-
-        // Releasing is not started yet
-        if (userLockInfo.startTime > block.timestamp) {
-            return true;
-        }
-
-        (, uint lockAmount) = getLockCalculation(account);
-        uint accountBalance = tokenState.balanceOf(account);
-
-        // Account's remained balance may less than lock amount
-        if (accountBalance.sub(amount) < lockAmount) {
-            return true;
-        }
-
-        return false;
     }
 
     // ========== MUTATIVE FUNCTIONS ==========
