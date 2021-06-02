@@ -163,7 +163,7 @@ jobs:
       - cmd-wait-for-port:
             port: 9545
       - run:
-          name: Deploy OVM Pynthetix instances
+          name: Deploy OVM PeriFinance instances
           command: |
             node publish deploy-ovm-pair
       - run:

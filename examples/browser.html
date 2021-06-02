@@ -16,17 +16,17 @@
     <script type="text/javascript" src="../browser.js"></script>
     <script>
       const network = "mainnet";
-      const sources = pynthetix.getSource({ network });
+      const sources = perifinance.getSource({ network });
       console.log("sources", sources);
-      const targets = pynthetix.getTarget({ network });
+      const targets = perifinance.getTarget({ network });
       console.log("targets", targets);
-      const pynths = pynthetix.getPynths({ network });
+      const pynths = perifinance.getPynths({ network });
       console.log("pynths", pynths);
-      const users = pynthetix.getUsers({ network });
+      const users = perifinance.getUsers({ network });
       console.log("users", users);
       console.log(
-        "pynthetix.toBytes32 correct?",
-        pynthetix.toBytes32("PERI") ===
+        "perifinance.toBytes32 correct?",
+        perifinance.toBytes32("PERI") ===
           "0x534e580000000000000000000000000000000000000000000000000000000000"
       );
       const pETHContract = new ethers.Contract(

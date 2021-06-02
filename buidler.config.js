@@ -12,7 +12,7 @@ require('@eth-optimism/ovm-toolchain/build/src/buidler-plugins/buidler-ovm-node'
 
 usePlugin('@nomiclabs/buidler-truffle5'); // uses and exposes web3 via buidler-web3 plugin
 usePlugin('solidity-coverage');
-usePlugin('buidler-ast-doc'); // compile ASTs for use with pynthetix-docs
+usePlugin('buidler-ast-doc'); // compile ASTs for use with perifinance-docs
 usePlugin('buidler-gas-reporter');
 
 const { logContractSizes } = require('./publish/src/contract-size');

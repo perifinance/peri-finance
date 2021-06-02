@@ -140,7 +140,7 @@ contract PeriFinanceBridgeToOptimism is Owned, MixinSystemSettings, IPeriFinance
         activated = false;
 
         IERC20 ERC20PeriFinance = periFinanceERC20();
-        // get the current contract balance and transfer it to the new PynthetixL1ToL2Bridge contract
+        // get the current contract balance and transfer it to the new PeriFinanceL1ToL2Bridge contract
         uint256 contractBalance = ERC20PeriFinance.balanceOf(address(this));
         ERC20PeriFinance.transfer(newBridge, contractBalance);
 

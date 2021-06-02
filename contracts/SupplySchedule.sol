@@ -30,7 +30,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     // The initial weekly inflationary supply is 75m / 52 until the start of the decay rate.
     // 75e6 * SafeDecimalMath.unit() / 52
-    uint public constant INITIAL_WEEKLY_SUPPLY = 1442307692307692307692307;
+    uint public constant INITIAL_WEEKLY_SUPPLY = 1442307692307692307692307 ether;
 
     // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
@@ -192,7 +192,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== SETTERS ========== */
 
     /**
-     * @notice Set the PynthetixProxy should it ever change.
+     * @notice Set the PeriFinanceProxy should it ever change.
      * SupplySchedule requires PeriFinance address as it has the authority
      * to record mint event.
      * */
@@ -227,7 +227,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     event MinterRewardUpdated(uint newRewardAmount);
 
     /**
-     * @notice Emitted when setPynthetixProxy is called changing the PeriFinance Proxy address
+     * @notice Emitted when setPeriFinanceProxy is called changing the PeriFinance Proxy address
      * */
     event PeriFinanceProxyUpdated(address newAddress);
 }

@@ -80,7 +80,7 @@ interface IRewardEscrowV2 {
         VestingEntries.VestingEntry[] calldata vestingEntries
     ) external;
 
-    // Return amount of PERI transfered to PynthetixBridgeToOptimism deposit contract
+    // Return amount of PERI transfered to PeriFinanceBridgeToOptimism deposit contract
     function burnForMigration(address account, uint256[] calldata entryIDs)
         external
         returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries);
