@@ -9,6 +9,9 @@
 		"type": "git",
 		"url": "https://github.com/perifinance/peri-finance"
 	},
+	"publishConfig": {
+		"access": "public"
+	},
 	"keywords": [
 		"PeriFinance",
 		"PERI",
