@@ -1,5 +1,5 @@
 {
-	"name": "peri-finance",
+	"name": "@perifinance/peri-finance",
 	"version": "0.0.1",
 	"author": "perifinance",
 	"description": "The smart contracts which make up the Peri Finance system. (pynths.com)",
@@ -8,9 +8,6 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/perifinance/peri-finance"
-	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
 	},
 	"keywords": [
 		"PeriFinance",
