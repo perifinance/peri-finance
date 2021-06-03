@@ -17,8 +17,6 @@ jobs:
           node-version: 15
       - run: npm ci
       - run: npm test
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_REGISTRY_TOKEN}}
 
   publish-npm:
     needs: build
