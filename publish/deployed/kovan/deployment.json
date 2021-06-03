@@ -227,10 +227,10 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x5fC544E9ad9d619f8CE49e73FB2558Bcd397a3E1",
+			"address": "0xD6A6D0a091D509136Eb8E3E9Ea4C6146Cc803208",
 			"source": "MultiCollateralPynth",
-			"link": "https://kovan.etherscan.io/address/0x5fC544E9ad9d619f8CE49e73FB2558Bcd397a3E1",
-			"timestamp": "2021-06-03T02:03:01.361Z",
+			"link": "https://kovan.etherscan.io/address/0xD6A6D0a091D509136Eb8E3E9Ea4C6146Cc803208",
+			"timestamp": "2021-06-03T08:22:41.256Z",
 			"txn": "",
 			"network": "kovan"
 		},
@@ -308,10 +308,10 @@
 		},
 		"TokenStatepUSD": {
 			"name": "TokenStatepUSD",
-			"address": "0x32Eb20010131A229F0225b9DbdCcDc131379E510",
+			"address": "0xBF6dfd5f41bC4EF2C3130032a2Ea434acb8FCdd7",
 			"source": "TokenState",
-			"link": "https://kovan.etherscan.io/address/0x32Eb20010131A229F0225b9DbdCcDc131379E510",
-			"timestamp": "2021-06-03T02:02:49.814Z",
+			"link": "https://kovan.etherscan.io/address/0xBF6dfd5f41bC4EF2C3130032a2Ea434acb8FCdd7",
+			"timestamp": "2021-06-03T08:22:33.779Z",
 			"txn": "",
 			"network": "kovan"
 		},
@@ -704,10 +704,10 @@
 		},
 		"ProxypUSD": {
 			"name": "ProxypUSD",
-			"address": "0x882448E165aA0B520127757aDCad0A7f032657dC",
+			"address": "0x76C1828257E48a5Aec0EE13d0f5018e0a494d1AD",
 			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0x882448E165aA0B520127757aDCad0A7f032657dC",
-			"timestamp": "2021-06-03T02:02:53.221Z",
+			"link": "https://kovan.etherscan.io/address/0x76C1828257E48a5Aec0EE13d0f5018e0a494d1AD",
+			"timestamp": "2021-06-03T08:22:37.081Z",
 			"txn": "",
 			"network": "kovan"
 		},
@@ -965,10 +965,10 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x1a65Bfde83ED420236243bF247E2114072993480",
+			"address": "0x035C0dd24f76153cAC350C1AfFf41845a48C820f",
 			"source": "Issuer",
-			"link": "https://kovan.etherscan.io/address/0x1a65Bfde83ED420236243bF247E2114072993480",
-			"timestamp": "2021-06-03T02:02:01.418Z",
+			"link": "https://kovan.etherscan.io/address/0x035C0dd24f76153cAC350C1AfFf41845a48C820f",
+			"timestamp": "2021-06-03T08:25:18.111Z",
 			"txn": "",
 			"network": "kovan"
 		},
@@ -1298,10 +1298,10 @@
 		},
 		"EtherCollateralpUSD": {
 			"name": "EtherCollateralpUSD",
-			"address": "0x72045892Eb4c39D53b1fE6344661fa810D4d2190",
+			"address": "0xbaE619c691C39cd4aACA1043566291464A0FFc41",
 			"source": "EtherCollateralpUSD",
-			"link": "https://kovan.etherscan.io/address/0x72045892Eb4c39D53b1fE6344661fa810D4d2190",
-			"timestamp": "2021-06-03T02:05:25.572Z",
+			"link": "https://kovan.etherscan.io/address/0xbaE619c691C39cd4aACA1043566291464A0FFc41",
+			"timestamp": "2021-06-03T08:22:57.349Z",
 			"txn": "",
 			"network": "kovan"
 		},
