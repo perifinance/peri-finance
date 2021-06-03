@@ -8,18 +8,7 @@ on:
     types: [created]
 
 jobs:
-  setup:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v2
-      - name: Create .env file
-        run: |
-          touch .env
-          echo PROVIDER_URL=${{ secrets.PROVIDER_URL }} >> .env
-          echo PROVIDER_URL_MAINNET=${{ secrets.PROVIDER_URL_MAINNET }} >> .env
-
   build:
-    needs: setup
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2

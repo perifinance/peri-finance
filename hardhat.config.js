@@ -11,8 +11,6 @@ require('@nomiclabs/hardhat-etherscan');
 require('solidity-coverage');
 require('hardhat-gas-reporter');
 
-const PROVIDER_URL_MAINNET = process.env.PROVIDER_URL_MAINNET;
-const DEPLOY_PRIVATE_KEY = process.env.DEPLOY_PRIVATE_KEY;
 const {
 	constants: { inflationStartTimestampInSecs, AST_FILENAME, AST_FOLDER, BUILD_FOLDER },
 } = require('.');
@@ -48,11 +46,6 @@ module.exports = {
 	},
 	defaultNetwork: 'hardhat',
 	networks: {
-		mainnet: {
-			chainId: 1,
-			url: PROVIDER_URL_MAINNET,
-			accounts: [DEPLOY_PRIVATE_KEY],
-		},
 		hardhat: {
 			chainId: 1337,
 			gas: 12e6,
