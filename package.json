@@ -1,5 +1,5 @@
 {
-	"name": "@perifinance/peri-finance",
+	"name": "peri-finance",
 	"version": "0.0.1",
 	"author": "perifinance",
 	"description": "The smart contracts which make up the Peri Finance system. (pynths.com)",
