@@ -305,8 +305,8 @@ contract('FeePool', async accounts => {
 			console.log('rewardsToDistribute:', feePeriod[5].toString());
 			console.log('rewardsClaimed:', feePeriod[6].toString());
 
-			await feePool.claimFees({ from: account1 });
-			await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
 
 			console.log('');
 			console.log('After Claimed.....');
@@ -356,8 +356,8 @@ contract('FeePool', async accounts => {
 			await feePool.closeCurrentFeePeriod({ from: account1 });
 			await updateRatesWithDefaults();
 
-			await feePool.claimFees({ from: account1 });
-			await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
 
 			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
 			console.log(
@@ -403,8 +403,8 @@ contract('FeePool', async accounts => {
 			await feePool.closeCurrentFeePeriod({ from: account1 });
 			await updateRatesWithDefaults();
 
-			await feePool.claimFees({ from: account1 });
-			await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
 
 			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
 			console.log(
@@ -442,7 +442,7 @@ contract('FeePool', async accounts => {
 			console.log('rewardsToDistribute:', feePeriod[5].toString());
 			console.log('rewardsClaimed:', feePeriod[6].toString());
 
-			console.log('-------------Fourth Time (Account3 finally claimed)-----------');
+			console.log('-------------Fourth Time (Account3 Didnt claim) -----------');
 
 			const fourthWeek = thirdWeek + WEEK + DAY;
 			await fastForwardTo(new Date(fourthWeek * 1000));
@@ -450,9 +450,199 @@ contract('FeePool', async accounts => {
 			await feePool.closeCurrentFeePeriod({ from: account1 });
 			await updateRatesWithDefaults();
 
-			await feePool.claimFees({ from: account1 });
-			await feePool.claimFees({ from: account2 });
-			await feePool.claimFees({ from: account3 });
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
+
+			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
+			console.log(
+				'afterClaimAvailableFeesOfAccount1:',
+				afterClaimAvailableFeesOfAccount1[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
+			console.log(
+				'afterClaimAvailableFeesOfAccount2:',
+				afterClaimAvailableFeesOfAccount2[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
+			console.log(
+				'afterClaimAvailableFeesOfAccount3:',
+				afterClaimAvailableFeesOfAccount3[1].toString()
+			);
+
+			console.log('------------------------');
+
+			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
+			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
+			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
+			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
+			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
+			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
+
+			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
+			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
+
+			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
+			console.log('escrowBalance : ', escrowBalance.toString());
+
+			feePeriod = await feePool.recentFeePeriods(1);
+			console.log('feePeriodId:', feePeriod[0].toString());
+			console.log('rewardsToDistribute:', feePeriod[5].toString());
+			console.log('rewardsClaimed:', feePeriod[6].toString());
+
+			console.log('-------------Fifth Time (Account3 Didnt claim)-----------');
+
+			const fifthWeek = fourthWeek + WEEK + DAY;
+			await fastForwardTo(new Date(fifthWeek * 1000));
+			await periFinance.mint({ from: account1 });
+			await feePool.closeCurrentFeePeriod({ from: account1 });
+			await updateRatesWithDefaults();
+
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
+
+			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
+			console.log(
+				'afterClaimAvailableFeesOfAccount1:',
+				afterClaimAvailableFeesOfAccount1[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
+			console.log(
+				'afterClaimAvailableFeesOfAccount2:',
+				afterClaimAvailableFeesOfAccount2[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
+			console.log(
+				'afterClaimAvailableFeesOfAccount3:',
+				afterClaimAvailableFeesOfAccount3[1].toString()
+			);
+
+			console.log('------------------------');
+
+			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
+			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
+			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
+			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
+			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
+			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
+
+			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
+			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
+
+			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
+			console.log('escrowBalance : ', escrowBalance.toString());
+
+			feePeriod = await feePool.recentFeePeriods(1);
+			console.log('feePeriodId:', feePeriod[0].toString());
+			console.log('rewardsToDistribute:', feePeriod[5].toString());
+			console.log('rewardsClaimed:', feePeriod[6].toString());
+
+			console.log('-------------Sixth Time (Account3 finally claimed)-----------');
+
+			const sixthWeek = fifthWeek + WEEK + DAY;
+			await fastForwardTo(new Date(sixthWeek * 1000));
+			await periFinance.mint({ from: account1 });
+			await feePool.closeCurrentFeePeriod({ from: account1 });
+			await updateRatesWithDefaults();
+
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account3 });
+
+			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
+			console.log(
+				'afterClaimAvailableFeesOfAccount1:',
+				afterClaimAvailableFeesOfAccount1[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
+			console.log(
+				'afterClaimAvailableFeesOfAccount2:',
+				afterClaimAvailableFeesOfAccount2[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
+			console.log(
+				'afterClaimAvailableFeesOfAccount3:',
+				afterClaimAvailableFeesOfAccount3[1].toString()
+			);
+
+			console.log('------------------------');
+
+			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
+			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
+			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
+			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
+			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
+			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
+
+			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
+			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
+
+			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
+			console.log('escrowBalance : ', escrowBalance.toString());
+
+			feePeriod = await feePool.recentFeePeriods(1);
+			console.log('feePeriodId:', feePeriod[0].toString());
+			console.log('rewardsToDistribute:', feePeriod[5].toString());
+			console.log('rewardsClaimed:', feePeriod[6].toString());
+
+			console.log('-------------Seventh Time (Account3 finally claimed)-----------');
+
+			const seventhWeek = sixthWeek + WEEK + DAY;
+			await fastForwardTo(new Date(seventhWeek * 1000));
+			await periFinance.mint({ from: account1 });
+			await feePool.closeCurrentFeePeriod({ from: account1 });
+			await updateRatesWithDefaults();
+
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account3 });
+
+			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
+			console.log(
+				'afterClaimAvailableFeesOfAccount1:',
+				afterClaimAvailableFeesOfAccount1[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
+			console.log(
+				'afterClaimAvailableFeesOfAccount2:',
+				afterClaimAvailableFeesOfAccount2[1].toString()
+			);
+			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
+			console.log(
+				'afterClaimAvailableFeesOfAccount3:',
+				afterClaimAvailableFeesOfAccount3[1].toString()
+			);
+
+			console.log('------------------------');
+
+			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
+			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
+			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
+			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
+			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
+			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
+
+			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
+			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
+
+			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
+			console.log('escrowBalance : ', escrowBalance.toString());
+
+			feePeriod = await feePool.recentFeePeriods(1);
+			console.log('feePeriodId:', feePeriod[0].toString());
+			console.log('rewardsToDistribute:', feePeriod[5].toString());
+			console.log('rewardsClaimed:', feePeriod[6].toString());
+
+			console.log('-------------Eighth Time (Account3 finally claimed)-----------');
+
+			const eighthWeek = seventhWeek + WEEK + DAY;
+			await fastForwardTo(new Date(eighthWeek * 1000));
+			await periFinance.mint({ from: account1 });
+			await feePool.closeCurrentFeePeriod({ from: account1 });
+			await updateRatesWithDefaults();
+
+			// await feePool.claimFees({ from: account1 });
+			// await feePool.claimFees({ from: account2 });
+			// await feePool.claimFees({ from: account3 });
 
 			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
 			console.log(
