@@ -1066,7 +1066,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
         // the change for the rest of the debt holders. The debt ledger holds high precision integers.
-        if (state.debtLedgerLength() > 0) {
+        if (state.debtLedgerLength() > 0 && state.lastDebtLedgerEntry() != 0) {
             state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
         } else {
             state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
