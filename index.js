@@ -162,6 +162,9 @@ const defaults = {
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
 	},
+	LP_TOKEN_ADDRESSES: {
+		kovan: '',
+	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${20e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,

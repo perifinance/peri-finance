@@ -1152,24 +1152,31 @@ const deploy = async ({
 			args: [account],
 		});
 
-		await runStep({
-			contract: `TempExchangeRateStorageKovan`,
-			target: tempExchangeRateStorageKovan,
-			read: 'getRate',
-			readArg: toBytes32('PERI'),
-			expected: input => input !== '0',
-			write: 'setRate',
-			writeArg: [toBytes32('PERI'), w3utils.toBN('19940000000000000000')],
-		});
+		const currenciesForTempStorage = ['PERI', 'USDC'].map(toBytes32);
+		const ratesForCurrencies = ['19940000000000000000', '980000000000000000'].map(w3utils.toBN);
 
-		await runStep({
-			contract: `TempExchangeRateStorageKovan`,
-			target: tempExchangeRateStorageKovan,
-			read: 'getRate',
-			readArg: toBytes32('USDC'),
-			expected: input => input !== '0',
-			write: 'setRate',
-			writeArg: [toBytes32('USDC'), w3utils.toBN('980000000000000000')],
+		for (const [index, currency] of currenciesForTempStorage.entries()) {
+			await runStep({
+				contract: `TempExchangeRateStorageKovan`,
+				target: tempExchangeRateStorageKovan,
+				read: 'getRate',
+				readArg: currency,
+				expected: input => input !== '0',
+				write: 'setRate',
+				writeArg: [currency, ratesForCurrencies[index]],
+			});
+		}
+	}
+
+	const lpTokenAddress = (await getDeployParameter('LP_TOKEN_ADDRESSES'))[network];
+
+	if (rewardsDistribution && periFinance && lpTokenAddress) {
+		console.log(gray(`\n------ DEPLOY STAKING REWARDS CONTRACTS ------\n`));
+
+		await deployer.deployContract({
+			name: 'StakingRewards',
+			source: 'StakingRewards',
+			args: [owner, addressOf(rewardsDistribution), addressOf(periFinance), lpTokenAddress],
 		});
 	}
 
