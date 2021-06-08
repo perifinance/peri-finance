@@ -870,7 +870,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     /**
-     * @param _amount 6 decimals USDC amount to unstake and refund
+     * @dev refund() adjusts decimals 18 to 6
+     * @param _amount 18 decimals USDC amount to unstake and refund
      */
     function _unstakeAndRefundUSDC(address _account, uint _amount) internal {
         stakingStateUSDC().unstake(_account, _amount);
