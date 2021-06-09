@@ -537,7 +537,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
         if(periFinance().usdcStakedAmountOf(account) > 0) {
             // USDC staked amount should be below of the USDC quota.
-            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
+            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account).div(10**12).mul(10**12);
             if(accountUSDCDebtQuota > getUSDCQuota()) {
                 return (false, false);
             }
