@@ -51,10 +51,6 @@ interface IPeriFinance {
     external view
     returns(uint);
 
-    function availableUSDCStakeAmount(address _account)
-    external view
-    returns(uint);
-
     function usdcStakedAmountOf(address _account)
     external view
     returns(uint);

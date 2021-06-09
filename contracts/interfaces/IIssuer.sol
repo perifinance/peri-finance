@@ -47,10 +47,6 @@ interface IIssuer {
     external view
     returns(uint);
 
-    function availableUSDCStakeAmount(address _account)
-    external view
-    returns(uint);
-
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory);
