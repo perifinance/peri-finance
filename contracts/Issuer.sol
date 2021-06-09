@@ -261,11 +261,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 .multiplyDecimalRoundPrecise(initialDebtOwnership);
         }
 
-        // uint currentDebtOwnership = state
-        //     .lastDebtLedgerEntry()
-        //     .divideDecimalRoundPrecise(state.debtLedger(debtEntryIndex))
-        //     .multiplyDecimalRoundPrecise(initialDebtOwnership);
-
         // Their debt balance is their portion of the total system value.
         uint highPrecisionBalance =
             totalSystemValue.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(currentDebtOwnership);
@@ -291,24 +286,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
 
         return (debtByUSDC.divideDecimalRound(debtBalance), anyRateIsInvalid || isUSDCInvalid);
-    }
-
-    function _availableUSDCStakeAmount(address _account) internal view returns (uint) {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        uint maxUSDCQuotaAmount = debtBalance.multiplyDecimalRound(getUSDCQuota()).divideDecimalRound(getIssuanceRatio());
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_account), usdcRate);
-
-        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid);
-
-        if (maxUSDCQuotaAmount <= usdcStakedAmountToUSD) {
-            return 0;
-        } else {
-            return _usdToUSDC(maxUSDCQuotaAmount.sub(usdcStakedAmountToUSD), usdcRate);
-        }
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {
@@ -426,7 +403,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint usdcQuota = getUSDCQuota();
 
         uint initialCRatio = _currentDebt.divideDecimal(_stakedUSDCAmount.add(_periCollateral));
-        // it doesn't satisfy defined c-ratio
+        // it doesn't satisfy target c-ratio
         if (initialCRatio > targetRatio) {
             uint maxAllowedUSDCStakeAmountByPeriCollateral =
                 _periCollateral.multiplyDecimal(usdcQuota.divideDecimal(SafeDecimalMath.unit().sub(usdcQuota)));
@@ -437,10 +414,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 _periCollateral.add(_stakedUSDCAmount).sub(usdcAmountToUnstake).multiplyDecimal(targetRatio)
             );
 
-            // it satisfies defined c-ratio but violates USDC quota
+            // it satisfies target c-ratio but violates USDC quota
         } else {
             uint currentUSDCQuota = _stakedUSDCAmount.multiplyDecimal(targetRatio).divideDecimal(_currentDebt);
-            require(currentUSDCQuota > usdcQuota, "Account is already claimable");
+            require(currentUSDCQuota.div(10**12).mul(10**12) > usdcQuota, "Account is already claimable");
 
             burnAmount = (_stakedUSDCAmount.multiplyDecimal(targetRatio).sub(_currentDebt.multiplyDecimal(usdcQuota)))
                 .divideDecimal(SafeDecimalMath.unit().sub(usdcQuota));
@@ -588,10 +565,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         return usdcDebtQuota;
-    }
-
-    function availableUSDCStakeAmount(address _account) external view returns (uint) {
-        return _availableUSDCStakeAmount(_account);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -858,6 +831,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         _issuePynths(_issuer, _issueAmount, false);
+
+        _parsingUSDCStakingAmount(_issuer);
     }
 
     function _transferAndStakeUSDC(address _account, uint _amount) internal {
@@ -877,6 +852,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         stakingStateUSDC().unstake(_account, _amount);
 
         require(stakingStateUSDC().refund(_account, _amount), "refunding USDC has been failed");
+    }
+
+    function _parsingUSDCStakingAmount(address _account)
+    internal {
+        uint stakedAmountAfterIssue = stakingStateUSDC().stakedAmountOf(_account);
+        uint stakedAmountToParse = stakedAmountAfterIssue.sub(stakedAmountAfterIssue.div(10**12).mul(10**12));
+        if(stakedAmountToParse > 0) {
+            stakingStateUSDC().unstake(_account, stakedAmountToParse);
+        }
     }
 
     function _burnPynths(
@@ -975,6 +959,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         _voluntaryBurnPynths(_from, _burnAmount, false);
+
+        _parsingUSDCStakingAmount(_from);
 
         (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
 
