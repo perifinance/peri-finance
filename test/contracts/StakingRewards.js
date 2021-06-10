@@ -69,10 +69,16 @@ contract('StakingRewards', accounts => {
 			PeriFinance: rewardsToken,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
-			StakingStateUSDC: stakingStateUSDC
+			StakingStateUSDC: stakingStateUSDC,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['RewardsDistribution', 'PeriFinance', 'FeePool', 'SystemSettings', 'StakingStateUSDC'],
+			contracts: [
+				'RewardsDistribution',
+				'PeriFinance',
+				'FeePool',
+				'SystemSettings',
+				'StakingStateUSDC',
+			],
 		}));
 
 		stakingRewards = await setupContract({

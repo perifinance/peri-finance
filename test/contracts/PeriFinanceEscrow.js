@@ -4,7 +4,7 @@ const { contract } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { mockToken, setupContract } = require('./setup');
+const { mockToken, setupAllContracts } = require('./setup');
 
 const { currentTime, fastForward, toUnit } = require('../utils')();
 
@@ -32,16 +32,10 @@ contract('PeriFinanceEscrow', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		// Mock PERI
-		({ token: periFinance } = await mockToken({ accounts, name: 'PeriFinance', symbol: 'PERI' }));
-
-		escrow = await setupContract({
+		({ PeriFinanceEscrow: escrow, PeriFinance: periFinance } = await setupAllContracts({
 			accounts,
-			contract: 'PeriFinanceEscrow',
-			cache: {
-				PeriFinance: periFinance,
-			},
-		});
+			contracts: ['PeriFinanceEscrow', 'PeriFinance', 'StakingStateUSDC'],
+		}));
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -98,29 +92,27 @@ contract('PeriFinanceEscrow', async accounts => {
 			assert.isAtLeast(times[0], parseInt(await escrow.getVestingTime(account1, 0)));
 			assert.isAtLeast(times[1], parseInt(await escrow.getVestingTime(account1, 1)));
 		});
-		it("should NOT allow owner to call functions after setup duration", async () => {
+		it('should NOT allow owner to call functions after setup duration', async () => {
 			await fastForward(8 * WEEK + 1);
-			
+
 			await assert.revert(
-				escrow.appendVestingEntry(
-					account1, 
-					await getYearFromNow(), 
-					toUnit('1000'), 
-					{ from: owner }
-				),
-				"Can only perform this action during setup"
+				escrow.appendVestingEntry(account1, await getYearFromNow(), toUnit('1000'), {
+					from: owner,
+				}),
+				'Can only perform this action during setup'
 			);
 
 			await assert.revert(
 				escrow.purgeAccount(account1, { from: owner }),
-				"Can only perform this action during setup"
+				'Can only perform this action during setup'
 			);
-			
+
 			const times = [await weeksFromNow(1), await weeksFromNow(2)];
 			const quantities = [toUnit('100'), toUnit('100')];
 			await assert.revert(
 				escrow.addVestingSchedule(account1, times, quantities, { from: owner }),
-				"Can only perform this action during setup");
+				'Can only perform this action during setup'
+			);
 		});
 	});
 

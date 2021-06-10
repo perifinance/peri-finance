@@ -898,7 +898,7 @@ const setupAllContracts = async ({
 
 	const USDC = await artifacts.require('MockToken').new(
 		...['USDC', 'USDC', '6'].concat({
-			from: accounts[0],
+			from: owner,
 		})
 	);
 
