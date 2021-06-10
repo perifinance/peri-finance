@@ -1168,18 +1168,6 @@ const deploy = async ({
 		}
 	}
 
-	const lpTokenAddress = (await getDeployParameter('LP_TOKEN_ADDRESSES'))[network];
-
-	if (rewardsDistribution && periFinance && lpTokenAddress) {
-		console.log(gray(`\n------ DEPLOY STAKING REWARDS CONTRACTS ------\n`));
-
-		await deployer.deployContract({
-			name: 'StakingRewards',
-			source: 'StakingRewards',
-			args: [owner, addressOf(rewardsDistribution), addressOf(periFinance), lpTokenAddress],
-		});
-	}
-
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
 	await deployer.deployContract({
