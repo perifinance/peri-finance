@@ -335,6 +335,21 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return _amount.divideDecimalRound(_usdcRate);
     }
 
+    function _decimalParser(
+        uint _amount, 
+        uint _decimal1,
+        uint _decimal2
+    ) internal pure
+    returns(uint) {
+        require(_decimal1 != _decimal2,
+            "Decimals should not be same");
+
+        uint diff = _decimal1 > _decimal2 ? _decimal1 - _decimal2 : _decimal2 - _decimal1;
+
+        return _amount.div(10**diff).mul(10**diff);
+    }
+
+
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
         // What is the value of their PERI balance in pUSD
         (uint periRate, bool anyRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
@@ -775,7 +790,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            require(amount <= maxIssuable, "Amount too large");
+            require(_decimalParser(amount, 2, 1) <= _decimalParser(maxIssuable, 2, 1), "Amount too large");
         } else {
             amount = maxIssuable;
         }
@@ -802,7 +817,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _usdcStakeAmount,
         bool _stakeMax
     ) internal {
-        if (_stakeMax || _usdcStakeAmount > 0) {
+        if (_stakeMax || _usdcStakeAmount >= 10**6) {
             (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
 
             uint afterDebtBalanceWithIssuanceRatio = debtBalance.add(_issueAmount).divideDecimalRound(getIssuanceRatio());
