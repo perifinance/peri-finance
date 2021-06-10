@@ -790,7 +790,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            require(_decimalParser(amount, 2, 1) <= _decimalParser(maxIssuable, 2, 1), "Amount too large");
+            require(_decimalParser(amount, 2, 1) <= maxIssuable, "Amount too large");
         } else {
             amount = maxIssuable;
         }
