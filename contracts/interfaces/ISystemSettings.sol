@@ -24,4 +24,6 @@ interface ISystemSettings {
     function exchangeFeeRate(bytes32 currencyKey) external view returns (uint);
 
     function minimumStakeTime() external view returns (uint);
+
+    function usdcQuota() external view returns (uint);
 }
