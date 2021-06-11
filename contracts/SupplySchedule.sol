@@ -39,7 +39,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     uint public constant MAX_MINTER_REWARD = 200 * 1e18;
 
     // How long each inflation period is before mint can be called
-    uint public constant MINT_PERIOD_DURATION = 1 hours; // default 1 weeks;
+    uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
     uint public constant INFLATION_START_DATE = 1623312000; // Thursday, June 10, 2021 5:00:00 PM GMT+09:00
     uint public constant MINT_BUFFER = 1 days;
