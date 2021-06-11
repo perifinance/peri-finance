@@ -182,7 +182,7 @@
 	"TempExchangeRateStorageKovan": {
 		"deploy": false
 	},
-	"LP": {
+	"PERIUniswapV1": {
 		"deploy": false
 	}
 }

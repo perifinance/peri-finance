@@ -1,7 +1,7 @@
 [
 	{
-		"name": "PERI",
-		"stakingToken": "PeriFinance",
+		"name": "PERIUniV2",
+		"stakingToken": "0x57ed66ca0e67a97e217e617b1ba6b75e87db118d",
 		"rewardsToken": "ProxyERC20"
 	}
 ]

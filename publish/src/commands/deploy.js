@@ -584,7 +584,7 @@ const deploy = async ({
 
 	const periFinanceEscrow = await deployer.deployContract({
 		name: 'PeriFinanceEscrow',
-		args: [account, ZERO_ADDRESS],
+		args: [account, ZERO_ADDRESS, account],
 	});
 
 	const periFinanceState = await deployer.deployContract({
@@ -973,6 +973,16 @@ const deploy = async ({
 		});
 	}
 
+	// setting address to refund when addressToRefund is zero
+	await runStep({
+		contract: 'PeriFinanceEscrow',
+		target: periFinanceEscrow,
+		read: 'addressToRefund',
+		expected: input => input !== ZERO_ADDRESS, // only change if zero
+		write: 'setAddressToRefund',
+		writeArg: account,
+	});
+
 	// ----------------
 	// Pynths
 	// ----------------
@@ -1144,6 +1154,13 @@ const deploy = async ({
 	}
 
 	if (network !== 'mainnet') {
+		console.log(gray(`\n------ DEPLOY Mock LP Token ------\n`));
+		await deployer.deployContract({
+			name: 'PERIUniswapV1',
+			source: 'MockToken',
+			args: ['PERIUniswapV1', 'LP', 6],
+		});
+
 		console.log(gray(`\n------ DEPLOY TempExchangeRateStorageKovan ------\n`));
 
 		const tempExchangeRateStorageKovan = await deployer.deployContract({

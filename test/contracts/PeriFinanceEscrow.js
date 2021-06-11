@@ -46,6 +46,11 @@ contract('PeriFinanceEscrow', async accounts => {
 			assert.equal(periFinanceAddress, periFinance.address);
 		});
 
+		it('should set addressToRefund on contructor', async () => {
+			const addressToRefund = await escrow.addressToRefund();
+			assert.equal(addressToRefund, owner);
+		});
+
 		it('should set owner on contructor', async () => {
 			const ownerAddress = await escrow.owner();
 			assert.equal(ownerAddress, owner);
@@ -55,6 +60,12 @@ contract('PeriFinanceEscrow', async accounts => {
 			await escrow.setPeriFinance(ZERO_ADDRESS, { from: owner });
 			const periFinanceAddress = await escrow.periFinance();
 			assert.equal(periFinanceAddress, ZERO_ADDRESS);
+		});
+
+		it('should allow owner to set addressToRefund', async () => {
+			await escrow.setAddressToRefund(ZERO_ADDRESS, { from: owner });
+			const addresstoRefund = await escrow.addressToRefund();
+			assert.equal(addresstoRefund, ZERO_ADDRESS);
 		});
 	});
 

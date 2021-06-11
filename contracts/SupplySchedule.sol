@@ -30,7 +30,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     // The initial weekly inflationary supply is 75m / 52 until the start of the decay rate.
     // 75e6 * SafeDecimalMath.unit() / 52
-    uint public constant INITIAL_WEEKLY_SUPPLY = 1442307692307692307692307 ether;
+    uint public constant INITIAL_WEEKLY_SUPPLY = 45000 ether;
 
     // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
@@ -39,12 +39,12 @@ contract SupplySchedule is Owned, ISupplySchedule {
     uint public constant MAX_MINTER_REWARD = 200 * 1e18;
 
     // How long each inflation period is before mint can be called
-    uint public constant MINT_PERIOD_DURATION = 1 weeks;
+    uint public constant MINT_PERIOD_DURATION = 1 hours; // default 1 weeks;
 
-    uint public constant INFLATION_START_DATE = 1551830400; // 2019-03-06T00:00:00+00:00
+    uint public constant INFLATION_START_DATE = 1623312000; // Thursday, June 10, 2021 5:00:00 PM GMT+09:00
     uint public constant MINT_BUFFER = 1 days;
-    uint8 public constant SUPPLY_DECAY_START = 40; // Week 40
-    uint8 public constant SUPPLY_DECAY_END = 234; //  Supply Decay ends on Week 234 (inclusive of Week 234 for a total of 195 weeks of inflation decay)
+    uint8 public constant SUPPLY_DECAY_START = 54; // Week 54 (1 Year)
+    uint8 public constant SUPPLY_DECAY_END = 254;
 
     // Weekly percentage decay of inflationary supply from the first 40 weeks of the 75% inflation rate
     uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly

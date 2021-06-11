@@ -403,8 +403,5 @@
 	},
 	"TempExchangeRateStorageKovan": {
 		"deploy": true
-	},
-	"LP": {
-		"deploy": true
 	}
 }

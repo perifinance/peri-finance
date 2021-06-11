@@ -23,10 +23,10 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
      * These are the times at which each given quantity of PERI vests. */
     mapping(address => uint[2][]) public vestingSchedules;
 
-    /* An account's total vested periFinance balance to save recomputing this for fee extraction purposes. */
+    /* An account's total vested PERI balance to save recomputing this for fee extraction purposes. */
     mapping(address => uint) public totalVestedAccountBalance;
 
-    /* The total remaining vested balance, for verifying the actual periFinance balance of this contract against. */
+    /* The total remaining vested balance, for verifying the actual PERI balance of this contract against. */
     uint public totalVestedBalance;
 
     uint public constant TIME_INDEX = 0;
@@ -34,11 +34,15 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /* Limit vesting entries to disallow unbounded iteration over vesting schedules. */
     uint public constant MAX_VESTING_ENTRIES = 20;
+    
+    /* Account address to send balance of purged accounts */
+    address public addressToRefund;
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _owner, IPeriFinance _periFinance) public Owned(_owner) {
+    constructor(address _owner, IPeriFinance _periFinance, address _addressToRefund) public Owned(_owner) {
         periFinance = _periFinance;
+        addressToRefund = _addressToRefund;
     }
 
     /* ========== SETTERS ========== */
@@ -46,6 +50,11 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
     function setPeriFinance(IPeriFinance _periFinance) external onlyOwner {
         periFinance = _periFinance;
         emit PeriFinanceUpdated(address(_periFinance));
+    }
+
+    function setAddressToRefund(address _addressToRefund) external onlyOwner {
+        addressToRefund = _addressToRefund;
+        emit AddressToRefundUpdated(_addressToRefund);
     }
 
     /* ========== VIEW FUNCTIONS ========== */
@@ -66,7 +75,7 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /**
      * @notice Get a particular schedule entry for an account.
-     * @return A pair of uints: (timestamp, periFinance quantity).
+     * @return A pair of uints: (timestamp, PERI quantity).
      */
     function getVestingScheduleEntry(address account, uint index) public view returns (uint[2] memory) {
         return vestingSchedules[account][index];
@@ -101,7 +110,7 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /**
      * @notice Obtain the next schedule entry that will vest for a given user.
-     * @return A pair of uints: (timestamp, periFinance quantity). */
+     * @return A pair of uints: (timestamp, PERI quantity). */
     function getNextVestingEntry(address account) public view returns (uint[2] memory) {
         uint index = getNextVestingIndex(account);
         if (index == numVestingEntries(account)) {
@@ -130,8 +139,20 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
      * @notice Destroy the vesting information associated with an account.
      */
     function purgeAccount(address account) external onlyOwner onlyDuringSetup {
+        require(
+            addressToRefund != address(0),
+            "Refund address can not be zero address"
+        );
+
         delete vestingSchedules[account];
         totalVestedBalance = totalVestedBalance.sub(totalVestedAccountBalance[account]);
+
+        require(
+            totalVestedBalance <= IERC20(address(periFinance)).balanceOf(address(this)),
+            "Must be enough balance in the contract to retrieve vested balance of purged account"
+        );
+
+        IERC20(address(periFinance)).transfer(addressToRefund, totalVestedAccountBalance[account]);
         delete totalVestedAccountBalance[account];
     }
 
@@ -230,6 +251,8 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
     /* ========== EVENTS ========== */
 
     event PeriFinanceUpdated(address newPeriFinance);
+
+    event AddressToRefundUpdated(address addressToRefund);
 
     event Vested(address indexed beneficiary, uint time, uint value);
 }

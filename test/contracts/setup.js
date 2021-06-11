@@ -196,7 +196,7 @@ const setupContract = async ({
 		BaseRewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
 		RewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
 		ImportableRewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
-		PeriFinanceEscrow: [owner, tryGetAddressOf('PeriFinance')],
+		PeriFinanceEscrow: [owner, tryGetAddressOf('PeriFinance'), owner],
 		// use deployerAccount as associated contract to allow it to call setBalanceOf()
 		TokenState: [owner, deployerAccount],
 		EtherCollateral: [owner, tryGetAddressOf('AddressResolver')],
