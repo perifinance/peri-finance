@@ -59,6 +59,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     FeePeriod[FEE_PERIOD_LENGTH] private _recentFeePeriods;
     uint256 private _currentFeePeriod;
 
+    uint256 public quotaTolerance;
+
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -238,6 +240,15 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         require(messageSender == rewardsAuthority || msg.sender == rewardsAuthority, "Caller is not rewardsAuthority");
         // Add the amount of PERI rewards to distribute on top of any rolling unclaimed amount
         _recentFeePeriodsStorage(0).rewardsToDistribute = _recentFeePeriodsStorage(0).rewardsToDistribute.add(amount);
+    }
+
+    function setQuotaTolerance(uint _val)
+    external
+    onlyOwner {
+        require(_val < SafeDecimalMath.unit(),
+            "Tolerance value cannot exceeds 1");
+        
+        quotaTolerance = _val;
     }
 
     /**
@@ -537,8 +548,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
         if(periFinance().usdcStakedAmountOf(account) > 0) {
             // USDC staked amount should be below of the USDC quota.
-            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account).div(10**12).mul(10**12);
-            if(accountUSDCDebtQuota > getUSDCQuota()) {
+            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
+            if(accountUSDCDebtQuota.roundDownDecimal(12) > getUSDCQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))) {
                 return (false, false);
             }
         }
