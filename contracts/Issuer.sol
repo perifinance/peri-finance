@@ -335,21 +335,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return _amount.divideDecimalRound(_usdcRate);
     }
 
-    function _decimalParser(
-        uint _amount, 
-        uint _decimal1,
-        uint _decimal2
-    ) internal pure
-    returns(uint) {
-        require(_decimal1 != _decimal2,
-            "Decimals should not be same");
-
-        uint diff = _decimal1 > _decimal2 ? _decimal1 - _decimal2 : _decimal2 - _decimal1;
-
-        return _amount.div(10**diff).mul(10**diff);
-    }
-
-
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
         // What is the value of their PERI balance in pUSD
         (uint periRate, bool anyRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
@@ -790,7 +775,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            require(_decimalParser(amount, 2, 1) <= maxIssuable, "Amount too large");
+            require(amount.roundDownDecimal(1) <= maxIssuable, "Amount too large");
         } else {
             amount = maxIssuable;
         }
@@ -872,9 +857,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _parsingUSDCStakingAmount(address _account)
     internal {
         uint stakedAmountAfterIssue = stakingStateUSDC().stakedAmountOf(_account);
-        uint stakedAmountToParse = stakedAmountAfterIssue.sub(stakedAmountAfterIssue.div(10**12).mul(10**12));
-        if(stakedAmountToParse > 0) {
-            stakingStateUSDC().unstake(_account, stakedAmountToParse);
+        uint stakedAmountToRoundDown = stakedAmountAfterIssue.sub(stakedAmountAfterIssue.div(10**12).mul(10**12));
+        if(stakedAmountToRoundDown > 0) {
+            stakingStateUSDC().unstake(_account, stakedAmountToRoundDown);
         }
     }
 

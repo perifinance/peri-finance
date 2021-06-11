@@ -184,4 +184,12 @@ library SafeDecimalMath {
 
         return quotientTimesTen / 10;
     }
+
+    /**
+     * @dev Round down the value with given number
+     */
+    function roundDownDecimal(uint x, uint d) internal pure returns (uint) {
+        return x.div(10**d).mul(10**d);
+    }
+
 }
