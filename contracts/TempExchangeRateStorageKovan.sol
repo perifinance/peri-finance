@@ -8,12 +8,10 @@ contract TempExchangeRateStorageKovan is Owned {
         uint40 time;
     }
     mapping(bytes32 => RateAndUpdatedTime) public rates;
-    
-    constructor(
-        address _owner
-    ) public Owned(_owner) {} 
 
-    function setRate(bytes32 _currencyKey, uint216 _rate) external {
+    constructor(address _owner) public Owned(_owner) {}
+
+    function setRate(bytes32 _currencyKey, uint216 _rate) external onlyOwner {
         rates[_currencyKey] = RateAndUpdatedTime(_rate, uint40(block.timestamp));
     }
 
