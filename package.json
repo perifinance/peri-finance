@@ -33,7 +33,8 @@
 		"publish/deployed/mainnet/*",
 		"publish/deployed/mainnet-ovm/*",
 		"publish/deployed/goerli/*",
-		"publish/deployed/goerli-ovm/*"
+		"publish/deployed/goerli-ovm/*",
+		"publish/deployed/mumbai/*"
 	],
 	"bin": {
 		"peri": "bin.js"

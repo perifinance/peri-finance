@@ -32,8 +32,8 @@
 			"address": "0xA7BD3A495bB4B3FDbE4536Cd39C5E7Ca30703bEB",
 			"source": "FeePool",
 			"link": "https://kovan.etherscan.io/address/0xA7BD3A495bB4B3FDbE4536Cd39C5E7Ca30703bEB",
-			"timestamp": "2021-06-11T08:11:49.770Z",
-			"txn": "",
+			"timestamp": "2021-06-11T08:11:48.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0x2304313178c26336534c84489e65fb35ff6d0163720f088f9917ccb283ed0add",
 			"network": "kovan"
 		},
 		"ProxyFeePool": {
@@ -1476,24 +1476,6 @@
 			"txn": "https://kovan.etherscan.io/tx/0xbbd263d7782307e7877227351f5fdd46e9c924b44bcbd59a54274a60355a20c2",
 			"network": "kovan"
 		},
-		"FeePoolStateUsdc": {
-			"name": "FeePoolStateUsdc",
-			"address": "0x86c6a436182d24c055C93996f6baaE5aa243f748",
-			"source": "FeePoolState",
-			"link": "https://kovan.etherscan.io/address/0x86c6a436182d24c055C93996f6baaE5aa243f748",
-			"timestamp": "2021-04-30T09:30:52.485Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"StakeStateUsdc": {
-			"name": "StakeStateUsdc",
-			"address": "0x7d7Ec3322d56B33438a4F76d7e6CC813623df9c3",
-			"source": "StakeState",
-			"link": "https://kovan.etherscan.io/address/0x7d7Ec3322d56B33438a4F76d7e6CC813623df9c3",
-			"timestamp": "2021-04-30T09:45:19.190Z",
-			"txn": "",
-			"network": "kovan"
-		},
 		"USDC": {
 			"name": "USDC",
 			"address": "0x98da9a82224E7A5896D6227382F7a52c82082146",
@@ -1518,42 +1500,6 @@
 			"source": "TempExchangeRateStorageKovan",
 			"link": "https://kovan.etherscan.io/address/0x658F1cF2aFf6275d667949bc6aE6161a909f193F",
 			"timestamp": "2021-06-08T01:14:34.564Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"LP": {
-			"name": "LP",
-			"address": "0xA9C74Eb67FD1fE98E0f3cF61Ec728948f597B03e",
-			"source": "MockToken",
-			"link": "https://kovan.etherscan.io/address/0xA9C74Eb67FD1fE98E0f3cF61Ec728948f597B03e",
-			"timestamp": "2021-06-10T01:02:21.154Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"StakingRewardsLP": {
-			"name": "StakingRewardsLP",
-			"address": "0x8AA51279Bc93b7eAc0CaE15E54E3Cea607497916",
-			"source": "StakingRewards",
-			"link": "https://kovan.etherscan.io/address/0x8AA51279Bc93b7eAc0CaE15E54E3Cea607497916",
-			"timestamp": "2021-06-10T01:02:25.912Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"PERIUniswapV1": {
-			"name": "PERIUniswapV1",
-			"address": "0x73bE8605160960Aa851C45a7c7c63E307cF0e71f",
-			"source": "MockToken",
-			"link": "https://kovan.etherscan.io/address/0x73bE8605160960Aa851C45a7c7c63E307cF0e71f",
-			"timestamp": "2021-06-10T06:10:53.255Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"StakingRewardsPERIUniswapV1": {
-			"name": "StakingRewardsPERIUniswapV1",
-			"address": "0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
-			"source": "StakingRewards",
-			"link": "https://kovan.etherscan.io/address/0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
-			"timestamp": "2021-06-10T06:11:28.671Z",
 			"txn": "",
 			"network": "kovan"
 		}
