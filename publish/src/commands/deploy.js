@@ -1156,9 +1156,9 @@ const deploy = async ({
 	if (network !== 'mainnet') {
 		console.log(gray(`\n------ DEPLOY Mock LP Token ------\n`));
 		await deployer.deployContract({
-			name: 'PERIUniswapV1',
+			name: 'PERIUniswapV2',
 			source: 'MockToken',
-			args: ['PERIUniswapV1', 'LP', 6],
+			args: ['PERIUniswapV2', 'LP', 6],
 		});
 
 		console.log(gray(`\n------ DEPLOY TempExchangeRateStorageKovan ------\n`));

@@ -1,0 +1,164 @@
+{
+	"AddressResolver": {
+		"deploy": false
+	},
+	"BinaryOptionMarketData": {
+		"deploy": false
+	},
+	"CollateralManager": {
+		"deploy": false
+	},
+	"CollateralManagerState": {
+		"deploy": false
+	},
+	"CollateralEth": {
+		"deploy": false
+	},
+	"CollateralErc20": {
+		"deploy": false
+	},
+	"CollateralShort": {
+		"deploy": false
+	},
+	"CollateralStateErc20": {
+		"deploy": false
+	},
+	"CollateralStateEth": {
+		"deploy": false
+	},
+	"CollateralStateShort": {
+		"deploy": false
+	},
+	"ReadProxyAddressResolver": {
+		"deploy": false
+	},
+	"DelegateApprovals": {
+		"deploy": false
+	},
+	"DelegateApprovalsEternalStorage": {
+		"deploy": false
+	},
+	"DebtCache": {
+		"deploy": false
+	},
+	"Depot": {
+		"deploy": false
+	},
+	"EscrowChecker": {
+		"deploy": false
+	},
+	"EtherCollateral": {
+		"deploy": false
+	},
+	"EtherCollateralpUSD": {
+		"deploy": false
+	},
+	"ExchangeRates": {
+		"deploy": false
+	},
+	"Exchanger": {
+		"deploy": false
+	},
+	"ExchangeState": {
+		"deploy": false
+	},
+	"FeePool": {
+		"deploy": false
+	},
+	"FeePoolState": {
+		"deploy": false
+	},
+	"FeePoolEternalStorage": {
+		"deploy": false
+	},
+	"FlexibleStorage": {
+		"deploy": false
+	},
+	"Issuer": {
+		"deploy": false
+	},
+	"EternalStorageLiquidations": {
+		"deploy": false
+	},
+	"Liquidations": {
+		"deploy": false
+	},
+	"RewardEscrow": {
+		"deploy": false
+	},
+	"RewardsDistribution": {
+		"deploy": false
+	},
+	"SupplySchedule": {
+		"deploy": false
+	},
+	"PeriFinance": {
+		"deploy": false
+	},
+	"PeriFinanceEscrow": {
+		"deploy": false
+	},
+	"PeriFinanceState": {
+		"deploy": false
+	},
+	"SystemSettings": {
+		"deploy": false
+	},
+	"SystemStatus": {
+		"deploy": false
+	},
+	"PynthUtil": {
+		"deploy": false
+	},
+	"DappMaintenance": {
+		"deploy": false
+	},
+	"PynthpUSD": {
+		"deploy": false
+	},
+	"ProxyERC20": {
+		"deploy": false
+	},
+	"ProxyFeePool": {
+		"deploy": false
+	},
+	"ProxyPeriFinance": {
+		"deploy": false
+	},
+	"ProxypUSD": {
+		"deploy": false
+	},
+	"SafeDecimalMath": {
+		"deploy": false
+	},
+	"Math": {
+		"deploy": false
+	},
+	"TokenStatePeriFinance": {
+		"deploy": false
+	},
+	"TokenStatepUSD": {
+		"deploy": false
+	},
+	"TradingRewards": {
+		"deploy": false
+	},
+	"RewardEscrowV2": {
+		"deploy": false
+	},
+	"PeriFinanceBridgeToOptimism": {
+		"deploy": false
+	},
+	"StakingStateUSDC": {
+		"deploy": false
+	},
+	"USDC": {
+		"deploy": false
+	},
+	"TempExchangeRateStorageKovan": {
+		"deploy": false
+	},
+	"PERIUniswapV2": {
+		"deploy": false
+	}
+}

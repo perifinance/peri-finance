@@ -27,6 +27,9 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	// Note: require this here as silent error is detected on require that impacts pretty-error
 	const solc = require('solc');
 
+	const networkScanKey =
+		network !== 'mumbai' ? process.env.ETHERSCAN_KEY : process.env.POLYGONSCAN_KEY;
+
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
 	ensureDeploymentPath(deploymentPath);
@@ -64,7 +67,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 				module: 'contract',
 				action: 'getabi',
 				address,
-				apikey: process.env.ETHERSCAN_KEY,
+				apikey: networkScanKey,
 			},
 		});
 
@@ -81,7 +84,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 					action: 'txlist',
 					address,
 					sort: 'asc',
-					apikey: process.env.ETHERSCAN_KEY,
+					apikey: networkScanKey,
 				},
 			});
 
@@ -179,7 +182,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 					runs,
 					libraryname1: 'SafeDecimalMath',
 					libraryaddress1: deployment.targets['SafeDecimalMath'].address,
-					apikey: process.env.ETHERSCAN_KEY,
+					apikey: networkScanKey,
 				}),
 				{
 					headers: {

@@ -13,6 +13,7 @@ const data = {
 	'goerli-ovm': require('./publish/deployed/goerli-ovm'),
 	'kovan-ovm': require('./publish/deployed/kovan-ovm'),
 	'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
+	mumbai: require('./publish/deployed/mumbai'),
 };
 
 const assets = require('./publish/assets.json');
@@ -20,7 +21,7 @@ const ovmIgnored = require('./publish/ovm-ignore.json');
 const nonUpgradeable = require('./publish/non-upgradeable.json');
 const releases = require('./publish/releases.json');
 
-const networks = ['local', 'kovan', 'rinkeby', 'ropsten', 'mainnet', 'goerli'];
+const networks = ['local', 'kovan', 'rinkeby', 'ropsten', 'mainnet', 'goerli', 'mumbai'];
 
 const chainIdMapping = Object.entries({
 	1: {
@@ -60,6 +61,9 @@ const chainIdMapping = Object.entries({
 		useOvm: true,
 	},
 	// now append any defaults
+	80001: {
+		network: 'mumbai',
+	},
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
 	return memo;
@@ -118,6 +122,7 @@ const knownAccounts = {
 	],
 	rinkeby: [],
 	kovan: [],
+	mumbai: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -158,6 +163,7 @@ const defaults = {
 		mainnet: '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D',
 		kovan: '0x9B2fE385cEDea62D839E4dE89B0A23EF4eacC717',
 		rinkeby: '0xEDC0C23864B041607D624E2d9a67916B6cf40F7a',
+		mumbai: constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
@@ -507,6 +513,7 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 			// Deterministic account #0 when using `npx hardhat node`
 			owner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 		}),
+		mumbai: Object.assign({}, base),
 	};
 
 	const users = Object.entries(

@@ -1,0 +1,14 @@
+{
+	"PERI": {
+		"asset": "PERI",
+		"feed": "0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada"
+	},
+	"ETH": {
+		"asset": "ETH",
+		"feed": "0x0715A7794a1dc8e42615F059dD6e406A6594651A"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0x572dDec9087154dC5dfBB1546Bb62713147e0Ab0"
+	}
+}
