@@ -70,7 +70,7 @@ contract('PynthUtil', accounts => {
 		const amountToExchange = toUnit('50');
 		const pUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await periFinance.issuePynths(pUSDMinted, {
+			await periFinance.issuePynthsAndStakeUSDC(pUSDMinted, toUnit('0'), {
 				from: ownerAccount,
 			});
 			await pUSDContract.transfer(account2, pUSDAmount, { from: ownerAccount });

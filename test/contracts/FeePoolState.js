@@ -377,7 +377,7 @@ contract('FeePoolState', async accounts => {
 	// 	const maxIssuable = await periFinance.maxIssuablePynths(account1, pUSD);
 
 	// 	// Issue
-	// 	await periFinance.issuePynths(maxIssuable, { from: account1 });
+	// 	await periFinance.issuePynthsAndStakeUSDC(maxIssuable, toUnit('0'), { from: account1 });
 
 	// 	// There should be 200 pUSD of value in the system
 	// 	assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('200'));
@@ -411,7 +411,7 @@ contract('FeePoolState', async accounts => {
 	// 	await periFinance.transfer(account1, toUnit('20000'), { from: owner });
 
 	// 	// Issue
-	// 	await periFinance.issuePynths(toUnit('200'), { from: account1 });
+	// 	await periFinance.issuePynthsAndStakeUSDC(toUnit('200'), toUnit('0'), { from: account1 });
 
 	// 	// There should be 200 pUSD of value in the system
 	// 	assert.bnEqual(await periFinance.totalIssuedPynths(pUSD), toUnit('200'));
@@ -430,7 +430,7 @@ contract('FeePoolState', async accounts => {
 	// 	assert.bnEqual(feePoolLedger.debtPercentage, issuanceDataFromState.initialDebtOwnership);
 
 	// 	// Issue
-	// 	await periFinance.issuePynths(toUnit('200'), { from: account1 });
+	// 	await periFinance.issuePynthsAndStakeUSDC(toUnit('200'), toUnit('0'), { from: account1 });
 
 	// 	// And account1 should own all of it.
 	// 	assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('400'));

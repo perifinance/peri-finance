@@ -159,7 +159,7 @@ contract('Pynth', async accounts => {
 		const amount = toUnit('10000');
 		beforeEach(async () => {
 			// ensure owner has funds
-			await periFinance.issuePynths(amount, { from: owner });
+			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 			// approve for transferFrom to work
 			await pUSDContract.approve(account1, amount, { from: owner });
@@ -241,7 +241,7 @@ contract('Pynth', async accounts => {
 	it('should transfer (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 pUSD.
 		const amount = toUnit('10000');
-		await periFinance.issuePynths(amount, { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 		// Do a single transfer of all our pUSD.
 		const transaction = await pUSDContract.transfer(account1, amount, {
@@ -266,7 +266,7 @@ contract('Pynth', async accounts => {
 	it('should revert when transferring (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 pUSD.
 		const amount = toUnit('10000');
-		await periFinance.issuePynths(amount, { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 		// Try to transfer 10,000 + 1 wei, which we don't have the balance for.
 		await assert.revert(
@@ -277,7 +277,7 @@ contract('Pynth', async accounts => {
 	it('should transferFrom (ERC20) without error @gasprofile', async () => {
 		// Issue 10,000 pUSD.
 		const amount = toUnit('10000');
-		await periFinance.issuePynths(amount, { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 		// Give account1 permission to act on our behalf
 		await pUSDContract.approve(account1, amount, { from: owner });
@@ -308,7 +308,7 @@ contract('Pynth', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient allowance', async () => {
 		// Issue 10,000 pUSD.
 		const amount = toUnit('10000');
-		await periFinance.issuePynths(amount, { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 		// Approve for 1 wei less than amount
 		await pUSDContract.approve(account1, amount.sub(web3.utils.toBN('1')), {
@@ -326,7 +326,9 @@ contract('Pynth', async accounts => {
 	it('should revert when calling transferFrom (ERC20) with insufficient balance', async () => {
 		// Issue 10,000 - 1 wei pUSD.
 		const amount = toUnit('10000');
-		await periFinance.issuePynths(amount.sub(web3.utils.toBN('1')), { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount.sub(web3.utils.toBN('1')), toUnit('0'), {
+			from: owner,
+		});
 
 		// Approve for full amount
 		await pUSDContract.approve(account1, amount, { from: owner });
@@ -371,7 +373,7 @@ contract('Pynth', async accounts => {
 			await pUSDContract.issue(owner, toUnit('10000'), {
 				from: owner,
 			});
-			// await periFinance.issuePynths(toUnit('10000'), { from: owner });
+			await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
 
 			const transaction = await pUSDContract.burn(owner, toUnit('10000'), { from: owner });
 
@@ -389,7 +391,7 @@ contract('Pynth', async accounts => {
 		// Issue 10,000 pUSD.
 		const amount = toUnit('10000');
 
-		await periFinance.issuePynths(amount, { from: owner });
+		await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 
 		// Do a single transfer of all our pUSD.
 		const transaction = await pUSDContract.transfer(account1, amount, {
@@ -421,7 +423,7 @@ contract('Pynth', async accounts => {
 			// Issue 1,000 pUSD.
 			amount = toUnit('1000');
 
-			await periFinance.issuePynths(amount, { from: owner });
+			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 		});
 
 		describe('suspension conditions', () => {
@@ -687,7 +689,7 @@ contract('Pynth', async accounts => {
 			// Issue 10,000 pUSD.
 			amount = toUnit('10000');
 
-			await periFinance.issuePynths(amount, { from: owner });
+			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 		});
 		it('should transfer to FEE_ADDRESS and recorded as fee', async () => {
 			const feeBalanceBefore = await pUSDContract.balanceOf(FEE_ADDRESS);
@@ -791,7 +793,7 @@ contract('Pynth', async accounts => {
 			// Issue 10,000 pUSD.
 			amount = toUnit('1000');
 
-			await periFinance.issuePynths(amount, { from: owner });
+			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
 		});
 		it('should burn the pynths and reduce totalSupply', async () => {
 			const balanceBefore = await pUSDContract.balanceOf(owner);

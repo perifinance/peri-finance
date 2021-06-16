@@ -152,7 +152,7 @@ contract('PeriFinance (prod tests)', accounts => {
 				const user1BalanceBefore = await PynthpUSD.balanceOf(user1);
 
 				const amount = toUnit('10');
-				const txn = await PeriFinance.issuePynths(amount, {
+				const txn = await PeriFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), {
 					from: user1,
 				});
 				const receipt = await web3.eth.getTransactionReceipt(txn.tx);

@@ -272,7 +272,7 @@ contract('FeePool', async accounts => {
 			console.log('------------------------');
 		});
 
-		it.only('when a user didnt claim a few times, check if the rewards still remained or not', async () => {
+		it('when a user didnt claim a few times, check if the rewards still remained or not', async () => {
 			let feePeriod;
 
 			console.log('-------------FirstTime-----------');

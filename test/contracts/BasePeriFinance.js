@@ -79,14 +79,8 @@ contract('BasePeriFinance', async accounts => {
 			ignoreParents: ['ExternStateToken', 'MixinResolver'],
 			expected: [
 				'burnSecondary',
-				'burnPynths',
-				'burnPynthsOnBehalf',
-				'burnPynthsToTarget',
-				'burnPynthsToTargetOnBehalf',
+				'burnPynthsAndUnstakeUSDC',
 				'burnPynthsAndUnstakeUSDCToTarget',
-				'burnPynthsToTargetAndUnstakeUSDCToTarget',
-				'unstakeAndRefundUSDC',
-				'unstakeToTargetAndRefundUSDC',
 				'emitPynthExchange',
 				'emitExchangeRebate',
 				'emitExchangeReclaim',
@@ -97,18 +91,11 @@ contract('BasePeriFinance', async accounts => {
 				'exchangeWithTracking',
 				'exchangeWithVirtual',
 				'issueMaxPynths',
-				'issueMaxPynthsOnBehalf',
-				'issuePynths',
-				'issuePynthsOnBehalf',
 				'issuePynthsAndStakeUSDC',
-				'stakeMaxUSDCAndIssuePynths',
-				'stakeUSDCAndIssueMaxPynths',
-				'stakeMaxUSDCAndIssueMaxPynths',
+				'issuePynthsAndStakeMaxUSDC',
 				'mint',
 				'mintSecondary',
 				'mintSecondaryRewards',
-				'resetLock',
-				'setLock',
 				'settle',
 				'transfer',
 				'transferFrom',
@@ -401,7 +388,7 @@ contract('BasePeriFinance', async accounts => {
 	// 		beforeEach(async () => {
 	// 			await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
 
-	// 			await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
+	// 			await basePeriFinance.issuePynthsAndStakeUSDC(toUnit('100'), toUnit('0'), { from: owner });
 	// 			await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
 	// 				from: owner,
 	// 			});
@@ -638,7 +625,7 @@ contract('BasePeriFinance', async accounts => {
 		// currently exchange doesn`t support
 		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
-				await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
+				await basePeriFinance.issuePynthsAndStakeUSDC(toUnit('100'), toUnit('0'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
 					from: owner,
 				});
@@ -722,8 +709,8 @@ contract('BasePeriFinance', async accounts => {
 				beforeEach(async () => {
 					// ensure the accounts have a debt position
 					await Promise.all([
-						basePeriFinance.issuePynths(toUnit('1'), { from: account1 }),
-						basePeriFinance.issuePynths(toUnit('1'), { from: account2 }),
+						basePeriFinance.issuePynthsAndStakeUSDC(toUnit('1'), toUnit('0'), { from: account1 }),
+						basePeriFinance.issuePynthsAndStakeUSDC(toUnit('1'), toUnit('0'), { from: account2 }),
 					]);
 
 					// Now jump forward in time so the rates are stale
@@ -840,7 +827,9 @@ contract('BasePeriFinance', async accounts => {
 
 				describe('when the user has a debt position (i.e. has issued)', () => {
 					beforeEach(async () => {
-						await basePeriFinance.issuePynths(toUnit('10'), { from: account1 });
+						await basePeriFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0'), {
+							from: account1,
+						});
 					});
 
 					it('should not allow transfer of periFinance in escrow', async () => {
@@ -864,7 +853,7 @@ contract('BasePeriFinance', async accounts => {
 
 			// Issue
 			const amountIssued = toUnit('2000');
-			await basePeriFinance.issuePynths(amountIssued, { from: account1 });
+			await basePeriFinance.issuePynthsAndStakeUSDC(amountIssued, toUnit('0'), { from: account1 });
 
 			await assert.revert(
 				basePeriFinance.transfer(account2, toUnit(issuedPeriFinances), {
@@ -894,7 +883,9 @@ contract('BasePeriFinance', async accounts => {
 			const maxIssuablePynths = await basePeriFinance.maxIssuablePynths(account1);
 
 			// Issue
-			await basePeriFinance.issuePynths(maxIssuablePynths, { from: account1 });
+			await basePeriFinance.issuePynthsAndStakeUSDC(maxIssuablePynths, toUnit('0'), {
+				from: account1,
+			});
 
 			// Exchange into pEUR
 			await basePeriFinance.exchange(pUSD, maxIssuablePynths, pEUR, {
@@ -946,7 +937,7 @@ contract('BasePeriFinance', async accounts => {
 
 			// Issue
 			const issuedPynths = await basePeriFinance.maxIssuablePynths(account1);
-			await basePeriFinance.issuePynths(issuedPynths, { from: account1 });
+			await basePeriFinance.issuePynthsAndStakeUSDC(issuedPynths, toUnit('0'), { from: account1 });
 			const remainingIssuable = (await basePeriFinance.remainingIssuablePynths(account1))[0];
 
 			assert.bnClose(remainingIssuable, '0');
@@ -972,7 +963,7 @@ contract('BasePeriFinance', async accounts => {
 		// currently exchange does not support
 		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
-				await basePeriFinance.issuePynths(toUnit('100'), { from: owner });
+				await basePeriFinance.issuePynthsAndStakeUSDC(toUnit('100'), toUnit('0'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
 					from: owner,
 				});

@@ -315,7 +315,9 @@ contract('RealtimeDebtCache', async accounts => {
 
 					const pynthsToIssue = toUnit('10');
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-					const tx = await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+					const tx = await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), {
+						from: account1,
+					});
 					assert.bnEqual((await realtimeDebtCache.cacheInfo())[0], issued.add(pynthsToIssue));
 
 					const logs = await getDecodedLogs({
@@ -328,7 +330,7 @@ contract('RealtimeDebtCache', async accounts => {
 				it('burning pUSD updates the debt total', async () => {
 					const pynthsToIssue = toUnit('10');
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-					await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+					await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), { from: account1 });
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
 
 					const pynthsToBurn = toUnit('5');
@@ -351,7 +353,7 @@ contract('RealtimeDebtCache', async accounts => {
 					});
 
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-					await periFinance.issuePynths(toUnit('10'), { from: account1 });
+					await periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0'), { from: account1 });
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
 					const debts = await realtimeDebtCache.cachedPynthDebts([pUSD, pAUD]);
 					const tx = await periFinance.exchange(pUSD, toUnit('5'), pAUD, { from: account1 });

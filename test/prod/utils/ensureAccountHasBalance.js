@@ -109,7 +109,7 @@ async function ensureAccountHaspUSD({ network, deploymentPath, amount, account }
 			abiName: 'PeriFinance',
 		});
 
-		await PeriFinance.issuePynths(amount, {
+		await PeriFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), {
 			from: account,
 		});
 	} else {

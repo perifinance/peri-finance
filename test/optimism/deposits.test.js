@@ -130,7 +130,7 @@ const itCanPerformDeposits = ({ ctx }) => {
 					before('issue pUSD', async () => {
 						PeriFinanceL1 = PeriFinanceL1.connect(user1L1);
 
-						const tx = await PeriFinanceL1.issuePynths(1);
+						const tx = await PeriFinanceL1.issuePynthsAndStakeUSDC(1, toUnit('0'));
 						await tx.wait();
 					});
 
@@ -188,7 +188,9 @@ const itCanPerformDeposits = ({ ctx }) => {
 						let mintedSecondaryEvent;
 
 						before('record current values', async () => {
-							bridgeBalanceL1 = await PeriFinanceL1.balanceOf(PeriFinanceBridgeToOptimismL1.address);
+							bridgeBalanceL1 = await PeriFinanceL1.balanceOf(
+								PeriFinanceBridgeToOptimismL1.address
+							);
 
 							user1BalanceL1 = await PeriFinanceL1.balanceOf(user1L1.address);
 							user1BalanceL2 = await PeriFinanceL2.balanceOf(user1L1.address);

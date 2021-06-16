@@ -358,8 +358,9 @@ contract('DebtCache', async accounts => {
 				// Ensure the account has some pynths to attempt to burn later.
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 				await periFinance.transfer(account2, toUnit('1000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10'), { from: account1 });
-				await periFinance.issuePynthsAndStakeUSDC( toUnit('10'), '1000000', { from: account1 });
+				await periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0.000000000001'), {
+					from: account1,
+				});
 
 				// Stale the debt snapshot
 				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
@@ -373,7 +374,7 @@ contract('DebtCache', async accounts => {
 				);
 
 				await assert.revert(
-					periFinance.issuePynths(toUnit('10'), { from: account1 }),
+					periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0'), { from: account1 }),
 					'A pynth or PERI rate is invalid'
 				);
 
@@ -488,7 +489,9 @@ contract('DebtCache', async accounts => {
 
 				const pynthsToIssue = toUnit('10');
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-				const tx = await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				const tx = await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), {
+					from: account1,
+				});
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.add(pynthsToIssue));
 
 				const logs = await getDecodedLogs({
@@ -508,7 +511,7 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 				const pynthsToIssue = toUnit('10');
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-				await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
 
 				const pynthsToBurn = toUnit('5');
@@ -538,7 +541,7 @@ contract('DebtCache', async accounts => {
 
 				await debtCache.takeDebtSnapshot();
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10'), { from: account1 });
+				await periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
 				const debts = await debtCache.cachedPynthDebts([pUSD]);
 				const tx = await periFinance.exchange(pUSD, toUnit('5'), pBTC, { from: account1 });
