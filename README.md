@@ -11,7 +11,7 @@ It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USD
 
 ## Overview
 
-This bug bounty document is to verify that [perifinance] hosts a bug bounty on Immunefi at the address [https://immunefi.com/bounty/perifinance/](https://immunefi.com/bounty/perifinance/).
+This bug bounty document is to verify that PeriFinance hosts a bug bounty on Immunefi at the address [https://immunefi.com/bounty/perifinance/](https://immunefi.com/bounty/perifinance/).
 
 If you have found a vulnerability in our project, it must be submitted through [Immunefi's platform](https://immunefi.com/). Immunefi will handle bug bounty communications.
 
