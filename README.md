@@ -7,6 +7,18 @@ PERI Finance is a crpyto-backed synthetic asset platform forking from Synthetix.
 
 It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USDC holders can stake them into PERI Liquidity Pool to issue Pynth called pUSD.
 
+# Bug Bounty README
+
+## Overview
+
+This bug bounty document is to verify that [88mph] hosts a bug bounty on Immunefi at the address [https://immunefi.com/bounty/88mph/](https://immunefi.com/bounty/88mph/).
+
+If you have found a vulnerability in our project, it must be submitted through [Immunefi's platform](https://immunefi.com/). Immunefi will handle bug bounty communications.
+
+See the bounty page at Immunefi for more details on accepted vulnerabilities, payout amounts, and rules of participation.
+
+Users who violate the rules of participation will not receive bug bounty payouts and may be temporarily suspended or banned from the bug bounty program.
+
 # Test
 
 [![CircleCI](https://circleci.com/gh/perifinance/peri-finance.svg?style=svg)](https://circleci.com/gh/perifinance/peri-finance)
