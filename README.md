@@ -17,7 +17,16 @@ If you have found a vulnerability in our project, it must be submitted through [
 
 See the bounty page at Immunefi for more details on accepted vulnerabilities, payout amounts, and rules of participation.
 
-Users who violate the rules of participation will not receive bug bounty payouts and may be temporarily suspended or banned from the bug bounty program.
+Users who violate the rules of participation will not receive bug bounty payouts and may be temporarily suspended or banned from the bug bounty program.  
+
+Our test application is running on **Kovan** test network at https://staking.peri.finance.  
+You can buy our test tokens from [Uniswap](https://app.uniswap.org/#/swap?use=V2) with your Kovan ETH(KETH).  
+
+**Test Token Addresses**
+|Token|Address|
+|:---|:---|
+|PERI|0xca8bE6F8364D1316de2dD2BA06AA44CF07Da3D52|
+|mocked USDC|0x98da9a82224E7A5896D6227382F7a52c82082146|
 
 # Test
 
