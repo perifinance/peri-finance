@@ -153,9 +153,9 @@ const loadConnections = ({ network, useFork }) => {
 	const etherscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
-			: network === 'mumbai'
-			? 'https://api.polygonscan.com/api' // 'https://mumbai-watcher.api.matic.today/api/v1'
-			: `https://api-${network}.etherscan.io/api`;
+			: network !== 'mumbai'
+			? `https://api-${network}.etherscan.io/api`
+			: 'https://api.polygonscan.com/api';
 
 	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
 
