@@ -7,7 +7,7 @@ PERI Finance is a crpyto-backed synthetic asset platform forking from Synthetix.
 
 It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USDC holders can stake them into PERI Liquidity Pool to issue Pynth called pUSD.
 
-# Bug Bounty README
+# Bug Bounty
 
 ## Overview
 
