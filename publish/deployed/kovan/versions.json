@@ -37,7 +37,7 @@
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"ProxypBTC": {
-				"address": "0xdE3Fa88b5098c8D676B36fd439217732653aB64c",
+				"address": "0xb34e9B5d8B198caE22f51188C4634BC554021585",
 				"status": "current",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
@@ -62,7 +62,7 @@
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"ProxyERC20pUSD": {
-				"address": "0x13DEd21bed9d7045aE4Ad0A08b4057eafFB3167D",
+				"address": "0x01d0C66fc0ca2A8f968D158eF7B2580A25452354",
 				"status": "current",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
@@ -107,9 +107,9 @@
 				"keccak256": "0xc00d4230a26cd82df0c9a92f0b3dcece7e15e0650f216e0e21663303b5412fec"
 			},
 			"PynthpBTC": {
-				"address": "0x3923a822Dd8CdBa9c24E54913E30aFE4803DF9C5",
+				"address": "0x87A6F6495585c739625B8a4270833d3D0b9b970f",
 				"status": "current",
-				"keccak256": "0xab5a7288f555756a4430e2621f4b39b00726c5ab6557db9665f62d663be64e8b"
+				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"PynthpCHF": {
 				"address": "0xFa652124ff0B3d36Ce830833eCF24F1695F6990E",
@@ -134,7 +134,7 @@
 			"PynthpUSD": {
 				"address": "0xD6A6D0a091D509136Eb8E3E9Ea4C6146Cc803208",
 				"status": "current",
-				"keccak256": "0xab5a7288f555756a4430e2621f4b39b00726c5ab6557db9665f62d663be64e8b"
+				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"PynthpXAG": {
 				"address": "0x456BA61E70ed8755F4741fb959FBF9dc01181802",
@@ -152,7 +152,7 @@
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"TokenStatepBTC": {
-				"address": "0xc9fE32B66071326B3fAbd30F3e3bB60E62AC8f2F",
+				"address": "0x1d9415279E0a491Ea4086F6DEaAD37Ab721c76C6",
 				"status": "current",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
@@ -197,19 +197,19 @@
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"TokenStatepETH": {
-				"address": "0x2B62529eB47B571C87B016862A8207A63Dd86473",
+				"address": "0x2efb8Ae7EDD2187c3Cb5Df64F87FC2eC7D47bd0f",
 				"status": "current",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxypETH": {
-				"address": "0x78863D0FdFb6082D5b8f9F7F2bbD08bF3D59A7B9",
+				"address": "0xCEe25b61b18924a4380330bf81ef3aCa3c39281E",
 				"status": "current",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthpETH": {
-				"address": "0x3BdC44751C32f3a4b310358cC060A76F5201bFD5",
+				"address": "0x5099F0968de33aBe815B2AdB7726E45991C1ad38",
 				"status": "current",
-				"keccak256": "0xab5a7288f555756a4430e2621f4b39b00726c5ab6557db9665f62d663be64e8b"
+				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"TokenStatepBNB": {
 				"address": "0xFE6fa6a7bfBCf6e587B21de2D57F3A1d51a13417",
@@ -839,6 +839,11 @@
 				"address": "0x658F1cF2aFf6275d667949bc6aE6161a909f193F",
 				"status": "current",
 				"keccak256": "0xfc53b777abbee0c6b0a511d62d5d38ff3f74484fc8210b878d40314ccdbd9a17"
+			},
+			"PERIUniswapV2": {
+				"address": "0x7ca0907aea10Dacd213a306a0E28F09a7b611277",
+				"status": "current",
+				"keccak256": "0x316dcd9eec665e0abccaf2a4a59a59e3a6a3abea703d1d085aa23cea494169ea"
 			}
 		}
 	}

@@ -182,7 +182,28 @@
 	"TempExchangeRateStorageKovan": {
 		"deploy": false
 	},
-	"PERIUniswapV1": {
+	"PERIUniswapV2": {
+		"deploy": false
+	},
+	"ProxyERC20pUSD": {
+		"deploy": false
+	},
+	"TokenStatepBTC": {
+		"deploy": false
+	},
+	"ProxypBTC": {
+		"deploy": false
+	},
+	"PynthpBTC": {
+		"deploy": false
+	},
+	"TokenStatepETH": {
+		"deploy": false
+	},
+	"ProxypETH": {
+		"deploy": false
+	},
+	"PynthpETH": {
 		"deploy": false
 	}
 }

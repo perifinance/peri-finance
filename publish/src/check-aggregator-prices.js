@@ -27,7 +27,7 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 			}
 
 			if (!abi) {
-				if (useOvm) {
+				if (useOvm || network === 'mumbai') {
 					abi = require('@chainlink/contracts-0.0.10/abi/v0.5/AggregatorV2V3Interface.json')
 						.compilerOutput.abi;
 				} else {

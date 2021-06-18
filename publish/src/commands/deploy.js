@@ -1001,12 +1001,29 @@ const deploy = async ({
 			force: addNewPynths,
 		});
 
+		// Legacy proxy will be around until May 30, 2020
+		// https://docs.peri.finance/integrations/guide/#proxy-deprecation
+		// Until this time, on mainnet we will still deploy ProxyERC20pUSD and ensure that
+		// PynthpUSD.proxy is ProxyERC20pUSD, PynthpUSD.integrationProxy is ProxypUSD
+		const pynthProxyIsLegacy = currencyKey === 'pUSD' && network === 'mainnet';
+
 		const proxyForPynth = await deployer.deployContract({
 			name: `Proxy${currencyKey}`,
-			source: 'ProxyERC20',
+			source: pynthProxyIsLegacy ? 'Proxy' : 'ProxyERC20',
 			args: [account],
 			force: addNewPynths,
 		});
+
+		// additionally deploy an ERC20 proxy for the pynth if it's legacy (pUSD)
+		let proxyERC20ForPynth;
+		if (currencyKey === 'pUSD') {
+			proxyERC20ForPynth = await deployer.deployContract({
+				name: `ProxyERC20${currencyKey}`,
+				source: `ProxyERC20`,
+				args: [account],
+				force: addNewPynths,
+			});
+		}
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
@@ -1050,7 +1067,7 @@ const deploy = async ({
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'PeriFinance', 'FeePool'],
 			args: [
-				addressOf(proxyForPynth),
+				proxyERC20ForPynth ? addressOf(proxyERC20ForPynth) : addressOf(proxyForPynth),
 				addressOf(tokenStateForPynth),
 				`Pynth ${currencyKey}`,
 				currencyKey,
@@ -1084,14 +1101,27 @@ const deploy = async ({
 				writeArg: addressOf(pynth),
 			});
 
+			// Migration Phrase 2: if there's a ProxyERC20pUSD then the Pynth's proxy must use it
 			await runStep({
 				contract: `Pynth${currencyKey}`,
 				target: pynth,
 				read: 'proxy',
-				expected: input => input === addressOf(proxyForPynth),
+				expected: input => input === addressOf(proxyERC20ForPynth || proxyForPynth),
 				write: 'setProxy',
-				writeArg: addressOf(proxyForPynth),
+				writeArg: addressOf(proxyERC20ForPynth || proxyForPynth),
 			});
+
+			if (proxyERC20ForPynth) {
+				// and make sure this new proxy has the target of the pynth
+				await runStep({
+					contract: `ProxyERC20${currencyKey}`,
+					target: proxyERC20ForPynth,
+					read: 'target',
+					expected: input => input === addressOf(pynth),
+					write: 'setTarget',
+					writeArg: addressOf(pynth),
+				});
+			}
 		}
 
 		// Save the pynth to be added once the AddressResolver has been synced.
