@@ -720,7 +720,11 @@ const deploy = async ({
 
 	const periFinance = await deployer.deployContract({
 		name: 'PeriFinance',
-		source: useOvm ? 'MintablePeriFinance' : 'PeriFinance',
+		source: ['polygon', 'mumbai'].includes(network)
+			? 'PeriFinanceToPolygon'
+			: useOvm
+			? 'MintablePeriFinance'
+			: 'PeriFinance',
 		deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
 		args: [
 			addressOf(proxyERC20PeriFinance),
