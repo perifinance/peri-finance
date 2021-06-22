@@ -25,5 +25,5 @@ interface ISystemSettings {
 
     function minimumStakeTime() external view returns (uint);
 
-    function usdcQuota() external view returns (uint);
+    function externalTokenQuota() external view returns (uint);
 }

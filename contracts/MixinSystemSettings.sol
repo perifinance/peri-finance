@@ -27,7 +27,7 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_CROSS_DOMAIN_ESCROW_GAS_LIMIT = "crossDomainEscrowGasLimit";
     bytes32 internal constant SETTING_CROSS_DOMAIN_REWARD_GAS_LIMIT = "crossDomainRewardGasLimit";
     bytes32 internal constant SETTING_CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT = "crossDomainWithdrawalGasLimit";
-    bytes32 internal constant SETTING_USDC_QUOTA = "usdcQuota";
+    bytes32 internal constant SETTING_EXTERNAL_TOKEN_QUOTA = "externalTokenQuota";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
@@ -125,9 +125,7 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_DEBT_SNAPSHOT_STALE_TIME);
     }
 
-    function getUSDCQuota()
-    internal view 
-    returns(uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_USDC_QUOTA);
+    function getExternalTokenQuota() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_EXTERNAL_TOKEN_QUOTA);
     }
 }

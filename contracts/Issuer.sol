@@ -400,7 +400,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _periCollateral
     ) internal view returns (uint burnAmount, uint usdcAmountToUnstake) {
         uint targetRatio = getIssuanceRatio();
-        uint usdcQuota = getUSDCQuota();
+        uint usdcQuota = getExternalTokenQuota();
 
         uint initialCRatio = _currentDebt.divideDecimal(_stakedUSDCAmount.add(_periCollateral));
         // it doesn't satisfy target c-ratio
@@ -814,7 +814,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             );
 
             uint maxUSDCQuotaAfterIssue =
-                _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
+                _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getExternalTokenQuota());
             uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
             require(maxUSDCQuotaAfterIssue > userStakedAmount, "No availalbe USDC staking amount remains");
@@ -854,11 +854,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(stakingStateUSDC().refund(_account, _amount), "refunding USDC has been failed");
     }
 
-    function _parsingUSDCStakingAmount(address _account)
-    internal {
+    function _parsingUSDCStakingAmount(address _account) internal {
         uint stakedAmountAfterIssue = stakingStateUSDC().stakedAmountOf(_account);
         uint stakedAmountToRoundDown = stakedAmountAfterIssue.sub(stakedAmountAfterIssue.div(10**12).mul(10**12));
-        if(stakedAmountToRoundDown > 0) {
+        if (stakedAmountToRoundDown > 0) {
             stakingStateUSDC().unstake(_account, stakedAmountToRoundDown);
         }
     }
@@ -964,7 +963,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
 
-        require(usdcQuota <= getUSDCQuota(), "USDC staked exceeds quota");
+        require(usdcQuota <= getExternalTokenQuota(), "USDC staked exceeds quota");
     }
 
     function _setLastIssueEvent(address account) internal {

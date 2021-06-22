@@ -242,12 +242,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _recentFeePeriodsStorage(0).rewardsToDistribute = _recentFeePeriodsStorage(0).rewardsToDistribute.add(amount);
     }
 
-    function setQuotaTolerance(uint _val)
-    external
-    onlyOwner {
-        require(_val < SafeDecimalMath.unit(),
-            "Tolerance value cannot exceeds 1");
-        
+    function setQuotaTolerance(uint _val) external onlyOwner {
+        require(_val < SafeDecimalMath.unit(), "Tolerance value cannot exceeds 1");
+
         quotaTolerance = _val;
     }
 
@@ -546,14 +543,17 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
-        if(periFinance().usdcStakedAmountOf(account) > 0) {
+        if (periFinance().usdcStakedAmountOf(account) > 0) {
             // USDC staked amount should be below of the USDC quota.
             uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
-            if(accountUSDCDebtQuota.roundDownDecimal(12) > getUSDCQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))) {
+            if (
+                accountUSDCDebtQuota.roundDownDecimal(12) >
+                getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
+            ) {
                 return (false, false);
             }
         }
-        
+
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
         //  0  <  10%:   Claimable
         // 10% > above:  Unable to claim
