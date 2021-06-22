@@ -3,8 +3,8 @@
 		"tag": "v0.0.1",
 		"fulltag": "v0.0.1",
 		"network": "kovan",
-		"date": "2021-06-15T18:25:51+09:00",
-		"commit": "14040535dca67068bb3befc82d4988edc5b8725c",
+		"date": "2021-06-18T12:34:03+09:00",
+		"commit": "34e2287f5cf73b2d8259c789986cee2845e0e1a7",
 		"contracts": {
 			"EscrowChecker": {
 				"address": "0x79d8Da4Cb3b2876d18dD9d76F7A557a29C35ADa0",

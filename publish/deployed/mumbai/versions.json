@@ -3,8 +3,8 @@
 		"tag": "v0.0.1",
 		"fulltag": "v0.0.1",
 		"network": "mumbai",
-		"date": "2021-06-15T17:38:19+09:00",
-		"commit": "09c5cd8c8010c9ac605a20268f2f2b1b2f5d9870",
+		"date": "2021-06-18T12:34:03+09:00",
+		"commit": "34e2287f5cf73b2d8259c789986cee2845e0e1a7",
 		"contracts": {
 			"SafeDecimalMath": {
 				"address": "0xce39A10e7eD2239F352dc47962b14fDF6009150F",
@@ -42,9 +42,9 @@
 				"keccak256": "0x4848e1e335b81c301b474ff1a611ac4a6dd869d589f91e75eadb69774a32455d"
 			},
 			"ExchangeRates": {
-				"address": "0x16bbfd2520759B72887f4f2a636ed08E501e2c1A",
+				"address": "0x5B8E6aA4d5a9aF951A14B5B9b1C13F4743eD56f0",
 				"status": "current",
-				"keccak256": "0x7c58e219734550a3676f31e273de4aac9439c78fff51de21ff56723c0ed2f692"
+				"keccak256": "0x75f4faea2e3a456c966c4f8270cec8c6adc8699f06eae92bc004381b08f11fdb"
 			},
 			"RewardEscrow": {
 				"address": "0x0a09c979923976947e44dD3dd6165FD6dEE25c14",

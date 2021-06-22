@@ -54,15 +54,6 @@
 			"txn": "",
 			"network": "kovan"
 		},
-		"ProxypBTC": {
-			"name": "ProxypBTC",
-			"address": "0xb34e9B5d8B198caE22f51188C4634BC554021585",
-			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0xb34e9B5d8B198caE22f51188C4634BC554021585",
-			"timestamp": "2021-06-18T02:15:04.672Z",
-			"txn": "",
-			"network": "kovan"
-		},
 		"ProxypCHF": {
 			"name": "ProxypCHF",
 			"address": "0xfDd2fAd6CfF60feAAA5A306aad19b5da072f884c",
@@ -180,15 +171,6 @@
 			"txn": "https://kovan.etherscan.io/tx/0xa819ed6e9139e481f2cff9ba5ff8c91b2a29b0b491286c80cfc74ed8bdd6627e",
 			"network": "kovan"
 		},
-		"PynthpBTC": {
-			"name": "PynthpBTC",
-			"address": "0x87A6F6495585c739625B8a4270833d3D0b9b970f",
-			"source": "MultiCollateralPynth",
-			"link": "https://kovan.etherscan.io/address/0x87A6F6495585c739625B8a4270833d3D0b9b970f",
-			"timestamp": "2021-06-18T02:15:13.856Z",
-			"txn": "",
-			"network": "kovan"
-		},
 		"PynthpCHF": {
 			"name": "PynthpCHF",
 			"address": "0xFa652124ff0B3d36Ce830833eCF24F1695F6990E",
@@ -258,15 +240,6 @@
 			"source": "TokenState",
 			"link": "https://kovan.etherscan.io/address/0x425A0952c3C27c5B8691b3661909d1618403C22C",
 			"timestamp": "2021-03-29T23:49:24.277Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"TokenStatepBTC": {
-			"name": "TokenStatepBTC",
-			"address": "0x1d9415279E0a491Ea4086F6DEaAD37Ab721c76C6",
-			"source": "TokenState",
-			"link": "https://kovan.etherscan.io/address/0x1d9415279E0a491Ea4086F6DEaAD37Ab721c76C6",
-			"timestamp": "2021-06-18T02:15:01.325Z",
 			"txn": "",
 			"network": "kovan"
 		},
@@ -342,33 +315,6 @@
 			"txn": "https://kovan.etherscan.io/tx/0x9d8aca06090a71369592942b7512508f0c32e4402f5a0570b27ba9f4cc579f74",
 			"network": "kovan"
 		},
-		"TokenStatepETH": {
-			"name": "TokenStatepETH",
-			"address": "0x2efb8Ae7EDD2187c3Cb5Df64F87FC2eC7D47bd0f",
-			"source": "TokenState",
-			"link": "https://kovan.etherscan.io/address/0x2efb8Ae7EDD2187c3Cb5Df64F87FC2eC7D47bd0f",
-			"timestamp": "2021-06-18T02:15:32.819Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"ProxypETH": {
-			"name": "ProxypETH",
-			"address": "0xCEe25b61b18924a4380330bf81ef3aCa3c39281E",
-			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0xCEe25b61b18924a4380330bf81ef3aCa3c39281E",
-			"timestamp": "2021-06-18T02:15:37.585Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"PynthpETH": {
-			"name": "PynthpETH",
-			"address": "0x5099F0968de33aBe815B2AdB7726E45991C1ad38",
-			"source": "MultiCollateralPynth",
-			"link": "https://kovan.etherscan.io/address/0x5099F0968de33aBe815B2AdB7726E45991C1ad38",
-			"timestamp": "2021-06-18T02:15:42.356Z",
-			"txn": "",
-			"network": "kovan"
-		},
 		"TokenStatepBNB": {
 			"name": "TokenStatepBNB",
 			"address": "0xFE6fa6a7bfBCf6e587B21de2D57F3A1d51a13417",
@@ -394,60 +340,6 @@
 			"link": "https://kovan.etherscan.io/address/0x210F2cf889B38838A44e0B6a50B1D11F091fd805",
 			"timestamp": "2021-03-29T23:56:04.000Z",
 			"txn": "https://kovan.etherscan.io/tx/0x9eef98702dc522c6a296f019d7ef33d6acf34ceeaa45380491d742e04ed2d787",
-			"network": "kovan"
-		},
-		"TokenStateiBTC": {
-			"name": "TokenStateiBTC",
-			"address": "0xe89eE2DcfE90AC8E5cC497AC14C63bc5B4B6f638",
-			"source": "TokenState",
-			"link": "https://kovan.etherscan.io/address/0xe89eE2DcfE90AC8E5cC497AC14C63bc5B4B6f638",
-			"timestamp": "2021-05-13T08:46:32.854Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"ProxyiBTC": {
-			"name": "ProxyiBTC",
-			"address": "0xAFD49162299a1f4616CF5b837BA0C4B4F816cacD",
-			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0xAFD49162299a1f4616CF5b837BA0C4B4F816cacD",
-			"timestamp": "2021-05-13T08:46:39.489Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"PynthiBTC": {
-			"name": "PynthiBTC",
-			"address": "0xF5f1881935f75D51B6B43FEe1199639C72C674a8",
-			"source": "PurgeablePynth",
-			"link": "https://kovan.etherscan.io/address/0xF5f1881935f75D51B6B43FEe1199639C72C674a8",
-			"timestamp": "2021-05-13T08:46:44.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0xa420d4ce32384e116f67fa1cd0c1ce2d3e4aa92de57aadfde5f759442065a7cc",
-			"network": "kovan"
-		},
-		"TokenStateiETH": {
-			"name": "TokenStateiETH",
-			"address": "0x97581B29BdC396c5f76C00D29809D645B4b6373F",
-			"source": "TokenState",
-			"link": "https://kovan.etherscan.io/address/0x97581B29BdC396c5f76C00D29809D645B4b6373F",
-			"timestamp": "2021-05-13T08:49:09.007Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"ProxyiETH": {
-			"name": "ProxyiETH",
-			"address": "0x9c365266EF9534E1177B8b2505d6ec7DF3A187d7",
-			"source": "ProxyERC20",
-			"link": "https://kovan.etherscan.io/address/0x9c365266EF9534E1177B8b2505d6ec7DF3A187d7",
-			"timestamp": "2021-05-13T08:49:15.603Z",
-			"txn": "",
-			"network": "kovan"
-		},
-		"PynthiETH": {
-			"name": "PynthiETH",
-			"address": "0xC81Adf317341f8F6530479C9716555e9b55B323C",
-			"source": "PurgeablePynth",
-			"link": "https://kovan.etherscan.io/address/0xC81Adf317341f8F6530479C9716555e9b55B323C",
-			"timestamp": "2021-05-13T08:49:24.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0xcc53637e0dc09d68aa96e7ac30b6d947912145c8dcddf5f44e22458dc7d88296",
 			"network": "kovan"
 		},
 		"TokenStateiBNB": {

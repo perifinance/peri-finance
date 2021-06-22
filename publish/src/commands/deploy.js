@@ -750,25 +750,6 @@ const deploy = async ({
 		});
 	}
 
-	// Old PeriFinance proxy based off Proxy.sol: this has been deprecated.
-	// To be removed after May 30, 2020:
-	// https://docs.peri.finance/integrations/guide/#proxy-deprecation
-	const proxyPeriFinance = await deployer.deployContract({
-		name: 'ProxyPeriFinance',
-		source: 'Proxy',
-		args: [account],
-	});
-	if (proxyPeriFinance && periFinance) {
-		await runStep({
-			contract: 'ProxyPeriFinance',
-			target: proxyPeriFinance,
-			read: 'target',
-			expected: input => input === addressOf(periFinance),
-			write: 'setTarget',
-			writeArg: addressOf(periFinance),
-		});
-	}
-
 	const debtCache = await deployer.deployContract({
 		name: 'DebtCache',
 		source: useOvm ? 'RealtimeDebtCache' : 'DebtCache',
@@ -916,9 +897,9 @@ const deploy = async ({
 				contract: 'SupplySchedule',
 				target: supplySchedule,
 				read: 'periFinanceProxy',
-				expected: input => input === addressOf(proxyPeriFinance),
+				expected: input => input === addressOf(proxyERC20PeriFinance),
 				write: 'setPeriFinanceProxy',
-				writeArg: addressOf(proxyPeriFinance),
+				writeArg: addressOf(proxyERC20PeriFinance),
 			});
 		}
 	}
@@ -1001,29 +982,12 @@ const deploy = async ({
 			force: addNewPynths,
 		});
 
-		// Legacy proxy will be around until May 30, 2020
-		// https://docs.peri.finance/integrations/guide/#proxy-deprecation
-		// Until this time, on mainnet we will still deploy ProxyERC20pUSD and ensure that
-		// PynthpUSD.proxy is ProxyERC20pUSD, PynthpUSD.integrationProxy is ProxypUSD
-		const pynthProxyIsLegacy = currencyKey === 'pUSD' && network === 'mainnet';
-
-		const proxyForPynth = await deployer.deployContract({
-			name: `Proxy${currencyKey}`,
-			source: pynthProxyIsLegacy ? 'Proxy' : 'ProxyERC20',
+		const proxyERC20ForPynth = await deployer.deployContract({
+			name: `ProxyERC20${currencyKey}`,
+			source: 'ProxyERC20',
 			args: [account],
 			force: addNewPynths,
 		});
-
-		// additionally deploy an ERC20 proxy for the pynth if it's legacy (pUSD)
-		let proxyERC20ForPynth;
-		if (currencyKey === 'pUSD') {
-			proxyERC20ForPynth = await deployer.deployContract({
-				name: `ProxyERC20${currencyKey}`,
-				source: `ProxyERC20`,
-				args: [account],
-				force: addNewPynths,
-			});
-		}
 
 		const currencyKeyInBytes = toBytes32(currencyKey);
 
@@ -1067,7 +1031,7 @@ const deploy = async ({
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'PeriFinance', 'FeePool'],
 			args: [
-				proxyERC20ForPynth ? addressOf(proxyERC20ForPynth) : addressOf(proxyForPynth),
+				addressOf(proxyERC20ForPynth),
 				addressOf(tokenStateForPynth),
 				`Pynth ${currencyKey}`,
 				currencyKey,
@@ -1091,10 +1055,11 @@ const deploy = async ({
 		}
 
 		// Setup proxy for pynth
-		if (proxyForPynth && pynth) {
+		if (proxyERC20ForPynth && pynth) {
+			// and make sure this new proxy has the target of the pynth
 			await runStep({
-				contract: `Proxy${currencyKey}`,
-				target: proxyForPynth,
+				contract: `ProxyERC20${currencyKey}`,
+				target: proxyERC20ForPynth,
 				read: 'target',
 				expected: input => input === addressOf(pynth),
 				write: 'setTarget',
@@ -1106,22 +1071,10 @@ const deploy = async ({
 				contract: `Pynth${currencyKey}`,
 				target: pynth,
 				read: 'proxy',
-				expected: input => input === addressOf(proxyERC20ForPynth || proxyForPynth),
+				expected: input => input === addressOf(proxyERC20ForPynth),
 				write: 'setProxy',
-				writeArg: addressOf(proxyERC20ForPynth || proxyForPynth),
+				writeArg: addressOf(proxyERC20ForPynth),
 			});
-
-			if (proxyERC20ForPynth) {
-				// and make sure this new proxy has the target of the pynth
-				await runStep({
-					contract: `ProxyERC20${currencyKey}`,
-					target: proxyERC20ForPynth,
-					read: 'target',
-					expected: input => input === addressOf(pynth),
-					write: 'setTarget',
-					writeArg: addressOf(pynth),
-				});
-			}
 		}
 
 		// Save the pynth to be added once the AddressResolver has been synced.
@@ -1219,7 +1172,7 @@ const deploy = async ({
 
 	await deployer.deployContract({
 		name: 'Depot',
-		deps: ['ProxyPeriFinance', 'PynthpUSD', 'FeePool'],
+		deps: ['ProxyERC20', 'PynthpUSD', 'FeePool'],
 		args: [account, account, addressOf(readProxyForResolver)],
 	});
 

@@ -131,9 +131,6 @@
 	"ProxyPeriFinance": {
 		"deploy": false
 	},
-	"ProxypUSD": {
-		"deploy": false
-	},
 	"SafeDecimalMath": {
 		"deploy": false
 	},

@@ -125,6 +125,9 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 };
 
 const getEtherscanLinkPrefix = network => {
+	if (network === 'polygon') {
+		return `https://polygonscan.com/`;
+	}
 	if (network === 'mumbai') {
 		return `https://polygon-explorer-mumbai.chainstacklabs.com`;
 	}
@@ -140,6 +143,8 @@ const loadConnections = ({ network, useFork }) => {
 	} else {
 		if (network === 'mainnet' && process.env.PROVIDER_URL_MAINNET) {
 			providerUrl = process.env.PROVIDER_URL_MAINNET;
+		} else if (network === 'polygon') {
+			providerUrl = process.env.PROVIDER_URL_POLYGON;
 		} else if (network === 'mumbai') {
 			providerUrl = process.env.PROVIDER_URL_MUMBAI;
 		} else {
@@ -153,7 +158,7 @@ const loadConnections = ({ network, useFork }) => {
 	const etherscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
-			: network !== 'mumbai'
+			: ['kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)
 			? `https://api-${network}.etherscan.io/api`
 			: 'https://api.polygonscan.com/api';
 

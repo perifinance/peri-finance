@@ -13,6 +13,7 @@ const data = {
 	'goerli-ovm': require('./publish/deployed/goerli-ovm'),
 	'kovan-ovm': require('./publish/deployed/kovan-ovm'),
 	'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
+	polygon: require('./publish/deployed/polygon'),
 	mumbai: require('./publish/deployed/mumbai'),
 };
 
@@ -21,7 +22,7 @@ const ovmIgnored = require('./publish/ovm-ignore.json');
 const nonUpgradeable = require('./publish/non-upgradeable.json');
 const releases = require('./publish/releases.json');
 
-const networks = ['local', 'kovan', 'rinkeby', 'ropsten', 'mainnet', 'goerli', 'mumbai'];
+const networks = ['local', 'kovan', 'rinkeby', 'ropsten', 'mainnet', 'goerli', 'polygon', 'mumbai'];
 
 const chainIdMapping = Object.entries({
 	1: {
@@ -61,6 +62,9 @@ const chainIdMapping = Object.entries({
 		useOvm: true,
 	},
 	// now append any defaults
+	137: {
+		network: 'polygon',
+	},
 	80001: {
 		network: 'mumbai',
 	},
