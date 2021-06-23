@@ -718,22 +718,35 @@ const deploy = async ({
 		args: [account, account],
 	});
 
-	const periFinance = await deployer.deployContract({
-		name: 'PeriFinance',
-		source: ['polygon', 'mumbai'].includes(network)
-			? 'PeriFinanceToPolygon'
-			: useOvm
-			? 'MintablePeriFinance'
-			: 'PeriFinance',
-		deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
-		args: [
-			addressOf(proxyERC20PeriFinance),
-			addressOf(tokenStatePeriFinance),
-			account,
-			currentPeriFinanceSupply,
-			addressOf(readProxyForResolver),
-		],
-	});
+	let periFinance;
+	if (['polygon', 'mumbai'].includes(network)) {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: 'PeriFinanceToPolygon',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			args: [
+				ZERO_ADDRESS, // address of childChainManager,
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+			],
+		});
+	} else {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: useOvm ? 'MintablePeriFinance' : 'PeriFinance',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			args: [
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+			],
+		});
+	}
 
 	if (periFinance && proxyERC20PeriFinance) {
 		await runStep({
@@ -987,7 +1000,7 @@ const deploy = async ({
 		});
 
 		const proxyERC20ForPynth = await deployer.deployContract({
-			name: `ProxyERC20${currencyKey}`,
+			name: `Proxy${currencyKey}`,
 			source: 'ProxyERC20',
 			args: [account],
 			force: addNewPynths,
@@ -1062,7 +1075,7 @@ const deploy = async ({
 		if (proxyERC20ForPynth && pynth) {
 			// and make sure this new proxy has the target of the pynth
 			await runStep({
-				contract: `ProxyERC20${currencyKey}`,
+				contract: `Proxy${currencyKey}`,
 				target: proxyERC20ForPynth,
 				read: 'target',
 				expected: input => input === addressOf(pynth),

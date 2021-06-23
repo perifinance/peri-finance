@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-interface IStakingStateUSDC {
+interface IStakingState {
     // Mutative
     function stake(address _account, uint _amount) external;
 

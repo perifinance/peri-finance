@@ -1403,6 +1403,15 @@
 			"timestamp": "2021-06-18T02:16:14.230Z",
 			"txn": "",
 			"network": "kovan"
+		},
+		"StakingRewardsPERIUniV2": {
+			"name": "StakingRewardsPERIUniV2",
+			"address": "0x4c40b3E3AeC2505e801Db038821989FB0bd144fe",
+			"source": "StakingRewards",
+			"link": "https://kovan.etherscan.io/address/0x4c40b3E3AeC2505e801Db038821989FB0bd144fe",
+			"timestamp": "2021-06-22T08:45:09.106Z",
+			"txn": "",
+			"network": "kovan"
 		}
 	},
 	"sources": {
