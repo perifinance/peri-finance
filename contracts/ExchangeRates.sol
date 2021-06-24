@@ -20,6 +20,10 @@ interface TempExchangeRateStorage {
     function getRate(bytes32 _currencyKey) external view returns (uint216, uint40);
 }
 
+interface IExternalRateAggregator {
+    function getRateAndUpdatedTime(bytes32 _currencyKey) external view returns (uint, uint);
+}
+
 // https://docs.peri.finance/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
@@ -33,6 +37,10 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     // The address of the mocked oracle of kovan which pushes fake rate updates for the test.
     address public oracle_kovan;
+
+    address public externalRateAggregator;
+
+    mapping(bytes32 => bool) public currencyByExternal;
 
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
@@ -85,6 +93,14 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function setOracleKovan(address _oracle) external {
         oracle_kovan = _oracle;
+    }
+
+    function setExternalRateAggregator(address _aggregator) external onlyOwner {
+        externalRateAggregator = _aggregator;
+    }
+
+    function setCurrencyToExternalAggregator(bytes32 _currencyKey, bool _set) external onlyOwner {
+        currencyByExternal[_currencyKey] = _set;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -600,6 +616,16 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
+        if (currencyByExternal[currencyKey]) {
+            require(externalRateAggregator != address(0), "External price aggregator is not set yet");
+
+            IExternalRateAggregator externalRateAggregator = IExternalRateAggregator(externalRateAggregator);
+
+            (uint rate, uint time) = externalRateAggregator.getRateAndUpdatedTime(currencyKey);
+
+            return RateAndUpdatedTime({rate: uint216(rate), time: uint40(time)});
+        }
+
         if (aggregator != AggregatorV2V3Interface(0)) {
             // this view from the aggregator is the most gas efficient but it can throw when there's no data,
             // so let's call it low-level to suppress any reverts
@@ -608,10 +634,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
             if (success) {
-                (uint80 roundId, int256 answer, , uint256 updatedAt, ) = abi.decode(
-                    returnData,
-                    (uint80, int256, uint256, uint256, uint80)
-                );
+                (uint80 roundId, int256 answer, , uint256 updatedAt, ) =
+                    abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
                 return
                     RateAndUpdatedTime({
                         rate: uint216(_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId)),
@@ -624,7 +648,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
             return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
         }
-
 
         // Test Purpose...
         ///////////////////
