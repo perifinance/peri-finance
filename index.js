@@ -140,7 +140,7 @@ const defaults = {
 		.mul(w3utils.toBN(1e18))
 		.div(w3utils.toBN(4))
 		.toString(), // 1/4 = 0.25
-	USDC_QUOTA: w3utils
+	MAX_EXTERNAL_TOKEN_QUOTA: w3utils
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
 		.toString(),

@@ -2056,10 +2056,10 @@ const deploy = async ({
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
-			read: 'usdcQuota',
+			read: 'MAX_EXTERNAL_TOKEN_QUOTA',
 			expected: input => input !== '0', // only change if zero
-			write: 'setUSDCQuota',
-			writeArg: await getDeployParameter('USDC_QUOTA'),
+			write: 'setExternalTokenQuota',
+			writeArg: await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA'),
 		});
 
 		await runStep({
