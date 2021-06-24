@@ -138,6 +138,7 @@
 		"commander": "5.1.0",
 		"leveldown": "^5.6.0",
 		"levelup": "^3.1.1",
+		"node-schedule": "^2.0.0",
 		"openzeppelin-solidity-2.3.0": "npm:openzeppelin-solidity@2.3.0",
 		"pretty-error": "^2.1.1",
 		"solidity-parser-antlr": "^0.4.11",
