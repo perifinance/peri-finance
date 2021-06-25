@@ -614,8 +614,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
-
         if (currencyByExternal[currencyKey]) {
             require(externalRateAggregator != address(0), "External price aggregator is not set yet");
 
@@ -625,6 +623,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
             return RateAndUpdatedTime({rate: uint216(rate), time: uint40(time)});
         }
+
+        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
         if (aggregator != AggregatorV2V3Interface(0)) {
             // this view from the aggregator is the most gas efficient but it can throw when there's no data,
