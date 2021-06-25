@@ -3,6 +3,8 @@ require('dotenv').config();
 const Web3 = require('web3');
 const path = require('path');
 const schedule = require('node-schedule');
+const cron = require('cron-validator');
+const axios = require('axios');
 
 const {
 	ensureNetwork,
@@ -17,14 +19,16 @@ const {
 	constants: { BUILD_FOLDER, CONFIG_FILENAME, PYNTHS_FILENAME, DEPLOYMENT_FILENAME },
 } = require('../../../.');
 
-const { getVersions, getUsers } = require('../../../');
+const { getVersions, getUsers, toBytes32 } = require('../../../');
 
 const DEFAULTS = {
 	network: 'kovan',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 	methodCallGasLimit: 250e3, // 250k
 	gasPrice: '1',
-	cronScheduleFormat: `10 * * * * *`,
+	cronScheduleFormat: `0 0 0/8 ? * *`,
+	methodArgs: [],
+	feedUrls: [],
 };
 
 function getExistingContract({ network, deployment, contract, web3 }) {
@@ -59,10 +63,9 @@ const scheduler = async ({
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
 	}
-	if (!cronScheduleFormat) {
-		throw new Error('must specify scheduler time');
+	if (!cronScheduleFormat || !cron.isValidCron(cronScheduleFormat, { seconds: true })) {
+		throw new Error('must specify scheduler time or correct scheduler time');
 	}
-
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
 	ensureDeploymentPath(deploymentPath);
@@ -120,13 +123,69 @@ const scheduler = async ({
 		console.log(`\n## scheduler method : ${schedulerMethod}`);
 		console.log(`Running Schedule at ${new Date().toLocaleString()}`);
 
-		await runStep({
-			contract: scheduler,
-			target: schedulerContract,
-			write: schedulerMethod,
-		});
+		let cnt = 0;
+		let success = false;
+		while (!success && cnt < 100) {
+			try {
+				cnt++;
+
+				if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
+					const feedPriceArr = [];
+
+					for (const feedUrl of DEFAULTS.feedUrls) {
+						const price = await requestPriceFeed(feedUrl);
+						feedPriceArr.push(price);
+					}
+
+					const feedKeyArr = DEFAULTS.methodArgs.map(toBytes32);
+
+					await runStep({
+						contract: scheduler,
+						target: schedulerContract,
+						write: schedulerMethod,
+						writeArg: [feedKeyArr, feedPriceArr, new Date().getTime() / 1000],
+					});
+				} else if (DEFAULTS.methodArgs.length > 0) {
+					await runStep({
+						contract: scheduler,
+						target: schedulerContract,
+						write: schedulerMethod,
+						writeArg: DEFAULTS.methodArgs,
+					});
+				} else {
+					await runStep({
+						contract: scheduler,
+						target: schedulerContract,
+						write: schedulerMethod,
+					});
+				}
+
+				success = true;
+			} catch (e) {
+				console.log(e);
+				await sleep(3000);
+			}
+		}
 	});
 };
+
+function requestPriceFeed(url) {
+	return axios
+		.get(url)
+		.then(({ data }) => {
+			const lastPrice = Web3.utils.toWei(data.last);
+			return lastPrice;
+		})
+		.catch(e => {
+			console.log(e);
+		});
+}
+
+function sleep(ms) {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms);
+	});
+}
 
 module.exports = {
 	scheduler,
@@ -148,7 +207,19 @@ module.exports = {
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
 			.option('-s, --scheduler <value>', `The name of the contract scheduler`)
 			.option('-sm, --scheduler-method <value>', `Method to call of the scheduler`)
+			.option(
+				'-sma, --scheduler-method-arguments <value>',
+				`Method Arguments`,
+				x => DEFAULTS.methodArgs.push(x),
+				DEFAULTS.methodArgs
+			)
 			.option('-csf, --cron-schedule-format <value>', `cron schedule format for scheduler`)
+			.option(
+				'-fu, --feed-urls <value>',
+				`url to request price feeds`,
+				x => DEFAULTS.feedUrls.push(x),
+				DEFAULTS.feedUrls
+			)
 			.option(
 				'-v, --private-key [value]',
 				'The private key to deploy with (only works in local mode, otherwise set in .env).'
