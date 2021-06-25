@@ -242,6 +242,7 @@ const setupContract = async ({
 		ExternalRateAggregator: [owner, oracle],
 		TempKovanOracle: [owner],
 		StakingStateUSDC: [owner, tryGetAddressOf('Issuer'), tryGetAddressOf('USDC')],
+		StakingState: [owner, tryGetAddressOf('Issuer')],
 	};
 
 	let instance;
@@ -798,6 +799,9 @@ const setupAllContracts = async ({
 			contract: 'StakingStateUSDC',
 			source: 'StakingStateUSDC',
 		},
+		{
+			contract: 'StakingState',
+		},
 	];
 
 	// get deduped list of all required base contracts
@@ -906,29 +910,35 @@ const setupAllContracts = async ({
 		})
 	);
 
+	const DAI = await artifacts
+		.require('MockToken')
+		.new(...['Dai Stablecoin', 'DAI', '18'].concat({ from: owner }));
+
+	returnObj[`USDC`] = USDC;
+	returnObj['DAI'] = DAI;
+
 	if (returnObj['StakingStateUSDC'] && USDC) {
 		returnObj['StakingStateUSDC'].setUSDCAddress(USDC.address, { from: owner });
 	}
 
-	returnObj[`USDC`] = USDC;
-
-	// now invoke AddressResolver to set all addresses
-	if (returnObj['AddressResolver']) {
-		if (process.env.DEBUG) {
-			log(`Importing into AddressResolver:\n\t - ${Object.keys(returnObj).join('\n\t - ')}`);
-		}
-
-		await returnObj['AddressResolver'].importAddresses(
-			Object.keys(returnObj).map(toBytes32),
-			Object.values(returnObj).map(entry =>
-				// use 0x1111 address for any mocks that have no actual deployment
-				entry === true ? '0x' + '1'.repeat(40) : entry.address
-			),
-			{
-				from: owner,
+	if (returnObj['StakingState'])
+		if (returnObj['AddressResolver']) {
+			// now invoke AddressResolver to set all addresses
+			if (process.env.DEBUG) {
+				log(`Importing into AddressResolver:\n\t - ${Object.keys(returnObj).join('\n\t - ')}`);
 			}
-		);
-	}
+
+			await returnObj['AddressResolver'].importAddresses(
+				Object.keys(returnObj).map(toBytes32),
+				Object.values(returnObj).map(entry =>
+					// use 0x1111 address for any mocks that have no actual deployment
+					entry === true ? '0x' + '1'.repeat(40) : entry.address
+				),
+				{
+					from: owner,
+				}
+			);
+		}
 
 	// now rebuild caches for all contracts that need it
 	await Promise.all(

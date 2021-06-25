@@ -71,7 +71,7 @@ contract StakingState is Owned, State {
         address _tokenAddress,
         uint8 _decimals
     ) external onlyOwner {
-        require(_tokenAddress != address(0), "Address should not be empty");
+        require(_tokenAddress != address(0), "Address cannot be empty");
 
         if (targetTokens[_currencyKey].tokenAddress == address(0)) {
             tokenList.push(_currencyKey);
@@ -91,6 +91,7 @@ contract StakingState is Owned, State {
         address _account,
         uint _amount
     ) external onlyAssociatedContract {
+        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target token is not set");
         require(targetTokens[_currencyKey].activated, "Target token is not activated");
 
         if (stakedAmountOf[_currencyKey][_account] <= 0 && _amount > 0) {
@@ -108,7 +109,7 @@ contract StakingState is Owned, State {
         address _account,
         uint _amount
     ) external onlyAssociatedContract {
-        require(stakedAmountOf[_currencyKey][_account] >= _amount, "User doesn't have enough staked amount");
+        require(stakedAmountOf[_currencyKey][_account] >= _amount, "Account doesn't have enough staked amount");
         require(totalStakedAmount[_currencyKey] >= _amount, "Not enough staked amount to withdraw");
 
         if (stakedAmountOf[_currencyKey][_account].sub(_amount) == 0) {
@@ -126,10 +127,7 @@ contract StakingState is Owned, State {
         address _account,
         uint _amount
     ) external onlyAssociatedContract returns (bool) {
-        uint decimalDiff =
-            targetTokens[_currencyKey].decimals < 18
-                ? 18 - targetTokens[_currencyKey].decimals
-                : targetTokens[_currencyKey].decimals - 18;
+        uint decimalDiff = targetTokens[_currencyKey].decimals < 18 ? 18 - targetTokens[_currencyKey].decimals : 0;
 
         return tokenInstance(_currencyKey).transfer(_account, _amount.div(10**decimalDiff));
     }
