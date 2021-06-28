@@ -17,9 +17,10 @@ const {
 
 const {
 	constants: { BUILD_FOLDER, CONFIG_FILENAME, PYNTHS_FILENAME, DEPLOYMENT_FILENAME },
-} = require('../../../.');
-
-const { getVersions, getUsers, toBytes32 } = require('../../../');
+	getVersions,
+	getUsers,
+	toBytes32,
+} = require('../../../');
 
 const DEFAULTS = {
 	network: 'kovan',

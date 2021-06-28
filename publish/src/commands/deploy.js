@@ -736,7 +736,7 @@ const deploy = async ({
 	} else {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
-			source: useOvm ? 'MintablePeriFinance' : 'PeriFinance',
+			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
 			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
 			args: [
 				addressOf(proxyERC20PeriFinance),
@@ -744,6 +744,7 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
+				account,
 			],
 		});
 	}

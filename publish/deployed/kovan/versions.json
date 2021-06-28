@@ -18,8 +18,9 @@
 			},
 			"ExchangeRates": {
 				"address": "0x9c89188741B379E6fE40068c5bD5dA4b96b92E86",
-				"status": "current",
-				"keccak256": "0x18ac0dbc8bb037386e5331083c89c9b87b94c9a9d6d312fe228c386c53a9f982"
+				"status": "replaced",
+				"keccak256": "0x18ac0dbc8bb037386e5331083c89c9b87b94c9a9d6d312fe228c386c53a9f982",
+				"replaced_in": "v0.0.2"
 			},
 			"FeePool": {
 				"address": "0xA7BD3A495bB4B3FDbE4536Cd39C5E7Ca30703bEB",
@@ -38,7 +39,7 @@
 			},
 			"ProxypBTC": {
 				"address": "0xb34e9B5d8B198caE22f51188C4634BC554021585",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"ProxypCHF": {
@@ -108,7 +109,7 @@
 			},
 			"PynthpBTC": {
 				"address": "0x87A6F6495585c739625B8a4270833d3D0b9b970f",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"PynthpCHF": {
@@ -153,7 +154,7 @@
 			},
 			"TokenStatepBTC": {
 				"address": "0x1d9415279E0a491Ea4086F6DEaAD37Ab721c76C6",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"TokenStatepCHF": {
@@ -198,17 +199,17 @@
 			},
 			"TokenStatepETH": {
 				"address": "0x2efb8Ae7EDD2187c3Cb5Df64F87FC2eC7D47bd0f",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxypETH": {
 				"address": "0xCEe25b61b18924a4380330bf81ef3aCa3c39281E",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthpETH": {
 				"address": "0x5099F0968de33aBe815B2AdB7726E45991C1ad38",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"TokenStatepBNB": {
@@ -228,32 +229,32 @@
 			},
 			"TokenStateiBTC": {
 				"address": "0xe89eE2DcfE90AC8E5cC497AC14C63bc5B4B6f638",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxyiBTC": {
 				"address": "0xAFD49162299a1f4616CF5b837BA0C4B4F816cacD",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthiBTC": {
 				"address": "0xF5f1881935f75D51B6B43FEe1199639C72C674a8",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xda9ab01babe13712ccf59855c6fe1c3538bea3d5fd7df85ea81b876113b0ae36"
 			},
 			"TokenStateiETH": {
 				"address": "0x97581B29BdC396c5f76C00D29809D645B4b6373F",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxyiETH": {
 				"address": "0x9c365266EF9534E1177B8b2505d6ec7DF3A187d7",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthiETH": {
 				"address": "0xC81Adf317341f8F6530479C9716555e9b55B323C",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xda9ab01babe13712ccf59855c6fe1c3538bea3d5fd7df85ea81b876113b0ae36"
 			},
 			"TokenStateiBNB": {
@@ -717,8 +718,9 @@
 			},
 			"SystemSettings": {
 				"address": "0x712D0459F766472bd873a1693ecc24F5CCA901A0",
-				"status": "current",
-				"keccak256": "0x14ef34d08ddfa5146d34992a5bca320594795e4fdfcba2fc40900b486333b8ac"
+				"status": "replaced",
+				"keccak256": "0x14ef34d08ddfa5146d34992a5bca320594795e4fdfcba2fc40900b486333b8ac",
+				"replaced_in": "v0.0.2"
 			},
 			"TradingRewards": {
 				"address": "0x434b5fDa6bD32F7c805356DAD8105C93dd0a9277",
@@ -844,6 +846,35 @@
 				"address": "0x7ca0907aea10Dacd213a306a0E28F09a7b611277",
 				"status": "current",
 				"keccak256": "0x316dcd9eec665e0abccaf2a4a59a59e3a6a3abea703d1d085aa23cea494169ea"
+			}
+		}
+	},
+	"v0.0.2": {
+		"tag": "v0.0.2",
+		"fulltag": "v0.0.2",
+		"network": "kovan",
+		"date": "2021-06-28T14:54:21+09:00",
+		"commit": "d280ce193124c0889326e13a645c04fb86a1bfb8",
+		"contracts": {
+			"ExchangeRates": {
+				"address": "0xe38f309a2E3BA2B842FC6ff4249e25b08C593A1c",
+				"status": "current",
+				"keccak256": "0xc3b71f6dc959452a5a3c51588411adef727e23752fd4cab3fa5a14af57ce7205"
+			},
+			"SystemSettings": {
+				"address": "0x8E1EE5A3dcbc59225BF2FD39C5d12E4271942D83",
+				"status": "current",
+				"keccak256": "0xbbd15a3edfb1c5ebe5cdbefb4103efdb07a242c382b31b198dc7dc3836704261"
+			},
+			"StakingRewardsPERIUniV2": {
+				"address": "0x4c40b3E3AeC2505e801Db038821989FB0bd144fe",
+				"status": "current",
+				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
+			},
+			"ExternalRateAggregator": {
+				"address": "0x7250480369aEd3AA1d09EFDAb6aAF08A7B21836D",
+				"status": "current",
+				"keccak256": "0x173275bc90183dc1edcb20a2f5e6b241b9de5107e6d0dd08c7489cb6befef01b"
 			}
 		}
 	}
