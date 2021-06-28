@@ -89,8 +89,9 @@
 			},
 			"PeriFinance": {
 				"address": "0xBAdF10e1C9182353bfbf0946a71F88DC0F0ee2AF",
-				"status": "current",
-				"keccak256": "0x9f0bb09e1549bbe0202dbd5b0067fef77de4729a6928c1923efc1b369770cced"
+				"status": "replaced",
+				"keccak256": "0x9f0bb09e1549bbe0202dbd5b0067fef77de4729a6928c1923efc1b369770cced",
+				"replaced_in": "v0.0.3"
 			},
 			"PeriFinanceEscrow": {
 				"address": "0x775aad7e9fea6F9A9f2b6caf29AeBF1B2E0D2D1C",
@@ -875,6 +876,20 @@
 				"address": "0x7250480369aEd3AA1d09EFDAb6aAF08A7B21836D",
 				"status": "current",
 				"keccak256": "0x173275bc90183dc1edcb20a2f5e6b241b9de5107e6d0dd08c7489cb6befef01b"
+			}
+		}
+	},
+	"v0.0.3": {
+		"tag": "v0.0.3",
+		"fulltag": "v0.0.3",
+		"network": "kovan",
+		"date": "2021-06-28T14:54:21+09:00",
+		"commit": "d280ce193124c0889326e13a645c04fb86a1bfb8",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xc9bb45FeF3F213092d6E5307bEb8b69fED54090a",
+				"status": "current",
+				"keccak256": "0x2eac57046b7c31b9111445f3977c25bbf0bbbe487def287ad44137ed5d51d170"
 			}
 		}
 	}

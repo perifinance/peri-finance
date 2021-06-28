@@ -129,6 +129,7 @@ const scheduler = async ({
 		while (!success && cnt < 100) {
 			try {
 				cnt++;
+				const now = (new Date().getTime() / 1000).toFixed(0);
 
 				if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
 					const feedPriceArr = [];
@@ -143,8 +144,14 @@ const scheduler = async ({
 					await runStep({
 						contract: scheduler,
 						target: schedulerContract,
+						read: 'rates',
+						readArg: DEFAULTS.methodArgs,
+						expected: input =>
+							input.foreach(
+								({ rate, time }, index) => rate === feedPriceArr[index] && time < now - 300
+							),
 						write: schedulerMethod,
-						writeArg: [feedKeyArr, feedPriceArr, new Date().getTime() / 1000],
+						writeArg: [feedKeyArr, feedPriceArr, now],
 					});
 				} else if (DEFAULTS.methodArgs.length > 0) {
 					await runStep({
