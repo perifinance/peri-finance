@@ -91,9 +91,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
     }
 
-    function getRequiredAddress(bytes32 _contractName)
-    external view
-    returns(address) {
+    function getRequiredAddress(bytes32 _contractName) external view returns (address) {
         return requireAndGetAddress(_contractName);
     }
 
@@ -163,36 +161,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function transferablePeriFinance(address account) external view returns (uint transferable) {
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
-    }
-
-    function currentUSDCDebtQuota(address _account)
-    external view
-    returns(uint) {
-        return issuer().currentUSDCDebtQuota(_account);
-    }
-
-    function usdcStakedAmountOf(address _account)
-    external view
-    returns(uint) {
-        return stakingStateUSDC().stakedAmountOf(_account);
-    }
-
-    function usdcTotalStakedAmount()
-    external view
-    returns(uint) {
-        return stakingStateUSDC().totalStakedAmount();
-    }
-
-    function userUSDCStakingShare(address _account)
-    external view
-    returns(uint) {
-        return stakingStateUSDC().userStakingShare(_account);
-    }
-
-    function totalUSDCStakerCount()
-    external view
-    returns(uint) {
-        return stakingStateUSDC().totalStakerCount();
     }
 
     function _canTransfer(address account, uint value) internal view returns (bool) {
@@ -312,34 +280,24 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
-    external
-    issuanceActive optionalProxy {
-        issuer().issuePynthsAndStakeUSDC(messageSender, _issueAmount, _usdcStakeAmount);
+    function issuePynths(bytes32 _currencyKey, uint _issueAmount) external issuanceActive optionalProxy {
+        issuer().issuePynths(messageSender, _currencyKey, _issueAmount);
     }
 
-    function issueMaxPynths()
-    external
-    issuanceActive optionalProxy {
+    function issueMaxPynths() external issuanceActive optionalProxy {
         issuer().issueMaxPynths(messageSender);
     }
 
-    function issuePynthsAndStakeMaxUSDC(uint _issueAmount)
-    external
-    issuanceActive optionalProxy {
-        issuer().issuePynthsAndStakeMaxUSDC(messageSender, _issueAmount);
+    function burnPynths(bytes32 _currencyKey, uint _burnAmount) external issuanceActive optionalProxy {
+        issuer().burnPynths(messageSender, _currencyKey, _burnAmount);
     }
 
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
-    external
-    issuanceActive optionalProxy {
-        return issuer().burnPynthsAndUnstakeUSDC(messageSender, _burnAmount, _unstakeAmount);
+    function fitToClaimable() external issuanceActive optionalProxy {
+        issuer().fitToClaimable(messageSender);
     }
 
-    function burnPynthsAndUnstakeUSDCToTarget()
-    external
-    issuanceActive optionalProxy {
-        return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender);
+    function exit() external issuanceActive optionalProxy {
+        issuer().exit(messageSender);
     }
 
     function exchangeWithVirtual(

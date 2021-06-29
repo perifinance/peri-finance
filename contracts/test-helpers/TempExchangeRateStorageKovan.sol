@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-import "./Owned.sol";
+import "../Owned.sol";
 
 contract TempExchangeRateStorageKovan is Owned {
     struct RateAndUpdatedTime {

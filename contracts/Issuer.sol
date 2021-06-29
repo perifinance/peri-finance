@@ -23,7 +23,7 @@ import "./interfaces/IHasBalance.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IStakingStateUSDC.sol";
+import "./interfaces/IExternalTokenStakeManager.sol";
 
 interface IRewardEscrowV2 {
     // Views
@@ -85,15 +85,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_PERIFINANCEESCROW = "PeriFinanceEscrow";
     bytes32 private constant CONTRACT_LIQUIDATIONS = "Liquidations";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_USDC = "USDC";
-    bytes32 private constant CONTRACT_STAKINGSTATE_USDC = "StakingStateUSDC";
+    bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "externalTokenStakeManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](15);
+        bytes32[] memory newAddresses = new bytes32[](14);
         newAddresses[0] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -107,8 +106,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[10] = CONTRACT_LIQUIDATIONS;
         newAddresses[11] = CONTRACT_DEBTCACHE;
         newAddresses[12] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[13] = CONTRACT_USDC;
-        newAddresses[14] = CONTRACT_STAKINGSTATE_USDC;
+        newAddresses[13] = CONTRACT_EXTOKENSTAKEMANAGER;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -116,12 +114,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return IPeriFinance(requireAndGetAddress(CONTRACT_PERIFINANCE));
     }
 
-    function stakingStateUSDC() internal view returns (IStakingStateUSDC) {
-        return IStakingStateUSDC(requireAndGetAddress(CONTRACT_STAKINGSTATE_USDC));
-    }
-
-    function usdc() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(USDC));
+    function exTokenStakeManager() internal view returns (IExternalTokenStakeManager) {
+        return IExternalTokenStakeManager(requireAndGetAddress(CONTRACT_EXTOKENSTAKEMANAGER));
     }
 
     function exchanger() internal view returns (IExchanger) {
@@ -252,7 +246,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _debtLedgerLength = state.debtLedgerLength();
         uint systemDebt = state.debtLedger(debtEntryIndex);
         uint currentDebtOwnership;
-        if (_debtLedgerLength <= 0 || systemDebt == 0) {
+        if (_debtLedgerLength == 0 || systemDebt == 0) {
             currentDebtOwnership = 0;
         } else {
             currentDebtOwnership = state
@@ -271,21 +265,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _canBurnPynths(address account) internal view returns (bool) {
         return now >= _lastIssueEvent(account).add(getMinimumStakeTime());
-    }
-
-    function _currentUSDCDebtQuota(address _account) internal view returns (uint, bool) {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_account);
-        if (usdcStakedAmount == 0 || debtBalance == 0) {
-            return (0, anyRateIsInvalid);
-        }
-
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(usdcStakedAmount, usdcRate);
-        uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
-
-        return (debtByUSDC.divideDecimalRound(debtBalance), anyRateIsInvalid || isUSDCInvalid);
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {
@@ -323,61 +302,31 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return amount.divideDecimalRound(periRate);
     }
 
-    function _usdcToUSD(uint _amount, uint _usdcRate) internal pure returns (uint) {
-        if (_amount == 0) return 0;
-
-        return _amount.multiplyDecimalRound(_usdcRate);
-    }
-
-    function _usdToUSDC(uint _amount, uint _usdcRate) internal pure returns (uint) {
-        if (_amount == 0) return 0;
-
-        return _amount.divideDecimalRound(_usdcRate);
-    }
-
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
         // What is the value of their PERI balance in pUSD
-        (uint periRate, bool anyRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
+        (uint periRate, bool periRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
         uint periCollateral = _periToUSD(_collateral(_issuer), periRate);
 
-        uint usdcStakedAmountToUSD;
-        if (stakingStateUSDC().hasStaked(_issuer)) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-            usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_issuer), usdcRate);
+        uint externalTokenStaked = exTokenStakeManager().totalStakedAmountOf(_issuer, pUSD);
 
-            anyRateIsInvalid = anyRateIsInvalid || isUSDCInvalid;
-        }
-
-        uint destinationValue = periCollateral.add(usdcStakedAmountToUSD);
+        uint destinationValue = periCollateral.add(externalTokenStaked);
 
         // They're allowed to issue up to issuanceRatio of that value
-        return (destinationValue.multiplyDecimal(getIssuanceRatio()), anyRateIsInvalid);
+        return (destinationValue.multiplyDecimal(getIssuanceRatio()), periRateIsInvalid);
     }
 
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
         uint totalOwnedPeriFinance = _collateral(_issuer);
+        uint externalTokenStaked = exTokenStakeManager().totalStakedAmountOf(_issuer, PERI);
 
         (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, PERI);
 
-        uint usdcStakedAmountToPeri;
-        bool rateIsInvalid;
-        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
-        if (usdcStakedAmount > 0) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-            uint usdcStakedAmountToUSD = _usdcToUSD(usdcStakedAmount, usdcRate);
-            (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-            usdcStakedAmountToPeri = _usdToPeri(usdcStakedAmountToUSD, periRate);
-
-            rateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
-        }
-
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
-        rateIsInvalid = rateIsInvalid || anyRateIsInvalid;
-        if (totalOwnedPeriFinance == 0 && usdcStakedAmount == 0) return (0, rateIsInvalid);
+        if (totalOwnedPeriFinance == 0 && externalTokenStaked == 0) return (0, anyRateIsInvalid);
 
-        uint totalOwned = totalOwnedPeriFinance.add(usdcStakedAmountToPeri);
+        uint totalOwned = totalOwnedPeriFinance.add(externalTokenStaked);
 
-        return (debtBalance.divideDecimal(totalOwned), rateIsInvalid);
+        return (debtBalance.divideDecimal(totalOwned), anyRateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
@@ -396,32 +345,32 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _amountsToFitClaimable(
         uint _currentDebt,
-        uint _stakedUSDCAmount,
+        uint _stakedExTokenAmount,
         uint _periCollateral
-    ) internal view returns (uint burnAmount, uint usdcAmountToUnstake) {
+    ) internal view returns (uint burnAmount, uint exTokenAmountToUnstake) {
         uint targetRatio = getIssuanceRatio();
-        uint usdcQuota = getExternalTokenQuota();
+        uint exTokenQuota = getExternalTokenQuota();
 
-        uint initialCRatio = _currentDebt.divideDecimal(_stakedUSDCAmount.add(_periCollateral));
+        uint initialCRatio = _currentDebt.divideDecimal(_stakedExTokenAmount.add(_periCollateral));
         // it doesn't satisfy target c-ratio
         if (initialCRatio > targetRatio) {
-            uint maxAllowedUSDCStakeAmountByPeriCollateral =
-                _periCollateral.multiplyDecimal(usdcQuota.divideDecimal(SafeDecimalMath.unit().sub(usdcQuota)));
-            usdcAmountToUnstake = _stakedUSDCAmount > maxAllowedUSDCStakeAmountByPeriCollateral
-                ? _stakedUSDCAmount.sub(maxAllowedUSDCStakeAmountByPeriCollateral)
+            uint maxAllowedExTokenStakeAmountByPeriCollateral =
+                _periCollateral.multiplyDecimal(exTokenQuota.divideDecimal(SafeDecimalMath.unit().sub(exTokenQuota)));
+            exTokenAmountToUnstake = _stakedExTokenAmount > maxAllowedExTokenStakeAmountByPeriCollateral
+                ? _stakedExTokenAmount.sub(maxAllowedExTokenStakeAmountByPeriCollateral)
                 : 0;
             burnAmount = _currentDebt.sub(
-                _periCollateral.add(_stakedUSDCAmount).sub(usdcAmountToUnstake).multiplyDecimal(targetRatio)
+                _periCollateral.add(_stakedExTokenAmount).sub(exTokenAmountToUnstake).multiplyDecimal(targetRatio)
             );
 
-            // it satisfies target c-ratio but violates USDC quota
+            // it satisfies target c-ratio but violates external token quota
         } else {
-            uint currentUSDCQuota = _stakedUSDCAmount.multiplyDecimal(targetRatio).divideDecimal(_currentDebt);
-            require(currentUSDCQuota.div(10**12).mul(10**12) > usdcQuota, "Account is already claimable");
+            uint currentExTokenQuota = _stakedExTokenAmount.multiplyDecimal(targetRatio).divideDecimal(_currentDebt);
+            require(currentExTokenQuota > exTokenQuota, "Account is already claimable");
 
-            burnAmount = (_stakedUSDCAmount.multiplyDecimal(targetRatio).sub(_currentDebt.multiplyDecimal(usdcQuota)))
-                .divideDecimal(SafeDecimalMath.unit().sub(usdcQuota));
-            usdcAmountToUnstake = burnAmount.divideDecimal(targetRatio);
+            burnAmount = (_stakedExTokenAmount.multiplyDecimal(targetRatio).sub(_currentDebt.multiplyDecimal(exTokenQuota)))
+                .divideDecimal(SafeDecimalMath.unit().sub(exTokenQuota));
+            exTokenAmountToUnstake = burnAmount.divideDecimal(targetRatio);
         }
     }
 
@@ -515,30 +464,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool rateIsInvalid;
         (debtBalance, , rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
 
-        uint lockedPeriFinanceValue;
+        uint debtAppliedIssuanceRatio = debtBalance.divideDecimalRound(getIssuanceRatio());
 
-        if (stakingStateUSDC().hasStaked(account)) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-            uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(account), usdcRate);
-            uint debtByUSDC = usdcStakedAmountToUSD.multiplyDecimalRound(getIssuanceRatio());
+        uint externalTokenStaked = exTokenStakeManager().totalStakedAmountOf(account, PERI);
 
-            (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-            uint debtByUSDCToPeri = _usdToPeri(debtByUSDC, periRate);
-
-            if (debtBalance > debtByUSDCToPeri) {
-                uint debtBalanceWithoutUSDC = debtBalance.sub(debtByUSDCToPeri);
-
-                lockedPeriFinanceValue = debtBalanceWithoutUSDC.divideDecimalRound(getIssuanceRatio());
-            } else {
-                lockedPeriFinanceValue = 0;
-            }
-
-            anyRateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
-        } else {
-            lockedPeriFinanceValue = debtBalance.divideDecimalRound(getIssuanceRatio());
-
-            anyRateIsInvalid = rateIsInvalid;
-        }
+        // If external token staked balance is larger than required collateral amount for current debt,
+        // no PERI would be locked. (But it violates external token staking quota rule)
+        uint lockedPeriFinanceValue =
+            debtAppliedIssuanceRatio > externalTokenStaked ? debtAppliedIssuanceRatio.sub(externalTokenStaked) : 0;
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
         if (lockedPeriFinanceValue >= balance) {
@@ -557,14 +490,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         return addresses;
-    }
-
-    function currentUSDCDebtQuota(address _account) external view returns (uint) {
-        (uint usdcDebtQuota, bool anyRateIsInvalid) = _currentUSDCDebtQuota(_account);
-
-        _requireRatesNotInvalid(anyRateIsInvalid);
-
-        return usdcDebtQuota;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -654,46 +579,25 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
-    function issuePynthsAndStakeUSDC(
+    function issuePynths(
         address _issuer,
-        uint _issueAmount,
-        uint _usdcStakeAmount
-    ) external onlyPeriFinance {
-        _issuePynthsAndStakeUSDC(_issuer, _issueAmount, _usdcStakeAmount, false);
-    }
-
-    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount) external onlyPeriFinance {
-        _issuePynthsAndStakeUSDC(_issuer, _issueAmount, 0, true);
-    }
+        bytes32 _currencyKey,
+        uint _issueAmount
+    ) external onlyPeriFinance {}
 
     function issueMaxPynths(address _issuer) external onlyPeriFinance {
         _issuePynths(_issuer, 0, true);
     }
 
-    function burnPynthsAndUnstakeUSDC(
+    function burnPynths(
         address _from,
-        uint _burnAmount,
-        uint _unstakeAmount
-    ) external onlyPeriFinance {
-        _burnPynthsAndUnstakeUSDC(_from, _burnAmount, _unstakeAmount);
-    }
+        bytes32 _currencyKey,
+        uint _burnAmount
+    ) external onlyPeriFinance {}
 
-    function burnPynthsAndUnstakeUSDCToTarget(address _from) external onlyPeriFinance {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
+    function fitToClaimable(address _from) external onlyPeriFinance {}
 
-        (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-        uint usdcStakedAmountToUSD = _usdcToUSD(stakingStateUSDC().stakedAmountOf(_from), usdcRate);
-
-        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint periCollateralToUSD = _periToUSD(_collateral(_from), periRate);
-
-        _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid || isPeriInvalid);
-
-        (uint burnAmount, uint usdcAmountToUnstake) =
-            _amountsToFitClaimable(debtBalance, usdcStakedAmountToUSD, periCollateralToUSD);
-
-        _burnPynthsAndUnstakeUSDC(_from, burnAmount, _usdToUSDC(usdcAmountToUnstake, usdcRate));
-    }
+    function exit(address _from) external onlyPeriFinance {}
 
     function liquidateDelinquentAccount(
         address account,
@@ -775,7 +679,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         if (!issueMax) {
-            require(amount.roundDownDecimal(1) <= maxIssuable, "Amount too large");
+            require(amount <= maxIssuable, "Amount too large");
         } else {
             amount = maxIssuable;
         }
@@ -796,72 +700,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _appendAccountIssuanceRecord(from);
     }
 
-    function _issuePynthsAndStakeUSDC(
-        address _issuer,
-        uint _issueAmount,
-        uint _usdcStakeAmount,
-        bool _stakeMax
-    ) internal {
-        if (_stakeMax || _usdcStakeAmount >= 10**6) {
-            (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
-
-            uint afterDebtBalanceWithIssuanceRatio = debtBalance.add(_issueAmount).divideDecimalRound(getIssuanceRatio());
-
-            (uint usdcRate, ) = exchangeRates().rateAndInvalid(USDC);
-            require(
-                _issueAmount >= _usdcToUSD(_usdcStakeAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio()),
-                "Staking amount exceeds issueing amount"
-            );
-
-            uint maxUSDCQuotaAfterIssue =
-                _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getExternalTokenQuota());
-            uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
-
-            require(maxUSDCQuotaAfterIssue > userStakedAmount, "No availalbe USDC staking amount remains");
-
-            uint availableUSDCAmountToStake = maxUSDCQuotaAfterIssue.sub(userStakedAmount);
-            if (_stakeMax) {
-                uint usdcBalance = usdc().balanceOf(_issuer).mul(10**12);
-                _usdcStakeAmount = usdcBalance >= availableUSDCAmountToStake ? availableUSDCAmountToStake : usdcBalance;
-            } else {
-                require(availableUSDCAmountToStake >= _usdcStakeAmount, "Input amount exceeds available staking amount");
-            }
-
-            _transferAndStakeUSDC(_issuer, _usdcStakeAmount);
-        }
-
-        _issuePynths(_issuer, _issueAmount, false);
-
-        _parsingUSDCStakingAmount(_issuer);
-    }
-
-    function _transferAndStakeUSDC(address _account, uint _amount) internal {
-        require(
-            usdc().transferFrom(_account, address(stakingStateUSDC()), _amount.div(10**12)),
-            "transferring USDC has been failed"
-        );
-
-        stakingStateUSDC().stake(_account, _amount);
-    }
-
-    /**
-     * @dev refund() adjusts decimals 18 to 6
-     * @param _amount 18 decimals USDC amount to unstake and refund
-     */
-    function _unstakeAndRefundUSDC(address _account, uint _amount) internal {
-        stakingStateUSDC().unstake(_account, _amount);
-
-        require(stakingStateUSDC().refund(_account, _amount), "refunding USDC has been failed");
-    }
-
-    function _parsingUSDCStakingAmount(address _account) internal {
-        uint stakedAmountAfterIssue = stakingStateUSDC().stakedAmountOf(_account);
-        uint stakedAmountToRoundDown = stakedAmountAfterIssue.sub(stakedAmountAfterIssue.div(10**12).mul(10**12));
-        if (stakedAmountToRoundDown > 0) {
-            stakingStateUSDC().unstake(_account, stakedAmountToRoundDown);
-        }
-    }
-
     function _burnPynths(
         address debtAccount,
         address burnAccount,
@@ -874,21 +712,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // If they're trying to burn more debt than they actually owe, rather than fail the transaction, let's just
         // clear their debt and leave them be.
         amountBurnt = existingDebt < amount ? existingDebt : amount;
-
-        uint usdcStakedAmount = stakingStateUSDC().stakedAmountOf(debtAccount);
-        if (usdcStakedAmount > 0) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-            _requireRatesNotInvalid(isUSDCInvalid);
-
-            uint usdcStakedAmountToUSDWithIssuanceRatio =
-                _usdcToUSD(usdcStakedAmount, usdcRate).multiplyDecimalRound(getIssuanceRatio());
-
-            require(
-                existingDebt.sub(amountBurnt) >= usdcStakedAmountToUSDWithIssuanceRatio,
-                "Burn amount exceeds available amount"
-            );
-        }
 
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
@@ -937,33 +760,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (existingDebt >= amountBurnt && existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
             liquidations().removeAccountInLiquidation(from);
         }
-    }
-
-    function _burnPynthsAndUnstakeUSDC(
-        address _from,
-        uint _burnAmount,
-        uint _unstakeAmount
-    ) internal {
-        if (_unstakeAmount > 0) {
-            (uint usdcRate, bool isUSDCInvalid) = exchangeRates().rateAndInvalid(USDC);
-
-            _requireRatesNotInvalid(isUSDCInvalid);
-
-            uint unstakeAmountToUSDWithIssuanceRatio =
-                _usdcToUSD(_unstakeAmount, usdcRate).multiplyDecimal(getIssuanceRatio());
-
-            require(_burnAmount >= unstakeAmountToUSDWithIssuanceRatio, "Unstake amount exceeds burn amount");
-
-            _unstakeAndRefundUSDC(_from, _unstakeAmount);
-        }
-
-        _voluntaryBurnPynths(_from, _burnAmount, false);
-
-        _parsingUSDCStakingAmount(_from);
-
-        (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
-
-        require(usdcQuota <= getExternalTokenQuota(), "USDC staked exceeds quota");
     }
 
     function _setLastIssueEvent(address account) internal {

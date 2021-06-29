@@ -43,9 +43,7 @@ interface IIssuer {
             uint totalSystemDebt
         );
 
-    function currentUSDCDebtQuota(address _account)
-    external view
-    returns(uint);
+    function currentUSDCDebtQuota(address _account) external view returns (uint);
 
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
@@ -61,26 +59,23 @@ interface IIssuer {
         returns (uint transferable, bool anyRateIsInvalid);
 
     // Restricted: used internally to PeriFinance
-    function issuePynthsAndStakeUSDC(
+    function issuePynths(
         address _issuer,
-        uint _issueAmount,
-        uint _usdcStakeAmount
+        bytes32 _currencyKey,
+        uint _issueAmount
     ) external;
 
-    function issueMaxPynths(address _issuer)
-    external;
+    function issueMaxPynths(address _issuer) external;
 
-    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount)
-    external;
-
-    function burnPynthsAndUnstakeUSDC(
+    function burnPynths(
         address _from,
-        uint _burnAmount,
-        uint _unstakeAmount
+        bytes32 _currencyKey,
+        uint _burnAmount
     ) external;
 
-    function burnPynthsAndUnstakeUSDCToTarget(address _from)
-    external;
+    function fitToClaimable(address _from) external;
+
+    function exit(address _from) external;
 
     function liquidateDelinquentAccount(
         address account,

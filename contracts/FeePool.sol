@@ -543,16 +543,16 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
-        if (periFinance().usdcStakedAmountOf(account) > 0) {
-            // USDC staked amount should be below of the USDC quota.
-            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
-            if (
-                accountUSDCDebtQuota.roundDownDecimal(12) >
-                getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
-            ) {
-                return (false, false);
-            }
-        }
+        // if (periFinance().usdcStakedAmountOf(account) > 0) {
+        //     // USDC staked amount should be below of the USDC quota.
+        //     uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
+        //     if (
+        //         accountUSDCDebtQuota.roundDownDecimal(12) >
+        //         getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
+        //     ) {
+        //         return (false, false);
+        //     }
+        // }
 
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
         //  0  <  10%:   Claimable
