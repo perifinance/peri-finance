@@ -16,10 +16,6 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
 import "./interfaces/IExchanger.sol";
 
-interface TempExchangeRateStorage {
-    function getRate(bytes32 _currencyKey) external view returns (uint216, uint40);
-}
-
 // https://docs.peri.finance/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
@@ -30,9 +26,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     // The address of the oracle which pushes rate updates to this contract
     address public oracle;
-
-    // The address of the mocked oracle of kovan which pushes fake rate updates for the test.
-    address public oracle_kovan;
 
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
@@ -81,10 +74,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function setOracle(address _oracle) external onlyOwner {
         oracle = _oracle;
         emit OracleUpdated(oracle);
-    }
-
-    function setOracleKovan(address _oracle) external {
-        oracle_kovan = _oracle;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -608,10 +597,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
             if (success) {
-                (uint80 roundId, int256 answer, , uint256 updatedAt, ) = abi.decode(
-                    returnData,
-                    (uint80, int256, uint256, uint256, uint80)
-                );
+                (uint80 roundId, int256 answer, , uint256 updatedAt, ) =
+                    abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
                 return
                     RateAndUpdatedTime({
                         rate: uint216(_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId)),
@@ -624,19 +611,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
             return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
         }
-
-
-        // Test Purpose...
-        ///////////////////
-        // if (oracle_kovan == address(0)) {
-        //     return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
-        // }
-
-        // TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
-
-        // (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
-
-        // return RateAndUpdatedTime({rate: _rate, time: _time});
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
