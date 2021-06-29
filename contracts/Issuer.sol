@@ -252,7 +252,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _debtLedgerLength = state.debtLedgerLength();
         uint systemDebt = state.debtLedger(debtEntryIndex);
         uint currentDebtOwnership;
-        if (_debtLedgerLength <= 0 || systemDebt == 0) {
+        if (_debtLedgerLength == 0 || systemDebt == 0) {
             currentDebtOwnership = 0;
         } else {
             currentDebtOwnership = state
@@ -368,7 +368,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
             usdcStakedAmountToPeri = _usdToPeri(usdcStakedAmountToUSD, periRate);
 
-            rateIsInvalid = rateIsInvalid || isUSDCInvalid || isPeriInvalid;
+            rateIsInvalid = isUSDCInvalid || isPeriInvalid;
         }
 
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
