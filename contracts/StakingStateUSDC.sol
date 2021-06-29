@@ -62,17 +62,13 @@ contract StakingStateUSDC is Owned, State {
         return stakers.length;
     }
 
-    function getStakersByRange(uint _from, uint _to) external view returns (address[] memory) {
-        if (_to > stakers.length) {
-            _to = stakers.length.sub(1);
-        }
+    function getStakersByRange(uint _index, uint _cnt) external view returns (address[] memory) {
+        require(_index >= 0, "index should not be less than zero");
+        require(_cnt <= 50, "Number of indice should be less than 200");
 
-        uint numOfIndice = _to.sub(_from).add(1);
-        require(numOfIndice <= 200, "Number of indice should be less than 200");
-
-        address[] memory _addresses = new address[](numOfIndice);
-        for (uint i = _from; i <= _to; i++) {
-            _addresses[i.sub(_from)] = stakers[i];
+        address[] memory _addresses = new address[](_cnt);
+        for (uint i = _index; i < _cnt; i++) {
+            _addresses[i] = stakers[i];
         }
 
         return _addresses;

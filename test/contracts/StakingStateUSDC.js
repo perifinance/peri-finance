@@ -168,7 +168,7 @@ contract('StakingStateUSDC', async accounts => {
 			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
 
 			let stakers = [];
-			for (let i = 0; i < 2000; i++) {
+			for (let i = 0; i < 200; i++) {
 				stakers.push(web3.eth.accounts.create(String(i)).address);
 			}
 
@@ -196,7 +196,15 @@ contract('StakingStateUSDC', async accounts => {
 
 			const stakersLength = await stakingStateUSDC.stakersLength();
 
-			assert.equal(stakersLength.toNumber(), 2001);
+			assert.equal(stakersLength.toNumber(), 200);
+		});
+
+		it.only('should get all stakers adress', async () => {
+			const index = 0;
+			const cnt = 50;
+			const stakerAccounts = await stakingStateUSDC.getStakersByRange(index, cnt);
+
+			assert.equal(stakerAccounts.length, cnt);
 		});
 	});
 });
