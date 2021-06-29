@@ -129,7 +129,7 @@ const scheduler = async ({
 		while (!success && cnt < 100) {
 			try {
 				cnt++;
-				const now = (new Date().getTime() / 1000).toFixed(0);
+				const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
 
 				if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
 					const feedPriceArr = [];
@@ -140,18 +140,26 @@ const scheduler = async ({
 					}
 
 					const feedKeyArr = DEFAULTS.methodArgs.map(toBytes32);
+					if (feedPriceArr.length !== feedKeyArr.length) {
+						throw new Error('must match the length of price and key');
+					}
 
-					await runStep({
-						contract: scheduler,
-						target: schedulerContract,
-						read: 'rates',
-						readArg: DEFAULTS.methodArgs,
-						expected: input =>
-							input.foreach(
-								({ rate, time }, index) => rate === feedPriceArr[index] && time < now - 300
-							),
-						write: schedulerMethod,
-						writeArg: [feedKeyArr, feedPriceArr, now],
+					feedKeyArr.forEach(async (feedKey, index) => {
+						await runStep({
+							contract: scheduler,
+							target: schedulerContract,
+							read: 'getRateAndUpdatedTime',
+							readArg: feedKey,
+							expected: input => {
+								const rate = input[0];
+								const time = input[1];
+								if (rate === 0 || time === 0) return false;
+								// check if rate has changed or time has passed 5 mins
+								return rate === feedPriceArr[index] || time < now - 300;
+							},
+							write: schedulerMethod,
+							writeArg: [[feedKey], [feedPriceArr[index]], now],
+						});
 					});
 				} else if (DEFAULTS.methodArgs.length > 0) {
 					await runStep({
