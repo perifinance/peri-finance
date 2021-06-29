@@ -16,10 +16,6 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
 import "./interfaces/IExchanger.sol";
 
-interface TempExchangeRateStorage {
-    function getRate(bytes32 _currencyKey) external view returns (uint216, uint40);
-}
-
 interface IExternalRateAggregator {
     function getRateAndUpdatedTime(bytes32 _currencyKey) external view returns (uint, uint);
 }
@@ -34,9 +30,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     // The address of the oracle which pushes rate updates to this contract
     address public oracle;
-
-    // The address of the mocked oracle of kovan which pushes fake rate updates for the test.
-    address public oracle_kovan;
 
     address public externalRateAggregator;
 
@@ -89,10 +82,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function setOracle(address _oracle) external onlyOwner {
         oracle = _oracle;
         emit OracleUpdated(oracle);
-    }
-
-    function setOracleKovan(address _oracle) external {
-        oracle_kovan = _oracle;
     }
 
     function setExternalRateAggregator(address _aggregator) external onlyOwner {
@@ -648,18 +637,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
             return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
         }
-
-        // Test Purpose...
-        ///////////////////
-        // if (oracle_kovan == address(0)) {
-        //     return RateAndUpdatedTime({rate: uint216(10**18), time: uint40(block.timestamp)});
-        // }
-
-        // TempExchangeRateStorage rateStorage = TempExchangeRateStorage(oracle_kovan);
-
-        // (uint216 _rate, uint40 _time) = rateStorage.getRate(currencyKey);
-
-        // return RateAndUpdatedTime({rate: _rate, time: _time});
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
