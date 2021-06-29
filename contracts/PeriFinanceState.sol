@@ -98,7 +98,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @notice Retrieve the most recent entry from the debt ledger
      */
     function lastDebtLedgerEntry() external view returns (uint) {
-        if (debtLedger.length <= 0) {
+        if (debtLedger.length == 0) {
             return 0;
         }
 
