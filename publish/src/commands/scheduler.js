@@ -155,7 +155,7 @@ const scheduler = async ({
 								const time = input[1];
 								if (rate === 0 || time === 0) return false;
 								// check if rate has changed or time has passed 5 mins
-								return rate === feedPriceArr[index] || time < now - 300;
+								return rate === feedPriceArr[index] || time > now - 300;
 							},
 							write: schedulerMethod,
 							writeArg: [[feedKey], [feedPriceArr[index]], now],
