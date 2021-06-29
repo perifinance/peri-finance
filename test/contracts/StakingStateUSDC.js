@@ -144,7 +144,7 @@ contract('StakingStateUSDC', async accounts => {
 			// set virtual issuer address
 			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
 			// provide USDC to account1 for test
-			await USDCContract.transfer(account1, '1000', { from: deployerAccount });
+			await USDCContract.transfer(account1, '1000', { from: owner });
 			// set USDC allowance for account1 and issuer
 			await USDCContract.approve(tempIssuer, toUnit('1'), { from: account1 });
 			await USDCContract.approve(tempIssuer, toUnit('1'), { from: tempIssuer });
@@ -160,6 +160,43 @@ contract('StakingStateUSDC', async accounts => {
 
 			// try refund
 			await stakingStateUSDC.refund(account1, '300', { from: tempIssuer });
+		});
+	});
+
+	describe('stakers', () => {
+		beforeEach(async () => {
+			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
+
+			let stakers = [];
+			for (let i = 0; i < 2000; i++) {
+				stakers.push(web3.eth.accounts.create(String(i)).address);
+			}
+
+			await Promise.all(
+				stakers.map(_staker => stakingStateUSDC.stake(_staker, 1, { from: tempIssuer }))
+			);
+		});
+
+		it('should count stake', async () => {
+			const stakers = await stakingStateUSDC.getStakersByRange(1950, 2200);
+
+			assert.equal(stakers.length, 50);
+
+			const stakersLength = await stakingStateUSDC.stakersLength();
+
+			assert.equal(stakersLength.toNumber(), 2000);
+		});
+
+		it.only('should NOT register multiple times', async () => {
+			const newAccount = web3.eth.accounts.create('abc');
+
+			await Promise.all(
+				new Array(10).map(() => stakingStateUSDC.stake(newAccount, 1, { from: tempIssuer }))
+			);
+
+			const stakersLength = await stakingStateUSDC.stakersLength();
+
+			assert.equal(stakersLength.toNumber(), 2001);
 		});
 	});
 });

@@ -17,6 +17,10 @@ contract StakingStateUSDC is Owned, State {
 
     uint public totalStakedAmount;
 
+    mapping(address => bool) public registered;
+
+    address[] public stakers; // for migration later
+
     constructor(
         address _owner,
         address _associatedContract,
@@ -54,6 +58,26 @@ contract StakingStateUSDC is Owned, State {
         return USDC_ADDRESS;
     }
 
+    function stakersLength() external view returns (uint) {
+        return stakers.length;
+    }
+
+    function getStakersByRange(uint _from, uint _to) external view returns (address[] memory) {
+        if (_to > stakers.length) {
+            _to = stakers.length.sub(1);
+        }
+
+        uint numOfIndice = _to.sub(_from).add(1);
+        require(numOfIndice <= 200, "Number of indice should be less than 200");
+
+        address[] memory _addresses = new address[](numOfIndice);
+        for (uint i = _from; i <= _to; i++) {
+            _addresses[i.sub(_from)] = stakers[i];
+        }
+
+        return _addresses;
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function setUSDCAddress(address _usdcAddress) external onlyOwner {
@@ -65,6 +89,11 @@ contract StakingStateUSDC is Owned, State {
     function stake(address _account, uint _amount) external onlyAssociatedContract {
         if (stakedAmountOf[_account] == 0 && _amount > 0) {
             _incrementTotalStaker();
+
+            if (!registered[_account]) {
+                registered[_account] = true;
+                stakers.push(_account);
+            }
         }
 
         stakedAmountOf[_account] = stakedAmountOf[_account].add(_amount);
