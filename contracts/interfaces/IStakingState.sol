@@ -20,7 +20,7 @@ interface IStakingState {
         bytes32 _currencyKey,
         address _account,
         uint _amount
-    ) external;
+    ) external returns (bool);
 
     // View
     function targetTokens(bytes32 _currencyKey)
@@ -39,10 +39,6 @@ interface IStakingState {
     function totalStakerCount(bytes32 _currencyKey) external view returns (uint);
 
     function tokenList(uint _index) external view returns (bytes32);
-
-    function userStakingShare(bytes32 _currencyKey, address _account) external view returns (uint);
-
-    function hasStaked(bytes32 _currencyKey, address _account) external view returns (bool);
 
     function tokenAddress(bytes32 _currencyKey) external view returns (address);
 

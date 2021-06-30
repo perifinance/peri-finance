@@ -139,6 +139,13 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().maxIssuablePynths(account);
     }
 
+    function externalTokenQuota(
+        address _account,
+        uint _addtionalpUSD,
+        uint _addtionalExToken,
+        bool _isIssue
+    ) external view returns (uint);
+
     function remainingIssuablePynths(address account)
         external
         view

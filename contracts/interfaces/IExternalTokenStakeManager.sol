@@ -1,7 +1,29 @@
 pragma solidity ^0.5.16;
 
 contract IExternalTokenStakeManager {
-    function totalStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
+    function stake(
+        address _staker,
+        uint _amount,
+        bytes32 _targetCurrency,
+        bytes32 _inputCurrency
+    ) external;
+
+    function unstake(
+        address _unstaker,
+        uint _amount,
+        bytes32 _targetCurrency,
+        bytes32 _inputCurrency
+    ) external;
+
+    function unstakeMultipleTokens(
+        address _unstaker,
+        uint _amount,
+        bytes32 _inputCurrency
+    ) external;
+
+    function getTokenList() external view returns (bytes32[] memory);
+
+    function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
 
     function stakedAmountOf(
         address _user,

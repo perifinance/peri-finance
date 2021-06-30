@@ -29,19 +29,6 @@ contract StakingState is Owned, State {
 
     /* ========== VIEWER FUNCTIONS ========== */
 
-    function userStakingShare(bytes32 _currencyKey, address _account) public view returns (uint) {
-        uint _percentage =
-            stakedAmountOf[_currencyKey][_account] == 0 || totalStakedAmount[_currencyKey] == 0
-                ? 0
-                : (stakedAmountOf[_currencyKey][_account]).multiplyDecimalRound(totalStakedAmount[_currencyKey]);
-
-        return _percentage;
-    }
-
-    function hasStaked(bytes32 _currencyKey, address _account) external view returns (bool) {
-        return stakedAmountOf[_currencyKey][_account] > 0;
-    }
-
     function tokenInstance(bytes32 _currencyKey) internal view returns (IERC20) {
         require(targetTokens[_currencyKey].tokenAddress != address(0), "Target address is empty");
 
