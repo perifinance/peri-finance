@@ -380,13 +380,28 @@
 			},
 			"PeriFinance": {
 				"address": "0x1049AB675aC9372ED90067909a87bE6EFd32dfDA",
-				"status": "current",
-				"keccak256": "0x06dd1bac0f93a806cbf2977740d620db11fc9c79badf8dbcd91615a400bb874a"
+				"status": "replaced",
+				"keccak256": "0x06dd1bac0f93a806cbf2977740d620db11fc9c79badf8dbcd91615a400bb874a",
+				"replaced_in": "v0.0.5"
 			},
 			"ExternalRateAggregator": {
 				"address": "0xF04F0c23cB20e6718A17853959A05eD685499333",
 				"status": "current",
 				"keccak256": "0x173275bc90183dc1edcb20a2f5e6b241b9de5107e6d0dd08c7489cb6befef01b"
+			}
+		}
+	},
+	"v0.0.5": {
+		"tag": "v0.0.5",
+		"fulltag": "v0.0.5",
+		"network": "mumbai",
+		"date": "2021-06-28T14:54:21+09:00",
+		"commit": "d280ce193124c0889326e13a645c04fb86a1bfb8",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
+				"status": "current",
+				"keccak256": "0xf7892460866827bf742731e8bafc57436159a3f07565cf36fd27593ff4ab0a76"
 			}
 		}
 	}

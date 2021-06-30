@@ -1162,15 +1162,6 @@ const deploy = async ({
 		args: [account, account],
 	});
 
-	if (!['mainnet', 'polygon'].includes(network)) {
-		console.log(gray(`\n------ DEPLOY Mock LP Token ------\n`));
-		await deployer.deployContract({
-			name: 'PERIUniswapV2',
-			source: 'MockToken',
-			args: ['PERIUniswapV2', 'LP', 6],
-		});
-	}
-
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
 	await deployer.deployContract({
