@@ -31,7 +31,7 @@ contract StakingStateUSDC is Owned, State {
         uint _percentage =
             stakedAmountOf[_account] == 0 || totalStakedAmount == 0
                 ? 0
-                : (stakedAmountOf[_account]).multiplyDecimalRound(totalStakedAmount);
+                : (stakedAmountOf[_account]).divideDecimalRound(totalStakedAmount);
 
         return _percentage;
     }
