@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.16;
 
 import "../interfaces/IERC20.sol";
 
@@ -15,7 +15,11 @@ contract ERC20Detailed is IERC20 {
      * these values are immutable: they can only be set once during
      * construction.
      */
-    constructor (string memory name, string memory symbol, uint8 decimals) public {
+    constructor(
+        string memory name,
+        string memory symbol,
+        uint8 decimals
+    ) public {
         _name = name;
         _symbol = symbol;
         _decimals = decimals;

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./interfaces/IERC20.sol";
@@ -91,9 +91,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
     }
 
-    function getRequiredAddress(bytes32 _contractName)
-    external view
-    returns(address) {
+    function getRequiredAddress(bytes32 _contractName) external view returns (address) {
         return requireAndGetAddress(_contractName);
     }
 
@@ -165,33 +163,23 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
-    function currentUSDCDebtQuota(address _account)
-    external view
-    returns(uint) {
+    function currentUSDCDebtQuota(address _account) external view returns (uint) {
         return issuer().currentUSDCDebtQuota(_account);
     }
 
-    function usdcStakedAmountOf(address _account)
-    external view
-    returns(uint) {
+    function usdcStakedAmountOf(address _account) external view returns (uint) {
         return stakingStateUSDC().stakedAmountOf(_account);
     }
 
-    function usdcTotalStakedAmount()
-    external view
-    returns(uint) {
+    function usdcTotalStakedAmount() external view returns (uint) {
         return stakingStateUSDC().totalStakedAmount();
     }
 
-    function userUSDCStakingShare(address _account)
-    external view
-    returns(uint) {
+    function userUSDCStakingShare(address _account) external view returns (uint) {
         return stakingStateUSDC().userStakingShare(_account);
     }
 
-    function totalUSDCStakerCount()
-    external view
-    returns(uint) {
+    function totalUSDCStakerCount() external view returns (uint) {
         return stakingStateUSDC().totalStakerCount();
     }
 
@@ -312,33 +300,23 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
-    external
-    issuanceActive optionalProxy {
+    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) external issuanceActive optionalProxy {
         issuer().issuePynthsAndStakeUSDC(messageSender, _issueAmount, _usdcStakeAmount);
     }
 
-    function issueMaxPynths()
-    external
-    issuanceActive optionalProxy {
+    function issueMaxPynths() external issuanceActive optionalProxy {
         issuer().issueMaxPynths(messageSender);
     }
 
-    function issuePynthsAndStakeMaxUSDC(uint _issueAmount)
-    external
-    issuanceActive optionalProxy {
+    function issuePynthsAndStakeMaxUSDC(uint _issueAmount) external issuanceActive optionalProxy {
         issuer().issuePynthsAndStakeMaxUSDC(messageSender, _issueAmount);
     }
 
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
-    external
-    issuanceActive optionalProxy {
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount) external issuanceActive optionalProxy {
         return issuer().burnPynthsAndUnstakeUSDC(messageSender, _burnAmount, _unstakeAmount);
     }
 
-    function burnPynthsAndUnstakeUSDCToTarget()
-    external
-    issuanceActive optionalProxy {
+    function burnPynthsAndUnstakeUSDCToTarget() external issuanceActive optionalProxy {
         return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender);
     }
 

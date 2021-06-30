@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 pragma experimental ABIEncoderV2;
 
@@ -9,7 +9,6 @@ import "./interfaces/ICollateralErc20.sol";
 // Internal references
 import "./CollateralState.sol";
 import "./interfaces/IERC20.sol";
-
 
 // This contract handles the specific ERC20 implementation details of managing a loan.
 contract CollateralErc20 is ICollateralErc20, Collateral {

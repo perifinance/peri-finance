@@ -1,8 +1,7 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "../BinaryOptionMarket.sol";
 import "../AddressResolver.sol";
-
 
 contract MockBinaryOptionMarketManager {
     BinaryOptionMarket public market;

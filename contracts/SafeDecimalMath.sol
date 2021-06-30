@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Libraries
 import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
@@ -191,5 +191,4 @@ library SafeDecimalMath {
     function roundDownDecimal(uint x, uint d) internal pure returns (uint) {
         return x.div(10**d).mul(10**d);
     }
-
 }

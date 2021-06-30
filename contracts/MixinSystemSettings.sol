@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "./MixinResolver.sol";
 
@@ -125,9 +125,7 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_DEBT_SNAPSHOT_STALE_TIME);
     }
 
-    function getUSDCQuota()
-    internal view 
-    returns(uint) {
+    function getUSDCQuota() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_USDC_QUOTA);
     }
 }

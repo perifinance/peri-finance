@@ -1,10 +1,9 @@
 /* PublicSafeDecimalMath.sol: expose the internal functions in SafeDecimalMath
  * for testing purposes.
  */
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "../SafeDecimalMath.sol";
-
 
 contract PublicSafeDecimalMath {
     using SafeDecimalMath for uint;

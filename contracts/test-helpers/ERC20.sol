@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.16;
 
 import "../interfaces/IERC20.sol";
 import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
@@ -29,9 +29,9 @@ import "openzeppelin-solidity-2.3.0/contracts/math/SafeMath.sol";
 contract ERC20 is IERC20 {
     using SafeMath for uint256;
 
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping (address => mapping (address => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
@@ -93,12 +93,15 @@ contract ERC20 is IERC20 {
      * - the caller must have allowance for `sender`'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public returns (bool) {
         _transfer(sender, recipient, amount);
 
-        require(_allowances[sender][msg.sender] >= amount,
-          "Transfer amount exceeds allowance");
-        
+        require(_allowances[sender][msg.sender] >= amount, "Transfer amount exceeds allowance");
+
         _approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount));
         return true;
     }
@@ -135,8 +138,7 @@ contract ERC20 is IERC20 {
      * `subtractedValue`.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
-        require(_allowances[msg.sender][spender] >= subtractedValue,
-          "Decrease amount exceeds allowance");
+        require(_allowances[msg.sender][spender] >= subtractedValue, "Decrease amount exceeds allowance");
 
         _approve(msg.sender, spender, _allowances[msg.sender][spender].sub(subtractedValue));
         return true;
@@ -156,12 +158,15 @@ contract ERC20 is IERC20 {
      * - `recipient` cannot be the zero address.
      * - `sender` must have a balance of at least `amount`.
      */
-    function _transfer(address sender, address recipient, uint256 amount) internal {
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
-        require(_balances[sender] >= amount,
-          "Transfer exceeds balance");
+        require(_balances[sender] >= amount, "Transfer exceeds balance");
 
         _balances[sender] = _balances[sender].sub(amount);
         _balances[recipient] = _balances[recipient].add(amount);
@@ -185,7 +190,7 @@ contract ERC20 is IERC20 {
         emit Transfer(address(0), account, amount);
     }
 
-     /**
+    /**
      * @dev Destoys `amount` tokens from `account`, reducing the
      * total supply.
      *
@@ -217,7 +222,11 @@ contract ERC20 is IERC20 {
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function _approve(address owner, address spender, uint256 value) internal {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 

@@ -1,9 +1,8 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "../BinaryOption.sol";
 
 import "../SafeDecimalMath.sol";
-
 
 contract MockBinaryOptionMarket {
     using SafeDecimalMath for uint;

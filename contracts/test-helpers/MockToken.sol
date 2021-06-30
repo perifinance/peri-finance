@@ -1,8 +1,7 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "./ERC20.sol";
 import "./ERC20Detailed.sol";
-
 
 contract MockToken is ERC20, ERC20Detailed {
     constructor(
@@ -13,8 +12,7 @@ contract MockToken is ERC20, ERC20Detailed {
         _mint(msg.sender, 10000000000 * (10**uint256(decimals)));
     }
 
-    function faucet(address _account)
-    external {
+    function faucet(address _account) external {
         _mint(_account, 100 * (10**uint256(decimals())));
     }
 }

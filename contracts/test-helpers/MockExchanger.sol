@@ -1,7 +1,6 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "../interfaces/IPeriFinance.sol";
-
 
 contract MockExchanger {
     uint256 private _mockReclaimAmount;

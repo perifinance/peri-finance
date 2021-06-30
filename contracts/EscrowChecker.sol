@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 interface IPeriFinanceEscrow {
     function numVestingEntries(address account) external view returns (uint);

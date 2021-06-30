@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // https://docs.peri.finance/contracts/source/contracts/owned
 contract Owned {
