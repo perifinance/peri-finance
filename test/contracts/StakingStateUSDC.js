@@ -2,7 +2,7 @@
 
 const { contract } = require('hardhat');
 
-const { assert } = require('./common');
+const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const {
 	toBytes32,
@@ -11,12 +11,7 @@ const {
 
 const { setupAllContracts } = require('./setup');
 
-const {
-	ensureOnlyExpectedMutativeFunctions,
-	onlyGivenAddressCanInvoke,
-	setStatus,
-} = require('./helpers');
-const deploy = require('../../publish/src/commands/deploy');
+const { ensureOnlyExpectedMutativeFunctions, onlyGivenAddressCanInvoke } = require('./helpers');
 
 const { toUnit } = require('../utils')();
 
@@ -43,6 +38,8 @@ contract('StakingStateUSDC', async accounts => {
 			],
 		}));
 	});
+
+	addSnapshotBeforeRestoreAfterEach();
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
@@ -178,16 +175,16 @@ contract('StakingStateUSDC', async accounts => {
 		});
 
 		it('should count stake', async () => {
-			const stakers = await stakingStateUSDC.getStakersByRange(1950, 2200);
+			const stakers = await stakingStateUSDC.getStakersByRange(1950, 50);
 
 			assert.equal(stakers.length, 50);
 
 			const stakersLength = await stakingStateUSDC.stakersLength();
 
-			assert.equal(stakersLength.toNumber(), 2000);
+			assert.equal(stakersLength.toNumber(), 200);
 		});
 
-		it.only('should NOT register multiple times', async () => {
+		it('should NOT register multiple times', async () => {
 			const newAccount = web3.eth.accounts.create('abc');
 
 			await Promise.all(
@@ -199,7 +196,7 @@ contract('StakingStateUSDC', async accounts => {
 			assert.equal(stakersLength.toNumber(), 200);
 		});
 
-		it.only('should get all stakers adress', async () => {
+		it('should get all stakers adress', async () => {
 			const index = 0;
 			const cnt = 50;
 			const stakerAccounts = await stakingStateUSDC.getStakersByRange(index, cnt);
