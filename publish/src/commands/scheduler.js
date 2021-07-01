@@ -64,7 +64,10 @@ const scheduler = async ({
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
 	}
-	if (!cronScheduleFormat || !cron.isValidCron(cronScheduleFormat, { seconds: true })) {
+	if (
+		!cronScheduleFormat ||
+		!cron.isValidCron(cronScheduleFormat, { seconds: true, allowBlankDay: true })
+	) {
 		throw new Error('must specify scheduler time or correct scheduler time');
 	}
 	ensureNetwork(network);
