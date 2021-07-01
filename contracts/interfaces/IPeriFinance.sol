@@ -28,8 +28,8 @@ interface IPeriFinance {
 
     function externalTokenQuota(
         address _account,
-        uint _addtionalpUSD,
-        uint _addtionalExToken,
+        uint _additionalpUSD,
+        uint _additionalExToken,
         bool _isIssue
     ) external view returns (uint);
 
