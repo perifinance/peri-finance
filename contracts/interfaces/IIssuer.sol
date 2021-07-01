@@ -28,6 +28,8 @@ interface IIssuer {
 
     function issuanceRatio() external view returns (uint);
 
+    function externalTokenLimit() external view returns (uint);
+
     function lastIssueEvent(address account) external view returns (uint);
 
     function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);

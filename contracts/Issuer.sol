@@ -25,6 +25,8 @@ import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IExternalTokenStakeManager.sol";
 
+import "hardhat/console.sol";
+
 interface IRewardEscrowV2 {
     // Views
     function balanceOf(address account) external view returns (uint);
@@ -168,6 +170,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function issuanceRatio() external view returns (uint) {
         return getIssuanceRatio();
+    }
+
+    function externalTokenLimit() external view returns (uint) {
+        return getExternalTokenQuota();
     }
 
     function _availableCurrencyKeysWithOptionalPERI(bool withPERI) internal view returns (bytes32[] memory) {
@@ -348,35 +354,33 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
      *         If parameters are not 0, it estimates the quota assuming those value is applied to current status.
      *
      * @param _account account
+     * @param _debtBalance Debt balance to estimate [USD]
      * @param _additionalpUSD The pUSD value to be applied for estimation [USD]
      * @param _additionalExToken The external token stake amount to be applied for estimation [USD]
      * @param _isIssue If true, it is considered issueing/staking estimation.
      */
     function _externalTokenQuota(
         address _account,
+        uint _debtBalance,
         uint _additionalpUSD,
         uint _additionalExToken,
         bool _isIssue
-    ) internal view returns (uint, bool) {
-        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+    ) internal view returns (uint) {
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_account, pUSD);
 
-        if (debtBalance == 0 || combinedStakedAmount == 0) {
-            return (0, anyRateIsInvalid);
+        if (_debtBalance == 0 || combinedStakedAmount == 0) {
+            return 0;
         }
 
         if (_isIssue) {
-            debtBalance = debtBalance.add(_additionalpUSD);
+            _debtBalance = _debtBalance.add(_additionalpUSD);
             combinedStakedAmount = combinedStakedAmount.add(_additionalExToken);
         } else {
-            debtBalance = debtBalance.sub(_additionalpUSD);
+            _debtBalance = _debtBalance.sub(_additionalpUSD);
             combinedStakedAmount = combinedStakedAmount.sub(_additionalExToken);
         }
 
-        return (
-            combinedStakedAmount.divideDecimalRound(debtBalance.divideDecimalRound(getIssuanceRatio())),
-            anyRateIsInvalid
-        );
+        return combinedStakedAmount.divideDecimalRound(_debtBalance.divideDecimalRound(getIssuanceRatio()));
     }
 
     function _amountsToFitClaimable(
@@ -489,10 +493,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _additionalExToken,
         bool _isIssue
     ) external view returns (uint) {
-        (uint estimatedQuota, bool anyRateIsInvalid) =
-            _externalTokenQuota(_account, _additionalpUSD, _additionalExToken, _isIssue);
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
 
         _requireRatesNotInvalid(anyRateIsInvalid);
+
+        uint estimatedQuota = _externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
 
         return estimatedQuota;
     }
@@ -510,9 +515,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Assuming issuance ratio is 20%, then issuing 20 PERI of value would require
         // 100 PERI to be locked in their wallet to maintain their collateralisation ratio
         // The locked periFinance value can exceed their balance.
-        uint debtBalance;
-        bool rateIsInvalid;
-        (debtBalance, , rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
+        (uint debtBalance, , bool rateIsInvalid) = _debtBalanceOfAndTotalDebt(account, PERI);
 
         uint debtAppliedIssuanceRatio = debtBalance.divideDecimalRound(getIssuanceRatio());
 
@@ -529,6 +532,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             transferable = balance.sub(lockedPeriFinanceValue);
         }
+
+        anyRateIsInvalid = rateIsInvalid;
     }
 
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory) {
@@ -637,13 +642,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (_currencyKey != PERI) {
             uint amountToStake = _issueAmount.divideDecimalRound(getIssuanceRatio());
 
-            (uint estimatedExternalTokenQuota, bool rateIsInvalid) =
-                _externalTokenQuota(_issuer, _issueAmount, amountToStake, true);
-            _requireRatesNotInvalid(rateIsInvalid);
-            require(
-                estimatedExternalTokenQuota <= getExternalTokenQuota(),
-                "External token staking amount exceeds quota limit"
-            );
+            (uint initialDebtOwnership, ) = periFinanceState().issuanceData(_issuer);
+            // Condition of policy, user must have any amount of PERI locked before staking external token.
+            require(initialDebtOwnership > 0, "User does not have any debt yet");
 
             exTokenStakeManager().stake(_issuer, amountToStake, _currencyKey, pUSD);
         }
@@ -660,15 +661,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bytes32 _currencyKey,
         uint _burnAmount
     ) external onlyPeriFinance {
+        uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false);
+
         if (_currencyKey == PERI) {
-            (uint estimatedQuota, bool rateIsInvalid) = _externalTokenQuota(_from, _burnAmount, 0, false);
-
-            require(estimatedQuota <= getExternalTokenQuota(), "External token staking amount exceeds quota limit");
-
-            _requireRatesNotInvalid(rateIsInvalid);
+            _requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
         }
-
-        _voluntaryBurnPynths(_from, _burnAmount, false);
 
         if (_currencyKey != PERI && _currencyKey != pUSD) {
             exTokenStakeManager().unstake(_from, _burnAmount.divideDecimalRound(getIssuanceRatio()), _currencyKey, pUSD);
@@ -779,6 +776,19 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
     }
 
+    function _requireNotExceedsQuotaLimit(
+        address _account,
+        uint _debtBalance,
+        uint _additionalpUSD,
+        uint _additionalExToken,
+        bool _isIssue
+    ) internal view {
+        uint estimatedExternalTokenQuota =
+            _externalTokenQuota(_account, _debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
+
+        require(estimatedExternalTokenQuota <= getExternalTokenQuota(), "External token staking amount exceeds quota limit");
+    }
+
     function _issuePynths(
         address from,
         uint amount,
@@ -792,6 +802,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             amount = maxIssuable;
         }
+
+        _requireNotExceedsQuotaLimit(from, existingDebt, amount, 0, true);
 
         // Keep track of the debt they're about to create
         _addToDebtRegister(from, amount, existingDebt, totalSystemDebt);
@@ -842,7 +854,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         address from,
         uint amount,
         bool burnToTarget
-    ) internal {
+    ) internal returns (uint remainingDebt) {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
             require(_canBurnPynths(from), "Minimum stake time not reached");
@@ -863,10 +875,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+        remainingDebt = existingDebt.sub(amountBurnt);
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
-        if (existingDebt >= amountBurnt && existingDebt.sub(amountBurnt) <= maxIssuablePynthsForAccount) {
+        if (existingDebt >= amountBurnt && remainingDebt <= maxIssuablePynthsForAccount) {
             liquidations().removeAccountInLiquidation(from);
         }
     }

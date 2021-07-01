@@ -13,6 +13,8 @@ import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IStakingStateUSDC.sol";
 
+import "hardhat/console.sol";
+
 contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings, LimitedSetup(8 weeks) {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -90,8 +92,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     {
         bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
 
-        uint[] memory stakedAmountOf = new uint[](tokenList.length);
-
         for (uint i = 0; i < tokenList.length; i++) {
             uint _stakedAmount = stakingState.stakedAmountOf(tokenList[i], _user);
 
@@ -99,9 +99,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 continue;
             }
 
-            stakedAmountOf[i] = _toCurrency(tokenList[i], _unitCurrency, _stakedAmount);
+            uint stakedAmount = _toCurrency(tokenList[i], _unitCurrency, _stakedAmount);
 
-            combinedStakedAmount.add(stakedAmountOf[i]);
+            combinedStakedAmount = combinedStakedAmount.add(stakedAmount);
         }
     }
 
@@ -122,7 +122,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
             _requireRatesNotInvalid(fromCurrencyRateIsInvalid);
 
-            uint amountToUSD = _amount.multiplyDecimalRound(toUSDRate);
+            amountToUSD = _amount.multiplyDecimalRound(toUSDRate);
         }
 
         if (_toCurrencyKey == pUSD) {
@@ -152,7 +152,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             tokenInstance(_targetCurrency).transferFrom(
                 _staker,
                 address(stakingState),
-                stakingAmountConvertedRoundedUp.div(uint(18).sub(targetDecimals))
+                stakingAmountConvertedRoundedUp.div(10**(uint(18).sub(targetDecimals)))
             ),
             "Transferring staking token has been failed"
         );
