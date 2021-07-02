@@ -174,7 +174,7 @@ const defaults = {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
 		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
-		polygon: '',
+		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '',
