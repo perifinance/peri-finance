@@ -48,7 +48,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
 
     // Percentage growth of terminal supply per annum
-    uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 50000000000000000; // 2.5% pa
+    uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 50000000000000000; // 5% pa
 
     constructor(
         address _owner,
