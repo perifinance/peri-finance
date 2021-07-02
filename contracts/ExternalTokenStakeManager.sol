@@ -69,6 +69,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return stakingState.getTokenCurrencyKeys();
     }
 
+    function getTokenDecimals(bytes32 _currencyKey) external view returns (uint8) {
+        return stakingState.tokenDecimals(_currencyKey);
+    }
+
+    function getTokenActivation(bytes32 _currencyKey) external view returns (bool) {
+        return stakingState.tokenActivated(_currencyKey);
+    }
+
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint) {
         return _combinedStakedAmountOf(_user, _unitCurrency);
     }

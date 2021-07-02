@@ -649,7 +649,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             exTokenStakeManager().stake(_issuer, amountToStake, _currencyKey, pUSD);
         }
 
-        _issuePynths(_issuer, _issueAmount, false);
+        uint afterDebtBalance = _issuePynths(_issuer, _issueAmount, false);
+
+        // For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
+        _requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function issueMaxPynths(address _issuer) external onlyPeriFinance {
@@ -786,14 +789,26 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint estimatedExternalTokenQuota =
             _externalTokenQuota(_account, _debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
 
-        require(estimatedExternalTokenQuota <= getExternalTokenQuota(), "External token staking amount exceeds quota limit");
+        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
+        uint minDecimals = 18;
+        for (uint i = 0; i < tokenList.length; i++) {
+            uint decimals = exTokenStakeManager().getTokenDecimals(tokenList[i]);
+
+            minDecimals = decimals < minDecimals ? decimals : minDecimals;
+        }
+
+        require(
+            // due to the error caused by decimal difference, round down it upto minimum decimals among staking token list.
+            estimatedExternalTokenQuota.roundDownDecimal(uint(18).sub(minDecimals)) <= getExternalTokenQuota(),
+            "External token staking amount exceeds quota limit"
+        );
     }
 
     function _issuePynths(
         address from,
         uint amount,
         bool issueMax
-    ) internal {
+    ) internal returns (uint afterDebt) {
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _remainingIssuablePynths(from);
         _requireRatesNotInvalid(anyRateIsInvalid);
 
@@ -802,8 +817,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             amount = maxIssuable;
         }
-
-        _requireNotExceedsQuotaLimit(from, existingDebt, amount, 0, true);
 
         // Keep track of the debt they're about to create
         _addToDebtRegister(from, amount, existingDebt, totalSystemDebt);
@@ -819,6 +832,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Store their locked PERI amount to determine their fee % for the period
         _appendAccountIssuanceRecord(from);
+
+        afterDebt = existingDebt.add(amount);
     }
 
     function _burnPynths(

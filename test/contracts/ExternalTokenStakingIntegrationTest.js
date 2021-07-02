@@ -11,6 +11,7 @@ const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
+const { utf8ToHex } = require('web3-utils');
 const {
 	currentTime,
 	toUnit,
@@ -446,9 +447,36 @@ contract('External token staking integrating test', async accounts => {
 
 				// Irrelavant to issuable state, external token staked amount is still on quota limit.
 				await assert.revert(
-					periFinance.issuePynths(USDC, 100, { from: users[0] }),
+					periFinance.issuePynths(USDC, toUnit('1'), { from: users[0] }),
 					'External token staking amount exceeds quota limit'
 				);
+			});
+
+			it('should stake multiple tokens', async () => {
+				await periFinance.issuePynths(PERI, toUnit('300'), { from: users[0] });
+
+				await periFinance.issuePynths(USDC, toUnit('20'), { from: users[0] });
+
+				const roundingUp = (_amount, _decimals) => {
+					const powered = toBN('1' + '0'.repeat(Number(_decimals)));
+
+					let amount = toBN(_amount);
+					if (amount.mod(powered).gt(toBN('0'))) {
+						amount = amount.add(powered);
+					}
+
+					return amount.div(powered).mul(powered);
+				};
+
+				await periFinance.issuePynths(DAI, toUnit('55'), { from: users[0] });
+
+				const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+
+				await assert.revert(
+					periFinance.issuePynths(KRW, toUnit('1'), { from: users[0] }),
+					'External token staking amount exceeds quota limit'
+				);
+				assert.bnClose(quota_0_after, toUnit('0.2'), '1' + '0'.repeat(12));
 			});
 		});
 	});

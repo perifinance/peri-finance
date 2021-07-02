@@ -23,6 +23,10 @@ contract IExternalTokenStakeManager {
 
     function getTokenList() external view returns (bytes32[] memory);
 
+    function getTokenDecimals(bytes32 _currencyKey) external view returns (uint8);
+
+    function getTokenActivation(bytes32 _currencyKey) external view returns (bool);
+
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
 
     function stakedAmountOf(
