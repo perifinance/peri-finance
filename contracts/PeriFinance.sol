@@ -16,6 +16,7 @@ contract PeriFinance is BasePeriFinance {
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
 
     address public minterRole;
+    address public inflationer;
 
     // ========== CONSTRUCTOR ==========
 
@@ -91,13 +92,16 @@ contract PeriFinance is BasePeriFinance {
         return exchanger().settle(messageSender, currencyKey);
     }
 
-    function inflationalMint() external issuanceActive returns (bool) {
+    function inflationalMint(uint _networkDebtShare) external issuanceActive returns (bool) {
+        require(msg.sender == inflationer, "Not allowed to mint");
+        require(SafeDecimalMath.unit() >= _networkDebtShare, "Invalid network debt share");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
         uint supplyToMint = _supplySchedule.mintableSupply();
+        supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply
@@ -171,6 +175,10 @@ contract PeriFinance is BasePeriFinance {
     function setMinterRole(address _newMinter) external onlyOwner {
         // If address is set to zero address, mint is not prohibited
         minterRole = _newMinter;
+    }
+
+    function setInflationer(address _newInflationer) external onlyOwner {
+        inflationer = _newInflationer;
     }
 
     // ========== EVENTS ==========
