@@ -23,8 +23,8 @@
 			"address": "0x2436953d15Ae8b9119c787e1d50e393aFEe3426A",
 			"source": "AddressResolver",
 			"link": "https://polygon-explorer-mumbai.chainstacklabs.com/address/0x2436953d15Ae8b9119c787e1d50e393aFEe3426A",
-			"timestamp": "2021-06-15T07:26:43.243Z",
-			"txn": "",
+			"timestamp": "2021-06-15T07:26:42.000Z",
+			"txn": "https://mumbai.polygonscan.com/tx/0x39a7a185525786bdd93294155c6deacbf2c1da0ec672e63a1b3845146297bbec",
 			"network": "mumbai"
 		},
 		"ReadProxyAddressResolver": {
