@@ -64,11 +64,11 @@ contract StakingStateUSDC is Owned, State {
 
     function getStakersByRange(uint _index, uint _cnt) external view returns (address[] memory) {
         require(_index >= 0, "index should not be less than zero");
-        require(_cnt <= 50, "Number of indice should be less than 200");
+        require(stakers.length >= _index + _cnt, "requesting size is too big to query");
 
         address[] memory _addresses = new address[](_cnt);
-        for (uint i = _index; i < _cnt; i++) {
-            _addresses[i] = stakers[i];
+        for (uint i = 0; i < _cnt; i++) {
+            _addresses[i] = stakers[i + _index];
         }
 
         return _addresses;
