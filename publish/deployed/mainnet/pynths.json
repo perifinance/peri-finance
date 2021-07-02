@@ -3,35 +3,5 @@
 		"name": "pUSD",
 		"asset": "USD",
 		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "pBTC",
-		"asset": "BTC",
-		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "pETH",
-		"asset": "ETH",
-		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "iBTC",
-		"asset": "BTC",
-		"subclass": "PurgeablePynth",
-		"inverted": {
-			"entryPoint": 40378,
-			"upperLimit": 60567,
-			"lowerLimit": 20189
-		}
-	},
-	{
-		"name": "iETH",
-		"asset": "ETH",
-		"subclass": "PurgeablePynth",
-		"inverted": {
-			"entryPoint": 970,
-			"upperLimit": 1455,
-			"lowerLimit": 485
-		}
 	}
 ]
