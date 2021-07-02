@@ -127,6 +127,7 @@ const knownAccounts = {
 	rinkeby: [],
 	kovan: [],
 	mumbai: [],
+	polygon: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -173,6 +174,13 @@ const defaults = {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
 		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
+		polygon: '',
+	},
+	DAI_ERC20_ADDRESSES: {
+		mainnet: '',
+		kovan: '',
+		mumbai: '',
+		polygon: '',
 	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${20e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,

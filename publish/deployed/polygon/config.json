@@ -155,13 +155,7 @@
 	"StakingStateUSDC": {
 		"deploy": false
 	},
-	"USDC": {
-		"deploy": false
-	},
-	"TempExchangeRateStorageKovan": {
-		"deploy": false
-	},
-	"PERIUniswapV2": {
+	"ExternalRateAggregator": {
 		"deploy": false
 	},
 	"ProxyERC20pUSD": {

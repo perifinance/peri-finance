@@ -283,9 +283,8 @@ const deploy = async ({
 	let systemSuspendedReason;
 
 	try {
-		// const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
-		// currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
-		currentPeriFinanceSupply = w3utils.toWei('20000000');
+		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
+		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
 
 		// inflationSupplyToDate = total supply - 100m
 		const inflationSupplyToDate = w3utils
@@ -307,8 +306,6 @@ const deploy = async ({
 		const inflationStartDate = inflationStartTimestampInSecs;
 		currentLastMintEvent =
 			inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
-		currentWeekOfInflation = 0;
-		currentLastMintEvent = 0;
 	} catch (err) {
 		console.log(err);
 		if (freshDeploy) {
