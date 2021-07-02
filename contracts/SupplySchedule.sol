@@ -25,8 +25,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Counter for number of weeks since the start of supply inflation
     uint public weekCounter;
 
-    // The number of PERI rewarded to the caller of PeriFinance.mint()
-    uint public minterReward = 200 * SafeDecimalMath.unit();
+    uint public minterReward = 0;
 
     uint public constant INITIAL_WEEKLY_SUPPLY = 76924719527063029689120;
 
@@ -34,7 +33,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     address payable public periFinanceProxy;
 
     // Max PERI rewards for minter
-    uint public constant MAX_MINTER_REWARD = 0;
+    uint public constant MAX_MINTER_REWARD = 200 ether;
 
     // How long each inflation period is before mint can be called
     uint public constant MINT_PERIOD_DURATION = 1 weeks;
