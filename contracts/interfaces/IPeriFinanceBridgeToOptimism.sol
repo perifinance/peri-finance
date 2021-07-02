@@ -1,6 +1,5 @@
-pragma solidity >=0.4.24;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
-
 
 interface IPeriFinanceBridgeToOptimism {
     // Invoked by the relayer on L1

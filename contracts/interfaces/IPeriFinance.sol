@@ -1,14 +1,12 @@
-pragma solidity >=0.4.24;
+pragma solidity 0.5.16;
 
 import "./IPynth.sol";
 import "./IVirtualPynth.sol";
 
 // https://docs.peri.finance/contracts/source/interfaces/iperiFinance
 interface IPeriFinance {
-    // Views    
-    function getRequiredAddress(bytes32 contractName)
-    external view
-    returns(address);
+    // Views
+    function getRequiredAddress(bytes32 contractName) external view returns (address);
 
     function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
 
@@ -47,41 +45,26 @@ interface IPeriFinance {
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
-    function currentUSDCDebtQuota(address _account)
-    external view
-    returns(uint);
+    function currentUSDCDebtQuota(address _account) external view returns (uint);
 
-    function usdcStakedAmountOf(address _account)
-    external view
-    returns(uint);
+    function usdcStakedAmountOf(address _account) external view returns (uint);
 
-    function usdcTotalStakedAmount()
-    external view
-    returns(uint);
+    function usdcTotalStakedAmount() external view returns (uint);
 
-    function userUSDCStakingShare(address _account)
-    external view
-    returns(uint);
+    function userUSDCStakingShare(address _account) external view returns (uint);
 
-    function totalUSDCStakerCount()
-    external view
-    returns(uint);
+    function totalUSDCStakerCount() external view returns (uint);
 
     // Mutative Functions
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) 
-    external;
+    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) external;
 
-    function issueMaxPynths()
-    external;
+    function issueMaxPynths() external;
 
-    function issuePynthsAndStakeMaxUSDC(uint _issueAmount)
-    external;
+    function issuePynthsAndStakeMaxUSDC(uint _issueAmount) external;
 
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
-    external;
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount) external;
 
-    function burnPynthsAndUnstakeUSDCToTarget()
-    external;
+    function burnPynthsAndUnstakeUSDCToTarget() external;
 
     function exchange(
         bytes32 sourceCurrencyKey,

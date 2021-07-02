@@ -1,8 +1,7 @@
-pragma solidity >=0.4.24;
+pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import "./IRewardEscrowV2.sol";
-
 
 interface IPeriFinanceBridgeToBase {
     // invoked by users on L2

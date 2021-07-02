@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 pragma experimental ABIEncoderV2;
 
@@ -7,7 +7,6 @@ import "./Collateral.sol";
 
 // Internal references
 import "./CollateralState.sol";
-
 
 contract CollateralShort is Collateral {
     constructor(

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "./SafeDecimalMath.sol";
 import "./State.sol";
@@ -9,7 +9,7 @@ contract StakingStateUSDC is Owned, State {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    address private USDC_ADDRESS;
+    address public USDC_ADDRESS;
 
     mapping(address => uint) public stakedAmountOf;
 
@@ -35,7 +35,7 @@ contract StakingStateUSDC is Owned, State {
         uint _percentage =
             stakedAmountOf[_account] == 0 || totalStakedAmount == 0
                 ? 0
-                : (stakedAmountOf[_account]).multiplyDecimalRound(totalStakedAmount);
+                : (stakedAmountOf[_account]).divideDecimalRound(totalStakedAmount);
 
         return _percentage;
     }
@@ -75,12 +75,6 @@ contract StakingStateUSDC is Owned, State {
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-
-    function setUSDCAddress(address _usdcAddress) external onlyOwner {
-        require(_usdcAddress != address(0), "Address should not be empty");
-
-        USDC_ADDRESS = _usdcAddress;
-    }
 
     function stake(address _account, uint _amount) external onlyAssociatedContract {
         if (stakedAmountOf[_account] == 0 && _amount > 0) {

@@ -1,4 +1,4 @@
-pragma solidity >=0.4.24;
+pragma solidity 0.5.16;
 
 import "../interfaces/IPynth.sol";
 
@@ -43,9 +43,7 @@ interface IIssuer {
             uint totalSystemDebt
         );
 
-    function currentUSDCDebtQuota(address _account)
-    external view
-    returns(uint);
+    function currentUSDCDebtQuota(address _account) external view returns (uint);
 
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
@@ -67,11 +65,9 @@ interface IIssuer {
         uint _usdcStakeAmount
     ) external;
 
-    function issueMaxPynths(address _issuer)
-    external;
+    function issueMaxPynths(address _issuer) external;
 
-    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount)
-    external;
+    function issuePynthsAndStakeMaxUSDC(address _issuer, uint _issueAmount) external;
 
     function burnPynthsAndUnstakeUSDC(
         address _from,
@@ -79,8 +75,7 @@ interface IIssuer {
         uint _unstakeAmount
     ) external;
 
-    function burnPynthsAndUnstakeUSDCToTarget(address _from)
-    external;
+    function burnPynthsAndUnstakeUSDCToTarget(address _from) external;
 
     function liquidateDelinquentAccount(
         address account,

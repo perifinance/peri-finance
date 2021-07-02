@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./Owned.sol";
@@ -394,6 +394,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return balance;
     }
 
+    /**
+     * @notice It calculates the amounts that to be burnt and unstaked to make user be claimable.
+     *
+     * @param _currentDebt user's current debt. [USD]
+     * @param _stakedUSDCAmount user's current USDC staked amount. [USD]
+     * @param _periCollateral the PERI collateral amount user currently has. [USD]
+     *
+     * @dev All parameters and returned values are USD unit for convenient reason.
+     *
+     * @return burnAmount the calculated pUSD value to be burnt. [USD]
+     * @return usdcAmountToUnstake the calculated USDC amount to be burnt. [USD, 18 decimals]
+     */
     function _amountsToFitClaimable(
         uint _currentDebt,
         uint _stakedUSDCAmount,
@@ -689,9 +701,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         _requireRatesNotInvalid(anyRateIsInvalid || isUSDCInvalid || isPeriInvalid);
 
+        // All of inputs and returned values have [USD] currency unit.
         (uint burnAmount, uint usdcAmountToUnstake) =
             _amountsToFitClaimable(debtBalance, usdcStakedAmountToUSD, periCollateralToUSD);
 
+        // It gets [USDC] currency unit value for third parameter.
         _burnPynthsAndUnstakeUSDC(_from, burnAmount, _usdToUSDC(usdcAmountToUnstake, usdcRate));
     }
 
@@ -939,6 +953,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+    /**
+     * @notice This method burns pUSD and unstakes USDC with given values.
+     *
+     * @param _burnAmount pUSD amount supposed to be burnt [USD]
+     * @param _unstakeAmount USDC amount supposed to be unstaked [USDC, 18 decimals]
+     */
     function _burnPynthsAndUnstakeUSDC(
         address _from,
         uint _burnAmount,

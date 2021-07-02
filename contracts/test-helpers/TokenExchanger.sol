@@ -1,7 +1,7 @@
 /* TokenExchanger.sol: Used for testing contract to contract calls on chain
  * with PeriFinance for testing ERC20 compatability
  */
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 import "../Owned.sol";
 import "../interfaces/IPeriFinance.sol";
