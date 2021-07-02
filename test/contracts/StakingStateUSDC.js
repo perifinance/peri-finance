@@ -175,7 +175,7 @@ contract('StakingStateUSDC', async accounts => {
 		});
 
 		it('should count stake', async () => {
-			const stakers = await stakingStateUSDC.getStakersByRange(1950, 50);
+			const stakers = await stakingStateUSDC.getStakersByRange(0, 50);
 
 			assert.equal(stakers.length, 50);
 
@@ -186,19 +186,23 @@ contract('StakingStateUSDC', async accounts => {
 
 		it('should NOT register multiple times', async () => {
 			const newAccount = web3.eth.accounts.create('abc');
+			const result = [];
+			for (let i = 0; i < 10; i++) {
+				result.push(stakingStateUSDC.stake(newAccount.address, 1, { from: tempIssuer }));
+			}
 
-			await Promise.all(
-				new Array(10).map(() => stakingStateUSDC.stake(newAccount, 1, { from: tempIssuer }))
-			);
+			await Promise.all(result);
+
+			const stakerBalance = await stakingStateUSDC.stakedAmountOf(newAccount.address);
+			assert.equal(stakerBalance.toString(), 10);
 
 			const stakersLength = await stakingStateUSDC.stakersLength();
-
-			assert.equal(stakersLength.toNumber(), 200);
+			assert.equal(stakersLength.toNumber(), 201);
 		});
 
 		it('should get all stakers adress', async () => {
 			const index = 0;
-			const cnt = 50;
+			const cnt = 200;
 			const stakerAccounts = await stakingStateUSDC.getStakersByRange(index, cnt);
 
 			assert.equal(stakerAccounts.length, cnt);
