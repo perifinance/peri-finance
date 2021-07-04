@@ -2,15 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketFactory": {
-		"deploy": true
-	},
-	"BinaryOptionMarketManager": {
-		"deploy": true
-	},
-	"BinaryOptionMarketData": {
-		"deploy": false
-	},
 	"CollateralManager": {
 		"deploy": false
 	},
@@ -126,9 +117,6 @@
 		"deploy": false
 	},
 	"ProxyFeePool": {
-		"deploy": false
-	},
-	"ProxyPeriFinance": {
 		"deploy": false
 	},
 	"SafeDecimalMath": {

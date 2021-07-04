@@ -400,6 +400,21 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
+				"status": "replaced",
+				"keccak256": "0xf7892460866827bf742731e8bafc57436159a3f07565cf36fd27593ff4ab0a76",
+				"replaced_in": "v0.0.6"
+			}
+		}
+	},
+	"v0.0.6": {
+		"tag": "v0.0.6",
+		"fulltag": "v0.0.6",
+		"network": "mumbai",
+		"date": "2021-07-02T18:07:41+09:00",
+		"commit": "443327b1a46bb30ec7103c162c533afed39ef4e8",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x3Ef5BA1F779c702660697E0360256944D5e47A89",
 				"status": "current",
 				"keccak256": "0xf7892460866827bf742731e8bafc57436159a3f07565cf36fd27593ff4ab0a76"
 			}

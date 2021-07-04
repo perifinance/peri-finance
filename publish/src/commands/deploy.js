@@ -998,7 +998,7 @@ const deploy = async ({
 		});
 
 		const proxyERC20ForPynth = await deployer.deployContract({
-			name: `Proxy${currencyKey}`,
+			name: `ProxyERC20${currencyKey}`,
 			source: 'ProxyERC20',
 			args: [account],
 			force: addNewPynths,
@@ -1044,7 +1044,7 @@ const deploy = async ({
 		const pynth = await deployer.deployContract({
 			name: `Pynth${currencyKey}`,
 			source: sourceContract,
-			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'PeriFinance', 'FeePool'],
+			deps: [`TokenState${currencyKey}`, `ProxyERC20${currencyKey}`, 'PeriFinance', 'FeePool'],
 			args: [
 				addressOf(proxyERC20ForPynth),
 				addressOf(tokenStateForPynth),
