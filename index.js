@@ -106,7 +106,7 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1623312000, // Thursday, June 10, 2021 5:00:00 PM GMT+09:00
+	inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
