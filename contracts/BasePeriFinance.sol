@@ -329,10 +329,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _notImplemented();
     }
 
-    function mint() external returns (bool) {
-        _notImplemented();
-    }
-
     function liquidateDelinquentAccount(address, uint) external returns (bool) {
         _notImplemented();
     }
