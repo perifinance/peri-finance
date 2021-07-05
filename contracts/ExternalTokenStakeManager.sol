@@ -31,7 +31,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
 
-    bytes32[] private unstakingOrder;
+    // This key order is used from unstaking multiple coins
+    bytes32[] public currencyKeyOrder;
 
     constructor(
         address _owner,
@@ -75,6 +76,12 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
     function getTokenActivation(bytes32 _currencyKey) external view returns (bool) {
         return stakingState.tokenActivated(_currencyKey);
+    }
+
+    function getCurrencyKeyOrder()
+    external view
+    returns(bytes32[] memory) {
+        return currencyKeyOrder;
     }
 
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint) {
@@ -144,6 +151,35 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
     }
 
+    /**
+     * @notice Utils checking given two key arrays' value are matching each other(its order will not be considered).
+     */
+    function _keyChecker(bytes32[] memory _keysA, bytes32[] memory _keysB)
+    internal pure 
+    returns (bool) {
+        if(_keysA.length != _keysB.length) {
+            return false;
+        }
+
+        for(uint i = 0; i < _keysA.length; i++) {
+            bool exist;
+            for(uint j = 0; j < _keysA.length; j++) {
+                if(_keysA[i] == _keysB[j]) {
+                    exist = true;
+
+                    break;
+                }
+            }
+
+            // given currency key is not matched
+            if(!exist) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function stake(
         address _staker,
         uint _amount,
@@ -185,6 +221,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _unstaker unstaker address
      * @param _amount amount to unstake
      * @param _inputCurrency the currency unit of _amount
+     *
+     * @dev bytes32 variable "order" is only able to be assigned by setUnstakingOrder(),
+     *      and it checks its conditions there, here won't check its validation.
      */
     function unstakeMultipleTokens(
         address _unstaker,
@@ -192,9 +231,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         bytes32 _inputCurrency
     ) external onlyIssuer {
         bytes32[] memory currencyKeys = stakingState.getTokenCurrencyKeys();
-        bytes32[] memory order = new bytes32[](currencyKeys.length);
-        order = unstakingOrder.length != currencyKeys.length ? currencyKeys : unstakingOrder;
 
+        bytes32[] memory order;
+        if(!_keyChecker(currencyKeys, currencyKeyOrder)) {
+            order = currencyKeys;
+        } else {
+            order = currencyKeyOrder;
+        }
+        
         uint combinedStakedAmount = _combinedStakedAmountOf(_unstaker, _inputCurrency);
         require(combinedStakedAmount >= _amount, "Combined staked amount is not enough");
 
@@ -248,9 +292,11 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
     function setUnstakingOrder(bytes32[] calldata _order) external onlyOwner {
         bytes32[] memory currencyKeys = stakingState.getTokenCurrencyKeys();
-        require(currencyKeys.length == _order.length, "input length is not matched with defined currency keys");
-
-        unstakingOrder = _order;
+        
+        require(_keyChecker(currencyKeys, _order), 
+            "Given currency keys are not available");
+        
+        currencyKeyOrder = _order;
     }
 
     function migrateStakedAmounts(address[] calldata _accounts) external onlyDuringSetup onlyOwner {

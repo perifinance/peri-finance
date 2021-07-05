@@ -480,4 +480,228 @@ contract('External token staking integrating test', async accounts => {
 			});
 		});
 	});
+
+	describe("Burning", () => {
+		const unitBal = '10000';
+
+		beforeEach(async () => {
+			await Promise.all(
+				users.map(_user => periFinance.transfer(_user, toUnit(unitBal), { from: owner }))
+			);
+
+			await Promise.all(
+				users.map(_user => {
+					return Promise.all([
+						tokenInfos.USDC.contract.transfer(_user, unitBal + '0'.repeat(6), {
+							from: deployerAccount,
+						}),
+						tokenInfos.DAI.contract.transfer(_user, toUnit(unitBal), { from: deployerAccount }),
+						tokenInfos.KRW.contract.transfer(_user, toUnit(unitBal), { from: deployerAccount }),
+						tokenInfos.USDC.contract.approve(
+							externalTokenStakeManager.address,
+							toUnit(toUnit('1')),
+							{ from: _user }
+						),
+						tokenInfos.DAI.contract.approve(
+							externalTokenStakeManager.address,
+							toUnit(toUnit('1')),
+							{ from: _user }
+						),
+						tokenInfos.KRW.contract.approve(
+							externalTokenStakeManager.address,
+							toUnit(toUnit('1')),
+							{ from: _user }
+						),
+					]);
+				})
+			);
+		});
+
+		describe("unstaking only PERI Token", async () => {
+			
+			beforeEach(async () => {
+				// It locks 4000 PERI with IR: 0.25, exRate: 0.2 [USD/PERI]
+				await periFinance.issuePynths(PERI, toUnit("200"), { from: users[0] });
+
+				await assert.revert(
+					periFinance.burnPynths(PERI, toUnit("1"), { from: users[0] }),
+					"Minimum stake time not reached"
+				);
+
+				await fastForward(86401);
+
+				await updateRates([PERI, USDC, DAI, KRW], ['0.2', '0.98', '1.001', '1100']);
+			});
+			
+			it("should burn pUSD and unlock PERI", async () => {
+				const balance_0_pUSD_before = await pUSDContract.balanceOf(users[0]);
+				const transferable_0_before = await periFinance.transferablePeriFinance(users[0]);
+				
+				// Burns 50 pUSD, it should unlock 1000 PERI
+				await periFinance.burnPynths(PERI, toUnit("50"), { from: users[0] });
+
+				const balance_0_pUSD_after = await pUSDContract.balanceOf(users[0]);
+				const transferable_0_after = await periFinance.transferablePeriFinance(users[0]);
+
+				assert.bnEqual(balance_0_pUSD_before, balance_0_pUSD_after.add(toUnit("50")));
+				assert.bnEqual(transferable_0_before, toUnit("6000"));
+				assert.bnEqual(transferable_0_after, toUnit("7000"));
+			});
+
+			it("should NOT burn pynths", async () => {
+				// No debt
+				await assert.revert(
+					periFinance.burnPynths(PERI, toUnit("1"), { from: users[1] }),
+					"No debt to forgive"
+				);
+				
+				// Burn max then debt
+				await assert.revert(
+					periFinance.burnPynths(PERI, toUnit("201"), { from: users[0] }),
+					"Trying to burn more than debt"
+				);
+
+				// Not enough pUSD
+				await pUSDContract.transfer(users[1], toUnit("151"), { from: users[0] });
+
+				await assert.revert(
+					periFinance.burnPynths(PERI, toUnit("50"), { from: users[0] }),
+					"SafeMath: subtraction overflow"
+				);
+			});
+			
+		});
+
+		describe("unstaking external token", () => {
+			
+			beforeEach(async () => {
+				await periFinance.issuePynths(PERI, toUnit("200"), { from: users[0] });
+				await periFinance.issuePynths(USDC, toUnit("5"), { from: users[0]} );
+				await periFinance.issuePynths(DAI, toUnit("20"), { from: users[0]} );
+				await periFinance.issuePynths(KRW, toUnit("25"), { from: users[0]} );
+			});
+
+			it("should unstake", async () => {
+				const stakedAmount_DAI_0_before = await externalTokenStakeManager.stakedAmountOf(users[0], DAI, DAI);
+				const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const balance_DAI_0_before = await dai.balanceOf(users[0]);
+
+				const targetQuota = await issuer.externalTokenLimit();
+				const targetRatio = await issuer.issuanceRatio();
+
+				assert.bnClose(quota_0_before, targetQuota, "1" + "0".repeat(12));
+
+				await fastForward(86401);
+
+				await updateRates([PERI, USDC, DAI, KRW], ['0.2', '0.98', '1.001', '1100']);
+
+				await periFinance.burnPynths(DAI, toUnit("2"), { from: users[0] });
+
+				const stakedAmount_DAI_0_after = await externalTokenStakeManager.stakedAmountOf(users[0], DAI, DAI);
+				const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const balance_DAI_0_after = await dai.balanceOf(users[0]);
+
+				const expectedUnstaked = divideDecimal(toUnit("2"), targetRatio);
+
+				assert.bnClose(stakedAmount_DAI_0_after, stakedAmount_DAI_0_before.sub(divideDecimal(expectedUnstaked, toUnit("1.001"))), "10");
+				assert.bnClose(quota_0_after, divideDecimal(toUnit("48"), toUnit("248")), "1" + "0".repeat(12));
+				assert.bnClose(balance_DAI_0_after, balance_DAI_0_before.add(divideDecimal(expectedUnstaked, toUnit("1.001"))), "10");
+			});
+
+			it("should NOT unstake", async () => {
+				await fastForward(86401);
+
+				await updateRates([PERI, USDC, DAI, KRW], ['0.2', '0.98', '1.001', '1100']);
+
+				// if it exceeds limit quota after unstake PERI
+				await assert.revert(
+					periFinance.burnPynths(PERI, toUnit("1"), { from: users[0] }),
+					"External token staking amount exceeds quota limit"
+				);
+				
+				// it exceeds available staked amount
+				await assert.revert(
+					periFinance.burnPynths(USDC, toUnit("6"), { from: users[0] }),
+					"Account doesn't have enough staked amount"
+				);
+			});
+		
+			describe("Settings", () => {
+			
+				it("should set currency key order", async () => {
+					const orderKeys_before = await externalTokenStakeManager.getCurrencyKeyOrder();
+	
+					// There is no order defined if it is not set
+					assert.equal(orderKeys_before.length, 0);
+	
+					await externalTokenStakeManager.setUnstakingOrder([KRW, USDC, DAI], { from: owner });
+					
+					const orderKeys_after = await externalTokenStakeManager.getCurrencyKeyOrder();
+	
+					assert.equal(orderKeys_after[0], KRW);
+					assert.equal(orderKeys_after[1], USDC);
+					assert.equal(orderKeys_after[2], DAI);
+				});
+				
+				it("should NOT set currency key order", async () => {
+					// not owner 
+					await assert.revert(
+						externalTokenStakeManager.setUnstakingOrder([KRW, USDC, DAI], { from: deployerAccount }),
+						"Only the contract owner may perform this action"
+					);
+	
+					// length is not matched with registered currency keys
+					await assert.revert(
+						externalTokenStakeManager.setUnstakingOrder([KRW, USDC, DAI, DAI], { from: owner }),
+						"Given currency keys are not available"
+					);
+					
+					// different currency key
+					await assert.revert(
+						externalTokenStakeManager.setUnstakingOrder([KRW, USDC, PERI], { from: owner }),
+						"Given currency keys are not available"
+					);
+				});
+				
+			});
+
+			describe("fit to claimable", () => {
+
+				beforeEach(async () => {
+					await periFinance.issueMaxPynths({ from: users[0] });
+
+					const cRatio = await periFinance.collateralisationRatio(users[0]);
+					const targetRatio = await issuer.issuanceRatio();
+					assert.bnEqual(cRatio, targetRatio);
+				});
+				
+				it.only("should fit to claimable if ratio violates target ratio", async () => {
+					await fastForward(86401);
+
+					await updateRates([PERI, USDC, DAI, KRW], ['0.1', '0.98', '1.001', '1100']);
+
+					// Debt: 550, USDC: 200, PERI: 1000
+					// C-Ratio: 218.1818181818182, Current Quota: 0.09090909090909091
+					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+					const targetRatio = await issuer.issuanceRatio();
+					assert.bnGt(cRatio_0_before, targetRatio);
+
+					await periFinance.fitToClaimable({ from: users[0] });
+
+					// after fit,
+					// burn amount would be 250 pUSD.
+					// The debt would be 300, external token staking quota going to be: 0.16666666....
+					const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
+					const balance_pUSD_0_after = await pUSDContract.balanceOf(users[0]);
+					const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					assert.bnEqual(cRatio_0_after, targetRatio);
+					assert.bnClose(balance_pUSD_0_after, toUnit("300"), "1" + "0".repeat(12));
+					assert.bnClose(quota_0_after, "166666666666666666", "1" + "0".repeat(12));
+				});
+								
+			});
+
+		});
+
+	});
 });
