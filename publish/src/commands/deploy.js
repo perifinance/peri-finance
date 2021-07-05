@@ -967,17 +967,17 @@ const deploy = async ({
 			write: 'setPeriFinance',
 			writeArg: addressOf(proxyERC20PeriFinance),
 		});
-	}
 
-	// setting address to refund when addressToRefund is zero
-	await runStep({
-		contract: 'PeriFinanceEscrow',
-		target: periFinanceEscrow,
-		read: 'addressToRefund',
-		expected: input => input !== ZERO_ADDRESS, // only change if zero
-		write: 'setAddressToRefund',
-		writeArg: account,
-	});
+		// setting address to refund when addressToRefund is zero
+		await runStep({
+			contract: 'PeriFinanceEscrow',
+			target: periFinanceEscrow,
+			read: 'addressToRefund',
+			expected: input => input !== ZERO_ADDRESS, // only change if zero
+			write: 'setAddressToRefund',
+			writeArg: account,
+		});
+	}
 
 	// ----------------
 	// Pynths
