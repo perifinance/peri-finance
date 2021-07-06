@@ -2,7 +2,7 @@
 
 const { contract } = require('hardhat');
 
-const { assert } = require('./common');
+const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const {
 	toBytes32,
@@ -11,12 +11,7 @@ const {
 
 const { setupAllContracts } = require('./setup');
 
-const {
-	ensureOnlyExpectedMutativeFunctions,
-	onlyGivenAddressCanInvoke,
-	setStatus,
-} = require('./helpers');
-const deploy = require('../../publish/src/commands/deploy');
+const { ensureOnlyExpectedMutativeFunctions, onlyGivenAddressCanInvoke } = require('./helpers');
 
 const { toUnit } = require('../utils')();
 
@@ -43,6 +38,8 @@ contract('StakingStateUSDC', async accounts => {
 			],
 		}));
 	});
+
+	addSnapshotBeforeRestoreAfterEach();
 
 	describe('constructor', () => {
 		it('should set constructor params on deployment', async () => {
@@ -144,7 +141,7 @@ contract('StakingStateUSDC', async accounts => {
 			// set virtual issuer address
 			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
 			// provide USDC to account1 for test
-			await USDCContract.transfer(account1, '1000', { from: deployerAccount });
+			await USDCContract.transfer(account1, '1000', { from: owner });
 			// set USDC allowance for account1 and issuer
 			await USDCContract.approve(tempIssuer, toUnit('1'), { from: account1 });
 			await USDCContract.approve(tempIssuer, toUnit('1'), { from: tempIssuer });
@@ -160,6 +157,55 @@ contract('StakingStateUSDC', async accounts => {
 
 			// try refund
 			await stakingStateUSDC.refund(account1, '300', { from: tempIssuer });
+		});
+	});
+
+	describe('stakers', () => {
+		beforeEach(async () => {
+			await stakingStateUSDC.setAssociatedContract(tempIssuer, { from: owner });
+
+			let stakers = [];
+			for (let i = 0; i < 200; i++) {
+				stakers.push(web3.eth.accounts.create(String(i)).address);
+			}
+
+			await Promise.all(
+				stakers.map(_staker => stakingStateUSDC.stake(_staker, 1, { from: tempIssuer }))
+			);
+		});
+
+		it('should count stake', async () => {
+			const stakers = await stakingStateUSDC.getStakersByRange(0, 50);
+
+			assert.equal(stakers.length, 50);
+
+			const stakersLength = await stakingStateUSDC.stakersLength();
+
+			assert.equal(stakersLength.toNumber(), 200);
+		});
+
+		it('should NOT register multiple times', async () => {
+			const newAccount = web3.eth.accounts.create('abc');
+			const result = [];
+			for (let i = 0; i < 10; i++) {
+				result.push(stakingStateUSDC.stake(newAccount.address, 1, { from: tempIssuer }));
+			}
+
+			await Promise.all(result);
+
+			const stakerBalance = await stakingStateUSDC.stakedAmountOf(newAccount.address);
+			assert.equal(stakerBalance.toString(), 10);
+
+			const stakersLength = await stakingStateUSDC.stakersLength();
+			assert.equal(stakersLength.toNumber(), 201);
+		});
+
+		it('should get all stakers adress', async () => {
+			const index = 0;
+			const cnt = 200;
+			const stakerAccounts = await stakingStateUSDC.getStakersByRange(index, cnt);
+
+			assert.equal(stakerAccounts.length, cnt);
 		});
 	});
 });

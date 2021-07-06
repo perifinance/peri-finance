@@ -2,15 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketFactory": {
-		"deploy": true
-	},
-	"BinaryOptionMarketManager": {
-		"deploy": true
-	},
-	"BinaryOptionMarketData": {
-		"deploy": false
-	},
 	"CollateralManager": {
 		"deploy": false
 	},
@@ -128,9 +119,6 @@
 	"ProxyFeePool": {
 		"deploy": false
 	},
-	"ProxyPeriFinance": {
-		"deploy": false
-	},
 	"SafeDecimalMath": {
 		"deploy": false
 	},
@@ -155,13 +143,7 @@
 	"StakingStateUSDC": {
 		"deploy": false
 	},
-	"USDC": {
-		"deploy": false
-	},
-	"TempExchangeRateStorageKovan": {
-		"deploy": false
-	},
-	"PERIUniswapV2": {
+	"ExternalRateAggregator": {
 		"deploy": false
 	},
 	"ProxyERC20pUSD": {

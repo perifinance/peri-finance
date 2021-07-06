@@ -59,6 +59,7 @@ contract('Exchange Rates', async accounts => {
 	].map(toBytes32);
 	let instance;
 	let systemSettings;
+	let externalRateAggregator;
 	let aggregatorJPY;
 	let aggregatorXTZ;
 	let aggregatorFastGasPrice;
@@ -73,9 +74,16 @@ contract('Exchange Rates', async accounts => {
 			ExchangeRates: instance,
 			SystemSettings: systemSettings,
 			AddressResolver: resolver,
+			ExternalRateAggregator: externalRateAggregator,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['ExchangeRates', 'SystemSettings', 'AddressResolver', 'StakingStateUSDC'],
+			contracts: [
+				'ExchangeRates',
+				'SystemSettings',
+				'AddressResolver',
+				'ExternalRateAggregator',
+				'StakingStateUSDC',
+			],
 		}));
 
 		aggregatorJPY = await MockAggregator.new({ from: owner });
@@ -110,6 +118,8 @@ contract('Exchange Rates', async accounts => {
 				'setOracle',
 				'updateRates',
 				'setOracleKovan',
+				'setExternalRateAggregator',
+				'setCurrencyToExternalAggregator',
 			],
 		});
 	});
@@ -466,6 +476,39 @@ contract('Exchange Rates', async accounts => {
 		});
 	});
 
+	describe('setExternalRateAggregator()', () => {
+		it("only the owner should be able to change the external aggregator's address", async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: instance.setExternalRateAggregator,
+				args: [externalRateAggregator.address],
+				address: owner,
+				accounts,
+				skipPassCheck: true,
+			});
+
+			await instance.setExternalRateAggregator(accounts[8], { from: owner });
+
+			assert.equal(await instance.externalRateAggregator.call(), accounts[8]);
+			assert.notEqual(await instance.externalRateAggregator.call(), externalRateAggregator.address);
+		});
+	});
+
+	describe('setCurrencyToExternalAggregator()', () => {
+		it('only the owner should be able to currency external status', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: instance.setCurrencyToExternalAggregator,
+				args: [toBytes32('USDC'), true],
+				address: owner,
+				accounts,
+				skipPassCheck: true,
+			});
+
+			await instance.setCurrencyToExternalAggregator(toBytes32('USDC'), true, { from: owner });
+
+			assert.equal(await instance.currencyByExternal(toBytes32('USDC')), true);
+		});
+	});
+
 	describe('deleteRate()', () => {
 		it('should be able to remove specific rate', async () => {
 			const foolsRate = '0.002';
@@ -598,6 +641,44 @@ contract('Exchange Rates', async accounts => {
 			const rateAndTime = await instance.rateAndUpdatedTime(encodedRate);
 			assert.equal(rateAndTime.rate, rateValueEncodedStr);
 			assert.bnEqual(rateAndTime.time, updatedTime);
+		});
+	});
+
+	describe('getting rates by external aggregator', () => {
+		const encodedRate = toBytes32('GOLD');
+		const rateValueEncodedStr = web3.utils.toWei('10.123', 'ether');
+		beforeEach(async () => {
+			const updatedTime = await currentTime();
+
+			await instance.updateRates([encodedRate], [rateValueEncodedStr], updatedTime, {
+				from: oracle,
+			});
+
+			const rate = await instance.rateForCurrency(encodedRate);
+			assert.equal(rate, rateValueEncodedStr);
+
+			await instance.setExternalRateAggregator(externalRateAggregator.address, { from: owner });
+		});
+
+		it('should get rate from external aggregator', async () => {
+			await instance.setCurrencyToExternalAggregator(encodedRate, true, { from: owner });
+
+			const rate = await instance.rateForCurrency(encodedRate);
+			assert.equal(rate.toString(), '0');
+
+			const newRate = toUnit('1010');
+			const updatedTime = await currentTime();
+			await externalRateAggregator.updateRates([encodedRate], [newRate], updatedTime, {
+				from: oracle,
+			});
+
+			const rate2 = await instance.rateForCurrency(encodedRate);
+			assert.bnEqual(rate2.toString(), toUnit('1010'));
+
+			await instance.setCurrencyToExternalAggregator(encodedRate, false, { from: owner });
+
+			const rate3 = await instance.rateForCurrency(encodedRate);
+			assert.bnEqual(rate3.toString(), rateValueEncodedStr);
 		});
 	});
 

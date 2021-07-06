@@ -283,9 +283,8 @@ const deploy = async ({
 	let systemSuspendedReason;
 
 	try {
-		// const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
-		// currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
-		currentPeriFinanceSupply = w3utils.toWei('20000000');
+		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
+		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
 
 		// inflationSupplyToDate = total supply - 100m
 		const inflationSupplyToDate = w3utils
@@ -307,8 +306,6 @@ const deploy = async ({
 		const inflationStartDate = inflationStartTimestampInSecs;
 		currentLastMintEvent =
 			inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
-		currentWeekOfInflation = 0;
-		currentLastMintEvent = 0;
 	} catch (err) {
 		console.log(err);
 		if (freshDeploy) {
@@ -546,7 +543,7 @@ const deploy = async ({
 		args: [account],
 	});
 
-	if (network !== 'mainnet' && systemStatus) {
+	if (!['mainnet', 'polygon'].includes(network) && systemStatus) {
 		// On testnet, give the deployer the rights to update status
 		await runStep({
 			contract: 'SystemStatus',
@@ -718,22 +715,58 @@ const deploy = async ({
 		args: [account, account],
 	});
 
-	const periFinance = await deployer.deployContract({
-		name: 'PeriFinance',
-		source: ['polygon', 'mumbai'].includes(network)
-			? 'PeriFinanceToPolygon'
-			: useOvm
-			? 'MintablePeriFinance'
-			: 'PeriFinance',
-		deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
-		args: [
-			addressOf(proxyERC20PeriFinance),
-			addressOf(tokenStatePeriFinance),
-			account,
-			currentPeriFinanceSupply,
-			addressOf(readProxyForResolver),
-		],
-	});
+	let periFinance;
+	if (['polygon', 'mumbai'].includes(network)) {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: 'PeriFinanceToPolygon',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			args: [
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+				defaults.CHILD_CHAIN_MANAGER_ADDRESS[network], // address of childChainManager,
+			],
+		});
+
+		if (defaults.CHILD_CHAIN_MANAGER_ADDRESS[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'childChainManager',
+				expected: input => input === defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+				write: 'setChildChainManager',
+				writeArg: defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+			});
+		}
+	} else {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			args: [
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+				defaults.MINTER_ROLE_ADDRESS[network],
+			],
+		});
+
+		if (defaults.MINTER_ROLE_ADDRESS[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'minterRole',
+				expected: input => input === defaults.MINTER_ROLE_ADDRESS[network],
+				write: 'setMinterRole',
+				writeArg: defaults.MINTER_ROLE_ADDRESS[network],
+			});
+		}
+	}
 
 	if (periFinance && proxyERC20PeriFinance) {
 		await runStep({
@@ -956,17 +989,17 @@ const deploy = async ({
 			write: 'setPeriFinance',
 			writeArg: addressOf(proxyERC20PeriFinance),
 		});
-	}
 
-	// setting address to refund when addressToRefund is zero
-	await runStep({
-		contract: 'PeriFinanceEscrow',
-		target: periFinanceEscrow,
-		read: 'addressToRefund',
-		expected: input => input !== ZERO_ADDRESS, // only change if zero
-		write: 'setAddressToRefund',
-		writeArg: account,
-	});
+		// setting address to refund when addressToRefund is zero
+		await runStep({
+			contract: 'PeriFinanceEscrow',
+			target: periFinanceEscrow,
+			read: 'addressToRefund',
+			expected: input => input !== ZERO_ADDRESS, // only change if zero
+			write: 'setAddressToRefund',
+			writeArg: account,
+		});
+	}
 
 	// ----------------
 	// Pynths
@@ -1033,7 +1066,7 @@ const deploy = async ({
 		const pynth = await deployer.deployContract({
 			name: `Pynth${currencyKey}`,
 			source: sourceContract,
-			deps: [`TokenState${currencyKey}`, `Proxy${currencyKey}`, 'PeriFinance', 'FeePool'],
+			deps: [`TokenState${currencyKey}`, `ProxyERC20${currencyKey}`, 'PeriFinance', 'FeePool'],
 			args: [
 				addressOf(proxyERC20ForPynth),
 				addressOf(tokenStateForPynth),
@@ -1062,7 +1095,7 @@ const deploy = async ({
 		if (proxyERC20ForPynth && pynth) {
 			// and make sure this new proxy has the target of the pynth
 			await runStep({
-				contract: `ProxyERC20${currencyKey}`,
+				contract: `Proxy${currencyKey}`,
 				target: proxyERC20ForPynth,
 				read: 'target',
 				expected: input => input === addressOf(pynth),
@@ -1107,7 +1140,7 @@ const deploy = async ({
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
 	if (!USDC_ADDRESS) {
-		if (network === 'mainnet') {
+		if (['mainnet', 'polygon'].includes(network)) {
 			throw new Error('USDC address is not known');
 		}
 
@@ -1140,37 +1173,13 @@ const deploy = async ({
 		});
 	}
 
-	if (network !== 'mainnet') {
-		console.log(gray(`\n------ DEPLOY Mock LP Token ------\n`));
-		await deployer.deployContract({
-			name: 'PERIUniswapV2',
-			source: 'MockToken',
-			args: ['PERIUniswapV2', 'LP', 6],
-		});
+	console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
 
-		console.log(gray(`\n------ DEPLOY TempExchangeRateStorageKovan ------\n`));
-
-		const tempExchangeRateStorageKovan = await deployer.deployContract({
-			name: 'TempExchangeRateStorageKovan',
-			source: 'TempExchangeRateStorageKovan',
-			args: [account],
-		});
-
-		const currenciesForTempStorage = ['PERI', 'USDC'].map(toBytes32);
-		const ratesForCurrencies = ['19940000000000000000', '980000000000000000'].map(w3utils.toBN);
-
-		for (const [index, currency] of currenciesForTempStorage.entries()) {
-			await runStep({
-				contract: `TempExchangeRateStorageKovan`,
-				target: tempExchangeRateStorageKovan,
-				read: 'getRate',
-				readArg: currency,
-				expected: input => input !== '0',
-				write: 'setRate',
-				writeArg: [currency, ratesForCurrencies[index]],
-			});
-		}
-	}
+	await deployer.deployContract({
+		name: 'ExternalRateAggregator',
+		source: 'ExternalRateAggregator',
+		args: [account, account],
+	});
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
@@ -1902,7 +1911,7 @@ const deploy = async ({
 					);
 					// Then a new inverted pynth is being added (as there's no existing supply)
 					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-				} else if (network !== 'mainnet' && forceUpdateInversePynthsOnTestnet) {
+				} else if (!['mainnet', 'polygon'].includes(network) && forceUpdateInversePynthsOnTestnet) {
 					// as we are on testnet and the flag is enabled, allow a mutative pricing change
 					console.log(
 						redBright(
@@ -2043,10 +2052,10 @@ const deploy = async ({
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
-			read: 'usdcQuota',
+			read: 'externalTokenQuota',
 			expected: input => input !== '0', // only change if zero
-			write: 'setUSDCQuota',
-			writeArg: await getDeployParameter('USDC_QUOTA'),
+			write: 'setExternalTokenQuota',
+			writeArg: await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA'),
 		});
 
 		await runStep({

@@ -170,7 +170,7 @@ const removePynths = async ({
 		});
 
 		// now update the config and deployment JSON files
-		const contracts = ['Proxy', 'TokenState', 'Pynth'].map(name => `${name}${currencyKey}`);
+		const contracts = ['ProxyERC20', 'TokenState', 'Pynth'].map(name => `${name}${currencyKey}`);
 		for (const contract of contracts) {
 			delete updatedConfig[contract];
 			delete updatedDeployment.targets[contract];
@@ -206,5 +206,6 @@ module.exports = {
 				},
 				[]
 			)
+			.option('-v, --private-key [value]')
 			.action(removePynths),
 };

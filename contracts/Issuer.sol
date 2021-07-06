@@ -85,7 +85,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_PERIFINANCEESCROW = "PeriFinanceEscrow";
     bytes32 private constant CONTRACT_LIQUIDATIONS = "Liquidations";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_USDC = "USDC";
+    address private constant CONTRACT_USDC = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
     bytes32 private constant CONTRACT_STAKINGSTATE_USDC = "StakingStateUSDC";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
@@ -93,7 +93,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](15);
+        bytes32[] memory newAddresses = new bytes32[](14);
         newAddresses[0] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -107,8 +107,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[10] = CONTRACT_LIQUIDATIONS;
         newAddresses[11] = CONTRACT_DEBTCACHE;
         newAddresses[12] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[13] = CONTRACT_USDC;
-        newAddresses[14] = CONTRACT_STAKINGSTATE_USDC;
+        newAddresses[13] = CONTRACT_STAKINGSTATE_USDC;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -120,8 +119,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return IStakingStateUSDC(requireAndGetAddress(CONTRACT_STAKINGSTATE_USDC));
     }
 
-    function usdc() internal view returns (IERC20) {
-        return IERC20(requireAndGetAddress(USDC));
+    function usdc() internal pure returns (IERC20) {
+        return IERC20(CONTRACT_USDC);
     }
 
     function exchanger() internal view returns (IExchanger) {
@@ -412,7 +411,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _periCollateral
     ) internal view returns (uint burnAmount, uint usdcAmountToUnstake) {
         uint targetRatio = getIssuanceRatio();
-        uint usdcQuota = getUSDCQuota();
+        uint usdcQuota = getExternalTokenQuota();
 
         uint initialCRatio = _currentDebt.divideDecimal(_stakedUSDCAmount.add(_periCollateral));
         // it doesn't satisfy target c-ratio
@@ -828,7 +827,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             );
 
             uint maxUSDCQuotaAfterIssue =
-                _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getUSDCQuota());
+                _usdToUSDC(afterDebtBalanceWithIssuanceRatio, usdcRate).multiplyDecimalRound(getExternalTokenQuota());
             uint userStakedAmount = stakingStateUSDC().stakedAmountOf(_issuer);
 
             require(maxUSDCQuotaAfterIssue > userStakedAmount, "No availalbe USDC staking amount remains");
@@ -983,7 +982,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint usdcQuota, ) = _currentUSDCDebtQuota(_from);
 
-        require(usdcQuota <= getUSDCQuota(), "USDC staked exceeds quota");
+        require(usdcQuota <= getExternalTokenQuota(), "USDC staked exceeds quota");
     }
 
     function _setLastIssueEvent(address account) internal {

@@ -2,15 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketFactory": {
-		"deploy": true
-	},
-	"BinaryOptionMarketManager": {
-		"deploy": true
-	},
-	"BinaryOptionMarketData": {
-		"deploy": false
-	},
 	"CollateralManager": {
 		"deploy": false
 	},
@@ -128,9 +119,6 @@
 	"ProxyFeePool": {
 		"deploy": false
 	},
-	"ProxyPeriFinance": {
-		"deploy": false
-	},
 	"SafeDecimalMath": {
 		"deploy": false
 	},
@@ -158,9 +146,6 @@
 	"USDC": {
 		"deploy": false
 	},
-	"TempExchangeRateStorageKovan": {
-		"deploy": false
-	},
 	"PERIUniswapV2": {
 		"deploy": false
 	},
@@ -170,49 +155,7 @@
 	"ProxypUSD": {
 		"deploy": false
 	},
-	"TokenStatepBTC": {
-		"deploy": false
-	},
-	"ProxypBTC": {
-		"deploy": false
-	},
-	"PynthpBTC": {
-		"deploy": false
-	},
-	"TokenStatepETH": {
-		"deploy": false
-	},
-	"ProxypETH": {
-		"deploy": false
-	},
-	"PynthpETH": {
-		"deploy": false
-	},
-	"TokenStateiBTC": {
-		"deploy": false
-	},
-	"ProxyiBTC": {
-		"deploy": false
-	},
-	"PynthiBTC": {
-		"deploy": false
-	},
-	"TokenStateiETH": {
-		"deploy": false
-	},
-	"ProxyiETH": {
-		"deploy": false
-	},
-	"PynthiETH": {
-		"deploy": false
-	},
-	"TokenStatepAUD": {
-		"deploy": false
-	},
-	"ProxypAUD": {
-		"deploy": false
-	},
-	"PynthpAUD": {
+	"ExternalRateAggregator": {
 		"deploy": false
 	}
 }

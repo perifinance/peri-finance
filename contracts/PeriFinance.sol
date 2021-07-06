@@ -15,6 +15,9 @@ contract PeriFinance is BasePeriFinance {
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
 
+    address public minterRole;
+    address public inflationMinter;
+
     // ========== CONSTRUCTOR ==========
 
     constructor(
@@ -22,8 +25,11 @@ contract PeriFinance is BasePeriFinance {
         TokenState _tokenState,
         address _owner,
         uint _totalSupply,
-        address _resolver
-    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver) {}
+        address _resolver,
+        address _minterRole
+    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver) {
+        minterRole = _minterRole;
+    }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
@@ -86,13 +92,16 @@ contract PeriFinance is BasePeriFinance {
         return exchanger().settle(messageSender, currencyKey);
     }
 
-    function mint() external issuanceActive returns (bool) {
+    function inflationalMint(uint _networkDebtShare) external issuanceActive returns (bool) {
+        require(msg.sender == inflationMinter, "Not allowed to mint");
+        require(SafeDecimalMath.unit() >= _networkDebtShare, "Invalid network debt share");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
         uint supplyToMint = _supplySchedule.mintableSupply();
+        supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply
@@ -123,12 +132,26 @@ contract PeriFinance is BasePeriFinance {
         return true;
     }
 
+    function mint(address _user, uint _amount) external optionalProxy returns (bool) {
+        require(minterRole != address(0), "Mint is not available");
+        require(minterRole == messageSender, "Caller is not allowed to mint");
+
+        // It won't change totalsupply since it is only for bridge purpose.
+        tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
+
+        emitTransfer(address(0), _user, _amount);
+
+        return true;
+    }
+
     function liquidateDelinquentAccount(address account, uint pusdAmount)
         external
         systemActive
         optionalProxy
         returns (bool)
     {
+        _notImplemented();
+
         (uint totalRedeemed, uint amountLiquidated) =
             issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
 
@@ -149,6 +172,15 @@ contract PeriFinance is BasePeriFinance {
         // transfer all of RewardEscrow's balance to RewardEscrowV2
         // _internalTransfer emits the transfer event
         _internalTransfer(address(rewardEscrow()), address(rewardEscrowV2()), rewardEscrowBalance);
+    }
+
+    function setMinterRole(address _newMinter) external onlyOwner {
+        // If address is set to zero address, mint is not prohibited
+        minterRole = _newMinter;
+    }
+
+    function setinflationMinter(address _newinflationMinter) external onlyOwner {
+        inflationMinter = _newinflationMinter;
     }
 
     // ========== EVENTS ==========

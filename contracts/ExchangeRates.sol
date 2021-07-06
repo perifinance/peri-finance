@@ -16,6 +16,10 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
 import "./interfaces/IExchanger.sol";
 
+interface IExternalRateAggregator {
+    function getRateAndUpdatedTime(bytes32 _currencyKey) external view returns (uint, uint);
+}
+
 // https://docs.peri.finance/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
@@ -26,6 +30,10 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     // The address of the oracle which pushes rate updates to this contract
     address public oracle;
+
+    address public externalRateAggregator;
+
+    mapping(bytes32 => bool) public currencyByExternal;
 
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
@@ -74,6 +82,14 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function setOracle(address _oracle) external onlyOwner {
         oracle = _oracle;
         emit OracleUpdated(oracle);
+    }
+
+    function setExternalRateAggregator(address _aggregator) external onlyOwner {
+        externalRateAggregator = _aggregator;
+    }
+
+    function setCurrencyToExternalAggregator(bytes32 _currencyKey, bool _set) external onlyOwner {
+        currencyByExternal[_currencyKey] = _set;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -587,6 +603,16 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
+        if (currencyByExternal[currencyKey]) {
+            require(externalRateAggregator != address(0), "External price aggregator is not set yet");
+
+            IExternalRateAggregator externalRateAggregator = IExternalRateAggregator(externalRateAggregator);
+
+            (uint rate, uint time) = externalRateAggregator.getRateAndUpdatedTime(currencyKey);
+
+            return RateAndUpdatedTime({rate: uint216(rate), time: uint40(time)});
+        }
+
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
         if (aggregator != AggregatorV2V3Interface(0)) {

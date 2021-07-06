@@ -161,13 +161,10 @@
 	"USDC": {
 		"deploy": false
 	},
-	"TempExchangeRateStorageKovan": {
-		"deploy": false
-	},
-	"PERIUniswapV2": {
-		"deploy": false
-	},
 	"ProxyERC20pUSD": {
+		"deploy": false
+	},
+	"ExternalRateAggregator": {
 		"deploy": false
 	}
 }

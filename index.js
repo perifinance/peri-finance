@@ -106,7 +106,7 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1623312000, // Thursday, June 10, 2021 5:00:00 PM GMT+09:00
+	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
@@ -127,6 +127,7 @@ const knownAccounts = {
 	rinkeby: [],
 	kovan: [],
 	mumbai: [],
+	polygon: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -140,7 +141,7 @@ const defaults = {
 		.mul(w3utils.toBN(1e18))
 		.div(w3utils.toBN(4))
 		.toString(), // 1/4 = 0.25
-	USDC_QUOTA: w3utils
+	MAX_EXTERNAL_TOKEN_QUOTA: w3utils
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
@@ -168,11 +169,34 @@ const defaults = {
 		kovan: '0x9B2fE385cEDea62D839E4dE89B0A23EF4eacC717',
 		rinkeby: '0xEDC0C23864B041607D624E2d9a67916B6cf40F7a',
 		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
+		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
+		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
+		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 	},
-	INITIAL_ISSUANCE: w3utils.toWei(`${20e6}`),
+	DAI_ERC20_ADDRESSES: {
+		// TODO should be changed later after implementing DAI
+		mainnet: constants.ZERO_ADDRESS,
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+	},
+	MINTER_ROLE_ADDRESS: {
+		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+	},
+	CHILD_CHAIN_MANAGER_ADDRESS: {
+		mainnet: constants.ZERO_ADDRESS,
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
+	},
+	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,

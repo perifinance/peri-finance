@@ -103,7 +103,9 @@ interface IPeriFinance {
         bytes32 trackingCode
     ) external returns (uint amountReceived, IVirtualPynth vPynth);
 
-    function mint() external returns (bool);
+    function mint(address _user, uint _amount) external returns (bool);
+
+    function inflationalMint(uint _networkDebtShare) external returns (bool);
 
     function settle(bytes32 currencyKey)
         external

@@ -27,8 +27,9 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	// Note: require this here as silent error is detected on require that impacts pretty-error
 	const solc = require('solc');
 
-	const networkScanKey =
-		network !== 'mumbai' ? process.env.ETHERSCAN_KEY : process.env.POLYGONSCAN_KEY;
+	const networkScanKey = !['mumbai', 'polygon'].includes(network)
+		? process.env.ETHERSCAN_KEY
+		: process.env.POLYGONSCAN_KEY;
 
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });

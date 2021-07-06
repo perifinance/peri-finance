@@ -33,8 +33,9 @@
 			},
 			"SystemSettings": {
 				"address": "0xf1ee0C81Be9BCd0fab3F7f8d8d1a615750EBa086",
-				"status": "current",
-				"keccak256": "0x822de5b17ce303c0032b719d572ef04e6eec25f3844762ab344cd18659c0e349"
+				"status": "replaced",
+				"keccak256": "0x822de5b17ce303c0032b719d572ef04e6eec25f3844762ab344cd18659c0e349",
+				"replaced_in": "v0.0.2"
 			},
 			"SystemStatus": {
 				"address": "0x5Cca81fb3ec8132019AA7314C498B58c19e05471",
@@ -43,8 +44,9 @@
 			},
 			"ExchangeRates": {
 				"address": "0x5B8E6aA4d5a9aF951A14B5B9b1C13F4743eD56f0",
-				"status": "current",
-				"keccak256": "0x75f4faea2e3a456c966c4f8270cec8c6adc8699f06eae92bc004381b08f11fdb"
+				"status": "replaced",
+				"keccak256": "0x75f4faea2e3a456c966c4f8270cec8c6adc8699f06eae92bc004381b08f11fdb",
+				"replaced_in": "v0.0.2"
 			},
 			"RewardEscrow": {
 				"address": "0x0a09c979923976947e44dD3dd6165FD6dEE25c14",
@@ -123,8 +125,9 @@
 			},
 			"PeriFinance": {
 				"address": "0xa9CF7323a1c12C2CdAd3456E343cf9B93272045d",
-				"status": "current",
-				"keccak256": "0xd996e7625ab318dee1ff8a6da810ec5a520515f04738e68890211197d0f1e7a1"
+				"status": "replaced",
+				"keccak256": "0xd996e7625ab318dee1ff8a6da810ec5a520515f04738e68890211197d0f1e7a1",
+				"replaced_in": "v0.0.2"
 			},
 			"ProxyPeriFinance": {
 				"address": "0x7f92bcB8749BB6a8141b4756aF6005b9EE981A31",
@@ -283,78 +286,137 @@
 			},
 			"TokenStatepBTC": {
 				"address": "0x49f469dd43041d04cE66e32c726df5860484F9FC",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxypBTC": {
 				"address": "0xa4FD9C0A85DA063a13ee71321BE181eD53BC08dF",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthpBTC": {
 				"address": "0xBAAf974B16bc2FF964253791D9053a5422d1831C",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"TokenStatepETH": {
 				"address": "0xe50A4D42f9f28fBBAdbF5A6C4d1361665DB488Ad",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxypETH": {
 				"address": "0x0a01809bbc19c9a2d27F6D46de329E92E3cf9A28",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthpETH": {
 				"address": "0x5C4F2237B65d60145ff7866AB64464965034e8e4",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xe559345af5cb7e02d4ef604a2ebfd7bfe9bf1ae13bf30d8619eebb1bf60a6fb5"
 			},
 			"TokenStateiBTC": {
 				"address": "0x6C0755B081Ff1292f58a91264ea41Ed7cAAD47C8",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxyiBTC": {
 				"address": "0x1bbd5DE4D315c8D467866d858E78164F1E6f0782",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthiBTC": {
 				"address": "0x58C9D87936130346C53b6Eb8A563aFE42d67531D",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x9c32333fd9f2d0e71ba36cbc148a670babb978a7e96990f147c1bfb343ca62e1"
 			},
 			"TokenStateiETH": {
 				"address": "0x1f8aD626bC259b961287102cd622fF5b4DE58Cf0",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxyiETH": {
 				"address": "0xBC5620119B7374fb06369745e440cacc87273c10",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthiETH": {
 				"address": "0xA3d426D8987c01aF34e01cf01093529c6d3fE72F",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x9c32333fd9f2d0e71ba36cbc148a670babb978a7e96990f147c1bfb343ca62e1"
 			},
 			"TokenStatepAUD": {
 				"address": "0x6Ae154027a17adBe3D7977fa24F6F6607b72810a",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x8219d476f8d152869fdb2412f0a91c58d0757ce6c4409efecffa6fc7cf930b1b"
 			},
 			"ProxypAUD": {
 				"address": "0xabcBb98B9F9fF6DA94398005fc6D16a9ef572642",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd0ea94a183b820f77257dce311edb9f8f3424106511569fe6927391efd82fad8"
 			},
 			"PynthpAUD": {
 				"address": "0x087f939C9272E321748054Ec55e086A159bdC4Da",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x285e984b77c9e187907fc3e970708594e9424bfb425f863ba2634ac2623e26bc"
+			}
+		}
+	},
+	"v0.0.2": {
+		"tag": "v0.0.2",
+		"fulltag": "v0.0.2",
+		"network": "mumbai",
+		"date": "2021-06-28T14:54:21+09:00",
+		"commit": "d280ce193124c0889326e13a645c04fb86a1bfb8",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xcB26A7785Ead42BFf552d202742FEa67eb702971",
+				"status": "current",
+				"keccak256": "0xbbd15a3edfb1c5ebe5cdbefb4103efdb07a242c382b31b198dc7dc3836704261"
+			},
+			"ExchangeRates": {
+				"address": "0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
+				"status": "current",
+				"keccak256": "0xecbb6fd2f9056480be816e38fefeafd56ac74ed8fc883c4ecb6e33b2aeb05b5b"
+			},
+			"PeriFinance": {
+				"address": "0x1049AB675aC9372ED90067909a87bE6EFd32dfDA",
+				"status": "replaced",
+				"keccak256": "0x06dd1bac0f93a806cbf2977740d620db11fc9c79badf8dbcd91615a400bb874a",
+				"replaced_in": "v0.0.5"
+			},
+			"ExternalRateAggregator": {
+				"address": "0xF04F0c23cB20e6718A17853959A05eD685499333",
+				"status": "current",
+				"keccak256": "0x173275bc90183dc1edcb20a2f5e6b241b9de5107e6d0dd08c7489cb6befef01b"
+			}
+		}
+	},
+	"v0.0.5": {
+		"tag": "v0.0.5",
+		"fulltag": "v0.0.5",
+		"network": "mumbai",
+		"date": "2021-06-28T14:54:21+09:00",
+		"commit": "d280ce193124c0889326e13a645c04fb86a1bfb8",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
+				"status": "replaced",
+				"keccak256": "0xf7892460866827bf742731e8bafc57436159a3f07565cf36fd27593ff4ab0a76",
+				"replaced_in": "v0.0.6"
+			}
+		}
+	},
+	"v0.0.6": {
+		"tag": "v0.0.6",
+		"fulltag": "v0.0.6",
+		"network": "mumbai",
+		"date": "2021-07-02T18:07:41+09:00",
+		"commit": "443327b1a46bb30ec7103c162c533afed39ef4e8",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x3Ef5BA1F779c702660697E0360256944D5e47A89",
+				"status": "current",
+				"keccak256": "0xf7892460866827bf742731e8bafc57436159a3f07565cf36fd27593ff4ab0a76"
 			}
 		}
 	}

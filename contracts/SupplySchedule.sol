@@ -25,32 +25,29 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Counter for number of weeks since the start of supply inflation
     uint public weekCounter;
 
-    // The number of PERI rewarded to the caller of PeriFinance.mint()
-    uint public minterReward = 200 * SafeDecimalMath.unit();
+    uint public minterReward = 0;
 
-    // The initial weekly inflationary supply is 75m / 52 until the start of the decay rate.
-    // 75e6 * SafeDecimalMath.unit() / 52
-    uint public constant INITIAL_WEEKLY_SUPPLY = 45000 ether;
+    uint public constant INITIAL_WEEKLY_SUPPLY = 76924719527063029689120;
 
     // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
 
     // Max PERI rewards for minter
-    uint public constant MAX_MINTER_REWARD = 200 * 1e18;
+    uint public constant MAX_MINTER_REWARD = 200 ether;
 
     // How long each inflation period is before mint can be called
     uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
-    uint public constant INFLATION_START_DATE = 1623312000; // Thursday, June 10, 2021 5:00:00 PM GMT+09:00
+    uint public constant INFLATION_START_DATE = 1626480000; // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
     uint public constant MINT_BUFFER = 1 days;
-    uint8 public constant SUPPLY_DECAY_START = 54; // Week 54 (1 Year)
-    uint8 public constant SUPPLY_DECAY_END = 254;
+    uint8 public constant SUPPLY_DECAY_START = 53;
+    uint8 public constant SUPPLY_DECAY_END = 173; // 40 months
 
     // Weekly percentage decay of inflationary supply from the first 40 weeks of the 75% inflation rate
     uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
 
     // Percentage growth of terminal supply per annum
-    uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 25000000000000000; // 2.5% pa
+    uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 50000000000000000; // 5% pa
 
     constructor(
         address _owner,

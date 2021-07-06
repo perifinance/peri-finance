@@ -18,7 +18,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     uint public constant MAX_ISSUANCE_RATIO = 1e18;
 
     // The fee period must be between 1 day and 60 days.
-    uint public constant MIN_FEE_PERIOD_DURATION = 60 minutes; // default 1 days;
+    uint public constant MIN_FEE_PERIOD_DURATION = 1 days;
     uint public constant MAX_FEE_PERIOD_DURATION = 60 days;
 
     uint public constant MAX_TARGET_THRESHOLD = 50;
@@ -41,7 +41,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     uint public constant MAX_CROSS_DOMAIN_GAS_LIMIT = 8e6;
     uint public constant MIN_CROSS_DOMAIN_GAS_LIMIT = 3e6;
 
-    uint public constant MAX_USDC_QUOTA = 1e18;
+    uint public constant MAX_EXTERNAL_TOKEN_QUOTA = 8e17;
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -130,8 +130,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getCrossDomainMessageGasLimit(gasLimitType);
     }
 
-    function usdcQuota() external view returns (uint) {
-        return getUSDCQuota();
+    function externalTokenQuota() external view returns (uint) {
+        return getExternalTokenQuota();
     }
 
     // ========== RESTRICTED ==========
@@ -271,12 +271,12 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit AggregatorWarningFlagsUpdated(_flags);
     }
 
-    function setUSDCQuota(uint _newQuota) external onlyOwner {
-        require(_newQuota <= MAX_USDC_QUOTA, "new quota exceeds maximum 100 percentage");
+    function setExternalTokenQuota(uint _newQuota) external onlyOwner {
+        require(_newQuota <= MAX_EXTERNAL_TOKEN_QUOTA, "new quota exceeds maximum 100 percentage");
 
-        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_USDC_QUOTA, _newQuota);
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_EXTERNAL_TOKEN_QUOTA, _newQuota);
 
-        emit USDCQuotaChanged(_newQuota);
+        emit ExternalTokenQuotaUpdated(_newQuota);
     }
 
     // ========== EVENTS ==========
@@ -295,5 +295,5 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event MinimumStakeTimeUpdated(uint minimumStakeTime);
     event DebtSnapshotStaleTimeUpdated(uint debtSnapshotStaleTime);
     event AggregatorWarningFlagsUpdated(address flags);
-    event USDCQuotaChanged(uint quota);
+    event ExternalTokenQuotaUpdated(uint quota);
 }

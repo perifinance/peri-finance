@@ -554,7 +554,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             // However, we considers the number 10**18 as the unit number in the contract, 0.2 would becomes 2*10**17.
             if (
                 accountUSDCDebtQuota.roundDownDecimal(12) >
-                getUSDCQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
+                getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
             ) {
                 return (false, false);
             }
