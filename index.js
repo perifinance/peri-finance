@@ -106,7 +106,7 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
+	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
@@ -178,10 +178,23 @@ const defaults = {
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 	},
 	DAI_ERC20_ADDRESSES: {
-		mainnet: '',
-		kovan: '',
-		mumbai: '',
-		polygon: '',
+		// TODO should be changed later after implementing DAI
+		mainnet: constants.ZERO_ADDRESS,
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+	},
+	MINTER_ROLE_ADDRESS: {
+		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+	},
+	CHILD_CHAIN_MANAGER_ADDRESS: {
+		mainnet: constants.ZERO_ADDRESS,
+		kovan: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
 	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,

@@ -727,9 +727,20 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
-				ZERO_ADDRESS, // address of childChainManager,
+				defaults.CHILD_CHAIN_MANAGER_ADDRESS[network], // address of childChainManager,
 			],
 		});
+
+		if (defaults.CHILD_CHAIN_MANAGER_ADDRESS[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'childChainManager',
+				expected: input => input === defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+				write: 'setChildChainManager',
+				writeArg: defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+			});
+		}
 	} else {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
@@ -741,9 +752,20 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
-				account,
+				defaults.MINTER_ROLE_ADDRESS[network],
 			],
 		});
+
+		if (defaults.MINTER_ROLE_ADDRESS[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'minterRole',
+				expected: input => input === defaults.MINTER_ROLE_ADDRESS[network],
+				write: 'setMinterRole',
+				writeArg: defaults.MINTER_ROLE_ADDRESS[network],
+			});
+		}
 	}
 
 	if (periFinance && proxyERC20PeriFinance) {
