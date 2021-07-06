@@ -25,8 +25,6 @@ import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IExternalTokenStakeManager.sol";
 
-import "hardhat/console.sol";
-
 interface IRewardEscrowV2 {
     // Views
     function balanceOf(address account) external view returns (uint);
@@ -664,7 +662,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bytes32 _currencyKey,
         uint _burnAmount
     ) external onlyPeriFinance {
-        uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false);
+        uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false, false);
 
         if (_currencyKey == PERI) {
             _requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
@@ -687,16 +685,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint burnAmount, uint amountToUnstake) =
             _amountsToFitClaimable(debtBalance, combinedStakedAmount, periCollateralToUSD);
 
-        _voluntaryBurnPynths(_from, burnAmount, false);
+        _voluntaryBurnPynths(_from, burnAmount, true, false);
 
         exTokenStakeManager().unstakeMultipleTokens(_from, amountToUnstake, pUSD);
     }
 
     function exit(address _from) external onlyPeriFinance {
-        _voluntaryBurnPynths(_from, 0, true);
+        _voluntaryBurnPynths(_from, 0, true, true);
 
         bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
-
         for (uint i = 0; i < tokenList.length; i++) {
             uint stakedAmount = exTokenStakeManager().stakedAmountOf(_from, tokenList[i], tokenList[i]);
 
@@ -868,7 +865,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _voluntaryBurnPynths(
         address from,
         uint amount,
-        bool burnToTarget
+        bool burnToTarget,
+        bool burnMax
     ) internal returns (uint remainingDebt) {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
@@ -885,8 +883,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
 
-        if (burnToTarget) {
-            amount = existingDebt.sub(maxIssuablePynthsForAccount);
+        if(burnMax) {
+            amount = existingDebt;
         }
 
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);

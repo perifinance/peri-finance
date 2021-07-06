@@ -19,7 +19,7 @@ const {
 	multiplyDecimal,
 	divideDecimal,
 	multiplyDecimalRound,
-	divideDecimalRound,
+	divideDecimalRound
 } = require('../utils')();
 
 const toBN = _val => web3.utils.toBN(String(_val));
@@ -576,9 +576,9 @@ contract('External token staking integrating test', async accounts => {
 			
 			beforeEach(async () => {
 				await periFinance.issuePynths(PERI, toUnit("200"), { from: users[0] });
-				await periFinance.issuePynths(USDC, toUnit("5"), { from: users[0]} );
-				await periFinance.issuePynths(DAI, toUnit("20"), { from: users[0]} );
-				await periFinance.issuePynths(KRW, toUnit("25"), { from: users[0]} );
+				await periFinance.issuePynths(USDC, toUnit("5"), { from: users[0] });
+				await periFinance.issuePynths(DAI, toUnit("20"), { from: users[0] });
+				await periFinance.issuePynths(KRW, toUnit("25"), { from: users[0] });
 			});
 
 			it("should unstake", async () => {
@@ -675,15 +675,15 @@ contract('External token staking integrating test', async accounts => {
 					assert.bnEqual(cRatio, targetRatio);
 				});
 				
-				it.only("should fit to claimable if ratio violates target ratio", async () => {
-					await fastForward(86401);
-
+				it("should fit to claimable if ratio violates target ratio", async () => {
 					await updateRates([PERI, USDC, DAI, KRW], ['0.1', '0.98', '1.001', '1100']);
 
 					// Debt: 550, USDC: 200, PERI: 1000
 					// C-Ratio: 218.1818181818182, Current Quota: 0.09090909090909091
-					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
 					const targetRatio = await issuer.issuanceRatio();
+					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+					const combinedStakedAmount_0_before = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_before = await periFinance.debtBalanceOf(users[0], pUSD);
 					assert.bnGt(cRatio_0_before, targetRatio);
 
 					await periFinance.fitToClaimable({ from: users[0] });
@@ -691,16 +691,170 @@ contract('External token staking integrating test', async accounts => {
 					// after fit,
 					// burn amount would be 250 pUSD.
 					// The debt would be 300, external token staking quota going to be: 0.16666666....
+					// No unstaking for external token
 					const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
 					const balance_pUSD_0_after = await pUSDContract.balanceOf(users[0]);
 					const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const combinedStakedAmount_0_after = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_after = await periFinance.debtBalanceOf(users[0], pUSD);
 					assert.bnEqual(cRatio_0_after, targetRatio);
 					assert.bnClose(balance_pUSD_0_after, toUnit("300"), "1" + "0".repeat(12));
 					assert.bnClose(quota_0_after, "166666666666666666", "1" + "0".repeat(12));
+					assert.bnEqual(combinedStakedAmount_0_before, combinedStakedAmount_0_after);
+					assert.bnEqual(debtBalance_0_after, debtBalance_0_before.sub(toUnit("250")));
 				});
-								
+
+				it("should fit to claimable if quota violates target ratio", async () => {
+					// Increase external tokens price for increasing its quota
+					await updateRates([PERI, USDC, DAI, KRW], ['0.2', '2', '2.5', '3000']);
+
+					// Current debt: 550000000179999999975, StakedAmounts[USD]: 513343800527472527200, Quota: 0.23333809107248596
+					const targetRatio = await issuer.issuanceRatio();
+					const targetQuota = await issuer.externalTokenLimit();
+					const stakedAmounts_0_before = await Promise.all(keys.map(_key => externalTokenStakeManager.stakedAmountOf(users[0], tokenInfos[_key].currencyKey, tokenInfos[_key].currencyKey)));					
+					// Staked Amounts:
+					// USDC: 20408164000000000000, DAI: 79920079920079920080, KRW: 90909090909090909
+					const combinedStakedAmount_0_before = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_before = await periFinance.debtBalanceOf(users[0], pUSD);
+					const balance_pUSD_0_before = await pUSDContract.balanceOf(users[0]);
+					const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+					
+					assert.bnLt(cRatio_0_before, targetRatio);
+					assert.bnGt(quota_0_before, targetQuota);
+
+					await periFinance.fitToClaimable({ from: users[0] });
+
+					// Expected values::
+					// burnAmount: 22919937619835160000, unstakeAmount: 91679750479340640000
+					const stakedAmounts_0_after = await Promise.all(keys.map(_key => externalTokenStakeManager.stakedAmountOf(users[0], tokenInfos[_key].currencyKey, tokenInfos[_key].currencyKey)));					
+					// Staked Amounts:
+					// USDC: 20408164000000000000, DAI: 79920079920079920080, KRW: 90909090909090909
+					const combinedStakedAmount_0_after = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_after = await periFinance.debtBalanceOf(users[0], pUSD);
+					const balance_pUSD_0_after = await pUSDContract.balanceOf(users[0]);
+					const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
+					
+					assert.bnClose(combinedStakedAmount_0_after, combinedStakedAmount_0_before.sub(toBN("91679750479340640000")), "1" + "0".repeat(12));
+					assert.bnClose(debtBalance_0_after, debtBalance_0_before.sub(toBN("22919937619835160000")), "10000");
+					assert.bnClose(balance_pUSD_0_after, balance_pUSD_0_before.sub(toBN("22919937619835160000")), "10000");					
+					assert.bnLt(cRatio_0_after, targetRatio);
+					assert.bnClose(quota_0_after, targetQuota);
+				});
+
+				it("should fit to claimable if quota violates target ratio and quota limit", async () => {
+					await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
+
+					const targetRatio = await issuer.issuanceRatio();
+					const targetQuota = await issuer.externalTokenLimit();
+					const combinedStakedAmount_0_before = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_before = await periFinance.debtBalanceOf(users[0], pUSD);
+					const balance_pUSD_0_before = await pUSDContract.balanceOf(users[0]);
+					const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+					
+					assert.bnGt(cRatio_0_before, targetRatio);
+					assert.bnGt(quota_0_before, targetQuota);
+
+					await periFinance.fitToClaimable({ from: users[0] });
+					
+					// Expected values::
+					// burnAmount: 518.75000018, stakedAmount: 488.3438005274726
+					const combinedStakedAmount_0_after = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+					const debtBalance_0_after = await periFinance.debtBalanceOf(users[0], pUSD);
+					const balance_pUSD_0_after = await pUSDContract.balanceOf(users[0]);
+					const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
+
+					assert.bnClose(combinedStakedAmount_0_after, combinedStakedAmount_0_before.sub(toUnit("488.3438005274726")), "1" + "0".repeat(12));
+					assert.bnClose(debtBalance_0_after, debtBalance_0_before.sub(toUnit("518.75000018")), "10000");
+					assert.bnClose(balance_pUSD_0_after, balance_pUSD_0_before.sub(toUnit("518.75000018")), "10000");
+					assert.bnClose(cRatio_0_after, targetRatio);
+					assert.bnClose(quota_0_after, targetQuota);
+				});
+				
+				it("should NOT run if user is already claimable", async () => {
+					await updateRates([PERI, USDC, DAI, KRW], ['0.2', '0.98', '1.001', '1100']);
+
+					const targetRatio = await issuer.issuanceRatio();
+					const targetQuota = await issuer.externalTokenLimit();
+					const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+					const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+					assert.bnLte(quota_0_before, targetQuota);
+					assert.bnLte(cRatio_0_before, targetRatio);
+
+					await assert.revert(
+						periFinance.fitToClaimable({ from: users[0] }),
+						"Account is already claimable"
+					);
+				});
+
 			});
 
+		});
+
+		describe("exit", () => {
+
+			beforeEach(async () => {
+				await periFinance.issuePynths(PERI, toUnit("200"), { from: users[0] });
+				await periFinance.issuePynths(USDC, toUnit("5"), { from: users[0] });
+				await periFinance.issuePynths(DAI, toUnit("20"), { from: users[0] });
+				await periFinance.issuePynths(KRW, toUnit("25"), { from: users[0] });
+			});
+			
+			it("should exit at no violation status", async () => {
+				await fastForward(86401);
+
+				await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
+
+				await periFinance.exit({ from: users[0] });
+
+				const combinedStakedAmount_0 = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+				const stakedAmounts_0 = await Promise.all(keys.map(_key => externalTokenStakeManager.stakedAmountOf(users[0], tokenInfos[_key].currencyKey, tokenInfos[_key].currencyKey)));
+				const debtBalance_0 = await periFinance.debtBalanceOf(users[0], pUSD);
+				const balance_pUSD_0 = await pUSDContract.balanceOf(users[0]);
+				const balances_0 = await Promise.all(keys.map(_key => tokenInfos[_key].contract.balanceOf(users[0])));
+				const transferable_0 = await periFinance.transferablePeriFinance(users[0]);
+				const balance_0_PERI = await periFinance.balanceOf(users[0]);
+
+				assert.bnEqual(combinedStakedAmount_0, toBN("0"));
+				stakedAmounts_0.forEach(_stakedAmount => assert.bnEqual(_stakedAmount, toBN("0")));
+				assert.bnEqual(debtBalance_0, toBN("0"));
+				assert.bnEqual(balance_pUSD_0, toBN("0"));
+				balances_0.forEach((_balance, _idx) => assert.bnEqual(_balance, "10000" + "0".repeat(tokenInfos[keys[_idx]].decimals)))			
+				assert.bnEqual(transferable_0, balance_0_PERI);
+			});
+
+			it("should exit at the violation status", async () => {
+				// Set the status to fit to claimable violation set
+				await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
+
+				const targetRatio = await issuer.issuanceRatio();
+				const targetQuota = await issuer.externalTokenLimit();
+				const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+				
+				assert.bnGt(cRatio_0_before, targetRatio);
+				assert.bnGt(quota_0_before, targetQuota);
+
+				await periFinance.exit({ from: users[0] });
+
+				const combinedStakedAmount_0 = await externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD);
+				const stakedAmounts_0 = await Promise.all(keys.map(_key => externalTokenStakeManager.stakedAmountOf(users[0], tokenInfos[_key].currencyKey, tokenInfos[_key].currencyKey)));
+				const debtBalance_0 = await periFinance.debtBalanceOf(users[0], pUSD);
+				const balance_pUSD_0 = await pUSDContract.balanceOf(users[0]);
+				const balances_0 = await Promise.all(keys.map(_key => tokenInfos[_key].contract.balanceOf(users[0])));
+				const transferable_0 = await periFinance.transferablePeriFinance(users[0]);
+				const balance_0_PERI = await periFinance.balanceOf(users[0]);
+
+				assert.bnEqual(combinedStakedAmount_0, toBN("0"));
+				stakedAmounts_0.forEach(_stakedAmount => assert.bnEqual(_stakedAmount, toBN("0")));
+				assert.bnEqual(debtBalance_0, toBN("0"));
+				assert.bnEqual(balance_pUSD_0, toBN("0"));
+				balances_0.forEach((_balance, _idx) => assert.bnEqual(_balance, "10000" + "0".repeat(tokenInfos[keys[_idx]].decimals)))			
+				assert.bnEqual(transferable_0, balance_0_PERI);				
+			});
 		});
 
 	});

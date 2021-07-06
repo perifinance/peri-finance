@@ -13,8 +13,6 @@ import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IStakingStateUSDC.sol";
 
-import "hardhat/console.sol";
-
 contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings, LimitedSetup(8 weeks) {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
