@@ -123,8 +123,9 @@
 			},
 			"PeriFinance": {
 				"address": "0xB90D26b3595bb55F5902498A2BBD8Ce88d46FC7f",
-				"status": "current",
-				"keccak256": "0x719075f1c2cdb0decf32fed850e1d7519981cd16b24e95454dbe08c9e396c73a"
+				"status": "replaced",
+				"keccak256": "0x719075f1c2cdb0decf32fed850e1d7519981cd16b24e95454dbe08c9e396c73a",
+				"replaced_in": "v0.0.6"
 			},
 			"DebtCache": {
 				"address": "0x2CC685fc9C1574fE8400548392067eC0B9eA1095",
@@ -158,8 +159,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0x8C49D4289069A15Ba802980d8607C175a54c4C6A",
-				"status": "current",
-				"keccak256": "0x5bc95b6e5b09d7208b35123f32bf28d61fb3501a6485bd734d7ccb65db00dcc3"
+				"status": "replaced",
+				"keccak256": "0x5bc95b6e5b09d7208b35123f32bf28d61fb3501a6485bd734d7ccb65db00dcc3",
+				"replaced_in": "v0.0.6"
 			},
 			"TokenStatepUSD": {
 				"address": "0xC5dC6240f48268Ce285f46E4cF37d1dEf5347845",
@@ -260,6 +262,25 @@
 				"address": "0x2Ed4000F7A041D2CBf45F4346d3EF6fD2416dd9B",
 				"status": "current",
 				"keccak256": "0xc87dc2abae3857b0e3cb155e7062aef82e010f2306250799bd91a6fa04fadb53"
+			}
+		}
+	},
+	"v0.0.6": {
+		"tag": "v0.0.6",
+		"fulltag": "v0.0.6",
+		"network": "polygon",
+		"date": "2021-07-06T10:36:57+09:00",
+		"commit": "2e7c717b21d8d04e57fe5b61aac527df247b9f18",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xfC342f81103c5295b3662cFFEBF6a1BB89af157f",
+				"status": "current",
+				"keccak256": "0x719075f1c2cdb0decf32fed850e1d7519981cd16b24e95454dbe08c9e396c73a"
+			},
+			"SupplySchedule": {
+				"address": "0x4671d3cC4318831cE230CE3b958DD1276982AA9B",
+				"status": "current",
+				"keccak256": "0x18293ecddf7f978d28dac90e232acf9adc8497415b31e7ed8ba296990a66b041"
 			}
 		}
 	}
