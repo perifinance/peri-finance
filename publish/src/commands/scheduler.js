@@ -30,6 +30,7 @@ const DEFAULTS = {
 	cronScheduleFormat: `0 0 0/8 ? * *`,
 	methodArgs: [],
 	feedUrls: [],
+	tryCnt: 10,
 };
 
 function getExistingContract({ network, deployment, contract, web3 }) {
@@ -60,6 +61,7 @@ const scheduler = async ({
 	privateKey,
 	providerUrl,
 	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
+	tryCnt = DEFAULTS.tryCnt,
 }) => {
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
@@ -129,7 +131,7 @@ const scheduler = async ({
 
 		let cnt = 0;
 		let success = false;
-		while (!success && cnt < 100) {
+		while (!success && cnt < tryCnt) {
 			try {
 				cnt++;
 				const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
@@ -242,6 +244,11 @@ module.exports = {
 			.option(
 				'-v, --private-key [value]',
 				'The private key to deploy with (only works in local mode, otherwise set in .env).'
+			)
+			.option(
+				'-tc, --try-cnt [value]',
+				'try count if scheduler failed to call contracts',
+				DEFAULTS.tryCnt
 			)
 			.action(scheduler),
 };
