@@ -62,6 +62,7 @@ const scheduler = async ({
 	providerUrl,
 	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
 	tryCnt = DEFAULTS.tryCnt,
+	publiclyCallable,
 }) => {
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
@@ -119,6 +120,7 @@ const scheduler = async ({
 			account,
 			gasPrice,
 			etherscanLinkPrefix,
+			publiclyCallable,
 		});
 
 	const schedulerContract = getExistingContract({ network, deployment, contract: scheduler, web3 });
@@ -249,6 +251,11 @@ module.exports = {
 				'-tc, --try-cnt [value]',
 				'try count if scheduler failed to call contracts',
 				DEFAULTS.tryCnt
+			)
+			.option(
+				'-p, --publicly-callable',
+				'Add this if scheduler method has to be called from other accounts',
+				false
 			)
 			.action(scheduler),
 };
