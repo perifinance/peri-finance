@@ -101,7 +101,7 @@ contract PeriFinanceToEthereum is PeriFinance {
     }
 
     function transfer(address to, uint value) external optionalProxy systemActive returns (bool) {
-        _transferByProxy(messageSender, to, value);
+        return _transferByProxy(messageSender, to, value);
     }
 
     function transferFrom(
