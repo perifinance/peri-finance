@@ -31,6 +31,7 @@ const DEFAULTS = {
 	methodArgs: [],
 	feedUrls: [],
 	tryCnt: 10,
+	priority: 'safeLow',
 };
 
 function getExistingContract({ network, deployment, contract, web3 }) {
@@ -51,6 +52,30 @@ function getExistingContract({ network, deployment, contract, web3 }) {
 	return new web3.eth.Contract(abi, address);
 }
 
+function estimatePolygonGasPice(network, priority) {
+	const gasStationUrl = `https://gasstation-${
+		network === 'polygon' ? 'mainnet' : network
+	}.matic.network`;
+
+	return axios
+		.get(gasStationUrl)
+		.then(({ data }) => {
+			const { safeLow, standard, fast, fastest } = data;
+
+			switch (priority) {
+				case 'fastest':
+					return fastest;
+				case 'fast':
+					return fast;
+				case 'standard':
+					return standard;
+				default:
+					return safeLow;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
 const scheduler = async ({
 	network = DEFAULTS.network,
 	methodCallGasLimit = DEFAULTS.methodCallGasLimit,
@@ -63,6 +88,7 @@ const scheduler = async ({
 	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
 	tryCnt = DEFAULTS.tryCnt,
 	publiclyCallable,
+	priority = DEFAULTS.priority,
 }) => {
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
@@ -112,6 +138,12 @@ const scheduler = async ({
 		web3.eth.defaultAccount = web3.eth.accounts.wallet[0].address;
 	}
 	const account = web3.eth.defaultAccount;
+
+	if (['polygon', 'mumbai'].includes(network)) {
+		gasPrice = await estimatePolygonGasPice(network, priority);
+		console.log(`using gas price : ${gasPrice}`);
+		if (!gasPrice) throw new Error('gas price is undefined');
+	}
 
 	const runStep = async opts =>
 		performTransactionalStep({
@@ -253,9 +285,15 @@ module.exports = {
 				DEFAULTS.tryCnt
 			)
 			.option(
-				'-p, --publicly-callable',
+				'-pc, --publicly-callable',
 				'Add this if scheduler method has to be called from other accounts',
 				false
+			)
+			.option(
+				'-p, --priority <value>',
+				'Only used for polygon networks, available options : ["safeLow", "standard", "fast", "fastest"]',
+				x => x.toLowerCase(),
+				DEFAULTS.priority
 			)
 			.action(scheduler),
 };
