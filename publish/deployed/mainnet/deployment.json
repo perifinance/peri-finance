@@ -974,8 +974,8 @@
 			"address": "0x8b6Ab9f79f8b9D89d1d7a269Ae8A780B5C04Ce61",
 			"source": "SystemStatus",
 			"link": "https://etherscan.io/address/0x8b6Ab9f79f8b9D89d1d7a269Ae8A780B5C04Ce61",
-			"timestamp": "2021-07-07T01:16:47.485Z",
-			"txn": "",
+			"timestamp": "2021-07-07T01:16:43.000Z",
+			"txn": "https://etherscan.io/tx/0xc3fed23d9ae6166dd1251e4390e676f9013d0c6ac53247cfc2ccd2aea65496bf",
 			"network": "mainnet"
 		},
 		"DelegateApprovalsEternalStorage": {
@@ -1694,8 +1694,8 @@
 			"address": "0xCA4f304F58dF2231ef04E63d85C88A9D46d0ca94",
 			"source": "StakingStateUSDC",
 			"link": "https://etherscan.io/address/0xCA4f304F58dF2231ef04E63d85C88A9D46d0ca94",
-			"timestamp": "2021-07-07T01:23:15.888Z",
-			"txn": "",
+			"timestamp": "2021-07-07T01:22:36.000Z",
+			"txn": "https://etherscan.io/tx/0x7132acbbd0da13b17c367d1acfa810c155ad0a5269ff52957e2b36a962de30ba",
 			"network": "mainnet"
 		}
 	},
