@@ -190,5 +190,8 @@
 	},
 	"TradingRewards": {
 		"deploy": false
+	},
+	"StakingStateUSDC": {
+		"deploy": false
 	}
 }
