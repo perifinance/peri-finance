@@ -52,6 +52,26 @@ function getExistingContract({ network, deployment, contract, web3 }) {
 	return new web3.eth.Contract(abi, address);
 }
 
+function estimateEtherGasPice(priority) {
+	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
+
+	return axios
+		.get(gasStationUrl)
+		.then(({ data }) => {
+			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
+
+			switch (priority) {
+				case 'fast':
+					return FastGasPrice;
+				case 'standard':
+					return ProposeGasPrice;
+				default:
+					return SafeGasPrice;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
 function estimatePolygonGasPice(network, priority) {
 	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
 		network === 'polygon' ? 'network' : 'today'
@@ -150,6 +170,10 @@ const scheduler = async ({
 		while (!success && cnt < tryCnt) {
 			if (['polygon', 'mumbai'].includes(network)) {
 				gasPrice = await estimatePolygonGasPice(network, priority);
+				console.log(`using gas price : ${gasPrice}`);
+				if (!gasPrice) throw new Error('gas price is undefined');
+			} else {
+				gasPrice = await estimateEtherGasPice(priority);
 				console.log(`using gas price : ${gasPrice}`);
 				if (!gasPrice) throw new Error('gas price is undefined');
 			}
