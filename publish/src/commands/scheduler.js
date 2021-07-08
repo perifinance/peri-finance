@@ -53,9 +53,9 @@ function getExistingContract({ network, deployment, contract, web3 }) {
 }
 
 function estimatePolygonGasPice(network, priority) {
-	const gasStationUrl = `https://gasstation-${
-		network === 'polygon' ? 'mainnet' : network
-	}.matic.network`;
+	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
+		network === 'polygon' ? 'network' : 'today'
+	}`;
 
 	return axios
 		.get(gasStationUrl)
@@ -206,11 +206,14 @@ const scheduler = async ({
 						});
 					});
 				} else if (DEFAULTS.methodArgs.length > 0) {
+					const methodArgs = DEFAULTS.methodArgs.map(x => (isNaN(x) ? x : Web3.utils.toWei(x)));
+					console.log(`adding arguments : ${methodArgs}`);
+
 					await runStep({
 						contract: scheduler,
 						target: schedulerContract,
 						write: schedulerMethod,
-						writeArg: DEFAULTS.methodArgs,
+						writeArg: methodArgs,
 					});
 				} else {
 					await runStep({
