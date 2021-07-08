@@ -139,24 +139,6 @@ const scheduler = async ({
 	}
 	const account = web3.eth.defaultAccount;
 
-	if (['polygon', 'mumbai'].includes(network)) {
-		gasPrice = await estimatePolygonGasPice(network, priority);
-		console.log(`using gas price : ${gasPrice}`);
-		if (!gasPrice) throw new Error('gas price is undefined');
-	}
-
-	const runStep = async opts =>
-		performTransactionalStep({
-			gasLimit: methodCallGasLimit, // allow overriding of gasLimit
-			...opts,
-			account,
-			gasPrice,
-			etherscanLinkPrefix,
-			publiclyCallable,
-		});
-
-	const schedulerContract = getExistingContract({ network, deployment, contract: scheduler, web3 });
-
 	console.log('Starting Schedule');
 	schedule.scheduleJob(cronScheduleFormat, async () => {
 		console.log(`\n## scheduler name : ${scheduler}`);
@@ -166,6 +148,29 @@ const scheduler = async ({
 		let cnt = 0;
 		let success = false;
 		while (!success && cnt < tryCnt) {
+			if (['polygon', 'mumbai'].includes(network)) {
+				gasPrice = await estimatePolygonGasPice(network, priority);
+				console.log(`using gas price : ${gasPrice}`);
+				if (!gasPrice) throw new Error('gas price is undefined');
+			}
+
+			const runStep = async opts =>
+				performTransactionalStep({
+					gasLimit: methodCallGasLimit, // allow overriding of gasLimit
+					...opts,
+					account,
+					gasPrice,
+					etherscanLinkPrefix,
+					publiclyCallable,
+				});
+
+			const schedulerContract = getExistingContract({
+				network,
+				deployment,
+				contract: scheduler,
+				web3,
+			});
+
 			try {
 				cnt++;
 				const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
