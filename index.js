@@ -516,22 +516,22 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		owner: testnetOwner,
 		deployer: testnetOwner,
 		marketClosure: testnetOwner,
-		oracle: '0xac1e8B385230970319906C03A1d8567e3996d1d5',
+		oracle: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		fee: '0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF',
 		zero: '0x' + '0'.repeat(40),
 	};
 
 	const map = {
 		mainnet: Object.assign({}, base, {
-			owner: '0xEb3107117FEAd7de89Cd14D463D340A2E6917769',
-			deployer: '0xDe910777C787903F78C89e7a0bf7F4C435cBB1Fe',
+			owner: '0x918153D6e806dF9d4D33664D1cC580416171f720',
+			deployer: '0x918153D6e806dF9d4D33664D1cC580416171f720',
 			marketClosure: '0xC105Ea57Eb434Fbe44690d7Dec2702e4a2FBFCf7',
-			oracle: '0xaC1ED4Fabbd5204E02950D68b6FC8c446AC95362',
+			oracle: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		}),
 		kovan: Object.assign({}, base),
 		'kovan-ovm': Object.assign({}, base),
 		'mainnet-ovm': Object.assign({}, base, {
-			owner: '0xDe910777C787903F78C89e7a0bf7F4C435cBB1Fe',
+			owner: '0x918153D6e806dF9d4D33664D1cC580416171f720',
 		}),
 		rinkeby: Object.assign({}, base),
 		ropsten: Object.assign({}, base),
