@@ -1,6 +1,6 @@
 [
 	{
-		"name": "PeriQuickSwap",
+		"name": "PeriMaticQuickSwap",
 		"stakingToken": "0x98f675b60769abc732ee59685bffa19ea3c8e81c",
 		"rewardsToken": "ProxyERC20"
 	}
