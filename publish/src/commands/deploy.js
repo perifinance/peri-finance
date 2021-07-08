@@ -768,6 +768,17 @@ const deploy = async ({
 		}
 	}
 
+	if (defaults.INFLATION_MINTER[network] !== ZERO_ADDRESS) {
+		await runStep({
+			contract: 'PeriFinance',
+			target: periFinance,
+			read: 'inflationMinter',
+			expected: input => input === defaults.INFLATION_MINTER[network],
+			write: 'setinflationMinter',
+			writeArg: defaults.INFLATION_MINTER[network],
+		});
+	}
+
 	if (periFinance && proxyERC20PeriFinance) {
 		await runStep({
 			contract: 'ProxyERC20',
