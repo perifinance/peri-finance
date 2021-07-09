@@ -76,9 +76,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return stakingState.tokenActivated(_currencyKey);
     }
 
-    function getCurrencyKeyOrder()
-    external view
-    returns(bytes32[] memory) {
+    function getCurrencyKeyOrder() external view returns (bytes32[] memory) {
         return currencyKeyOrder;
     }
 
@@ -152,17 +150,15 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     /**
      * @notice Utils checking given two key arrays' value are matching each other(its order will not be considered).
      */
-    function _keyChecker(bytes32[] memory _keysA, bytes32[] memory _keysB)
-    internal pure 
-    returns (bool) {
-        if(_keysA.length != _keysB.length) {
+    function _keyChecker(bytes32[] memory _keysA, bytes32[] memory _keysB) internal pure returns (bool) {
+        if (_keysA.length != _keysB.length) {
             return false;
         }
 
-        for(uint i = 0; i < _keysA.length; i++) {
+        for (uint i = 0; i < _keysA.length; i++) {
             bool exist;
-            for(uint j = 0; j < _keysA.length; j++) {
-                if(_keysA[i] == _keysB[j]) {
+            for (uint j = 0; j < _keysA.length; j++) {
+                if (_keysA[i] == _keysB[j]) {
                     exist = true;
 
                     break;
@@ -170,7 +166,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             }
 
             // given currency key is not matched
-            if(!exist) {
+            if (!exist) {
                 return false;
             }
         }
@@ -187,7 +183,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint stakingAmountConverted = _toCurrency(_inputCurrency, _targetCurrency, _amount);
 
         uint targetDecimals = stakingState.tokenDecimals(_targetCurrency);
-        require(targetDecimals > 0 && targetDecimals <= 18, "Invalid decimal number");
+        require(targetDecimals <= 18, "Invalid decimal number");
         uint stakingAmountConvertedRoundedUp = stakingAmountConverted.roundUpDecimal(uint(18).sub(targetDecimals));
 
         require(
@@ -231,12 +227,12 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         bytes32[] memory currencyKeys = stakingState.getTokenCurrencyKeys();
 
         bytes32[] memory order;
-        if(!_keyChecker(currencyKeys, currencyKeyOrder)) {
+        if (!_keyChecker(currencyKeys, currencyKeyOrder)) {
             order = currencyKeys;
         } else {
             order = currencyKeyOrder;
         }
-        
+
         uint combinedStakedAmount = _combinedStakedAmountOf(_unstaker, _inputCurrency);
         require(combinedStakedAmount >= _amount, "Combined staked amount is not enough");
 
@@ -275,9 +271,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         address _unstaker,
         uint _amount,
         bytes32 _targetCurrency
-    ) internal {
+    ) internal tokenRegistered(_targetCurrency) {
         uint targetDecimals = stakingState.tokenDecimals(_targetCurrency);
-        require(targetDecimals > 0 && targetDecimals <= 18, "Invalid decimal number");
+        require(targetDecimals <= 18, "Invalid decimal number");
         uint unstakingAmountConvertedRoundedUp = _amount.roundUpDecimal(uint(18).sub(targetDecimals));
 
         stakingState.unstake(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedUp);
@@ -290,10 +286,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
     function setUnstakingOrder(bytes32[] calldata _order) external onlyOwner {
         bytes32[] memory currencyKeys = stakingState.getTokenCurrencyKeys();
-        
-        require(_keyChecker(currencyKeys, _order), 
-            "Given currency keys are not available");
-        
+
+        require(_keyChecker(currencyKeys, _order), "Given currency keys are not available");
+
         currencyKeyOrder = _order;
     }
 
@@ -321,7 +316,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     }
 
     function _tokenRegistered(bytes32 _currencyKey) internal view {
-        require(stakingState.tokenAddress(_currencyKey) != address(0), "Token is not registered");
+        require(stakingState.tokenAddress(_currencyKey) != address(0), "Target token is not registered");
     }
 
     modifier onlyIssuer() {

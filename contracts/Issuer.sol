@@ -637,6 +637,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bytes32 _currencyKey,
         uint _issueAmount
     ) external onlyPeriFinance {
+        _requireCurrencyKeyIsNotpUSD(_currencyKey);
+
         if (_currencyKey != PERI) {
             uint amountToStake = _issueAmount.divideDecimalRound(getIssuanceRatio());
 
@@ -662,13 +664,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bytes32 _currencyKey,
         uint _burnAmount
     ) external onlyPeriFinance {
+        _requireCurrencyKeyIsNotpUSD(_currencyKey);
+
         uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false, false);
 
         if (_currencyKey == PERI) {
             _requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
         }
 
-        if (_currencyKey != PERI && _currencyKey != pUSD) {
+        if (_currencyKey != PERI) {
             exTokenStakeManager().unstake(_from, _burnAmount.divideDecimalRound(getIssuanceRatio()), _currencyKey, pUSD);
         }
     }
@@ -774,6 +778,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _requireCanBurnOnBehalf(address burnForAddress, address from) internal view {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
+    }
+
+    function _requireCurrencyKeyIsNotpUSD(bytes32 _currencyKey) internal pure {
+        require(_currencyKey != pUSD, "pUSD is not staking coin");
     }
 
     function _requireNotExceedsQuotaLimit(
@@ -883,7 +891,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
         require(existingDebt > 0, "No debt to forgive");
 
-        if(burnMax) {
+        if (burnMax) {
             amount = existingDebt;
         }
 

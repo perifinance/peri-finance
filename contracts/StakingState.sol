@@ -59,7 +59,7 @@ contract StakingState is Owned, State {
         uint8 _decimals
     ) external onlyOwner {
         require(_tokenAddress != address(0), "Address cannot be empty");
-        require(targetTokens[_currencyKey].tokenAddress == address(0), "Token is already set");
+        require(targetTokens[_currencyKey].tokenAddress == address(0), "Token is already registered");
 
         if (targetTokens[_currencyKey].tokenAddress == address(0)) {
             tokenList.push(_currencyKey);
@@ -69,7 +69,7 @@ contract StakingState is Owned, State {
     }
 
     function setTokenActivation(bytes32 _currencyKey, bool _activate) external onlyOwner {
-        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target token is not set");
+        _requireTokenRegistered(_currencyKey);
 
         targetTokens[_currencyKey].activated = _activate;
     }
@@ -79,7 +79,7 @@ contract StakingState is Owned, State {
         address _account,
         uint _amount
     ) external onlyAssociatedContract {
-        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target token is not set");
+        _requireTokenRegistered(_currencyKey);
         require(targetTokens[_currencyKey].activated, "Target token is not activated");
 
         if (stakedAmountOf[_currencyKey][_account] <= 0 && _amount > 0) {
@@ -121,6 +121,10 @@ contract StakingState is Owned, State {
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
+
+    function _requireTokenRegistered(bytes32 _currencyKey) internal view {
+        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target token is not registered");
+    }
 
     function _incrementTotalStaker(bytes32 _currencyKey) internal {
         totalStakerCount[_currencyKey] = totalStakerCount[_currencyKey].add(1);
