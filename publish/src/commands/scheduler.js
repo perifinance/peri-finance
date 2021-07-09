@@ -170,7 +170,7 @@ const scheduler = async ({
 		let cnt = 0;
 		let success = false;
 		while (!success && cnt < tryCnt) {
-			console.log(`trying to execute ${cnt} times at ${new Date().toLocaleTimeString}`);
+			console.log(`trying to execute ${cnt} times at ${new Date().toLocaleString()}`);
 			try {
 				if (['polygon', 'mumbai'].includes(network)) {
 					gasPrice = await estimatePolygonGasPice(network, priority);
@@ -257,7 +257,7 @@ const scheduler = async ({
 					await sleep(3000);
 				}
 			} catch (e) {
-				console.log(`scheduler failed at ${new Date().toLocaleTimeString}`);
+				console.log(`scheduler failed at ${new Date().toLocaleString()}`);
 				console.log(e);
 				await sleep(3000);
 			}
