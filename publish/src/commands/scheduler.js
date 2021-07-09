@@ -54,6 +54,7 @@ function getExistingContract({ network, deployment, contract, web3 }) {
 
 function estimateEtherGasPice(priority) {
 	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
+	console.log(`requesting gas price for ether mainnet : ${gasStationUrl}`);
 
 	return axios
 		.get(gasStationUrl)
@@ -76,6 +77,7 @@ function estimatePolygonGasPice(network, priority) {
 	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
 		network === 'polygon' ? 'network' : 'today'
 	}`;
+	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
 		.get(gasStationUrl)
@@ -168,87 +170,94 @@ const scheduler = async ({
 		let cnt = 0;
 		let success = false;
 		while (!success && cnt < tryCnt) {
-			if (['polygon', 'mumbai'].includes(network)) {
-				gasPrice = await estimatePolygonGasPice(network, priority);
-				console.log(`using gas price : ${gasPrice}`);
-				if (!gasPrice) throw new Error('gas price is undefined');
-			} else {
-				gasPrice = await estimateEtherGasPice(priority);
-				console.log(`using gas price : ${gasPrice}`);
-				if (!gasPrice) throw new Error('gas price is undefined');
-			}
+			console.log(`trying to execute ${cnt} times at ${new Date().toLocaleTimeString}`);
+			try {
+				if (['polygon', 'mumbai'].includes(network)) {
+					gasPrice = await estimatePolygonGasPice(network, priority);
+					console.log(`using gas price : ${gasPrice}`);
+					if (!gasPrice) throw new Error('gas price is undefined');
+				} else {
+					gasPrice = await estimateEtherGasPice(priority);
+					console.log(`using gas price : ${gasPrice}`);
+					if (!gasPrice) throw new Error('gas price is undefined');
+				}
 
-			const runStep = async opts =>
-				performTransactionalStep({
-					gasLimit: methodCallGasLimit, // allow overriding of gasLimit
-					...opts,
-					account,
-					gasPrice,
-					etherscanLinkPrefix,
-					publiclyCallable,
+				const runStep = async opts =>
+					performTransactionalStep({
+						gasLimit: methodCallGasLimit, // allow overriding of gasLimit
+						...opts,
+						account,
+						gasPrice,
+						etherscanLinkPrefix,
+						publiclyCallable,
+					});
+
+				const schedulerContract = getExistingContract({
+					network,
+					deployment,
+					contract: scheduler,
+					web3,
 				});
 
-			const schedulerContract = getExistingContract({
-				network,
-				deployment,
-				contract: scheduler,
-				web3,
-			});
+				try {
+					cnt++;
+					const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
 
-			try {
-				cnt++;
-				const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
+					if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
+						const feedPriceArr = [];
 
-				if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
-					const feedPriceArr = [];
+						for (const feedUrl of DEFAULTS.feedUrls) {
+							const price = await requestPriceFeed(feedUrl);
+							feedPriceArr.push(price);
+						}
 
-					for (const feedUrl of DEFAULTS.feedUrls) {
-						const price = await requestPriceFeed(feedUrl);
-						feedPriceArr.push(price);
-					}
+						const feedKeyArr = DEFAULTS.methodArgs.map(toBytes32);
+						if (feedPriceArr.length !== feedKeyArr.length) {
+							throw new Error('must match the length of price and key');
+						}
 
-					const feedKeyArr = DEFAULTS.methodArgs.map(toBytes32);
-					if (feedPriceArr.length !== feedKeyArr.length) {
-						throw new Error('must match the length of price and key');
-					}
+						feedKeyArr.forEach(async (feedKey, index) => {
+							await runStep({
+								contract: scheduler,
+								target: schedulerContract,
+								read: 'getRateAndUpdatedTime',
+								readArg: feedKey,
+								expected: input => {
+									const rate = input[0];
+									const time = input[1];
+									if (rate === 0 || time === 0) return false;
+									// check if rate has changed or time has passed 5 mins
+									return rate === feedPriceArr[index] || time > now - 300;
+								},
+								write: schedulerMethod,
+								writeArg: [[feedKey], [feedPriceArr[index]], now],
+							});
+						});
+					} else if (DEFAULTS.methodArgs.length > 0) {
+						const methodArgs = DEFAULTS.methodArgs.map(x => (isNaN(x) ? x : Web3.utils.toWei(x)));
+						console.log(`adding arguments : ${methodArgs}`);
 
-					feedKeyArr.forEach(async (feedKey, index) => {
 						await runStep({
 							contract: scheduler,
 							target: schedulerContract,
-							read: 'getRateAndUpdatedTime',
-							readArg: feedKey,
-							expected: input => {
-								const rate = input[0];
-								const time = input[1];
-								if (rate === 0 || time === 0) return false;
-								// check if rate has changed or time has passed 5 mins
-								return rate === feedPriceArr[index] || time > now - 300;
-							},
 							write: schedulerMethod,
-							writeArg: [[feedKey], [feedPriceArr[index]], now],
+							writeArg: methodArgs,
 						});
-					});
-				} else if (DEFAULTS.methodArgs.length > 0) {
-					const methodArgs = DEFAULTS.methodArgs.map(x => (isNaN(x) ? x : Web3.utils.toWei(x)));
-					console.log(`adding arguments : ${methodArgs}`);
+					} else {
+						await runStep({
+							contract: scheduler,
+							target: schedulerContract,
+							write: schedulerMethod,
+						});
+					}
 
-					await runStep({
-						contract: scheduler,
-						target: schedulerContract,
-						write: schedulerMethod,
-						writeArg: methodArgs,
-					});
-				} else {
-					await runStep({
-						contract: scheduler,
-						target: schedulerContract,
-						write: schedulerMethod,
-					});
+					success = true;
+				} catch (e) {
+					console.log(e);
+					await sleep(3000);
 				}
-
-				success = true;
 			} catch (e) {
+				console.log(`scheduler failed at ${new Date().toLocaleTimeString}`);
 				console.log(e);
 				await sleep(3000);
 			}
@@ -323,7 +332,7 @@ module.exports = {
 			)
 			.option(
 				'-p, --priority <value>',
-				'Only used for polygon networks, available options : ["safeLow", "standard", "fast", "fastest"]',
+				'set setimated gas price, available options : ["safeLow", "standard", "fast", "fastest" (polygon only)]',
 				x => x.toLowerCase(),
 				DEFAULTS.priority
 			)
