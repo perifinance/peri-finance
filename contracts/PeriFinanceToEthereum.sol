@@ -11,8 +11,9 @@ contract PeriFinanceToEthereum is PeriFinance {
         address _owner,
         uint _totalSupply,
         address _resolver,
-        address _minterRole
-    ) public PeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _minterRole) {}
+        address _minterRole,
+        address _blacklistManager
+    ) public PeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _minterRole, _blacklistManager) {}
 
     function inflationalMint() external returns (bool) {
         _notImplemented();
@@ -100,7 +101,7 @@ contract PeriFinanceToEthereum is PeriFinance {
         _notImplemented();
     }
 
-    function transfer(address to, uint value) external optionalProxy systemActive returns (bool) {
+    function transfer(address to, uint value) external optionalProxy systemActive blacklisted(messageSender) returns (bool) {
         return _transferByProxy(messageSender, to, value);
     }
 
@@ -108,7 +109,7 @@ contract PeriFinanceToEthereum is PeriFinance {
         address from,
         address to,
         uint value
-    ) external optionalProxy systemActive returns (bool) {
+    ) external optionalProxy systemActive blacklisted(messageSender) blacklisted(from) returns (bool) {
         return _transferFromByProxy(messageSender, from, to, value);
     }
 }

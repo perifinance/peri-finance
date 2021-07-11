@@ -20,6 +20,10 @@ import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IVirtualPynth.sol";
 import "./interfaces/IStakingStateUSDC.sol";
 
+interface IBlacklistManager {
+    function flagged(address _account) external view returns (bool);
+}
+
 contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinance {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -40,6 +44,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
     bytes32 private constant CONTRACT_STAKINGSTATE_USDC = "StakingStateUSDC";
 
+    IBlacklistManager public blacklistManager;
+
     // ========== CONSTRUCTOR ==========
 
     constructor(
@@ -47,12 +53,15 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         TokenState _tokenState,
         address _owner,
         uint _totalSupply,
-        address _resolver
+        address _resolver,
+        address _blacklistManager
     )
         public
         ExternStateToken(_proxy, _tokenState, TOKEN_NAME, TOKEN_SYMBOL, _totalSupply, DECIMALS, _owner)
         MixinResolver(_resolver)
-    {}
+    {
+        blacklistManager = IBlacklistManager(_blacklistManager);
+    }
 
     // ========== VIEWS ==========
 
@@ -197,11 +206,23 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     // ========== MUTATIVE FUNCTIONS ==========
 
+    function setBlacklistManager(address _blacklistManager) external onlyOwner {
+        require(_blacklistManager != address(0), "address cannot be empty");
+
+        blacklistManager = IBlacklistManager(_blacklistManager);
+    }
+
     function exchange(
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+    )
+        external
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
+        optionalProxy
+        blacklisted(messageSender)
+        returns (uint amountReceived)
+    {
         _notImplemented();
         return exchanger().exchange(messageSender, sourceCurrencyKey, sourceAmount, destinationCurrencyKey, messageSender);
     }
@@ -211,7 +232,14 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+    )
+        external
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
+        optionalProxy
+        blacklisted(messageSender)
+        blacklisted(exchangeForAddress)
+        returns (uint amountReceived)
+    {
         _notImplemented();
         return
             exchanger().exchangeOnBehalf(
@@ -226,6 +254,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     function settle(bytes32 currencyKey)
         external
         optionalProxy
+        blacklisted(messageSender)
         returns (
             uint reclaimed,
             uint refunded,
@@ -242,7 +271,13 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 destinationCurrencyKey,
         address originator,
         bytes32 trackingCode
-    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+    )
+        external
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
+        optionalProxy
+        blacklisted(messageSender)
+        returns (uint amountReceived)
+    {
         _notImplemented();
         return
             exchanger().exchangeWithTracking(
@@ -263,7 +298,14 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 destinationCurrencyKey,
         address originator,
         bytes32 trackingCode
-    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+    )
+        external
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
+        optionalProxy
+        blacklisted(messageSender)
+        blacklisted(exchangeForAddress)
+        returns (uint amountReceived)
+    {
         _notImplemented();
         return
             exchanger().exchangeOnBehalfWithTracking(
@@ -277,7 +319,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
             );
     }
 
-    function transfer(address to, uint value) external optionalProxy systemActive returns (bool) {
+    function transfer(address to, uint value) external optionalProxy systemActive blacklisted(messageSender) returns (bool) {
         // Ensure they're not trying to exceed their locked amount -- only if they have debt.
         _canTransfer(messageSender, value);
 
@@ -291,7 +333,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address from,
         address to,
         uint value
-    ) external optionalProxy systemActive returns (bool) {
+    ) external optionalProxy systemActive blacklisted(messageSender) blacklisted(from) returns (bool) {
         // Ensure they're not trying to exceed their locked amount -- only if they have debt.
         _canTransfer(from, value);
 
@@ -300,23 +342,33 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) external issuanceActive optionalProxy {
+    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount)
+        external
+        issuanceActive
+        optionalProxy
+        blacklisted(messageSender)
+    {
         issuer().issuePynthsAndStakeUSDC(messageSender, _issueAmount, _usdcStakeAmount);
     }
 
-    function issueMaxPynths() external issuanceActive optionalProxy {
+    function issueMaxPynths() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().issueMaxPynths(messageSender);
     }
 
-    function issuePynthsAndStakeMaxUSDC(uint _issueAmount) external issuanceActive optionalProxy {
+    function issuePynthsAndStakeMaxUSDC(uint _issueAmount) external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().issuePynthsAndStakeMaxUSDC(messageSender, _issueAmount);
     }
 
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount) external issuanceActive optionalProxy {
+    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount)
+        external
+        issuanceActive
+        optionalProxy
+        blacklisted(messageSender)
+    {
         return issuer().burnPynthsAndUnstakeUSDC(messageSender, _burnAmount, _unstakeAmount);
     }
 
-    function burnPynthsAndUnstakeUSDCToTarget() external issuanceActive optionalProxy {
+    function burnPynthsAndUnstakeUSDCToTarget() external issuanceActive optionalProxy blacklisted(messageSender) {
         return issuer().burnPynthsAndUnstakeUSDCToTarget(messageSender);
     }
 
@@ -367,6 +419,16 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function _issuanceActive() private {
         systemStatus().requireIssuanceActive();
+    }
+
+    function _blacklisted(address _account) private {
+        require(address(blacklistManager) != address(0), "Required contract is not set yet");
+        require(!blacklistManager.flagged(_account), "Account is on blacklist");
+    }
+
+    modifier blacklisted(address _account) {
+        _blacklisted(_account);
+        _;
     }
 
     modifier exchangeActive(bytes32 src, bytes32 dest) {

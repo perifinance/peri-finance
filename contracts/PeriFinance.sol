@@ -26,8 +26,9 @@ contract PeriFinance is BasePeriFinance {
         address _owner,
         uint _totalSupply,
         address _resolver,
-        address _minterRole
-    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver) {
+        address _minterRole,
+        address _blacklistManager
+    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _blacklistManager) {
         minterRole = _minterRole;
     }
 
@@ -65,6 +66,7 @@ contract PeriFinance is BasePeriFinance {
         external
         exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
         optionalProxy
+        blacklisted(messageSender)
         returns (uint amountReceived, IVirtualPynth vPynth)
     {
         _notImplemented();
@@ -82,6 +84,7 @@ contract PeriFinance is BasePeriFinance {
     function settle(bytes32 currencyKey)
         external
         optionalProxy
+        blacklisted(messageSender)
         returns (
             uint reclaimed,
             uint refunded,
@@ -148,6 +151,7 @@ contract PeriFinance is BasePeriFinance {
         external
         systemActive
         optionalProxy
+        blacklisted(messageSender)
         returns (bool)
     {
         _notImplemented();
