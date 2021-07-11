@@ -104,9 +104,6 @@
 	"PeriFinance": {
 		"deploy": false
 	},
-	"Perifi": {
-		"deploy": false
-	},
 	"PeriFinanceEscrow": {
 		"deploy": false
 	},
@@ -192,6 +189,9 @@
 		"deploy": false
 	},
 	"StakingStateUSDC": {
+		"deploy": false
+	},
+	"BlacklistManager": {
 		"deploy": false
 	}
 }

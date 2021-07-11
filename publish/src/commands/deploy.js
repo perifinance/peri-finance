@@ -715,12 +715,18 @@ const deploy = async ({
 		args: [account, account],
 	});
 
+	const blacklistManager = await deployer.deployContract({
+		name: 'BlacklistManager',
+		source: 'BlacklistManager',
+		args: [account],
+	});
+
 	let periFinance;
 	if (['polygon', 'mumbai'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinanceToPolygon',
-			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver', 'BlacklistManager'],
 			args: [
 				addressOf(proxyERC20PeriFinance),
 				addressOf(tokenStatePeriFinance),
@@ -728,6 +734,7 @@ const deploy = async ({
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
 				defaults.CHILD_CHAIN_MANAGER_ADDRESS[network], // address of childChainManager,
+				addressOf(blacklistManager),
 			],
 		});
 
@@ -745,7 +752,7 @@ const deploy = async ({
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
-			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver'],
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver', 'BlacklistManager'],
 			args: [
 				addressOf(proxyERC20PeriFinance),
 				addressOf(tokenStatePeriFinance),
@@ -753,6 +760,7 @@ const deploy = async ({
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
 				defaults.MINTER_ROLE_ADDRESS[network],
+				addressOf(blacklistManager),
 			],
 		});
 
@@ -768,7 +776,18 @@ const deploy = async ({
 		}
 	}
 
-	if (defaults.INFLATION_MINTER[network] !== ZERO_ADDRESS) {
+	if (periFinance && blacklistManager) {
+		await runStep({
+			contract: 'PeriFinance',
+			target: periFinance,
+			read: 'blacklistManager',
+			expected: input => input !== ZERO_ADDRESS,
+			write: 'setBlacklistManager',
+			writeArg: addressOf(blacklistManager),
+		});
+	}
+
+	if (periFinance && defaults.INFLATION_MINTER[network] !== ZERO_ADDRESS) {
 		await runStep({
 			contract: 'PeriFinance',
 			target: periFinance,
