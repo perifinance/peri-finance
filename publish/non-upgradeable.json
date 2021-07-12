@@ -14,5 +14,7 @@
 	"PeriFinanceState",
 	"TokenState",
 	"ReadProxyAddressResolver",
-	"StakingStateUSDC"
+	"StakingStateUSDC",
+	"BlacklistManager",
+	"StakingState"
 ]
