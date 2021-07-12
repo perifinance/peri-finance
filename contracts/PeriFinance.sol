@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./BasePeriFinance.sol";
@@ -16,6 +16,7 @@ contract PeriFinance is BasePeriFinance {
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
 
     address public minterRole;
+    address public inflationMinter;
 
     // ========== CONSTRUCTOR ==========
 
@@ -25,8 +26,9 @@ contract PeriFinance is BasePeriFinance {
         address _owner,
         uint _totalSupply,
         address _resolver,
-        address _minterRole
-    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver) {
+        address _minterRole,
+        address _blacklistManager
+    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _blacklistManager) {
         minterRole = _minterRole;
     }
 
@@ -64,6 +66,7 @@ contract PeriFinance is BasePeriFinance {
         external
         exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
         optionalProxy
+        blacklisted(messageSender)
         returns (uint amountReceived, IVirtualPynth vPynth)
     {
         _notImplemented();
@@ -81,6 +84,7 @@ contract PeriFinance is BasePeriFinance {
     function settle(bytes32 currencyKey)
         external
         optionalProxy
+        blacklisted(messageSender)
         returns (
             uint reclaimed,
             uint refunded,
@@ -91,13 +95,16 @@ contract PeriFinance is BasePeriFinance {
         return exchanger().settle(messageSender, currencyKey);
     }
 
-    function inflationalMint() external issuanceActive returns (bool) {
+    function inflationalMint(uint _networkDebtShare) external issuanceActive returns (bool) {
+        require(msg.sender == inflationMinter, "Not allowed to mint");
+        require(SafeDecimalMath.unit() >= _networkDebtShare, "Invalid network debt share");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
         uint supplyToMint = _supplySchedule.mintableSupply();
+        supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply
@@ -144,6 +151,7 @@ contract PeriFinance is BasePeriFinance {
         external
         systemActive
         optionalProxy
+        blacklisted(messageSender)
         returns (bool)
     {
         (uint totalRedeemed, uint amountLiquidated) =

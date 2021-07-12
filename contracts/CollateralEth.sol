@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 pragma experimental ABIEncoderV2;
 
@@ -9,7 +9,6 @@ import "./interfaces/ICollateralEth.sol";
 
 // Internal references
 import "./CollateralState.sol";
-
 
 // This contract handles the payable aspects of eth loans.
 contract CollateralEth is Collateral, ICollateralEth, ReentrancyGuard {

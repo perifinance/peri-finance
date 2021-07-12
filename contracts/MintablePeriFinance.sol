@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./BasePeriFinance.sol";
@@ -12,8 +12,9 @@ contract MintablePeriFinance is BasePeriFinance {
         TokenState _tokenState,
         address _owner,
         uint _totalSupply,
-        address _resolver
-    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver) {}
+        address _resolver,
+        address _blacklistManager
+    ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _blacklistManager) {}
 
     /* ========== INTERNALS =================== */
 

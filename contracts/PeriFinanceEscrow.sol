@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./Owned.sol";
@@ -34,13 +34,17 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
 
     /* Limit vesting entries to disallow unbounded iteration over vesting schedules. */
     uint public constant MAX_VESTING_ENTRIES = 20;
-    
+
     /* Account address to send balance of purged accounts */
     address public addressToRefund;
 
     /* ========== CONSTRUCTOR ========== */
 
-    constructor(address _owner, IPeriFinance _periFinance, address _addressToRefund) public Owned(_owner) {
+    constructor(
+        address _owner,
+        IPeriFinance _periFinance,
+        address _addressToRefund
+    ) public Owned(_owner) {
         periFinance = _periFinance;
         addressToRefund = _addressToRefund;
     }
@@ -139,10 +143,7 @@ contract PeriFinanceEscrow is Owned, LimitedSetup(8 weeks), IHasBalance {
      * @notice Destroy the vesting information associated with an account.
      */
     function purgeAccount(address account) external onlyOwner onlyDuringSetup {
-        require(
-            addressToRefund != address(0),
-            "Refund address can not be zero address"
-        );
+        require(addressToRefund != address(0), "Refund address can not be zero address");
 
         delete vestingSchedules[account];
         totalVestedBalance = totalVestedBalance.sub(totalVestedAccountBalance[account]);

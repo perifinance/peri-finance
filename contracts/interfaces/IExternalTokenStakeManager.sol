@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 contract IExternalTokenStakeManager {
     function stake(
@@ -27,9 +27,7 @@ contract IExternalTokenStakeManager {
 
     function getTokenActivation(bytes32 _currencyKey) external view returns (bool);
 
-    function getCurrencyKeyOrder()
-    external view
-    returns(bytes32[] memory);
+    function getCurrencyKeyOrder() external view returns (bytes32[] memory);
 
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
 
