@@ -307,6 +307,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
     }
 
+    function setStakingState(address _stakingState) external onlyOwner {
+        stakingState = IStakingState(_stakingState);
+    }
+
+    function setStakingStateUSDC(address _stakingStateUSDC) external onlyOwner {
+        stakingStateUSDC = IStakingStateUSDC(_stakingStateUSDC);
+    }
+
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
         require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
     }
