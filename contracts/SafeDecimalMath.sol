@@ -191,4 +191,17 @@ library SafeDecimalMath {
     function roundDownDecimal(uint x, uint d) internal pure returns (uint) {
         return x.div(10**d).mul(10**d);
     }
+
+    /**
+     * @dev Round up the value with given number
+     */
+    function roundUpDecimal(uint x, uint d) internal pure returns (uint) {
+        uint _decimal = 10**d;
+
+        if (x % _decimal > 0) {
+            x = x.add(10**d);
+        }
+
+        return x.div(_decimal).mul(_decimal);
+    }
 }

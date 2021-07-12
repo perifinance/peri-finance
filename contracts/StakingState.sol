@@ -9,102 +9,133 @@ contract StakingState is Owned, State {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    address private TARGET_TOKEN;
-
-    mapping(address => uint) public stakedAmountOf;
-
-    uint public totalStakerCount;
-
-    uint public totalStakedAmount;
-
-    uint8 public decimals;
-
-    constructor(
-        address _owner,
-        address _associatedContract,
-        address _tokenAddress,
-        uint8 _decimals
-    ) public Owned(_owner) State(_associatedContract) {
-        TARGET_TOKEN = _tokenAddress;
-        decimals = _decimals;
+    struct TargetToken {
+        address tokenAddress;
+        uint8 decimals;
+        bool activated;
     }
+
+    mapping(bytes32 => TargetToken) public targetTokens;
+
+    mapping(bytes32 => mapping(address => uint)) public stakedAmountOf;
+
+    mapping(bytes32 => uint) public totalStakedAmount;
+
+    mapping(bytes32 => uint) public totalStakerCount;
+
+    bytes32[] public tokenList;
+
+    constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {}
 
     /* ========== VIEWER FUNCTIONS ========== */
 
-    function userStakingShare(address _account) public view returns (uint) {
-        uint _percentage =
-            stakedAmountOf[_account] == 0 || totalStakedAmount == 0
-                ? 0
-                : (stakedAmountOf[_account]).multiplyDecimalRound(totalStakedAmount);
+    function tokenInstance(bytes32 _currencyKey) internal view returns (IERC20) {
+        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target address is empty");
 
-        return _percentage;
+        return IERC20(targetTokens[_currencyKey].tokenAddress);
     }
 
-    function hasStaked(address _account) external view returns (bool) {
-        return stakedAmountOf[_account] > 0;
+    function tokenAddress(bytes32 _currencyKey) external view returns (address) {
+        return targetTokens[_currencyKey].tokenAddress;
     }
 
-    function tokenInstance() internal view returns (IERC20) {
-        require(TARGET_TOKEN != address(0), "Target address is empty");
-
-        return IERC20(TARGET_TOKEN);
+    function tokenDecimals(bytes32 _currencyKey) external view returns (uint8) {
+        return targetTokens[_currencyKey].decimals;
     }
 
-    function tokenAddress() external view returns (address) {
-        return TARGET_TOKEN;
+    function tokenActivated(bytes32 _currencyKey) external view returns (bool) {
+        return targetTokens[_currencyKey].activated;
+    }
+
+    function getTokenCurrencyKeys() external view returns (bytes32[] memory) {
+        return tokenList;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function setTokenAddress(address _tokenAddress) external onlyOwner {
-        require(_tokenAddress != address(0), "Address should not be empty");
+    function setTargetToken(
+        bytes32 _currencyKey,
+        address _tokenAddress,
+        uint8 _decimals
+    ) external onlyOwner {
+        require(_tokenAddress != address(0), "Address cannot be empty");
+        require(targetTokens[_currencyKey].tokenAddress == address(0), "Token is already registered");
 
-        TARGET_TOKEN = _tokenAddress;
-    }
-
-    function stake(address _account, uint _amount) external onlyAssociatedContract {
-        if (stakedAmountOf[_account] <= 0 && _amount > 0) {
-            _incrementTotalStaker();
+        if (targetTokens[_currencyKey].tokenAddress == address(0)) {
+            tokenList.push(_currencyKey);
         }
 
-        stakedAmountOf[_account] = stakedAmountOf[_account].add(_amount);
-        totalStakedAmount = totalStakedAmount.add(_amount);
-
-        emit Staking(_account, _amount, userStakingShare(_account));
+        targetTokens[_currencyKey] = TargetToken(_tokenAddress, _decimals, true);
     }
 
-    function unstake(address _account, uint _amount) external onlyAssociatedContract {
-        require(stakedAmountOf[_account] >= _amount, "User doesn't have enough staked amount");
-        require(totalStakedAmount >= _amount, "Not enough staked amount to withdraw");
+    function setTokenActivation(bytes32 _currencyKey, bool _activate) external onlyOwner {
+        _requireTokenRegistered(_currencyKey);
 
-        if (stakedAmountOf[_account].sub(_amount) == 0) {
-            _decrementTotalStaker();
+        targetTokens[_currencyKey].activated = _activate;
+    }
+
+    function stake(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external onlyAssociatedContract {
+        _requireTokenRegistered(_currencyKey);
+        require(targetTokens[_currencyKey].activated, "Target token is not activated");
+
+        if (stakedAmountOf[_currencyKey][_account] <= 0 && _amount > 0) {
+            _incrementTotalStaker(_currencyKey);
         }
 
-        stakedAmountOf[_account] = stakedAmountOf[_account].sub(_amount);
-        totalStakedAmount = totalStakedAmount.sub(_amount);
+        stakedAmountOf[_currencyKey][_account] = stakedAmountOf[_currencyKey][_account].add(_amount);
+        totalStakedAmount[_currencyKey] = totalStakedAmount[_currencyKey].add(_amount);
 
-        emit Unstaking(_account, _amount, userStakingShare(_account));
+        emit Staking(_currencyKey, _account, _amount);
     }
 
-    function refund(address _account, uint _amount) external onlyAssociatedContract returns (bool) {
-        uint decimalDiff = decimals < 18 ? 18 - decimals : decimals - 18;
+    function unstake(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external onlyAssociatedContract {
+        require(stakedAmountOf[_currencyKey][_account] >= _amount, "Account doesn't have enough staked amount");
+        require(totalStakedAmount[_currencyKey] >= _amount, "Not enough staked amount to withdraw");
 
-        return tokenInstance().transfer(_account, _amount.div(10**decimalDiff));
+        if (stakedAmountOf[_currencyKey][_account].sub(_amount) == 0) {
+            _decrementTotalStaker(_currencyKey);
+        }
+
+        stakedAmountOf[_currencyKey][_account] = stakedAmountOf[_currencyKey][_account].sub(_amount);
+        totalStakedAmount[_currencyKey] = totalStakedAmount[_currencyKey].sub(_amount);
+
+        emit Unstaking(_currencyKey, _account, _amount);
+    }
+
+    function refund(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external onlyAssociatedContract returns (bool) {
+        uint decimalDiff = targetTokens[_currencyKey].decimals < 18 ? 18 - targetTokens[_currencyKey].decimals : 0;
+
+        return tokenInstance(_currencyKey).transfer(_account, _amount.div(10**decimalDiff));
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
-    function _incrementTotalStaker() internal {
-        totalStakerCount = totalStakerCount.add(1);
+    function _requireTokenRegistered(bytes32 _currencyKey) internal view {
+        require(targetTokens[_currencyKey].tokenAddress != address(0), "Target token is not registered");
     }
 
-    function _decrementTotalStaker() internal {
-        totalStakerCount = totalStakerCount.sub(1);
+    function _incrementTotalStaker(bytes32 _currencyKey) internal {
+        totalStakerCount[_currencyKey] = totalStakerCount[_currencyKey].add(1);
+    }
+
+    function _decrementTotalStaker(bytes32 _currencyKey) internal {
+        totalStakerCount[_currencyKey] = totalStakerCount[_currencyKey].sub(1);
     }
 
     /* ========== EVENTS ========== */
 
-    event Staking(address indexed account, uint amount, uint percentage);
-    event Unstaking(address indexed account, uint amount, uint percentage);
+    event Staking(bytes32 currencyKey, address account, uint amount);
+    event Unstaking(bytes32 currencyKey, address account, uint amount);
 }

@@ -543,21 +543,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
-        if (periFinance().usdcStakedAmountOf(account) > 0) {
-            // USDC staked amount should be below of the USDC quota.
-            uint accountUSDCDebtQuota = issuer().currentUSDCDebtQuota(account);
-
-            // getUSDCQuota() returns the value indicates the limited ratio of USDC staking amount to debt.
-            // For example, if USDC Quota has been assigned to 20%, allowed maximum USDC staking amount would be
-            // (debt * 20 / 100) / issuanceRatio.
-            // With this case, returned value from getUSDCQuota() should represents 0.2.
-            // However, we considers the number 10**18 as the unit number in the contract, 0.2 would becomes 2*10**17.
-            if (
-                accountUSDCDebtQuota.roundDownDecimal(12) >
-                getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
-            ) {
-                return (false, false);
-            }
+        // External token staked amount should not over the quota limit.
+        uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
+        if (
+            accountExternalTokenQuota > getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
+        ) {
+            return (false, false);
         }
 
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).

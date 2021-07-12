@@ -1,28 +1,50 @@
 pragma solidity 0.5.16;
 
+import "./IERC20.sol";
+
 interface IStakingState {
     // Mutative
-    function stake(address _account, uint _amount) external;
+    function stake(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external;
 
-    function unstake(address _account, uint _amount) external;
+    function unstake(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external;
 
-    function refund(address _account, uint _amount) external returns (bool);
-
-    // Admin
-    function setTokenAddress(address _usdcAddress) external;
-
-    function tokenAddress() external view returns (address);
+    function refund(
+        bytes32 _currencyKey,
+        address _account,
+        uint _amount
+    ) external returns (bool);
 
     // View
-    function stakedAmountOf(address _account) external view returns (uint);
+    function targetTokens(bytes32 _currencyKey)
+        external
+        view
+        returns (
+            address tokenAddress,
+            uint8 decimals,
+            bool activated
+        );
 
-    function totalStakerCount() external view returns (uint);
+    function stakedAmountOf(bytes32 _currencyKey, address _account) external view returns (uint);
 
-    function totalStakedAmount() external view returns (uint);
+    function totalStakedAmount(bytes32 _currencyKey) external view returns (uint);
 
-    function userStakingShare(address _account) external view returns (uint);
+    function totalStakerCount(bytes32 _currencyKey) external view returns (uint);
 
-    function decimals() external view returns (uint8);
+    function tokenList(uint _index) external view returns (bytes32);
 
-    function hasStaked(address _account) external view returns (bool);
+    function tokenAddress(bytes32 _currencyKey) external view returns (address);
+
+    function tokenDecimals(bytes32 _currencyKey) external view returns (uint8);
+
+    function tokenActivated(bytes32 _currencyKey) external view returns (bool);
+
+    function getTokenCurrencyKeys() external view returns (bytes32[] memory);
 }

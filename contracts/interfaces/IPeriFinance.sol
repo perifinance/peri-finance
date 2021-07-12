@@ -26,6 +26,13 @@ interface IPeriFinance {
 
     function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);
 
+    function externalTokenQuota(
+        address _account,
+        uint _additionalpUSD,
+        uint _additionalExToken,
+        bool _isIssue
+    ) external view returns (uint);
+
     function remainingIssuablePynths(address issuer)
         external
         view
@@ -45,26 +52,16 @@ interface IPeriFinance {
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
-    function currentUSDCDebtQuota(address _account) external view returns (uint);
-
-    function usdcStakedAmountOf(address _account) external view returns (uint);
-
-    function usdcTotalStakedAmount() external view returns (uint);
-
-    function userUSDCStakingShare(address _account) external view returns (uint);
-
-    function totalUSDCStakerCount() external view returns (uint);
-
     // Mutative Functions
-    function issuePynthsAndStakeUSDC(uint _issueAmount, uint _usdcStakeAmount) external;
+    function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
 
     function issueMaxPynths() external;
 
-    function issuePynthsAndStakeMaxUSDC(uint _issueAmount) external;
+    function burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
 
-    function burnPynthsAndUnstakeUSDC(uint _burnAmount, uint _unstakeAmount) external;
+    function fitToClaimable() external;
 
-    function burnPynthsAndUnstakeUSDCToTarget() external;
+    function exit() external;
 
     function exchange(
         bytes32 sourceCurrencyKey,

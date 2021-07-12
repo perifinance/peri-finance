@@ -170,6 +170,7 @@ const setupContract = async ({
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
+			tryGetAddressOf('BlacklistManager'),
 		],
 		PeriFinance: [
 			tryGetAddressOf('ProxyERC20PeriFinance'),
@@ -177,6 +178,8 @@ const setupContract = async ({
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
+			owner,
+			tryGetAddressOf('BlacklistManager'),
 		],
 		MintablePeriFinance: [
 			tryGetAddressOf('ProxyERC20MintablePeriFinance'),
@@ -184,6 +187,7 @@ const setupContract = async ({
 			owner,
 			SUPPLY_100M,
 			tryGetAddressOf('AddressResolver'),
+			tryGetAddressOf('BlacklistManager'),
 		],
 		RewardsDistribution: [
 			owner,
@@ -240,8 +244,15 @@ const setupContract = async ({
 			0,
 		],
 		ExternalRateAggregator: [owner, oracle],
-		TempKovanOracle: [owner],
 		StakingStateUSDC: [owner, tryGetAddressOf('Issuer'), tryGetAddressOf('USDC')],
+		StakingState: [owner, owner],
+		ExternalTokenStakeManager: [
+			owner,
+			tryGetAddressOf('StakingState'),
+			tryGetAddressOf('StakingStateUSDC'),
+			tryGetAddressOf('AddressResolver'),
+		],
+		BlacklistManager: [owner],
 	};
 
 	let instance;
@@ -250,6 +261,7 @@ const setupContract = async ({
 			constructorArgs: args.length > 0 ? args : defaultArgs[contract],
 		});
 		// Show contracts creating for debugging purposes
+
 		if (process.env.DEBUG) {
 			log(
 				'Deployed',
@@ -566,6 +578,9 @@ const setupAllContracts = async ({
 	// Note: those with deps need to be listed AFTER their deps
 	const baseContracts = [
 		{ contract: 'AddressResolver' },
+		{
+			contract: 'BlacklistManager',
+		},
 		{ contract: 'SystemStatus' },
 		{ contract: 'ExchangeState' },
 		{ contract: 'FlexibleStorage', deps: ['AddressResolver'] },
@@ -691,6 +706,7 @@ const setupAllContracts = async ({
 				'TokenState',
 				'SystemStatus',
 				'ExchangeRates',
+				'BlacklistManager',
 			],
 		},
 		{
@@ -712,6 +728,7 @@ const setupAllContracts = async ({
 				'TokenState',
 				'SystemStatus',
 				'ExchangeRates',
+				'BlacklistManager',
 			],
 		},
 		{
@@ -733,6 +750,7 @@ const setupAllContracts = async ({
 				'RewardsDistribution',
 				'RewardEscrow',
 				'PeriFinanceState',
+				'BlacklistManager',
 			],
 		},
 		{
@@ -791,12 +809,14 @@ const setupAllContracts = async ({
 			contract: 'ExternalRateAggregator',
 		},
 		{
-			contract: 'TempKovanOracle',
-			source: 'TempExchangeRateStorageKovan',
-		},
-		{
 			contract: 'StakingStateUSDC',
 			source: 'StakingStateUSDC',
+		},
+		{
+			contract: 'StakingState',
+		},
+		{
+			contract: 'ExternalTokenStakeManager',
 		},
 	];
 
@@ -906,14 +926,22 @@ const setupAllContracts = async ({
 		})
 	);
 
-	if (returnObj['StakingStateUSDC'] && USDC) {
-		returnObj['StakingStateUSDC'].setUSDCAddress(USDC.address, { from: owner });
-	}
+	const DAI = await artifacts
+		.require('MockToken')
+		.new(...['Dai Stablecoin', 'DAI', '18'].concat({ from: owner }));
 
 	returnObj[`USDC`] = USDC;
+	returnObj['DAI'] = DAI;
 
-	// now invoke AddressResolver to set all addresses
+	if (returnObj['StakingState']) {
+		returnObj['StakingState'].setAssociatedContract(
+			returnObj['ExternalTokenStakeManager'].address,
+			{ from: owner }
+		);
+	}
+
 	if (returnObj['AddressResolver']) {
+		// now invoke AddressResolver to set all addresses
 		if (process.env.DEBUG) {
 			log(`Importing into AddressResolver:\n\t - ${Object.keys(returnObj).join('\n\t - ')}`);
 		}
