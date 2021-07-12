@@ -6,6 +6,7 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts } = require('./setup');
 
 const MockToken = artifacts.require('MockToken');
+const StakingStateUSDCMock = artifacts.require('StakingStateUSDC');
 
 const {
 	toBytes32,
@@ -1033,11 +1034,17 @@ contract('External token staking integrating test', async accounts => {
 
 	describe('Old USDC staking state migration', () => {
 		let inputs = [];
+		let stakingStateUSDCMock;
 
 		beforeEach(async () => {
-			await stakingStateUSDC.setAssociatedContract(owner, { from: owner });
+			stakingStateUSDCMock = await StakingStateUSDCMock.new(owner, owner, usdc.address);
+			await externalTokenStakeManager.setStakingStateUSDC(stakingStateUSDCMock.address, {
+				from: owner,
+			});
+
+			await stakingStateUSDCMock.setAssociatedContract(owner, { from: owner });
 			// assume that StakingStateUSDC has 30000 balance of USDC
-			await usdc.transfer(stakingStateUSDC.address, '30000' + '0'.repeat(6), {
+			await usdc.transfer(stakingStateUSDCMock.address, '30000' + '0'.repeat(6), {
 				from: deployerAccount,
 			});
 
@@ -1048,23 +1055,21 @@ contract('External token staking integrating test', async accounts => {
 			}
 
 			for (let i = 0; i < 333; i++) {
-				await stakingStateUSDC.stake(web3.eth.accounts.create(String(i)).address, inputs[i], {
+				await stakingStateUSDCMock.stake(web3.eth.accounts.create(String(i)).address, inputs[i], {
 					from: owner,
 				});
 			}
 
-			const stakersLength = await stakingStateUSDC.stakersLength();
+			const stakersLength = await stakingStateUSDCMock.stakersLength();
 			assert.bnEqual(stakersLength, toBN('333'));
 
-			await stakingStateUSDC.setAssociatedContract(externalTokenStakeManager.address, {
+			await stakingStateUSDCMock.setAssociatedContract(externalTokenStakeManager.address, {
 				from: owner,
 			});
 		});
 
 		it('should migrate', async () => {
-			// this.timeout(60000);	// set timeout 60s
-
-			const stakers = await stakingStateUSDC.getStakersByRange(0, 333);
+			const stakers = await stakingStateUSDCMock.getStakersByRange(0, 333);
 
 			const indexingNumber = 20;
 			const numOfIteration = parseInt(333 / 20 + 1);
@@ -1110,6 +1115,14 @@ contract('External token staking integrating test', async accounts => {
 					assert.bnEqual(toBN(inputs[_idx]), _new);
 				})
 			);
+
+			const balance_USDC_stakingStateUSDC_after = await usdc.balanceOf(
+				stakingStateUSDCMock.address
+			);
+			const balance_USDC_stakingState_after = await usdc.balanceOf(stakingState.address);
+
+			assert.bnEqual(balance_USDC_stakingStateUSDC_after, toBN('0'));
+			assert.bnEqual(balance_USDC_stakingState_after, toBN('30000' + '0'.repeat(6)));
 		});
 	});
 });

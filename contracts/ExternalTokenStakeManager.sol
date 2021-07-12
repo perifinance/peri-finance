@@ -305,6 +305,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             stakingStateUSDC.unstake(account, staked);
             stakingState.stake(USDC, account, staked);
         }
+
+        stakingStateUSDC.refund(address(stakingState), tokenInstance(USDC).balanceOf(address(stakingStateUSDC)).mul(10**12));
     }
 
     function setStakingState(address _stakingState) external onlyOwner {
