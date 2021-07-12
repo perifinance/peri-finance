@@ -331,23 +331,33 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynths(bytes32 _currencyKey, uint _issueAmount) external issuanceActive optionalProxy {
+    function issuePynths(bytes32 _currencyKey, uint _issueAmount)
+        external
+        issuanceActive
+        optionalProxy
+        blacklisted(messageSender)
+    {
         issuer().issuePynths(messageSender, _currencyKey, _issueAmount);
     }
 
-    function issueMaxPynths() external issuanceActive optionalProxy {
+    function issueMaxPynths() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().issueMaxPynths(messageSender);
     }
 
-    function burnPynths(bytes32 _currencyKey, uint _burnAmount) external issuanceActive optionalProxy {
+    function burnPynths(bytes32 _currencyKey, uint _burnAmount)
+        external
+        issuanceActive
+        optionalProxy
+        blacklisted(messageSender)
+    {
         issuer().burnPynths(messageSender, _currencyKey, _burnAmount);
     }
 
-    function fitToClaimable() external issuanceActive optionalProxy {
+    function fitToClaimable() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().fitToClaimable(messageSender);
     }
 
-    function exit() external issuanceActive optionalProxy {
+    function exit() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().exit(messageSender);
     }
 
