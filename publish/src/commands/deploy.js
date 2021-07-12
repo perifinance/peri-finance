@@ -1169,7 +1169,7 @@ const deploy = async ({
 	}
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
-	if (!USDC_ADDRESS) {
+	if (!USDC_ADDRESS || USDC_ADDRESS === ZERO_ADDRESS) {
 		if (['mainnet', 'polygon'].includes(network)) {
 			throw new Error('USDC address is not known');
 		}
@@ -1180,7 +1180,22 @@ const deploy = async ({
 			args: ['USDC', 'USDC', 6],
 		});
 
-		USDC_ADDRESS = USDC.options.address;
+		USDC_ADDRESS = addressOf(USDC);
+	}
+
+	let DAI_ADDRESS = (await getDeployParameter('DAI_ERC20_ADDRESSES'))[network];
+	if (!DAI_ADDRESS || DAI_ADDRESS === ZERO_ADDRESS) {
+		if (['mainnet', 'polygon'].includes(network)) {
+			throw new Error('DAI address is not known');
+		}
+
+		const DAI = await deployer.deployContract({
+			name: 'DAI',
+			source: 'MockToken',
+			args: ['DAI', 'DAI', 18],
+		});
+
+		DAI_ADDRESS = addressOf(DAI);
 	}
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
@@ -1189,7 +1204,6 @@ const deploy = async ({
 		name: `StakingStateUSDC`,
 		source: 'StakingStateUSDC',
 		args: [account, addressOf(issuer), USDC_ADDRESS],
-		force: addNewPynths,
 	});
 
 	if (stakingStateUSDC && issuer) {
@@ -1200,6 +1214,50 @@ const deploy = async ({
 			expected: input => input === addressOf(issuer),
 			write: 'setAssociatedContract',
 			writeArg: addressOf(issuer),
+		});
+	}
+
+	const stakingState = await deployer.deployContract({
+		name: `StakingState`,
+		source: 'StakingState',
+		args: [account, ZERO_ADDRESS],
+	});
+
+	const externalTokenStakeManager = await deployer.deployContract({
+		name: `ExternalTokenStakeManager`,
+		source: 'ExternalTokenStakeManager',
+		deps: ['AddressResolver', 'StakingState', 'StakingStateUSDC'],
+		args: [
+			account,
+			addressOf(stakingState),
+			addressOf(stakingStateUSDC),
+			addressOf(readProxyForResolver),
+		],
+	});
+
+	await runStep({
+		contract: `StakingState`,
+		target: stakingState,
+		read: 'associatedContract',
+		expected: input => input === addressOf(externalTokenStakeManager),
+		write: 'setAssociatedContract',
+		writeArg: addressOf(externalTokenStakeManager),
+	});
+
+	const stakingStateCurrencies = [
+		{ currencyKey: toBytes32('USDC'), decimal: '6', address: USDC_ADDRESS },
+		{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
+	];
+
+	for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
+		await runStep({
+			contract: `StakingState`,
+			target: stakingState,
+			read: 'targetTokens',
+			readArg: currencyKey,
+			expected: ({ tokenAddress, decimals }) => tokenAddress === address && decimal === decimals,
+			write: 'setTargetToken',
+			writeArg: [currencyKey, address, decimal],
 		});
 	}
 

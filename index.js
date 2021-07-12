@@ -178,11 +178,10 @@ const defaults = {
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 	},
 	DAI_ERC20_ADDRESSES: {
-		// TODO should be changed later after implementing DAI
-		mainnet: constants.ZERO_ADDRESS,
+		mainnet: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
 		kovan: constants.ZERO_ADDRESS,
-		mumbai: constants.ZERO_ADDRESS,
-		polygon: constants.ZERO_ADDRESS,
+		mumbai: '0xAcC78d249781EDb5feB50027971EF4D60f144325',
+		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
