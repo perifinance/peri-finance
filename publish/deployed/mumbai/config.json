@@ -146,6 +146,9 @@
 	"USDC": {
 		"deploy": false
 	},
+	"DAI": {
+		"deploy": false
+	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
@@ -153,6 +156,15 @@
 		"deploy": false
 	},
 	"ExternalRateAggregator": {
+		"deploy": false
+	},
+	"BlacklistManager": {
+		"deploy": false
+	},
+	"ExternalTokenStakeManager": {
+		"deploy": false
+	},
+	"StakingState": {
 		"deploy": false
 	}
 }
