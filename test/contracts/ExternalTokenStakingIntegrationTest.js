@@ -183,7 +183,24 @@ contract('External token staking integrating test', async accounts => {
 	});
 
 	describe('ExternalTokenStakeManager authorization', () => {
-		it('should only issuer is allowed to invoke', async () => {});
+		it('should only issuer is allowed to invoke', async () => {
+			it('should only issuer is allowed to invoke', async () => {
+				await assert.revert(
+					externalTokenStakeManager.stake(users[0], 10, USDC, pUSD, { from: users[0] }),
+					'Sender is not Issuer'
+				);
+
+				await assert.revert(
+					externalTokenStakeManager.unstake(users[0], 10, USDC, pUSD, { from: users[0] }),
+					'Sender is not Issuer'
+				);
+
+				await assert.revert(
+					externalTokenStakeManager.unstakeMultipleTokens(users[0], 10, pUSD, { from: users[0] }),
+					'Sender is not Issuer'
+				);
+			});
+		});
 	});
 
 	describe('Issuance', () => {
@@ -1011,6 +1028,88 @@ contract('External token staking integrating test', async accounts => {
 				);
 				assert.bnEqual(transferable_0, balance_0_PERI);
 			});
+		});
+	});
+
+	describe('Old USDC staking state migration', () => {
+		let inputs = [];
+
+		beforeEach(async () => {
+			await stakingStateUSDC.setAssociatedContract(owner, { from: owner });
+			// assume that StakingStateUSDC has 30000 balance of USDC
+			await usdc.transfer(stakingStateUSDC.address, '30000' + '0'.repeat(6), {
+				from: deployerAccount,
+			});
+
+			// let inputs = [];
+			for (let i = 0; i < 333; i++) {
+				const _input = String(parseInt(Math.random() * 1000 + 1)) + '0'.repeat(6);
+				inputs.push(_input);
+			}
+
+			for (let i = 0; i < 333; i++) {
+				await stakingStateUSDC.stake(web3.eth.accounts.create(String(i)).address, inputs[i], {
+					from: owner,
+				});
+			}
+
+			const stakersLength = await stakingStateUSDC.stakersLength();
+			assert.bnEqual(stakersLength, toBN('333'));
+
+			await stakingStateUSDC.setAssociatedContract(externalTokenStakeManager.address, {
+				from: owner,
+			});
+		});
+
+		it('should migrate', async () => {
+			// this.timeout(60000);	// set timeout 60s
+
+			const stakers = await stakingStateUSDC.getStakersByRange(0, 333);
+
+			const indexingNumber = 20;
+			const numOfIteration = parseInt(333 / 20 + 1);
+			let i = 0;
+			let n = 0;
+			let migratee = [];
+			while (1) {
+				let j = i + indexingNumber;
+				let _migratee = [];
+				let checker = false;
+				for (let k = i; k < j; k++) {
+					if (k === 333) {
+						checker = true;
+						break;
+					}
+
+					_migratee.push(stakers[k]);
+				}
+
+				migratee.push(_migratee);
+
+				if (checker) {
+					break;
+				}
+
+				i = j;
+				n++;
+
+				if (n > numOfIteration) {
+					throw 'Fail';
+				}
+			}
+
+			await Promise.all(
+				migratee.map(_migratee =>
+					externalTokenStakeManager.migrateStakedAmounts(_migratee, { from: owner })
+				)
+			);
+
+			await Promise.all(
+				stakers.map(async (_staker, _idx) => {
+					const _new = await stakingState.stakedAmountOf(USDC, _staker);
+					assert.bnEqual(toBN(inputs[_idx]), _new);
+				})
+			);
 		});
 	});
 });
