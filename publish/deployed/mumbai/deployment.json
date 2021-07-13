@@ -527,8 +527,8 @@
 			"address": "0x63f1Aff5905323eB930630c64763902cD7a033Fe",
 			"source": "ExternalTokenStakeManager",
 			"link": "https://mumbai.polygonscan.com/address/0x63f1Aff5905323eB930630c64763902cD7a033Fe",
-			"timestamp": "2021-07-13T08:55:57.479Z",
-			"txn": "",
+			"timestamp": "2021-07-13T08:55:56.000Z",
+			"txn": "https://mumbai.polygonscan.com/tx/0x7fb8df351a78d5aa935332a566f3020053371e71d9abbca7abe00c4c3a2db32a",
 			"network": "mumbai"
 		},
 		"DAI": {
