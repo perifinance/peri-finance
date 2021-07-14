@@ -1223,42 +1223,47 @@ const deploy = async ({
 		args: [account, ZERO_ADDRESS],
 	});
 
-	const externalTokenStakeManager = await deployer.deployContract({
-		name: `ExternalTokenStakeManager`,
-		source: 'ExternalTokenStakeManager',
-		deps: ['AddressResolver', 'StakingState', 'StakingStateUSDC'],
-		args: [
-			account,
-			addressOf(stakingState),
-			addressOf(stakingStateUSDC),
-			addressOf(readProxyForResolver),
-		],
-	});
-
-	await runStep({
-		contract: `StakingState`,
-		target: stakingState,
-		read: 'associatedContract',
-		expected: input => input === addressOf(externalTokenStakeManager),
-		write: 'setAssociatedContract',
-		writeArg: addressOf(externalTokenStakeManager),
-	});
-
-	const stakingStateCurrencies = [
-		{ currencyKey: toBytes32('USDC'), decimal: '6', address: USDC_ADDRESS },
-		{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
-	];
-
-	for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
-		await runStep({
-			contract: `StakingState`,
-			target: stakingState,
-			read: 'targetTokens',
-			readArg: currencyKey,
-			expected: ({ tokenAddress, decimals }) => tokenAddress === address && decimal === decimals,
-			write: 'setTargetToken',
-			writeArg: [currencyKey, address, decimal],
+	if (stakingState) {
+		const externalTokenStakeManager = await deployer.deployContract({
+			name: `ExternalTokenStakeManager`,
+			source: 'ExternalTokenStakeManager',
+			deps: ['AddressResolver', 'StakingState', 'StakingStateUSDC'],
+			args: [
+				account,
+				addressOf(stakingState),
+				addressOf(stakingStateUSDC),
+				addressOf(readProxyForResolver),
+			],
 		});
+
+		if (externalTokenStakeManager) {
+			await runStep({
+				contract: `StakingState`,
+				target: stakingState,
+				read: 'associatedContract',
+				expected: input => input === addressOf(externalTokenStakeManager),
+				write: 'setAssociatedContract',
+				writeArg: addressOf(externalTokenStakeManager),
+			});
+
+			const stakingStateCurrencies = [
+				{ currencyKey: toBytes32('USDC'), decimal: '6', address: USDC_ADDRESS },
+				{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
+			];
+
+			for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
+				await runStep({
+					contract: `StakingState`,
+					target: stakingState,
+					read: 'targetTokens',
+					readArg: currencyKey,
+					expected: ({ tokenAddress, decimals }) =>
+						tokenAddress === address && decimal === decimals,
+					write: 'setTargetToken',
+					writeArg: [currencyKey, address, decimal],
+				});
+			}
+		}
 	}
 
 	console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
