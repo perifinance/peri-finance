@@ -15,6 +15,8 @@ const data = {
 	'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
 	polygon: require('./publish/deployed/polygon'),
 	mumbai: require('./publish/deployed/mumbai'),
+	bsctest: require('./publish/deployed/bsctest'),
+	bsc: require('./publish/deployed/bsc'),
 };
 
 const assets = require('./publish/assets.json');
@@ -22,7 +24,18 @@ const ovmIgnored = require('./publish/ovm-ignore.json');
 const nonUpgradeable = require('./publish/non-upgradeable.json');
 const releases = require('./publish/releases.json');
 
-const networks = ['local', 'kovan', 'rinkeby', 'ropsten', 'mainnet', 'goerli', 'polygon', 'mumbai'];
+const networks = [
+	'local',
+	'kovan',
+	'rinkeby',
+	'ropsten',
+	'mainnet',
+	'goerli',
+	'polygon',
+	'mumbai',
+	'bsctest',
+	'bsc',
+];
 
 const chainIdMapping = Object.entries({
 	1: {
@@ -68,6 +81,12 @@ const chainIdMapping = Object.entries({
 	80001: {
 		network: 'mumbai',
 	},
+	97: {
+		network: 'bsctest',
+	},
+	56: {
+		network: 'bsc',
+	},
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
 	return memo;
@@ -106,7 +125,7 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+	inflationStartTimestampInSecs: 1626415200, // Friday, July 16, 2021 3:00:00 PM GMT+09:00
 };
 
 const knownAccounts = {
@@ -128,6 +147,8 @@ const knownAccounts = {
 	kovan: [],
 	mumbai: [],
 	polygon: [],
+	bsctest: [],
+	bsc: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -145,7 +166,7 @@ const defaults = {
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
-	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
+	FEE_PERIOD_DURATION: '3600', // (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (3600 * 24 * 3).toString(), // 3 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
@@ -158,7 +179,7 @@ const defaults = {
 		crypto: w3utils.toWei('0.01'),
 		index: w3utils.toWei('0.01'),
 	},
-	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
+	MINIMUM_STAKE_TIME: (3600 / 2).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
 	AGGREGATOR_WARNING_FLAGS: {
 		mainnet: '0x4A5b9B4aD08616D11F3A402FF7cBEAcB732a76C6',
@@ -170,36 +191,48 @@ const defaults = {
 		rinkeby: '0xEDC0C23864B041607D624E2d9a67916B6cf40F7a',
 		mumbai: constants.ZERO_ADDRESS,
 		polygon: constants.ZERO_ADDRESS,
+		bsc: constants.ZERO_ADDRESS,
+		bsctest: constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
 		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+		bsctest: constants.ZERO_ADDRESS,
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
 		kovan: constants.ZERO_ADDRESS,
 		mumbai: '0xAcC78d249781EDb5feB50027971EF4D60f144325',
 		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+		bsc: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+		bsctest: constants.ZERO_ADDRESS,
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
 		kovan: constants.ZERO_ADDRESS,
 		mumbai: constants.ZERO_ADDRESS,
 		polygon: constants.ZERO_ADDRESS,
+		bsc: constants.ZERO_ADDRESS,
+		bsctest: constants.ZERO_ADDRESS,
 	},
 	INFLATION_MINTER: {
 		mainnet: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		kovan: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		mumbai: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		polygon: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		bsc: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		bsctest: '0x727bd962784C27C269E8287F9202312208B83FA7',
 	},
 	CHILD_CHAIN_MANAGER_ADDRESS: {
 		mainnet: constants.ZERO_ADDRESS,
 		kovan: constants.ZERO_ADDRESS,
 		mumbai: constants.ZERO_ADDRESS,
 		polygon: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
+		bsc: constants.ZERO_ADDRESS,
+		bsctest: constants.ZERO_ADDRESS,
 	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,

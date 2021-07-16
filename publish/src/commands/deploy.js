@@ -543,7 +543,7 @@ const deploy = async ({
 		args: [account],
 	});
 
-	if (!['mainnet', 'polygon'].includes(network) && systemStatus) {
+	if (!['mainnet', 'polygon', 'bsc'].includes(network) && systemStatus) {
 		// On testnet, give the deployer the rights to update status
 		await runStep({
 			contract: 'SystemStatus',
@@ -1170,7 +1170,7 @@ const deploy = async ({
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
 	if (!USDC_ADDRESS || USDC_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon'].includes(network)) {
+		if (['mainnet', 'polygon', 'bsc'].includes(network)) {
 			throw new Error('USDC address is not known');
 		}
 
@@ -1185,7 +1185,7 @@ const deploy = async ({
 
 	let DAI_ADDRESS = (await getDeployParameter('DAI_ERC20_ADDRESSES'))[network];
 	if (!DAI_ADDRESS || DAI_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon'].includes(network)) {
+		if (['mainnet', 'polygon', 'bsc'].includes(network)) {
 			throw new Error('DAI address is not known');
 		}
 
@@ -2004,7 +2004,10 @@ const deploy = async ({
 					);
 					// Then a new inverted pynth is being added (as there's no existing supply)
 					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-				} else if (!['mainnet', 'polygon'].includes(network) && forceUpdateInversePynthsOnTestnet) {
+				} else if (
+					!['mainnet', 'polygon', 'bsc'].includes(network) &&
+					forceUpdateInversePynthsOnTestnet
+				) {
 					// as we are on testnet and the flag is enabled, allow a mutative pricing change
 					console.log(
 						redBright(

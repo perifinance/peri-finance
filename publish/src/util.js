@@ -128,6 +128,9 @@ const getEtherscanLinkPrefix = network => {
 	if (['polygon', 'mumbai'].includes(network)) {
 		return `https://${network !== 'polygon' ? network + '.' : ''}polygonscan.com`;
 	}
+	if (['bsc', 'bsctest'].includes(network)) {
+		return `https://${network !== 'bsc' ? 'testnet.' : ''}bscscan.com`;
+	}
 	return `https://${network !== 'mainnet' ? network + '.' : ''}etherscan.io`;
 };
 
@@ -144,22 +147,29 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_POLYGON;
 		} else if (network === 'mumbai') {
 			providerUrl = process.env.PROVIDER_URL_MUMBAI;
+		} else if (network === 'bsc') {
+			providerUrl = process.env.PROVIDER_URL_BSC;
+		} else if (network === 'bsctest') {
+			providerUrl = process.env.PROVIDER_URL_BSCTEST;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey =
-		network === 'mainnet' ? process.env.DEPLOY_PRIVATE_KEY : process.env.TESTNET_DEPLOY_PRIVATE_KEY;
+	const privateKey = ['mainnet', 'polygon', 'bsc'].includes(network)
+		? process.env.DEPLOY_PRIVATE_KEY
+		: process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
 	const etherscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
 			: ['kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)
 			? `https://api-${network}.etherscan.io/api`
-			: network === 'polygon'
-			? 'https://api.polygonscan.com/api'
-			: 'https://api-testnet.polygonscan.com/api';
+			: ['bsc', 'bsctest'].includes(network)
+			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
+			: ['polygon', 'mumbai'].includes(network)
+			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
+			: '';
 
 	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
 
