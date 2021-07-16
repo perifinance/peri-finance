@@ -1275,7 +1275,18 @@ const deploy = async ({
 	});
 
 	if (externalRateAggregator) {
-		if (periFinance && defaults.ORACLE_ADDRESSES[network] !== ZERO_ADDRESS) {
+		if (exchangeRates) {
+			await runStep({
+				contract: 'ExchangeRates',
+				target: exchangeRates,
+				read: 'externalRateAggregator',
+				expected: input => input === addressOf(externalRateAggregator),
+				write: 'setExternalRateAggregator',
+				writeArg: addressOf(externalRateAggregator),
+			});
+		}
+
+		if (defaults.ORACLE_ADDRESSES[network] !== ZERO_ADDRESS) {
 			await runStep({
 				contract: 'ExternalRateAggregator',
 				target: externalRateAggregator,
