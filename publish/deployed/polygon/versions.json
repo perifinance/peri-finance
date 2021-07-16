@@ -98,8 +98,9 @@
 			},
 			"FeePool": {
 				"address": "0xE73C2f70aF6A339b4FdED7383b0Df6Aed7Bb6B77",
-				"status": "current",
-				"keccak256": "0x5051151c32b53cbe04377146dca3f8999aa3676ca7efa4a392693251b0abb8d5"
+				"status": "replaced",
+				"keccak256": "0x5051151c32b53cbe04377146dca3f8999aa3676ca7efa4a392693251b0abb8d5",
+				"replaced_in": "v0.0.9"
 			},
 			"FeePoolState": {
 				"address": "0x6dA90508E515DF133346b47be0176F7F9Ad48656",
@@ -281,6 +282,20 @@
 				"address": "0x4671d3cC4318831cE230CE3b958DD1276982AA9B",
 				"status": "current",
 				"keccak256": "0x18293ecddf7f978d28dac90e232acf9adc8497415b31e7ed8ba296990a66b041"
+			}
+		}
+	},
+	"v0.0.9": {
+		"tag": "v0.0.9",
+		"fulltag": "v0.0.9",
+		"network": "polygon",
+		"date": "2021-07-15T13:43:28+09:00",
+		"commit": "43e3637828ada3a6ebdc673813b4866db7691879",
+		"contracts": {
+			"FeePool": {
+				"address": "0x6E0Bff12512a94F3b1ECEBe08203FE7f8F8fAe64",
+				"status": "current",
+				"keccak256": "0xfc2904fc0740c6734d47efbc05e9368ba8f2fcc32f1387e61f62f6571589337e"
 			}
 		}
 	}

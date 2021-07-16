@@ -176,7 +176,7 @@ const scheduler = async ({
 					gasPrice = await estimatePolygonGasPice(network, priority);
 					console.log(`using gas price : ${gasPrice}`);
 					if (!gasPrice) throw new Error('gas price is undefined');
-				} else {
+				} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
 					gasPrice = await estimateEtherGasPice(priority);
 					console.log(`using gas price : ${gasPrice}`);
 					if (!gasPrice) throw new Error('gas price is undefined');

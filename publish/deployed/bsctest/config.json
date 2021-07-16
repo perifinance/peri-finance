@@ -1,155 +1,161 @@
 {
 	"AddressResolver": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralManagerState": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralEth": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralErc20": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralShort": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralStateErc20": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralStateEth": {
-		"deploy": true
+		"deploy": false
 	},
 	"CollateralStateShort": {
-		"deploy": true
+		"deploy": false
 	},
 	"ReadProxyAddressResolver": {
-		"deploy": true
+		"deploy": false
 	},
 	"DelegateApprovals": {
-		"deploy": true
+		"deploy": false
 	},
 	"DelegateApprovalsEternalStorage": {
-		"deploy": true
+		"deploy": false
 	},
 	"DebtCache": {
-		"deploy": true
+		"deploy": false
 	},
 	"Depot": {
-		"deploy": true
+		"deploy": false
 	},
 	"EscrowChecker": {
-		"deploy": true
+		"deploy": false
 	},
 	"EtherCollateral": {
-		"deploy": true
+		"deploy": false
 	},
 	"EtherCollateralpUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"ExchangeRates": {
-		"deploy": true
+		"deploy": false
 	},
 	"Exchanger": {
-		"deploy": true
+		"deploy": false
 	},
 	"ExchangeState": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePool": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePoolState": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePoolEternalStorage": {
-		"deploy": true
+		"deploy": false
 	},
 	"FlexibleStorage": {
-		"deploy": true
+		"deploy": false
 	},
 	"Issuer": {
-		"deploy": true
+		"deploy": false
 	},
 	"EternalStorageLiquidations": {
-		"deploy": true
+		"deploy": false
 	},
 	"Liquidations": {
-		"deploy": true
+		"deploy": false
 	},
 	"RewardEscrow": {
-		"deploy": true
+		"deploy": false
 	},
 	"RewardsDistribution": {
-		"deploy": true
+		"deploy": false
 	},
 	"SupplySchedule": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinanceEscrow": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinanceState": {
-		"deploy": true
+		"deploy": false
 	},
 	"SystemSettings": {
-		"deploy": true
+		"deploy": false
 	},
 	"SystemStatus": {
-		"deploy": true
+		"deploy": false
 	},
 	"PynthUtil": {
-		"deploy": true
+		"deploy": false
 	},
 	"DappMaintenance": {
-		"deploy": true
+		"deploy": false
 	},
 	"PynthpUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"ProxyERC20": {
-		"deploy": true
+		"deploy": false
 	},
 	"ProxyFeePool": {
-		"deploy": true
+		"deploy": false
 	},
 	"SafeDecimalMath": {
-		"deploy": true
+		"deploy": false
 	},
 	"Math": {
-		"deploy": true
+		"deploy": false
 	},
 	"TokenStatePeriFinance": {
-		"deploy": true
+		"deploy": false
 	},
 	"TokenStatepUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"TradingRewards": {
-		"deploy": true
+		"deploy": false
 	},
 	"RewardEscrowV2": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinanceBridgeToOptimism": {
-		"deploy": true
+		"deploy": false
 	},
 	"StakingStateUSDC": {
-		"deploy": true
+		"deploy": false
 	},
 	"ExternalRateAggregator": {
-		"deploy": true
+		"deploy": false
 	},
 	"ProxyERC20pUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"BlacklistManager": {
-		"deploy": true
+		"deploy": false
+	},
+	"USDC": {
+		"deploy": false
+	},
+	"DAI": {
+		"deploy": false
 	}
 }
