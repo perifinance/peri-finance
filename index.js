@@ -125,7 +125,7 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1626415200, // Friday, July 16, 2021 3:00:00 PM GMT+09:00
+	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
@@ -166,7 +166,7 @@ const defaults = {
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
-	FEE_PERIOD_DURATION: '3600', // (3600 * 24 * 7).toString(), // 1 week
+	FEE_PERIOD_DURATION: (3600 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (3600 * 24 * 3).toString(), // 3 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
@@ -179,7 +179,7 @@ const defaults = {
 		crypto: w3utils.toWei('0.01'),
 		index: w3utils.toWei('0.01'),
 	},
-	MINIMUM_STAKE_TIME: (3600 / 2).toString(), // 1 days
+	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
 	AGGREGATOR_WARNING_FLAGS: {
 		mainnet: '0x4A5b9B4aD08616D11F3A402FF7cBEAcB732a76C6',
