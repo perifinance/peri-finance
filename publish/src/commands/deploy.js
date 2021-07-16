@@ -787,14 +787,14 @@ const deploy = async ({
 		});
 	}
 
-	if (periFinance && defaults.INFLATION_MINTER[network] !== ZERO_ADDRESS) {
+	if (periFinance && defaults.INFLATION_MINTER_ADDRESSES[network] !== ZERO_ADDRESS) {
 		await runStep({
 			contract: 'PeriFinance',
 			target: periFinance,
 			read: 'inflationMinter',
-			expected: input => input === defaults.INFLATION_MINTER[network],
+			expected: input => input === defaults.INFLATION_MINTER_ADDRESSES[network],
 			write: 'setinflationMinter',
-			writeArg: defaults.INFLATION_MINTER[network],
+			writeArg: defaults.INFLATION_MINTER_ADDRESSES[network],
 		});
 	}
 
@@ -1268,11 +1268,24 @@ const deploy = async ({
 
 	console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
 
-	await deployer.deployContract({
+	const externalRateAggregator = await deployer.deployContract({
 		name: 'ExternalRateAggregator',
 		source: 'ExternalRateAggregator',
-		args: [account, account],
+		args: [account, defaults.ORACLE_ADDRESSES[network]],
 	});
+
+	if (externalRateAggregator) {
+		if (periFinance && defaults.ORACLE_ADDRESSES[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'ExternalRateAggregator',
+				target: externalRateAggregator,
+				read: 'oracle',
+				expected: input => input === defaults.ORACLE_ADDRESSES[network],
+				write: 'setOracle',
+				writeArg: defaults.ORACLE_ADDRESSES[network],
+			});
+		}
+	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
