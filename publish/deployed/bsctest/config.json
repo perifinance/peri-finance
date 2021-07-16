@@ -1,0 +1,155 @@
+{
+	"AddressResolver": {
+		"deploy": true
+	},
+	"CollateralManager": {
+		"deploy": true
+	},
+	"CollateralManagerState": {
+		"deploy": true
+	},
+	"CollateralEth": {
+		"deploy": true
+	},
+	"CollateralErc20": {
+		"deploy": true
+	},
+	"CollateralShort": {
+		"deploy": true
+	},
+	"CollateralStateErc20": {
+		"deploy": true
+	},
+	"CollateralStateEth": {
+		"deploy": true
+	},
+	"CollateralStateShort": {
+		"deploy": true
+	},
+	"ReadProxyAddressResolver": {
+		"deploy": true
+	},
+	"DelegateApprovals": {
+		"deploy": true
+	},
+	"DelegateApprovalsEternalStorage": {
+		"deploy": true
+	},
+	"DebtCache": {
+		"deploy": true
+	},
+	"Depot": {
+		"deploy": true
+	},
+	"EscrowChecker": {
+		"deploy": true
+	},
+	"EtherCollateral": {
+		"deploy": true
+	},
+	"EtherCollateralpUSD": {
+		"deploy": true
+	},
+	"ExchangeRates": {
+		"deploy": true
+	},
+	"Exchanger": {
+		"deploy": true
+	},
+	"ExchangeState": {
+		"deploy": true
+	},
+	"FeePool": {
+		"deploy": true
+	},
+	"FeePoolState": {
+		"deploy": true
+	},
+	"FeePoolEternalStorage": {
+		"deploy": true
+	},
+	"FlexibleStorage": {
+		"deploy": true
+	},
+	"Issuer": {
+		"deploy": true
+	},
+	"EternalStorageLiquidations": {
+		"deploy": true
+	},
+	"Liquidations": {
+		"deploy": true
+	},
+	"RewardEscrow": {
+		"deploy": true
+	},
+	"RewardsDistribution": {
+		"deploy": true
+	},
+	"SupplySchedule": {
+		"deploy": true
+	},
+	"PeriFinance": {
+		"deploy": true
+	},
+	"PeriFinanceEscrow": {
+		"deploy": true
+	},
+	"PeriFinanceState": {
+		"deploy": true
+	},
+	"SystemSettings": {
+		"deploy": true
+	},
+	"SystemStatus": {
+		"deploy": true
+	},
+	"PynthUtil": {
+		"deploy": true
+	},
+	"DappMaintenance": {
+		"deploy": true
+	},
+	"PynthpUSD": {
+		"deploy": true
+	},
+	"ProxyERC20": {
+		"deploy": true
+	},
+	"ProxyFeePool": {
+		"deploy": true
+	},
+	"SafeDecimalMath": {
+		"deploy": true
+	},
+	"Math": {
+		"deploy": true
+	},
+	"TokenStatePeriFinance": {
+		"deploy": true
+	},
+	"TokenStatepUSD": {
+		"deploy": true
+	},
+	"TradingRewards": {
+		"deploy": true
+	},
+	"RewardEscrowV2": {
+		"deploy": true
+	},
+	"PeriFinanceBridgeToOptimism": {
+		"deploy": true
+	},
+	"StakingStateUSDC": {
+		"deploy": true
+	},
+	"ExternalRateAggregator": {
+		"deploy": true
+	},
+	"ProxyERC20pUSD": {
+		"deploy": true
+	},
+	"BlacklistManager": {
+		"deploy": true
+	}
+}
