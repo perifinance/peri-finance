@@ -500,8 +500,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0x51fbf618B61aa9C24c0e56acad7c2AEc81417ce2",
-				"status": "current",
-				"keccak256": "0x4bbc3a287b164287a3c5411ec29f8d4fad752c28db3872ef6fd990b414e724c9"
+				"status": "replaced",
+				"keccak256": "0x4bbc3a287b164287a3c5411ec29f8d4fad752c28db3872ef6fd990b414e724c9",
+				"replaced_in": "v0.0.11"
 			},
 			"PeriFinance": {
 				"address": "0xC32Ebe7F9636C0F1a7C14143c0CDB1c83f46F531",
@@ -527,6 +528,20 @@
 				"address": "0xAcC78d249781EDb5feB50027971EF4D60f144325",
 				"status": "current",
 				"keccak256": "0xe2b4ff98fa89ef9ea0e4b24513b5f1af7fbb752a319cbcd5e88e1bc619aa35c9"
+			}
+		}
+	},
+	"v0.0.11": {
+		"tag": "v0.0.11",
+		"fulltag": "v0.0.11",
+		"network": "mumbai",
+		"date": "2021-07-14T18:25:53+09:00",
+		"commit": "9c39c20777ff16ca96f2549e05b1178e4b0c0914",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0x058a4eE9bdC998D23fC61f29505B7d5A8D6Da08a",
+				"status": "current",
+				"keccak256": "0x7347a4b5753c2e598746755801fb9b77cfe2f30a6a53b215f257ce16d453c357"
 			}
 		}
 	}

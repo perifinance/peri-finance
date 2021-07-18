@@ -315,8 +315,23 @@
 			},
 			"SupplySchedule": {
 				"address": "0xbAF488D47341a9679913748cE62268dD76bBb09F",
+				"status": "replaced",
+				"keccak256": "0xd26aef790793a3278e4ccc47a06e0a75bf3a4d7c8b21099180bac1d76fe0aed0",
+				"replaced_in": "v0.0.11"
+			}
+		}
+	},
+	"v0.0.11": {
+		"tag": "v0.0.11",
+		"fulltag": "v0.0.11",
+		"network": "polygon",
+		"date": "2021-07-16T23:30:07+09:00",
+		"commit": "41b33c882c8aeeba7dc289b2c2ad85950b32e9b9",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0xf31E4177332b135250fbd986A57C6c488df1c143",
 				"status": "current",
-				"keccak256": "0xd26aef790793a3278e4ccc47a06e0a75bf3a4d7c8b21099180bac1d76fe0aed0"
+				"keccak256": "0x7347a4b5753c2e598746755801fb9b77cfe2f30a6a53b215f257ce16d453c357"
 			}
 		}
 	}

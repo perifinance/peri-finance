@@ -38,10 +38,10 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // How long each inflation period is before mint can be called
     uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
-    uint public constant INFLATION_START_DATE = 1626480000; // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+    uint public constant INFLATION_START_DATE = 1625875200; // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
     uint public constant MINT_BUFFER = 1 days;
-    uint8 public constant SUPPLY_DECAY_START = 53;
-    uint8 public constant SUPPLY_DECAY_END = 173; // 40 months
+    uint8 public constant SUPPLY_DECAY_START = 52;
+    uint8 public constant SUPPLY_DECAY_END = 172; // 40 months
 
     // Weekly percentage decay of inflationary supply from the first 40 weeks of the 75% inflation rate
     uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
