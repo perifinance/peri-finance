@@ -1,1 +1,7 @@
-[]
+[
+	{
+		"name": "PeriMockLP",
+		"stakingToken": "0x1357a050b0895535A173B0aaD97d1A2DEC48398B",
+		"rewardsToken": "ProxyERC20"
+	}
+]

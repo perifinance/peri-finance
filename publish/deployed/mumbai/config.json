@@ -166,5 +166,8 @@
 	},
 	"StakingState": {
 		"deploy": false
+	},
+	"StakingRewardsPeriMockLP": {
+		"deploy": false
 	}
 }
