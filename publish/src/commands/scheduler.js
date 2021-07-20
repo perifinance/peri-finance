@@ -25,7 +25,7 @@ const {
 const DEFAULTS = {
 	network: 'kovan',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
-	methodCallGasLimit: 250e3, // 250k
+	methodCallGasLimit: 400e3, // 400k
 	gasPrice: '1',
 	cronScheduleFormat: `0 0 0/8 ? * *`,
 	methodArgs: [],
