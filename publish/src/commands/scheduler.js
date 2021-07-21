@@ -4,7 +4,6 @@ const Web3 = require('web3');
 const path = require('path');
 const schedule = require('node-schedule');
 const cron = require('cron-validator');
-const axios = require('axios');
 
 const {
 	ensureNetwork,
@@ -13,6 +12,10 @@ const {
 	loadAndCheckRequiredSources,
 	loadConnections,
 	performTransactionalStep,
+	requestPriceFeed,
+	estimateEtherGasPice,
+	estimatePolygonGasPice,
+	sleep,
 } = require('../util');
 
 const {
@@ -31,7 +34,6 @@ const DEFAULTS = {
 	methodArgs: [],
 	feedUrls: [],
 	tryCnt: 10,
-	priority: 'safeLow',
 };
 
 function getExistingContract({ network, deployment, contract, web3 }) {
@@ -52,52 +54,6 @@ function getExistingContract({ network, deployment, contract, web3 }) {
 	return new web3.eth.Contract(abi, address);
 }
 
-function estimateEtherGasPice(priority) {
-	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
-	console.log(`requesting gas price for ether mainnet : ${gasStationUrl}`);
-
-	return axios
-		.get(gasStationUrl)
-		.then(({ data }) => {
-			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
-
-			switch (priority) {
-				case 'fast':
-					return FastGasPrice;
-				case 'standard':
-					return ProposeGasPrice;
-				default:
-					return SafeGasPrice;
-			}
-		})
-		.catch(e => console.log(e));
-}
-
-function estimatePolygonGasPice(network, priority) {
-	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
-		network === 'polygon' ? 'network' : 'today'
-	}`;
-	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
-
-	return axios
-		.get(gasStationUrl)
-		.then(({ data }) => {
-			const { safeLow, standard, fast, fastest } = data;
-
-			switch (priority) {
-				case 'fastest':
-					return fastest;
-				case 'fast':
-					return fast;
-				case 'standard':
-					return standard;
-				default:
-					return safeLow;
-			}
-		})
-		.catch(e => console.log(e));
-}
-
 const scheduler = async ({
 	network = DEFAULTS.network,
 	methodCallGasLimit = DEFAULTS.methodCallGasLimit,
@@ -110,7 +66,7 @@ const scheduler = async ({
 	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
 	tryCnt = DEFAULTS.tryCnt,
 	publiclyCallable,
-	priority = DEFAULTS.priority,
+	priority,
 }) => {
 	if (!schedulerMethod) {
 		throw new Error('must specify contract method to run');
@@ -172,14 +128,18 @@ const scheduler = async ({
 		while (!success && cnt < tryCnt) {
 			console.log(`trying to execute ${cnt} times at ${new Date().toLocaleString()}`);
 			try {
-				if (['polygon', 'mumbai'].includes(network)) {
-					gasPrice = await estimatePolygonGasPice(network, priority);
+				if (priority) {
+					if (['polygon', 'mumbai'].includes(network)) {
+						gasPrice = await estimatePolygonGasPice(network, priority);
+						console.log(`using gas price : ${gasPrice}`);
+						if (!gasPrice) throw new Error('gas price is undefined');
+					} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
+						gasPrice = await estimateEtherGasPice(priority);
+						console.log(`using gas price : ${gasPrice}`);
+						if (!gasPrice) throw new Error('gas price is undefined');
+					}
+				} else {
 					console.log(`using gas price : ${gasPrice}`);
-					if (!gasPrice) throw new Error('gas price is undefined');
-				} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
-					gasPrice = await estimateEtherGasPice(priority);
-					console.log(`using gas price : ${gasPrice}`);
-					if (!gasPrice) throw new Error('gas price is undefined');
 				}
 
 				const runStep = async opts =>
@@ -265,24 +225,6 @@ const scheduler = async ({
 	});
 };
 
-function requestPriceFeed(url) {
-	return axios
-		.get(url)
-		.then(({ data }) => {
-			const lastPrice = Web3.utils.toWei(data.last);
-			return lastPrice;
-		})
-		.catch(e => {
-			console.log(e);
-		});
-}
-
-function sleep(ms) {
-	return new Promise(resolve => {
-		setTimeout(resolve, ms);
-	});
-}
-
 module.exports = {
 	scheduler,
 	cmd: program =>
@@ -333,8 +275,7 @@ module.exports = {
 			.option(
 				'-p, --priority <value>',
 				'set setimated gas price, available options : ["safeLow", "standard", "fast", "fastest" (polygon only)]',
-				x => x.toLowerCase(),
-				DEFAULTS.priority
+				x => x.toLowerCase()
 			)
 			.action(scheduler),
 };

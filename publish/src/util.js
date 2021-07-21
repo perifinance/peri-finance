@@ -6,6 +6,7 @@ const readline = require('readline');
 const { gray, cyan, yellow, redBright, green } = require('chalk');
 const { table } = require('table');
 const w3utils = require('web3-utils');
+const axios = require('axios');
 
 const {
 	constants: {
@@ -375,6 +376,70 @@ function reportDeployedContracts({ deployer }) {
 	}
 }
 
+function requestPriceFeed(url) {
+	return axios
+		.get(url)
+		.then(({ data }) => {
+			const lastPrice = w3utils.toWei(data.last);
+			return lastPrice;
+		})
+		.catch(e => {
+			console.log(e);
+		});
+}
+
+function estimateEtherGasPice(priority) {
+	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
+	console.log(`requesting gas price for ether mainnet : ${gasStationUrl}`);
+
+	return axios
+		.get(gasStationUrl)
+		.then(({ data }) => {
+			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
+
+			switch (priority) {
+				case 'fast':
+					return FastGasPrice;
+				case 'standard':
+					return ProposeGasPrice;
+				default:
+					return SafeGasPrice;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
+function estimatePolygonGasPice(network, priority) {
+	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
+		network === 'polygon' ? 'network' : 'today'
+	}`;
+	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
+
+	return axios
+		.get(gasStationUrl)
+		.then(({ data }) => {
+			const { safeLow, standard, fast, fastest } = data;
+
+			switch (priority) {
+				case 'fastest':
+					return fastest;
+				case 'fast':
+					return fast;
+				case 'standard':
+					return standard;
+				default:
+					return safeLow;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
+function sleep(ms) {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms);
+	});
+}
+
 module.exports = {
 	ensureNetwork,
 	ensureDeploymentPath,
@@ -388,4 +453,8 @@ module.exports = {
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
+	requestPriceFeed,
+	estimateEtherGasPice,
+	estimatePolygonGasPice,
+	sleep,
 };
