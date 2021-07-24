@@ -152,6 +152,12 @@
 	"BlacklistManager": {
 		"deploy": false
 	},
+	"ExternalTokenStakeManager": {
+		"deploy": false
+	},
+	"StakingState": {
+		"deploy": false
+	},
 	"USDC": {
 		"deploy": false
 	},

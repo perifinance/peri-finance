@@ -36,7 +36,6 @@
 		"publish/deployed/goerli-ovm/*",
 		"publish/deployed/mumbai/*",
 		"publish/deployed/polygon/*",
-		"publish/deployed/bsc/*",
 		"publish/deployed/bsctest/*"
 	],
 	"bin": {

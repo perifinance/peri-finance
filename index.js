@@ -16,7 +16,7 @@ const data = {
 	polygon: require('./publish/deployed/polygon'),
 	mumbai: require('./publish/deployed/mumbai'),
 	bsctest: require('./publish/deployed/bsctest'),
-	bsc: require('./publish/deployed/bsc'),
+	// bsc: require('./publish/deployed/bsc'),
 };
 
 const assets = require('./publish/assets.json');
@@ -34,7 +34,7 @@ const networks = [
 	'polygon',
 	'mumbai',
 	'bsctest',
-	'bsc',
+	// 'bsc',
 ];
 
 const chainIdMapping = Object.entries({
@@ -84,9 +84,9 @@ const chainIdMapping = Object.entries({
 	97: {
 		network: 'bsctest',
 	},
-	56: {
-		network: 'bsc',
-	},
+	// 56: {
+	// 	network: 'bsc',
+	// },
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
 	return memo;

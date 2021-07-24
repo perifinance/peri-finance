@@ -437,8 +437,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xC39eE41Ea0245d2c18a5dEE7D3D37052dDE1AcA7",
-				"status": "current",
-				"keccak256": "0x0e59172b411a903880ec23783a340df499c3890febf88da7c337fa2b3e76df90"
+				"status": "replaced",
+				"keccak256": "0x0e59172b411a903880ec23783a340df499c3890febf88da7c337fa2b3e76df90",
+				"replaced_in": "v0.0.12"
 			},
 			"ExchangeRates": {
 				"address": "0x23B14B81Bec72B290b1bC533396D6d7338382573",
@@ -540,8 +541,33 @@
 		"contracts": {
 			"SupplySchedule": {
 				"address": "0x058a4eE9bdC998D23fC61f29505B7d5A8D6Da08a",
+				"status": "replaced",
+				"keccak256": "0x7347a4b5753c2e598746755801fb9b77cfe2f30a6a53b215f257ce16d453c357",
+				"replaced_in": "v0.0.12"
+			}
+		}
+	},
+	"v0.0.12": {
+		"tag": "v0.0.12",
+		"fulltag": "v0.0.12",
+		"network": "mumbai",
+		"date": "2021-07-20T17:21:29+09:00",
+		"commit": "2e69f9ca669c1581379a98743c66a9878ae6091f",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xd4937d36648Ec908eFd9943083Db226e254628A2",
 				"status": "current",
-				"keccak256": "0x7347a4b5753c2e598746755801fb9b77cfe2f30a6a53b215f257ce16d453c357"
+				"keccak256": "0xb90c5d356958f7c20a36a483b9a4187cd5192207ce1788e78fac2860f3a21864"
+			},
+			"SupplySchedule": {
+				"address": "0x87df0AC73e931c95D3a6C10173f5EFc67A1c4AEc",
+				"status": "current",
+				"keccak256": "0x69627550541fc7af45517cc162f17c8a91eb062dc30fc87901b4ccca691ab0c5"
+			},
+			"StakingRewardsPeriMockLP": {
+				"address": "0x3F01190Aa0827f4E9fF96096CC386CC1b2DA8982",
+				"status": "current",
+				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
 			}
 		}
 	}
