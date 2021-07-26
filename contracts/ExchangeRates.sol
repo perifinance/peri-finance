@@ -606,9 +606,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         if (currencyByExternal[currencyKey]) {
             require(externalRateAggregator != address(0), "External price aggregator is not set yet");
 
-            IExternalRateAggregator externalRateAggregator = IExternalRateAggregator(externalRateAggregator);
+            IExternalRateAggregator _externalRateAggregator = IExternalRateAggregator(externalRateAggregator);
 
-            (uint rate, uint time) = externalRateAggregator.getRateAndUpdatedTime(currencyKey);
+            (uint rate, uint time) = _externalRateAggregator.getRateAndUpdatedTime(currencyKey);
 
             return RateAndUpdatedTime({rate: uint216(rate), time: uint40(time)});
         }

@@ -397,7 +397,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _;
     }
 
-    function _systemActive() private {
+    function _systemActive() private view {
         systemStatus().requireSystemActive();
     }
 
@@ -406,11 +406,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _;
     }
 
-    function _issuanceActive() private {
+    function _issuanceActive() private view {
         systemStatus().requireIssuanceActive();
     }
 
-    function _blacklisted(address _account) private {
+    function _blacklisted(address _account) private view {
         require(address(blacklistManager) != address(0), "Required contract is not set yet");
         require(!blacklistManager.flagged(_account), "Account is on blacklist");
     }
@@ -425,7 +425,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _;
     }
 
-    function _exchangeActive(bytes32 src, bytes32 dest) private {
+    function _exchangeActive(bytes32 src, bytes32 dest) private view {
         systemStatus().requireExchangeBetweenPynthsAllowed(src, dest);
     }
 
@@ -434,7 +434,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _;
     }
 
-    function _onlyExchanger() private {
+    function _onlyExchanger() private view {
         require(msg.sender == address(exchanger()), "Only Exchanger can invoke this");
     }
 
