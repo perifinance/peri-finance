@@ -19,6 +19,9 @@ const {
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
+	estimateEtherGasPice,
+	estimatePolygonGasPice,
+	estimateBSCGasPice,
 } = require('../util');
 
 const {
@@ -68,6 +71,7 @@ const deploy = async ({
 	ignoreSafetyChecks,
 	ignoreCustomParameters,
 	concurrency,
+	priority,
 } = {}) => {
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
@@ -76,6 +80,18 @@ const deploy = async ({
 	// OVM uses a gas price of 0 (unless --gas explicitely defined).
 	if (useOvm && gasPrice === DEFAULTS.gasPrice) {
 		gasPrice = w3utils.toBN('0');
+	}
+
+	if (priority) {
+		if (['polygon', 'mumbai'].includes(network)) {
+			gasPrice = await estimatePolygonGasPice(network, priority);
+		} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
+			gasPrice = await estimateEtherGasPice(priority);
+		} else if (['bsc', 'bsctest'].includes(network)) {
+			gasPrice = await estimateBSCGasPice(priority);
+		}
+		if (!gasPrice) throw new Error('gas price is undefined');
+		gasPrice = w3utils.toBN(gasPrice);
 	}
 
 	const limitPromise = pLimit(concurrency);
@@ -2659,6 +2675,9 @@ module.exports = {
 				'The address of the fee authority for this network (default is to use existing)'
 			)
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
+			.option('-p, --priority <value>', 'Estimated Gas price from gas station', x =>
+				x.toLowerCase()
+			)
 			.option(
 				'-h, --fresh-deploy',
 				'Perform a "fresh" deploy, i.e. the first deployment on a network.'
@@ -2721,6 +2740,7 @@ module.exports = {
 			)
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
+
 			.action(async (...args) => {
 				try {
 					await deploy(...args);
