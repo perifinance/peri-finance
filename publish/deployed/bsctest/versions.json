@@ -315,5 +315,19 @@
 				"keccak256": "0x469b59d351a0872b81573e62dc330a1d85e337f22978648d460f8a65bbd8d076"
 			}
 		}
+	},
+	"v0.0.13": {
+		"tag": "v0.0.13",
+		"fulltag": "v0.0.13",
+		"network": "bsctest",
+		"date": "2021-07-26T10:26:52+09:00",
+		"commit": "fc7b428bd6a9ac2df8ac4fe29ae00b116f8e22f9",
+		"contracts": {
+			"StakingRewardsPeriMockLP": {
+				"address": "0x5e8fd0bADC50628ea179997a7669c15a2D0bF72b",
+				"status": "current",
+				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
+			}
+		}
 	}
 }
