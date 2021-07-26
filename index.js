@@ -200,7 +200,7 @@ const defaults = {
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 		bsc: constants.ZERO_ADDRESS,
-		bsctest: constants.ZERO_ADDRESS,
+		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
@@ -208,7 +208,7 @@ const defaults = {
 		mumbai: '0xAcC78d249781EDb5feB50027971EF4D60f144325',
 		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
 		bsc: constants.ZERO_ADDRESS,
-		bsctest: constants.ZERO_ADDRESS,
+		bsctest: '0x52306d4521eFF70Ba555A578a66705b3352e8B3a',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',

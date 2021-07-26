@@ -748,10 +748,36 @@ const deploy = async ({
 				writeArg: defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
 			});
 		}
-	} else {
+	} else if (['mainnet', 'kovan', 'rinkeby', 'robsten', 'goerli'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver', 'BlacklistManager'],
+			args: [
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+				defaults.MINTER_ROLE_ADDRESS[network],
+				addressOf(blacklistManager),
+			],
+		});
+
+		if (defaults.MINTER_ROLE_ADDRESS[network] !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'minterRole',
+				expected: input => input === defaults.MINTER_ROLE_ADDRESS[network],
+				write: 'setMinterRole',
+				writeArg: defaults.MINTER_ROLE_ADDRESS[network],
+			});
+		}
+	} else if (['bsc', 'bsctest'].includes(network)) {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: 'PeriFinanceToBSC',
 			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver', 'BlacklistManager'],
 			args: [
 				addressOf(proxyERC20PeriFinance),
