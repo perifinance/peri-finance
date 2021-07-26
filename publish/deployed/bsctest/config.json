@@ -158,6 +158,9 @@
 	"StakingState": {
 		"deploy": false
 	},
+	"StakingRewardsPeriMockLP": {
+		"deploy": false
+	},
 	"USDC": {
 		"deploy": false
 	},
