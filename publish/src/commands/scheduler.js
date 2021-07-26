@@ -15,6 +15,7 @@ const {
 	requestPriceFeed,
 	estimateEtherGasPice,
 	estimatePolygonGasPice,
+	estimateBSCGasPice,
 	sleep,
 } = require('../util');
 
@@ -135,6 +136,10 @@ const scheduler = async ({
 						if (!gasPrice) throw new Error('gas price is undefined');
 					} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
 						gasPrice = await estimateEtherGasPice(priority);
+						console.log(`using gas price : ${gasPrice}`);
+						if (!gasPrice) throw new Error('gas price is undefined');
+					} else if (['bsc', 'bsctest'].includes(network)) {
+						gasPrice = await estimateBSCGasPice(priority);
 						console.log(`using gas price : ${gasPrice}`);
 						if (!gasPrice) throw new Error('gas price is undefined');
 					}

@@ -434,6 +434,29 @@ function estimatePolygonGasPice(network, priority) {
 		.catch(e => console.log(e));
 }
 
+function estimateBSCGasPice(network, priority) {
+	const gasStationUrl = `https://bscgas.info/gas`;
+	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
+
+	return axios
+		.get(gasStationUrl)
+		.then(({ data }) => {
+			const { slow, standard, fast, instant } = data;
+
+			switch (priority) {
+				case 'fastest':
+					return instant;
+				case 'fast':
+					return fast;
+				case 'standard':
+					return standard;
+				default:
+					return slow;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
 function sleep(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms);
@@ -456,5 +479,6 @@ module.exports = {
 	requestPriceFeed,
 	estimateEtherGasPice,
 	estimatePolygonGasPice,
+	estimateBSCGasPice,
 	sleep,
 };
