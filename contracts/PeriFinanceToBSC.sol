@@ -13,7 +13,13 @@ contract PeriFinanceToBSC is PeriFinance {
         address _blacklistManager
     ) public PeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _minterRole, _blacklistManager) {}
 
-    function multiTransfer(address[] calldata _recipients, uint[] calldata _amounts) external optionalProxy returns (bool) {
+    function multiTransfer(address[] calldata _recipients, uint[] calldata _amounts)
+        external
+        optionalProxy
+        systemActive
+        blacklisted(messageSender)
+        returns (bool)
+    {
         require(_recipients.length == _amounts.length, "length is not matched");
 
         bool transferResult = true;
