@@ -429,24 +429,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint targetRatio = getIssuanceRatio();
         uint quotaLimit = getExternalTokenQuota();
 
-        require(
-            _stakedAmount.multiplyDecimal(targetRatio).divideDecimal(_debtBalance) < quotaLimit,
-            "Already meets or exceeds external token quota limit"
-        );
+        uint maxAllowedStakingAmount = _debtBalance.multiplyDecimal(quotaLimit).divideDecimal(targetRatio);
+        if (_stakedAmount >= maxAllowedStakingAmount) {
+            return (0, 0);
+        }
 
-        uint periStakedAmountByUSD = _debtBalance.divideDecimal(targetRatio).sub(_stakedAmount);
-
-        (uint periRate, ) = exchangeRates().rateAndInvalid(PERI);
-        uint periCollateralToUSD = _periToUSD(_collateral(_from), periRate);
-        require(periCollateralToUSD >= periStakedAmountByUSD, "Violates target ratio");
-
-        uint allowedExTokenAmount =
-            quotaLimit.multiplyDecimal(periStakedAmountByUSD).divideDecimal(SafeDecimalMath.unit().sub(quotaLimit));
-
-        require(allowedExTokenAmount > _stakedAmount, "No available external token staking amount");
+        stakeAmount = ((maxAllowedStakingAmount).sub(_stakedAmount)).divideDecimal(SafeDecimalMath.unit().sub(quotaLimit));
 
         uint balance = IERC20(exTokenStakeManager().getTokenAddress(_currencyKey)).balanceOf(_from);
-        stakeAmount = balance > allowedExTokenAmount.sub(_stakedAmount) ? allowedExTokenAmount.sub(_stakedAmount) : balance;
+        stakeAmount = balance < stakeAmount ? balance : stakeAmount;
         issueAmount = stakeAmount.multiplyDecimal(targetRatio);
     }
 
@@ -734,6 +725,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
         (uint issueAmountToQuota, uint stakeAmountToQuota) =
             _maxExternalTokenStakeAmount(_issuer, existingDebt, combinedStakedAmount, _currencyKey);
+
+        require(issueAmountToQuota > 0 && stakeAmountToQuota > 0, "No available external token staking amount");
 
         exTokenStakeManager().stake(_issuer, stakeAmountToQuota, _currencyKey, pUSD);
 

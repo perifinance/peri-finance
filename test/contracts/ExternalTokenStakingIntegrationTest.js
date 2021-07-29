@@ -533,7 +533,7 @@ contract('External token staking integrating test', async accounts => {
 				assert.bnClose(quota_0_after, toUnit('0.2'), '1' + '0'.repeat(12));
 			});
 
-			it('should stake to max quota', async () => {
+			it.only('should stake to max quota', async () => {
 				// 10000 PERI is being staked
 				// As price is 0.2 USD/PERI, the value of staked PERI is 2000[USD]
 				await periFinance.issueMaxPynths({ from: users[0] });
@@ -586,7 +586,7 @@ contract('External token staking integrating test', async accounts => {
 				);
 			});
 
-			it('should stake upto user balance if balance is not enough', async () => {
+			it.only('should stake upto user balance if balance is not enough', async () => {
 				// As 0.2 USD/PERI exchange rate,
 				// PERI staked 2000 [USD], issued pUSD 500
 				await periFinance.issueMaxPynths({ from: users[0] });
@@ -621,14 +621,14 @@ contract('External token staking integrating test', async accounts => {
 				assert.bnEqual(daiBalance_0_after, toBN('0'));
 			});
 
-			it('should NOT stake to max quota', async () => {
+			it.only('should NOT stake to max quota', async () => {
 				// User already meets or violates quota limit
 				await periFinance.issueMaxPynths({ from: users[1] });
 				await periFinance.issuePynthsToMaxQuota(DAI, { from: users[1] });
 
 				await assert.revert(
 					periFinance.issuePynthsToMaxQuota(DAI, { from: users[1] }),
-					'Already meets or exceeds external token quota limit'
+					'No available external token staking amount'
 				);
 			});
 		});
