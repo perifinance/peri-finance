@@ -16,6 +16,7 @@ const { utf8ToHex } = require('web3-utils');
 const {
 	currentTime,
 	toUnit,
+	fromUnit,
 	fastForward,
 	multiplyDecimal,
 	divideDecimal,
@@ -530,6 +531,105 @@ contract('External token staking integrating test', async accounts => {
 					'External token staking amount exceeds quota limit'
 				);
 				assert.bnClose(quota_0_after, toUnit('0.2'), '1' + '0'.repeat(12));
+			});
+
+			it('should stake to max quota', async () => {
+				// 10000 PERI is being staked
+				// As price is 0.2 USD/PERI, the value of staked PERI is 2000[USD]
+				await periFinance.issueMaxPynths({ from: users[0] });
+
+				const targetQuota = await issuer.externalTokenLimit();
+				const targetRatio = await issuer.issuanceRatio();
+				const quota_0_before = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
+				const pUSDBalance_0_before = await pUSDContract.balanceOf(users[0]);
+				const usdcBalance_0_before = await usdc.balanceOf(users[0]);
+				const daiBalance_0_before = await dai.balanceOf(users[0]);
+
+				assert.bnEqual(quota_0_before, toBN('0'));
+				assert.bnLte(cRatio_0_before, targetRatio);
+				assert.bnEqual(pUSDBalance_0_before, toUnit('500'));
+
+				await periFinance.issuePynths(USDC, toUnit('5'), { from: users[0] });
+
+				await periFinance.issuePynthsToMaxQuota(DAI, { from: users[0] });
+
+				const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
+				const pUSDBalance_0_after = await pUSDContract.balanceOf(users[0]);
+				const combinedStakedAmount_0_after = await externalTokenStakeManager.combinedStakedAmountOf(
+					users[0],
+					pUSD
+				);
+				const usdcBalance_0_after = await usdc.balanceOf(users[0]);
+				const daiBalance_0_after = await dai.balanceOf(users[0]);
+
+				assert.bnEqual(quota_0_after, targetQuota);
+				assert.bnLte(cRatio_0_after, targetRatio);
+				assert.bnClose(pUSDBalance_0_after, toUnit('625'), '1' + '0'.repeat(12));
+				assert.bnClose(combinedStakedAmount_0_after, toUnit('500'), '1' + '0'.repeat(12));
+				assert.bnClose(
+					usdcBalance_0_after,
+					usdcBalance_0_before.sub(
+						divideDecimal(divideDecimal(toUnit('5'), toUnit('0.98')), targetRatio).div(
+							toBN(10 ** 12)
+						)
+					),
+					'1' + '0'.repeat(12)
+				);
+				assert.bnClose(
+					daiBalance_0_after,
+					daiBalance_0_before.sub(
+						divideDecimal(divideDecimal(toUnit('120'), toUnit('1.001')), targetRatio)
+					),
+					'1' + '0'.repeat(12)
+				);
+			});
+
+			it('should stake upto user balance if balance is not enough', async () => {
+				// As 0.2 USD/PERI exchange rate,
+				// PERI staked 2000 [USD], issued pUSD 500
+				await periFinance.issueMaxPynths({ from: users[0] });
+
+				const daiBalance = await dai.balanceOf(users[0]);
+				await dai.transfer(deployerAccount, daiBalance.sub(toUnit('5')), { from: users[0] });
+
+				// For convinient calculation
+				await updateRates([DAI], ['1']);
+
+				// It will stake 5 DAI, and issue 1.25 pUSD
+				await periFinance.issuePynthsToMaxQuota(DAI, { from: users[0] });
+
+				const targetQuota = await issuer.externalTokenLimit();
+				const targetRatio = await issuer.issuanceRatio();
+				const quota_0_after = await periFinance.externalTokenQuota(users[0], 0, 0, true);
+				const cRatio_0_after = await periFinance.collateralisationRatio(users[0]);
+				const pUSDBalance_0_after = await pUSDContract.balanceOf(users[0]);
+				const combinedStakedAmount_0_after = await externalTokenStakeManager.combinedStakedAmountOf(
+					users[0],
+					pUSD
+				);
+				const daiBalance_0_after = await dai.balanceOf(users[0]);
+
+				assert.bnClose(
+					quota_0_after,
+					divideDecimal(multiplyDecimal(toUnit('5'), targetRatio), toUnit('501.25'))
+				);
+				assert.bnEqual(cRatio_0_after, targetRatio);
+				assert.bnEqual(pUSDBalance_0_after, toUnit('501.25'));
+				assert.bnEqual(combinedStakedAmount_0_after, toUnit('5'));
+				assert.bnEqual(daiBalance_0_after, toBN('0'));
+			});
+
+			it('should NOT stake to max quota', async () => {
+				// User already meets or violates quota limit
+				await periFinance.issueMaxPynths({ from: users[1] });
+				await periFinance.issuePynthsToMaxQuota(DAI, { from: users[1] });
+
+				await assert.revert(
+					periFinance.issuePynthsToMaxQuota(DAI, { from: users[1] }),
+					'Already meets or exceeds external token quota limit'
+				);
 			});
 		});
 	});

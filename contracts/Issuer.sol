@@ -412,6 +412,44 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+    /**
+     * @notice It calculates maximum issue/stake(external token) amount to meet external token quota limit.
+     *
+     * @param _from target address
+     * @param _debtBalance current debt balance[pUSD]
+     * @param _stakedAmount currently target address's external token staked amount[pUSD]
+     * @param _currencyKey currency key of external token to stake
+     */
+    function _maxExternalTokenStakeAmount(
+        address _from,
+        uint _debtBalance,
+        uint _stakedAmount,
+        bytes32 _currencyKey
+    ) internal view returns (uint issueAmount, uint stakeAmount) {
+        uint targetRatio = getIssuanceRatio();
+        uint quotaLimit = getExternalTokenQuota();
+
+        require(
+            _stakedAmount.multiplyDecimal(targetRatio).divideDecimal(_debtBalance) < quotaLimit,
+            "Already meets or exceeds external token quota limit"
+        );
+
+        uint periStakedAmountByUSD = _debtBalance.divideDecimal(targetRatio).sub(_stakedAmount);
+
+        (uint periRate, ) = exchangeRates().rateAndInvalid(PERI);
+        uint periCollateralToUSD = _periToUSD(_collateral(_from), periRate);
+        require(periCollateralToUSD >= periStakedAmountByUSD, "Violates target ratio");
+
+        uint allowedExTokenAmount =
+            quotaLimit.multiplyDecimal(periStakedAmountByUSD).divideDecimal(SafeDecimalMath.unit().sub(quotaLimit));
+
+        require(allowedExTokenAmount > _stakedAmount, "No available external token staking amount");
+
+        uint balance = IERC20(exTokenStakeManager().getTokenAddress(_currencyKey)).balanceOf(_from);
+        stakeAmount = balance > allowedExTokenAmount.sub(_stakedAmount) ? allowedExTokenAmount.sub(_stakedAmount) : balance;
+        issueAmount = stakeAmount.multiplyDecimal(targetRatio);
+    }
+
     function minimumStakeTime() external view returns (uint) {
         return getMinimumStakeTime();
     }
@@ -498,6 +536,23 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint estimatedQuota = _externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
 
         return estimatedQuota;
+    }
+
+    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
+        external
+        view
+        returns (uint issueAmountToQuota, uint stakeAmountToQuota)
+    {
+        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+
+        uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_account, pUSD);
+
+        (issueAmountToQuota, stakeAmountToQuota) = _maxExternalTokenStakeAmount(
+            _account,
+            debtBalance,
+            combinedStakedAmount,
+            _currencyKey
+        );
     }
 
     function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance)
@@ -649,14 +704,46 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             exTokenStakeManager().stake(_issuer, amountToStake, _currencyKey, pUSD);
         }
 
-        uint afterDebtBalance = _issuePynths(_issuer, _issueAmount, false);
+        (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
+            _remainingIssuablePynths(_issuer);
+        _requireRatesNotInvalid(anyRateIsInvalid);
+
+        uint afterDebtBalance = _issuePynths(_issuer, _issueAmount, maxIssuable, existingDebt, totalSystemDebt, false);
 
         // For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
         _requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function issueMaxPynths(address _issuer) external onlyPeriFinance {
-        _issuePynths(_issuer, 0, true);
+        (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
+            _remainingIssuablePynths(_issuer);
+        _requireRatesNotInvalid(anyRateIsInvalid);
+
+        _issuePynths(_issuer, 0, maxIssuable, existingDebt, totalSystemDebt, true);
+    }
+
+    function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external onlyPeriFinance {
+        _requireCurrencyKeyIsNotpUSD(_currencyKey);
+        require(_currencyKey != PERI, "Only external token allowed to stake");
+
+        (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
+            _remainingIssuablePynths(_issuer);
+        _requireRatesNotInvalid(anyRateIsInvalid);
+        require(existingDebt > 0, "User does not have any debt yet");
+
+        uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
+        (uint issueAmountToQuota, uint stakeAmountToQuota) =
+            _maxExternalTokenStakeAmount(_issuer, existingDebt, combinedStakedAmount, _currencyKey);
+
+        exTokenStakeManager().stake(_issuer, stakeAmountToQuota, _currencyKey, pUSD);
+
+        // maxIssuable should be increased for increased collateral
+        maxIssuable = maxIssuable.add(issueAmountToQuota);
+
+        uint afterDebtBalance = _issuePynths(_issuer, issueAmountToQuota, maxIssuable, existingDebt, totalSystemDebt, false);
+
+        // For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
+        _requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function burnPynths(
@@ -812,11 +899,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _issuePynths(
         address from,
         uint amount,
+        uint maxIssuable,
+        uint existingDebt,
+        uint totalSystemDebt,
         bool issueMax
     ) internal returns (uint afterDebt) {
-        (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _remainingIssuablePynths(from);
-        _requireRatesNotInvalid(anyRateIsInvalid);
-
         if (!issueMax) {
             require(amount <= maxIssuable, "Amount too large");
         } else {

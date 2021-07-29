@@ -23,6 +23,8 @@ contract IExternalTokenStakeManager {
 
     function getTokenList() external view returns (bytes32[] memory);
 
+    function getTokenAddress(bytes32 _currencyKey) external view returns (address);
+
     function getTokenDecimals(bytes32 _currencyKey) external view returns (uint8);
 
     function getTokenActivation(bytes32 _currencyKey) external view returns (bool);

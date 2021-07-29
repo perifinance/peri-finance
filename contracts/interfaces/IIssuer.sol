@@ -41,6 +41,11 @@ interface IIssuer {
         bool _isIssue
     ) external view returns (uint);
 
+    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
+        external
+        view
+        returns (uint issueAmountToQuota, uint stakeAmountToQuota);
+
     function minimumStakeTime() external view returns (uint);
 
     function remainingIssuablePynths(address issuer)
@@ -73,6 +78,8 @@ interface IIssuer {
     ) external;
 
     function issueMaxPynths(address _issuer) external;
+
+    function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external;
 
     function burnPynths(
         address _from,

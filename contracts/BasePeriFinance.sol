@@ -169,6 +169,14 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().remainingIssuablePynths(account);
     }
 
+    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
+        external
+        view
+        returns (uint issueAmountToQuota, uint stakeAmountToQuota)
+    {
+        return issuer().maxExternalTokenStakeAmount(_account, _currencyKey);
+    }
+
     function collateralisationRatio(address _issuer) external view returns (uint) {
         return issuer().collateralisationRatio(_issuer);
     }
@@ -342,6 +350,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function issueMaxPynths() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().issueMaxPynths(messageSender);
+    }
+
+    function issuePynthsToMaxQuota(bytes32 _currencyKey) external issuanceActive optionalProxy blacklisted(messageSender) {
+        issuer().issuePynthsToMaxQuota(messageSender, _currencyKey);
     }
 
     function burnPynths(bytes32 _currencyKey, uint _burnAmount)
