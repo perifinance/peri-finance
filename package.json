@@ -36,7 +36,8 @@
 		"publish/deployed/goerli-ovm/*",
 		"publish/deployed/mumbai/*",
 		"publish/deployed/polygon/*",
-		"publish/deployed/bsctest/*"
+		"publish/deployed/bsctest/*",
+		"publish/deployed/bsc/*"
 	],
 	"bin": {
 		"peri": "bin.js"

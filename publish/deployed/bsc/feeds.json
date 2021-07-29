@@ -1,8 +1,4 @@
 {
-	"ETH": {
-		"asset": "ETH",
-		"feed": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e"
-	},
 	"USDC": {
 		"asset": "USDC",
 		"feed": "0x51597f405303C4377E36123cBc172b13269EA163"
