@@ -1,1 +1,81 @@
-{}
+{
+	"v0.0.15": {
+		"tag": "v0.0.15",
+		"fulltag": "v0.0.15",
+		"network": "bsc",
+		"date": "2021-07-29T13:42:19+09:00",
+		"commit": "edd4df0fa13906aa021791d58e16ac7507bbc4f7",
+		"contracts": {
+			"SafeDecimalMath": {
+				"address": "0xB8Aa8820da9F999Ba3b3dbB7F08f07Cc1c8Fa933",
+				"status": "current",
+				"keccak256": "0x817b946de41f6d3ebd548a04b488602bbfbe9a2f79465cde010eac639c28cef8"
+			},
+			"Math": {
+				"address": "0x1E21E50999890E093B3525DA158877ddBda6DdBb",
+				"status": "current",
+				"keccak256": "0x03fc30b8273ac217fad4914b0132798ae4b8842045bfc8d868022301f3324370"
+			},
+			"AddressResolver": {
+				"address": "0x69Cda6A078E6cb0C55d1f4FEC6544fb4B24aA967",
+				"status": "current",
+				"keccak256": "0xa64da901ca88e93dbf31ae97ae81cf1a7a9cfd8954b84cfda299d927f7702e17"
+			},
+			"ReadProxyAddressResolver": {
+				"address": "0x23d2B65507066e1855E201DD1a7dd5c007ddA4b7",
+				"status": "current",
+				"keccak256": "0x1542835257ac239aaf1549f1faa3a3bcf939b304d18a5283b0b64242007323c5"
+			},
+			"SystemSettings": {
+				"address": "0x036ec2Bc5352C66C0D56c2c42E1F4C09355a790f",
+				"status": "current",
+				"keccak256": "0x661bbe0cbb0132c92b6edd1f29cc0a047bf227c98ed39a973d669121ba115719"
+			},
+			"SystemStatus": {
+				"address": "0x538e8e2157Db0487Df93D377438A45Cfa85a56c9",
+				"status": "current",
+				"keccak256": "0xd007bffcedcf8fa79fec1aa185613f403ce3a03e7617cddd3acd0adc3899fd19"
+			},
+			"FlexibleStorage": {
+				"address": "0x4637f7bA92b8e9aD51D6ef3700c5515eDF77Ed51",
+				"status": "current",
+				"keccak256": "0x80f3f43223f5bd3901d2671aba562e0c247125de61fa1d044512bacd31c2a6f5"
+			},
+			"ProxyERC20": {
+				"address": "0xb49B7e0742EcB4240ffE91661d2A580677460b6A",
+				"status": "current",
+				"keccak256": "0xccd3c45b0f87c6bb391c4e641f009258cdf06815f81dfa699e708039e6095ac0"
+			},
+			"TokenStatePeriFinance": {
+				"address": "0xfc45e2897f131FB087A9580D4b19AC0759766b49",
+				"status": "current",
+				"keccak256": "0x3ec4b27cd0fee4d8b4eecda7a7d578008d0b437496a672737f0b82037848bf18"
+			},
+			"BlacklistManager": {
+				"address": "0xC23bED9D432358835eAC41e060676a89C27f338e",
+				"status": "current",
+				"keccak256": "0x4e30bb11fc1750dcdfec63374918cc10f12477e5b0671f71a368a205e5144fdf"
+			},
+			"PeriFinance": {
+				"address": "0xA590C980050d934c046920f8a9e0d9567536eDce",
+				"status": "replaced",
+				"keccak256": "0x3007b2546a16204589ba1f77dc6e5ef89df40237d512df869ebc235e3c5877d5",
+				"replaced_in": "v0.0.16"
+			}
+		}
+	},
+	"v0.0.16": {
+		"tag": "v0.0.16",
+		"fulltag": "v0.0.16",
+		"network": "bsc",
+		"date": "2021-07-29T13:42:19+09:00",
+		"commit": "edd4df0fa13906aa021791d58e16ac7507bbc4f7",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x0c700b7f9221e3511C61a9a5F2f7C22BDc9daF2d",
+				"status": "current",
+				"keccak256": "0x269496d9cd76cfec1816c2f85f7cd454d1f7bd74f6146b31db579b7bc4f6677d"
+			}
+		}
+	}
+}
