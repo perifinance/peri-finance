@@ -382,5 +382,19 @@
 				"keccak256": "0xa06939e2f05ce7708975d9a5283e722cb31b33f240a4d2ec8715dd15e7c9f092"
 			}
 		}
+	},
+	"v0.1.1": {
+		"tag": "v0.1.1",
+		"fulltag": "v0.1.1",
+		"network": "polygon",
+		"date": "2021-08-02T23:44:28+09:00",
+		"commit": "33052456c715a09ff10244144e366eff552ef0fa",
+		"contracts": {
+			"StakingRewardsPeriMaticQuickSwap": {
+				"address": "0xeFf7642144991B11DedD4c0a7e353386952fe9A5",
+				"status": "current",
+				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
+			}
+		}
 	}
 }
