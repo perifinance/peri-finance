@@ -11,14 +11,12 @@ import "./interfaces/IStakingState.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IERC20.sol";
-import "./interfaces/IStakingStateUSDC.sol";
 
 contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings, LimitedSetup(8 weeks) {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
     IStakingState public stakingState;
-    IStakingStateUSDC public stakingStateUSDC; // this one for migration from old state
 
     bytes32 internal constant pUSD = "pUSD";
     bytes32 internal constant PERI = "PERI";
@@ -35,11 +33,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     constructor(
         address _owner,
         address _stakingState,
-        address _stakingStateUSDC,
         address _resolver
     ) public Owned(_owner) MixinSystemSettings(_resolver) {
         stakingState = IStakingState(_stakingState);
-        stakingStateUSDC = IStakingStateUSDC(_stakingStateUSDC);
     }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
@@ -296,32 +292,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         currencyKeyOrder = _order;
     }
 
-    function migrateStakedAmounts(address[] calldata _accounts) external onlyDuringSetup onlyOwner {
-        for (uint i = 0; i < _accounts.length; i++) {
-            address account = _accounts[i];
-
-            uint staked = stakingStateUSDC.stakedAmountOf(account);
-
-            if (staked == 0) {
-                continue;
-            }
-
-            stakingStateUSDC.unstake(account, staked);
-            stakingState.stake(USDC, account, staked);
-        }
-
-        uint oldStateBalance = tokenInstance(USDC).balanceOf(address(stakingStateUSDC));
-        if (oldStateBalance > 0) {
-            stakingStateUSDC.refund(address(stakingState), oldStateBalance.mul(10**12));
-        }
-    }
-
     function setStakingState(address _stakingState) external onlyOwner {
         stakingState = IStakingState(_stakingState);
-    }
-
-    function setStakingStateUSDC(address _stakingStateUSDC) external onlyOwner {
-        stakingStateUSDC = IStakingStateUSDC(_stakingStateUSDC);
     }
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {

@@ -199,7 +199,7 @@ const defaults = {
 		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-		bsc: constants.ZERO_ADDRESS,
+		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 	},
 	DAI_ERC20_ADDRESSES: {
@@ -207,7 +207,7 @@ const defaults = {
 		kovan: constants.ZERO_ADDRESS,
 		mumbai: '0xAcC78d249781EDb5feB50027971EF4D60f144325',
 		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
-		bsc: constants.ZERO_ADDRESS,
+		bsc: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
 		bsctest: '0x52306d4521eFF70Ba555A578a66705b3352e8B3a',
 	},
 	MINTER_ROLE_ADDRESS: {

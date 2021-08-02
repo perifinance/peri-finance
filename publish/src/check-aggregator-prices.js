@@ -40,8 +40,11 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 							module: 'contract',
 							action: 'getabi',
 							address: feed,
-							apikey:
-								network !== 'mumbai' ? process.env.ETHERSCAN_KEY : process.env.POLYGONSCAN_KEY,
+							apikey: ['mumbai', 'polygon'].includes(network)
+								? process.env.POLYGONSCAN_KEY
+								: ['bsc', 'bsctest'].includes(network)
+								? process.env.BSCSCAN_KEY
+								: process.env.ETHERSCAN_KEY,
 						},
 					});
 					abi = JSON.parse(result);

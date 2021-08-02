@@ -1242,23 +1242,6 @@ const deploy = async ({
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
-	const stakingStateUSDC = await deployer.deployContract({
-		name: `StakingStateUSDC`,
-		source: 'StakingStateUSDC',
-		args: [account, addressOf(issuer), USDC_ADDRESS],
-	});
-
-	if (stakingStateUSDC && issuer) {
-		await runStep({
-			contract: `StakingStateUSDC`,
-			target: stakingStateUSDC,
-			read: 'associatedContract',
-			expected: input => input === addressOf(issuer),
-			write: 'setAssociatedContract',
-			writeArg: addressOf(issuer),
-		});
-	}
-
 	const stakingState = await deployer.deployContract({
 		name: `StakingState`,
 		source: 'StakingState',
@@ -1269,13 +1252,8 @@ const deploy = async ({
 		const externalTokenStakeManager = await deployer.deployContract({
 			name: `ExternalTokenStakeManager`,
 			source: 'ExternalTokenStakeManager',
-			deps: ['AddressResolver', 'StakingState', 'StakingStateUSDC'],
-			args: [
-				account,
-				addressOf(stakingState),
-				addressOf(stakingStateUSDC),
-				addressOf(readProxyForResolver),
-			],
+			deps: ['AddressResolver', 'StakingState'],
+			args: [account, addressOf(stakingState), addressOf(readProxyForResolver)],
 		});
 
 		if (externalTokenStakeManager) {
@@ -1297,10 +1275,9 @@ const deploy = async ({
 				await runStep({
 					contract: `StakingState`,
 					target: stakingState,
-					read: 'targetTokens',
+					read: 'tokenAddress',
 					readArg: currencyKey,
-					expected: ({ tokenAddress, decimals }) =>
-						tokenAddress === address && decimal === decimals,
+					expected: tokenAddress => tokenAddress === address,
 					write: 'setTargetToken',
 					writeArg: [currencyKey, address, decimal],
 				});
