@@ -157,5 +157,8 @@
 	},
 	"ExternalTokenStakeManager": {
 		"deploy": false
+	},
+	"StakingRewardsPeriMaticQuickSwap": {
+		"deploy": false
 	}
 }
