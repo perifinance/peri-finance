@@ -318,5 +318,19 @@
 				"keccak256": "0x84408b37c4b8e3a93a7771be269700965ed87c5f45aa7ae731e103564a7ad03f"
 			}
 		}
+	},
+	"v0.1.2": {
+		"tag": "v0.1.2",
+		"fulltag": "v0.1.2",
+		"network": "bsc",
+		"date": "2021-08-02T21:32:59+09:00",
+		"commit": "1d432947e3a0d875438385c2594fa1707d3fa72f",
+		"contracts": {
+			"StakingRewardsPeriBnbPancakeSwap": {
+				"address": "0xCA4f304F58dF2231ef04E63d85C88A9D46d0ca94",
+				"status": "current",
+				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
+			}
+		}
 	}
 }

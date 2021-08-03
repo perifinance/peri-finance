@@ -154,5 +154,8 @@
 	},
 	"BlacklistManager": {
 		"deploy": false
+	},
+	"StakingRewardsPeriBnbPancakeSwap": {
+		"deploy": false
 	}
 }
