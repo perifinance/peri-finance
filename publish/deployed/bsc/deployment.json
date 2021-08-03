@@ -317,10 +317,10 @@
 		},
 		"StakingState": {
 			"name": "StakingState",
-			"address": "0x96E5c0b4644ab18A77AB2984f4CCDCDc56B62e14",
+			"address": "0xD7357AF502ba9D07f8DD2Ad9204bE039d1A1D0fD",
 			"source": "StakingState",
-			"link": "https://bscscan.com/address/0x96E5c0b4644ab18A77AB2984f4CCDCDc56B62e14",
-			"timestamp": "2021-08-02T12:25:08.313Z",
+			"link": "https://bscscan.com/address/0xD7357AF502ba9D07f8DD2Ad9204bE039d1A1D0fD",
+			"timestamp": "2021-08-03T11:12:47.778Z",
 			"txn": "",
 			"network": "bsc"
 		},

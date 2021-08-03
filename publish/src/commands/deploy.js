@@ -1266,8 +1266,13 @@ const deploy = async ({
 				writeArg: addressOf(externalTokenStakeManager),
 			});
 
+			// BSC pegged USDC has 18 decimals
 			const stakingStateCurrencies = [
-				{ currencyKey: toBytes32('USDC'), decimal: '6', address: USDC_ADDRESS },
+				{
+					currencyKey: toBytes32('USDC'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: USDC_ADDRESS,
+				},
 				{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
 			];
 
