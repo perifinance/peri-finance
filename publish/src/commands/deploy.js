@@ -1282,7 +1282,7 @@ const deploy = async ({
 					target: stakingState,
 					read: 'tokenAddress',
 					readArg: currencyKey,
-					expected: tokenAddress => tokenAddress === address,
+					expected: tokenAddress => tokenAddress === address.toLowerCase(),
 					write: 'setTargetToken',
 					writeArg: [currencyKey, address, decimal],
 				});
