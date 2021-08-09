@@ -1,30 +1,37 @@
 require('dotenv').config();
 
 const Web3 = require('web3');
-const path = require('path');
 const schedule = require('node-schedule');
 const cron = require('cron-validator');
+
+const path = require('path');
+const fs = require('fs');
 
 const {
 	ensureNetwork,
 	ensureDeploymentPath,
 	getDeploymentPathForNetwork,
-	loadAndCheckRequiredSources,
 	loadConnections,
 	performTransactionalStep,
-	requestPriceFeed,
-	estimateEtherGasPice,
-	estimatePolygonGasPice,
-	estimateBSCGasPice,
+	requestPriceFeedFromGateIO,
+	checkGasPrice,
 	sleep,
 } = require('../util');
 
+const { toBN, fromWei } = require('web3-utils');
+const { multiplyDecimal, divideDecimal } = require('../../../test/utils')();
+
 const {
 	constants: { BUILD_FOLDER, CONFIG_FILENAME, PYNTHS_FILENAME, DEPLOYMENT_FILENAME },
-	getVersions,
-	getUsers,
+	wrap,
 	toBytes32,
+	FEE_PERIOD_DURATION,
 } = require('../../../');
+
+const { getSource, getTarget, getUsers } = wrap({
+	fs,
+	path,
+});
 
 const DEFAULTS = {
 	network: 'kovan',
@@ -32,65 +39,17 @@ const DEFAULTS = {
 	methodCallGasLimit: 100e4, // 1000k
 	gasPrice: '1',
 	cronScheduleFormat: `0 0 0/8 ? * *`,
-	methodArgs: [],
-	feedUrls: [],
 	tryCnt: 10,
+	feedArgs: [],
 };
 
-function getExistingContract({ network, deployment, contract, web3 }) {
-	let address;
-	if (network === 'local') {
-		address = deployment.targets[contract].address;
-	} else {
-		const contractVersion = getVersions({
-			network,
-			byContract: true,
-		})[contract];
-		const lastEntry = contractVersion.slice(-1)[0];
-		address = lastEntry.address;
-	}
-
-	const { source } = deployment.targets[contract];
-	const { abi } = deployment.sources[source];
-	return new web3.eth.Contract(abi, address);
-}
-
-const scheduler = async ({
-	network = DEFAULTS.network,
-	methodCallGasLimit = DEFAULTS.methodCallGasLimit,
-	gasPrice = DEFAULTS.gasPrice,
-	deploymentPath,
-	scheduler,
-	schedulerMethod,
-	privateKey,
-	providerUrl,
-	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
-	tryCnt = DEFAULTS.tryCnt,
-	publiclyCallable,
-	priority,
-}) => {
-	if (!schedulerMethod) {
-		throw new Error('must specify contract method to run');
-	}
-	if (
-		!cronScheduleFormat ||
-		!cron.isValidCron(cronScheduleFormat, { seconds: true, allowBlankDay: true })
-	) {
-		throw new Error('must specify scheduler time or correct scheduler time');
-	}
-	ensureNetwork(network);
-	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
-	ensureDeploymentPath(deploymentPath);
-
-	const { deployment } = loadAndCheckRequiredSources({
-		deploymentPath,
-		network,
-	});
-
+const getConnectionsByNetwork = ({ network, providerUrl, privateKey }) => {
+	let owner, oracle, debtManager, feePeriodManager, minterManager;
 	const {
 		providerUrl: envProviderUrl,
 		privateKey: envPrivateKey,
 		etherscanLinkPrefix,
+		rolePrivateKeys,
 	} = loadConnections({
 		network,
 	});
@@ -103,25 +62,76 @@ const scheduler = async ({
 		providerUrl = envProviderUrl;
 	}
 
+	const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+
 	// if not specified, or in a local network, override the private key passed as a CLI option, with the one specified in .env
 	if (network !== 'local' && !privateKey) {
 		privateKey = envPrivateKey;
 	}
 
-	const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
-
 	if (!privateKey && network === 'local') {
 		web3.eth.defaultAccount = getUsers({ network, user: 'owner' }).address; // protocolDAO
 	} else {
 		web3.eth.accounts.wallet.add(privateKey);
-		web3.eth.defaultAccount = web3.eth.accounts.wallet[0].address;
+		for (const [, privateKey] of Object.entries(rolePrivateKeys)) {
+			web3.eth.accounts.wallet.add(privateKey);
+		}
+
+		owner = web3.eth.accounts.wallet[0].address;
+		oracle = web3.eth.accounts.wallet[1].address;
+		debtManager = web3.eth.accounts.wallet[2].address;
+		feePeriodManager = web3.eth.accounts.wallet[3].address;
+		minterManager = web3.eth.accounts.wallet[4].address;
 	}
-	const account = web3.eth.defaultAccount;
+	const accounts = {
+		owner: owner,
+		oracle: oracle,
+		debtManager: debtManager,
+		feePeriodManager: feePeriodManager,
+		minterManager: minterManager,
+	};
+
+	web3.eth.defaultAccount = owner;
+
+	return { web3, etherscanLinkPrefix, accounts };
+};
+
+function getContractInstance({ network, deploymentPath, contract, web3, target, source }) {
+	const { address } = getTarget({ network, contract: target || contract, deploymentPath });
+	const { abi } = getSource({ network, contract: source || contract, deploymentPath });
+	return new web3.eth.Contract(abi, address);
+}
+
+const scheduler = async ({
+	network = DEFAULTS.network,
+	methodCallGasLimit = DEFAULTS.methodCallGasLimit,
+	gasPrice = DEFAULTS.gasPrice,
+	deploymentPath,
+	feedArgs = DEFAULTS.feedArgs,
+	privateKey,
+	providerUrl,
+	cronScheduleFormat = DEFAULTS.cronScheduleFormat,
+	tryCnt = DEFAULTS.tryCnt,
+	publiclyCallable,
+	priority,
+	job,
+}) => {
+	if (!job) {
+		throw new Error('must specify job to run');
+	}
+	if (
+		!cronScheduleFormat ||
+		!cron.isValidCron(cronScheduleFormat, { seconds: true, allowBlankDay: true })
+	) {
+		throw new Error('must specify scheduler time or correct scheduler time');
+	}
+
+	ensureNetwork(network);
+	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network });
+	ensureDeploymentPath(deploymentPath);
 
 	console.log('Starting Schedule');
 	schedule.scheduleJob(cronScheduleFormat, async () => {
-		console.log(`\n## scheduler name : ${scheduler}`);
-		console.log(`\n## scheduler method : ${schedulerMethod}`);
 		console.log(`Running Schedule at ${new Date().toLocaleString()}`);
 
 		let cnt = 0;
@@ -130,90 +140,52 @@ const scheduler = async ({
 			console.log(`trying to execute ${cnt} times at ${new Date().toLocaleString()}`);
 			try {
 				if (priority) {
-					if (['polygon', 'mumbai'].includes(network)) {
-						gasPrice = await estimatePolygonGasPice(network, priority);
-						console.log(`using gas price : ${gasPrice}`);
-						if (!gasPrice) throw new Error('gas price is undefined');
-					} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
-						gasPrice = await estimateEtherGasPice(priority);
-						console.log(`using gas price : ${gasPrice}`);
-						if (!gasPrice) throw new Error('gas price is undefined');
-					} else if (['bsc', 'bsctest'].includes(network)) {
-						gasPrice = await estimateBSCGasPice(priority);
-						console.log(`using gas price : ${gasPrice}`);
-						if (!gasPrice) throw new Error('gas price is undefined');
-					}
+					gasPrice = await checkGasPrice(network, priority);
 				} else {
 					console.log(`using gas price : ${gasPrice}`);
 				}
 
 				const runStep = async opts =>
 					performTransactionalStep({
-						gasLimit: methodCallGasLimit, // allow overriding of gasLimit
-						...opts,
-						account,
-						gasPrice,
-						etherscanLinkPrefix,
+						gasLimit: methodCallGasLimit,
 						publiclyCallable,
+						gasPrice,
+						...opts,
 					});
-
-				const schedulerContract = getExistingContract({
-					network,
-					deployment,
-					contract: scheduler,
-					web3,
-				});
 
 				try {
 					cnt++;
-					const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
 
-					if (DEFAULTS.feedUrls.length > 0 && DEFAULTS.methodArgs.length > 0) {
-						const feedPriceArr = [];
-
-						for (const feedUrl of DEFAULTS.feedUrls) {
-							const price = await requestPriceFeed(feedUrl);
-							feedPriceArr.push(price);
+					if (job) {
+						switch (job) {
+							case 'inflationalMint':
+								inflationalMint({ network, deploymentPath, privateKey, providerUrl, runStep });
+								break;
+							case 'updateRates':
+								updateRates({
+									network,
+									deploymentPath,
+									feedArgs,
+									privateKey,
+									providerUrl,
+									runStep,
+								});
+								break;
+							case 'takeDebtSnapshot':
+								takeDebtSnapshot({ network, deploymentPath, privateKey, providerUrl, runStep });
+								break;
+							case 'closeCurrentFeePeriod':
+								closeCurrentFeePeriod({
+									network,
+									deploymentPath,
+									privateKey,
+									providerUrl,
+									runStep,
+								});
+								break;
+							default:
+								throw new Error(`${job} is not defined in scheduler.`);
 						}
-
-						const feedKeyArr = DEFAULTS.methodArgs.map(toBytes32);
-						if (feedPriceArr.length !== feedKeyArr.length) {
-							throw new Error('must match the length of price and key');
-						}
-
-						feedKeyArr.forEach(async (feedKey, index) => {
-							await runStep({
-								contract: scheduler,
-								target: schedulerContract,
-								read: 'getRateAndUpdatedTime',
-								readArg: feedKey,
-								expected: input => {
-									const rate = input[0];
-									const time = input[1];
-									if (rate === 0 || time === 0) return false;
-									// check if rate has changed or time has passed 5 mins
-									return rate === feedPriceArr[index] || time > now - 300;
-								},
-								write: schedulerMethod,
-								writeArg: [[feedKey], [feedPriceArr[index]], now],
-							});
-						});
-					} else if (DEFAULTS.methodArgs.length > 0) {
-						const methodArgs = DEFAULTS.methodArgs.map(x => (isNaN(x) ? x : Web3.utils.toWei(x)));
-						console.log(`adding arguments : ${methodArgs}`);
-
-						await runStep({
-							contract: scheduler,
-							target: schedulerContract,
-							write: schedulerMethod,
-							writeArg: methodArgs,
-						});
-					} else {
-						await runStep({
-							contract: scheduler,
-							target: schedulerContract,
-							write: schedulerMethod,
-						});
 					}
 
 					success = true;
@@ -227,6 +199,287 @@ const scheduler = async ({
 				await sleep(3000);
 			}
 		}
+	});
+};
+
+const updateRates = async ({
+	network,
+	deploymentPath,
+	feedArgs,
+	providerUrl,
+	privateKey,
+	runStep,
+}) => {
+	const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
+	const { web3, accounts, etherscanLinkPrefix } = getConnectionsByNetwork({
+		network,
+		providerUrl,
+		privateKey,
+	});
+
+	const externalRateAggregator = getContractInstance({
+		network,
+		deploymentPath,
+		contract: 'ExternalRateAggregator',
+		web3,
+	});
+
+	// get last price of currency from gate.io
+	const feedPriceArr = feedArgs.map(requestPriceFeedFromGateIO);
+
+	Promise.all(feedPriceArr)
+		.then(async data => {
+			for (const { price, currencyKey } of data) {
+				await runStep({
+					contract: 'ExternalRateAggregator',
+					target: externalRateAggregator,
+					read: 'getRateAndUpdatedTime',
+					readArg: toBytes32(currencyKey),
+					expected: response => {
+						const rate = response[0];
+						const time = response[1];
+						// check if rate has changed or time has passed 5 mins
+						return (rate !== 0 || time !== 0) && (rate === price || time > now - 300);
+					},
+					write: 'updateRates',
+					writeArg: [[toBytes32(currencyKey)], [price], now],
+					account: accounts.oracle,
+					etherscanLinkPrefix,
+				});
+			}
+		})
+		.catch(err => console.log(err));
+};
+
+const takeDebtSnapshot = async ({ network, deploymentPath, providerUrl, privateKey, runStep }) => {
+	const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
+
+	const { web3, accounts, etherscanLinkPrefix } = getConnectionsByNetwork({
+		network,
+		providerUrl,
+		privateKey,
+	});
+
+	const debtCache = getContractInstance({ network, deploymentPath, contract: 'DebtCache', web3 });
+
+	await runStep({
+		contract: 'DebtCache',
+		target: debtCache,
+		read: 'cacheInfo',
+		expected: input => {
+			const cacheTimestamp = input[1];
+			const cacheIsInvalid = input[2];
+			const cacheStale = input[3];
+			// every 6h or cache is stale or invalid
+			return cacheTimestamp > now - 21600 || cacheIsInvalid || cacheStale;
+		},
+		write: 'takeDebtSnapshot',
+		account: accounts.debtManager,
+		etherscanLinkPrefix,
+	});
+};
+
+const closeCurrentFeePeriod = async ({
+	network,
+	deploymentPath,
+	providerUrl,
+	privateKey,
+	runStep,
+}) => {
+	const now = (new Date().getTime() / 1000).toFixed(0); // convert to epoch time
+
+	const { web3, accounts, etherscanLinkPrefix } = getConnectionsByNetwork({
+		network,
+		providerUrl,
+		privateKey,
+	});
+
+	const proxyFeePool = getContractInstance({
+		network,
+		deploymentPath,
+		contract: 'FeePool',
+		target: 'ProxyFeePool',
+		web3,
+	});
+
+	const feePeriodDuration = ['bsc', 'polygon', 'mainnet'].includes(network)
+		? FEE_PERIOD_DURATION
+		: 1800;
+
+	await runStep({
+		contract: 'ProxyFeePool',
+		target: proxyFeePool,
+		read: 'recentFeePeriods',
+		readArg: 0,
+		expected: input => {
+			const startTime = input[2];
+			return startTime > now - feePeriodDuration;
+		},
+		write: 'closeCurrentFeePeriod',
+		account: accounts.feePeriodManager,
+		etherscanLinkPrefix,
+	});
+};
+
+const inflationalMint = async ({ network, deploymentPath, providerUrl, privateKey, runStep }) => {
+	const { web3, accounts, etherscanLinkPrefix } = getConnectionsByNetwork({
+		network,
+		providerUrl,
+		privateKey,
+	});
+
+	const supplySchedule = getContractInstance({
+		network,
+		deploymentPath,
+		contract: 'SupplySchedule',
+		web3,
+	});
+
+	const totalInflationMintSupply = toBN(
+		await supplySchedule.methods.INITIAL_WEEKLY_SUPPLY().call()
+	); // 76924719527063029689120
+
+	const isMintable = await supplySchedule.methods.isMintable().call();
+
+	const polygon_network = 'polygon';
+	const { web3: web3_polygon } = getConnectionsByNetwork({ network: polygon_network });
+	const deploymentPath_polygon = getDeploymentPathForNetwork({ network: polygon_network });
+	const debtCache_polygon = getContractInstance({
+		network: polygon_network,
+		deploymentPath: deploymentPath_polygon,
+		contract: 'DebtCache',
+		web3: web3_polygon,
+	});
+
+	const rewardsDistribution_polygon = getContractInstance({
+		network: polygon_network,
+		deploymentPath: deploymentPath_polygon,
+		contract: 'RewardsDistribution',
+		web3: web3_polygon,
+	});
+
+	const distributionsLength_polygon = await rewardsDistribution_polygon.methods
+		.distributionsLength()
+		.call();
+
+	let distributed_sum_polygon = toBN(0);
+	const distributionDataArr_polygon = [];
+
+	for (let i = 0; i < distributionsLength_polygon; i++) {
+		const distributionData = await rewardsDistribution_polygon.methods.distributions(i).call();
+		distributionDataArr_polygon.push(distributionData[1]);
+	}
+
+	await Promise.all(distributionDataArr_polygon)
+		.then(data => {
+			distributed_sum_polygon = data.reduce(
+				(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
+				toBN(0)
+			);
+		})
+		.catch(e => console.log(e));
+
+	const bsc_network = 'bsc';
+	const { web3: web3_bsc } = getConnectionsByNetwork({ network: bsc_network });
+	const deploymentPath_bsc = getDeploymentPathForNetwork({ network: bsc_network });
+	const debtCache_bsc = getContractInstance({
+		network: bsc_network,
+		deploymentPath: deploymentPath_bsc,
+		contract: 'DebtCache',
+		web3: web3_bsc,
+	});
+
+	const rewardsDistribution_bsc = getContractInstance({
+		network: bsc_network,
+		deploymentPath: deploymentPath_bsc,
+		contract: 'RewardsDistribution',
+		web3: web3_bsc,
+	});
+
+	const distributionsLength_bsc = await rewardsDistribution_bsc.methods
+		.distributionsLength()
+		.call();
+
+	let distributed_sum_bsc = toBN(0);
+	const distributionDataArr_bsc = [];
+
+	for (let i = 0; i < distributionsLength_bsc; i++) {
+		const distributionData = await rewardsDistribution_bsc.methods.distributions(i).call();
+		distributionDataArr_bsc.push(distributionData[1]);
+	}
+
+	await Promise.all(distributionDataArr_bsc)
+		.then(data => {
+			distributed_sum_bsc = data.reduce(
+				(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
+				toBN(0)
+			);
+		})
+		.catch(e => console.log(e));
+
+	// ! not yet implemented on mainnet
+	// const mainnet_network = 'mainnet';
+	// const { web3: web3_mainnet } = getConnectionsByNetwork({network : 'mainnet'});
+	// const deploymentPath_mainnet = getDeploymentPathForNetwork({ network: 'mainnet' });
+	// const debtCache_mainnet = getContractInstance({
+	// 	network: 'mainnet',
+	// 	deploymentPath: deploymentPath_mainnet,
+	// 	contract: 'DebtCache',
+	// 	web3: web3_mainnet,
+	// });
+
+	const pureMintAmount = totalInflationMintSupply
+		.sub(distributed_sum_polygon)
+		.sub(distributed_sum_bsc);
+
+	const polygonDebt = toBN(await debtCache_polygon.methods.cachedDebt().call());
+	const bscDebt = toBN(await debtCache_bsc.methods.cachedDebt().call());
+
+	const totalDebt = polygonDebt.add(bscDebt);
+
+	const polygonMintAmount = multiplyDecimal(
+		pureMintAmount,
+		divideDecimal(polygonDebt, totalDebt)
+	).add(distributed_sum_polygon);
+	const bscMintAmount = multiplyDecimal(pureMintAmount, divideDecimal(bscDebt, totalDebt)).add(
+		distributed_sum_bsc
+	);
+
+	const polygonRatio = divideDecimal(polygonMintAmount, totalInflationMintSupply);
+	const bscRatio = divideDecimal(bscMintAmount, totalInflationMintSupply);
+	const mainnetRatio = 1; // currently not used
+
+	console.log('polygon ratio : ', fromWei(polygonRatio));
+	console.log('bsc ratio : ', fromWei(bscRatio));
+
+	const source = ['polygon', 'mumbai'].includes(network)
+		? 'PeriFinanceToPolygon'
+		: ['bsc', 'bsctest'].includes(network)
+		? 'PeriFinanceToBSC'
+		: 'PeriFinanceToEthereum';
+
+	const proxyPeriFinance = getContractInstance({
+		network,
+		deploymentPath,
+		contract: 'PeriFinance',
+		// target: 'ProxyERC20',
+		source,
+		web3,
+	});
+
+	await runStep({
+		contract: 'PeriFinance',
+		target: proxyPeriFinance,
+		read: 'anyPynthOrPERIRateIsInvalid', // this doesnt do anything here
+		expected: input => !isMintable,
+		write: 'inflationalMint',
+		writeArg: ['bsc', 'bsctest'].includes(network)
+			? bscRatio
+			: ['polygon', 'mumbai'].includes(network)
+			? polygonRatio
+			: mainnetRatio,
+		account: accounts.minterManager,
+		etherscanLinkPrefix,
 	});
 };
 
@@ -248,21 +501,14 @@ module.exports = {
 				DEFAULTS.methodCallGasLimit
 			)
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
-			.option('-s, --scheduler <value>', `The name of the contract scheduler`)
-			.option('-sm, --scheduler-method <value>', `Method to call of the scheduler`)
+			.option('-j, --job <value>', `The name of the job to execute`)
 			.option(
-				'-sma, --scheduler-method-arguments <value>',
-				`Method Arguments`,
-				x => DEFAULTS.methodArgs.push(x),
-				DEFAULTS.methodArgs
+				'-f, --feed-args <value>',
+				`feed Arguments ["PERI", "USDC", "DAI"]`,
+				x => x.split(','),
+				DEFAULTS.feedArgs
 			)
 			.option('-csf, --cron-schedule-format <value>', `cron schedule format for scheduler`)
-			.option(
-				'-fu, --feed-urls <value>',
-				`url to request price feeds`,
-				x => DEFAULTS.feedUrls.push(x),
-				DEFAULTS.feedUrls
-			)
 			.option(
 				'-v, --private-key [value]',
 				'The private key to deploy with (only works in local mode, otherwise set in .env).'
@@ -279,7 +525,7 @@ module.exports = {
 			)
 			.option(
 				'-p, --priority <value>',
-				'set setimated gas price, available options : ["safeLow", "standard", "fast", "fastest" (polygon only)]',
+				'set setimated gas price, available options : ["safeLow", "standard", "fast"]',
 				x => x.toLowerCase()
 			)
 			.action(scheduler),

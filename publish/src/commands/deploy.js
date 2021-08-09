@@ -19,9 +19,7 @@ const {
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
-	estimateEtherGasPice,
-	estimatePolygonGasPice,
-	estimateBSCGasPice,
+	checkGasPrice,
 } = require('../util');
 
 const {
@@ -83,15 +81,7 @@ const deploy = async ({
 	}
 
 	if (priority) {
-		if (['polygon', 'mumbai'].includes(network)) {
-			gasPrice = await estimatePolygonGasPice(network, priority);
-		} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
-			gasPrice = await estimateEtherGasPice(priority);
-		} else if (['bsc', 'bsctest'].includes(network)) {
-			gasPrice = await estimateBSCGasPice(priority);
-		}
-		if (!gasPrice) throw new Error('gas price is undefined');
-		gasPrice = w3utils.toBN(gasPrice);
+		gasPrice = await checkGasPrice(network, priority);
 	}
 
 	const limitPromise = pLimit(concurrency);
@@ -1282,7 +1272,7 @@ const deploy = async ({
 					target: stakingState,
 					read: 'tokenAddress',
 					readArg: currencyKey,
-					expected: tokenAddress => tokenAddress === address.toLowerCase(),
+					expected: tokenAddress => tokenAddress.toLowerCase() === address.toLowerCase(),
 					write: 'setTargetToken',
 					writeArg: [currencyKey, address, decimal],
 				});

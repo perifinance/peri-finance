@@ -174,7 +174,14 @@ const loadConnections = ({ network, useFork }) => {
 
 	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
 
-	return { providerUrl, privateKey, etherscanUrl, etherscanLinkPrefix };
+	const rolePrivateKeys = {
+		oracle: process.env.ORACLE_PRIVATE_KEY,
+		debtManager: process.env.DEBT_MANAGER_PRIVATE_KEY,
+		feePeriodManager: process.env.FEE_PERIOD_MANAGER_PRIVATE_KEY,
+		minterManager: process.env.MINTER_MANAGER_PRIVATE_KEY,
+	};
+
+	return { providerUrl, privateKey, etherscanUrl, etherscanLinkPrefix, rolePrivateKeys };
 };
 
 const confirmAction = prompt =>
@@ -376,21 +383,23 @@ function reportDeployedContracts({ deployer }) {
 	}
 }
 
-function requestPriceFeed(url) {
+function requestPriceFeedFromGateIO(currencyKey) {
+	const feedUrl = `https://data.gateapi.io/api2/1/ticker/${currencyKey}_USDT`;
+
 	return axios
-		.get(url)
+		.get(feedUrl)
 		.then(({ data }) => {
-			const lastPrice = w3utils.toWei(data.last);
-			return lastPrice;
+			const price = w3utils.toWei(data.last);
+			return { price, currencyKey };
 		})
 		.catch(e => {
 			console.log(e);
 		});
 }
 
-function estimateEtherGasPice(priority) {
+function estimateEtherGasPice(network, priority) {
 	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
-	console.log(`requesting gas price for ether mainnet : ${gasStationUrl}`);
+	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
 		.get(gasStationUrl)
@@ -457,6 +466,23 @@ function estimateBSCGasPice(network, priority) {
 		.catch(e => console.log(e));
 }
 
+async function checkGasPrice(network, priority) {
+	let gasPrice;
+
+	if (['polygon', 'mumbai'].includes(network)) {
+		gasPrice = await estimatePolygonGasPice(network, priority);
+	} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
+		gasPrice = await estimateEtherGasPice(priority);
+	} else if (['bsc', 'bsctest'].includes(network)) {
+		gasPrice = await estimateBSCGasPice(network, priority);
+	}
+
+	console.log(`using gas price : ${gasPrice}`);
+	if (!gasPrice) throw new Error('gas price is undefined');
+
+	return gasPrice;
+}
+
 function sleep(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms);
@@ -476,9 +502,7 @@ module.exports = {
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
-	requestPriceFeed,
-	estimateEtherGasPice,
-	estimatePolygonGasPice,
-	estimateBSCGasPice,
+	requestPriceFeedFromGateIO,
+	checkGasPrice,
 	sleep,
 };
