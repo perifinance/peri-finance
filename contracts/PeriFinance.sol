@@ -7,6 +7,7 @@ import "./BasePeriFinance.sol";
 import "./interfaces/IRewardEscrow.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/ISupplySchedule.sol";
+import "./interfaces/IBridgeState.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
@@ -17,6 +18,8 @@ contract PeriFinance is BasePeriFinance {
 
     address public minterRole;
     address public inflationMinter;
+
+    IBridgeState public bridgeState;
 
     // ========== CONSTRUCTOR ==========
 
@@ -166,6 +169,51 @@ contract PeriFinance is BasePeriFinance {
         return _transferByProxy(account, messageSender, totalRedeemed);
     }
 
+    // ------------- Bridge Experiment
+    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyTester {
+        require(_amount > 0, "Cannot transfer zero");
+
+        require(_burnByProxy(messageSender, _amount), "burning failed");
+
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
+    }
+
+    function claimAllBridgedAmounts() external optionalProxy onlyTester {
+        uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
+
+        require(applicableIds.length > 0, "No claimable");
+
+        for (uint i = 0; i < applicableIds.length; i++) {
+            _claimBridgedAmount(applicableIds[i]);
+        }
+    }
+
+    function claimBridgedAmount(uint _index) external optionalProxy onlyTester {
+        _claimBridgedAmount(_index);
+    }
+
+    function _claimBridgedAmount(uint _index) internal returns (bool) {
+        // Validations are checked from bridge state
+        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+
+        require(account == messageSender, "Caller is not matched");
+
+        bridgeState.claimInbound(_index);
+
+        require(_mintByProxy(account, amount), "Mint failed");
+
+        return true;
+    }
+
+    modifier onlyTester() {
+        require(address(bridgeState) != address(0), "BridgeState is not set");
+
+        bytes32 tester = "Tester";
+
+        require(bridgeState.isOnRole(tester, messageSender), "Not tester");
+        _;
+    }
+
     /* Once off function for SIP-60 to migrate PERI balances in the RewardEscrow contract
      * To the new RewardEscrowV2 contract
      */
@@ -185,6 +233,10 @@ contract PeriFinance is BasePeriFinance {
 
     function setinflationMinter(address _newinflationMinter) external onlyOwner {
         inflationMinter = _newinflationMinter;
+    }
+
+    function setBridgeState(address _newBridgeState) external onlyOwner {
+        bridgeState = IBridgeState(_newBridgeState);
     }
 
     // ========== EVENTS ==========

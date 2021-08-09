@@ -118,6 +118,22 @@ contract ExternStateToken is Owned, Proxyable {
         return _internalTransfer(from, to, value);
     }
 
+    function _mintByProxy(address _minter, uint _value) internal returns (bool) {
+        tokenState.setBalanceOf(_minter, tokenState.balanceOf(_minter).add(_value));
+
+        emitTransfer(address(0), _minter, _value);
+
+        return true;
+    }
+
+    function _burnByProxy(address _burner, uint _value) internal returns (bool) {
+        tokenState.setBalanceOf(_burner, tokenState.balanceOf(_burner).sub(_value));
+
+        emitTransfer(_burner, address(0), _value);
+
+        return true;
+    }
+
     /**
      * @notice Approves spender to transfer on the message sender's behalf.
      */
