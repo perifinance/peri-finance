@@ -173,6 +173,9 @@
 	"ExternalTokenStakeManager": {
 		"deploy": false
 	},
+	"BridgeState": {
+		"deploy": false
+	},
 	"DAI": {
 		"deploy": false
 	},

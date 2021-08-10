@@ -98,6 +98,9 @@
 	"PeriFinanceEscrow": {
 		"deploy": false
 	},
+	"RewardEscrow": {
+		"deploy": false
+	},
 	"RewardEscrowV2": {
 		"deploy": false
 	},
@@ -150,6 +153,9 @@
 		"deploy": false
 	},
 	"ExternalRateAggregator": {
+		"deploy": false
+	},
+	"BridgeState": {
 		"deploy": false
 	},
 	"USDC": {

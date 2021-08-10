@@ -37,6 +37,7 @@ const {
 	},
 	defaults,
 	nonUpgradeable,
+	networkToChainId,
 } = require('../../../.');
 
 const DEFAULTS = {
@@ -728,6 +729,12 @@ const deploy = async ({
 	});
 
 	let periFinance;
+
+	const childChainManagerAddress = (await getDeployParameter('CHILD_CHAIN_MANAGER_ADDRESS'))[
+		network
+	];
+	const minterRoleAddress = (await getDeployParameter('MINTER_ROLE_ADDRESS'))[network];
+
 	if (['polygon', 'mumbai'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
@@ -739,22 +746,22 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
-				defaults.CHILD_CHAIN_MANAGER_ADDRESS[network], // address of childChainManager,
+				childChainManagerAddress, // address of childChainManager,
 				addressOf(blacklistManager),
 			],
 		});
 
-		if (defaults.CHILD_CHAIN_MANAGER_ADDRESS[network] !== ZERO_ADDRESS) {
+		if (childChainManagerAddress !== ZERO_ADDRESS) {
 			await runStep({
 				contract: 'PeriFinance',
 				target: periFinance,
 				read: 'childChainManager',
-				expected: input => input === defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+				expected: input => input === childChainManagerAddress,
 				write: 'setChildChainManager',
-				writeArg: defaults.CHILD_CHAIN_MANAGER_ADDRESS[network],
+				writeArg: childChainManagerAddress,
 			});
 		}
-	} else if (['mainnet', 'kovan', 'rinkeby', 'robsten', 'goerli'].includes(network)) {
+	} else if (['mainnet', 'kovan', 'rinkeby', 'robsten', 'goerli', 'local'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
@@ -765,19 +772,19 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
-				defaults.MINTER_ROLE_ADDRESS[network],
+				minterRoleAddress,
 				addressOf(blacklistManager),
 			],
 		});
 
-		if (defaults.MINTER_ROLE_ADDRESS[network] !== ZERO_ADDRESS) {
+		if (minterRoleAddress !== ZERO_ADDRESS) {
 			await runStep({
 				contract: 'PeriFinance',
 				target: periFinance,
 				read: 'minterRole',
-				expected: input => input === defaults.MINTER_ROLE_ADDRESS[network],
+				expected: input => input === minterRoleAddress,
 				write: 'setMinterRole',
-				writeArg: defaults.MINTER_ROLE_ADDRESS[network],
+				writeArg: minterRoleAddress,
 			});
 		}
 	} else if (['bsc', 'bsctest'].includes(network)) {
@@ -791,19 +798,19 @@ const deploy = async ({
 				account,
 				currentPeriFinanceSupply,
 				addressOf(readProxyForResolver),
-				defaults.MINTER_ROLE_ADDRESS[network],
+				minterRoleAddress,
 				addressOf(blacklistManager),
 			],
 		});
 
-		if (defaults.MINTER_ROLE_ADDRESS[network] !== ZERO_ADDRESS) {
+		if (minterRoleAddress !== ZERO_ADDRESS) {
 			await runStep({
 				contract: 'PeriFinance',
 				target: periFinance,
 				read: 'minterRole',
-				expected: input => input === defaults.MINTER_ROLE_ADDRESS[network],
+				expected: input => input === minterRoleAddress,
 				write: 'setMinterRole',
-				writeArg: defaults.MINTER_ROLE_ADDRESS[network],
+				writeArg: minterRoleAddress,
 			});
 		}
 	}
@@ -819,14 +826,15 @@ const deploy = async ({
 		});
 	}
 
-	if (periFinance && defaults.INFLATION_MINTER_ADDRESSES[network] !== ZERO_ADDRESS) {
+	const inflationMinterAddress = (await getDeployParameter('INFLATION_MINTER_ADDRESSES'))[network];
+	if (periFinance && inflationMinterAddress !== ZERO_ADDRESS) {
 		await runStep({
 			contract: 'PeriFinance',
 			target: periFinance,
 			read: 'inflationMinter',
-			expected: input => input === defaults.INFLATION_MINTER_ADDRESSES[network],
+			expected: input => input === inflationMinterAddress,
 			write: 'setinflationMinter',
-			writeArg: defaults.INFLATION_MINTER_ADDRESSES[network],
+			writeArg: inflationMinterAddress,
 		});
 	}
 
@@ -846,6 +854,66 @@ const deploy = async ({
 			expected: input => input === addressOf(proxyERC20PeriFinance),
 			write: 'setProxy',
 			writeArg: addressOf(proxyERC20PeriFinance),
+		});
+	}
+
+	const bridgeState = await deployer.deployContract({
+		name: 'BridgeState',
+		source: 'BridgeState',
+		deps: ['PeriFinance'],
+		args: [account, addressOf(periFinance)],
+	});
+
+	// Deploy Temporal Bridge
+	if (periFinance && bridgeState) {
+		await runStep({
+			contract: 'BridgeState',
+			target: bridgeState,
+			read: 'associatedContract',
+			expected: input => input === addressOf(periFinance),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(periFinance),
+		});
+
+		const roles = (await getDeployParameter('BRIDGE_ROLES'))[network];
+
+		if (roles && roles.length > 0) {
+			for (const { roleKey, address } of roles) {
+				await runStep({
+					contract: 'BridgeState',
+					target: bridgeState,
+					read: 'isOnRole',
+					readArg: [toBytes32(roleKey), address],
+					expected: input => input,
+					write: 'setRole',
+					writeArg: [toBytes32(roleKey), address, true],
+				});
+			}
+		}
+
+		const bridgeNetworkStatus = (await getDeployParameter('BRIDGE_NETWORK_STATUS'))[network];
+
+		if (bridgeNetworkStatus && bridgeNetworkStatus.length > 0) {
+			for (const { network, isOpened } of bridgeNetworkStatus) {
+				await runStep({
+					contract: 'BridgeState',
+					target: bridgeState,
+					read: 'networkOpened',
+					readArg: [networkToChainId[network]],
+					expected: input => input === isOpened,
+					write: 'setNetworkStatus',
+					writeArg: [networkToChainId[network], isOpened],
+				});
+			}
+		}
+
+		await runStep({
+			contract: 'PeriFinance',
+			target: periFinance,
+			read: 'bridgeState',
+			expected: input => input === addressOf(bridgeState),
+			write: 'setBridgeState',
+			writeArg: addressOf(bridgeState),
 		});
 	}
 
@@ -1282,10 +1350,12 @@ const deploy = async ({
 
 	console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
 
+	const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
+
 	const externalRateAggregator = await deployer.deployContract({
 		name: 'ExternalRateAggregator',
 		source: 'ExternalRateAggregator',
-		args: [account, defaults.ORACLE_ADDRESSES[network]],
+		args: [account, oracleAddress],
 	});
 
 	if (externalRateAggregator) {
@@ -1300,14 +1370,14 @@ const deploy = async ({
 			});
 		}
 
-		if (defaults.ORACLE_ADDRESSES[network] !== ZERO_ADDRESS) {
+		if (oracleAddress !== ZERO_ADDRESS) {
 			await runStep({
 				contract: 'ExternalRateAggregator',
 				target: externalRateAggregator,
 				read: 'oracle',
-				expected: input => input === defaults.ORACLE_ADDRESSES[network],
+				expected: input => input === oracleAddress,
 				write: 'setOracle',
-				writeArg: defaults.ORACLE_ADDRESSES[network],
+				writeArg: oracleAddress,
 			});
 		}
 	}

@@ -249,12 +249,30 @@ const defaults = {
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
 	},
+	BRIDGE_ROLES: {
+		kovan: [
+			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+		],
+		bsctest: [
+			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+		],
+		goerli: [
+			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+		],
+	},
+	BRIDGE_NETWORK_STATUS: {
+		kovan: [{ network: 'bsctest', isOpened: true }],
+		bsctest: [{ network: 'kovan', isOpened: true }],
+		goerli: [{ network: 'bsctest', isOpened: true }],
+	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT: `${3e6}`,
-
 	COLLATERAL_MANAGER: {
 		PYNTHS: ['pUSD', 'pBTC', 'pETH'],
 		SHORTS: [
