@@ -82,7 +82,7 @@ const deploy = async ({
 	}
 
 	if (priority) {
-		gasPrice = await checkGasPrice(network, priority);
+		gasPrice = w3utils.toBN(await checkGasPrice(network, priority));
 	}
 
 	const limitPromise = pLimit(concurrency);

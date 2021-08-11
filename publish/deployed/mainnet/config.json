@@ -3,10 +3,10 @@
 		"deploy": false
 	},
 	"BinaryOptionMarketFactory": {
-		"deploy": false
+		"deploy": true
 	},
 	"BinaryOptionMarketManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"BinaryOptionMarketData": {
 		"deploy": false
@@ -17,9 +17,6 @@
 	"CollateralManagerState": {
 		"deploy": false
 	},
-	"CollateralEth": {
-		"deploy": false
-	},
 	"CollateralErc20": {
 		"deploy": false
 	},
@@ -27,9 +24,6 @@
 		"deploy": false
 	},
 	"CollateralStateErc20": {
-		"deploy": false
-	},
-	"CollateralStateEth": {
 		"deploy": false
 	},
 	"CollateralStateShort": {
@@ -57,6 +51,9 @@
 		"deploy": false
 	},
 	"EtherCollateralpUSD": {
+		"deploy": false
+	},
+	"PeriFinanceBridgeToOptimism": {
 		"deploy": false
 	},
 	"ExchangeRates": {
@@ -125,22 +122,13 @@
 	"PynthpUSD": {
 		"deploy": false
 	},
-	"PynthpBTC": {
+	"ProxyERC20pUSD": {
 		"deploy": false
 	},
 	"ProxyERC20": {
 		"deploy": false
 	},
 	"ProxyFeePool": {
-		"deploy": false
-	},
-	"ProxyPeriFinance": {
-		"deploy": false
-	},
-	"ProxypUSD": {
-		"deploy": false
-	},
-	"ProxypBTC": {
 		"deploy": false
 	},
 	"SafeDecimalMath": {
@@ -155,43 +143,25 @@
 	"TokenStatepUSD": {
 		"deploy": false
 	},
-	"TokenStatepBTC": {
-		"deploy": false
-	},
-	"TokenStatepETH": {
-		"deploy": false
-	},
-	"ProxypETH": {
-		"deploy": false
-	},
-	"PynthpETH": {
-		"deploy": false
-	},
-	"TokenStateiETH": {
-		"deploy": false
-	},
-	"ProxyiETH": {
-		"deploy": false
-	},
-	"PynthiETH": {
-		"deploy": false
-	},
-	"TokenStateiBTC": {
-		"deploy": false
-	},
-	"ProxyiBTC": {
-		"deploy": false
-	},
-	"PynthiBTC": {
-		"deploy": false
-	},
 	"TradingRewards": {
 		"deploy": false
 	},
-	"StakingStateUSDC": {
+	"StakingState": {
+		"deploy": false
+	},
+	"ExternalTokenStakeManager": {
+		"deploy": false
+	},
+	"BridgeState": {
+		"deploy": false
+	},
+	"ExternalRateAggregator": {
 		"deploy": false
 	},
 	"BlacklistManager": {
 		"deploy": false
+	},
+	"StakingRewardsPeriEthUniV2": {
+		"deploy": true
 	}
 }

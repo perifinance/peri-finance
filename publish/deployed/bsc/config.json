@@ -155,6 +155,9 @@
 	"BlacklistManager": {
 		"deploy": false
 	},
+	"BridgeState": {
+		"deploy": false
+	},
 	"StakingRewardsPeriBnbPancakeSwap": {
 		"deploy": false
 	}

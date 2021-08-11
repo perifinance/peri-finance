@@ -130,18 +130,18 @@ const constants = {
 
 const knownAccounts = {
 	mainnet: [
-		{
-			name: 'binance', // Binance 8 Wallet
-			address: '0xF977814e90dA44bFA03b6295A0616a897441aceC',
-		},
-		{
-			name: 'renBTCWallet', // KeeperDAO wallet (has renBTC and ETH)
-			address: '0x35ffd6e268610e764ff6944d07760d0efe5e40e5',
-		},
-		{
-			name: 'loansAccount',
-			address: '0x62f7A1F94aba23eD2dD108F8D23Aa3e7d452565B',
-		},
+		// {
+		// 	name: 'binance', // Binance 8 Wallet
+		// 	address: '0xF977814e90dA44bFA03b6295A0616a897441aceC',
+		// },
+		// {
+		// 	name: 'renBTCWallet', // KeeperDAO wallet (has renBTC and ETH)
+		// 	address: '0x35ffd6e268610e764ff6944d07760d0efe5e40e5',
+		// },
+		// {
+		// 	name: 'loansAccount',
+		// 	address: '0x62f7A1F94aba23eD2dD108F8D23Aa3e7d452565B',
+		// },
 	],
 	rinkeby: [],
 	kovan: [],
@@ -196,7 +196,7 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
-		mainnet: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
+		mainnet: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
 		kovan: '0x98da9a82224E7A5896D6227382F7a52c82082146',
 		goerli: '0x15040a4bDE0731664373Fb46Ce233262A644DFcd',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
@@ -205,7 +205,7 @@ const defaults = {
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 	},
 	DAI_ERC20_ADDRESSES: {
-		mainnet: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+		mainnet: '0x6b175474e89094c44da98b954eedeac495271d0f',
 		kovan: '0x39247f428F3A4ceAf40D4ED66809d02Ad016d3af',
 		goerli: '0x7A95dE39F23e3Cf5B49dA829DA0fE39DaE39e4e8',
 		mumbai: '0xAcC78d249781EDb5feB50027971EF4D60f144325',
@@ -250,8 +250,16 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
+		mainnet: [
+			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+		],
 		kovan: [
 			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+		],
+		bsc: [
+			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
 		],
 		bsctest: [

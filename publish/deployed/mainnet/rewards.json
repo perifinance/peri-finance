@@ -1,1 +1,7 @@
-[]
+[
+	{
+		"name": "PeriEthUniV2",
+		"stakingToken": "0x3530A9461788891b7f5b94148a6E82FFa6fd236a",
+		"rewardsToken": "ProxyERC20"
+	}
+]

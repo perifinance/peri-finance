@@ -507,8 +507,9 @@
 			},
 			"PeriFinance": {
 				"address": "0xC32Ebe7F9636C0F1a7C14143c0CDB1c83f46F531",
-				"status": "current",
-				"keccak256": "0xbef04fbccf3e482ca777b4e51404ae9606a0cbb3b9511187687136ab8d01e51e"
+				"status": "replaced",
+				"keccak256": "0xbef04fbccf3e482ca777b4e51404ae9606a0cbb3b9511187687136ab8d01e51e",
+				"replaced_in": "v0.1.4"
 			},
 			"BlacklistManager": {
 				"address": "0x1193f980DE14f2C88EB7495b616fEa4c8c545738",
@@ -568,6 +569,25 @@
 				"address": "0x3F01190Aa0827f4E9fF96096CC386CC1b2DA8982",
 				"status": "current",
 				"keccak256": "0x00bd2f2687e707adb11e44b40d542f2a25b2cc5ce44a62673da44910770fc088"
+			}
+		}
+	},
+	"v0.1.4": {
+		"tag": "v0.1.4",
+		"fulltag": "v0.1.4",
+		"network": "mumbai",
+		"date": "2021-08-10T16:25:08+09:00",
+		"commit": "cfe2190f52273b6df5e22e3c2088db053ae12dc4",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x05FA6b3Ce4aF3A6FB60B8919e9062ac2C06308a7",
+				"status": "current",
+				"keccak256": "0x4049429fee9147d0c814d6be5e085cfe3b7d2c2db367ac416be420b46a8a9af2"
+			},
+			"BridgeState": {
+				"address": "0x71043eaE4C56a116eD4375281f87013D6088d665",
+				"status": "current",
+				"keccak256": "0xda45bab516a5a8eb266ec926035ae5605e4d5d5a2d2609525c9ddd6c83f8af7d"
 			}
 		}
 	}

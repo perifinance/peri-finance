@@ -18,7 +18,7 @@ const {
 	sleep,
 } = require('../util');
 
-const { toBN, fromWei } = require('web3-utils');
+const { toBN, fromWei, toWei } = require('web3-utils');
 const { multiplyDecimal, divideDecimal } = require('../../../test/utils')();
 
 const {
@@ -115,6 +115,7 @@ const scheduler = async ({
 	publiclyCallable,
 	priority,
 	job,
+	inflationalMintRatio,
 }) => {
 	if (!job) {
 		throw new Error('must specify job to run');
@@ -159,7 +160,14 @@ const scheduler = async ({
 					if (job) {
 						switch (job) {
 							case 'inflationalMint':
-								inflationalMint({ network, deploymentPath, privateKey, providerUrl, runStep });
+								inflationalMint({
+									network,
+									deploymentPath,
+									privateKey,
+									providerUrl,
+									runStep,
+									inflationalMintRatio,
+								});
 								break;
 							case 'updateRates':
 								updateRates({
@@ -227,28 +235,46 @@ const updateRates = async ({
 	// get last price of currency from gate.io
 	const feedPriceArr = feedArgs.map(requestPriceFeedFromGateIO);
 
-	Promise.all(feedPriceArr)
-		.then(async data => {
-			for (const { price, currencyKey } of data) {
-				await runStep({
-					contract: 'ExternalRateAggregator',
-					target: externalRateAggregator,
-					read: 'getRateAndUpdatedTime',
-					readArg: toBytes32(currencyKey),
-					expected: response => {
-						const rate = response[0];
-						const time = response[1];
-						// check if rate has changed or time has passed 5 mins
-						return (rate !== 0 || time !== 0) && (rate === price || time > now - 300);
-					},
-					write: 'updateRates',
-					writeArg: [[toBytes32(currencyKey)], [price], now],
-					account: accounts.oracle,
-					etherscanLinkPrefix,
-				});
-			}
-		})
-		.catch(err => console.log(err));
+	if (feedPriceArr && feedPriceArr.length > 0) {
+		Promise.all(feedPriceArr)
+			.then(async data => {
+				for (const { price, currencyKey } of data) {
+					await runStep({
+						contract: 'ExternalRateAggregator',
+						target: externalRateAggregator,
+						read: 'getRateAndUpdatedTime',
+						readArg: toBytes32(currencyKey),
+						expected: response => {
+							const prevPrice = response[0];
+							const lastUpdatedTime = response[1];
+
+							const priceGap =
+								prevPrice > price
+									? toBN(prevPrice).sub(toBN(price))
+									: toBN(price).sub(toBN(prevPrice));
+
+							const deviation = multiplyDecimal(
+								divideDecimal(priceGap, toBN(prevPrice)),
+								toBN(100)
+							).toString();
+
+							// check if rate has changed or time has passed a day
+							return (
+								((prevPrice !== 0 || lastUpdatedTime !== 0) &&
+									prevPrice === price &&
+									lastUpdatedTime > now - 86400) ||
+								deviation < 5 // if deviation is higher than 5% , should update rates
+							);
+						},
+						write: 'updateRates',
+						writeArg: [[toBytes32(currencyKey)], [price], now],
+						account: accounts.oracle,
+						etherscanLinkPrefix,
+					});
+				}
+			})
+			.catch(err => console.log(err));
+	}
 };
 
 const takeDebtSnapshot = async ({ network, deploymentPath, providerUrl, privateKey, runStep }) => {
@@ -321,136 +347,19 @@ const closeCurrentFeePeriod = async ({
 	});
 };
 
-const inflationalMint = async ({ network, deploymentPath, providerUrl, privateKey, runStep }) => {
+const inflationalMint = async ({
+	network,
+	deploymentPath,
+	providerUrl,
+	privateKey,
+	runStep,
+	inflationalMintRatio,
+}) => {
 	const { web3, accounts, etherscanLinkPrefix } = getConnectionsByNetwork({
 		network,
 		providerUrl,
 		privateKey,
 	});
-
-	const supplySchedule = getContractInstance({
-		network,
-		deploymentPath,
-		contract: 'SupplySchedule',
-		web3,
-	});
-
-	const totalInflationMintSupply = toBN(
-		await supplySchedule.methods.INITIAL_WEEKLY_SUPPLY().call()
-	); // 76924719527063029689120
-
-	const isMintable = await supplySchedule.methods.isMintable().call();
-
-	const polygon_network = 'polygon';
-	const { web3: web3_polygon } = getConnectionsByNetwork({ network: polygon_network });
-	const deploymentPath_polygon = getDeploymentPathForNetwork({ network: polygon_network });
-	const debtCache_polygon = getContractInstance({
-		network: polygon_network,
-		deploymentPath: deploymentPath_polygon,
-		contract: 'DebtCache',
-		web3: web3_polygon,
-	});
-
-	const rewardsDistribution_polygon = getContractInstance({
-		network: polygon_network,
-		deploymentPath: deploymentPath_polygon,
-		contract: 'RewardsDistribution',
-		web3: web3_polygon,
-	});
-
-	const distributionsLength_polygon = await rewardsDistribution_polygon.methods
-		.distributionsLength()
-		.call();
-
-	let distributed_sum_polygon = toBN(0);
-	const distributionDataArr_polygon = [];
-
-	for (let i = 0; i < distributionsLength_polygon; i++) {
-		const distributionData = await rewardsDistribution_polygon.methods.distributions(i).call();
-		distributionDataArr_polygon.push(distributionData[1]);
-	}
-
-	await Promise.all(distributionDataArr_polygon)
-		.then(data => {
-			distributed_sum_polygon = data.reduce(
-				(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
-				toBN(0)
-			);
-		})
-		.catch(e => console.log(e));
-
-	const bsc_network = 'bsc';
-	const { web3: web3_bsc } = getConnectionsByNetwork({ network: bsc_network });
-	const deploymentPath_bsc = getDeploymentPathForNetwork({ network: bsc_network });
-	const debtCache_bsc = getContractInstance({
-		network: bsc_network,
-		deploymentPath: deploymentPath_bsc,
-		contract: 'DebtCache',
-		web3: web3_bsc,
-	});
-
-	const rewardsDistribution_bsc = getContractInstance({
-		network: bsc_network,
-		deploymentPath: deploymentPath_bsc,
-		contract: 'RewardsDistribution',
-		web3: web3_bsc,
-	});
-
-	const distributionsLength_bsc = await rewardsDistribution_bsc.methods
-		.distributionsLength()
-		.call();
-
-	let distributed_sum_bsc = toBN(0);
-	const distributionDataArr_bsc = [];
-
-	for (let i = 0; i < distributionsLength_bsc; i++) {
-		const distributionData = await rewardsDistribution_bsc.methods.distributions(i).call();
-		distributionDataArr_bsc.push(distributionData[1]);
-	}
-
-	await Promise.all(distributionDataArr_bsc)
-		.then(data => {
-			distributed_sum_bsc = data.reduce(
-				(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
-				toBN(0)
-			);
-		})
-		.catch(e => console.log(e));
-
-	// ! not yet implemented on mainnet
-	// const mainnet_network = 'mainnet';
-	// const { web3: web3_mainnet } = getConnectionsByNetwork({network : 'mainnet'});
-	// const deploymentPath_mainnet = getDeploymentPathForNetwork({ network: 'mainnet' });
-	// const debtCache_mainnet = getContractInstance({
-	// 	network: 'mainnet',
-	// 	deploymentPath: deploymentPath_mainnet,
-	// 	contract: 'DebtCache',
-	// 	web3: web3_mainnet,
-	// });
-
-	const pureMintAmount = totalInflationMintSupply
-		.sub(distributed_sum_polygon)
-		.sub(distributed_sum_bsc);
-
-	const polygonDebt = toBN(await debtCache_polygon.methods.cachedDebt().call());
-	const bscDebt = toBN(await debtCache_bsc.methods.cachedDebt().call());
-
-	const totalDebt = polygonDebt.add(bscDebt);
-
-	const polygonMintAmount = multiplyDecimal(
-		pureMintAmount,
-		divideDecimal(polygonDebt, totalDebt)
-	).add(distributed_sum_polygon);
-	const bscMintAmount = multiplyDecimal(pureMintAmount, divideDecimal(bscDebt, totalDebt)).add(
-		distributed_sum_bsc
-	);
-
-	const polygonRatio = divideDecimal(polygonMintAmount, totalInflationMintSupply);
-	const bscRatio = divideDecimal(bscMintAmount, totalInflationMintSupply);
-	const mainnetRatio = 1; // currently not used
-
-	console.log('polygon ratio : ', fromWei(polygonRatio));
-	console.log('bsc ratio : ', fromWei(bscRatio));
 
 	const source = ['polygon', 'mumbai'].includes(network)
 		? 'PeriFinanceToPolygon'
@@ -467,20 +376,193 @@ const inflationalMint = async ({ network, deploymentPath, providerUrl, privateKe
 		web3,
 	});
 
-	await runStep({
-		contract: 'PeriFinance',
-		target: proxyPeriFinance,
-		read: 'anyPynthOrPERIRateIsInvalid', // this doesnt do anything here
-		expected: input => !isMintable,
-		write: 'inflationalMint',
-		writeArg: ['bsc', 'bsctest'].includes(network)
-			? bscRatio
-			: ['polygon', 'mumbai'].includes(network)
-			? polygonRatio
-			: mainnetRatio,
-		account: accounts.minterManager,
-		etherscanLinkPrefix,
+	const supplySchedule = getContractInstance({
+		network,
+		deploymentPath,
+		contract: 'SupplySchedule',
+		web3,
 	});
+
+	const isMintable = await supplySchedule.methods.isMintable().call();
+
+	if (inflationalMintRatio && !isNaN(inflationalMintRatio)) {
+		console.log(`${network} inflational mint ratio : ${inflationalMintRatio}`);
+		await runStep({
+			contract: 'PeriFinance',
+			target: proxyPeriFinance,
+			read: 'anyPynthOrPERIRateIsInvalid', // this doesnt do anything here
+			expected: input => !isMintable,
+			write: 'inflationalMint',
+			writeArg: inflationalMintRatio,
+			account: accounts.minterManager,
+			etherscanLinkPrefix,
+		});
+	} else {
+		const totalInflationMintSupply = toBN(
+			await supplySchedule.methods.INITIAL_WEEKLY_SUPPLY().call()
+		); // 76924719527063029689120
+
+		const polygon_network = 'polygon';
+		const { web3: web3_polygon } = getConnectionsByNetwork({ network: polygon_network });
+		const deploymentPath_polygon = getDeploymentPathForNetwork({ network: polygon_network });
+		const debtCache_polygon = getContractInstance({
+			network: polygon_network,
+			deploymentPath: deploymentPath_polygon,
+			contract: 'DebtCache',
+			web3: web3_polygon,
+		});
+
+		const rewardsDistribution_polygon = getContractInstance({
+			network: polygon_network,
+			deploymentPath: deploymentPath_polygon,
+			contract: 'RewardsDistribution',
+			web3: web3_polygon,
+		});
+
+		const distributionsLength_polygon = await rewardsDistribution_polygon.methods
+			.distributionsLength()
+			.call();
+
+		let distributed_sum_polygon = toBN(0);
+		const distributionDataArr_polygon = [];
+
+		for (let i = 0; i < distributionsLength_polygon; i++) {
+			const distributionData = await rewardsDistribution_polygon.methods.distributions(i).call();
+			distributionDataArr_polygon.push(distributionData[1]);
+		}
+
+		await Promise.all(distributionDataArr_polygon)
+			.then(data => {
+				distributed_sum_polygon = data.reduce(
+					(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
+					toBN(0)
+				);
+			})
+			.catch(e => console.log(e));
+
+		const bsc_network = 'bsc';
+		const { web3: web3_bsc } = getConnectionsByNetwork({ network: bsc_network });
+		const deploymentPath_bsc = getDeploymentPathForNetwork({ network: bsc_network });
+		const debtCache_bsc = getContractInstance({
+			network: bsc_network,
+			deploymentPath: deploymentPath_bsc,
+			contract: 'DebtCache',
+			web3: web3_bsc,
+		});
+
+		const rewardsDistribution_bsc = getContractInstance({
+			network: bsc_network,
+			deploymentPath: deploymentPath_bsc,
+			contract: 'RewardsDistribution',
+			web3: web3_bsc,
+		});
+
+		const distributionsLength_bsc = await rewardsDistribution_bsc.methods
+			.distributionsLength()
+			.call();
+
+		let distributed_sum_bsc = toBN(0);
+		const distributionDataArr_bsc = [];
+
+		for (let i = 0; i < distributionsLength_bsc; i++) {
+			const distributionData = await rewardsDistribution_bsc.methods.distributions(i).call();
+			distributionDataArr_bsc.push(distributionData[1]);
+		}
+
+		await Promise.all(distributionDataArr_bsc)
+			.then(data => {
+				distributed_sum_bsc = data.reduce(
+					(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
+					toBN(0)
+				);
+			})
+			.catch(e => console.log(e));
+
+		const mainnet_network = 'mainnet';
+		const { web3: web3_mainnet } = getConnectionsByNetwork({ network: mainnet_network });
+		const deploymentPath_mainnet = getDeploymentPathForNetwork({ network: mainnet_network });
+		const debtCache_mainnet = getContractInstance({
+			network: mainnet_network,
+			deploymentPath: deploymentPath_mainnet,
+			contract: 'DebtCache',
+			web3: web3_mainnet,
+		});
+
+		const rewardsDistribution_mainnet = getContractInstance({
+			network: mainnet_network,
+			deploymentPath: deploymentPath_mainnet,
+			contract: 'RewardsDistribution',
+			web3: web3_mainnet,
+		});
+
+		const distributionsLength_mainnet = await rewardsDistribution_mainnet.methods
+			.distributionsLength()
+			.call();
+
+		let distributed_sum_mainnet = toBN(0);
+		const distributionDataArr_mainnet = [];
+
+		for (let i = 0; i < distributionsLength_mainnet; i++) {
+			const distributionData = await rewardsDistribution_mainnet.methods.distributions(i).call();
+			distributionDataArr_mainnet.push(distributionData[1]);
+		}
+
+		await Promise.all(distributionDataArr_mainnet)
+			.then(data => {
+				distributed_sum_mainnet = data.reduce(
+					(totalReserved, reservedAmount) => totalReserved.add(toBN(reservedAmount)),
+					toBN(0)
+				);
+			})
+			.catch(e => console.log(e));
+
+		console.log('\n------------- calculating ratio for each network -------------\n');
+		const pureMintAmount = totalInflationMintSupply
+			.sub(distributed_sum_polygon)
+			.sub(distributed_sum_bsc)
+			.sub(distributed_sum_mainnet);
+
+		const polygonDebt = toBN(await debtCache_polygon.methods.cachedDebt().call());
+		const bscDebt = toBN(await debtCache_bsc.methods.cachedDebt().call());
+		const mainnetDebt = toBN(await debtCache_mainnet.methods.cachedDebt().call());
+
+		const totalDebt = polygonDebt.add(bscDebt);
+
+		const polygonMintAmount = multiplyDecimal(
+			pureMintAmount,
+			divideDecimal(polygonDebt, totalDebt)
+		).add(distributed_sum_polygon);
+		const bscMintAmount = multiplyDecimal(pureMintAmount, divideDecimal(bscDebt, totalDebt)).add(
+			distributed_sum_bsc
+		);
+		const mainnetMintAmount = multiplyDecimal(
+			pureMintAmount,
+			divideDecimal(mainnetDebt, totalDebt)
+		).add(distributed_sum_mainnet);
+
+		const polygonRatio = divideDecimal(polygonMintAmount, totalInflationMintSupply);
+		const bscRatio = divideDecimal(bscMintAmount, totalInflationMintSupply);
+		const mainnetRatio = divideDecimal(mainnetMintAmount, totalInflationMintSupply);
+
+		console.log('polygon ratio : ', fromWei(polygonRatio));
+		console.log('bsc ratio : ', fromWei(bscRatio));
+		console.log('mainnet ratio : ', fromWei(mainnetRatio));
+
+		await runStep({
+			contract: 'PeriFinance',
+			target: proxyPeriFinance,
+			read: 'anyPynthOrPERIRateIsInvalid', // this doesnt do anything here
+			expected: input => !isMintable,
+			write: 'inflationalMint',
+			writeArg: ['bsc', 'bsctest'].includes(network)
+				? bscRatio
+				: ['polygon', 'mumbai'].includes(network)
+				? polygonRatio
+				: mainnetRatio,
+			account: accounts.minterManager,
+			etherscanLinkPrefix,
+		});
+	}
 };
 
 module.exports = {
@@ -500,6 +582,7 @@ module.exports = {
 				parseFloat,
 				DEFAULTS.methodCallGasLimit
 			)
+			.option('-imr, --inflational-mint-ratio <value>', 'inflationalMintRatio for network', toWei)
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
 			.option('-j, --job <value>', `The name of the job to execute`)
 			.option(
