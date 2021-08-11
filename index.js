@@ -274,6 +274,8 @@ const defaults = {
 		],
 	},
 	BRIDGE_NETWORK_STATUS: {
+		mainnet: [{ network: 'bsc', isOpened: true }],
+		bsc: [{ network: 'mainnet', isOpened: true }],
 		kovan: [{ network: 'bsctest', isOpened: true }],
 		bsctest: [{ network: 'kovan', isOpened: true }],
 		goerli: [{ network: 'bsctest', isOpened: true }],
