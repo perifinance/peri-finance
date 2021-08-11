@@ -296,8 +296,8 @@ const takeDebtSnapshot = async ({ network, deploymentPath, providerUrl, privateK
 			const cacheTimestamp = input[1];
 			const cacheIsInvalid = input[2];
 			const cacheStale = input[3];
-			// every 6h or cache is stale or invalid
-			return cacheTimestamp > now - 21600 || cacheIsInvalid || cacheStale;
+			// every 12h or cache is stale or invalid
+			return cacheTimestamp > now - 43200 || cacheIsInvalid || cacheStale;
 		},
 		write: 'takeDebtSnapshot',
 		account: accounts.debtManager,
