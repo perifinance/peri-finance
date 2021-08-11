@@ -253,6 +253,7 @@ const defaults = {
 		mainnet: [
 			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'TESTER', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
 		],
 		kovan: [
 			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
@@ -261,6 +262,7 @@ const defaults = {
 		bsc: [
 			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'TESTER', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
 		],
 		bsctest: [
 			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
