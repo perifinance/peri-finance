@@ -253,17 +253,17 @@ const updateRates = async ({
 									? toBN(prevPrice).sub(toBN(price))
 									: toBN(price).sub(toBN(prevPrice));
 
-							const deviation = multiplyDecimal(
-								divideDecimal(priceGap, toBN(prevPrice)),
-								toBN(100)
-							).toString();
+							const deviation =
+								prevPrice == 0
+									? 0
+									: multiplyDecimal(divideDecimal(priceGap, toBN(prevPrice)), toBN(100)).toString();
 
 							// check if rate has changed or time has passed a day
 							return (
 								((prevPrice !== 0 || lastUpdatedTime !== 0) &&
 									prevPrice === price &&
 									lastUpdatedTime > now - 86400) ||
-								deviation < 5 // if deviation is higher than 5% , should update rates
+								(deviation < 5 && prevPrice != 0) // if deviation is higher than 5% , should update rates
 							);
 						},
 						write: 'updateRates',
