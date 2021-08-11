@@ -251,26 +251,24 @@ const defaults = {
 	},
 	BRIDGE_ROLES: {
 		mainnet: [
-			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
-			{ roleKey: 'TESTER', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
 		],
 		kovan: [
-			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
 		],
 		bsc: [
-			{ roleKey: 'VALIDATOR', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
-			{ roleKey: 'TESTER', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0x23208519548387F9f65D92A5C43f27Aec70C34A2' },
 		],
 		bsctest: [
-			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
 		],
 		goerli: [
-			{ roleKey: 'VALIDATOR', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'TESTER', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
+			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
 		],
 	},
 	BRIDGE_NETWORK_STATUS: {
