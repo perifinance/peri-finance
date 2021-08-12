@@ -258,14 +258,18 @@ const updateRates = async ({
 									? 0
 									: multiplyDecimal(divideDecimal(priceGap, toBN(prevPrice)), toBN(100)).toString();
 
-							// check if rate has changed or time has passed a day
-							return (
-								prevPrice != 0 &&
-								lastUpdatedTime != 0 &&
-								lastUpdatedTime > now - 86400 &&
-								prevPrice === price &&
-								deviation < 5 // if deviation is higher than 5% , should update rates
-							);
+							// if no price is set, should update the rate
+							if (prevPrice == 0 || lastUpdatedTime == 0) {
+								return false;
+							}
+
+							// if deviation is higher than 5% , should update rates
+							if (deviation >= 5) {
+								return false;
+							}
+
+							// check if updated time has passed a day
+							return lastUpdatedTime > now - 86400;
 						},
 						write: 'updateRates',
 						writeArg: [[toBytes32(currencyKey)], [price], now],
