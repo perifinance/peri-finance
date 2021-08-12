@@ -260,10 +260,11 @@ const updateRates = async ({
 
 							// check if rate has changed or time has passed a day
 							return (
-								((prevPrice !== 0 || lastUpdatedTime !== 0) &&
-									prevPrice === price &&
-									lastUpdatedTime > now - 86400) ||
-								(deviation < 5 && prevPrice != 0) // if deviation is higher than 5% , should update rates
+								prevPrice != 0 &&
+								lastUpdatedTime != 0 &&
+								lastUpdatedTime > now - 86400 &&
+								prevPrice === price &&
+								deviation < 5 // if deviation is higher than 5% , should update rates
 							);
 						},
 						write: 'updateRates',
