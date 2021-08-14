@@ -25,7 +25,7 @@ const {
 	constants: { BUILD_FOLDER, CONFIG_FILENAME, PYNTHS_FILENAME, DEPLOYMENT_FILENAME },
 	wrap,
 	toBytes32,
-	FEE_PERIOD_DURATION,
+	defaults,
 } = require('../../../');
 
 const { getSource, getTarget, getUsers } = wrap({
@@ -334,7 +334,7 @@ const closeCurrentFeePeriod = async ({
 	});
 
 	const feePeriodDuration = ['bsc', 'polygon', 'mainnet'].includes(network)
-		? FEE_PERIOD_DURATION
+		? defaults.FEE_PERIOD_DURATION // 1 week
 		: 1800;
 
 	await runStep({
