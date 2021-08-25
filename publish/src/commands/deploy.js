@@ -943,9 +943,9 @@ const deploy = async ({
 			contract: 'ExchangeState',
 			target: exchangeState,
 			read: 'associatedContract',
-			expected: input => input === exchanger.options.address,
+			expected: input => input === addressOf(exchanger),
 			write: 'setAssociatedContract',
-			writeArg: exchanger.options.address,
+			writeArg: addressOf(exchanger),
 		});
 	}
 
@@ -1225,7 +1225,7 @@ const deploy = async ({
 		if (proxyERC20ForPynth && pynth) {
 			// and make sure this new proxy has the target of the pynth
 			await runStep({
-				contract: `Proxy${currencyKey}`,
+				contract: `ProxyERC20${currencyKey}`,
 				target: proxyERC20ForPynth,
 				read: 'target',
 				expected: input => input === addressOf(pynth),
