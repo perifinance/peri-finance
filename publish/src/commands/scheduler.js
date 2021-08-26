@@ -252,12 +252,12 @@ const updateRates = async ({
 									: toBN(price).sub(toBN(prevPrice));
 
 							const deviation =
-								prevPrice == 0
+								prevPrice === 0
 									? 0
 									: multiplyDecimal(divideDecimal(priceGap, toBN(prevPrice)), toBN(100)).toString();
 
 							// if no price is set, should update the rate
-							if (prevPrice == 0 || lastUpdatedTime == 0) {
+							if (prevPrice === 0 || lastUpdatedTime === 0) {
 								return false;
 							}
 
