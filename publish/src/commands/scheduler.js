@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const Web3 = require('web3');
 const schedule = require('node-schedule');
 const cron = require('cron-validator');
