@@ -657,6 +657,17 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         lastExchangeRate[currencyKey] = rate;
     }
 
+    // SIP-139
+    function resetLastExchangeRate(bytes32[] calldata currencyKeys) external onlyOwner {
+        (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
+
+        require(!anyRateInvalid, "Rates for given synths not valid");
+
+        for (uint i = 0; i < currencyKeys.length; i++) {
+            lastExchangeRate[currencyKeys[i]] = rates[i];
+        }
+    }
+
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _ensureCanExchange(
