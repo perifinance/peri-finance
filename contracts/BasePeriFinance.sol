@@ -213,7 +213,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         blacklisted(messageSender)
         returns (uint amountReceived)
     {
-        _notImplemented();
         return exchanger().exchange(messageSender, sourceCurrencyKey, sourceAmount, destinationCurrencyKey, messageSender);
     }
 
@@ -251,7 +250,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
             uint numEntriesSettled
         )
     {
-        _notImplemented();
         return exchanger().settle(messageSender, currencyKey);
     }
 
@@ -268,7 +266,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         blacklisted(messageSender)
         returns (uint amountReceived)
     {
-        _notImplemented();
         return
             exchanger().exchangeWithTracking(
                 messageSender,

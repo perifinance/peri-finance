@@ -161,6 +161,12 @@
 	"ProxyERC20pUSD": {
 		"deploy": true
 	},
+	"ProxyERC20pBTC": {
+		"deploy": true
+	},
+	"ProxyERC20pETH": {
+		"deploy": true
+	},
 	"ProxyFeePool": {
 		"deploy": true
 	},
@@ -395,13 +401,19 @@
 	"MockToken": {
 		"deploy": true
 	},
-	"StakingStateUSDC": {
-		"deploy": true
-	},
 	"USDC": {
 		"deploy": true
 	},
-	"TempExchangeRateStorageKovan": {
+	"ExternalTokenStakeManager": {
+		"deploy": true
+	},
+	"StakingState": {
+		"deploy": true
+	},
+	"BlacklistManager": {
+		"deploy": true
+	},
+	"DAI": {
 		"deploy": true
 	}
 }

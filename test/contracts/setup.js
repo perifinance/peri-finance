@@ -243,13 +243,11 @@ const setupContract = async ({
 			0,
 			0,
 		],
-		ExternalRateAggregator: [owner, oracle],
 		StakingStateUSDC: [owner, tryGetAddressOf('Issuer'), tryGetAddressOf('USDC')],
 		StakingState: [owner, owner],
 		ExternalTokenStakeManager: [
 			owner,
 			tryGetAddressOf('StakingState'),
-			tryGetAddressOf('StakingStateUSDC'),
 			tryGetAddressOf('AddressResolver'),
 		],
 		BlacklistManager: [owner],
@@ -804,9 +802,6 @@ const setupAllContracts = async ({
 		{
 			contract: 'CollateralManager',
 			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
-		},
-		{
-			contract: 'ExternalRateAggregator',
 		},
 		{
 			contract: 'StakingStateUSDC',

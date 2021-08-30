@@ -935,6 +935,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
 
+        amountBurnt = amountBurnt.roundDownDecimal(1) ==
+            IERC20(address(pynths[pUSD])).balanceOf(burnAccount).roundDownDecimal(1)
+            ? IERC20(address(pynths[pUSD])).balanceOf(burnAccount)
+            : amountBurnt;
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
 

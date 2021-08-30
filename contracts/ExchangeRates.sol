@@ -31,8 +31,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     // The address of the oracle which pushes rate updates to this contract
     address public oracle;
 
-    address public externalRateAggregator;
-
     mapping(bytes32 => bool) public currencyByExternal;
 
     // Decentralized oracle networks that feed into pricing aggregators
@@ -82,10 +80,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function setOracle(address _oracle) external onlyOwner {
         oracle = _oracle;
         emit OracleUpdated(oracle);
-    }
-
-    function setExternalRateAggregator(address _aggregator) external onlyOwner {
-        externalRateAggregator = _aggregator;
     }
 
     function setCurrencyToExternalAggregator(bytes32 _currencyKey, bool _set) external onlyOwner {
@@ -497,6 +491,18 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         });
     }
 
+    function nowPlusLimit()
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        )
+    {
+        return (now, ORACLE_FUTURE_LIMIT, now + ORACLE_FUTURE_LIMIT);
+    }
+
     function internalUpdateRates(
         bytes32[] memory currencyKeys,
         uint[] memory newRates,
@@ -602,20 +608,14 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         return uint(rate);
     }
 
+    function _isFromAggregator(bytes32 _currencyKey) internal view returns (bool) {
+        return !currencyByExternal[_currencyKey] && aggregators[_currencyKey] != AggregatorV2V3Interface(0);
+    }
+
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        if (currencyByExternal[currencyKey]) {
-            require(externalRateAggregator != address(0), "External price aggregator is not set yet");
-
-            IExternalRateAggregator _externalRateAggregator = IExternalRateAggregator(externalRateAggregator);
-
-            (uint rate, uint time) = _externalRateAggregator.getRateAndUpdatedTime(currencyKey);
-
-            return RateAndUpdatedTime({rate: uint216(rate), time: uint40(time)});
-        }
-
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
-        if (aggregator != AggregatorV2V3Interface(0)) {
+        if (_isFromAggregator(currencyKey)) {
             // this view from the aggregator is the most gas efficient but it can throw when there's no data,
             // so let's call it low-level to suppress any reverts
             bytes memory payload = abi.encodeWithSignature("latestRoundData()");
@@ -642,7 +642,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
-        if (aggregator != AggregatorV2V3Interface(0)) {
+        if (_isFromAggregator(currencyKey)) {
             return aggregator.latestRound();
         } else {
             return currentRoundForRate[currencyKey];
@@ -652,7 +652,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     function _getRateAndTimestampAtRound(bytes32 currencyKey, uint roundId) internal view returns (uint rate, uint time) {
         AggregatorV2V3Interface aggregator = aggregators[currencyKey];
 
-        if (aggregator != AggregatorV2V3Interface(0)) {
+        if (_isFromAggregator(currencyKey)) {
             // this view from the aggregator is the most gas efficient but it can throw when there's no data,
             // so let's call it low-level to suppress any reverts
             bytes memory payload = abi.encodeWithSignature("getRoundData(uint80)", roundId);

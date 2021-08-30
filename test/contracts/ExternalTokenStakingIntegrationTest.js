@@ -6,7 +6,6 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts } = require('./setup');
 
 const MockToken = artifacts.require('MockToken');
-const StakingStateUSDCMock = artifacts.require('StakingStateUSDC');
 
 const {
 	toBytes32,
@@ -61,10 +60,8 @@ contract('External token staking integrating test', async accounts => {
 		issuer,
 		pynths,
 		addressResolver,
-		stakingStateUSDC,
 		externalTokenStakeManager,
 		stakingState,
-		externalRateAggregator,
 		blacklistManager,
 		usdc,
 		dai,
@@ -86,8 +83,6 @@ contract('External token staking integrating test', async accounts => {
 			Issuer: issuer,
 			DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
-			ExternalRateAggregator: externalRateAggregator,
-			StakingStateUSDC: stakingStateUSDC,
 			StakingState: stakingState,
 			ExternalTokenStakeManager: externalTokenStakeManager,
 			BlacklistManager: blacklistManager,
@@ -110,8 +105,6 @@ contract('External token staking integrating test', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'FeePoolStateUSDC',
-				'ExternalRateAggregator',
-				'StakingStateUSDC',
 				'StakingState',
 				'ExternalTokenStakeManager',
 				'BlacklistManager',
@@ -158,10 +151,8 @@ contract('External token staking integrating test', async accounts => {
 	describe('Deployment settings', () => {
 		it('should ExternalTokenStakeManager deployed', async () => {
 			const stakingStateAddress = await externalTokenStakeManager.stakingState();
-			const stakingStateUSDCAddress = await externalTokenStakeManager.stakingStateUSDC();
 
 			assert.equal(stakingStateAddress, stakingState.address);
-			assert.equal(stakingStateUSDCAddress, stakingStateUSDC.address);
 		});
 
 		it('should set token on stakingState', async () => {
@@ -533,7 +524,7 @@ contract('External token staking integrating test', async accounts => {
 				assert.bnClose(quota_0_after, toUnit('0.2'), '1' + '0'.repeat(12));
 			});
 
-			it.only('should stake to max quota', async () => {
+			it('should stake to max quota', async () => {
 				// 10000 PERI is being staked
 				// As price is 0.2 USD/PERI, the value of staked PERI is 2000[USD]
 				await periFinance.issueMaxPynths({ from: users[0] });
@@ -586,7 +577,7 @@ contract('External token staking integrating test', async accounts => {
 				);
 			});
 
-			it.only('should stake upto user balance if balance is not enough', async () => {
+			it('should stake upto user balance if balance is not enough', async () => {
 				// As 0.2 USD/PERI exchange rate,
 				// PERI staked 2000 [USD], issued pUSD 500
 				await periFinance.issueMaxPynths({ from: users[0] });
@@ -621,7 +612,7 @@ contract('External token staking integrating test', async accounts => {
 				assert.bnEqual(daiBalance_0_after, toBN('0'));
 			});
 
-			it.only('should NOT stake to max quota', async () => {
+			it('should NOT stake to max quota', async () => {
 				// User already meets or violates quota limit
 				await periFinance.issueMaxPynths({ from: users[1] });
 				await periFinance.issuePynthsToMaxQuota(DAI, { from: users[1] });
@@ -1129,100 +1120,6 @@ contract('External token staking integrating test', async accounts => {
 				);
 				assert.bnEqual(transferable_0, balance_0_PERI);
 			});
-		});
-	});
-
-	describe('Old USDC staking state migration', () => {
-		let inputs = [];
-		let stakingStateUSDCMock;
-
-		beforeEach(async () => {
-			stakingStateUSDCMock = await StakingStateUSDCMock.new(owner, owner, usdc.address);
-			await externalTokenStakeManager.setStakingStateUSDC(stakingStateUSDCMock.address, {
-				from: owner,
-			});
-
-			await stakingStateUSDCMock.setAssociatedContract(owner, { from: owner });
-			// assume that StakingStateUSDC has 30000 balance of USDC
-			await usdc.transfer(stakingStateUSDCMock.address, '30000' + '0'.repeat(6), {
-				from: deployerAccount,
-			});
-
-			// let inputs = [];
-			for (let i = 0; i < 333; i++) {
-				const _input = String(parseInt(Math.random() * 1000 + 1)) + '0'.repeat(6);
-				inputs.push(_input);
-			}
-
-			for (let i = 0; i < 333; i++) {
-				await stakingStateUSDCMock.stake(web3.eth.accounts.create(String(i)).address, inputs[i], {
-					from: owner,
-				});
-			}
-
-			const stakersLength = await stakingStateUSDCMock.stakersLength();
-			assert.bnEqual(stakersLength, toBN('333'));
-
-			await stakingStateUSDCMock.setAssociatedContract(externalTokenStakeManager.address, {
-				from: owner,
-			});
-		});
-
-		it('should migrate', async () => {
-			const stakers = await stakingStateUSDCMock.getStakersByRange(0, 333);
-
-			const indexingNumber = 20;
-			const numOfIteration = parseInt(333 / 20 + 1);
-			let i = 0;
-			let n = 0;
-			let migratee = [];
-			while (1) {
-				let j = i + indexingNumber;
-				let _migratee = [];
-				let checker = false;
-				for (let k = i; k < j; k++) {
-					if (k === 333) {
-						checker = true;
-						break;
-					}
-
-					_migratee.push(stakers[k]);
-				}
-
-				migratee.push(_migratee);
-
-				if (checker) {
-					break;
-				}
-
-				i = j;
-				n++;
-
-				if (n > numOfIteration) {
-					throw 'Fail';
-				}
-			}
-
-			await Promise.all(
-				migratee.map(_migratee =>
-					externalTokenStakeManager.migrateStakedAmounts(_migratee, { from: owner })
-				)
-			);
-
-			await Promise.all(
-				stakers.map(async (_staker, _idx) => {
-					const _new = await stakingState.stakedAmountOf(USDC, _staker);
-					assert.bnEqual(toBN(inputs[_idx]), _new);
-				})
-			);
-
-			const balance_USDC_stakingStateUSDC_after = await usdc.balanceOf(
-				stakingStateUSDCMock.address
-			);
-			const balance_USDC_stakingState_after = await usdc.balanceOf(stakingState.address);
-
-			assert.bnEqual(balance_USDC_stakingStateUSDC_after, toBN('0'));
-			assert.bnEqual(balance_USDC_stakingState_after, toBN('30000' + '0'.repeat(6)));
 		});
 	});
 });

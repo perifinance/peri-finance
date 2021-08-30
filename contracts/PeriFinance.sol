@@ -94,7 +94,6 @@ contract PeriFinance is BasePeriFinance {
             uint numEntriesSettled
         )
     {
-        _notImplemented();
         return exchanger().settle(messageSender, currencyKey);
     }
 

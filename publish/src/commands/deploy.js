@@ -1348,39 +1348,39 @@ const deploy = async ({
 		}
 	}
 
-	console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
+	// console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
 
-	const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
+	// const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
 
-	const externalRateAggregator = await deployer.deployContract({
-		name: 'ExternalRateAggregator',
-		source: 'ExternalRateAggregator',
-		args: [account, oracleAddress],
-	});
+	// const externalRateAggregator = await deployer.deployContract({
+	// 	name: 'ExternalRateAggregator',
+	// 	source: 'ExternalRateAggregator',
+	// 	args: [account, oracleAddress],
+	// });
 
-	if (externalRateAggregator) {
-		if (exchangeRates) {
-			await runStep({
-				contract: 'ExchangeRates',
-				target: exchangeRates,
-				read: 'externalRateAggregator',
-				expected: input => input === addressOf(externalRateAggregator),
-				write: 'setExternalRateAggregator',
-				writeArg: addressOf(externalRateAggregator),
-			});
-		}
+	// if (externalRateAggregator) {
+	// 	if (exchangeRates) {
+	// 		await runStep({
+	// 			contract: 'ExchangeRates',
+	// 			target: exchangeRates,
+	// 			read: 'externalRateAggregator',
+	// 			expected: input => input === addressOf(externalRateAggregator),
+	// 			write: 'setExternalRateAggregator',
+	// 			writeArg: addressOf(externalRateAggregator),
+	// 		});
+	// 	}
 
-		if (oracleAddress !== ZERO_ADDRESS) {
-			await runStep({
-				contract: 'ExternalRateAggregator',
-				target: externalRateAggregator,
-				read: 'oracle',
-				expected: input => input === oracleAddress,
-				write: 'setOracle',
-				writeArg: oracleAddress,
-			});
-		}
-	}
+	// 	if (oracleAddress !== ZERO_ADDRESS) {
+	// 		await runStep({
+	// 			contract: 'ExternalRateAggregator',
+	// 			target: externalRateAggregator,
+	// 			read: 'oracle',
+	// 			expected: input => input === oracleAddress,
+	// 			write: 'setOracle',
+	// 			writeArg: oracleAddress,
+	// 		});
+	// 	}
+	// }
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
