@@ -32,9 +32,6 @@
 	"ExternalTokenStakeManager": {
 		"deploy": false
 	},
-	"ExternalRateAggregator": {
-		"deploy": false
-	},
 	"DebtCache": {
 		"deploy": false
 	},

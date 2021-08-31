@@ -137,9 +137,6 @@
 	"PeriFinanceBridgeToOptimism": {
 		"deploy": false
 	},
-	"ExternalRateAggregator": {
-		"deploy": false
-	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},

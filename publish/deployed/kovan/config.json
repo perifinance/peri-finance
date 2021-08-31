@@ -161,9 +161,6 @@
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
-	"ExternalRateAggregator": {
-		"deploy": false
-	},
 	"BlacklistManager": {
 		"deploy": false
 	},
@@ -181,5 +178,41 @@
 	},
 	"USDC": {
 		"deploy": true
+	},
+	"TokenStatepBTC": {
+		"deploy": false
+	},
+	"ProxyERC20pBTC": {
+		"deploy": false
+	},
+	"PynthpBTC": {
+		"deploy": false
+	},
+	"TokenStatepETH": {
+		"deploy": false
+	},
+	"ProxyERC20pETH": {
+		"deploy": false
+	},
+	"PynthpETH": {
+		"deploy": false
+	},
+	"TokenStateiBTC": {
+		"deploy": false
+	},
+	"ProxyERC20iBTC": {
+		"deploy": false
+	},
+	"PynthiBTC": {
+		"deploy": false
+	},
+	"TokenStateiETH": {
+		"deploy": false
+	},
+	"ProxyERC20iETH": {
+		"deploy": false
+	},
+	"PynthiETH": {
+		"deploy": false
 	}
 }

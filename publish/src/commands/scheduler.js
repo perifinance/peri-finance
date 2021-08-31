@@ -223,10 +223,10 @@ const updateRates = async ({
 		privateKey,
 	});
 
-	const externalRateAggregator = getContractInstance({
+	const exchangeRates = getContractInstance({
 		network,
 		deploymentPath,
-		contract: 'ExternalRateAggregator',
+		contract: 'ExchangeRates',
 		web3,
 	});
 
@@ -238,9 +238,9 @@ const updateRates = async ({
 			.then(async data => {
 				for (const { price, currencyKey } of data) {
 					await runStep({
-						contract: 'ExternalRateAggregator',
-						target: externalRateAggregator,
-						read: 'getRateAndUpdatedTime',
+						contract: 'ExchangeRates',
+						target: exchangeRates,
+						read: 'rateAndUpdatedTime',
 						readArg: toBytes32(currencyKey),
 						expected: response => {
 							const prevPrice = response[0];

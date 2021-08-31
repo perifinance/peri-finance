@@ -79,7 +79,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			Issuer: issuer,
 			DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
-			ExternalRateAggregator: externalRateAggregator,
 			StakingStateUSDC: stakingStateUSDC,
 			USDC: usdc,
 		} = await setupAllContracts({
@@ -101,7 +100,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'FeePoolStateUSDC',
-				'ExternalRateAggregator',
 				'StakingStateUSDC',
 			],
 		}));

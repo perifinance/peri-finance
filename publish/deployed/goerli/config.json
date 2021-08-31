@@ -152,9 +152,6 @@
 	"ExternalTokenStakeManager": {
 		"deploy": false
 	},
-	"ExternalRateAggregator": {
-		"deploy": false
-	},
 	"BridgeState": {
 		"deploy": false
 	},

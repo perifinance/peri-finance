@@ -155,9 +155,6 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"ExternalRateAggregator": {
-		"deploy": false
-	},
 	"BlacklistManager": {
 		"deploy": false
 	},

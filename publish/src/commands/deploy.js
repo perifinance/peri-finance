@@ -1348,40 +1348,6 @@ const deploy = async ({
 		}
 	}
 
-	// console.log(gray(`\n------ DEPLOY ExternalRateAggregator ------\n`));
-
-	// const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
-
-	// const externalRateAggregator = await deployer.deployContract({
-	// 	name: 'ExternalRateAggregator',
-	// 	source: 'ExternalRateAggregator',
-	// 	args: [account, oracleAddress],
-	// });
-
-	// if (externalRateAggregator) {
-	// 	if (exchangeRates) {
-	// 		await runStep({
-	// 			contract: 'ExchangeRates',
-	// 			target: exchangeRates,
-	// 			read: 'externalRateAggregator',
-	// 			expected: input => input === addressOf(externalRateAggregator),
-	// 			write: 'setExternalRateAggregator',
-	// 			writeArg: addressOf(externalRateAggregator),
-	// 		});
-	// 	}
-
-	// 	if (oracleAddress !== ZERO_ADDRESS) {
-	// 		await runStep({
-	// 			contract: 'ExternalRateAggregator',
-	// 			target: externalRateAggregator,
-	// 			read: 'oracle',
-	// 			expected: input => input === oracleAddress,
-	// 			write: 'setOracle',
-	// 			writeArg: oracleAddress,
-	// 		});
-	// 	}
-	// }
-
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
 	await deployer.deployContract({
@@ -1487,7 +1453,7 @@ const deploy = async ({
 		name: 'BinaryOptionMarketData',
 	});
 
-	console.log(gray(`\n------ CONFIGURE STANDLONE FEEDS ------\n`));
+	console.log(gray(`\n------ CONFIGURE STANDALONE FEEDS ------\n`));
 
 	// Setup remaining price feeds (that aren't pynths)
 
@@ -1501,6 +1467,19 @@ const deploy = async ({
 				expected: input => input === feed,
 				write: 'addAggregator',
 				writeArg: [toBytes32(asset), feed],
+			});
+		}
+
+		// set peri price by our own oracle as chainlink doesnt provicde the price feed for PERI
+		if (['PERI'].includes(asset)) {
+			await runStep({
+				contract: `ExchangeRates`,
+				target: exchangeRates,
+				read: 'currencyByExternal',
+				readArg: toBytes32(asset),
+				expected: input => input,
+				write: 'setCurrencyToExternalAggregator',
+				writeArg: [toBytes32(asset), true],
 			});
 		}
 	}
