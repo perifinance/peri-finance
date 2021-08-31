@@ -574,6 +574,18 @@ const deploy = async ({
 		args: [account, oracleExrates, addressOf(readProxyForResolver), [], []],
 	});
 
+	const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
+	if (exchangeRates) {
+		await runStep({
+			contract: 'ExchangeRates',
+			target: exchangeRates,
+			read: 'oracle',
+			expected: oracle => oracle === oracleAddress,
+			write: 'setOracle',
+			writeArg: oracleAddress,
+		});
+	}
+
 	const rewardEscrow = await deployer.deployContract({
 		name: 'RewardEscrow',
 		args: [account, ZERO_ADDRESS, ZERO_ADDRESS],
