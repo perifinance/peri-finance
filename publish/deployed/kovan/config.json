@@ -173,12 +173,6 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"DAI": {
-		"deploy": false
-	},
-	"USDC": {
-		"deploy": true
-	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -214,5 +208,11 @@
 	},
 	"PynthiETH": {
 		"deploy": false
+	},
+	"DAI": {
+		"deploy": false
+	},
+	"USDC": {
+		"deploy": true
 	}
 }

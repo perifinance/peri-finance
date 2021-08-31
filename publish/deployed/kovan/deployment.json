@@ -23,8 +23,8 @@
 			"address": "0x8CCBC31B591B093a16F5A35CC723C4526815BF78",
 			"source": "ExchangeRates",
 			"link": "https://kovan.etherscan.io/address/0x8CCBC31B591B093a16F5A35CC723C4526815BF78",
-			"timestamp": "2021-08-31T00:49:33.057Z",
-			"txn": "",
+			"timestamp": "2021-08-31T00:49:32.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0xc034a1de2365fddd486507d0b550c40a5eae96402e6369f7f50f5b425f3eb6d7",
 			"network": "kovan"
 		},
 		"FeePool": {
@@ -1472,8 +1472,8 @@
 			"address": "0xA25A64Fc50fa5668A566540e94Cbb89628af58dE",
 			"source": "TokenState",
 			"link": "https://kovan.etherscan.io/address/0xA25A64Fc50fa5668A566540e94Cbb89628af58dE",
-			"timestamp": "2021-08-31T01:27:33.077Z",
-			"txn": "",
+			"timestamp": "2021-08-31T01:27:32.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0x61006cef6f9175d25bca996453bc9c497060b77fe1dfcd85977419a2380f9a18",
 			"network": "kovan"
 		},
 		"ProxyERC20pBTC": {
@@ -1481,8 +1481,8 @@
 			"address": "0xF2e84Fae8d9a1C8eF00145A7DBF0664cBC3272C9",
 			"source": "ProxyERC20",
 			"link": "https://kovan.etherscan.io/address/0xF2e84Fae8d9a1C8eF00145A7DBF0664cBC3272C9",
-			"timestamp": "2021-08-31T01:27:41.408Z",
-			"txn": "",
+			"timestamp": "2021-08-31T01:27:40.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0xc1eeb38111daeef149664d134179d8882281bd155825dbfc14db5d1813d76140",
 			"network": "kovan"
 		},
 		"PynthpBTC": {
@@ -1490,8 +1490,8 @@
 			"address": "0x4907411Ab8EaEE5D619E5596F15021b3D958E522",
 			"source": "MultiCollateralPynth",
 			"link": "https://kovan.etherscan.io/address/0x4907411Ab8EaEE5D619E5596F15021b3D958E522",
-			"timestamp": "2021-08-31T01:27:44.922Z",
-			"txn": "",
+			"timestamp": "2021-08-31T01:27:44.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0x372f96d0207eed96bebf7d5ea122d5e7c9edd0de5ffec8d999f7ed07bb941a0c",
 			"network": "kovan"
 		},
 		"TokenStatepETH": {
@@ -1544,8 +1544,8 @@
 			"address": "0x95Dee57E94C95dfe9510f79167df57944917581A",
 			"source": "PurgeablePynth",
 			"link": "https://kovan.etherscan.io/address/0x95Dee57E94C95dfe9510f79167df57944917581A",
-			"timestamp": "2021-08-31T01:29:40.564Z",
-			"txn": "",
+			"timestamp": "2021-08-31T01:29:40.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0x4e7ad648d61793dff47ad42045080e0ca8cc4514bbbe0a471af359128426815f",
 			"network": "kovan"
 		},
 		"TokenStateiETH": {
