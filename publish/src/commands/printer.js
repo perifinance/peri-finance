@@ -35,7 +35,7 @@ module.exports = {
 		program
 			.command('printer')
 			.description('print all contracts deployed')
-			.option('-n, --network <value>', `The network which scheduler will be called`)
+			.option('-n, --network <value>', `contracts of the network`)
 			.option(
 				'-d, --deployment-path <value>',
 				`Path to a folder that has your input configuration file ${CONFIG_FILENAME}, the pynth list ${PYNTHS_FILENAME} and where your ${DEPLOYMENT_FILENAME} files will go`

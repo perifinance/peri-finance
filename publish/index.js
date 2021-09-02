@@ -29,7 +29,6 @@ require('./src/commands/versions-history').cmd(program);
 require('./src/commands/versions-update').cmd(program);
 require('./src/commands/deploy-shorting-rewards').cmd(program);
 
-require('./src/commands/scheduler').cmd(program);
 require('./src/commands/printer').cmd(program);
 
 program.parse(process.argv);

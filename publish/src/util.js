@@ -383,20 +383,6 @@ function reportDeployedContracts({ deployer }) {
 	}
 }
 
-function requestPriceFeedFromGateIO(currencyKey) {
-	const feedUrl = `https://data.gateapi.io/api2/1/ticker/${currencyKey}_USDT`;
-
-	return axios
-		.get(feedUrl)
-		.then(({ data }) => {
-			const price = w3utils.toWei(data.last);
-			return { price, currencyKey };
-		})
-		.catch(e => {
-			console.log(e);
-		});
-}
-
 function estimateEtherGasPice(network, priority) {
 	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
@@ -502,7 +488,6 @@ module.exports = {
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
-	requestPriceFeedFromGateIO,
 	checkGasPrice,
 	sleep,
 };
