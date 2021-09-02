@@ -536,8 +536,9 @@
 			},
 			"Exchanger": {
 				"address": "0x34F0f80B7dEfc87F67e8B5985c0a0A73030e3401",
-				"status": "current",
-				"keccak256": "0x9cc52630934664c7394c471e7a0fcb68529cfb332eaa5e2644da00daabfed26b"
+				"status": "replaced",
+				"keccak256": "0x9cc52630934664c7394c471e7a0fcb68529cfb332eaa5e2644da00daabfed26b",
+				"replaced_in": "v0.1.6"
 			},
 			"ExchangeState": {
 				"address": "0xfcAb6F6DFf6437230be1ba8022DF2e66536f3f7A",
@@ -906,8 +907,9 @@
 		"contracts": {
 			"ExchangeRates": {
 				"address": "0xF29D5D27d9776B9b3A9017d3BaB8CbB08279A490",
-				"status": "current",
-				"keccak256": "0x5369c8e9769ce64f256b7a8c425383da224f7fec3019eb504ff0ba0be5d3157a"
+				"status": "replaced",
+				"keccak256": "0x5369c8e9769ce64f256b7a8c425383da224f7fec3019eb504ff0ba0be5d3157a",
+				"replaced_in": "v0.1.6"
 			}
 		}
 	},
@@ -1011,6 +1013,85 @@
 				"address": "0x486843ae81964A6023CD4F3540303A81AF1F1ca8",
 				"status": "current",
 				"keccak256": "0x4e4bebeec581cdcc62589700f94d18093900493d09266a2632bf56f5d3284be3"
+			}
+		}
+	},
+	"v0.1.6": {
+		"tag": "v0.1.6",
+		"fulltag": "v0.1.6",
+		"network": "kovan",
+		"date": "2021-08-31T13:52:55+09:00",
+		"commit": "355602a50488701984581488be6beb473525fbcd",
+		"contracts": {
+			"ExchangeRates": {
+				"address": "0x8CCBC31B591B093a16F5A35CC723C4526815BF78",
+				"status": "current",
+				"keccak256": "0xfe751ca70e6de5078e311178fe97af56dd56f570e8f90f98fd32e160d5e4734d"
+			},
+			"Exchanger": {
+				"address": "0x5dAf7768A4d3c3c3Cc89755F4Aa0Cb3C18e73aFa",
+				"status": "current",
+				"keccak256": "0xf2b481b911f46bc336f0956dfd8f8d9f34c3f912527c309b318aad93bf6deaf3"
+			},
+			"TokenStatepBTC": {
+				"address": "0xA25A64Fc50fa5668A566540e94Cbb89628af58dE",
+				"status": "current",
+				"keccak256": "0x3ec4b27cd0fee4d8b4eecda7a7d578008d0b437496a672737f0b82037848bf18"
+			},
+			"ProxyERC20pBTC": {
+				"address": "0xF2e84Fae8d9a1C8eF00145A7DBF0664cBC3272C9",
+				"status": "current",
+				"keccak256": "0xccd3c45b0f87c6bb391c4e641f009258cdf06815f81dfa699e708039e6095ac0"
+			},
+			"PynthpBTC": {
+				"address": "0x4907411Ab8EaEE5D619E5596F15021b3D958E522",
+				"status": "current",
+				"keccak256": "0xe1ce21badb1ef93547c20a3c35f0495b92eaf77f31ae31ec1d3492824479a969"
+			},
+			"TokenStatepETH": {
+				"address": "0x2fB4b12db83308169871De6Fc4B2dADcE0419F0d",
+				"status": "current",
+				"keccak256": "0x3ec4b27cd0fee4d8b4eecda7a7d578008d0b437496a672737f0b82037848bf18"
+			},
+			"ProxyERC20pETH": {
+				"address": "0x90ADb44fD89017CB49bFAea047cCc165c956fbd4",
+				"status": "current",
+				"keccak256": "0xccd3c45b0f87c6bb391c4e641f009258cdf06815f81dfa699e708039e6095ac0"
+			},
+			"PynthpETH": {
+				"address": "0xc1f89D17bb2361F2C89a40979b2e62048EA19CeF",
+				"status": "current",
+				"keccak256": "0xe1ce21badb1ef93547c20a3c35f0495b92eaf77f31ae31ec1d3492824479a969"
+			},
+			"TokenStateiBTC": {
+				"address": "0x07E1b0D2EC907C67D361B6bB8229cc70de1e9389",
+				"status": "current",
+				"keccak256": "0x3ec4b27cd0fee4d8b4eecda7a7d578008d0b437496a672737f0b82037848bf18"
+			},
+			"ProxyERC20iBTC": {
+				"address": "0xc4C7bd766F774b0A271859BbbD1B305a547d89b7",
+				"status": "current",
+				"keccak256": "0xccd3c45b0f87c6bb391c4e641f009258cdf06815f81dfa699e708039e6095ac0"
+			},
+			"PynthiBTC": {
+				"address": "0x95Dee57E94C95dfe9510f79167df57944917581A",
+				"status": "current",
+				"keccak256": "0x70cac693ef99f5c56cfd889b6737f5af821096bee9662c938f8e77c7eb3580a2"
+			},
+			"TokenStateiETH": {
+				"address": "0x01Eb6494C5D94CaAa5641427613FA0D78218a5f5",
+				"status": "current",
+				"keccak256": "0x3ec4b27cd0fee4d8b4eecda7a7d578008d0b437496a672737f0b82037848bf18"
+			},
+			"ProxyERC20iETH": {
+				"address": "0xAD1af8Dd9D07c625980eB42128E87708F292D835",
+				"status": "current",
+				"keccak256": "0xccd3c45b0f87c6bb391c4e641f009258cdf06815f81dfa699e708039e6095ac0"
+			},
+			"PynthiETH": {
+				"address": "0x7cA589Af8C5674F8fD28E5EfED55a36d85eFa6Fe",
+				"status": "current",
+				"keccak256": "0x70cac693ef99f5c56cfd889b6737f5af821096bee9662c938f8e77c7eb3580a2"
 			}
 		}
 	}
