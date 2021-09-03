@@ -70,6 +70,8 @@ interface IIssuer {
         view
         returns (uint transferable, bool anyRateIsInvalid);
 
+    function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
+
     // Restricted: used internally to PeriFinance
     function issuePynths(
         address _issuer,

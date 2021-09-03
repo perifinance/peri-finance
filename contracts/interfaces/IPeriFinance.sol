@@ -57,6 +57,8 @@ interface IPeriFinance {
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
+    function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
+
     // Mutative Functions
     function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
 

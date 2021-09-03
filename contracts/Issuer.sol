@@ -580,6 +580,22 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         anyRateIsInvalid = rateIsInvalid;
     }
 
+    function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exTokenAmountToUnstake) {
+        (uint debtBalance, , bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+        uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_account, pUSD);
+
+        (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint periCollateralToUSD = _periToUSD(_collateral(_account), periRate);
+
+        _requireRatesNotInvalid(anyRateIsInvalid || isPeriInvalid);
+
+        (burnAmount, exTokenAmountToUnstake) = _amountsToFitClaimable(
+            debtBalance,
+            combinedStakedAmount,
+            periCollateralToUSD
+        );
+    }
+
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory) {
         uint numKeys = currencyKeys.length;
         IPynth[] memory addresses = new IPynth[](numKeys);

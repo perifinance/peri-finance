@@ -182,6 +182,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
+    function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake) {
+        (burnAmount, exTokenAmountToUnstake) = issuer().amountsToFitClaimable(account);
+    }
+
     function _canTransfer(address account, uint value) internal view returns (bool) {
         (uint initialDebtOwnership, ) = periFinanceState().issuanceData(account);
 
