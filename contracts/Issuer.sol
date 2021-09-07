@@ -935,10 +935,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
 
-        amountBurnt = amountBurnt.roundDownDecimal(1) ==
-            IERC20(address(pynths[pUSD])).balanceOf(burnAccount).roundDownDecimal(1)
-            ? IERC20(address(pynths[pUSD])).balanceOf(burnAccount)
-            : amountBurnt;
+        uint pUSDBalance = IERC20(address(pynths[pUSD])).balanceOf(burnAccount);
+        uint deviation = pUSDBalance < amountBurnt ? amountBurnt.sub(pUSDBalance) : pUSDBalance.sub(amountBurnt);
+        amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
+
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
 
@@ -980,7 +980,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
-        remainingDebt = existingDebt.sub(amountBurnt);
+        remainingDebt = existingDebt.sub(amount);
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
