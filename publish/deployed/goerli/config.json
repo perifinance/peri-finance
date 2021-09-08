@@ -154,11 +154,5 @@
 	},
 	"BridgeState": {
 		"deploy": false
-	},
-	"USDC": {
-		"deploy": false
-	},
-	"DAI": {
-		"deploy": false
 	}
 }

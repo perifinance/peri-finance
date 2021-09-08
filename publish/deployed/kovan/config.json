@@ -208,11 +208,5 @@
 	},
 	"PynthiETH": {
 		"deploy": false
-	},
-	"DAI": {
-		"deploy": false
-	},
-	"USDC": {
-		"deploy": true
 	}
 }
