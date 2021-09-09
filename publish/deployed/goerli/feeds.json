@@ -1,3 +1,7 @@
 {
-	"PERI": { "asset": "PERI" }
+	"PERI": {
+		"asset": "PERI",
+		"feed": "",
+		"standalone": true
+	}
 }
