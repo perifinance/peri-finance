@@ -164,40 +164,31 @@
 	"ProxyERC20pBTC": {
 		"deploy": true
 	},
-	"ProxyERC20pETH": {
-		"deploy": true
-	},
 	"ProxyFeePool": {
 		"deploy": true
 	},
 	"ProxyPeriFinance": {
 		"deploy": true
 	},
-	"ProxypUSD": {
+	"ProxyERC20pEUR": {
 		"deploy": true
 	},
-	"ProxypEUR": {
+	"ProxyERC20pJPY": {
 		"deploy": true
 	},
-	"ProxypJPY": {
+	"ProxyERC20pAUD": {
 		"deploy": true
 	},
-	"ProxypAUD": {
+	"ProxyERC20pGBP": {
 		"deploy": true
 	},
-	"ProxypGBP": {
+	"ProxyERC20pCHF": {
 		"deploy": true
 	},
-	"ProxypCHF": {
+	"ProxyERC20pXAU": {
 		"deploy": true
 	},
-	"ProxypXAU": {
-		"deploy": true
-	},
-	"ProxypXAG": {
-		"deploy": true
-	},
-	"ProxypBTC": {
+	"ProxyERC20pXAG": {
 		"deploy": true
 	},
 	"SafeDecimalMath": {
@@ -239,7 +230,7 @@
 	"TokenStatepETH": {
 		"deploy": true
 	},
-	"ProxypETH": {
+	"ProxyERC20pETH": {
 		"deploy": true
 	},
 	"PynthpETH": {
@@ -248,7 +239,7 @@
 	"TokenStatepBNB": {
 		"deploy": true
 	},
-	"ProxypBNB": {
+	"ProxyERC20pBNB": {
 		"deploy": true
 	},
 	"PynthpBNB": {
@@ -257,7 +248,7 @@
 	"TokenStatepTRX": {
 		"deploy": true
 	},
-	"ProxypTRX": {
+	"ProxyERC20pTRX": {
 		"deploy": true
 	},
 	"PynthpTRX": {
@@ -266,7 +257,7 @@
 	"TokenStatepXTZ": {
 		"deploy": true
 	},
-	"ProxypXTZ": {
+	"ProxyERC20pXTZ": {
 		"deploy": true
 	},
 	"PynthpXTZ": {
@@ -320,7 +311,7 @@
 	"TokenStatepCEX": {
 		"deploy": true
 	},
-	"ProxypCEX": {
+	"ProxyERC20pCEX": {
 		"deploy": true
 	},
 	"PynthpCEX": {
@@ -338,7 +329,7 @@
 	"TokenStatepXRP": {
 		"deploy": true
 	},
-	"ProxypXRP": {
+	"ProxyERC20pXRP": {
 		"deploy": true
 	},
 	"PynthpXRP": {
@@ -347,7 +338,7 @@
 	"TokenStatepLTC": {
 		"deploy": true
 	},
-	"ProxypLTC": {
+	"ProxyERC20pLTC": {
 		"deploy": true
 	},
 	"PynthpLTC": {
@@ -356,7 +347,7 @@
 	"TokenStatepLINK": {
 		"deploy": true
 	},
-	"ProxypLINK": {
+	"ProxyERC20pLINK": {
 		"deploy": true
 	},
 	"PynthpLINK": {
@@ -365,7 +356,7 @@
 	"TokenStatepEOS": {
 		"deploy": true
 	},
-	"ProxypEOS": {
+	"ProxyERC20pEOS": {
 		"deploy": true
 	},
 	"PynthpEOS": {
@@ -374,7 +365,7 @@
 	"TokenStatepETC": {
 		"deploy": true
 	},
-	"ProxypETC": {
+	"ProxyERC20pETC": {
 		"deploy": true
 	},
 	"PynthpETC": {
@@ -383,7 +374,7 @@
 	"TokenStatepDEFI": {
 		"deploy": true
 	},
-	"ProxypDEFI": {
+	"ProxyERC20pDEFI": {
 		"deploy": true
 	},
 	"PynthpDEFI": {
