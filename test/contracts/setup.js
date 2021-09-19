@@ -576,11 +576,10 @@ const setupAllContracts = async ({
 	// Note: those with deps need to be listed AFTER their deps
 	const baseContracts = [
 		{ contract: 'AddressResolver' },
-		{
-			contract: 'BlacklistManager',
-		},
+		{ contract: 'BlacklistManager' },
 		{ contract: 'SystemStatus' },
 		{ contract: 'ExchangeState' },
+		{ contract: 'ExternalTokenStakeManager' },
 		{ contract: 'FlexibleStorage', deps: ['AddressResolver'] },
 		{
 			contract: 'SystemSettings',
@@ -804,14 +803,8 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
 		},
 		{
-			contract: 'StakingStateUSDC',
-			source: 'StakingStateUSDC',
-		},
-		{
 			contract: 'StakingState',
-		},
-		{
-			contract: 'ExternalTokenStakeManager',
+			deps: ['ExternalTokenStakeManager'],
 		},
 	];
 

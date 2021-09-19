@@ -24,7 +24,7 @@ const {
 } = require('../..');
 
 contract('PeriFinance', async accounts => {
-	const [pAUD, pEUR] = ['pAUD', 'pEUR'].map(toBytes32);
+	const [pBTC, pETH] = ['pBTC', 'pETH'].map(toBytes32);
 
 	const [, owner, account1, account2] = accounts;
 
@@ -50,7 +50,7 @@ contract('PeriFinance', async accounts => {
 			SupplySchedule: supplySchedule,
 		} = await setupAllContracts({
 			accounts,
-			pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD'],
+			pynths: ['pUSD', 'pETH', 'pBTC'],
 			contracts: [
 				'PeriFinance',
 				'PeriFinanceState',
@@ -65,7 +65,6 @@ contract('PeriFinance', async accounts => {
 				'CollateralManager',
 				'RewardEscrowV2', // required for issuer._collateral to read collateral
 				'RewardEscrow',
-				'StakingStateUSDC',
 			],
 		}));
 
@@ -115,8 +114,8 @@ contract('PeriFinance', async accounts => {
 		});
 
 		const amount1 = '10';
-		const currencyKey1 = pAUD;
-		const currencyKey2 = pEUR;
+		const currencyKey1 = pBTC;
+		const currencyKey2 = pETH;
 		const trackingCode = toBytes32('1inch');
 		const msgSender = owner;
 
