@@ -1,7 +1,7 @@
 {
 	"PERI": {
 		"asset": "PERI",
-		"feed": "0x31f93DA9823d737b7E44bdee0DF389Fe62Fd1AcD",
+		"feed": "",
 		"standalone": true
 	},
 	"ETH": {
