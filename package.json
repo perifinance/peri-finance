@@ -37,7 +37,8 @@
 		"publish/deployed/mumbai/*",
 		"publish/deployed/polygon/*",
 		"publish/deployed/bsctest/*",
-		"publish/deployed/bsc/*"
+		"publish/deployed/bsc/*",
+		"publish/deployed/moonbase-alphanet/*"
 	],
 	"bin": {
 		"peri": "bin.js"

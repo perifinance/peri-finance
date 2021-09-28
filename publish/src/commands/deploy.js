@@ -825,6 +825,32 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
+	} else if (['moonbase-alphanet'].includes(network)) {
+		periFinance = await deployer.deployContract({
+			name: 'PeriFinance',
+			source: 'PeriFinance',
+			deps: ['ProxyERC20', 'TokenStatePeriFinance', 'AddressResolver', 'BlacklistManager'],
+			args: [
+				addressOf(proxyERC20PeriFinance),
+				addressOf(tokenStatePeriFinance),
+				account,
+				currentPeriFinanceSupply,
+				addressOf(readProxyForResolver),
+				minterRoleAddress,
+				addressOf(blacklistManager),
+			],
+		});
+
+		if (minterRoleAddress !== ZERO_ADDRESS) {
+			await runStep({
+				contract: 'PeriFinance',
+				target: periFinance,
+				read: 'minterRole',
+				expected: input => input === minterRoleAddress,
+				write: 'setMinterRole',
+				writeArg: minterRoleAddress,
+			});
+		}
 	}
 
 	if (periFinance && blacklistManager) {

@@ -17,6 +17,7 @@ const data = {
 	mumbai: require('./publish/deployed/mumbai'),
 	bsctest: require('./publish/deployed/bsctest'),
 	bsc: require('./publish/deployed/bsc'),
+	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
 };
 
 const assets = require('./publish/assets.json');
@@ -35,6 +36,9 @@ const networks = [
 	'mumbai',
 	'bsctest',
 	'bsc',
+	'dusty',
+	'shibuya',
+	'moonbase-alphanet',
 ];
 
 const chainIdMapping = Object.entries({
@@ -86,6 +90,9 @@ const chainIdMapping = Object.entries({
 	},
 	56: {
 		network: 'bsc',
+	},
+	1287: {
+		network: 'moonbase-alphanet',
 	},
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
@@ -149,6 +156,7 @@ const knownAccounts = {
 	polygon: [],
 	bsctest: [],
 	bsc: [],
+	'moonbase-alphanet': [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -194,6 +202,7 @@ const defaults = {
 		polygon: constants.ZERO_ADDRESS,
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -203,6 +212,7 @@ const defaults = {
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
+		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -212,6 +222,7 @@ const defaults = {
 		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
 		bsc: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
 		bsctest: '0x52306d4521eFF70Ba555A578a66705b3352e8B3a',
+		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -221,6 +232,7 @@ const defaults = {
 		polygon: constants.ZERO_ADDRESS,
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},
 	INFLATION_MINTER_ADDRESSES: {
@@ -231,6 +243,7 @@ const defaults = {
 		polygon: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		bsc: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		bsctest: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		'moonbase-alphanet': '0x727bd962784C27C269E8287F9202312208B83FA7',
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},
 	ORACLE_ADDRESSES: {
@@ -241,6 +254,7 @@ const defaults = {
 		polygon: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		bsc: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		bsctest: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		'moonbase-alphanet': '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},
 	CHILD_CHAIN_MANAGER_ADDRESS: {

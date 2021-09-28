@@ -132,6 +132,9 @@ const getEtherscanLinkPrefix = network => {
 	if (['bsc', 'bsctest'].includes(network)) {
 		return `https://${network !== 'bsc' ? 'testnet.' : ''}bscscan.com`;
 	}
+	if (['moonbase-alphanet'].includes(network)) {
+		return `https://moonbase-blockscout.testnet.moonbeam.network/`;
+	}
 	return `https://${network !== 'mainnet' ? network + '.' : ''}etherscan.io`;
 };
 
@@ -152,6 +155,12 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_BSC;
 		} else if (network === 'bsctest') {
 			providerUrl = process.env.PROVIDER_URL_BSCTEST;
+		} else if (network === 'dusty') {
+			providerUrl = process.env.PROVIDER_URL_DUSTY;
+		} else if (network === 'shibuya') {
+			providerUrl = process.env.PROVIDER_URL_SHIBUYA;
+		} else if (network === 'moonbase-alphanet') {
+			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
@@ -170,6 +179,8 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
 			: ['polygon', 'mumbai'].includes(network)
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
+			: ['moonbase-alphanet'].includes(network)
+			? `https://moonbase-blockscout.testnet.moonbeam.network/api`
 			: '';
 
 	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
