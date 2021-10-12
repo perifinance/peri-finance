@@ -65,11 +65,11 @@
 		},
 		"ExchangeRates": {
 			"name": "ExchangeRates",
-			"address": "0xA95741B2306A43c0a307C0DBdFA273E648a08657",
+			"address": "0xaa33E44Fba27B768B8a2d23681860500B8100C84",
 			"source": "ExchangeRates",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xA95741B2306A43c0a307C0DBdFA273E648a08657",
-			"timestamp": "2021-09-27T10:09:12.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xf6a3b7818c7ad1014a044e5e689a7b5de5b416e957932e403504a9cf14b5f590",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xaa33E44Fba27B768B8a2d23681860500B8100C84",
+			"timestamp": "2021-10-12T01:39:00.488Z",
+			"txn": "",
 			"network": "moonbase-alphanet"
 		},
 		"RewardEscrow": {
@@ -551,11 +551,11 @@
 		},
 		"CollateralEth": {
 			"name": "CollateralEth",
-			"address": "0x0319826827E437744af8E45634b22aA0332B7455",
+			"address": "0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
 			"source": "CollateralEth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x0319826827E437744af8E45634b22aA0332B7455",
-			"timestamp": "2021-09-27T10:56:48.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xdcec345495c6d29d5b66561b7560fc47a717b370d735350dc887ee897b47fed6",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
+			"timestamp": "2021-10-12T01:43:54.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0xd61290fdcffcaf4b4989aca2fa83aa502158e7a728c2f20feea937d1eccd2c87",
 			"network": "moonbase-alphanet"
 		},
 		"CollateralStateErc20": {

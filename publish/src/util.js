@@ -133,7 +133,7 @@ const getEtherscanLinkPrefix = network => {
 		return `https://${network !== 'bsc' ? 'testnet.' : ''}bscscan.com`;
 	}
 	if (['moonbase-alphanet'].includes(network)) {
-		return `https://moonbase-blockscout.testnet.moonbeam.network/`;
+		return `https://moonbase-blockscout.testnet.moonbeam.network`;
 	}
 	return `https://${network !== 'mainnet' ? network + '.' : ''}etherscan.io`;
 };
