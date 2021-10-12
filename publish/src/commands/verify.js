@@ -186,7 +186,12 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 							addressHash: address,
 							contractSourceCode: warningHeader() + readFlattened(),
 							constructorArguments,
-							compilerVersion: 'v' + solc.version().replace('.Emscripten.clang', ''), // The version reported by solc-js is too verbose and needs a v at the front
+							compilerVersion:
+								'v' +
+								solc
+									.version()
+									.replace('.Darwin.appleclang', '')
+									.replace('.Emscripten.clang', ''), // The version reported by solc-js is too verbose and needs a v at the front
 							optimization: true,
 							optimizationRuns: runs,
 							libraryName1: 'SafeDecimalMath',

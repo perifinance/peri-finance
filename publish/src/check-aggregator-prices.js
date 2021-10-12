@@ -44,6 +44,8 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 								? process.env.POLYGONSCAN_KEY
 								: ['bsc', 'bsctest'].includes(network)
 								? process.env.BSCSCAN_KEY
+								: ['moonbase-alphanet'].includes(network)
+								? process.env.SUBSCAN_KEY
 								: process.env.ETHERSCAN_KEY,
 						},
 					});

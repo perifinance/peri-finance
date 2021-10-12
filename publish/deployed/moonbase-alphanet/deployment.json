@@ -4,7 +4,7 @@
 			"name": "SafeDecimalMath",
 			"address": "0x1f8aD626bC259b961287102cd622fF5b4DE58Cf0",
 			"source": "SafeDecimalMath",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x1f8aD626bC259b961287102cd622fF5b4DE58Cf0",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x1f8aD626bC259b961287102cd622fF5b4DE58Cf0",
 			"timestamp": "2021-09-27T10:05:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x58f6f2fc563c49e284911f8a697cc947c3e9bed70836fbe1933847e0853b1b7e",
 			"network": "moonbase-alphanet"
@@ -13,7 +13,7 @@
 			"name": "Math",
 			"address": "0xBC5620119B7374fb06369745e440cacc87273c10",
 			"source": "Math",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xBC5620119B7374fb06369745e440cacc87273c10",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xBC5620119B7374fb06369745e440cacc87273c10",
 			"timestamp": "2021-09-27T10:06:00.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x96583958736a02794c7155ac8444266dce762fd12949290e5d75a5a2edd9a70e",
 			"network": "moonbase-alphanet"
@@ -22,7 +22,7 @@
 			"name": "AddressResolver",
 			"address": "0xA3d426D8987c01aF34e01cf01093529c6d3fE72F",
 			"source": "AddressResolver",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xA3d426D8987c01aF34e01cf01093529c6d3fE72F",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xA3d426D8987c01aF34e01cf01093529c6d3fE72F",
 			"timestamp": "2021-09-27T10:06:36.950Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -31,7 +31,7 @@
 			"name": "ReadProxyAddressResolver",
 			"address": "0x49f058Ae62A0F559110B0Ce18dd28168ff232C83",
 			"source": "ReadProxy",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x49f058Ae62A0F559110B0Ce18dd28168ff232C83",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x49f058Ae62A0F559110B0Ce18dd28168ff232C83",
 			"timestamp": "2021-09-27T10:06:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x67535284bc0d65149a636c9be9b696b6ee3960a0e272b5c8f6d4afaf0911c704",
 			"network": "moonbase-alphanet"
@@ -40,7 +40,7 @@
 			"name": "FlexibleStorage",
 			"address": "0x65EDc6fcf78867392fe3d8fb6431D6B87996a961",
 			"source": "FlexibleStorage",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x65EDc6fcf78867392fe3d8fb6431D6B87996a961",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x65EDc6fcf78867392fe3d8fb6431D6B87996a961",
 			"timestamp": "2021-09-27T10:07:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x55f149fbe5f686e3aa94c20bfc6b757735e5961deaa6bb15719128623c83f034",
 			"network": "moonbase-alphanet"
@@ -49,16 +49,16 @@
 			"name": "SystemSettings",
 			"address": "0xfAfAd0e42d379B1042Da033a858FF9D9e7bc9856",
 			"source": "SystemSettings",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xfAfAd0e42d379B1042Da033a858FF9D9e7bc9856",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xfAfAd0e42d379B1042Da033a858FF9D9e7bc9856",
 			"timestamp": "2021-09-27T10:08:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x15b4c9b570ef6fce3ee526ec8641b07fc6c979d480662722ef8764be0939ace1",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x15b4c9b570ef6fce3ee526ec8641b07fc6c979d480662722ef8764be0939ace1",
 			"network": "moonbase-alphanet"
 		},
 		"SystemStatus": {
 			"name": "SystemStatus",
 			"address": "0xD6b1785261Ffed0Eb9d0BCe04e0e09626bD3573F",
 			"source": "SystemStatus",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xD6b1785261Ffed0Eb9d0BCe04e0e09626bD3573F",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xD6b1785261Ffed0Eb9d0BCe04e0e09626bD3573F",
 			"timestamp": "2021-09-27T10:08:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xe7f8dfa07b59d04e6fea59d6950f1ba82b4ef1a21b156f61fa22b181cca796fb",
 			"network": "moonbase-alphanet"
@@ -67,16 +67,16 @@
 			"name": "ExchangeRates",
 			"address": "0xaa33E44Fba27B768B8a2d23681860500B8100C84",
 			"source": "ExchangeRates",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xaa33E44Fba27B768B8a2d23681860500B8100C84",
-			"timestamp": "2021-10-12T01:39:00.488Z",
-			"txn": "",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xaa33E44Fba27B768B8a2d23681860500B8100C84",
+			"timestamp": "2021-10-12T01:38:48.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x22bdac7e07d43ef1d462b85a89714b13b14ad6a936a7d6fa0fa36b943d719820",
 			"network": "moonbase-alphanet"
 		},
 		"RewardEscrow": {
 			"name": "RewardEscrow",
 			"address": "0x2e873A283726C58f0DA4f1303f6f66731fE21480",
 			"source": "RewardEscrow",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x2e873A283726C58f0DA4f1303f6f66731fE21480",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x2e873A283726C58f0DA4f1303f6f66731fE21480",
 			"timestamp": "2021-09-27T10:09:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xbd1d7eba971654e0f55d4f179b78e4e24b23b7d7ac28e5fe6f35c13675b70f18",
 			"network": "moonbase-alphanet"
@@ -85,16 +85,16 @@
 			"name": "RewardEscrowV2",
 			"address": "0xf19499E7D1aBe2793e23773c0320d7A962b9923B",
 			"source": "RewardEscrowV2",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xf19499E7D1aBe2793e23773c0320d7A962b9923B",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xf19499E7D1aBe2793e23773c0320d7A962b9923B",
 			"timestamp": "2021-09-27T10:10:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x785d36afa14f38d06ac403d11b200c51c30ccf73cb149a966be876e887099c1e",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x785d36afa14f38d06ac403d11b200c51c30ccf73cb149a966be876e887099c1e",
 			"network": "moonbase-alphanet"
 		},
 		"PeriFinanceEscrow": {
 			"name": "PeriFinanceEscrow",
 			"address": "0xa0D3982aD3B60AE1F4758CC21D3Bc3773a701bA8",
 			"source": "PeriFinanceEscrow",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xa0D3982aD3B60AE1F4758CC21D3Bc3773a701bA8",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xa0D3982aD3B60AE1F4758CC21D3Bc3773a701bA8",
 			"timestamp": "2021-09-27T10:10:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xb71d8ade2a42d9e5cf94c61c3745388588696228a281b73f0cea5a27e3741e00",
 			"network": "moonbase-alphanet"
@@ -103,7 +103,7 @@
 			"name": "PeriFinanceState",
 			"address": "0xabcBb98B9F9fF6DA94398005fc6D16a9ef572642",
 			"source": "PeriFinanceState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xabcBb98B9F9fF6DA94398005fc6D16a9ef572642",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xabcBb98B9F9fF6DA94398005fc6D16a9ef572642",
 			"timestamp": "2021-09-27T10:24:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x8474e6c2e842b25c51ba8398294a83c0344a445991ad8c901c0c493c1ce7cfb5",
 			"network": "moonbase-alphanet"
@@ -112,7 +112,7 @@
 			"name": "ProxyFeePool",
 			"address": "0x087f939C9272E321748054Ec55e086A159bdC4Da",
 			"source": "Proxy",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x087f939C9272E321748054Ec55e086A159bdC4Da",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x087f939C9272E321748054Ec55e086A159bdC4Da",
 			"timestamp": "2021-09-27T10:25:12.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x7d48f1f6405ecc9ac0e5d74ad169966a427211c63aa91a91270be4a39168c318",
 			"network": "moonbase-alphanet"
@@ -121,7 +121,7 @@
 			"name": "DelegateApprovalsEternalStorage",
 			"address": "0xc5E42cF051CB196eDdc7dE45771FDfE4287F6a86",
 			"source": "EternalStorage",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xc5E42cF051CB196eDdc7dE45771FDfE4287F6a86",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xc5E42cF051CB196eDdc7dE45771FDfE4287F6a86",
 			"timestamp": "2021-09-27T10:25:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xcf7e2252899d65d03a55c164d65f0c13af90865f49cf444093cbb64e54a851a7",
 			"network": "moonbase-alphanet"
@@ -130,7 +130,7 @@
 			"name": "DelegateApprovals",
 			"address": "0x128863B190a8e2998Ac08d305b028A30291Ef23C",
 			"source": "DelegateApprovals",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x128863B190a8e2998Ac08d305b028A30291Ef23C",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x128863B190a8e2998Ac08d305b028A30291Ef23C",
 			"timestamp": "2021-09-27T10:26:00.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x40943c83feb044bcb866a4bfecf0c7bf805cc898759d72e19fafa4372776cb69",
 			"network": "moonbase-alphanet"
@@ -139,16 +139,16 @@
 			"name": "Liquidations",
 			"address": "0x5e8fd0bADC50628ea179997a7669c15a2D0bF72b",
 			"source": "Liquidations",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x5e8fd0bADC50628ea179997a7669c15a2D0bF72b",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x5e8fd0bADC50628ea179997a7669c15a2D0bF72b",
 			"timestamp": "2021-09-27T10:26:48.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x7ee73d38dcbef293a300e8622910cde3956f00cd02dce9348b79adab6a38383c",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x7ee73d38dcbef293a300e8622910cde3956f00cd02dce9348b79adab6a38383c",
 			"network": "moonbase-alphanet"
 		},
 		"EternalStorageLiquidations": {
 			"name": "EternalStorageLiquidations",
 			"address": "0x8844BD158d7EE9068eF605Da33cd9275914d71EF",
 			"source": "EternalStorage",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x8844BD158d7EE9068eF605Da33cd9275914d71EF",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x8844BD158d7EE9068eF605Da33cd9275914d71EF",
 			"timestamp": "2021-09-27T10:27:24.650Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -157,7 +157,7 @@
 			"name": "FeePoolEternalStorage",
 			"address": "0x22E15530Ae3FcB68449b56D34245116cADDD000D",
 			"source": "FeePoolEternalStorage",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x22E15530Ae3FcB68449b56D34245116cADDD000D",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x22E15530Ae3FcB68449b56D34245116cADDD000D",
 			"timestamp": "2021-09-27T10:27:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x2a1537d8be558d13c69343010e8dc36b63fcec48e8325e659eca3b42f16a8b50",
 			"network": "moonbase-alphanet"
@@ -166,16 +166,16 @@
 			"name": "FeePool",
 			"address": "0x023933a997a088D3C6efAb87d546d672EeC89195",
 			"source": "FeePool",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x023933a997a088D3C6efAb87d546d672EeC89195",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x023933a997a088D3C6efAb87d546d672EeC89195",
 			"timestamp": "2021-09-27T10:28:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xb6c3a73525990f4470a6e14a159e5bf72ebe331009bb565df2df5397cdc286e8",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0xb6c3a73525990f4470a6e14a159e5bf72ebe331009bb565df2df5397cdc286e8",
 			"network": "moonbase-alphanet"
 		},
 		"FeePoolState": {
 			"name": "FeePoolState",
 			"address": "0x0Cb8c24517E4457346d2d6AA0b10A155f4B03153",
 			"source": "FeePoolState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x0Cb8c24517E4457346d2d6AA0b10A155f4B03153",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x0Cb8c24517E4457346d2d6AA0b10A155f4B03153",
 			"timestamp": "2021-09-27T10:29:12.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xd5324a593c350c88a3bf4291df5e46a24a36df03be4779f8ba7eb25bea522bb7",
 			"network": "moonbase-alphanet"
@@ -184,7 +184,7 @@
 			"name": "RewardsDistribution",
 			"address": "0x5B8E6aA4d5a9aF951A14B5B9b1C13F4743eD56f0",
 			"source": "RewardsDistribution",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x5B8E6aA4d5a9aF951A14B5B9b1C13F4743eD56f0",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x5B8E6aA4d5a9aF951A14B5B9b1C13F4743eD56f0",
 			"timestamp": "2021-09-27T10:29:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xe7ea36ff5aa00f63b2212a394250a561d73b1f1fadb504820fcd1770594a6c18",
 			"network": "moonbase-alphanet"
@@ -193,7 +193,7 @@
 			"name": "ProxyERC20",
 			"address": "0x21Ff61eF60E58F61eFD103C540f9C1C3AEb0cE1A",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x21Ff61eF60E58F61eFD103C540f9C1C3AEb0cE1A",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x21Ff61eF60E58F61eFD103C540f9C1C3AEb0cE1A",
 			"timestamp": "2021-09-27T10:30:00.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x63db831861e49c4b42443b3e763bef7a3a2768d61b1556fb1970548b127aaeae",
 			"network": "moonbase-alphanet"
@@ -202,7 +202,7 @@
 			"name": "TokenStatePeriFinance",
 			"address": "0x9c705D7A70932E1198779D2D8E8843e771FCAA36",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x9c705D7A70932E1198779D2D8E8843e771FCAA36",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x9c705D7A70932E1198779D2D8E8843e771FCAA36",
 			"timestamp": "2021-09-27T10:30:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xd4de7aa9bdafed4d0d53e7715f8d558e1c2c066376be93486f4f831c411006d1",
 			"network": "moonbase-alphanet"
@@ -211,7 +211,7 @@
 			"name": "BlacklistManager",
 			"address": "0xcF93612e7d98fAE96dF5ABE296963ECEE16a37AE",
 			"source": "BlacklistManager",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xcF93612e7d98fAE96dF5ABE296963ECEE16a37AE",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xcF93612e7d98fAE96dF5ABE296963ECEE16a37AE",
 			"timestamp": "2021-09-27T10:30:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xf0967febdc557a54a9b17353088329052bc47d901c48a160b90db7e0b1e632fc",
 			"network": "moonbase-alphanet"
@@ -220,16 +220,16 @@
 			"name": "PeriFinance",
 			"address": "0x7B122F67440e8469fA04b57C2abb902623447892",
 			"source": "PeriFinance",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x7B122F67440e8469fA04b57C2abb902623447892",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x7B122F67440e8469fA04b57C2abb902623447892",
 			"timestamp": "2021-09-27T10:31:12.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x2aeb01cc20b7ae9c43e930bf492c4d836c7a75beda60008d1b3898b201740a21",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x2aeb01cc20b7ae9c43e930bf492c4d836c7a75beda60008d1b3898b201740a21",
 			"network": "moonbase-alphanet"
 		},
 		"BridgeState": {
 			"name": "BridgeState",
 			"address": "0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
 			"source": "BridgeState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
 			"timestamp": "2021-09-27T10:32:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x1a85b3ba3fdbd14964ae4b0ebad21b45fbe91a833750954601d84d78cb35dfae",
 			"network": "moonbase-alphanet"
@@ -238,7 +238,7 @@
 			"name": "DebtCache",
 			"address": "0x335b354A2E9E9730AfF44671c8CA4404c7d22734",
 			"source": "DebtCache",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x335b354A2E9E9730AfF44671c8CA4404c7d22734",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x335b354A2E9E9730AfF44671c8CA4404c7d22734",
 			"timestamp": "2021-09-27T10:33:12.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x2025683242b48d8567de2d32c825d6342138d75d3a9ad85054983c495d4c96c9",
 			"network": "moonbase-alphanet"
@@ -247,16 +247,16 @@
 			"name": "Exchanger",
 			"address": "0x84D27dA4FEc59631838Fd9A4e4a6789D79694Cf1",
 			"source": "ExchangerWithVirtualPynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x84D27dA4FEc59631838Fd9A4e4a6789D79694Cf1",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x84D27dA4FEc59631838Fd9A4e4a6789D79694Cf1",
 			"timestamp": "2021-09-27T10:33:36.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x8991fb22c3bd8d94a27ca682b50dfbc5a44e4d4548c65e1d385662985340cd60",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x8991fb22c3bd8d94a27ca682b50dfbc5a44e4d4548c65e1d385662985340cd60",
 			"network": "moonbase-alphanet"
 		},
 		"ExchangeState": {
 			"name": "ExchangeState",
 			"address": "0x1757302d14997F1e01fE4C84cd90f4E5B6620b3E",
 			"source": "ExchangeState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x1757302d14997F1e01fE4C84cd90f4E5B6620b3E",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x1757302d14997F1e01fE4C84cd90f4E5B6620b3E",
 			"timestamp": "2021-09-27T10:34:00.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x931ed23090e86330f6ea7f831a5f38305a35b7d8fd0b6f9521a3e03276744325",
 			"network": "moonbase-alphanet"
@@ -265,16 +265,16 @@
 			"name": "Issuer",
 			"address": "0x7279bF8cC9aD938a098C1E45668ed02DfAE74d22",
 			"source": "Issuer",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x7279bF8cC9aD938a098C1E45668ed02DfAE74d22",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x7279bF8cC9aD938a098C1E45668ed02DfAE74d22",
 			"timestamp": "2021-09-27T10:35:36.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x2d666438ab6f76bdd5854b2a5a5136511a1a41689d182c46ed31271d0dee0628",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x2d666438ab6f76bdd5854b2a5a5136511a1a41689d182c46ed31271d0dee0628",
 			"network": "moonbase-alphanet"
 		},
 		"TradingRewards": {
 			"name": "TradingRewards",
 			"address": "0xEAae4EfD1CE446CF5A7E607eD505d1e3e5cF51E4",
 			"source": "TradingRewards",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xEAae4EfD1CE446CF5A7E607eD505d1e3e5cF51E4",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xEAae4EfD1CE446CF5A7E607eD505d1e3e5cF51E4",
 			"timestamp": "2021-09-27T10:36:00.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x883cabc3fb2d83c716eaa0bb11bb3176fffc03869f36db7a16149b27cebab262",
 			"network": "moonbase-alphanet"
@@ -283,7 +283,7 @@
 			"name": "EscrowChecker",
 			"address": "0xFeC41Ae537dA68D51c44ee4f7F84734a1D6008Be",
 			"source": "EscrowChecker",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xFeC41Ae537dA68D51c44ee4f7F84734a1D6008Be",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xFeC41Ae537dA68D51c44ee4f7F84734a1D6008Be",
 			"timestamp": "2021-09-27T10:36:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xe84802ea35b2437f8e124f8ba21761b6fab19a823c6a0640af3778c7e7747745",
 			"network": "moonbase-alphanet"
@@ -292,16 +292,16 @@
 			"name": "SupplySchedule",
 			"address": "0xA2F116C4C221A3D9b7e389056543c836c3fD0493",
 			"source": "SupplySchedule",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xA2F116C4C221A3D9b7e389056543c836c3fD0493",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xA2F116C4C221A3D9b7e389056543c836c3fD0493",
 			"timestamp": "2021-09-27T10:38:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x50c269f030f9c145b56fa90dabc3debe8c1aec0b145e674ffe73c5b0649ef29e",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x50c269f030f9c145b56fa90dabc3debe8c1aec0b145e674ffe73c5b0649ef29e",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStatepUSD": {
 			"name": "TokenStatepUSD",
 			"address": "0xfd4167920d232E6DeAFe526bDeF8AAd430E76C4D",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xfd4167920d232E6DeAFe526bDeF8AAd430E76C4D",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xfd4167920d232E6DeAFe526bDeF8AAd430E76C4D",
 			"timestamp": "2021-09-27T10:40:12.586Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -310,7 +310,7 @@
 			"name": "ProxyERC20pUSD",
 			"address": "0xF3433eBfAF6D8aa3Eab17b1639ed133bF6f55cD4",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xF3433eBfAF6D8aa3Eab17b1639ed133bF6f55cD4",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xF3433eBfAF6D8aa3Eab17b1639ed133bF6f55cD4",
 			"timestamp": "2021-09-27T10:40:36.802Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -319,7 +319,7 @@
 			"name": "PynthpUSD",
 			"address": "0x43aC0E8d4C6104418989d1ada89199eb31E4cBD4",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x43aC0E8d4C6104418989d1ada89199eb31E4cBD4",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x43aC0E8d4C6104418989d1ada89199eb31E4cBD4",
 			"timestamp": "2021-09-27T10:40:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x03feb6c80d24821863de6435791e12f5d3f8d22d4d723ee661e1a064649b5723",
 			"network": "moonbase-alphanet"
@@ -328,7 +328,7 @@
 			"name": "TokenStatepBTC",
 			"address": "0xe1CCA031502940916542451eF30035F144708f2C",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xe1CCA031502940916542451eF30035F144708f2C",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xe1CCA031502940916542451eF30035F144708f2C",
 			"timestamp": "2021-09-27T10:42:12.629Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -337,7 +337,7 @@
 			"name": "ProxyERC20pBTC",
 			"address": "0xbe721A9Aaa76E31b81b58C152C878efC40acfAC2",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xbe721A9Aaa76E31b81b58C152C878efC40acfAC2",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xbe721A9Aaa76E31b81b58C152C878efC40acfAC2",
 			"timestamp": "2021-09-27T10:42:36.915Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -346,7 +346,7 @@
 			"name": "PynthpBTC",
 			"address": "0xadE46535927e840729249540D8FA5f34cc4B789c",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xadE46535927e840729249540D8FA5f34cc4B789c",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xadE46535927e840729249540D8FA5f34cc4B789c",
 			"timestamp": "2021-09-27T10:42:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xbe4dc142558e9ab0cb33ea41104bc7131954852a003d6926067a67d322bc5922",
 			"network": "moonbase-alphanet"
@@ -355,7 +355,7 @@
 			"name": "TokenStatepETH",
 			"address": "0xe2BA04b0518F96E5fdbd53dD3e86f63e79FB8e9E",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xe2BA04b0518F96E5fdbd53dD3e86f63e79FB8e9E",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xe2BA04b0518F96E5fdbd53dD3e86f63e79FB8e9E",
 			"timestamp": "2021-09-27T10:44:12.456Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -364,7 +364,7 @@
 			"name": "ProxyERC20pETH",
 			"address": "0xdF1089d713597D97FEaA08AcC0a9eD5Cd26e9df1",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xdF1089d713597D97FEaA08AcC0a9eD5Cd26e9df1",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xdF1089d713597D97FEaA08AcC0a9eD5Cd26e9df1",
 			"timestamp": "2021-09-27T10:44:36.881Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -373,7 +373,7 @@
 			"name": "PynthpETH",
 			"address": "0x5f1409a169D72EB8e18C635eEF4f9dbcDEe58077",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x5f1409a169D72EB8e18C635eEF4f9dbcDEe58077",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x5f1409a169D72EB8e18C635eEF4f9dbcDEe58077",
 			"timestamp": "2021-09-27T10:44:48.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x14d11a5f29864db4500a03433c50c550b63115773cb6783738437ab81a01b20c",
 			"network": "moonbase-alphanet"
@@ -382,7 +382,7 @@
 			"name": "TokenStateiBTC",
 			"address": "0x58779FeC7C4490Ce0D6478ddA41c8955A5D88aB6",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x58779FeC7C4490Ce0D6478ddA41c8955A5D88aB6",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x58779FeC7C4490Ce0D6478ddA41c8955A5D88aB6",
 			"timestamp": "2021-09-27T10:46:12.807Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -391,7 +391,7 @@
 			"name": "ProxyERC20iBTC",
 			"address": "0xCe20618bA2c37E67CFcE89619bfD1ce20C4B318b",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xCe20618bA2c37E67CFcE89619bfD1ce20C4B318b",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xCe20618bA2c37E67CFcE89619bfD1ce20C4B318b",
 			"timestamp": "2021-09-27T10:46:38.786Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -400,16 +400,16 @@
 			"name": "PynthiBTC",
 			"address": "0x9CD2B24Fe0ECae5e07be14CeA146dAf14a438dc4",
 			"source": "PurgeablePynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x9CD2B24Fe0ECae5e07be14CeA146dAf14a438dc4",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x9CD2B24Fe0ECae5e07be14CeA146dAf14a438dc4",
 			"timestamp": "2021-09-27T10:47:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x63e0531f42a66e2ce07fecb7e6fac40f514bff3b6faabefb3f86faa87649260c",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x63e0531f42a66e2ce07fecb7e6fac40f514bff3b6faabefb3f86faa87649260c",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStateiETH": {
 			"name": "TokenStateiETH",
 			"address": "0x7e15abc1a8918b7CAb323eC93E7C9A23d010722b",
 			"source": "TokenState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x7e15abc1a8918b7CAb323eC93E7C9A23d010722b",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x7e15abc1a8918b7CAb323eC93E7C9A23d010722b",
 			"timestamp": "2021-09-27T10:48:24.569Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -418,7 +418,7 @@
 			"name": "ProxyERC20iETH",
 			"address": "0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
 			"source": "ProxyERC20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
 			"timestamp": "2021-09-27T10:48:48.816Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -427,16 +427,16 @@
 			"name": "PynthiETH",
 			"address": "0x6604e87dDC1c355F002367fba1dCd8fb58578288",
 			"source": "PurgeablePynth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x6604e87dDC1c355F002367fba1dCd8fb58578288",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x6604e87dDC1c355F002367fba1dCd8fb58578288",
 			"timestamp": "2021-09-27T10:49:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x8b9ab989c76c3c8403c96555743363b5cea0f8bccee22d3d7391b38fd2325ae8",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x8b9ab989c76c3c8403c96555743363b5cea0f8bccee22d3d7391b38fd2325ae8",
 			"network": "moonbase-alphanet"
 		},
 		"StakingState": {
 			"name": "StakingState",
 			"address": "0x3293B17c2ad3e49bDA42e8209db4EC5A56a8f393",
 			"source": "StakingState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x3293B17c2ad3e49bDA42e8209db4EC5A56a8f393",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x3293B17c2ad3e49bDA42e8209db4EC5A56a8f393",
 			"timestamp": "2021-09-27T10:50:12.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x1d2f302ac752add5be584490ae75682cae075a70e4098b641ce069aa9049b6f2",
 			"network": "moonbase-alphanet"
@@ -445,7 +445,7 @@
 			"name": "ExternalTokenStakeManager",
 			"address": "0x7a47A92F0896e0217D932111EE8299Ee36ae389f",
 			"source": "ExternalTokenStakeManager",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x7a47A92F0896e0217D932111EE8299Ee36ae389f",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x7a47A92F0896e0217D932111EE8299Ee36ae389f",
 			"timestamp": "2021-09-27T10:50:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x84a0c88292c06f6158c4a0846f84fef5ca610278875f239486a2048583dfd1f4",
 			"network": "moonbase-alphanet"
@@ -472,34 +472,34 @@
 			"name": "Depot",
 			"address": "0x3EEd2171230dd351251d63d7Fcf21D0BCC82635B",
 			"source": "Depot",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x3EEd2171230dd351251d63d7Fcf21D0BCC82635B",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x3EEd2171230dd351251d63d7Fcf21D0BCC82635B",
 			"timestamp": "2021-09-27T10:52:12.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x78e191278a07a47f9669d9815577a1bebaa86b218a2001d3c46f9c6f75d01277",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x78e191278a07a47f9669d9815577a1bebaa86b218a2001d3c46f9c6f75d01277",
 			"network": "moonbase-alphanet"
 		},
 		"EtherCollateral": {
 			"name": "EtherCollateral",
 			"address": "0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb",
 			"source": "EtherCollateral",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb",
 			"timestamp": "2021-09-27T10:52:36.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xc20852a6a369fd9b09016d3ab05a35d5958a261a3231d1fbdef75a2bf02c549d",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0xc20852a6a369fd9b09016d3ab05a35d5958a261a3231d1fbdef75a2bf02c549d",
 			"network": "moonbase-alphanet"
 		},
 		"EtherCollateralpUSD": {
 			"name": "EtherCollateralpUSD",
 			"address": "0xcB26A7785Ead42BFf552d202742FEa67eb702971",
 			"source": "EtherCollateralpUSD",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xcB26A7785Ead42BFf552d202742FEa67eb702971",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xcB26A7785Ead42BFf552d202742FEa67eb702971",
 			"timestamp": "2021-09-27T10:53:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x4e2c5dcbe2fc45a2dbf463822d3066a7741176bbf2f13625637a3f8a0b8ebc54",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x4e2c5dcbe2fc45a2dbf463822d3066a7741176bbf2f13625637a3f8a0b8ebc54",
 			"network": "moonbase-alphanet"
 		},
 		"PeriFinanceBridgeToOptimism": {
 			"name": "PeriFinanceBridgeToOptimism",
 			"address": "0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
 			"source": "PeriFinanceBridgeToOptimism",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
 			"timestamp": "2021-09-27T10:53:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xa478635f1162c3571fc3f3858315d54503053fde034ff3c1a401c73f3f59a201",
 			"network": "moonbase-alphanet"
@@ -508,7 +508,7 @@
 			"name": "PynthUtil",
 			"address": "0x35214692b452602D2CA4164A862DFc09480a7B20",
 			"source": "PynthUtil",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x35214692b452602D2CA4164A862DFc09480a7B20",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x35214692b452602D2CA4164A862DFc09480a7B20",
 			"timestamp": "2021-09-27T10:54:24.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xa96bf0ce8d8b5aa085c141ce5ce2237caca28566b0a52690aac5f5c4020b70be",
 			"network": "moonbase-alphanet"
@@ -517,16 +517,16 @@
 			"name": "DappMaintenance",
 			"address": "0x20AA6297084139525E7a311CE2d285dBCCF5ADBa",
 			"source": "DappMaintenance",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x20AA6297084139525E7a311CE2d285dBCCF5ADBa",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x20AA6297084139525E7a311CE2d285dBCCF5ADBa",
 			"timestamp": "2021-09-27T10:54:48.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x7f799a15316c19c5b3036a28a9b4d4f81a8e09405dac3070dd659424215fa001",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x7f799a15316c19c5b3036a28a9b4d4f81a8e09405dac3070dd659424215fa001",
 			"network": "moonbase-alphanet"
 		},
 		"CollateralManagerState": {
 			"name": "CollateralManagerState",
 			"address": "0x98Fe6C80B44eC64CF487E3668512c312176103ce",
 			"source": "CollateralManagerState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x98Fe6C80B44eC64CF487E3668512c312176103ce",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x98Fe6C80B44eC64CF487E3668512c312176103ce",
 			"timestamp": "2021-09-27T10:55:24.372Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -535,7 +535,7 @@
 			"name": "CollateralManager",
 			"address": "0x44C76A57736dBe644115218c6EA2224CE3bbDA31",
 			"source": "CollateralManager",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x44C76A57736dBe644115218c6EA2224CE3bbDA31",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x44C76A57736dBe644115218c6EA2224CE3bbDA31",
 			"timestamp": "2021-09-27T10:55:48.886Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -544,7 +544,7 @@
 			"name": "CollateralStateEth",
 			"address": "0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
 			"source": "CollateralState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
 			"timestamp": "2021-09-27T10:56:36.387Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -553,7 +553,7 @@
 			"name": "CollateralEth",
 			"address": "0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
 			"source": "CollateralEth",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
 			"timestamp": "2021-10-12T01:43:54.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0xd61290fdcffcaf4b4989aca2fa83aa502158e7a728c2f20feea937d1eccd2c87",
 			"network": "moonbase-alphanet"
@@ -562,7 +562,7 @@
 			"name": "CollateralStateErc20",
 			"address": "0xa9dEF9b01dcd224FAADDbd75826034a2c4ff73d2",
 			"source": "CollateralState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xa9dEF9b01dcd224FAADDbd75826034a2c4ff73d2",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xa9dEF9b01dcd224FAADDbd75826034a2c4ff73d2",
 			"timestamp": "2021-09-27T10:57:36.000Z",
 			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0xeacb56fd5e478addc117a56bb08a1431cb819a0aed8fc63f906dc6903434a4d5",
 			"network": "moonbase-alphanet"
@@ -571,16 +571,16 @@
 			"name": "CollateralErc20",
 			"address": "0x24E910eE07b3504bC14420E7C08383E787954903",
 			"source": "CollateralErc20",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0x24E910eE07b3504bC14420E7C08383E787954903",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x24E910eE07b3504bC14420E7C08383E787954903",
 			"timestamp": "2021-09-27T10:58:00.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x500cd84f64b5cd6efb1b49be932cbc757c8a9edcdb1fc4266e2b5832edb9278e",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x500cd84f64b5cd6efb1b49be932cbc757c8a9edcdb1fc4266e2b5832edb9278e",
 			"network": "moonbase-alphanet"
 		},
 		"CollateralStateShort": {
 			"name": "CollateralStateShort",
 			"address": "0xF9FF7EB0ae0c54e0296008CD30172EE5A93f2d12",
 			"source": "CollateralState",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xF9FF7EB0ae0c54e0296008CD30172EE5A93f2d12",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xF9FF7EB0ae0c54e0296008CD30172EE5A93f2d12",
 			"timestamp": "2021-09-27T10:59:00.772Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
@@ -589,9 +589,9 @@
 			"name": "CollateralShort",
 			"address": "0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
 			"source": "CollateralShort",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network//address/0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xfec043ba43c733069CBc2243b36bc4fa33AFcC28",
 			"timestamp": "2021-09-27T10:59:12.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network//tx/0x8a01fb3afbe96b755239b43f390e59fd8b9fb33444ecb8f93c391c5303307dae",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x8a01fb3afbe96b755239b43f390e59fd8b9fb33444ecb8f93c391c5303307dae",
 			"network": "moonbase-alphanet"
 		}
 	},
