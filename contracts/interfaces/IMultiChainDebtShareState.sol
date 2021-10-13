@@ -3,6 +3,7 @@ pragma solidity 0.5.16;
 interface IMultiChainDebtShareState {
     struct DebtShareStorage {
         // Indicates how much addtional debt should be added or subtracted
+        // This should be only pUSD amount
         uint debtShare;
         // When this data was added
         uint timeStamp;
