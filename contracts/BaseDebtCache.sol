@@ -18,6 +18,7 @@ import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICollateralManager.sol";
+import "./interfaces/IMultiChainDebtShareManager.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/debtcache
 contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
@@ -43,6 +44,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_ETHERCOLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
+    bytes32 private constant CONTRACT_MULTICHAINDEBTSHAREMANAGER = "IMultiChainDebtShareManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -50,7 +52,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](7);
+        bytes32[] memory newAddresses = new bytes32[](8);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -58,6 +60,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
         newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
         newAddresses[6] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[7] = CONTRACT_MULTICHAINDEBTSHAREMANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -87,6 +90,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function collateralManager() internal view returns (ICollateralManager) {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
+    }
+
+    function multiChainDebtShareManager() internal view returns (IMultiChainDebtShareManager) {
+        return IMultiChainDebtShareManager(requireAndGetAddress(CONTRACT_MULTICHAINDEBTSHAREMANAGER));
     }
 
     function debtSnapshotStaleTime() external view returns (uint) {

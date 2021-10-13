@@ -25,18 +25,17 @@ contract MultiChainDebtShareManager is Owned, MixinResolver, MixinSystemSettings
     }
 
     // View functions
-    function getCurrentExternalDebtEntry() external view returns (uint debtShare) {
-        (debtShare, ) = multiChainDebtShareState.lastDebtShareStorageInfo();
+    function getCurrentExternalDebtEntry() external view returns (uint debtShare, bool isDecreased) {
+        (debtShare, isDecreased, ) = multiChainDebtShareState.lastDebtShareStorageInfo();
     }
 
     // Mutative functions
-    function setCurrentExternalDebtEntry(uint debtShare) external onlyOwner {
-        multiChainDebtShareState.appendToDebtShareStorage(debtShare);
+    function setCurrentExternalDebtEntry(uint debtShare, bool isDecreased) external onlyOwner {
+        multiChainDebtShareState.appendToDebtShareStorage(debtShare, isDecreased);
     }
 
     function removeCurrentExternalDebtEntry() external onlyOwner {
-        uint lastIndex = multiChainDebtShareState.debtShareStorageLength() - 1;
-        multiChainDebtShareState.removeDebtShareStorage(lastIndex);
+        multiChainDebtShareState.removeDebtShareStorage(multiChainDebtShareState.lastDebtShareStorageIndex());
     }
 
     function setMultiChainDebtShareState(address _multiChainDebtShareState) external onlyOwner {
