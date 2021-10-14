@@ -623,8 +623,6 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		mainnet: Object.assign({}, base, {
 			owner: '0x918153D6e806dF9d4D33664D1cC580416171f720',
 			deployer: '0x918153D6e806dF9d4D33664D1cC580416171f720',
-			marketClosure: '0xC105Ea57Eb434Fbe44690d7Dec2702e4a2FBFCf7',
-			oracle: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		}),
 		kovan: Object.assign({}, base),
 		'kovan-ovm': Object.assign({}, base),
