@@ -2,43 +2,36 @@ pragma solidity 0.5.16;
 
 // Inheritance
 import "./Owned.sol";
-import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
 
 import "./interfaces/IMultiChainDebtShareManager.sol";
 import "./interfaces/IMultiChainDebtShareState.sol";
 
-// Libraries
-import "./SafeDecimalMath.sol";
+contract MultiChainDebtShareManager is Owned, IMultiChainDebtShareManager {
+    IMultiChainDebtShareState internal _multiChainDebtShareState;
 
-contract MultiChainDebtShareManager is Owned, MixinResolver, MixinSystemSettings, IMultiChainDebtShareManager {
-    using SafeDecimalMath for uint;
-
-    IMultiChainDebtShareState public multiChainDebtShareState;
-
-    constructor(
-        address owner,
-        address debtShareState,
-        address resolver
-    ) public Owned(owner) MixinSystemSettings(resolver) {
-        multiChainDebtShareState = IMultiChainDebtShareState(debtShareState);
+    constructor(address _owner, address _debtShareState) public Owned(_owner) {
+        _multiChainDebtShareState = IMultiChainDebtShareState(_debtShareState);
     }
 
     // View functions
+    function multiChainDebtShareState() external view returns (address) {
+        return address(_multiChainDebtShareState);
+    }
+
     function getCurrentExternalDebtEntry() external view returns (uint debtShare, bool isDecreased) {
-        (debtShare, isDecreased, ) = multiChainDebtShareState.lastDebtShareStorageInfo();
+        (debtShare, isDecreased, ) = _multiChainDebtShareState.lastDebtShareStorageInfo();
     }
 
     // Mutative functions
     function setCurrentExternalDebtEntry(uint debtShare, bool isDecreased) external onlyOwner {
-        multiChainDebtShareState.appendToDebtShareStorage(debtShare, isDecreased);
+        _multiChainDebtShareState.appendToDebtShareStorage(debtShare, isDecreased);
     }
 
     function removeCurrentExternalDebtEntry() external onlyOwner {
-        multiChainDebtShareState.removeDebtShareStorage(multiChainDebtShareState.lastDebtShareStorageIndex());
+        _multiChainDebtShareState.removeDebtShareStorage(_multiChainDebtShareState.lastDebtShareStorageIndex());
     }
 
-    function setMultiChainDebtShareState(address _multiChainDebtShareState) external onlyOwner {
-        multiChainDebtShareState = IMultiChainDebtShareState(_multiChainDebtShareState);
+    function setMultiChainDebtShareState(address multiChainDebtShareStateAddress) external onlyOwner {
+        _multiChainDebtShareState = IMultiChainDebtShareState(multiChainDebtShareStateAddress);
     }
 }

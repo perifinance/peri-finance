@@ -389,12 +389,6 @@
 	"PynthiDEFI": {
 		"deploy": true
 	},
-	"MockToken": {
-		"deploy": true
-	},
-	"USDC": {
-		"deploy": true
-	},
 	"ExternalTokenStakeManager": {
 		"deploy": true
 	},
@@ -402,6 +396,18 @@
 		"deploy": true
 	},
 	"BlacklistManager": {
+		"deploy": true
+	},
+	"MultiChainDebtShareState": {
+		"deploy": true
+	},
+	"MultiChainDebtShareManager": {
+		"deploy": true
+	},
+	"MockToken": {
+		"deploy": true
+	},
+	"USDC": {
 		"deploy": true
 	},
 	"DAI": {

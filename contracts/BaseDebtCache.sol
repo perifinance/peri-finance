@@ -44,7 +44,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_ETHERCOLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
-    bytes32 private constant CONTRACT_MULTICHAINDEBTSHAREMANAGER = "IMultiChainDebtShareManager";
+    bytes32 private constant CONTRACT_MULTICHAINDEBTSHAREMANAGER = "MultiChainDebtShareManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 

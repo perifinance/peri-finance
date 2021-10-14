@@ -5,15 +5,10 @@ import "./Owned.sol";
 import "./State.sol";
 import "./interfaces/IMultiChainDebtShareState.sol";
 
-// Libraries
-import "./SafeDecimalMath.sol";
-
 contract MultiChainDebtShareState is Owned, State, IMultiChainDebtShareState {
-    using SafeDecimalMath for uint;
+    DebtShareStorage[] private _debtShareStorage;
 
-    DebtShareStorage[] internal _debtShareStorage;
-
-    constructor(address owner, address associatedContract) public Owned(owner) State(associatedContract) {}
+    constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {}
 
     // View functions
     function debtShareStorageInfoAt(uint index)
@@ -77,27 +72,23 @@ contract MultiChainDebtShareState is Owned, State, IMultiChainDebtShareState {
 
     function updateDebtShareStorage(
         uint index,
-        bool isDecreased,
-        uint debtShare
-    ) external onlyAssociatedContract shouldEqualToZeroOrGreater(index) {
+        uint debtShare,
+        bool isDecreased
+    ) external onlyAssociatedContract {
         _debtShareStorage[index].debtShare = debtShare;
-        _debtShareStorage[index].isDecreased = isDecreased;
         _debtShareStorage[index].timeStamp = block.timestamp;
+        _debtShareStorage[index].isDecreased = isDecreased;
 
         emit UpdatedDebtShareStorage(index, debtShare, isDecreased);
     }
 
-    function removeDebtShareStorage(uint index) external onlyAssociatedContract shouldEqualToZeroOrGreater(index) {
+    function removeDebtShareStorage(uint index) external onlyAssociatedContract {
         delete _debtShareStorage[index];
 
         emit RemovedDebtShareStorage(index);
     }
 
     // Modifiers
-    modifier shouldEqualToZeroOrGreater(uint index) {
-        require(index >= 0, "index should be greater or equal to 0");
-        _;
-    }
 
     // Events
     event AppendDebtShareStorage(uint index, uint _debtShare, bool isDecreased);

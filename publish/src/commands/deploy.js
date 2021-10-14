@@ -962,6 +962,42 @@ const deploy = async ({
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
+	// Deploy multi chain debt share related contracts
+	const multiChainDebtShareState = await deployer.deployContract({
+		name: 'MultiChainDebtShareState',
+		source: 'MultiChainDebtShareState',
+		deps: ['DebtCache'],
+		args: [account, ZERO_ADDRESS],
+	});
+
+	const multiChainDebtShareManager = await deployer.deployContract({
+		name: 'MultiChainDebtShareManager',
+		source: 'MultiChainDebtShareManager',
+		deps: ['DebtCache', 'MultiChainDebtShareState'],
+		args: [account, addressOf(multiChainDebtShareState)],
+	});
+
+	if (multiChainDebtShareState && multiChainDebtShareManager) {
+		await runStep({
+			contract: 'MultiChainDebtShareState',
+			target: multiChainDebtShareState,
+			read: 'associatedContract',
+			expected: input => input === addressOf(multiChainDebtShareManager),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(multiChainDebtShareManager),
+		});
+
+		await runStep({
+			contract: 'MultiChainDebtShareManager',
+			target: multiChainDebtShareManager,
+			read: 'multiChainDebtShareState',
+			expected: input => input === addressOf(multiChainDebtShareState),
+			write: 'setMultiChainDebtShareState',
+			writeArg: addressOf(multiChainDebtShareState),
+		});
+	}
+	// Deploy multi chain debt share related contracts
+
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
 		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualPynth',
