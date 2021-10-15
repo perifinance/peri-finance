@@ -40,7 +40,9 @@ contract MultiChainDebtShareState is Owned, State, IMultiChainDebtShareState {
             uint timeStamp
         )
     {
-        require(_debtShareStorage.length > 0, "currently no available debtShareStorage");
+        if (_debtShareStorage.length < 1) {
+            return (debtShare = 0, isDecreased = false, timeStamp = 0);
+        }
 
         uint lastIndex = _lastDebtShareStorageIndex();
         debtShare = _debtShareStorage[lastIndex].debtShare;
