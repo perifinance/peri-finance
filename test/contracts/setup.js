@@ -817,11 +817,10 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'MultiChainDebtShareState',
-			deps: ['DebtCache'],
 		},
 		{
 			contract: 'MultiChainDebtShareManager',
-			deps: ['DebtCache', 'MultiChainDebtShareState'],
+			deps: ['MultiChainDebtShareState'],
 		},
 	];
 
@@ -951,11 +950,16 @@ const setupAllContracts = async ({
 		});
 	}
 
-	if (returnObj['MultiChainDebtShareManager']) {
+	if (returnObj['MultiChainDebtShareState'] && returnObj['MultiChainDebtShareManager']) {
+		returnObj['MultiChainDebtShareState'].setAssociatedContract(
+			returnObj['MultiChainDebtShareManager'].address,
+			{ from: owner }
+		);
+
 		returnObj['MultiChainDebtShareManager'].setMultiChainDebtShareState(
-			returnObj['MultiChainDebtShareState']
-		).address,
-			{ from: owner };
+			returnObj['MultiChainDebtShareState'].address,
+			{ from: owner }
+		);
 	}
 
 	if (returnObj['AddressResolver']) {
