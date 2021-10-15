@@ -251,6 +251,8 @@ const setupContract = async ({
 			tryGetAddressOf('AddressResolver'),
 		],
 		BlacklistManager: [owner],
+		MultiChainDebtShareState: [owner, tryGetAddressOf('MultiChainDebtShareManager')],
+		MultiChainDebtShareManager: [owner, tryGetAddressOf('MultiChainDebtShareState')],
 	};
 
 	let instance;
@@ -661,8 +663,15 @@ const setupAllContracts = async ({
 				'FeePool',
 				'DelegateApprovals',
 				'FlexibleStorage',
+				'ExternalTokenStakeManager',
 			],
-			deps: ['AddressResolver', 'SystemStatus', 'FlexibleStorage', 'DebtCache'],
+			deps: [
+				'AddressResolver',
+				'SystemStatus',
+				'FlexibleStorage',
+				'DebtCache',
+				'ExternalTokenStakeManager',
+			],
 		},
 		{
 			contract: 'Exchanger',
@@ -806,6 +815,14 @@ const setupAllContracts = async ({
 			contract: 'StakingState',
 			deps: ['ExternalTokenStakeManager'],
 		},
+		{
+			contract: 'MultiChainDebtShareState',
+			deps: ['DebtCache'],
+		},
+		{
+			contract: 'MultiChainDebtShareManager',
+			deps: ['DebtCache', 'MultiChainDebtShareState'],
+		},
 	];
 
 	// get deduped list of all required base contracts
@@ -926,6 +943,19 @@ const setupAllContracts = async ({
 			returnObj['ExternalTokenStakeManager'].address,
 			{ from: owner }
 		);
+	}
+
+	if (returnObj['ExternalTokenStakeManager']) {
+		returnObj['ExternalTokenStakeManager'].setStakingState(returnObj['StakingState'].address, {
+			from: owner,
+		});
+	}
+
+	if (returnObj['MultiChainDebtShareManager']) {
+		returnObj['MultiChainDebtShareManager'].setMultiChainDebtShareState(
+			returnObj['MultiChainDebtShareState']
+		).address,
+			{ from: owner };
 	}
 
 	if (returnObj['AddressResolver']) {

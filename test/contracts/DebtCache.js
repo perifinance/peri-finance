@@ -35,7 +35,6 @@ contract('DebtCache', async accounts => {
 		feePool,
 		pUSDContract,
 		USDCContract,
-		PERIContract,
 		timestamp,
 		debtCache,
 		issuer,
@@ -54,7 +53,6 @@ contract('DebtCache', async accounts => {
 			ExchangeRates: exchangeRates,
 			PynthpUSD: pUSDContract,
 			USDC: USDCContract,
-			PERI: PERIContract,
 			FeePool: feePool,
 			DebtCache: debtCache,
 			Issuer: issuer,
@@ -79,7 +77,9 @@ contract('DebtCache', async accounts => {
 				'FlexibleStorage',
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
-				'StakingStateUSDC',
+				'StakingState',
+				'ExternalTokenStakeManager',
+				'MultiChainDebtShareManager',
 			],
 		}));
 	});
@@ -184,7 +184,7 @@ contract('DebtCache', async accounts => {
 			// Issue 1000 pUSD worth of tokens to a user
 			await pUSDContract.issue(account1, toUnit(100)); // arbitrary issued pynth doesnt calculate exchange rates
 			await periFinance.transfer(account1, toUnit(100), { from: owner });
-			await USDCContract.transfer(account1, '1000000');
+			await USDCContract.transfer(account1, '1000000', { from: owner });
 			await USDCContract.approve(issuer.address, '1000000000000', { from: account1 });
 		});
 
@@ -358,7 +358,7 @@ contract('DebtCache', async accounts => {
 				// Ensure the account has some pynths to attempt to burn later.
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 				await periFinance.transfer(account2, toUnit('1000'), { from: owner });
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0.000000000001'), {
+				await periFinance.issuePynths(PERI, toUnit('10'), {
 					from: account1,
 				});
 
@@ -374,12 +374,12 @@ contract('DebtCache', async accounts => {
 				);
 
 				await assert.revert(
-					periFinance.issuePynthsAndStakeUSDC(toUnit('10'), toUnit('0'), { from: account1 }),
+					periFinance.issuePynths(PERI, toUnit('10'), { from: account1 }),
 					'A pynth or PERI rate is invalid'
 				);
 
 				await assert.revert(
-					periFinance.burnPynths(toUnit('1'), { from: account1 }),
+					periFinance.burnPynths(PERI, toUnit('1'), { from: account1 }),
 					'A pynth or PERI rate is invalid'
 				);
 
@@ -489,7 +489,7 @@ contract('DebtCache', async accounts => {
 
 				const pynthsToIssue = toUnit('10');
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-				const tx = await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), {
+				const tx = await periFinance.issuePynths(PERI, pynthsToIssue, {
 					from: account1,
 				});
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.add(pynthsToIssue));
@@ -511,12 +511,12 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 				const pynthsToIssue = toUnit('10');
 				await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-				await periFinance.issuePynthsAndStakeUSDC(pynthsToIssue, toUnit('0'), { from: account1 });
+				await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
 
 				const pynthsToBurn = toUnit('5');
 
-				const tx = await periFinance.burnPynths(pynthsToBurn, { from: account1 });
+				const tx = await periFinance.burnPynths(PERI, pynthsToBurn, { from: account1 });
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.sub(pynthsToBurn));
 
 				const logs = await getDecodedLogs({
