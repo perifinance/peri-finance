@@ -29,7 +29,7 @@ contract DebtCache is BaseDebtCache {
             if (currencyKeys[i] == "pUSD") {
                 (uint debtShare, bool isDecreased) = multiChainDebtShareManager().getCurrentExternalDebtEntry();
                 // should be subtracted if DEX Debt is decreased otherwise add Debt to value
-                isDecreased ? value.sub(debtShare) : value.add(debtShare);
+                value = isDecreased ? value.sub(debtShare) : value.add(debtShare);
             }
 
             periCollateralDebt = periCollateralDebt.add(value);
