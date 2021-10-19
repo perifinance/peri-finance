@@ -6,7 +6,7 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const { setupAllContracts } = require('./setup');
 
-const { currentTime, toUnit } = require('../utils')();
+const { currentTime, toUnit, fromUnit } = require('../utils')();
 
 const {
 	onlyGivenAddressCanInvoke,
@@ -147,38 +147,121 @@ contract('MultiChainDebtShareManager', async accounts => {
 		});
 	});
 
-	describe('increasing debt to MultiChain contract should effect to current debt', () => {
+	describe('increasing or decreasing debt to MultiChain contract should effect to current debt', () => {
+		const accounts = [account1, account2, account3];
+
 		beforeEach(async () => {
-			await periFinance.transfer(account1, toUnit('200'), { from: owner });
-			await periFinance.issueMaxPynths({ from: account1 });
+			const issueDebtForAccount = async (account, balance) => {
+				await periFinance.transfer(account, toUnit(balance), { from: owner });
+				await periFinance.issueMaxPynths({ from: account });
+			};
+
+			for (let index = 0; index < accounts.length; index++) {
+				const account = accounts[index];
+				await issueDebtForAccount(account, 100 * (index + 1));
+			}
 		});
 
-		it.only('after issuing pynth', async () => {
-			let balance = await periFinance.balanceOf(account1);
-			let debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-			let cratio = await periFinance.collateralisationRatio(account1);
-			let currentDebt = await debtCache.currentDebt();
-
-			console.log(balance.toString());
-			console.log(debtBalance.toString());
-			console.log(cratio.toString());
-			console.log(currentDebt.debt.toString());
-
-			await multiChainDebtShareManager.setCurrentExternalDebtEntry(toUnit('1000'), false, {
+		it('check if account`s debtBalance increased, c-ratio decreased', async () => {
+			const isDecreased = false;
+			await multiChainDebtShareManager.setCurrentExternalDebtEntry(toUnit('500'), isDecreased, {
 				from: owner,
 			});
 
+			const debtBefore = accounts.map(async account =>
+				(await periFinance.debtBalanceOf(account, pUSD)).toString()
+			);
+			const cRatioBefore = accounts.map(async account =>
+				(await periFinance.collateralisationRatio(account)).toString()
+			);
+
+			const debtBeforeArr = await Promise.all(debtBefore);
+			const cRatioBeforeArr = await Promise.all(cRatioBefore);
+
+			// apply changed debt value to current system cached debt
 			await debtCache.takeDebtSnapshot();
 
-			balance = await periFinance.balanceOf(account1);
-			debtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-			cratio = await periFinance.collateralisationRatio(account1);
-			currentDebt = await debtCache.currentDebt();
+			const debtAfter = accounts.map(async account =>
+				(await periFinance.debtBalanceOf(account, pUSD)).toString()
+			);
+			const cRatioAfter = accounts.map(async account =>
+				(await periFinance.collateralisationRatio(account)).toString()
+			);
 
-			console.log(balance.toString());
-			console.log(debtBalance.toString());
-			console.log(cratio.toString());
-			console.log(currentDebt.debt.toString());
+			const debtAfterArr = await Promise.all(debtAfter);
+			const cRatioAfterArr = await Promise.all(cRatioAfter);
+
+			// account debt ratio and collateral ratio should be changed along with the changes above
+			for (let index = 0; index < accounts.length; index++) {
+				const prevDebt = Number(debtBeforeArr[index]);
+				const nextDebt = Number(debtAfterArr[index]);
+
+				assert.isBelow(
+					prevDebt,
+					nextDebt,
+					'The debt after snapshot taken should be more than prev debt'
+				);
+
+				const prevCRatio = 100 / fromUnit(cRatioBeforeArr[index]);
+				const nextCRatio = 100 / fromUnit(cRatioAfterArr[index]);
+
+				assert.isAbove(
+					prevCRatio,
+					nextCRatio,
+					'The cRatio after snapshot taken should be lower than prev cRatio'
+				);
+			}
+		});
+
+		it('check if account`s debtBalance decreased, c-ratio increased', async () => {
+			const isDecreased = true;
+			await multiChainDebtShareManager.setCurrentExternalDebtEntry(toUnit('200'), isDecreased, {
+				from: owner,
+			});
+
+			const debtBefore = accounts.map(async account =>
+				(await periFinance.debtBalanceOf(account, pUSD)).toString()
+			);
+			const cRatioBefore = accounts.map(async account =>
+				(await periFinance.collateralisationRatio(account)).toString()
+			);
+
+			const debtBeforeArr = await Promise.all(debtBefore);
+			const cRatioBeforeArr = await Promise.all(cRatioBefore);
+
+			// apply changed debt value to current system cached debt
+			await debtCache.takeDebtSnapshot();
+
+			const debtAfter = accounts.map(async account =>
+				(await periFinance.debtBalanceOf(account, pUSD)).toString()
+			);
+			const cRatioAfter = accounts.map(async account =>
+				(await periFinance.collateralisationRatio(account)).toString()
+			);
+
+			const debtAfterArr = await Promise.all(debtAfter);
+			const cRatioAfterArr = await Promise.all(cRatioAfter);
+
+			// account debt ratio and collateral ratio should be changed along with the changes above
+			for (let index = 0; index < accounts.length; index++) {
+				const prevDebt = Number(debtBeforeArr[index]);
+				const nextDebt = Number(debtAfterArr[index]);
+
+				assert.isAbove(
+					prevDebt,
+					nextDebt,
+					'The debt after snapshot taken should be less than prev debt'
+				);
+
+				const prevCRatio = 100 / fromUnit(cRatioBeforeArr[index]);
+				const nextCRatio = 100 / fromUnit(cRatioAfterArr[index]);
+
+				assert.isBelow(
+					prevCRatio,
+					nextCRatio,
+					'The cRatio after snapshot taken should be greater than prev cRatio'
+				);
+			}
 		});
 	});
 });
