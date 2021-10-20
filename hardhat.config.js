@@ -68,9 +68,4 @@ module.exports = {
 		maxMethodDiff: 25, // CI will fail if gas usage is > than this %
 		outputFile: 'test-gas-used.log',
 	},
-	etherscan: {
-		// Your API key for Etherscan
-		// Obtain one at https://etherscan.io/
-		apiKey: 'TXDQM39SQYQ17TC5PP6U2N4I1BGF6TVE6Z',
-	},
 };
