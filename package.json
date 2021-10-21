@@ -38,6 +38,7 @@
 		"publish/deployed/polygon/*",
 		"publish/deployed/bsctest/*",
 		"publish/deployed/bsc/*",
+		"publish/deployed/shibuya/*",
 		"publish/deployed/moonbase-alphanet/*"
 	],
 	"bin": {
