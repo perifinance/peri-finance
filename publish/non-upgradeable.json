@@ -17,5 +17,6 @@
 	"StakingStateUSDC",
 	"BlacklistManager",
 	"StakingState",
-	"BridgeState"
+	"BridgeState",
+	"MultiChainDebtShareState"
 ]

@@ -155,6 +155,12 @@
 	"StakingState": {
 		"deploy": false
 	},
+	"MultiChainDebtShareState": {
+		"deploy": false
+	},
+	"MultiChainDebtShareManager": {
+		"deploy": false
+	},
 	"StakingRewardsPeriMockLP": {
 		"deploy": false
 	},

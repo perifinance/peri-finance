@@ -137,8 +137,9 @@
 			},
 			"DebtCache": {
 				"address": "0x70B3fB148804eFD521BE7C58B07839cbD63360F3",
-				"status": "current",
-				"keccak256": "0x6e731ab867037e313666b46b89e2ca6c29db3c1408e91faf83be65f48786ed1d"
+				"status": "replaced",
+				"keccak256": "0x6e731ab867037e313666b46b89e2ca6c29db3c1408e91faf83be65f48786ed1d",
+				"replaced_in": "v0.2.0"
 			},
 			"Exchanger": {
 				"address": "0x5E01B82d6C18E0394a21084405ea2D39FCA1Ad6F",
@@ -334,6 +335,30 @@
 				"address": "0x023933a997a088D3C6efAb87d546d672EeC89195",
 				"status": "current",
 				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+			}
+		}
+	},
+	"v0.2.0": {
+		"tag": "v0.2.0",
+		"fulltag": "v0.2.0",
+		"network": "goerli",
+		"date": "2021-09-08T18:43:20+09:00",
+		"commit": "ce5449907a86091456934c888f47850c1e223dd0",
+		"contracts": {
+			"DebtCache": {
+				"address": "0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
+				"status": "current",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+			},
+			"MultiChainDebtShareState": {
+				"address": "0x6847754A4B03FdfAA38D539F1eF4E9a6099Be701",
+				"status": "current",
+				"keccak256": "0x93d1e0c74ead6d4d884cf6dbb00c245842ffc44a9485d9f46950423afa214d66"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0x335b354A2E9E9730AfF44671c8CA4404c7d22734",
+				"status": "current",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
 			}
 		}
 	}

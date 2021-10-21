@@ -173,6 +173,12 @@
 	"BridgeState": {
 		"deploy": false
 	},
+	"MultiChainDebtShareState": {
+		"deploy": false
+	},
+	"MultiChainDebtShareManager": {
+		"deploy": false
+	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},

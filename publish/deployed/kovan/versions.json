@@ -738,8 +738,9 @@
 			},
 			"DebtCache": {
 				"address": "0x5f9Cfaea5C7DD0A3fA712074Ff0FD3538438C20B",
-				"status": "current",
-				"keccak256": "0x2d28acf59af1a14c9a962f88a99a5e6f772e94082a941c21d53b807b7aa47f7c"
+				"status": "replaced",
+				"keccak256": "0x2d28acf59af1a14c9a962f88a99a5e6f772e94082a941c21d53b807b7aa47f7c",
+				"replaced_in": "v0.2.0"
 			},
 			"CollateralManagerState": {
 				"address": "0xD6B8CDA0BBcd086948473Be6f8D45DaCA0f2f742",
@@ -1113,6 +1114,30 @@
 				"address": "0x72Fa10D7593deE5C1C13d18c99E9967B4105DcfF",
 				"status": "current",
 				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+			}
+		}
+	},
+	"v0.2.0": {
+		"tag": "v0.2.0",
+		"fulltag": "v0.2.0",
+		"network": "kovan",
+		"date": "2021-09-08T15:41:47+09:00",
+		"commit": "2caceaac06e7979c493c7b61d12ec0d1ef5792dc",
+		"contracts": {
+			"DebtCache": {
+				"address": "0x65e9ccD58a7fAA682cb33AA05578E3BCd925fe54",
+				"status": "current",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+			},
+			"MultiChainDebtShareState": {
+				"address": "0x3EDeB188B6712Ae8476Fd735272bb669279056F8",
+				"status": "current",
+				"keccak256": "0x93d1e0c74ead6d4d884cf6dbb00c245842ffc44a9485d9f46950423afa214d66"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0x0E493a717e17015f518c71612C7Be9Ad737C5E61",
+				"status": "current",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
 			}
 		}
 	}

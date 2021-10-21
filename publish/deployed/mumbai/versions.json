@@ -138,8 +138,9 @@
 			},
 			"DebtCache": {
 				"address": "0x6D8c4432A2Cf89d19430f9e07cd75FBaE4b01249",
-				"status": "current",
-				"keccak256": "0xe88f8a16f3d58a5b2c1930090ddb3f1b248e9a3503a983fe26bb7e95a071e3ab"
+				"status": "replaced",
+				"keccak256": "0xe88f8a16f3d58a5b2c1930090ddb3f1b248e9a3503a983fe26bb7e95a071e3ab",
+				"replaced_in": "v0.2.0"
 			},
 			"Exchanger": {
 				"address": "0xE28Bf7007E42a43ec2F0a6e96E6d5D2f454a80Eb",
@@ -696,6 +697,30 @@
 				"address": "0xA9aeDf04fe20631E5682040bc6F584f01e1BeeC7",
 				"status": "current",
 				"keccak256": "0x8dbdb099c0b8ed1aa8d0e3bb954ba1149c96191ba1752cce14a629878f7ec70a"
+			}
+		}
+	},
+	"v0.2.0": {
+		"tag": "v0.2.0",
+		"fulltag": "v0.2.0",
+		"network": "mumbai",
+		"date": "2021-09-08T10:02:05+09:00",
+		"commit": "48569b9b22b2413b4f09bfaf337f1cf09e159cbc",
+		"contracts": {
+			"DebtCache": {
+				"address": "0xd0E3a094eE0b2C09f1139B21bBEd6eBeeb7Cb5e9",
+				"status": "current",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+			},
+			"MultiChainDebtShareState": {
+				"address": "0x9c8b775fF226c2c7907B748e13fe52d3b5Fe98b2",
+				"status": "current",
+				"keccak256": "0x93d1e0c74ead6d4d884cf6dbb00c245842ffc44a9485d9f46950423afa214d66"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0xBd28CC011F75c6b83a8067B2639Dc2902024A6cC",
+				"status": "current",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
 			}
 		}
 	}
