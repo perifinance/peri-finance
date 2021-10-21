@@ -202,6 +202,7 @@ const defaults = {
 		polygon: constants.ZERO_ADDRESS,
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
@@ -212,6 +213,7 @@ const defaults = {
 		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
 		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
+		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 	},
 	DAI_ERC20_ADDRESSES: {
@@ -222,6 +224,7 @@ const defaults = {
 		polygon: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
 		bsc: '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
 		bsctest: '0x52306d4521eFF70Ba555A578a66705b3352e8B3a',
+		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 	},
 	MINTER_ROLE_ADDRESS: {
@@ -232,6 +235,7 @@ const defaults = {
 		polygon: constants.ZERO_ADDRESS,
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},
@@ -243,6 +247,7 @@ const defaults = {
 		polygon: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		bsc: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		bsctest: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		shibuya: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		'moonbase-alphanet': '0x727bd962784C27C269E8287F9202312208B83FA7',
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},
@@ -254,6 +259,7 @@ const defaults = {
 		polygon: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		bsc: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		bsctest: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		shibuya: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		'moonbase-alphanet': '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
 	},

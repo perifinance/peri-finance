@@ -825,7 +825,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (['moonbase-alphanet'].includes(network)) {
+	} else if (['moonbase-alphanet', 'shibuya'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinance',

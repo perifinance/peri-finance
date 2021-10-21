@@ -168,6 +168,8 @@ const loadConnections = ({ network, useFork }) => {
 
 	const privateKey = ['mainnet', 'polygon', 'bsc'].includes(network)
 		? process.env.DEPLOY_PRIVATE_KEY
+		: ['dusty', 'shibuya'].includes(network)
+		? process.env.SUBSTRATE_PRIVATE_KEY
 		: process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
 	const etherscanUrl =
@@ -181,6 +183,8 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
 			: ['moonbase-alphanet'].includes(network)
 			? `https://moonbase-blockscout.testnet.moonbeam.network/api`
+			: ['dusty', 'shibuya'].includes(network)
+			? `https://${network}.api.subscan.io`
 			: '';
 
 	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
