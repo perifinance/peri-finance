@@ -404,6 +404,9 @@
 	"MultiChainDebtShareManager": {
 		"deploy": true
 	},
+	"BridgeState": {
+		"deploy": true
+	},
 	"MockToken": {
 		"deploy": true
 	},

@@ -278,20 +278,24 @@ const defaults = {
 			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
 		],
 		kovan: [
-			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
 		],
 		bsc: [
 			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
 		],
 		bsctest: [
-			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
 		],
 		goerli: [
-			{ roleKey: 'Validator', address: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390' },
-			{ roleKey: 'Tester', address: '0x3F60364dD5977812d0EcD9D9c2fE5f4D327Db94e' },
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
+		],
+		local: [
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
 		],
 	},
 	BRIDGE_NETWORK_STATUS: {
