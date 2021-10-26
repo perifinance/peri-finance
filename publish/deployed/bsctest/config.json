@@ -166,5 +166,8 @@
 	},
 	"BridgeState": {
 		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
 	}
 }
