@@ -58,6 +58,11 @@ contract BridgeState is Owned, State {
     uint public numberOfOutboundPerPeriod = 10;
     uint public periodDuration = 300;
 
+    // total transferred amount
+    uint public totalOutboundAmount = 0;
+    // total claimed amount
+    uint public totalInboundAmount = 0;
+
     // Current Outbound PeriodId, starts from 0
     uint public currentOutboundPeriodId;
 
@@ -144,12 +149,13 @@ contract BridgeState is Owned, State {
         require(_appendInboundingRequest(_account, _amount, _srcChainId, _srcOutboundingId), "Append inbounding failed");
     }
 
-    function claimInbound(uint _index) external onlyAssociatedContract {
+    function claimInbound(uint _index, uint _amount) external onlyAssociatedContract {
         Inbounding storage _inbounding = inboundings[_index];
 
         require(!_inbounding.claimed, "This inbounding has already been claimed");
 
         _inbounding.claimed = true;
+        totalInboundAmount = totalInboundAmount.add(_amount);
 
         emit InboundingClaimed(_index);
 
@@ -222,6 +228,8 @@ contract BridgeState is Owned, State {
         accountOutboundings[_account][currentOutboundPeriodId].push(nextOutboundingId);
 
         outboundings.push(Outbounding(_account, _amount, _destChainId, currentOutboundPeriodId));
+
+        totalOutboundAmount = totalOutboundAmount.add(_amount);
 
         // The first outbounding request will newly start the period
         if (outboundPeriods[currentOutboundPeriodId].outboundingIds.length == 0) {

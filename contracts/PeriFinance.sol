@@ -169,7 +169,7 @@ contract PeriFinance is BasePeriFinance {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyTester {
+    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
 
         require(_burnByProxy(messageSender, _amount), "burning failed");
@@ -177,7 +177,7 @@ contract PeriFinance is BasePeriFinance {
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
 
-    function claimAllBridgedAmounts() external optionalProxy onlyTester {
+    function claimAllBridgedAmounts() external optionalProxy onlyAvailableWhenBridgeStateSet {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "No claimable");
@@ -187,7 +187,7 @@ contract PeriFinance is BasePeriFinance {
         }
     }
 
-    function claimBridgedAmount(uint _index) external optionalProxy onlyTester {
+    function claimBridgedAmount(uint _index) external optionalProxy onlyAvailableWhenBridgeStateSet {
         _claimBridgedAmount(_index);
     }
 
@@ -197,20 +197,11 @@ contract PeriFinance is BasePeriFinance {
 
         require(account == messageSender, "Caller is not matched");
 
-        bridgeState.claimInbound(_index);
+        bridgeState.claimInbound(_index, amount);
 
         require(_mintByProxy(account, amount), "Mint failed");
 
         return true;
-    }
-
-    modifier onlyTester() {
-        require(address(bridgeState) != address(0), "BridgeState is not set");
-
-        bytes32 tester = "Tester";
-
-        require(bridgeState.isOnRole(tester, messageSender), "Not tester");
-        _;
     }
 
     /* Once off function for SIP-60 to migrate PERI balances in the RewardEscrow contract
@@ -236,6 +227,12 @@ contract PeriFinance is BasePeriFinance {
 
     function setBridgeState(address _newBridgeState) external onlyOwner {
         bridgeState = IBridgeState(_newBridgeState);
+    }
+
+    // ========== MODIFIERS ==========
+    modifier onlyAvailableWhenBridgeStateSet() {
+        require(address(bridgeState) != address(0), "Bridge State must be set to call this function");
+        _;
     }
 
     // ========== EVENTS ==========

@@ -895,7 +895,7 @@ const deploy = async ({
 		});
 	}
 
-	const bridgeState = await deployer.deployContract({
+	const periBridgeState = await deployer.deployContract({
 		name: 'BridgeState',
 		source: 'BridgeState',
 		deps: ['PeriFinance'],
@@ -903,10 +903,10 @@ const deploy = async ({
 	});
 
 	// Deploy Temporal Bridge
-	if (periFinance && bridgeState) {
+	if (periFinance && periBridgeState) {
 		await runStep({
 			contract: 'BridgeState',
-			target: bridgeState,
+			target: periBridgeState,
 			read: 'associatedContract',
 			expected: input => input === addressOf(periFinance),
 			write: 'setAssociatedContract',
@@ -919,7 +919,7 @@ const deploy = async ({
 			for (const { roleKey, address } of roles) {
 				await runStep({
 					contract: 'BridgeState',
-					target: bridgeState,
+					target: periBridgeState,
 					read: 'isOnRole',
 					readArg: [toBytes32(roleKey), address],
 					expected: input => input,
@@ -935,7 +935,7 @@ const deploy = async ({
 			for (const { network, isOpened } of bridgeNetworkStatus) {
 				await runStep({
 					contract: 'BridgeState',
-					target: bridgeState,
+					target: periBridgeState,
 					read: 'networkOpened',
 					readArg: [networkToChainId[network]],
 					expected: input => input === isOpened,
@@ -949,9 +949,9 @@ const deploy = async ({
 			contract: 'PeriFinance',
 			target: periFinance,
 			read: 'bridgeState',
-			expected: input => input === addressOf(bridgeState),
+			expected: input => input === addressOf(periBridgeState),
 			write: 'setBridgeState',
-			writeArg: addressOf(bridgeState),
+			writeArg: addressOf(periBridgeState),
 		});
 	}
 
@@ -1283,6 +1283,68 @@ const deploy = async ({
 			],
 			force: addNewPynths,
 		});
+
+		if (currencyKey === 'pUSD' && sourceContract === 'MultiCollateralPynth') {
+			const pynthBridgeState = await deployer.deployContract({
+				name: `BridgeState${currencyKey}`,
+				source: 'BridgeState',
+				deps: [`Pynth${currencyKey}`],
+				args: [account, addressOf(pynth)],
+				force: addNewPynths,
+			});
+
+			if (pynth && pynthBridgeState) {
+				await runStep({
+					contract: `BridgeState${currencyKey}`,
+					target: pynthBridgeState,
+					read: 'associatedContract',
+					expected: input => input === addressOf(pynth),
+					write: 'setAssociatedContract',
+					writeArg: addressOf(pynth),
+				});
+
+				const roles = (await getDeployParameter('BRIDGE_ROLES'))[network];
+
+				if (roles && roles.length > 0) {
+					for (const { roleKey, address } of roles) {
+						await runStep({
+							contract: `BridgeState${currencyKey}`,
+							target: pynthBridgeState,
+							read: 'isOnRole',
+							readArg: [toBytes32(roleKey), address],
+							expected: input => input,
+							write: 'setRole',
+							writeArg: [toBytes32(roleKey), address, true],
+						});
+					}
+				}
+
+				const bridgeNetworkStatus = (await getDeployParameter('BRIDGE_NETWORK_STATUS'))[network];
+
+				if (bridgeNetworkStatus && bridgeNetworkStatus.length > 0) {
+					for (const { network, isOpened } of bridgeNetworkStatus) {
+						await runStep({
+							contract: `BridgeState${currencyKey}`,
+							target: pynthBridgeState,
+							read: 'networkOpened',
+							readArg: [networkToChainId[network]],
+							expected: input => input === isOpened,
+							write: 'setNetworkStatus',
+							writeArg: [networkToChainId[network], isOpened],
+						});
+					}
+				}
+
+				await runStep({
+					contract: `Pynth${currencyKey}`,
+					target: pynth,
+					read: 'bridgeState',
+					expected: input => input === addressOf(pynthBridgeState),
+					write: 'setBridgeState',
+					writeArg: addressOf(pynthBridgeState),
+				});
+			}
+		}
 
 		if (tokenStateForPynth && pynth) {
 			await runStep({

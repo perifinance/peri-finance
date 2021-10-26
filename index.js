@@ -237,7 +237,7 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
-		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
+		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	INFLATION_MINTER_ADDRESSES: {
 		mainnet: '0x727bd962784C27C269E8287F9202312208B83FA7',
@@ -249,7 +249,7 @@ const defaults = {
 		bsctest: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		shibuya: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		'moonbase-alphanet': '0x727bd962784C27C269E8287F9202312208B83FA7',
-		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
+		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	ORACLE_ADDRESSES: {
 		mainnet: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
@@ -261,7 +261,7 @@ const defaults = {
 		bsctest: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		shibuya: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		'moonbase-alphanet': '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
-		local: '0x96C8399B3611B038513Fa2Fa8920D5870c0f2390',
+		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	CHILD_CHAIN_MANAGER_ADDRESS: {
 		mainnet: constants.ZERO_ADDRESS,
@@ -273,30 +273,12 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
-		mainnet: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
-		kovan: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
-		bsc: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
-		bsctest: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
-		goerli: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
-		local: [
-			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
-			{ roleKey: 'Tester', address: '0xD5Df4746a6bcA098cF497FBC4A94dA9f836E74bB' },
-		],
+		mainnet: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		kovan: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		bsc: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		bsctest: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		goerli: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		local: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 	},
 	BRIDGE_NETWORK_STATUS: {
 		mainnet: [{ network: 'bsc', isOpened: true }],
@@ -304,6 +286,7 @@ const defaults = {
 		kovan: [{ network: 'bsctest', isOpened: true }],
 		bsctest: [{ network: 'kovan', isOpened: true }],
 		goerli: [{ network: 'bsctest', isOpened: true }],
+		local: [{ network: 'mumbai', isOpened: true }],
 	},
 	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,

@@ -407,6 +407,9 @@
 	"BridgeState": {
 		"deploy": true
 	},
+	"BridgeStatepUSD": {
+		"deploy": true
+	},
 	"MockToken": {
 		"deploy": true
 	},

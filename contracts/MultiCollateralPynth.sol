@@ -7,6 +7,7 @@ import "./Pynth.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IEtherCollateral.sol";
+import "./interfaces/IBridgeState.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/multicollateralpynth
 contract MultiCollateralPynth is Pynth {
@@ -15,6 +16,8 @@ contract MultiCollateralPynth is Pynth {
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_ETH_COLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
+
+    IBridgeState public bridgeState;
 
     /* ========== CONSTRUCTOR ========== */
 
@@ -72,6 +75,46 @@ contract MultiCollateralPynth is Pynth {
         super._internalBurn(account, amount);
     }
 
+    // ------------- Bridge Experiment
+    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyAvailableWhenBridgeStateSet {
+        require(_amount > 0, "Cannot transfer zero");
+
+        require(_burnByProxy(messageSender, _amount), "burning failed");
+
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
+    }
+
+    function claimAllBridgedAmounts() external optionalProxy onlyAvailableWhenBridgeStateSet {
+        uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
+
+        require(applicableIds.length > 0, "No claimable");
+
+        for (uint i = 0; i < applicableIds.length; i++) {
+            _claimBridgedAmount(applicableIds[i]);
+        }
+    }
+
+    function claimBridgedAmount(uint _index) external optionalProxy onlyAvailableWhenBridgeStateSet {
+        _claimBridgedAmount(_index);
+    }
+
+    function _claimBridgedAmount(uint _index) internal returns (bool) {
+        // Validations are checked from bridge state
+        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+
+        require(account == messageSender, "Caller is not matched");
+
+        bridgeState.claimInbound(_index, amount);
+
+        require(_mintByProxy(account, amount), "Mint failed");
+
+        return true;
+    }
+
+    function setBridgeState(address _newBridgeState) external onlyOwner {
+        bridgeState = IBridgeState(_newBridgeState);
+    }
+
     /* ========== MODIFIERS ========== */
 
     // Contracts directly interacting with multiCollateralPynth to issue and burn
@@ -87,6 +130,11 @@ contract MultiCollateralPynth is Pynth {
             isFeePool || isExchanger || isIssuer || ipEtherCollateral || ipEtherCollateralpUSD || isMultiCollateral,
             "Only FeePool, Exchanger, Issuer or MultiCollateral contracts allowed"
         );
+        _;
+    }
+
+    modifier onlyAvailableWhenBridgeStateSet() {
+        require(address(bridgeState) != address(0), "Bridge State must be set to call this function");
         _;
     }
 }
