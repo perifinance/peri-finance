@@ -160,5 +160,8 @@
 	},
 	"MultiChainDebtShareManager": {
 		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
 	}
 }
