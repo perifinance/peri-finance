@@ -46,7 +46,7 @@ contract BridgeState is Owned, State {
     mapping(uint => OutboundPeriod) public outboundPeriods;
 
     // The outbound period id list to be processed
-    uint[] public outboundPeriodIdsToProcess;
+    uint[] internal outboundPeriodIdsToProcess;
 
     // Inbounding ids to Inbounding
     Inbounding[] public inboundings;

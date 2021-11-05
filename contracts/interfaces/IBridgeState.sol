@@ -46,8 +46,6 @@ interface IBridgeState {
 
     function srcOutboundingIdRegistered(uint chainId, uint srcOutboundingId) external view returns (bool isRegistered);
 
-    function outboundIdsToProcess(uint index) external view returns (uint);
-
     function numberOfOutboundPerPeriod() external view returns (uint);
 
     function periodDuration() external view returns (uint);

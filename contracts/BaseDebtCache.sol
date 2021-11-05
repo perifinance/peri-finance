@@ -154,10 +154,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
                 }
             }
 
-            bool isPUSD = key == pUSD;
-            if (isPUSD || key == pETH) {
+            bool ispUSD = key == pUSD;
+            if (ispUSD || key == pETH) {
                 IEtherCollateral etherCollateralContract =
-                    isPUSD ? IEtherCollateral(address(etherCollateralpUSD())) : etherCollateral();
+                    ispUSD ? IEtherCollateral(address(etherCollateralpUSD())) : etherCollateral();
                 uint etherCollateralSupply = etherCollateralContract.totalIssuedPynths();
                 supply = supply.sub(etherCollateralSupply);
             }
