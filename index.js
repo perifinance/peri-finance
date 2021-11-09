@@ -279,6 +279,9 @@ const defaults = {
 		bsctest: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		goerli: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		local: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		'moonbase-alphanet': [
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+		],
 	},
 	BRIDGE_NETWORK_STATUS: {
 		mainnet: [{ network: 'bsc', isOpened: true }],
