@@ -179,22 +179,7 @@
 	"PynthpETH": {
 		"deploy": false
 	},
-	"TokenStateiBTC": {
-		"deploy": false
-	},
-	"ProxyERC20iBTC": {
-		"deploy": false
-	},
-	"PynthiBTC": {
-		"deploy": false
-	},
-	"TokenStateiETH": {
-		"deploy": false
-	},
-	"ProxyERC20iETH": {
-		"deploy": false
-	},
-	"PynthiETH": {
+	"BridgeStatepUSD": {
 		"deploy": false
 	}
 }
