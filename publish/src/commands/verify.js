@@ -178,8 +178,9 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 			if (['moonbase-alphanet'].includes(network)) {
 				try {
 					result = await axios.post(
-						etherscanUrl,
-						qs.stringify({
+						// etherscanUrl,
+						'https://blockscout.com/poa/sokol/api',
+						{
 							module: 'contract',
 							action: 'verify',
 							name: source,
@@ -196,15 +197,15 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 							optimizationRuns: runs,
 							libraryName1: 'SafeDecimalMath',
 							libraryAddress1: deployment.targets['SafeDecimalMath'].address,
-						}),
+						},
 						{
 							headers: {
-								'Content-Type': 'application/x-www-form-urlencoded',
+								'Content-Type': 'application/json',
 							},
 						}
 					);
 				} catch (e) {
-					console.log(e);
+					console.log(e.response.status + ' ' + e.response.statusText);
 					continue;
 				}
 			} else {

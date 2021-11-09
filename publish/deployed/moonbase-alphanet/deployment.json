@@ -266,8 +266,8 @@
 			"address": "0x6b08b980881dc82D528B30F5a9E27af43ebF19f2",
 			"source": "Issuer",
 			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x6b08b980881dc82D528B30F5a9E27af43ebF19f2",
-			"timestamp": "2021-11-09T04:48:30.631Z",
-			"txn": "",
+			"timestamp": "2021-11-09T04:48:18.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0xba629a572fd581cf6410c817de70c2f001c2c877234555a6b334377254398fe7",
 			"network": "moonbase-alphanet"
 		},
 		"TradingRewards": {
@@ -320,8 +320,8 @@
 			"address": "0x3bc4f0e75f950f24154292362211D382487f3969",
 			"source": "MultiCollateralPynth",
 			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x3bc4f0e75f950f24154292362211D382487f3969",
-			"timestamp": "2021-11-09T04:08:06.578Z",
-			"txn": "",
+			"timestamp": "2021-11-09T04:07:54.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x7885b53bc01c3d0ed6e4f362f2f60e430ed7037172fbb1d7a2646421e90b2c0f",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStatepBTC": {
@@ -617,8 +617,8 @@
 			"address": "0xEeEf783bF548302d216BAf75735Dc070CDF89E4a",
 			"source": "BridgeState",
 			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xEeEf783bF548302d216BAf75735Dc070CDF89E4a",
-			"timestamp": "2021-11-09T03:58:15.124Z",
-			"txn": "",
+			"timestamp": "2021-11-09T03:58:00.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x77cdfabedea8442ea58e1d8784fb3a40e7e518916fe4f071a4057d0663b1c0e8",
 			"network": "moonbase-alphanet"
 		}
 	},
