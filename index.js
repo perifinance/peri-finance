@@ -288,6 +288,7 @@ const defaults = {
 		bsc: [{ network: 'mainnet', isOpened: true }],
 		kovan: [{ network: 'moonbase-alphanet', isOpened: true }],
 		bsctest: [{ network: 'moonbase-alphanet', isOpened: true }],
+		mumbai: [{ network: 'moonbase-alphanet', isOpened: true }],
 		goerli: [{ network: 'moonbase-alphanet', isOpened: true }],
 		local: [
 			{ network: 'mumbai', isOpened: true },
