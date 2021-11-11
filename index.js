@@ -277,6 +277,8 @@ const defaults = {
 		kovan: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		bsc: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		bsctest: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		mumbai: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		polygon: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		goerli: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		local: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		'moonbase-alphanet': [
@@ -289,6 +291,7 @@ const defaults = {
 		kovan: [{ network: 'moonbase-alphanet', isOpened: true }],
 		bsctest: [{ network: 'moonbase-alphanet', isOpened: true }],
 		mumbai: [{ network: 'moonbase-alphanet', isOpened: true }],
+		polygon: [{ network: 'mainnet', isOpened: true }],
 		goerli: [{ network: 'moonbase-alphanet', isOpened: true }],
 		local: [
 			{ network: 'mumbai', isOpened: true },
