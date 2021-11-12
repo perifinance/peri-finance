@@ -79,7 +79,7 @@ contract MultiCollateralPynth is Pynth {
     function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
 
-        require(_burnByProxy(messageSender, _amount), "burning failed");
+        require(_internalBurn(messageSender, _amount), "burning failed");
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
@@ -90,12 +90,12 @@ contract MultiCollateralPynth is Pynth {
         require(applicableIds.length > 0, "No claimable");
 
         for (uint i = 0; i < applicableIds.length; i++) {
-            _claimBridgedAmount(applicableIds[i]);
+            require(_claimBridgedAmount(applicableIds[i]), "Failed to claim");
         }
     }
 
     function claimBridgedAmount(uint _index) external optionalProxy onlyAvailableWhenBridgeStateSet {
-        _claimBridgedAmount(_index);
+        require(_claimBridgedAmount(_index), "Failed to claim");
     }
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
@@ -106,7 +106,7 @@ contract MultiCollateralPynth is Pynth {
 
         bridgeState.claimInbound(_index, amount);
 
-        require(_mintByProxy(account, amount), "Mint failed");
+        _internalIssue(account, amount);
 
         return true;
     }
