@@ -184,8 +184,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-				"status": "current",
-				"keccak256": "0x8c88a271313529bc3015b4f68e701b7268602811411a2d75ca1d9be905670c4a"
+				"status": "replaced",
+				"keccak256": "0x8c88a271313529bc3015b4f68e701b7268602811411a2d75ca1d9be905670c4a",
+				"replaced_in": "v0.2.2"
 			},
 			"USDC": {
 				"address": "0x8EDc640693b518c8d531A8516A5C0Ae98b641a03",
@@ -364,8 +365,9 @@
 			},
 			"BridgeState": {
 				"address": "0x9015C3E9c559B6b98E035b794e336E9444B51205",
-				"status": "current",
-				"keccak256": "0xda45bab516a5a8eb266ec926035ae5605e4d5d5a2d2609525c9ddd6c83f8af7d"
+				"status": "replaced",
+				"keccak256": "0xda45bab516a5a8eb266ec926035ae5605e4d5d5a2d2609525c9ddd6c83f8af7d",
+				"replaced_in": "v0.2.2"
 			}
 		}
 	},
@@ -378,13 +380,15 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xb8805A0af08D8A43C5092cAAB4D96C239aDB8Fd9",
-				"status": "current",
-				"keccak256": "0x9aa64314f8e571202e78468c2959841b933e31a4b08ad81206a1d41213e93d3c"
+				"status": "replaced",
+				"keccak256": "0x9aa64314f8e571202e78468c2959841b933e31a4b08ad81206a1d41213e93d3c",
+				"replaced_in": "v0.2.2"
 			},
 			"Issuer": {
 				"address": "0x66562BbE241DC5c32508cE80a4Cd171b7bD92B16",
-				"status": "current",
-				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+				"status": "replaced",
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3",
+				"replaced_in": "v0.2.2"
 			}
 		}
 	},
@@ -411,8 +415,9 @@
 		"contracts": {
 			"DebtCache": {
 				"address": "0xa46eA778C383E23815d4eE843087AD76C4C160E7",
-				"status": "current",
-				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+				"status": "replaced",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831",
+				"replaced_in": "v0.2.3"
 			},
 			"MultiChainDebtShareState": {
 				"address": "0xb27dDA7369179E32EC6bc64ac586fd12A9110b1a",
@@ -421,8 +426,62 @@
 			},
 			"MultiChainDebtShareManager": {
 				"address": "0x00575Bc2871f307c356314e6B03cBBe332a81725",
+				"status": "replaced",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b",
+				"replaced_in": "v0.2.3"
+			}
+		}
+	},
+	"v0.2.2": {
+		"tag": "v0.2.2",
+		"fulltag": "v0.2.2",
+		"network": "bsctest",
+		"date": "2021-10-27T00:21:07+09:00",
+		"commit": "554e2093b693a6497abb71df1bf12a93dc050bae",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x80122a2706e7C29A9eEddE1710c5f0e3578a2aB9",
 				"status": "current",
-				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
+				"keccak256": "0x798a8ad72ef543b396eb53d54f1483869361802eca96c82a43fdd0004bb80998"
+			},
+			"Issuer": {
+				"address": "0x59eDbCA37a3F8Ad43Fa4346D9D46Ed838e663c24",
+				"status": "current",
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+			},
+			"PynthpUSD": {
+				"address": "0x3Ab75FeA332CaEE5b7bCD9bdE48Be5f01c05d47e",
+				"status": "current",
+				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869"
+			},
+			"BridgeState": {
+				"address": "0x00f2A490C3b57348e9f8f4Bd00488813416CE87F",
+				"status": "current",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xDDF7dC1C5e8EDdEA32C5aa26481e9f2f080EB05D",
+				"status": "current",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
+			}
+		}
+	},
+	"v0.2.3": {
+		"tag": "v0.2.3",
+		"fulltag": "v0.2.3",
+		"network": "bsctest",
+		"date": "2021-10-27T00:21:07+09:00",
+		"commit": "554e2093b693a6497abb71df1bf12a93dc050bae",
+		"contracts": {
+			"DebtCache": {
+				"address": "0xbC7303aC3BB4f7B7E13f8e30267c31F8465c6970",
+				"status": "current",
+				"keccak256": "0x4480385503183d82db5f33062728e56c098d387c170eaac0c8c20649cc4e0bd3"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0x318D86BE509326F7D7607a5B93EC4FC4551e95F2",
+				"status": "current",
+				"keccak256": "0x8da9d0194738a9e4b9d6242e42c2e8daa0384ecbc7325d3dc22d477abfdffa82"
 			}
 		}
 	}

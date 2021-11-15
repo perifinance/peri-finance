@@ -17,6 +17,7 @@ const data = {
 	mumbai: require('./publish/deployed/mumbai'),
 	bsctest: require('./publish/deployed/bsctest'),
 	bsc: require('./publish/deployed/bsc'),
+	shibuya: require('./publish/deployed/shibuya'),
 	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
 };
 
@@ -90,6 +91,9 @@ const chainIdMapping = Object.entries({
 	},
 	56: {
 		network: 'bsc',
+	},
+	81: {
+		network: 'shibuya',
 	},
 	1287: {
 		network: 'moonbase-alphanet',

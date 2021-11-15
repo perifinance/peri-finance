@@ -18,8 +18,16 @@ contract MultiChainDebtShareManager is Owned, IMultiChainDebtShareManager {
         return address(_multiChainDebtShareState);
     }
 
-    function getCurrentExternalDebtEntry() external view returns (uint debtShare, bool isDecreased) {
-        (debtShare, isDecreased, ) = _multiChainDebtShareState.lastDebtShareStorageInfo();
+    function getCurrentExternalDebtEntry()
+        external
+        view
+        returns (
+            uint debtShare,
+            bool isDecreased,
+            uint timeStamp
+        )
+    {
+        (debtShare, isDecreased, timeStamp) = _multiChainDebtShareState.lastDebtShareStorageInfo();
     }
 
     // Mutative functions

@@ -184,8 +184,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-				"status": "current",
-				"keccak256": "0xf5a8b1fcc5fc6c06531b1ed7e36c5547c84f7de49ad5e0c8cc94190f5c734ed6"
+				"status": "replaced",
+				"keccak256": "0xf5a8b1fcc5fc6c06531b1ed7e36c5547c84f7de49ad5e0c8cc94190f5c734ed6",
+				"replaced_in": "v0.2.2"
 			},
 			"StakingState": {
 				"address": "0x8EDc640693b518c8d531A8516A5C0Ae98b641a03",
@@ -309,8 +310,9 @@
 			},
 			"BridgeState": {
 				"address": "0xBC5620119B7374fb06369745e440cacc87273c10",
-				"status": "current",
-				"keccak256": "0xda45bab516a5a8eb266ec926035ae5605e4d5d5a2d2609525c9ddd6c83f8af7d"
+				"status": "replaced",
+				"keccak256": "0xda45bab516a5a8eb266ec926035ae5605e4d5d5a2d2609525c9ddd6c83f8af7d",
+				"replaced_in": "v0.2.2"
 			}
 		}
 	},
@@ -328,13 +330,15 @@
 			},
 			"PeriFinance": {
 				"address": "0x6Ae154027a17adBe3D7977fa24F6F6607b72810a",
-				"status": "current",
-				"keccak256": "0xea20a53e912d12a7d6544ebdb3d9c42f83536c5226f0d135b423362921641835"
+				"status": "replaced",
+				"keccak256": "0xea20a53e912d12a7d6544ebdb3d9c42f83536c5226f0d135b423362921641835",
+				"replaced_in": "v0.2.2"
 			},
 			"Issuer": {
 				"address": "0x023933a997a088D3C6efAb87d546d672EeC89195",
-				"status": "current",
-				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+				"status": "replaced",
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3",
+				"replaced_in": "v0.2.2"
 			}
 		}
 	},
@@ -347,8 +351,9 @@
 		"contracts": {
 			"DebtCache": {
 				"address": "0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
-				"status": "current",
-				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+				"status": "replaced",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831",
+				"replaced_in": "v0.2.2"
 			},
 			"MultiChainDebtShareState": {
 				"address": "0x6847754A4B03FdfAA38D539F1eF4E9a6099Be701",
@@ -357,8 +362,53 @@
 			},
 			"MultiChainDebtShareManager": {
 				"address": "0x335b354A2E9E9730AfF44671c8CA4404c7d22734",
+				"status": "replaced",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b",
+				"replaced_in": "v0.2.2"
+			}
+		}
+	},
+	"v0.2.2": {
+		"tag": "v0.2.2",
+		"fulltag": "v0.2.2",
+		"network": "goerli",
+		"date": "2021-10-27T00:07:27+09:00",
+		"commit": "d4d013ef0e759c44d46ea29f18b012c5ccf9754c",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x7279bF8cC9aD938a098C1E45668ed02DfAE74d22",
 				"status": "current",
-				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
+				"keccak256": "0xc9995d09c6ceed4684e367789717f4c53626adebd8b28e5f2f4d6566fa401f65"
+			},
+			"DebtCache": {
+				"address": "0xe91b490435b1Ad315aE5Fe6c91027D4F0409ECfe",
+				"status": "current",
+				"keccak256": "0x4480385503183d82db5f33062728e56c098d387c170eaac0c8c20649cc4e0bd3"
+			},
+			"Issuer": {
+				"address": "0xC882525913Fd308f7556Ddcb954ca9fe96dFCDCf",
+				"status": "current",
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+			},
+			"PynthpUSD": {
+				"address": "0x87375611dE17F7D5A5E8e6a3ca2A9785B307D38a",
+				"status": "current",
+				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869"
+			},
+			"BridgeState": {
+				"address": "0xFeC41Ae537dA68D51c44ee4f7F84734a1D6008Be",
+				"status": "current",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0x160452Bee9DA103157EA1E512299728c46995157",
+				"status": "current",
+				"keccak256": "0x8da9d0194738a9e4b9d6242e42c2e8daa0384ecbc7325d3dc22d477abfdffa82"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xe2BA04b0518F96E5fdbd53dD3e86f63e79FB8e9E",
+				"status": "current",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
 			}
 		}
 	}

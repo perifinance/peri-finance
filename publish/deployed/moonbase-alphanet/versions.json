@@ -155,8 +155,9 @@
 			},
 			"Issuer": {
 				"address": "0x7279bF8cC9aD938a098C1E45668ed02DfAE74d22",
-				"status": "current",
-				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+				"status": "replaced",
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3",
+				"replaced_in": "v0.2.2"
 			},
 			"TradingRewards": {
 				"address": "0xEAae4EfD1CE446CF5A7E607eD505d1e3e5cF51E4",
@@ -185,8 +186,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x43aC0E8d4C6104418989d1ada89199eb31E4cBD4",
-				"status": "current",
-				"keccak256": "0x8a4613654014dab43009f514aed722fbae47d7447e3047aba91d653a2c0d6a75"
+				"status": "replaced",
+				"keccak256": "0x8a4613654014dab43009f514aed722fbae47d7447e3047aba91d653a2c0d6a75",
+				"replaced_in": "v0.2.2"
 			},
 			"TokenStatepBTC": {
 				"address": "0xe1CCA031502940916542451eF30035F144708f2C",
@@ -355,8 +357,9 @@
 			},
 			"DebtCache": {
 				"address": "0xc3527595a70bc206c508d660FFeC3a9691dBc38C",
-				"status": "current",
-				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831"
+				"status": "replaced",
+				"keccak256": "0x949e0efcb2f9dbffbd7ba71e951190b92c4749f15e0773f494f8ee98f59dd831",
+				"replaced_in": "v0.2.3"
 			},
 			"CollateralEth": {
 				"address": "0x11C338CBFA75ee07d9Ba1435a450c1fcc29cC0e3",
@@ -370,8 +373,52 @@
 			},
 			"MultiChainDebtShareManager": {
 				"address": "0xF2e5fA2F0df30B6c2fe2AA05ecA8C39Ef7877e12",
+				"status": "replaced",
+				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b",
+				"replaced_in": "v0.2.3"
+			}
+		}
+	},
+	"v0.2.2": {
+		"tag": "v0.2.2",
+		"fulltag": "v0.2.2",
+		"network": "moonbase-alphanet",
+		"date": "2021-11-09T14:10:00+09:00",
+		"commit": "449102e3b0d2b66e7aacd44943c2a71daa212e6d",
+		"contracts": {
+			"Issuer": {
+				"address": "0x6b08b980881dc82D528B30F5a9E27af43ebF19f2",
 				"status": "current",
-				"keccak256": "0x3e83e0298e0602be9113770064008772f7c196ab68de0c1dad5f324f5f6a293b"
+				"keccak256": "0x4bbb1bfcc227182c39ec23861b2dd490703869c897d11a689d6bf6231260a6c3"
+			},
+			"PynthpUSD": {
+				"address": "0x3bc4f0e75f950f24154292362211D382487f3969",
+				"status": "current",
+				"keccak256": "0x8c5cb075a83988e4dcff4a255ccb0e4c478246398d46f1742fd72b09f6c63f9c"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xEeEf783bF548302d216BAf75735Dc070CDF89E4a",
+				"status": "current",
+				"keccak256": "0xdaaa60fd86eee508c41292642ea5cd52532fa44798c9fecd4168bf7148dc0ec7"
+			}
+		}
+	},
+	"v0.2.3": {
+		"tag": "v0.2.3",
+		"fulltag": "v0.2.3",
+		"network": "moonbase-alphanet",
+		"date": "2021-11-09T14:10:00+09:00",
+		"commit": "449102e3b0d2b66e7aacd44943c2a71daa212e6d",
+		"contracts": {
+			"DebtCache": {
+				"address": "0x4c242E739370c2041a123c3433B5cde2EC4e9076",
+				"status": "current",
+				"keccak256": "0x4480385503183d82db5f33062728e56c098d387c170eaac0c8c20649cc4e0bd3"
+			},
+			"MultiChainDebtShareManager": {
+				"address": "0x59eDbCA37a3F8Ad43Fa4346D9D46Ed838e663c24",
+				"status": "current",
+				"keccak256": "0x8da9d0194738a9e4b9d6242e42c2e8daa0384ecbc7325d3dc22d477abfdffa82"
 			}
 		}
 	}

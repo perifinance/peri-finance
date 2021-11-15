@@ -4,7 +4,14 @@ interface IMultiChainDebtShareManager {
     // View Functions
     function multiChainDebtShareState() external view returns (address);
 
-    function getCurrentExternalDebtEntry() external view returns (uint debtShare, bool isDecreased);
+    function getCurrentExternalDebtEntry()
+        external
+        view
+        returns (
+            uint debtShare,
+            bool isDecreased,
+            uint timeStamp
+        );
 
     // Mutative functions
     function setCurrentExternalDebtEntry(uint debtShare, bool isDecreased) external;
