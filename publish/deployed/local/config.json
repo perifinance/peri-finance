@@ -131,27 +131,6 @@
 	"PynthpUSD": {
 		"deploy": true
 	},
-	"PynthpEUR": {
-		"deploy": true
-	},
-	"PynthpJPY": {
-		"deploy": true
-	},
-	"PynthpAUD": {
-		"deploy": true
-	},
-	"PynthpGBP": {
-		"deploy": true
-	},
-	"PynthpCHF": {
-		"deploy": true
-	},
-	"PynthpXAU": {
-		"deploy": true
-	},
-	"PynthpXAG": {
-		"deploy": true
-	},
 	"PynthpBTC": {
 		"deploy": true
 	},
@@ -170,27 +149,6 @@
 	"ProxyPeriFinance": {
 		"deploy": true
 	},
-	"ProxyERC20pEUR": {
-		"deploy": true
-	},
-	"ProxyERC20pJPY": {
-		"deploy": true
-	},
-	"ProxyERC20pAUD": {
-		"deploy": true
-	},
-	"ProxyERC20pGBP": {
-		"deploy": true
-	},
-	"ProxyERC20pCHF": {
-		"deploy": true
-	},
-	"ProxyERC20pXAU": {
-		"deploy": true
-	},
-	"ProxyERC20pXAG": {
-		"deploy": true
-	},
 	"SafeDecimalMath": {
 		"deploy": true
 	},
@@ -203,27 +161,6 @@
 	"TokenStatepUSD": {
 		"deploy": true
 	},
-	"TokenStatepEUR": {
-		"deploy": true
-	},
-	"TokenStatepJPY": {
-		"deploy": true
-	},
-	"TokenStatepAUD": {
-		"deploy": true
-	},
-	"TokenStatepGBP": {
-		"deploy": true
-	},
-	"TokenStatepCHF": {
-		"deploy": true
-	},
-	"TokenStatepXAU": {
-		"deploy": true
-	},
-	"TokenStatepXAG": {
-		"deploy": true
-	},
 	"TokenStatepBTC": {
 		"deploy": true
 	},
@@ -234,159 +171,6 @@
 		"deploy": true
 	},
 	"PynthpETH": {
-		"deploy": true
-	},
-	"TokenStatepBNB": {
-		"deploy": true
-	},
-	"ProxyERC20pBNB": {
-		"deploy": true
-	},
-	"PynthpBNB": {
-		"deploy": true
-	},
-	"TokenStatepTRX": {
-		"deploy": true
-	},
-	"ProxyERC20pTRX": {
-		"deploy": true
-	},
-	"PynthpTRX": {
-		"deploy": true
-	},
-	"TokenStatepXTZ": {
-		"deploy": true
-	},
-	"ProxyERC20pXTZ": {
-		"deploy": true
-	},
-	"PynthpXTZ": {
-		"deploy": true
-	},
-	"TokenStateiBTC": {
-		"deploy": true
-	},
-	"ProxyiBTC": {
-		"deploy": true
-	},
-	"PynthiBTC": {
-		"deploy": true
-	},
-	"TokenStateiETH": {
-		"deploy": true
-	},
-	"ProxyiETH": {
-		"deploy": true
-	},
-	"PynthiETH": {
-		"deploy": true
-	},
-	"TokenStateiBNB": {
-		"deploy": true
-	},
-	"ProxyiBNB": {
-		"deploy": true
-	},
-	"PynthiBNB": {
-		"deploy": true
-	},
-	"TokenStateiTRX": {
-		"deploy": true
-	},
-	"ProxyiTRX": {
-		"deploy": true
-	},
-	"PynthiTRX": {
-		"deploy": true
-	},
-	"TokenStateiXTZ": {
-		"deploy": true
-	},
-	"ProxyiXTZ": {
-		"deploy": true
-	},
-	"PynthiXTZ": {
-		"deploy": true
-	},
-	"TokenStatepCEX": {
-		"deploy": true
-	},
-	"ProxyERC20pCEX": {
-		"deploy": true
-	},
-	"PynthpCEX": {
-		"deploy": true
-	},
-	"TokenStateiCEX": {
-		"deploy": true
-	},
-	"ProxyiCEX": {
-		"deploy": true
-	},
-	"PynthiCEX": {
-		"deploy": true
-	},
-	"TokenStatepXRP": {
-		"deploy": true
-	},
-	"ProxyERC20pXRP": {
-		"deploy": true
-	},
-	"PynthpXRP": {
-		"deploy": true
-	},
-	"TokenStatepLTC": {
-		"deploy": true
-	},
-	"ProxyERC20pLTC": {
-		"deploy": true
-	},
-	"PynthpLTC": {
-		"deploy": true
-	},
-	"TokenStatepLINK": {
-		"deploy": true
-	},
-	"ProxyERC20pLINK": {
-		"deploy": true
-	},
-	"PynthpLINK": {
-		"deploy": true
-	},
-	"TokenStatepEOS": {
-		"deploy": true
-	},
-	"ProxyERC20pEOS": {
-		"deploy": true
-	},
-	"PynthpEOS": {
-		"deploy": true
-	},
-	"TokenStatepETC": {
-		"deploy": true
-	},
-	"ProxyERC20pETC": {
-		"deploy": true
-	},
-	"PynthpETC": {
-		"deploy": true
-	},
-	"TokenStatepDEFI": {
-		"deploy": true
-	},
-	"ProxyERC20pDEFI": {
-		"deploy": true
-	},
-	"PynthpDEFI": {
-		"deploy": true
-	},
-	"TokenStateiDEFI": {
-		"deploy": true
-	},
-	"ProxyiDEFI": {
-		"deploy": true
-	},
-	"PynthiDEFI": {
 		"deploy": true
 	},
 	"ExternalTokenStakeManager": {
