@@ -31,10 +31,6 @@ contract DebtCache is BaseDebtCache {
             _cachedPynthDebt[currencyKeys[i]] = value;
         }
 
-        (uint debtShare, bool isDecreased, ) = multiChainDebtShareManager().getCurrentExternalDebtEntry();
-        // should be subtracted if DEX Debt is decreased otherwise add Debt to value
-        periCollateralDebt = isDecreased ? periCollateralDebt.sub(debtShare) : periCollateralDebt.add(debtShare);
-
         _cachedDebt = periCollateralDebt.sub(shortValue);
         _cacheTimestamp = block.timestamp;
         emit DebtCacheUpdated(periCollateralDebt);
