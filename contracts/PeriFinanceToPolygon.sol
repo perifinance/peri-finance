@@ -17,6 +17,28 @@ contract PeriFinanceToPolygon is PeriFinance {
         childChainManager = _childChainManager;
     }
 
+    function multiTransfer(address[] calldata _recipients, uint[] calldata _amounts)
+        external
+        optionalProxy
+        systemActive
+        blacklisted(messageSender)
+        returns (bool)
+    {
+        require(_recipients.length == _amounts.length, "length is not matched");
+
+        bool transferResult = true;
+        for (uint i = 0; i < _recipients.length; i++) {
+            if (_recipients[i] == address(0) || _amounts[i] == 0) {
+                continue;
+            }
+
+            _canTransfer(messageSender, _amounts[i]);
+            require(_transferByProxy(messageSender, _recipients[i], _amounts[i]), "Transfer failed");
+        }
+
+        return transferResult;
+    }
+
     function setChildChainManager(address _childChainManager) external onlyOwner {
         require(_childChainManager != address(0), "Address cannot be zero");
 
