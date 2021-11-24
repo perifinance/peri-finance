@@ -61,6 +61,7 @@
 		"build:ci": "node .circleci/pack.js",
 		"slither": "pip3 install --user slither-analyzer && slither .",
 		"pack": "webpack --mode production",
+		"solidity:prettier": "npx prettier --write 'contracts/**/*.sol'",
 		"prepublishOnly": "npm run describe && npm run pack",
 		"fork": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet",
 		"test": "hardhat test",
