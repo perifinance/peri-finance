@@ -105,7 +105,7 @@ const setupContract = async ({
 	skipPostDeploy = false,
 	properties = {},
 }) => {
-	const [deployerAccount, owner, oracle, fundsWallet] = accounts;
+	const [deployerAccount, owner, oracle, fundsWallet, debtManager] = accounts;
 
 	const artifact = artifacts.require(source || contract);
 
@@ -243,7 +243,6 @@ const setupContract = async ({
 			0,
 			0,
 		],
-		StakingStateUSDC: [owner, tryGetAddressOf('Issuer'), tryGetAddressOf('USDC')],
 		StakingState: [owner, owner],
 		ExternalTokenStakeManager: [
 			owner,
@@ -251,8 +250,13 @@ const setupContract = async ({
 			tryGetAddressOf('AddressResolver'),
 		],
 		BlacklistManager: [owner],
-		MultiChainDebtShareState: [owner, tryGetAddressOf('MultiChainDebtShareManager')],
-		MultiChainDebtShareManager: [owner, tryGetAddressOf('MultiChainDebtShareState')],
+		CrossChainState: [owner, tryGetAddressOf('CrossChainManager')],
+		CrossChainManager: [
+			owner,
+			tryGetAddressOf('AddressResolver'),
+			tryGetAddressOf('CrossChainState'),
+			debtManager,
+		],
 	};
 
 	let instance;
@@ -816,11 +820,11 @@ const setupAllContracts = async ({
 			deps: ['ExternalTokenStakeManager'],
 		},
 		{
-			contract: 'MultiChainDebtShareState',
+			contract: 'CrossChainState',
 		},
 		{
-			contract: 'MultiChainDebtShareManager',
-			deps: ['MultiChainDebtShareState'],
+			contract: 'CrossChainManager',
+			deps: ['AddressResolver', 'CrossChainState', 'DebtCache'],
 		},
 	];
 
@@ -934,7 +938,7 @@ const setupAllContracts = async ({
 		.require('MockToken')
 		.new(...['Dai Stablecoin', 'DAI', '18'].concat({ from: owner }));
 
-	returnObj[`USDC`] = USDC;
+	returnObj['USDC'] = USDC;
 	returnObj['DAI'] = DAI;
 
 	if (returnObj['StakingState']) {
@@ -950,16 +954,14 @@ const setupAllContracts = async ({
 		});
 	}
 
-	if (returnObj['MultiChainDebtShareState'] && returnObj['MultiChainDebtShareManager']) {
-		returnObj['MultiChainDebtShareState'].setAssociatedContract(
-			returnObj['MultiChainDebtShareManager'].address,
-			{ from: owner }
-		);
+	if (returnObj['CrossChainState'] && returnObj['CrossChainManager']) {
+		returnObj['CrossChainState'].setAssociatedContract(returnObj['CrossChainManager'].address, {
+			from: owner,
+		});
 
-		returnObj['MultiChainDebtShareManager'].setMultiChainDebtShareState(
-			returnObj['MultiChainDebtShareState'].address,
-			{ from: owner }
-		);
+		returnObj['CrossChainManager'].setCrossChainState(returnObj['CrossChainState'].address, {
+			from: owner,
+		});
 	}
 
 	if (returnObj['AddressResolver']) {

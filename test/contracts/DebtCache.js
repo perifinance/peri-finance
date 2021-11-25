@@ -79,7 +79,7 @@ contract('DebtCache', async accounts => {
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'StakingState',
 				'ExternalTokenStakeManager',
-				'MultiChainDebtShareManager',
+				'CrossChainManager',
 			],
 		}));
 	});

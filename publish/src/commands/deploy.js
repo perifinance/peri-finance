@@ -963,37 +963,37 @@ const deploy = async ({
 	});
 
 	// Deploy multi chain debt share related contracts
-	const multiChainDebtShareState = await deployer.deployContract({
-		name: 'MultiChainDebtShareState',
-		source: 'MultiChainDebtShareState',
+	const crossChainState = await deployer.deployContract({
+		name: 'CrossChainState',
+		source: 'CrossChainState',
 		deps: ['DebtCache'],
 		args: [account, ZERO_ADDRESS],
 	});
 
-	const multiChainDebtShareManager = await deployer.deployContract({
-		name: 'MultiChainDebtShareManager',
-		source: 'MultiChainDebtShareManager',
-		deps: ['DebtCache', 'MultiChainDebtShareState'],
-		args: [account, addressOf(multiChainDebtShareState)],
+	const crossChainManager = await deployer.deployContract({
+		name: 'CrossChainManager',
+		source: 'CrossChainManager',
+		deps: ['DebtCache', 'CrossChainState', 'AddressResolver'],
+		args: [account, addressOf(crossChainState), addressOf(readProxyForResolver)],
 	});
 
-	if (multiChainDebtShareState && multiChainDebtShareManager) {
+	if (crossChainState && crossChainManager) {
 		await runStep({
-			contract: 'MultiChainDebtShareState',
-			target: multiChainDebtShareState,
+			contract: 'CrossChainState',
+			target: crossChainState,
 			read: 'associatedContract',
-			expected: input => input === addressOf(multiChainDebtShareManager),
+			expected: input => input === addressOf(crossChainManager),
 			write: 'setAssociatedContract',
-			writeArg: addressOf(multiChainDebtShareManager),
+			writeArg: addressOf(crossChainManager),
 		});
 
 		await runStep({
-			contract: 'MultiChainDebtShareManager',
-			target: multiChainDebtShareManager,
-			read: 'multiChainDebtShareState',
-			expected: input => input === addressOf(multiChainDebtShareState),
-			write: 'setMultiChainDebtShareState',
-			writeArg: addressOf(multiChainDebtShareState),
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'crossChainState',
+			expected: input => input === addressOf(crossChainState),
+			write: 'setCrossChainState',
+			writeArg: addressOf(crossChainState),
 		});
 	}
 	// Deploy multi chain debt share related contracts

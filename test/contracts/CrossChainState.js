@@ -10,20 +10,20 @@ const { toUnit } = require('../utils')();
 
 const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
-contract('MultiChainDebtShareState', async accounts => {
-	const [, owner] = accounts;
+contract('CrossChainState', async accounts => {
+	const [, owner, account1] = accounts;
 
-	let multiChainDebtShareState, multiChainDebtShareManager;
+	let crossChainState, crossChainManager;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
 		({
-			MultiChainDebtShareState: multiChainDebtShareState,
-			MultiChainDebtShareManager: multiChainDebtShareManager,
+			CrossChainState: crossChainState,
+			CrossChainManager: crossChainManager,
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['MultiChainDebtShareState', 'MultiChainDebtShareManager'],
+			contracts: ['CrossChainState', 'CrossChainManager'],
 		}));
 	});
 
@@ -31,35 +31,39 @@ contract('MultiChainDebtShareState', async accounts => {
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: multiChainDebtShareState.abi,
+			abi: crossChainState.abi,
 			ignoreParents: ['Owned', 'State'],
-			expected: ['appendToDebtShareStorage', 'updateDebtShareStorage', 'removeDebtShareStorage'],
+			expected: [
+				'setCrossNetworkUserData',
+				'clearCrossNetworkUserData',
+				'appendTotalNetworkDebtLedger',
+			],
 		});
 	});
 
 	describe('Should revert as intended', () => {
-		it('appendToDebtShareStorage() cannot be invoked directly by user', () => {
+		it('setCrossNetworkUserData() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: multiChainDebtShareState.appendToDebtShareStorage,
-				args: [toUnit('1'), true],
+				fnc: crossChainState.setCrossNetworkUserData,
+				args: [account1, toUnit('1'), 1],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
 		});
 
-		it('updateDebtShareStorage() cannot be invoked directly by user', () => {
+		it('clearCrossNetworkUserData() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: multiChainDebtShareState.updateDebtShareStorage,
-				args: [1, toUnit('1'), true],
+				fnc: crossChainState.clearCrossNetworkUserData,
+				args: [account1],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
 		});
 
-		it('removeDebtShareStorage() cannot be invoked directly by user', () => {
+		it('appendTotalNetworkDebtLedger() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: multiChainDebtShareState.removeDebtShareStorage,
-				args: [1],
+				fnc: crossChainState.appendTotalNetworkDebtLedger,
+				args: [toUnit('1')],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
@@ -68,14 +72,14 @@ contract('MultiChainDebtShareState', async accounts => {
 
 	describe('should fetch the contract data', () => {
 		beforeEach(async () => {
-			await multiChainDebtShareManager.setCurrentExternalDebtEntry(toUnit('1'), false, {
+			await crossChainManager.addTotalNetworkDebt(toUnit(1), {
 				from: owner,
 			});
 		});
 
-		it('should fetch debtShareStorageInfo at index', async () => {
-			const result = await multiChainDebtShareState.debtShareStorageInfoAt(0);
-			assert.equal(result.debtShare.toString(), toUnit(1));
+		it('should fetch CrossNetworkData at index', async () => {
+			const result = await crossChainManager.getCurrentTotalNetworkDebt();
+			assert.equal(result.toString(), toUnit(1));
 		});
 	});
 });
