@@ -7,6 +7,7 @@ import "./MixinResolver.sol";
 import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/ICrossChainState.sol";
 import "./interfaces/IDebtCache.sol";
+import "./interfaces/IIssuer.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
@@ -14,10 +15,10 @@ import "./SafeDecimalMath.sol";
 contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     using SafeDecimalMath for uint;
 
-    ICrossChainState internal _crossChainState;
+    address internal _crossChainState;
+    address internal _debtManager;
 
-    address public _debtManager;
-
+    bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
 
     constructor(
@@ -26,26 +27,35 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         address _crossChainStateAddress,
         address _debtManagerAddress
     ) public Owned(_owner) MixinResolver(_resolver) {
-        _crossChainState = ICrossChainState(_crossChainStateAddress);
+        _crossChainState = _crossChainStateAddress;
         _debtManager = _debtManagerAddress;
     }
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](1);
+        addresses = new bytes32[](2);
         addresses[0] = CONTRACT_DEBTCACHE;
+        addresses[1] = CONTRACT_ISSUER;
     }
 
     function debtCache() internal view returns (IDebtCache) {
         return IDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
     }
 
+    function issuer() internal view returns (IIssuer) {
+        return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
+    }
+
+    function state() internal view returns (ICrossChainState) {
+        return ICrossChainState(_crossChainState);
+    }
+
     function crossChainState() external view returns (address) {
-        return address(_crossChainState);
+        return _crossChainState;
     }
 
     function debtManager() external view returns (address) {
-        return address(_debtManager);
+        return _debtManager;
     }
 
     /**
@@ -53,7 +63,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return totalNetworkDebt uint
      */
     function currentTotalNetworkDebt() external view returns (uint) {
-        return _crossChainState.lastTotalNetworkDebtLedgerEntry();
+        return state().lastTotalNetworkDebtLedgerEntry();
     }
 
     /**
@@ -82,7 +92,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return debt network ratio by total network debt at specific time
      */
     function _ownedDebtPercentageAtIndex(uint _index) internal view returns (uint) {
-        uint totalNetworkDebt = _crossChainState.getTotalNetworkDebtEntryAtIndex(_index);
+        uint totalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(_index);
 
         return _debtPercentage(totalNetworkDebt);
     }
@@ -92,7 +102,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return current debt ratio of network by total network debt
      */
     function _currentOwnedDebtPercentage() internal view returns (uint) {
-        uint totalNetworkDebt = _crossChainState.lastTotalNetworkDebtLedgerEntry();
+        uint totalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
 
         return _debtPercentage(totalNetworkDebt);
     }
@@ -112,7 +122,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // Mutative functions
     function setCrossChainState(address crossChainStateAddress) external onlyOwner {
-        _crossChainState = ICrossChainState(crossChainStateAddress);
+        _crossChainState = crossChainStateAddress;
     }
 
     function setDebtManager(address debtManagerAddress) external onlyOwner {
@@ -124,12 +134,34 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @param totalNetworkDebt uint
      */
     function addTotalNetworkDebt(uint totalNetworkDebt) external onlyDebtManager {
-        _crossChainState.appendTotalNetworkDebtLedger(totalNetworkDebt);
+        state().appendTotalNetworkDebtLedger(totalNetworkDebt);
+    }
+
+    function setCrossNetworkUserDebt(address account, uint userDebt) external onlyIssuer {
+        uint _totalNetworkDebtLedgerIndex = state().totalNetworkDebtLedgerLength();
+        uint _currentTotalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
+
+        uint userDebtOwnershipOfTotalNetwork = userDebt.divideDecimalRoundPrecise(_currentTotalNetworkDebt);
+
+        state().setCrossNetworkUserData(account, userDebtOwnershipOfTotalNetwork, _totalNetworkDebtLedgerIndex);
+    }
+
+    function clearCrossNetworkUserDebt(address account) external onlyIssuer {
+        state().clearCrossNetworkUserData(account);
+    }
+
+    function _onlyIssuer() internal view {
+        require(msg.sender == address(issuer()), "CrossChainManager: Only the issuer contract can perform this action");
     }
 
     // Modifiers
     modifier onlyDebtManager() {
         require(msg.sender == _debtManager, "Only the debt manager may perform this action");
+        _;
+    }
+
+    modifier onlyIssuer() {
+        _onlyIssuer(); // Use an internal function to save code size.
         _;
     }
 }

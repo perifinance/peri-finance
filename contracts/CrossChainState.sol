@@ -45,6 +45,11 @@ contract CrossChainState is Owned, State, ICrossChainState {
         return _getTotalNetworkDebtEntryAtIndex(index);
     }
 
+    function getCrossNetworkUserData(address account) external view returns (uint ownership, uint64 debtEntryIndex) {
+        ownership = _crossNetworkUserData[account].userOwnershipOfTotalNetwork;
+        debtEntryIndex = _crossNetworkUserData[account].totalNetworkDebtLedgerIndex;
+    }
+
     function _getTotalNetworkDebtEntryAtIndex(uint index) internal view returns (uint) {
         require(_totalNetworkDebtLedger.length > 0, "There is no available data");
 
@@ -62,7 +67,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
     function setCrossNetworkUserData(
         address from,
         uint _userOwnershipOfTotalNetwork,
-        uint _totalNetworkDebtLedgerIndex
+        uint64 _totalNetworkDebtLedgerIndex
     ) external onlyAssociatedContract {
         _crossNetworkUserData[from] = CrossNetworkUserData({
             userOwnershipOfTotalNetwork: _userOwnershipOfTotalNetwork,

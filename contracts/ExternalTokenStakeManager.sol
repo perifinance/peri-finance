@@ -96,6 +96,75 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
     }
 
+    function requireNotExceedsQuotaLimit(
+        address _account,
+        uint _debtBalance,
+        uint _additionalpUSD,
+        uint _additionalExToken,
+        bool _isIssue
+    ) external view {
+        uint estimatedExternalTokenQuota =
+            _externalTokenQuota(_account, _debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
+
+        bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
+        uint minDecimals = 18;
+        for (uint i = 0; i < tokenList.length; i++) {
+            uint decimals = stakingState.tokenDecimals(tokenList[i]);
+
+            minDecimals = decimals < minDecimals ? decimals : minDecimals;
+        }
+
+        require(
+            // due to the error caused by decimal difference, round down it upto minimum decimals among staking token list.
+            estimatedExternalTokenQuota.roundDownDecimal(uint(18).sub(minDecimals)) <= getExternalTokenQuota(),
+            "External token staking amount exceeds quota limit"
+        );
+    }
+
+    function externalTokenQuota(
+        address _account,
+        uint _debtBalance,
+        uint _additionalpUSD,
+        uint _additionalExToken,
+        bool _isIssue
+    ) external view returns (uint) {
+        return _externalTokenQuota(_account, _debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
+    }
+
+    /**
+     * @notice It calculates the quota of user's staked amount to the debt.
+     *         If parameters are not 0, it estimates the quota assuming those value is applied to current status.
+     *
+     * @param _account account
+     * @param _debtBalance Debt balance to estimate [USD]
+     * @param _additionalpUSD The pUSD value to be applied for estimation [USD]
+     * @param _additionalExToken The external token stake amount to be applied for estimation [USD]
+     * @param _isIssue If true, it is considered issueing/staking estimation.
+     */
+    function _externalTokenQuota(
+        address _account,
+        uint _debtBalance,
+        uint _additionalpUSD,
+        uint _additionalExToken,
+        bool _isIssue
+    ) internal view returns (uint) {
+        uint combinedStakedAmount = _combinedStakedAmountOf(_account, pUSD);
+
+        if (_debtBalance == 0 || combinedStakedAmount == 0) {
+            return 0;
+        }
+
+        if (_isIssue) {
+            _debtBalance = _debtBalance.add(_additionalpUSD);
+            combinedStakedAmount = combinedStakedAmount.add(_additionalExToken);
+        } else {
+            _debtBalance = _debtBalance.sub(_additionalpUSD);
+            combinedStakedAmount = combinedStakedAmount.sub(_additionalExToken);
+        }
+
+        return combinedStakedAmount.divideDecimalRound(_debtBalance.divideDecimalRound(getIssuanceRatio()));
+    }
+
     function _combinedStakedAmountOf(address _user, bytes32 _unitCurrency)
         internal
         view

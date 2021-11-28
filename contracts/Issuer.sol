@@ -24,6 +24,7 @@ import "./interfaces/IERC20.sol";
 import "./interfaces/ILiquidations.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IExternalTokenStakeManager.sol";
+import "./interfaces/ICrossChainManager.sol";
 
 interface IRewardEscrowV2 {
     // Views
@@ -86,13 +87,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_LIQUIDATIONS = "Liquidations";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "ExternalTokenStakeManager";
+    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](14);
+        bytes32[] memory newAddresses = new bytes32[](15);
         newAddresses[0] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -107,6 +109,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[11] = CONTRACT_DEBTCACHE;
         newAddresses[12] = CONTRACT_COLLATERALMANAGER;
         newAddresses[13] = CONTRACT_EXTOKENSTAKEMANAGER;
+        newAddresses[14] = CONTRACT_CROSSCHAINMANAGER;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -164,6 +167,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function debtCache() internal view returns (IIssuerInternalDebtCache) {
         return IIssuerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
+    }
+
+    function crossChainManager() internal view returns (ICrossChainManager) {
+        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
     function issuanceRatio() external view returns (uint) {
@@ -347,40 +354,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return balance;
     }
 
-    /**
-     * @notice It calculates the quota of user's staked amount to the debt.
-     *         If parameters are not 0, it estimates the quota assuming those value is applied to current status.
-     *
-     * @param _account account
-     * @param _debtBalance Debt balance to estimate [USD]
-     * @param _additionalpUSD The pUSD value to be applied for estimation [USD]
-     * @param _additionalExToken The external token stake amount to be applied for estimation [USD]
-     * @param _isIssue If true, it is considered issueing/staking estimation.
-     */
-    function _externalTokenQuota(
-        address _account,
-        uint _debtBalance,
-        uint _additionalpUSD,
-        uint _additionalExToken,
-        bool _isIssue
-    ) internal view returns (uint) {
-        uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_account, pUSD);
-
-        if (_debtBalance == 0 || combinedStakedAmount == 0) {
-            return 0;
-        }
-
-        if (_isIssue) {
-            _debtBalance = _debtBalance.add(_additionalpUSD);
-            combinedStakedAmount = combinedStakedAmount.add(_additionalExToken);
-        } else {
-            _debtBalance = _debtBalance.sub(_additionalpUSD);
-            combinedStakedAmount = combinedStakedAmount.sub(_additionalExToken);
-        }
-
-        return combinedStakedAmount.divideDecimalRound(_debtBalance.divideDecimalRound(getIssuanceRatio()));
-    }
-
     function _amountsToFitClaimable(
         uint _currentDebt,
         uint _stakedExTokenAmount,
@@ -524,7 +497,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         _requireRatesNotInvalid(anyRateIsInvalid);
 
-        uint estimatedQuota = _externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
+        uint estimatedQuota =
+            exTokenStakeManager().externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
 
         return estimatedQuota;
     }
@@ -718,7 +692,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint afterDebtBalance = _issuePynths(_issuer, _issueAmount, maxIssuable, existingDebt, totalSystemDebt, false);
 
         // For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
-        _requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
+        exTokenStakeManager().requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function issueMaxPynths(address _issuer) external onlyPeriFinance {
@@ -752,7 +726,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint afterDebtBalance = _issuePynths(_issuer, issueAmountToQuota, maxIssuable, existingDebt, totalSystemDebt, false);
 
         // For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
-        _requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
+        exTokenStakeManager().requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function burnPynths(
@@ -765,10 +739,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false, false);
 
         if (_currencyKey == PERI) {
-            _requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
-        }
-
-        if (_currencyKey != PERI) {
+            exTokenStakeManager().requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
+        } else {
             exTokenStakeManager().unstake(_from, _burnAmount.divideDecimalRound(getIssuanceRatio()), _currencyKey, pUSD);
         }
     }
@@ -878,31 +850,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _requireCurrencyKeyIsNotpUSD(bytes32 _currencyKey) internal pure {
         require(_currencyKey != pUSD, "pUSD is not staking coin");
-    }
-
-    function _requireNotExceedsQuotaLimit(
-        address _account,
-        uint _debtBalance,
-        uint _additionalpUSD,
-        uint _additionalExToken,
-        bool _isIssue
-    ) internal view {
-        uint estimatedExternalTokenQuota =
-            _externalTokenQuota(_account, _debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
-
-        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
-        uint minDecimals = 18;
-        for (uint i = 0; i < tokenList.length; i++) {
-            uint decimals = exTokenStakeManager().getTokenDecimals(tokenList[i]);
-
-            minDecimals = decimals < minDecimals ? decimals : minDecimals;
-        }
-
-        require(
-            // due to the error caused by decimal difference, round down it upto minimum decimals among staking token list.
-            estimatedExternalTokenQuota.roundDownDecimal(uint(18).sub(minDecimals)) <= getExternalTokenQuota(),
-            "External token staking amount exceeds quota limit"
-        );
     }
 
     function _issuePynths(
@@ -1052,6 +999,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Save the debt entry parameters
         state.setCurrentIssuanceData(from, debtPercentage);
 
+        // Save the total debt entry parameters
+        crossChainManager().setCrossNetworkUserDebt(from, amount.add(existingDebt));
+
         // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
         // the change for the rest of the debt holders. The debt ledger holds high precision integers.
         if (state.debtLedgerLength() > 0 && state.lastDebtLedgerEntry() != 0) {
@@ -1090,6 +1040,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (debtToRemove == existingDebt) {
             state.setCurrentIssuanceData(from, 0);
             state.decrementTotalIssuerCount();
+
+            crossChainManager().clearCrossNetworkUserDebt(from);
         } else {
             // What percentage of the debt will they be left with?
             uint newDebt = existingDebt.sub(debtToRemove);
@@ -1097,6 +1049,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             // Store the debt percentage and debt ledger as high precision integers
             state.setCurrentIssuanceData(from, newDebtPercentage);
+
+            crossChainManager().setCrossNetworkUserDebt(from, debtToRemove);
         }
 
         // Update our cumulative ledger. This is also a high precision integer.

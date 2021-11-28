@@ -5,7 +5,7 @@ interface ICrossChainState {
         // user debt ownership percentage of total network debt
         uint userOwnershipOfTotalNetwork;
         // total network debtLedgerIndex
-        uint totalNetworkDebtLedgerIndex;
+        uint64 totalNetworkDebtLedgerIndex;
     }
 
     // Views
@@ -14,6 +14,8 @@ interface ICrossChainState {
     function lastTotalNetworkDebtLedgerEntry() external view returns (uint);
 
     function getTotalNetworkDebtEntryAtIndex(uint) external view returns (uint);
+
+    function getCrossNetworkUserData(address) external view returns (uint, uint64);
 
     // Mutative functions
     function setCrossNetworkUserData(
