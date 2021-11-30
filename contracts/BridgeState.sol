@@ -88,8 +88,16 @@ contract BridgeState is Owned, State {
         return outboundings.length;
     }
 
+    function getTotalOutboundAmount() external view returns (uint) {
+        return totalOutboundAmount;
+    }
+
     function inboundingsLength() external view returns (uint) {
         return inboundings.length;
+    }
+
+    function getTotalInboundAmount() external view returns (uint) {
+        return totalInboundAmount;
     }
 
     function outboundIdsInPeriod(uint _outboundPeriodId) external view returns (uint[] memory) {

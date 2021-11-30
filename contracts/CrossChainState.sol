@@ -45,13 +45,17 @@ contract CrossChainState is Owned, State, ICrossChainState {
         return _getTotalNetworkDebtEntryAtIndex(index);
     }
 
-    function getCrossNetworkUserData(address account) external view returns (uint ownership, uint64 debtEntryIndex) {
-        ownership = _crossNetworkUserData[account].userOwnershipOfTotalNetwork;
-        debtEntryIndex = _crossNetworkUserData[account].totalNetworkDebtLedgerIndex;
+    function getCrossNetworkUserData(address account)
+        external
+        view
+        returns (uint crossChainDebtEntryIndex, uint userStateDebtLedgerIndex)
+    {
+        crossChainDebtEntryIndex = _crossNetworkUserData[account].totalNetworkDebtLedgerIndex;
+        userStateDebtLedgerIndex = _crossNetworkUserData[account].userStateDebtLedgerIndex;
     }
 
     function _getTotalNetworkDebtEntryAtIndex(uint index) internal view returns (uint) {
-        require(_totalNetworkDebtLedger.length > 0, "There is no available data");
+        require(_totalNetworkDebtLedger.length > 0, "There is no available cross network debt data");
 
         return _totalNetworkDebtLedger[index];
     }
@@ -61,18 +65,12 @@ contract CrossChainState is Owned, State, ICrossChainState {
     /**
      * @notice set total network status when user's debt ownership is changed
      * @param from address
-     * @param _userOwnershipOfTotalNetwork uint
-     * @param _totalNetworkDebtLedgerIndex uint
+     * @param userStateDebtLedgerIndex uint
      */
-    function setCrossNetworkUserData(
-        address from,
-        uint _userOwnershipOfTotalNetwork,
-        uint64 _totalNetworkDebtLedgerIndex
-    ) external onlyAssociatedContract {
-        _crossNetworkUserData[from] = CrossNetworkUserData({
-            userOwnershipOfTotalNetwork: _userOwnershipOfTotalNetwork,
-            totalNetworkDebtLedgerIndex: _totalNetworkDebtLedgerIndex
-        });
+    function setCrossNetworkUserData(address from, uint userStateDebtLedgerIndex) external onlyAssociatedContract {
+        _crossNetworkUserData[from] = CrossNetworkUserData(_totalNetworkDebtLedger.length - 1, userStateDebtLedgerIndex);
+
+        emit UserCrossNetworkDataUpdated(from, userStateDebtLedgerIndex, block.timestamp);
     }
 
     /**
@@ -81,6 +79,8 @@ contract CrossChainState is Owned, State, ICrossChainState {
      */
     function clearCrossNetworkUserData(address from) external onlyAssociatedContract {
         delete _crossNetworkUserData[from];
+
+        emit UserCrossNetworkDataRemoved(from, block.timestamp);
     }
 
     /**
@@ -101,4 +101,19 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @param timestamp uint
      */
     event TotalNetworkDebtAdded(uint totalNetworkDebt, uint timestamp);
+
+    /**
+     * @notice Emitted when user cross network data updated
+     * @param account address
+     * @param userStateDebtLedgerIndex uint
+     * @param timestamp uint
+     */
+    event UserCrossNetworkDataUpdated(address account, uint userStateDebtLedgerIndex, uint timestamp);
+
+    /**
+     * @notice Emitted when user cross network data deleted
+     * @param account address
+     * @param timestamp uint
+     */
+    event UserCrossNetworkDataRemoved(address account, uint timestamp);
 }

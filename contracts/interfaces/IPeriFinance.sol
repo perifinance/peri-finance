@@ -42,11 +42,6 @@ interface IPeriFinance {
             uint totalSystemDebt
         );
 
-    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
-        external
-        view
-        returns (uint issueAmountToQuota, uint stakeAmountToQuota);
-
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
     function pynthsByAddress(address pynthAddress) external view returns (bytes32);

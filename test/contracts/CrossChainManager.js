@@ -6,7 +6,7 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const { setupAllContracts } = require('./setup');
 
-const { currentTime, toUnit, fromUnit } = require('../utils')();
+const { currentTime, toUnit, fromUnit, divideDecimal } = require('../utils')();
 
 const {
 	onlyGivenAddressCanInvoke,
@@ -28,18 +28,22 @@ contract('CrossChainManager', async accounts => {
 		crossChainState,
 		debtCache,
 		periFinance,
+		periFinanceState,
 		exchangeRates,
 		systemSettings,
-		issuer;
+		issuer,
+		bridgeStatepUSD;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
 		({
+			BridgeStatepUSD: bridgeStatepUSD,
 			CrossChainManager: crossChainManager,
 			CrossChainState: crossChainState,
 			DebtCache: debtCache,
 			PeriFinance: periFinance,
+			PeriFinanceState: periFinanceState,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
@@ -48,10 +52,12 @@ contract('CrossChainManager', async accounts => {
 			contracts: [
 				'AddressResolver',
 				'DebtCache',
+				'BridgeStatepUSD',
 				'CrossChainState',
 				'CrossChainManager',
 				'Issuer',
 				'PeriFinance',
+				'PeriFinanceState',
 				'ExchangeRates',
 				'StakingState',
 				'SystemSettings',
@@ -167,10 +173,9 @@ contract('CrossChainManager', async accounts => {
 		const accounts = [account1, account2, account3];
 
 		beforeEach(async () => {
-			await crossChainManager.addTotalNetworkDebt(toUnit('500'), {
+			await crossChainManager.addTotalNetworkDebt(toUnit('225'), {
 				from: debtManager,
 			});
-
 			const issueDebtForAccount = async (account, balance) => {
 				await periFinance.transfer(account, toUnit(balance), { from: owner });
 				await periFinance.issueMaxPynths({ from: account });
@@ -180,46 +185,63 @@ contract('CrossChainManager', async accounts => {
 				const account = accounts[index];
 				await issueDebtForAccount(account, 100 * (index + 1));
 			}
+
+			await crossChainManager.addTotalNetworkDebt(toUnit('450'), {
+				from: debtManager,
+			});
+
+			await crossChainManager.addTotalNetworkDebt(toUnit('225'), {
+				from: debtManager,
+			});
+			await crossChainManager.addTotalNetworkDebt(toUnit('200'), {
+				from: debtManager,
+			});
 		});
 
 		it.only('check if account`s debtBalance increased, c-ratio decreased', async () => {
+			const { debt } = await debtCache.currentDebt();
+			console.log('currentDebt : ', fromUnit(debt).toString());
+
 			const currentTotalNetworkDebt = await crossChainManager.currentTotalNetworkDebt();
-			console.log(fromUnit(currentTotalNetworkDebt).toString());
+			console.log('currentTotalNetworkDebt : ' + fromUnit(currentTotalNetworkDebt).toString());
 
-			const currentOwnedDebtPercentage = await crossChainManager.currentOwnedDebtPercentage();
-			console.log(fromUnit(currentOwnedDebtPercentage).toString());
+			const currentNetworkDebtPercentage = await crossChainManager.currentNetworkDebtPercentage();
+			console.log(
+				'currentNetworkDebtPercentage : ' + fromUnit(currentNetworkDebtPercentage).toString()
+			);
 
-			const {
-				ownership: ownership1,
-				debtEntryIndex: debtLedgerIndex1,
-			} = await crossChainState.getCrossNetworkUserData(account1);
-			const {
-				ownership: ownership2,
-				debtEntryIndex: debtLedgerIndex2,
-			} = await crossChainState.getCrossNetworkUserData(account2);
-			const {
-				ownership: ownership3,
-				debtEntryIndex: debtLedgerIndex3,
-			} = await crossChainState.getCrossNetworkUserData(account3);
+			const expectedNetworkDebtPercentage = divideDecimal(debt, currentTotalNetworkDebt);
+			console.log(
+				'expectedNetworkDebtPercentage : ' + fromUnit(expectedNetworkDebtPercentage).toString()
+			);
 
-			console.log(ownership1.toString());
-			console.log(debtLedgerIndex1);
-			console.log(ownership2.toString());
-			console.log(debtLedgerIndex2.toString());
-			console.log(ownership3.toString());
-			console.log(debtLedgerIndex3.toString());
+			const { initialDebtOwnership: initialDebtOwnership1 } = await periFinanceState.issuanceData(
+				account1
+			);
+			const { initialDebtOwnership: initialDebtOwnership2 } = await periFinanceState.issuanceData(
+				account2
+			);
+			const { initialDebtOwnership: initialDebtOwnership3 } = await periFinanceState.issuanceData(
+				account3
+			);
 
-			// const debtBefore = accounts.map(async account =>
-			// 	(await periFinance.debtBalanceOf(account, pUSD)).toString()
-			// );
+			console.log('initialDebtOwnership 1 :' + initialDebtOwnership1.toString());
+			console.log('initialDebtOwnership 2 : ' + initialDebtOwnership2.toString());
+			console.log('initialDebtOwnership 3 : ' + initialDebtOwnership3.toString());
+
+			// TODO 브릿지로 토큰 이동 후 계산 할 것
+
+			const debtBefore = accounts.map(async account =>
+				(await periFinance.debtBalanceOf(account, pUSD)).toString()
+			);
 			// const cRatioBefore = accounts.map(async account =>
 			// 	(await periFinance.collateralisationRatio(account)).toString()
 			// );
 
-			// const debtBeforeArr = await Promise.all(debtBefore);
+			const debtBeforeArr = await Promise.all(debtBefore);
 			// const cRatioBeforeArr = await Promise.all(cRatioBefore);
 
-			// console.log(debtBeforeArr);
+			console.log(debtBeforeArr);
 			// console.log(cRatioBeforeArr);
 			// // apply changed debt value to current system cached debt
 			// await debtCache.takeDebtSnapshot();

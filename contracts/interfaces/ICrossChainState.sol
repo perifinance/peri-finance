@@ -2,10 +2,10 @@ pragma solidity 0.5.16;
 
 interface ICrossChainState {
     struct CrossNetworkUserData {
-        // user debt ownership percentage of total network debt
-        uint userOwnershipOfTotalNetwork;
         // total network debtLedgerIndex
-        uint64 totalNetworkDebtLedgerIndex;
+        uint totalNetworkDebtLedgerIndex;
+        // user state debtledgerIndex
+        uint userStateDebtLedgerIndex;
     }
 
     // Views
@@ -15,14 +15,10 @@ interface ICrossChainState {
 
     function getTotalNetworkDebtEntryAtIndex(uint) external view returns (uint);
 
-    function getCrossNetworkUserData(address) external view returns (uint, uint64);
+    function getCrossNetworkUserData(address) external view returns (uint, uint);
 
     // Mutative functions
-    function setCrossNetworkUserData(
-        address,
-        uint,
-        uint
-    ) external;
+    function setCrossNetworkUserData(address, uint) external;
 
     function clearCrossNetworkUserData(address) external;
 

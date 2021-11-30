@@ -55,6 +55,10 @@ const mockToken = async ({
 		await tokenState.setBalanceOf(owner, totalSupply, { from: deployerAccount });
 	}
 
+	const bridgeState = await artifacts
+		.require('BridgeState')
+		.new(owner, deployerAccount, { from: deployerAccount });
+
 	const token = await artifacts.require(pynth ? 'MockPynth' : 'PublicEST').new(
 		...[proxy.address, tokenState.address, name, symbol, totalSupply, owner]
 			// add pynth as currency key if needed
@@ -68,7 +72,7 @@ const mockToken = async ({
 		proxy.setTarget(token.address, { from: owner }),
 	]);
 
-	return { token, tokenState, proxy };
+	return { token, tokenState, proxy, bridgeState };
 };
 
 const mockGenericContractFnc = async ({ instance, fncName, mock, returns = [] }) => {
@@ -250,6 +254,8 @@ const setupContract = async ({
 			tryGetAddressOf('AddressResolver'),
 		],
 		BlacklistManager: [owner],
+		BridgeState: [owner, tryGetAddressOf('PeriFinance')],
+		BridgeStatepUSD: [owner, tryGetAddressOf('Pynth')],
 		CrossChainState: [owner, tryGetAddressOf('CrossChainManager')],
 		CrossChainManager: [
 			owner,
@@ -583,6 +589,8 @@ const setupAllContracts = async ({
 	const baseContracts = [
 		{ contract: 'AddressResolver' },
 		{ contract: 'BlacklistManager' },
+		{ contract: 'BridgeState' },
+		{ contract: 'BridgeState', forContract: 'Pynth' },
 		{ contract: 'SystemStatus' },
 		{ contract: 'ExchangeState' },
 		{ contract: 'ExternalTokenStakeManager' },
@@ -824,7 +832,7 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'CrossChainManager',
-			deps: ['AddressResolver', 'CrossChainState', 'DebtCache'],
+			deps: ['AddressResolver', 'CrossChainState', 'DebtCache', 'BridgeStatepUSD'],
 		},
 	];
 
@@ -910,7 +918,7 @@ const setupAllContracts = async ({
 
 	// now setup each pynth and its deps
 	for (const pynth of pynths) {
-		const { token, proxy, tokenState } = await mockToken({
+		const { token, proxy, tokenState, bridgeState } = await mockToken({
 			accounts,
 			pynth,
 			supply: 0, // add pynths with 0 supply initially
@@ -922,6 +930,7 @@ const setupAllContracts = async ({
 		returnObj[`ProxyERC20${pynth}`] = proxy;
 		returnObj[`TokenState${pynth}`] = tokenState;
 		returnObj[`Pynth${pynth}`] = token;
+		returnObj[`BridgeState${pynth}`] = bridgeState;
 
 		// We'll defer adding the tokens into the Issuer as it must
 		// be synchronised with the FlexibleStorage address first.

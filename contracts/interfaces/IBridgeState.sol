@@ -52,7 +52,11 @@ interface IBridgeState {
 
     function outboundingsLength() external view returns (uint);
 
+    function getTotalOutboundAmount() external view returns (uint);
+
     function inboundingsLength() external view returns (uint);
+
+    function getTotalInboundAmount() external view returns (uint);
 
     function outboundIdsInPeriod(uint outboundPeriodId) external view returns (uint[] memory);
 

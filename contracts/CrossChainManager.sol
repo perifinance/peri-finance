@@ -8,11 +8,13 @@ import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/ICrossChainState.sol";
 import "./interfaces/IDebtCache.sol";
 import "./interfaces/IIssuer.sol";
+import "./interfaces/IBridgeState.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
 
 contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
+    using SafeMath for uint;
     using SafeDecimalMath for uint;
 
     address internal _crossChainState;
@@ -20,6 +22,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
+    bytes32 private constant CONTRACT_BRIDGESTATEPUSD = "BridgeStatepUSD";
 
     constructor(
         address _owner,
@@ -33,9 +36,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](2);
+        addresses = new bytes32[](3);
         addresses[0] = CONTRACT_DEBTCACHE;
         addresses[1] = CONTRACT_ISSUER;
+        addresses[2] = CONTRACT_BRIDGESTATEPUSD;
     }
 
     function debtCache() internal view returns (IDebtCache) {
@@ -50,12 +54,50 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         return ICrossChainState(_crossChainState);
     }
 
+    function bridgeStatepUSD() internal view returns (IBridgeState) {
+        return IBridgeState(requireAndGetAddress(CONTRACT_BRIDGESTATEPUSD));
+    }
+
     function crossChainState() external view returns (address) {
         return _crossChainState;
     }
 
     function debtManager() external view returns (address) {
         return _debtManager;
+    }
+
+    function userIssuanceDataForTotalNetwork(address account)
+        external
+        view
+        returns (uint crossChainDebtEntryIndex, uint userStateDebtLedgerIndex)
+    {
+        (crossChainDebtEntryIndex, userStateDebtLedgerIndex) = state().getCrossNetworkUserData(account);
+    }
+
+    function getTotalNetworkAdaptedTotalSystemValue(address account, uint _totalSystemValue)
+        external
+        view
+        returns (uint totalSystemValue)
+    {
+        (uint crossChainDebtEntryIndex, ) = state().getCrossNetworkUserData(account);
+        uint userLastIssuanceTotalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(crossChainDebtEntryIndex);
+        uint currentTotalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
+
+        if (userLastIssuanceTotalNetworkDebt >= currentTotalNetworkDebt) {
+            totalSystemValue = _totalSystemValue.sub(
+                userLastIssuanceTotalNetworkDebt.sub(currentTotalNetworkDebt).multiplyDecimal(
+                    _currentNetworkDebtPercentage()
+                )
+            );
+        } else {
+            totalSystemValue = _totalSystemValue.add(
+                currentTotalNetworkDebt.sub(userLastIssuanceTotalNetworkDebt).multiplyDecimal(
+                    _currentNetworkDebtPercentage()
+                )
+            );
+        }
+
+        return totalSystemValue;
     }
 
     /**
@@ -66,14 +108,22 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         return state().lastTotalNetworkDebtLedgerEntry();
     }
 
+    function totalNetworkDebtAtIndex(uint index) external view returns (uint) {
+        return state().getTotalNetworkDebtEntryAtIndex(index);
+    }
+
     /**
      * @notice Get owned debt percentage of network by total networks
      * @dev external function
      * @param _index uint
      * @return debt network ratio by total network debt at specific time
      */
-    function ownedDebtPercentageAtIndex(uint _index) external view returns (uint) {
-        return _ownedDebtPercentageAtIndex(_index);
+    function networkDebtPercentageAtIndex(uint _index) external view returns (uint) {
+        return _networkDebtPercentageAtIndex(_index);
+    }
+
+    function totalNetworkDebtEntryLength() external view returns (uint) {
+        return state().totalNetworkDebtLedgerLength();
     }
 
     /**
@@ -81,8 +131,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev external function
      * @return current debt ratio of network by total network debt
      */
-    function currentOwnedDebtPercentage() external view returns (uint) {
-        return _currentOwnedDebtPercentage();
+    function currentNetworkDebtPercentage() external view returns (uint) {
+        return _currentNetworkDebtPercentage();
     }
 
     /**
@@ -91,20 +141,20 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @param _index uint
      * @return debt network ratio by total network debt at specific time
      */
-    function _ownedDebtPercentageAtIndex(uint _index) internal view returns (uint) {
+    function _networkDebtPercentageAtIndex(uint _index) internal view returns (uint) {
         uint totalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(_index);
 
-        return _debtPercentage(totalNetworkDebt);
+        return _networkDebtPercentage(totalNetworkDebt);
     }
 
     /**
      * @notice Get CURRENT owned debt percentage of network by total networks
      * @return current debt ratio of network by total network debt
      */
-    function _currentOwnedDebtPercentage() internal view returns (uint) {
+    function _currentNetworkDebtPercentage() internal view returns (uint) {
         uint totalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
 
-        return _debtPercentage(totalNetworkDebt);
+        return _networkDebtPercentage(totalNetworkDebt);
     }
 
     /**
@@ -112,12 +162,23 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @param totalNetworkDebt uint
      * @return network debt ratio by total network debt
      */
-    function _debtPercentage(uint totalNetworkDebt) internal view returns (uint) {
+    function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint) {
         (uint currentNetworkDebt, bool isInvalid) = debtCache().currentDebt();
 
         require(!isInvalid, "current total debt is not valid");
 
-        return currentNetworkDebt.divideDecimal(totalNetworkDebt);
+        uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
+        uint inboundAmount = bridgeStatepUSD().getTotalInboundAmount();
+
+        if (outboundAmount > 0) {
+            currentNetworkDebt = currentNetworkDebt.add(outboundAmount);
+        }
+
+        if (inboundAmount > 0) {
+            currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
+        }
+
+        return totalNetworkDebt == 0 ? SafeDecimalMath.unit() : currentNetworkDebt.divideDecimal(totalNetworkDebt);
     }
 
     // Mutative functions
@@ -137,13 +198,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         state().appendTotalNetworkDebtLedger(totalNetworkDebt);
     }
 
-    function setCrossNetworkUserDebt(address account, uint userDebt) external onlyIssuer {
-        uint _totalNetworkDebtLedgerIndex = state().totalNetworkDebtLedgerLength();
-        uint _currentTotalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
-
-        uint userDebtOwnershipOfTotalNetwork = userDebt.divideDecimalRoundPrecise(_currentTotalNetworkDebt);
-
-        state().setCrossNetworkUserData(account, userDebtOwnershipOfTotalNetwork, _totalNetworkDebtLedgerIndex);
+    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external onlyIssuer {
+        state().setCrossNetworkUserData(account, userStateDebtLedgerIndex);
     }
 
     function clearCrossNetworkUserDebt(address account) external onlyIssuer {

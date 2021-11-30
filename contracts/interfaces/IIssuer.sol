@@ -26,10 +26,6 @@ interface IIssuer {
 
     function debtBalanceOf(address issuer, bytes32 currencyKey) external view returns (uint debtBalance);
 
-    function issuanceRatio() external view returns (uint);
-
-    function externalTokenLimit() external view returns (uint);
-
     function lastIssueEvent(address account) external view returns (uint);
 
     function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);
@@ -40,13 +36,6 @@ interface IIssuer {
         uint _addtionalExToken,
         bool _isIssue
     ) external view returns (uint);
-
-    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
-        external
-        view
-        returns (uint issueAmountToQuota, uint stakeAmountToQuota);
-
-    function minimumStakeTime() external view returns (uint);
 
     function remainingIssuablePynths(address issuer)
         external

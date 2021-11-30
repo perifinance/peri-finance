@@ -64,7 +64,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 internal constant pUSD = "pUSD";
     bytes32 internal constant pETH = "pETH";
     bytes32 internal constant PERI = "PERI";
-    bytes32 internal constant USDC = "USDC";
 
     // Flexible storage names
 
@@ -173,14 +172,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
-    function issuanceRatio() external view returns (uint) {
-        return getIssuanceRatio();
-    }
-
-    function externalTokenLimit() external view returns (uint) {
-        return getExternalTokenQuota();
-    }
-
     function _availableCurrencyKeysWithOptionalPERI(bool withPERI) internal view returns (bytes32[] memory) {
         bytes32[] memory currencyKeys = new bytes32[](availablePynths.length + (withPERI ? 1 : 0));
 
@@ -265,6 +256,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 .divideDecimalRoundPrecise(systemDebt)
                 .multiplyDecimalRoundPrecise(initialDebtOwnership);
         }
+
+        totalSystemValue = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(_issuer, totalSystemValue);
 
         // Their debt balance is their portion of the total system value.
         uint highPrecisionBalance =
@@ -414,10 +407,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         issueAmount = stakeAmount.multiplyDecimal(targetRatio);
     }
 
-    function minimumStakeTime() external view returns (uint) {
-        return getMinimumStakeTime();
-    }
-
     function canBurnPynths(address account) external view returns (bool) {
         return _canBurnPynths(account);
     }
@@ -501,23 +490,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             exTokenStakeManager().externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
 
         return estimatedQuota;
-    }
-
-    function maxExternalTokenStakeAmount(address _account, bytes32 _currencyKey)
-        external
-        view
-        returns (uint issueAmountToQuota, uint stakeAmountToQuota)
-    {
-        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
-
-        uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_account, pUSD);
-
-        (issueAmountToQuota, stakeAmountToQuota) = _maxExternalTokenStakeAmount(
-            _account,
-            debtBalance,
-            combinedStakedAmount,
-            _currencyKey
-        );
     }
 
     function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance)
@@ -1000,7 +972,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         state.setCurrentIssuanceData(from, debtPercentage);
 
         // Save the total debt entry parameters
-        crossChainManager().setCrossNetworkUserDebt(from, amount.add(existingDebt));
+        crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
 
         // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
         // the change for the rest of the debt holders. The debt ledger holds high precision integers.
@@ -1050,7 +1022,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Store the debt percentage and debt ledger as high precision integers
             state.setCurrentIssuanceData(from, newDebtPercentage);
 
-            crossChainManager().setCrossNetworkUserDebt(from, debtToRemove);
+            crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
         }
 
         // Update our cumulative ledger. This is also a high precision integer.
