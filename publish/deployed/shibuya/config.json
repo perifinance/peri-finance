@@ -176,10 +176,13 @@
 	"BlacklistManager": {
 		"deploy": false
 	},
-	"MultiChainDebtShareState": {
+	"BridgeStatepUSD": {
 		"deploy": false
 	},
-	"MultiChainDebtShareManager": {
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
 		"deploy": false
 	},
 	"USDC": {

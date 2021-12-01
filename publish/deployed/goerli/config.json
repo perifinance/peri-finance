@@ -155,13 +155,13 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"MultiChainDebtShareState": {
-		"deploy": false
-	},
-	"MultiChainDebtShareManager": {
-		"deploy": false
-	},
 	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
 		"deploy": false
 	}
 }

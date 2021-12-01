@@ -182,16 +182,16 @@
 	"BlacklistManager": {
 		"deploy": true
 	},
-	"MultiChainDebtShareState": {
-		"deploy": true
-	},
-	"MultiChainDebtShareManager": {
-		"deploy": true
-	},
 	"BridgeState": {
 		"deploy": true
 	},
 	"BridgeStatepUSD": {
+		"deploy": true
+	},
+	"CrossChainManager": {
+		"deploy": true
+	},
+	"CrossChainState": {
 		"deploy": true
 	},
 	"MockToken": {

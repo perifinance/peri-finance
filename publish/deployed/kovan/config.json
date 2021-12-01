@@ -155,9 +155,6 @@
 	"PeriFinanceBridgeToOptimism": {
 		"deploy": false
 	},
-	"StakingStateUSDC": {
-		"deploy": false
-	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
@@ -171,12 +168,6 @@
 		"deploy": false
 	},
 	"BridgeState": {
-		"deploy": false
-	},
-	"MultiChainDebtShareState": {
-		"deploy": false
-	},
-	"MultiChainDebtShareManager": {
 		"deploy": false
 	},
 	"TokenStatepBTC": {
@@ -198,6 +189,12 @@
 		"deploy": false
 	},
 	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
 		"deploy": false
 	}
 }

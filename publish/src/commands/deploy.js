@@ -574,7 +574,7 @@ const deploy = async ({
 		args: [account, oracleExrates, addressOf(readProxyForResolver), [], []],
 	});
 
-	const oracleAddress = (await getDeployParameter('ORACLE_ADDRESSES'))[network];
+	const oracleAddress = (await getDeployParameter('ORACLE_ADDRESS'))[network];
 	if (exchangeRates) {
 		await runStep({
 			contract: 'ExchangeRates',
@@ -864,7 +864,7 @@ const deploy = async ({
 		});
 	}
 
-	const inflationMinterAddress = (await getDeployParameter('INFLATION_MINTER_ADDRESSES'))[network];
+	const inflationMinterAddress = (await getDeployParameter('INFLATION_MINTER_ADDRESS'))[network];
 	if (periFinance && inflationMinterAddress !== ZERO_ADDRESS) {
 		await runStep({
 			contract: 'PeriFinance',
@@ -961,42 +961,6 @@ const deploy = async ({
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
-
-	// Deploy multi chain debt share related contracts
-	const crossChainState = await deployer.deployContract({
-		name: 'CrossChainState',
-		source: 'CrossChainState',
-		deps: ['DebtCache'],
-		args: [account, ZERO_ADDRESS],
-	});
-
-	const crossChainManager = await deployer.deployContract({
-		name: 'CrossChainManager',
-		source: 'CrossChainManager',
-		deps: ['DebtCache', 'CrossChainState', 'AddressResolver'],
-		args: [account, addressOf(crossChainState), addressOf(readProxyForResolver)],
-	});
-
-	if (crossChainState && crossChainManager) {
-		await runStep({
-			contract: 'CrossChainState',
-			target: crossChainState,
-			read: 'associatedContract',
-			expected: input => input === addressOf(crossChainManager),
-			write: 'setAssociatedContract',
-			writeArg: addressOf(crossChainManager),
-		});
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'crossChainState',
-			expected: input => input === addressOf(crossChainState),
-			write: 'setCrossChainState',
-			writeArg: addressOf(crossChainState),
-		});
-	}
-	// Deploy multi chain debt share related contracts
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
@@ -1482,6 +1446,48 @@ const deploy = async ({
 				});
 			}
 		}
+	}
+
+	console.log(gray(`\n------ Deploy multi chain debt share related contracts ------\n`));
+
+	const crossChainState = await deployer.deployContract({
+		name: 'CrossChainState',
+		source: 'CrossChainState',
+		args: [account, ZERO_ADDRESS],
+	});
+
+	const debtManagerAddress = (await getDeployParameter('DEBT_MANAGER_ADDRESS'))[network];
+
+	const crossChainManager = await deployer.deployContract({
+		name: 'CrossChainManager',
+		source: 'CrossChainManager',
+		deps: ['Issuer', 'CrossChainState', 'AddressResolver', 'BridgeStatepUSD'],
+		args: [
+			account,
+			addressOf(readProxyForResolver),
+			addressOf(crossChainState),
+			debtManagerAddress,
+		],
+	});
+
+	if (crossChainState && crossChainManager) {
+		await runStep({
+			contract: 'CrossChainState',
+			target: crossChainState,
+			read: 'associatedContract',
+			expected: input => input === addressOf(crossChainManager),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(crossChainManager),
+		});
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'crossChainState',
+			expected: input => input === addressOf(crossChainState),
+			write: 'setCrossChainState',
+			writeArg: addressOf(crossChainState),
+		});
 	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));

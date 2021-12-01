@@ -158,12 +158,6 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"MultiChainDebtShareState": {
-		"deploy": false
-	},
-	"MultiChainDebtShareManager": {
-		"deploy": false
-	},
 	"StakingRewardsPeriMockLP": {
 		"deploy": false
 	},
@@ -186,6 +180,12 @@
 		"deploy": false
 	},
 	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
 		"deploy": false
 	}
 }

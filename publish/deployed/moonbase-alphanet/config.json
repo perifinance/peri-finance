@@ -36,7 +36,7 @@
 		"deploy": false
 	},
 	"DebtCache": {
-		"deploy": false
+		"deploy": true
 	},
 	"Depot": {
 		"deploy": false
@@ -72,7 +72,7 @@
 		"deploy": false
 	},
 	"Issuer": {
-		"deploy": false
+		"deploy": true
 	},
 	"EternalStorageLiquidations": {
 		"deploy": false
@@ -90,7 +90,7 @@
 		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": false
+		"deploy": true
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
@@ -155,12 +155,6 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"MultiChainDebtShareState": {
-		"deploy": false
-	},
-	"MultiChainDebtShareManager": {
-		"deploy": false
-	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -181,5 +175,11 @@
 	},
 	"BridgeStatepUSD": {
 		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": true
+	},
+	"CrossChainState": {
+		"deploy": true
 	}
 }
