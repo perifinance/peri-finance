@@ -55,8 +55,6 @@ contract CrossChainState is Owned, State, ICrossChainState {
     }
 
     function _getTotalNetworkDebtEntryAtIndex(uint index) internal view returns (uint) {
-        require(_totalNetworkDebtLedger.length > 0, "There is no available cross network debt data");
-
         return _totalNetworkDebtLedger[index];
     }
 

@@ -36,7 +36,7 @@
 		"deploy": false
 	},
 	"DebtCache": {
-		"deploy": true
+		"deploy": false
 	},
 	"Depot": {
 		"deploy": false
@@ -72,7 +72,7 @@
 		"deploy": false
 	},
 	"Issuer": {
-		"deploy": true
+		"deploy": false
 	},
 	"EternalStorageLiquidations": {
 		"deploy": false
@@ -90,7 +90,7 @@
 		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
@@ -177,9 +177,9 @@
 		"deploy": false
 	},
 	"CrossChainManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"CrossChainState": {
-		"deploy": true
+		"deploy": false
 	}
 }
