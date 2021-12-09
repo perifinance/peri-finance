@@ -563,8 +563,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xd4937d36648Ec908eFd9943083Db226e254628A2",
-				"status": "current",
-				"keccak256": "0xb90c5d356958f7c20a36a483b9a4187cd5192207ce1788e78fac2860f3a21864"
+				"status": "replaced",
+				"keccak256": "0xb90c5d356958f7c20a36a483b9a4187cd5192207ce1788e78fac2860f3a21864",
+				"replaced_in": "v0.2.5"
 			},
 			"SupplySchedule": {
 				"address": "0x87df0AC73e931c95D3a6C10173f5EFc67A1c4AEc",
@@ -752,8 +753,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x8cBE96Fa0DCA0879f99ee149448297F8bC5377f7",
-				"status": "current",
-				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869"
+				"status": "replaced",
+				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869",
+				"replaced_in": "v0.2.5"
 			},
 			"PeriFinance": {
 				"address": "0x64B816e2DDaa91db406f18215f5a15923250A83A",
@@ -807,13 +809,15 @@
 			},
 			"Issuer": {
 				"address": "0x1a0177e3a485b27C2f6Fde8d3D8BFd1F2e087191",
-				"status": "current",
-				"keccak256": "0x141f539d7084f94afc741245f443fd298c6f0bd5c7a052e0f12ddb0bc88f51ad"
+				"status": "replaced",
+				"keccak256": "0x141f539d7084f94afc741245f443fd298c6f0bd5c7a052e0f12ddb0bc88f51ad",
+				"replaced_in": "v0.2.5"
 			},
 			"PeriFinance": {
 				"address": "0x1706596BFB58E96DBB87D10cAb4db32B1d99e491",
-				"status": "current",
-				"keccak256": "0xa068c336c9f39a74e3c7125be6d6da0e92d4906470d556fd61477442909f45e3"
+				"status": "replaced",
+				"keccak256": "0xa068c336c9f39a74e3c7125be6d6da0e92d4906470d556fd61477442909f45e3",
+				"replaced_in": "v0.2.5"
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x958fcd5d4AbBEC12685362685223AF63fa1e0D1A",
@@ -829,6 +833,35 @@
 				"address": "0x74e283846A912683CA0799dc0dfF1f7a879b0f92",
 				"status": "current",
 				"keccak256": "0x53527aff7e4af1588c45df0aba347f44d5bf29109124b1864857ec849c197e5d"
+			}
+		}
+	},
+	"v0.2.5": {
+		"tag": "v0.2.5",
+		"fulltag": "v0.2.5",
+		"network": "mumbai",
+		"date": "2021-12-09T17:18:13+09:00",
+		"commit": "e20465ab9364500244d06ea8416e8738e31e4792",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x0Cc9CeB310D4E7F76C6cC1D6c4e6e4485E244467",
+				"status": "current",
+				"keccak256": "0x093e526724ac0ddb6710bfee4fd8ee4419e07d0ed883f73c43cd3b1a532d40ca"
+			},
+			"Issuer": {
+				"address": "0x613d4A06C27cb8258c0B6a0aC367AADD6DCc8294",
+				"status": "current",
+				"keccak256": "0xff9e76a24d06e2e585a71ee740b7768ac0d03fd91c13c5720d423d7590a86ff1"
+			},
+			"PynthpUSD": {
+				"address": "0x9ce92EF824B3C2998871166c0E65143c59CB3038",
+				"status": "current",
+				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505"
+			},
+			"PeriFinance": {
+				"address": "0xc4D944F7a7e896910db081a85339b7FeaA545255",
+				"status": "current",
+				"keccak256": "0x3e0cf9f4cb179fe57a62662b78094598363f8f4a4913288a1e9f28451a0b5819"
 			}
 		}
 	}
