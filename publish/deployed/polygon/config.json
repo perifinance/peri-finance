@@ -140,9 +140,6 @@
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
-	"StakingStateUSDC": {
-		"deploy": false
-	},
 	"StakingState": {
 		"deploy": false
 	},

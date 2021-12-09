@@ -26,13 +26,6 @@ interface IPeriFinance {
 
     function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);
 
-    function externalTokenQuota(
-        address _account,
-        uint _additionalpUSD,
-        uint _additionalExToken,
-        bool _isIssue
-    ) external view returns (uint);
-
     function remainingIssuablePynths(address issuer)
         external
         view

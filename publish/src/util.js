@@ -449,7 +449,11 @@ function estimateBSCGasPice(network, priority) {
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
-		.get(gasStationUrl)
+		.get(gasStationUrl, {
+			params: {
+				apikey: process.env.BSC_GASSTAION_API_KEY,
+			},
+		})
 		.then(({ data }) => {
 			const { slow, standard, fast, instant } = data;
 
@@ -467,6 +471,31 @@ function estimateBSCGasPice(network, priority) {
 		.catch(e => console.log(e));
 }
 
+function estimateMoonBeamGasPrice(network, priority) {
+	const gasStationUrl = `https://gmriver.blockscan.com/gasapi.ashx`;
+	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
+
+	return axios
+		.get(gasStationUrl, {
+			params: { apiKey: 'key', method: 'gasoracle' },
+		})
+		.then(({ data }) => {
+			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
+
+			switch (priority) {
+				case 'fastest':
+					return FastGasPrice;
+				case 'fast':
+					return FastGasPrice;
+				case 'standard':
+					return ProposeGasPrice;
+				default:
+					return SafeGasPrice;
+			}
+		})
+		.catch(e => console.log(e));
+}
+
 async function checkGasPrice(network, priority) {
 	let gasPrice;
 
@@ -476,6 +505,8 @@ async function checkGasPrice(network, priority) {
 		gasPrice = await estimateEtherGasPice(priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);
+	} else if (['moonbase-alphanet', 'moonriver'].includes(network)) {
+		gasPrice = await estimateMoonBeamGasPrice(network, priority);
 	}
 
 	console.log(`using gas price : ${gasPrice}`);

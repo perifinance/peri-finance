@@ -4,7 +4,6 @@ pragma solidity 0.5.16;
 import "./BasePeriFinance.sol";
 
 // Internal references
-import "./interfaces/IRewardEscrow.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
@@ -12,12 +11,12 @@ import "./interfaces/IBridgeState.sol";
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
-    bytes32 private constant CONTRACT_REWARD_ESCROW = "RewardEscrow";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
 
     address public minterRole;
     address public inflationMinter;
+    address payable public bridgeValidator;
 
     IBridgeState public bridgeState;
 
@@ -30,25 +29,22 @@ contract PeriFinance is BasePeriFinance {
         uint _totalSupply,
         address _resolver,
         address _minterRole,
-        address _blacklistManager
+        address _blacklistManager,
+        address payable _bridgeValidator
     ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _blacklistManager) {
         minterRole = _minterRole;
+        bridgeValidator = _bridgeValidator;
     }
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](3);
-        newAddresses[0] = CONTRACT_REWARD_ESCROW;
-        newAddresses[1] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[2] = CONTRACT_SUPPLYSCHEDULE;
+        bytes32[] memory newAddresses = new bytes32[](2);
+        newAddresses[0] = CONTRACT_REWARDESCROW_V2;
+        newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
     // ========== VIEWS ==========
-
-    function rewardEscrow() internal view returns (IRewardEscrow) {
-        return IRewardEscrow(requireAndGetAddress(CONTRACT_REWARD_ESCROW));
-    }
 
     function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
@@ -59,30 +55,6 @@ contract PeriFinance is BasePeriFinance {
     }
 
     // ========== OVERRIDDEN FUNCTIONS ==========
-
-    function exchangeWithVirtual(
-        bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey,
-        bytes32 trackingCode
-    )
-        external
-        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
-        optionalProxy
-        blacklisted(messageSender)
-        returns (uint amountReceived, IVirtualPynth vPynth)
-    {
-        _notImplemented();
-        return
-            exchanger().exchangeWithVirtual(
-                messageSender,
-                sourceCurrencyKey,
-                sourceAmount,
-                destinationCurrencyKey,
-                messageSender,
-                trackingCode
-            );
-    }
 
     function settle(bytes32 currencyKey)
         external
@@ -169,26 +141,31 @@ contract PeriFinance is BasePeriFinance {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyAvailableWhenBridgeStateSet {
+    function overchainTransfer(uint _amount, uint _destChainId)
+        external
+        payable
+        optionalProxy
+        onlyAvailableWhenBridgeStateSet
+    {
         require(_amount > 0, "Cannot transfer zero");
+        require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
+        bridgeValidator.transfer(msg.value);
 
         require(_burnByProxy(messageSender, _amount), "burning failed");
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
 
-    function claimAllBridgedAmounts() external optionalProxy onlyAvailableWhenBridgeStateSet {
+    function claimAllBridgedAmounts() external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "No claimable");
+        require(msg.value >= systemSettings().bridgeClaimGasCost(), "fee is not sufficient");
+        bridgeValidator.transfer(msg.value);
 
         for (uint i = 0; i < applicableIds.length; i++) {
             _claimBridgedAmount(applicableIds[i]);
         }
-    }
-
-    function claimBridgedAmount(uint _index) external optionalProxy onlyAvailableWhenBridgeStateSet {
-        _claimBridgedAmount(_index);
     }
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
@@ -204,25 +181,17 @@ contract PeriFinance is BasePeriFinance {
         return true;
     }
 
-    /* Once off function for SIP-60 to migrate PERI balances in the RewardEscrow contract
-     * To the new RewardEscrowV2 contract
-     */
-    function migrateEscrowBalanceToRewardEscrowV2() external onlyOwner {
-        // Record balanceOf(RewardEscrow) contract
-        uint rewardEscrowBalance = tokenState.balanceOf(address(rewardEscrow()));
-
-        // transfer all of RewardEscrow's balance to RewardEscrowV2
-        // _internalTransfer emits the transfer event
-        _internalTransfer(address(rewardEscrow()), address(rewardEscrowV2()), rewardEscrowBalance);
-    }
-
     function setMinterRole(address _newMinter) external onlyOwner {
         // If address is set to zero address, mint is not prohibited
         minterRole = _newMinter;
     }
 
-    function setinflationMinter(address _newinflationMinter) external onlyOwner {
-        inflationMinter = _newinflationMinter;
+    function setBridgeValidator(address payable _bridgeValidator) external onlyOwner {
+        bridgeValidator = _bridgeValidator;
+    }
+
+    function setInflationMinter(address _newInflationMinter) external onlyOwner {
+        inflationMinter = _newInflationMinter;
     }
 
     function setBridgeState(address _newBridgeState) external onlyOwner {

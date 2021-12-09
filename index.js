@@ -322,7 +322,9 @@ const defaults = {
 			{ network: 'mumbai', isOpened: true },
 		],
 	},
-	INITIAL_ISSUANCE: w3utils.toWei(`${11e6}`),
+	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`176946`, 'gwei'), // processOutboundPeriod + closeOutboundPeriod = 51453 + 125493 = 176946
+	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`176993`, 'gwei'), // appendInboundingRequest = 176993
+	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,

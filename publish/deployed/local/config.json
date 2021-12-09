@@ -107,9 +107,6 @@
 	"PeriFinanceEscrow": {
 		"deploy": true
 	},
-	"RewardEscrow": {
-		"deploy": true
-	},
 	"RewardEscrowV2": {
 		"deploy": true
 	},

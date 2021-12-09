@@ -586,11 +586,6 @@ const deploy = async ({
 		});
 	}
 
-	const rewardEscrow = await deployer.deployContract({
-		name: 'RewardEscrow',
-		args: [account, ZERO_ADDRESS, ZERO_ADDRESS],
-	});
-
 	const rewardEscrowV2 = await deployer.deployContract({
 		name: 'RewardEscrowV2',
 		source: useOvm ? 'ImportableRewardEscrowV2' : 'RewardEscrowV2',
@@ -746,6 +741,9 @@ const deploy = async ({
 		network
 	];
 	const minterRoleAddress = (await getDeployParameter('MINTER_ROLE_ADDRESS'))[network];
+	const validatorAddress = (await getDeployParameter('BRIDGE_ROLES'))[network].filter(
+		({ roleKey }) => roleKey === 'Validator'
+	)[0].address;
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		periFinance = await deployer.deployContract({
@@ -760,6 +758,7 @@ const deploy = async ({
 				addressOf(readProxyForResolver),
 				childChainManagerAddress, // address of childChainManager,
 				addressOf(blacklistManager),
+				validatorAddress,
 			],
 		});
 
@@ -786,6 +785,7 @@ const deploy = async ({
 				addressOf(readProxyForResolver),
 				minterRoleAddress,
 				addressOf(blacklistManager),
+				validatorAddress,
 			],
 		});
 
@@ -812,6 +812,7 @@ const deploy = async ({
 				addressOf(readProxyForResolver),
 				minterRoleAddress,
 				addressOf(blacklistManager),
+				validatorAddress,
 			],
 		});
 
@@ -838,6 +839,7 @@ const deploy = async ({
 				addressOf(readProxyForResolver),
 				minterRoleAddress,
 				addressOf(blacklistManager),
+				validatorAddress,
 			],
 		});
 
@@ -851,6 +853,17 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
+	}
+
+	if (validatorAddress) {
+		await runStep({
+			contract: 'PeriFinance',
+			target: periFinance,
+			read: 'bridgeValidator',
+			expected: input => input === validatorAddress,
+			write: 'setBridgeValidator',
+			writeArg: validatorAddress,
+		});
 	}
 
 	if (periFinance && blacklistManager) {
@@ -871,7 +884,7 @@ const deploy = async ({
 			target: periFinance,
 			read: 'inflationMinter',
 			expected: input => input === inflationMinterAddress,
-			write: 'setinflationMinter',
+			write: 'setInflationMinter',
 			writeArg: inflationMinterAddress,
 		});
 	}
@@ -1070,28 +1083,6 @@ const deploy = async ({
 		});
 	}
 
-	if (rewardEscrow && periFinance) {
-		await runStep({
-			contract: 'RewardEscrow',
-			target: rewardEscrow,
-			read: 'periFinance',
-			expected: input => input === addressOf(periFinance),
-			write: 'setPeriFinance',
-			writeArg: addressOf(periFinance),
-		});
-	}
-
-	if (rewardEscrow && feePool) {
-		await runStep({
-			contract: 'RewardEscrow',
-			target: rewardEscrow,
-			read: 'feePool',
-			expected: input => input === addressOf(feePool),
-			write: 'setFeePool',
-			writeArg: addressOf(feePool),
-		});
-	}
-
 	if (!useOvm) {
 		const supplySchedule = await deployer.deployContract({
 			name: 'SupplySchedule',
@@ -1235,20 +1226,43 @@ const deploy = async ({
 			name: `Pynth${currencyKey}`,
 			source: sourceContract,
 			deps: [`TokenState${currencyKey}`, `ProxyERC20${currencyKey}`, 'PeriFinance', 'FeePool'],
-			args: [
-				addressOf(proxyERC20ForPynth),
-				addressOf(tokenStateForPynth),
-				`Pynth ${currencyKey}`,
-				currencyKey,
-				account,
-				currencyKeyInBytes,
-				originalTotalSupply,
-				addressOf(readProxyForResolver),
-			],
+			args:
+				sourceContract === 'MultiCollateralPynth'
+					? [
+							addressOf(proxyERC20ForPynth),
+							addressOf(tokenStateForPynth),
+							`Pynth ${currencyKey}`,
+							currencyKey,
+							account,
+							currencyKeyInBytes,
+							originalTotalSupply,
+							addressOf(readProxyForResolver),
+							validatorAddress,
+					  ]
+					: [
+							addressOf(proxyERC20ForPynth),
+							addressOf(tokenStateForPynth),
+							`Pynth ${currencyKey}`,
+							currencyKey,
+							account,
+							currencyKeyInBytes,
+							originalTotalSupply,
+							addressOf(readProxyForResolver),
+					  ],
 			force: addNewPynths,
 		});
 
 		if (currencyKey === 'pUSD' && sourceContract === 'MultiCollateralPynth') {
+			await runStep({
+				contract: `Pynth${currencyKey}`,
+				target: pynth,
+				source: sourceContract,
+				read: 'bridgeValidator',
+				expected: input => input === validatorAddress,
+				write: 'setBridgeValidator',
+				writeArg: validatorAddress,
+			});
+
 			const pynthBridgeState = await deployer.deployContract({
 				name: `BridgeState${currencyKey}`,
 				source: 'BridgeState',
@@ -2453,6 +2467,30 @@ const deploy = async ({
 			expected: input => input !== '0', // only change if zero
 			write: 'setDebtSnapshotStaleTime',
 			writeArg: await getDeployParameter('DEBT_SNAPSHOT_STALE_TIME'),
+		});
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'bridgeClaimGasCost',
+			expected: input => input !== '0', // only change if zero
+			write: 'setBridgeClaimGasCost',
+			writeArg: (
+				(await getDeployParameter('BRIDGE_CLAIM_GAS_COST')) *
+				(await checkGasPrice(network, 'standard'))
+			).toString(), // multiply by gasPrice
+		});
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'bridgeTransferGasCost',
+			expected: input => input !== '0', // only change if zero
+			write: 'setBridgeTransferGasCost',
+			writeArg: (
+				(await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')) *
+				(await checkGasPrice(network, 'standard'))
+			).toString(), // multiply by gasPrice
 		});
 
 		// await runStep({

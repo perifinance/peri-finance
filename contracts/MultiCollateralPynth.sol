@@ -8,6 +8,7 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IBridgeState.sol";
+import "./interfaces/ISystemSettings.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/multicollateralpynth
 contract MultiCollateralPynth is Pynth {
@@ -16,6 +17,9 @@ contract MultiCollateralPynth is Pynth {
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_ETH_COLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
+    bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
+
+    address payable public bridgeValidator;
 
     IBridgeState public bridgeState;
 
@@ -29,8 +33,11 @@ contract MultiCollateralPynth is Pynth {
         address _owner,
         bytes32 _currencyKey,
         uint _totalSupply,
-        address _resolver
-    ) public Pynth(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {}
+        address _resolver,
+        address payable _bridgeValidator
+    ) public Pynth(_proxy, _tokenState, _tokenName, _tokenSymbol, _owner, _currencyKey, _totalSupply, _resolver) {
+        bridgeValidator = _bridgeValidator;
+    }
 
     /* ========== VIEWS ======================= */
 
@@ -46,12 +53,17 @@ contract MultiCollateralPynth is Pynth {
         return IEtherCollateralpUSD(requireAndGetAddress(CONTRACT_ETH_COLLATERAL_PUSD));
     }
 
+    function systemSettings() internal view returns (ISystemSettings) {
+        return ISystemSettings(requireAndGetAddress(CONTRACT_SYSTEMSETTINGS));
+    }
+
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = Pynth.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](3);
+        bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_COLLATERALMANAGER;
         newAddresses[1] = CONTRACT_ETH_COLLATERAL;
         newAddresses[2] = CONTRACT_ETH_COLLATERAL_PUSD;
+        newAddresses[3] = CONTRACT_SYSTEMSETTINGS;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -76,26 +88,31 @@ contract MultiCollateralPynth is Pynth {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId) external optionalProxy onlyAvailableWhenBridgeStateSet {
+    function overchainTransfer(uint _amount, uint _destChainId)
+        external
+        payable
+        optionalProxy
+        onlyAvailableWhenBridgeStateSet
+    {
         require(_amount > 0, "Cannot transfer zero");
+        require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
+        bridgeValidator.transfer(msg.value);
 
         require(_internalBurn(messageSender, _amount), "burning failed");
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
 
-    function claimAllBridgedAmounts() external optionalProxy onlyAvailableWhenBridgeStateSet {
+    function claimAllBridgedAmounts() external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "No claimable");
+        require(msg.value >= systemSettings().bridgeClaimGasCost(), "fee is not sufficient");
+        bridgeValidator.transfer(msg.value);
 
         for (uint i = 0; i < applicableIds.length; i++) {
             require(_claimBridgedAmount(applicableIds[i]), "Failed to claim");
         }
-    }
-
-    function claimBridgedAmount(uint _index) external optionalProxy onlyAvailableWhenBridgeStateSet {
-        require(_claimBridgedAmount(_index), "Failed to claim");
     }
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
@@ -113,6 +130,10 @@ contract MultiCollateralPynth is Pynth {
 
     function setBridgeState(address _newBridgeState) external onlyOwner {
         bridgeState = IBridgeState(_newBridgeState);
+    }
+
+    function setBridgeValidator(address payable _bridgeValidator) external onlyOwner {
+        bridgeValidator = _bridgeValidator;
     }
 
     /* ========== MODIFIERS ========== */
