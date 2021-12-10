@@ -2,12 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketFactory": {
-		"deploy": true
-	},
-	"BinaryOptionMarketManager": {
-		"deploy": true
-	},
 	"BinaryOptionMarketData": {
 		"deploy": false
 	},
@@ -125,12 +119,6 @@
 	"ProxyFeePool": {
 		"deploy": false
 	},
-	"ProxyPeriFinance": {
-		"deploy": false
-	},
-	"ProxypUSD": {
-		"deploy": false
-	},
 	"SafeDecimalMath": {
 		"deploy": false
 	},
@@ -144,6 +132,9 @@
 		"deploy": false
 	},
 	"TradingRewards": {
+		"deploy": false
+	},
+	"RewardEscrow": {
 		"deploy": false
 	},
 	"RewardEscrowV2": {

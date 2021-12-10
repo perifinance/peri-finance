@@ -131,6 +131,9 @@
 	"TradingRewards": {
 		"deploy": false
 	},
+	"RewardEscrow": {
+		"deploy": false
+	},
 	"RewardEscrowV2": {
 		"deploy": false
 	},
@@ -150,7 +153,7 @@
 		"deploy": false
 	},
 	"StakingRewardsPeriMockLP": {
-		"deploy": false
+		"deploy": true
 	},
 	"BridgeState": {
 		"deploy": false

@@ -586,6 +586,11 @@ const deploy = async ({
 		});
 	}
 
+	const rewardEscrow = await deployer.deployContract({
+		name: 'RewardEscrow',
+		args: [account, ZERO_ADDRESS, ZERO_ADDRESS],
+	});
+
 	const rewardEscrowV2 = await deployer.deployContract({
 		name: 'RewardEscrowV2',
 		source: useOvm ? 'ImportableRewardEscrowV2' : 'RewardEscrowV2',
@@ -1080,6 +1085,28 @@ const deploy = async ({
 			name: 'EscrowChecker',
 			deps: ['PeriFinanceEscrow'],
 			args: [addressOf(periFinanceEscrow)],
+		});
+	}
+
+	if (rewardEscrow && periFinance) {
+		await runStep({
+			contract: 'RewardEscrow',
+			target: rewardEscrow,
+			read: 'periFinance',
+			expected: input => input === addressOf(periFinance),
+			write: 'setPeriFinance',
+			writeArg: addressOf(periFinance),
+		});
+	}
+
+	if (rewardEscrow && feePool) {
+		await runStep({
+			contract: 'RewardEscrow',
+			target: rewardEscrow,
+			read: 'feePool',
+			expected: input => input === addressOf(feePool),
+			write: 'setFeePool',
+			writeArg: addressOf(feePool),
 		});
 	}
 

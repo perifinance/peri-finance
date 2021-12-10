@@ -131,6 +131,9 @@
 	"TradingRewards": {
 		"deploy": false
 	},
+	"RewardEscrow": {
+		"deploy": false
+	},
 	"RewardEscrowV2": {
 		"deploy": false
 	},
@@ -138,9 +141,6 @@
 		"deploy": false
 	},
 	"ProxyERC20pUSD": {
-		"deploy": false
-	},
-	"ProxypUSD": {
 		"deploy": false
 	},
 	"BlacklistManager": {
@@ -156,7 +156,7 @@
 		"deploy": false
 	},
 	"StakingRewardsPeriMockLP": {
-		"deploy": false
+		"deploy": true
 	},
 	"TokenStatepBTC": {
 		"deploy": false
