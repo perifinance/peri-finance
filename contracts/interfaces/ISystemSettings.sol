@@ -26,4 +26,8 @@ interface ISystemSettings {
     function minimumStakeTime() external view returns (uint);
 
     function externalTokenQuota() external view returns (uint);
+
+    function bridgeTransferGasCost() external view returns (uint);
+
+    function bridgeClaimGasCost() external view returns (uint);
 }

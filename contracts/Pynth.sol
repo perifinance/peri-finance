@@ -31,6 +31,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_FEEPOOL = "FeePool";
+    bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
 
     /* ========== CONSTRUCTOR ========== */
 

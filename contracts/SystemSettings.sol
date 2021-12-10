@@ -134,6 +134,14 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getExternalTokenQuota();
     }
 
+    function bridgeTransferGasCost() external view returns (uint) {
+        return getBridgeTransferGasCost();
+    }
+
+    function bridgeClaimGasCost() external view returns (uint) {
+        return getBridgeClaimGasCost();
+    }
+
     // ========== RESTRICTED ==========
 
     function setCrossDomainMessageGasLimit(CrossDomainMessageGasLimits _gasLimitType, uint _crossDomainMessageGasLimit)
@@ -277,6 +285,14 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_EXTERNAL_TOKEN_QUOTA, _newQuota);
 
         emit ExternalTokenQuotaUpdated(_newQuota);
+    }
+
+    function setBridgeTransferGasCost(uint _gasCost) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_BRIDGE_TRANSFER_GAS_COST, _gasCost);
+    }
+
+    function setBridgeClaimGasCost(uint _gasCost) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_BRIDGE_CLAIM_GAS_COST, _gasCost);
     }
 
     // ========== EVENTS ==========

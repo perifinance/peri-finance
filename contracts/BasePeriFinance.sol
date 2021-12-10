@@ -17,6 +17,7 @@ import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardsDistribution.sol";
+import "./interfaces/ISystemSettings.sol";
 import "./interfaces/IVirtualPynth.sol";
 
 interface IBlacklistManager {
@@ -41,6 +42,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
+    bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
 
     IBlacklistManager public blacklistManager;
 
@@ -65,12 +67,13 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](5);
+        addresses = new bytes32[](6);
         addresses[0] = CONTRACT_PERIFINANCESTATE;
         addresses[1] = CONTRACT_SYSTEMSTATUS;
         addresses[2] = CONTRACT_EXCHANGER;
         addresses[3] = CONTRACT_ISSUER;
         addresses[4] = CONTRACT_REWARDSDISTRIBUTION;
+        addresses[5] = CONTRACT_SYSTEMSETTINGS;
     }
 
     function periFinanceState() internal view returns (IPeriFinanceState) {
@@ -91,6 +94,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function rewardsDistribution() internal view returns (IRewardsDistribution) {
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
+    }
+
+    function systemSettings() internal view returns (ISystemSettings) {
+        return ISystemSettings(requireAndGetAddress(CONTRACT_SYSTEMSETTINGS));
     }
 
     function getRequiredAddress(bytes32 _contractName) external view returns (address) {
@@ -139,15 +146,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     function maxIssuablePynths(address account) external view returns (uint maxIssuable) {
         return issuer().maxIssuablePynths(account);
-    }
-
-    function externalTokenQuota(
-        address _account,
-        uint _additionalpUSD,
-        uint _additionalExToken,
-        bool _isIssue
-    ) external view returns (uint) {
-        return issuer().externalTokenQuota(_account, _additionalpUSD, _additionalExToken, _isIssue);
     }
 
     function remainingIssuablePynths(address account)

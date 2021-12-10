@@ -33,8 +33,9 @@
 			},
 			"SystemSettings": {
 				"address": "0x16bbfd2520759B72887f4f2a636ed08E501e2c1A",
-				"status": "current",
-				"keccak256": "0x958766c1373fc80f3b10bcb452ddf008c20e2b861c9a9726a32ea3ad2057f839"
+				"status": "replaced",
+				"keccak256": "0x958766c1373fc80f3b10bcb452ddf008c20e2b861c9a9726a32ea3ad2057f839",
+				"replaced_in": "v0.2.5"
 			},
 			"SystemStatus": {
 				"address": "0x0a09c979923976947e44dD3dd6165FD6dEE25c14",
@@ -396,13 +397,15 @@
 			},
 			"PynthpUSD": {
 				"address": "0x87375611dE17F7D5A5E8e6a3ca2A9785B307D38a",
-				"status": "current",
-				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869"
+				"status": "replaced",
+				"keccak256": "0xa725739e4f8d13723af3055b2cd84d7ad90407aed471b3157e7cf43177001869",
+				"replaced_in": "v0.2.5"
 			},
 			"BridgeState": {
 				"address": "0xFeC41Ae537dA68D51c44ee4f7F84734a1D6008Be",
-				"status": "current",
-				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
+				"status": "replaced",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e",
+				"replaced_in": "v0.2.6"
 			},
 			"MultiChainDebtShareManager": {
 				"address": "0x160452Bee9DA103157EA1E512299728c46995157",
@@ -411,8 +414,9 @@
 			},
 			"BridgeStatepUSD": {
 				"address": "0xe2BA04b0518F96E5fdbd53dD3e86f63e79FB8e9E",
-				"status": "current",
-				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e"
+				"status": "replaced",
+				"keccak256": "0xcca69baf2fee2e7aa237c7a9576806561ace5c7c203862431575d0ce28d57f2e",
+				"replaced_in": "v0.2.6"
 			}
 		}
 	},
@@ -425,8 +429,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
-				"status": "current",
-				"keccak256": "0x624a69b5a7479e1db995a42874c95ad85ed6c975e09777fc263ec91dd1719292"
+				"status": "replaced",
+				"keccak256": "0x624a69b5a7479e1db995a42874c95ad85ed6c975e09777fc263ec91dd1719292",
+				"replaced_in": "v0.2.5"
 			},
 			"DebtCache": {
 				"address": "0x44C76A57736dBe644115218c6EA2224CE3bbDA31",
@@ -435,8 +440,9 @@
 			},
 			"Issuer": {
 				"address": "0xa9dEF9b01dcd224FAADDbd75826034a2c4ff73d2",
-				"status": "current",
-				"keccak256": "0x141f539d7084f94afc741245f443fd298c6f0bd5c7a052e0f12ddb0bc88f51ad"
+				"status": "replaced",
+				"keccak256": "0x141f539d7084f94afc741245f443fd298c6f0bd5c7a052e0f12ddb0bc88f51ad",
+				"replaced_in": "v0.2.5"
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0xbd65B6870b232ca0dd20aB0363b5A1f98aF628d1",
@@ -452,6 +458,54 @@
 				"address": "0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
 				"status": "current",
 				"keccak256": "0x53527aff7e4af1588c45df0aba347f44d5bf29109124b1864857ec849c197e5d"
+			}
+		}
+	},
+	"v0.2.5": {
+		"tag": "v0.2.5",
+		"fulltag": "v0.2.5",
+		"network": "goerli",
+		"date": "2021-12-09T17:18:13+09:00",
+		"commit": "e20465ab9364500244d06ea8416e8738e31e4792",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xFf54Ece25CfAe8CCCc9d580cCe4c3Aa9C3b8a47C",
+				"status": "current",
+				"keccak256": "0x093e526724ac0ddb6710bfee4fd8ee4419e07d0ed883f73c43cd3b1a532d40ca"
+			},
+			"PeriFinance": {
+				"address": "0x9d0d6E5d3264aEF539d6E9B31ba6cb158fEC1433",
+				"status": "current",
+				"keccak256": "0x344cd3a4d7b65cd02cb5e63205784cf0adffd9ffc4e8e56fd32fa9bca9e0af3f"
+			},
+			"Issuer": {
+				"address": "0xc3527595a70bc206c508d660FFeC3a9691dBc38C",
+				"status": "current",
+				"keccak256": "0xff9e76a24d06e2e585a71ee740b7768ac0d03fd91c13c5720d423d7590a86ff1"
+			},
+			"PynthpUSD": {
+				"address": "0x7f8bF39f15E831CbaF8c024F11b222F214cE51B1",
+				"status": "current",
+				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505"
+			}
+		}
+	},
+	"v0.2.6": {
+		"tag": "v0.2.6",
+		"fulltag": "v0.2.6",
+		"network": "goerli",
+		"date": "2021-12-09T17:18:13+09:00",
+		"commit": "e20465ab9364500244d06ea8416e8738e31e4792",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xa24Ed2A8668BF0B531b6DB6c2A4d46a07cb95Ba0",
+				"status": "current",
+				"keccak256": "0x836fafe3421fd6d3d38e56d9427f8f3b4bf7a7a2de0674a7e3d1e12904dbab1f"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x794755f988bdC83d85df5a410a2B40118E385672",
+				"status": "current",
+				"keccak256": "0x836fafe3421fd6d3d38e56d9427f8f3b4bf7a7a2de0674a7e3d1e12904dbab1f"
 			}
 		}
 	}

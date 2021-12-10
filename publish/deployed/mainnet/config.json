@@ -86,9 +86,6 @@
 	"Liquidations": {
 		"deploy": false
 	},
-	"RewardEscrow": {
-		"deploy": false
-	},
 	"RewardEscrowV2": {
 		"deploy": false
 	},

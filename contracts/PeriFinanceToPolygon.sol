@@ -12,8 +12,21 @@ contract PeriFinanceToPolygon is PeriFinance {
         uint _totalSupply,
         address _resolver,
         address _childChainManager,
-        address _blacklistManager
-    ) public PeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _childChainManager, _blacklistManager) {
+        address _blacklistManager,
+        address payable _bridgeValidator
+    )
+        public
+        PeriFinance(
+            _proxy,
+            _tokenState,
+            _owner,
+            _totalSupply,
+            _resolver,
+            _childChainManager,
+            _blacklistManager,
+            _bridgeValidator
+        )
+    {
         childChainManager = _childChainManager;
     }
 

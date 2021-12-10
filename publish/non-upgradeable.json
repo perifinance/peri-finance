@@ -18,6 +18,5 @@
 	"BlacklistManager",
 	"StakingState",
 	"BridgeState",
-	"MultiChainDebtShareState",
 	"CrossChainState"
 ]
