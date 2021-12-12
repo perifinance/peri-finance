@@ -82,5 +82,9 @@
 	"USDC": {
 		"asset": "USDC",
 		"feed": "0x9211c6b3BF41A10F78539810Cf5c64e1BB78Ec60"
+	},
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x777A68032a88E5A84678A77Af2CD65A7b3c0775a"
 	}
 }
