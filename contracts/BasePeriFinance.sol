@@ -223,7 +223,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         blacklisted(exchangeForAddress)
         returns (uint amountReceived)
     {
-        _notImplemented();
         return
             exchanger().exchangeOnBehalf(
                 exchangeForAddress,
@@ -287,7 +286,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         blacklisted(exchangeForAddress)
         returns (uint amountReceived)
     {
-        _notImplemented();
         return
             exchanger().exchangeOnBehalfWithTracking(
                 exchangeForAddress,

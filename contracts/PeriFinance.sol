@@ -128,8 +128,6 @@ contract PeriFinance is BasePeriFinance {
         blacklisted(messageSender)
         returns (bool)
     {
-        _notImplemented();
-
         (uint totalRedeemed, uint amountLiquidated) =
             issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
 
@@ -141,13 +139,12 @@ contract PeriFinance is BasePeriFinance {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId)
-        external
-        payable
-        optionalProxy
-        onlyAvailableWhenBridgeStateSet
-    {
+    function overchainTransfer(uint _amount, uint _destChainId) external payable optionalProxy {
         require(_amount > 0, "Cannot transfer zero");
+        (uint transferable, ) =
+            issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
+        require(transferable >= _amount, "Cannot transfer more than the transferrable");
+
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
         bridgeValidator.transfer(msg.value);
 
@@ -156,7 +153,7 @@ contract PeriFinance is BasePeriFinance {
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
 
-    function claimAllBridgedAmounts() external payable optionalProxy onlyAvailableWhenBridgeStateSet {
+    function claimAllBridgedAmounts() external payable optionalProxy {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "No claimable");
@@ -196,12 +193,6 @@ contract PeriFinance is BasePeriFinance {
 
     function setBridgeState(address _newBridgeState) external onlyOwner {
         bridgeState = IBridgeState(_newBridgeState);
-    }
-
-    // ========== MODIFIERS ==========
-    modifier onlyAvailableWhenBridgeStateSet() {
-        require(address(bridgeState) != address(0), "Bridge State must be set to call this function");
-        _;
     }
 
     // ========== EVENTS ==========
