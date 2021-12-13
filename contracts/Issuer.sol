@@ -236,7 +236,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
-        (totalSystemValue, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, true);
+        (, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, true);
+        totalSystemValue = crossChainManager().getTotalNetworkAdaptedTotalSystemValue();
 
         // If it's zero, they haven't issued, and they have no debt.
         // Note: it's more gas intensive to put this check here rather than before _totalIssuedPynths
@@ -256,8 +257,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 .divideDecimalRoundPrecise(systemDebt)
                 .multiplyDecimalRoundPrecise(initialDebtOwnership);
         }
-
-        totalSystemValue = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(_issuer, totalSystemValue);
 
         // Their debt balance is their portion of the total system value.
         uint highPrecisionBalance =

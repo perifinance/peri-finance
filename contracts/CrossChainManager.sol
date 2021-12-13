@@ -6,7 +6,6 @@ import "./MixinResolver.sol";
 
 import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/ICrossChainState.sol";
-import "./interfaces/IDebtCache.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IBridgeState.sol";
 
@@ -17,11 +16,12 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
+    bytes32 internal constant pUSD = "pUSD";
+
     address internal _crossChainState;
     address internal _debtManager;
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_BRIDGESTATEPUSD = "BridgeStatepUSD";
 
     constructor(
@@ -36,14 +36,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_DEBTCACHE;
-        addresses[1] = CONTRACT_ISSUER;
-        addresses[2] = CONTRACT_BRIDGESTATEPUSD;
-    }
-
-    function debtCache() internal view returns (IDebtCache) {
-        return IDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
+        addresses = new bytes32[](2);
+        addresses[0] = CONTRACT_ISSUER;
+        addresses[1] = CONTRACT_BRIDGESTATEPUSD;
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -74,30 +69,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         (crossChainDebtEntryIndex, userStateDebtLedgerIndex) = state().getCrossNetworkUserData(account);
     }
 
-    function getTotalNetworkAdaptedTotalSystemValue(address account, uint _totalSystemValue)
-        external
-        view
-        returns (uint totalSystemValue)
-    {
-        (uint crossChainDebtEntryIndex, ) = state().getCrossNetworkUserData(account);
-        uint userLastIssuanceTotalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(crossChainDebtEntryIndex);
-        uint currentTotalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
-
-        if (userLastIssuanceTotalNetworkDebt >= currentTotalNetworkDebt) {
-            totalSystemValue = _totalSystemValue.sub(
-                userLastIssuanceTotalNetworkDebt.sub(currentTotalNetworkDebt).multiplyDecimal(
-                    _currentNetworkDebtPercentage()
-                )
-            );
-        } else {
-            totalSystemValue = _totalSystemValue.add(
-                currentTotalNetworkDebt.sub(userLastIssuanceTotalNetworkDebt).multiplyDecimal(
-                    _currentNetworkDebtPercentage()
-                )
-            );
-        }
-
-        return totalSystemValue;
+    function getTotalNetworkAdaptedTotalSystemValue() external view returns (uint totalSystemValue) {
+        uint networkPercentage = _currentNetworkDebtPercentage();
+        totalSystemValue = state().lastTotalNetworkDebtLedgerEntry().multiplyDecimal(networkPercentage);
     }
 
     /**
@@ -139,7 +113,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @notice Get owned debt percentage of network by total networks
      * @dev internal function
      * @param _index uint
-     * @return debt network ratio by total network debt at specific time
+     * @return debt network ratio by total network debt at specific time, and
      */
     function _networkDebtPercentageAtIndex(uint _index) internal view returns (uint) {
         uint totalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(_index);
@@ -163,9 +137,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return network debt ratio by total network debt
      */
     function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint) {
-        (uint currentNetworkDebt, bool isInvalid) = debtCache().currentDebt();
-
-        require(!isInvalid, "current total debt is not valid");
+        uint currentNetworkDebt = issuer().totalIssuedPynths(pUSD, true);
 
         uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
         uint inboundAmount = bridgeStatepUSD().getTotalInboundAmount();

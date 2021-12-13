@@ -832,7 +832,7 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'CrossChainManager',
-			deps: ['AddressResolver', 'CrossChainState', 'DebtCache', 'BridgeStatepUSD'],
+			deps: ['AddressResolver', 'CrossChainState', 'Issuer', 'BridgeStatepUSD'],
 		},
 	];
 
