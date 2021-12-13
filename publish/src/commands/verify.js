@@ -179,6 +179,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 				try {
 					result = await axios.post(
 						// etherscanUrl,
+						// 'https://moonbase-blockscout.testnet.moonbeam.network/verify_smart_contract/contract_verifications'
 						'https://blockscout.com/poa/sokol/api',
 						{
 							module: 'contract',
