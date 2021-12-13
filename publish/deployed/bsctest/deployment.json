@@ -281,11 +281,11 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x0a55287336212Eaf7bf6cda24f02bF5B573b6ac0",
+			"address": "0x99F8a7b9136C3e65016cd03751A2E75dFFB67E4e",
 			"source": "SupplySchedule",
-			"link": "https://testnet.bscscan.com/address/0x0a55287336212Eaf7bf6cda24f02bF5B573b6ac0",
-			"timestamp": "2021-12-10T09:35:30.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0xeb2a4f169638035f37f151870ce423dd3eb542a6fbd55baa6471f4226b571755",
+			"link": "https://testnet.bscscan.com/address/0x99F8a7b9136C3e65016cd03751A2E75dFFB67E4e",
+			"timestamp": "2021-12-13T08:43:15.095Z",
+			"txn": "",
 			"network": "bsctest"
 		},
 		"TokenStatepUSD": {

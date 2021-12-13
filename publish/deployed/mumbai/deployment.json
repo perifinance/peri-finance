@@ -281,11 +281,11 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x837634D61f50F25B16c1139985825F3D3CA093d0",
+			"address": "0x9F68E13430E28ecbd087D05F7c8Ea344e3e7faC2",
 			"source": "SupplySchedule",
-			"link": "https://mumbai.polygonscan.com/address/0x837634D61f50F25B16c1139985825F3D3CA093d0",
-			"timestamp": "2021-12-10T09:39:31.000Z",
-			"txn": "https://mumbai.polygonscan.com/tx/0x550fd1ce7724ef832ae8151d4ee5d070c631d7ceec09b43d4fcfe3ae59102351",
+			"link": "https://mumbai.polygonscan.com/address/0x9F68E13430E28ecbd087D05F7c8Ea344e3e7faC2",
+			"timestamp": "2021-12-13T08:40:53.138Z",
+			"txn": "",
 			"network": "mumbai"
 		},
 		"TokenStatepUSD": {
