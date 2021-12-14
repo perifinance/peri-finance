@@ -212,8 +212,8 @@
 			"address": "0x9aF9599d472d04a416aF9d9fE0b1D18307f53F3E",
 			"source": "PeriFinance",
 			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x9aF9599d472d04a416aF9d9fE0b1D18307f53F3E",
-			"timestamp": "2021-12-13T12:41:37.619Z",
-			"txn": "",
+			"timestamp": "2021-12-13T12:41:24.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x229c1fb42814684f2787b156ab060a1d5acd905b983e1ce00b15f4929e7815da",
 			"network": "moonbase-alphanet"
 		},
 		"BridgeState": {
@@ -284,8 +284,8 @@
 			"address": "0x7EE27a525d74F8C9274Ea145c6cf2d4C15AA721d",
 			"source": "SupplySchedule",
 			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x7EE27a525d74F8C9274Ea145c6cf2d4C15AA721d",
-			"timestamp": "2021-12-13T08:44:49.187Z",
-			"txn": "",
+			"timestamp": "2021-12-13T08:44:36.000Z",
+			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x684344255843b7fe7bc4591656c4c2fba892ff322db33d36cb58aa4d7bd12bdc",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStatepUSD": {

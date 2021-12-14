@@ -212,8 +212,8 @@
 			"address": "0x9Da1f4D8A7B5B517feBcFd0a462eEf2A51460937",
 			"source": "PeriFinanceToEthereum",
 			"link": "https://kovan.etherscan.io/address/0x9Da1f4D8A7B5B517feBcFd0a462eEf2A51460937",
-			"timestamp": "2021-12-13T12:27:37.250Z",
-			"txn": "",
+			"timestamp": "2021-12-13T12:27:36.000Z",
+			"txn": "https://kovan.etherscan.io/tx/0x373aadd508c4a56eb946cb2c0fe8f2d6019074fc23ef7c6fe78b1dcba8e09ffe",
 			"network": "kovan"
 		},
 		"BridgeState": {
