@@ -170,8 +170,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0x86114673F574b0a885E64ccd51c4Bb0ffe82bcE3",
-				"status": "current",
-				"keccak256": "0x705aac3b624d186e431eee6a40ab28b105e183e8413cef72ec070e15935bc634"
+				"status": "replaced",
+				"keccak256": "0x705aac3b624d186e431eee6a40ab28b105e183e8413cef72ec070e15935bc634",
+				"replaced_in": "v0.2.9"
 			},
 			"TokenStatepUSD": {
 				"address": "0xcE954FC4c52A9E6e25306912A36eC59293da41E3",
@@ -456,8 +457,9 @@
 			},
 			"CrossChainManager": {
 				"address": "0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
-				"status": "current",
-				"keccak256": "0x53527aff7e4af1588c45df0aba347f44d5bf29109124b1864857ec849c197e5d"
+				"status": "replaced",
+				"keccak256": "0x53527aff7e4af1588c45df0aba347f44d5bf29109124b1864857ec849c197e5d",
+				"replaced_in": "v0.2.9"
 			}
 		}
 	},
@@ -475,13 +477,15 @@
 			},
 			"PeriFinance": {
 				"address": "0x9d0d6E5d3264aEF539d6E9B31ba6cb158fEC1433",
-				"status": "current",
-				"keccak256": "0x344cd3a4d7b65cd02cb5e63205784cf0adffd9ffc4e8e56fd32fa9bca9e0af3f"
+				"status": "replaced",
+				"keccak256": "0x344cd3a4d7b65cd02cb5e63205784cf0adffd9ffc4e8e56fd32fa9bca9e0af3f",
+				"replaced_in": "v0.2.9"
 			},
 			"Issuer": {
 				"address": "0xc3527595a70bc206c508d660FFeC3a9691dBc38C",
-				"status": "current",
-				"keccak256": "0xff9e76a24d06e2e585a71ee740b7768ac0d03fd91c13c5720d423d7590a86ff1"
+				"status": "replaced",
+				"keccak256": "0xff9e76a24d06e2e585a71ee740b7768ac0d03fd91c13c5720d423d7590a86ff1",
+				"replaced_in": "v0.2.9"
 			},
 			"PynthpUSD": {
 				"address": "0x7f8bF39f15E831CbaF8c024F11b222F214cE51B1",
@@ -506,6 +510,35 @@
 				"address": "0x794755f988bdC83d85df5a410a2B40118E385672",
 				"status": "current",
 				"keccak256": "0x836fafe3421fd6d3d38e56d9427f8f3b4bf7a7a2de0674a7e3d1e12904dbab1f"
+			}
+		}
+	},
+	"v0.2.9": {
+		"tag": "v0.2.9",
+		"fulltag": "v0.2.9",
+		"network": "goerli",
+		"date": "2021-12-13T22:10:01+09:00",
+		"commit": "9771f87e61c0ea15791a8d16dd25d5025200edcf",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xc0142A01e56d569C80686C1bfafb8c5998d1b24B",
+				"status": "current",
+				"keccak256": "0x5f36b8e821425b0150096bec7d709584c17e4b189bb2e94a6985dd49ea0c54b9"
+			},
+			"Issuer": {
+				"address": "0x4f7BF9ACD90beF00A5B13a4606b909C5F088B87a",
+				"status": "current",
+				"keccak256": "0xb1b288dcdd3cd0f5d77a00bdc5970c76dc8c58319e725cb063052cc01b9bd836"
+			},
+			"SupplySchedule": {
+				"address": "0x0E19E96D0B03DBC8a144a0Df6ea916dA04F8d61E",
+				"status": "current",
+				"keccak256": "0x2040bf63268e9af6bbe67a1af851db806a00904ef8660847143b7080ba984943"
+			},
+			"CrossChainManager": {
+				"address": "0x6F8E6990A6070336d806aAA8990f2ecE0AFF411b",
+				"status": "current",
+				"keccak256": "0x9606413ec42395a260a3b2b7ff3c433f0fdcaf9fb8038d616db5e3b1f4f59092"
 			}
 		}
 	}
