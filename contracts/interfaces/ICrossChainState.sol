@@ -23,4 +23,8 @@ interface ICrossChainState {
     function clearCrossNetworkUserData(address) external;
 
     function appendTotalNetworkDebtLedger(uint) external;
+
+    function addTotalNetworkDebtLedger(uint amount) external;
+
+    function subtractTotalNetworkDebtLedger(uint amount) external;
 }

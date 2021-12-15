@@ -25,7 +25,11 @@ interface ICrossChainManager {
 
     function setDebtManager(address) external;
 
+    function appendTotalNetworkDebt(uint) external;
+
     function addTotalNetworkDebt(uint) external;
+
+    function subtractTotalNetworkDebt(uint) external;
 
     function setCrossNetworkUserDebt(address, uint) external;
 

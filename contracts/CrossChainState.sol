@@ -5,12 +5,17 @@ import "./Owned.sol";
 import "./State.sol";
 import "./interfaces/ICrossChainState.sol";
 
+// libraries
+import "./Math.sol";
+
 /**
  * @title CrossChainState
  * @author @Enitsed
  * @notice This contract saves data of All the networks staking system debt
  */
 contract CrossChainState is Owned, State, ICrossChainState {
+    using SafeMath for uint;
+
     // the total network debt and current network debt percentage
     mapping(address => CrossNetworkUserData) private _crossNetworkUserData;
 
@@ -33,7 +38,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @return uint
      */
     function lastTotalNetworkDebtLedgerEntry() external view returns (uint) {
-        return _getTotalNetworkDebtEntryAtIndex(_totalNetworkDebtLedger.length - 1);
+        return _lastTotalNetworkDebtEntry();
     }
 
     /**
@@ -56,6 +61,14 @@ contract CrossChainState is Owned, State, ICrossChainState {
 
     function _getTotalNetworkDebtEntryAtIndex(uint index) internal view returns (uint) {
         return _totalNetworkDebtLedger[index];
+    }
+
+    function _lastTotalNetworkDebtEntry() internal view returns (uint) {
+        if (_totalNetworkDebtLedger.length == 0) {
+            return 0;
+        }
+
+        return _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1];
     }
 
     // Mutative functions
@@ -89,6 +102,18 @@ contract CrossChainState is Owned, State, ICrossChainState {
         _totalNetworkDebtLedger.push(totalNetworkDebt);
 
         emit TotalNetworkDebtAdded(totalNetworkDebt, block.timestamp);
+    }
+
+    function addTotalNetworkDebtLedger(uint amount) external {
+        require(_totalNetworkDebtLedger.length > 0, "total network debt should be appended first");
+
+        _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1] = _lastTotalNetworkDebtEntry().add(amount);
+    }
+
+    function subtractTotalNetworkDebtLedger(uint amount) external {
+        require(_totalNetworkDebtLedger.length > 0, "total network debt should be appended first");
+
+        _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1] = _lastTotalNetworkDebtEntry().sub(amount);
     }
 
     // Events

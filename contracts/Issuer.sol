@@ -586,7 +586,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _removePynth(bytes32 currencyKey) internal {
         address pynthToRemove = address(pynths[currencyKey]);
-        require(pynthToRemove != address(0), "Pynth does not exist");
+        require(pynthToRemove != address(0), "Pynth doesn't exist");
         require(IERC20(pynthToRemove).totalSupply() == 0, "Pynth supply exists");
         require(currencyKey != pUSD, "Cannot remove pynth");
 
@@ -651,7 +651,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             (uint initialDebtOwnership, ) = periFinanceState().issuanceData(_issuer);
             // Condition of policy, user must have any amount of PERI locked before staking external token.
-            require(initialDebtOwnership > 0, "User does not have any debt yet");
+            require(initialDebtOwnership > 0, "User has no debt");
 
             exTokenStakeManager().stake(_issuer, amountToStake, _currencyKey, pUSD);
         }
@@ -681,13 +681,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
             _remainingIssuablePynths(_issuer);
         _requireRatesNotInvalid(anyRateIsInvalid);
-        require(existingDebt > 0, "User does not have any debt yet");
+        require(existingDebt > 0, "User has no debt");
 
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
         (uint issueAmountToQuota, uint stakeAmountToQuota) =
             _maxExternalTokenStakeAmount(_issuer, existingDebt, combinedStakedAmount, _currencyKey);
 
-        require(issueAmountToQuota > 0 && stakeAmountToQuota > 0, "No available external token staking amount");
+        require(issueAmountToQuota > 0 && stakeAmountToQuota > 0, "Not available to stake");
 
         exTokenStakeManager().stake(_issuer, stakeAmountToQuota, _currencyKey, pUSD);
 
@@ -820,7 +820,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _requireCurrencyKeyIsNotpUSD(bytes32 _currencyKey) internal pure {
-        require(_currencyKey != pUSD, "pUSD is not staking coin");
+        require(_currencyKey != pUSD, "pUSD isn't stakable");
     }
 
     function _issuePynths(
@@ -970,6 +970,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Save the debt entry parameters
         state.setCurrentIssuanceData(from, debtPercentage);
 
+        crossChainManager().addTotalNetworkDebt(amount);
+
         // Save the total debt entry parameters
         crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
 
@@ -1023,6 +1025,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
         }
+
+        crossChainManager().subtractTotalNetworkDebt(debtToRemove);
 
         // Update our cumulative ledger. This is also a high precision integer.
         state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));

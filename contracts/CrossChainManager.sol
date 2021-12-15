@@ -71,7 +71,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     function getTotalNetworkAdaptedTotalSystemValue() external view returns (uint totalSystemValue) {
         uint networkPercentage = _currentNetworkDebtPercentage();
-        totalSystemValue = state().lastTotalNetworkDebtLedgerEntry().multiplyDecimal(networkPercentage);
+        totalSystemValue = state().lastTotalNetworkDebtLedgerEntry() == 0
+            ? _getCurrentNetworkPreservedDebt()
+            : state().lastTotalNetworkDebtLedgerEntry().multiplyDecimal(networkPercentage);
     }
 
     /**
@@ -137,6 +139,13 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return network debt ratio by total network debt
      */
     function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint) {
+        return
+            totalNetworkDebt == 0
+                ? SafeDecimalMath.unit()
+                : _getCurrentNetworkPreservedDebt().divideDecimal(totalNetworkDebt);
+    }
+
+    function _getCurrentNetworkPreservedDebt() internal view returns (uint) {
         uint currentNetworkDebt = issuer().totalIssuedPynths(pUSD, true);
 
         uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
@@ -150,7 +159,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
             currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
         }
 
-        return totalNetworkDebt == 0 ? SafeDecimalMath.unit() : currentNetworkDebt.divideDecimal(totalNetworkDebt);
+        return currentNetworkDebt;
     }
 
     // Mutative functions
@@ -166,8 +175,16 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @notice save current sum of total network system debt to the state
      * @param totalNetworkDebt uint
      */
-    function addTotalNetworkDebt(uint totalNetworkDebt) external onlyDebtManager {
+    function appendTotalNetworkDebt(uint totalNetworkDebt) external onlyDebtManager {
         state().appendTotalNetworkDebtLedger(totalNetworkDebt);
+    }
+
+    function addTotalNetworkDebt(uint amount) external onlyIssuer {
+        state().addTotalNetworkDebtLedger(amount);
+    }
+
+    function subtractTotalNetworkDebt(uint amount) external onlyIssuer {
+        state().subtractTotalNetworkDebtLedger(amount);
     }
 
     function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external onlyIssuer {
