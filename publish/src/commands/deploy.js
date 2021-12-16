@@ -777,7 +777,7 @@ const deploy = async ({
 				writeArg: childChainManagerAddress,
 			});
 		}
-	} else if (['mainnet', 'kovan', 'rinkeby', 'robsten', 'goerli', 'local'].includes(network)) {
+	} else if (['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'].includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
@@ -1411,7 +1411,7 @@ const deploy = async ({
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
 	if (!USDC_ADDRESS || USDC_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon', 'bsc'].includes(network)) {
+		if (['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)) {
 			throw new Error('USDC address is not known');
 		}
 
@@ -1651,10 +1651,20 @@ const deploy = async ({
 				write: 'addAggregator',
 				writeArg: [toBytes32(asset), feed],
 			});
+
+			await runStep({
+				contract: `ExchangeRates`,
+				target: exchangeRates,
+				read: 'currencyByExternal',
+				readArg: toBytes32(asset),
+				expected: input => !input,
+				write: 'setCurrencyToExternalAggregator',
+				writeArg: [toBytes32(asset), false],
+			});
 		}
 
-		// set peri price by our own oracle as chainlink doesnt provicde the price feed for PERI
-		if (['PERI'].includes(asset)) {
+		if (!w3utils.isAddress(feed)) {
+			// set peri price by our own oracle as chainlink doesnt provide the price feed for PERI
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,

@@ -527,8 +527,9 @@
 			},
 			"Issuer": {
 				"address": "0x4f7BF9ACD90beF00A5B13a4606b909C5F088B87a",
-				"status": "current",
-				"keccak256": "0xb1b288dcdd3cd0f5d77a00bdc5970c76dc8c58319e725cb063052cc01b9bd836"
+				"status": "replaced",
+				"keccak256": "0xb1b288dcdd3cd0f5d77a00bdc5970c76dc8c58319e725cb063052cc01b9bd836",
+				"replaced_in": "v0.2.10"
 			},
 			"SupplySchedule": {
 				"address": "0x0E19E96D0B03DBC8a144a0Df6ea916dA04F8d61E",
@@ -539,6 +540,20 @@
 				"address": "0x6F8E6990A6070336d806aAA8990f2ecE0AFF411b",
 				"status": "current",
 				"keccak256": "0x9606413ec42395a260a3b2b7ff3c433f0fdcaf9fb8038d616db5e3b1f4f59092"
+			}
+		}
+	},
+	"v0.2.10": {
+		"tag": "v0.2.10",
+		"fulltag": "v0.2.10",
+		"network": "goerli",
+		"date": "2021-12-13T22:10:01+09:00",
+		"commit": "9771f87e61c0ea15791a8d16dd25d5025200edcf",
+		"contracts": {
+			"Issuer": {
+				"address": "0xEA3750F46053388A759661628A18E36728FAf0F3",
+				"status": "current",
+				"keccak256": "0xb6bf1b3a73124b8c1c894cfa7b4e9036450aaf685152ee575ad99740cfeda16c"
 			}
 		}
 	}

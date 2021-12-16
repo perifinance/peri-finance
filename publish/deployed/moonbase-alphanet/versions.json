@@ -735,8 +735,9 @@
 			},
 			"Issuer": {
 				"address": "0x9D753eac93e4C967c1e18028E01E804b85aF4469",
-				"status": "current",
-				"keccak256": "0xb1b288dcdd3cd0f5d77a00bdc5970c76dc8c58319e725cb063052cc01b9bd836"
+				"status": "replaced",
+				"keccak256": "0xb1b288dcdd3cd0f5d77a00bdc5970c76dc8c58319e725cb063052cc01b9bd836",
+				"replaced_in": "v0.2.10"
 			},
 			"TradingRewards": {
 				"address": "0x185173aD6C6d8Dac8527347c8B945016E4fe0568",
@@ -897,6 +898,20 @@
 				"address": "0x94c87C43057513446760d35422E75917a36A50E8",
 				"status": "current",
 				"keccak256": "0x034afe96315012c8761daba8055e0a96af1293879c5b16c4fffb601d85ab5364"
+			}
+		}
+	},
+	"v0.2.10": {
+		"tag": "v0.2.10",
+		"fulltag": "v0.2.10",
+		"network": "moonbase-alphanet",
+		"date": "2021-12-14T15:27:56+09:00",
+		"commit": "8fd4ddffbeb589f5bc2d11d0b7a29f5828437dcf",
+		"contracts": {
+			"Issuer": {
+				"address": "0x132099ff76430b1C021741A919808eD43dbe7f0C",
+				"status": "current",
+				"keccak256": "0xb6bf1b3a73124b8c1c894cfa7b4e9036450aaf685152ee575ad99740cfeda16c"
 			}
 		}
 	}

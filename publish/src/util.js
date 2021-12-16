@@ -175,7 +175,7 @@ const loadConnections = ({ network, useFork }) => {
 	const etherscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
-			: ['kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)
+			: ['kovan', 'goerli', 'ropsten', 'rinkeby'].includes(network)
 			? `https://api-${network}.etherscan.io/api`
 			: ['bsc', 'bsctest'].includes(network)
 			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
@@ -501,7 +501,7 @@ async function checkGasPrice(network, priority) {
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		gasPrice = await estimatePolygonGasPice(network, priority);
-	} else if (['mainnet', 'kovan', 'goerli', 'robsten', 'rinkeby'].includes(network)) {
+	} else if (['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby'].includes(network)) {
 		gasPrice = await estimateEtherGasPice(priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);
