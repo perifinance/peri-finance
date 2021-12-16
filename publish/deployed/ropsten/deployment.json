@@ -5,8 +5,8 @@
 			"address": "0xf1ee0C81Be9BCd0fab3F7f8d8d1a615750EBa086",
 			"source": "SafeDecimalMath",
 			"link": "https://ropsten.etherscan.io/address/0xf1ee0C81Be9BCd0fab3F7f8d8d1a615750EBa086",
-			"timestamp": "2021-12-16T05:40:37.194Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:39:56.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xc9502d9c85637cc1f85f6ddd2c7bd149e384542cc20aa647768971e953c66a45",
 			"network": "ropsten"
 		},
 		"Math": {
@@ -14,8 +14,8 @@
 			"address": "0x5Cca81fb3ec8132019AA7314C498B58c19e05471",
 			"source": "Math",
 			"link": "https://ropsten.etherscan.io/address/0x5Cca81fb3ec8132019AA7314C498B58c19e05471",
-			"timestamp": "2021-12-16T05:40:48.315Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:40:35.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xed6f471d227c6bf2fe8a0b464663437b1c8a31c760402fb96f01e51653cfa675",
 			"network": "ropsten"
 		},
 		"AddressResolver": {
@@ -41,8 +41,8 @@
 			"address": "0xD40b11f22a08Ea15fAB97d0F51b4eB3E7cD2Db97",
 			"source": "FlexibleStorage",
 			"link": "https://ropsten.etherscan.io/address/0xD40b11f22a08Ea15fAB97d0F51b4eB3E7cD2Db97",
-			"timestamp": "2021-12-16T05:42:18.359Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:42:09.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xe3c1f7699b3d7562480aeb406ab16a39eef0485af3539e0e5e2e36b1c007592d",
 			"network": "ropsten"
 		},
 		"SystemSettings": {
@@ -50,8 +50,8 @@
 			"address": "0x3AA7AB772b2Ff1bFD625059b6498bFF8976950e7",
 			"source": "SystemSettings",
 			"link": "https://ropsten.etherscan.io/address/0x3AA7AB772b2Ff1bFD625059b6498bFF8976950e7",
-			"timestamp": "2021-12-16T05:42:40.125Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:42:37.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xe618eec309d1a78f644a612a4e73e79ecad97497e2a67560c64e86d0c9b2d7f2",
 			"network": "ropsten"
 		},
 		"SystemStatus": {
@@ -59,8 +59,8 @@
 			"address": "0x99540e120A07e0A8931d38Ba22220afD0ad2919b",
 			"source": "SystemStatus",
 			"link": "https://ropsten.etherscan.io/address/0x99540e120A07e0A8931d38Ba22220afD0ad2919b",
-			"timestamp": "2021-12-16T05:42:49.659Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:42:39.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x1fd56440e993622954b32b80b81e76954f8013a719a09aca244444a6847b6762",
 			"network": "ropsten"
 		},
 		"ExchangeRates": {
@@ -68,8 +68,8 @@
 			"address": "0x1199a48AFa2751F7C84A32FF1B1ca56F897c6F97",
 			"source": "ExchangeRates",
 			"link": "https://ropsten.etherscan.io/address/0x1199a48AFa2751F7C84A32FF1B1ca56F897c6F97",
-			"timestamp": "2021-12-16T05:43:12.212Z",
-			"txn": "",
+			"timestamp": "2021-12-16T05:43:06.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x2713bcb4ab5b9bde0c73d21b861cc8571bfd1fcba1ea245824e05d3accfd3a49",
 			"network": "ropsten"
 		},
 		"RewardEscrow": {
@@ -77,8 +77,8 @@
 			"address": "0x0B39a33D655BA9f88b8fF332F28867A97f3ccc02",
 			"source": "RewardEscrow",
 			"link": "https://ropsten.etherscan.io/address/0x0B39a33D655BA9f88b8fF332F28867A97f3ccc02",
-			"timestamp": "2021-12-16T06:02:52.776Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:02:49.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x8b59cc3d5fe44f602cc6d896042c2db82801460fb1457c7a8f27f9d2d0bf5a1e",
 			"network": "ropsten"
 		},
 		"RewardEscrowV2": {
@@ -86,8 +86,8 @@
 			"address": "0xdeD68331B26aD157Eb67c5242070Dd05785f8B47",
 			"source": "RewardEscrowV2",
 			"link": "https://ropsten.etherscan.io/address/0xdeD68331B26aD157Eb67c5242070Dd05785f8B47",
-			"timestamp": "2021-12-16T06:02:59.881Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:02:51.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x3ea50f64f4d07b106121363a614f1efe03433ffeaff24b2986b549f8485e3bd9",
 			"network": "ropsten"
 		},
 		"PeriFinanceEscrow": {
@@ -95,8 +95,8 @@
 			"address": "0xfbaB0E5677746DB790a0803bD0ab806832871996",
 			"source": "PeriFinanceEscrow",
 			"link": "https://ropsten.etherscan.io/address/0xfbaB0E5677746DB790a0803bD0ab806832871996",
-			"timestamp": "2021-12-16T06:03:03.167Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:02:58.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x9534322d967f31846b4bfe7715f9cbf3f8b68db5490b93be62689dd37e13156b",
 			"network": "ropsten"
 		},
 		"PeriFinanceState": {
@@ -104,8 +104,8 @@
 			"address": "0xE5F303b01098Df2AF62c16A11e4022f78a8F39BA",
 			"source": "PeriFinanceState",
 			"link": "https://ropsten.etherscan.io/address/0xE5F303b01098Df2AF62c16A11e4022f78a8F39BA",
-			"timestamp": "2021-12-16T06:03:08.240Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:03:05.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x5e85865f911295f1d83f1a72ee3c326f9a44b46d4440e85ee9aa8a7d696e2116",
 			"network": "ropsten"
 		},
 		"ProxyFeePool": {
@@ -113,8 +113,8 @@
 			"address": "0x7aD53270f31A52203faa13EAeEB21aba1e8c0d40",
 			"source": "Proxy",
 			"link": "https://ropsten.etherscan.io/address/0x7aD53270f31A52203faa13EAeEB21aba1e8c0d40",
-			"timestamp": "2021-12-16T06:03:33.533Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:03:07.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x8e88a7664f5b2e9873bb38f5e7fc1e1627a6f64d9f99f6a0a82de04c3cc650b9",
 			"network": "ropsten"
 		},
 		"DelegateApprovalsEternalStorage": {
@@ -140,8 +140,8 @@
 			"address": "0x1F5350E24eB256c9D0AeA531FEA2A291807BcACd",
 			"source": "Liquidations",
 			"link": "https://ropsten.etherscan.io/address/0x1F5350E24eB256c9D0AeA531FEA2A291807BcACd",
-			"timestamp": "2021-12-16T06:04:58.692Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:04:56.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xcb1a9e93192bf1bfeec37a8caf423627d6ec4b92ba93c1734e8d52dba477b223",
 			"network": "ropsten"
 		},
 		"EternalStorageLiquidations": {
@@ -158,8 +158,8 @@
 			"address": "0x2db7FDf3Afdfe661f15cFE692B1f09CB9c984F93",
 			"source": "FeePoolEternalStorage",
 			"link": "https://ropsten.etherscan.io/address/0x2db7FDf3Afdfe661f15cFE692B1f09CB9c984F93",
-			"timestamp": "2021-12-16T06:05:22.209Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:05:13.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x27ea5b96936ce985c9ecd99269372396f6a9bf2efa497dfc0d19147ddef97cfc",
 			"network": "ropsten"
 		},
 		"FeePool": {
@@ -167,8 +167,8 @@
 			"address": "0xa9CF7323a1c12C2CdAd3456E343cf9B93272045d",
 			"source": "FeePool",
 			"link": "https://ropsten.etherscan.io/address/0xa9CF7323a1c12C2CdAd3456E343cf9B93272045d",
-			"timestamp": "2021-12-16T06:05:43.121Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:05:36.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xc02c61f9e48d4949d227511e43f1084d45be842438fa73c7f0072accec9da946",
 			"network": "ropsten"
 		},
 		"FeePoolState": {
@@ -176,8 +176,8 @@
 			"address": "0x92Dd9661112a409F8C1b02c7CC9fb178C5D73119",
 			"source": "FeePoolState",
 			"link": "https://ropsten.etherscan.io/address/0x92Dd9661112a409F8C1b02c7CC9fb178C5D73119",
-			"timestamp": "2021-12-16T06:06:13.768Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:06:07.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x484ac08a0f6247f1859cf83a94479aa08bde60f03633699d6884685195a790cd",
 			"network": "ropsten"
 		},
 		"RewardsDistribution": {
@@ -185,8 +185,8 @@
 			"address": "0x6D8c4432A2Cf89d19430f9e07cd75FBaE4b01249",
 			"source": "RewardsDistribution",
 			"link": "https://ropsten.etherscan.io/address/0x6D8c4432A2Cf89d19430f9e07cd75FBaE4b01249",
-			"timestamp": "2021-12-16T06:07:55.180Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:07:21.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xfa810a48a418b1a5f2b2b774390e88afb4a4f93ecc27181fb973e19d54bf1d2c",
 			"network": "ropsten"
 		},
 		"ProxyERC20": {
@@ -194,8 +194,8 @@
 			"address": "0xE28Bf7007E42a43ec2F0a6e96E6d5D2f454a80Eb",
 			"source": "ProxyERC20",
 			"link": "https://ropsten.etherscan.io/address/0xE28Bf7007E42a43ec2F0a6e96E6d5D2f454a80Eb",
-			"timestamp": "2021-12-16T06:07:58.277Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:07:53.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x4a7dce8bd46db1bea43fd4104e350a6539dfd6be000b9c8c5c119aa6468a9175",
 			"network": "ropsten"
 		},
 		"TokenStatePeriFinance": {
@@ -203,8 +203,8 @@
 			"address": "0xf0d030b5470A55f15040e36C66dA780aFfF64cFC",
 			"source": "TokenState",
 			"link": "https://ropsten.etherscan.io/address/0xf0d030b5470A55f15040e36C66dA780aFfF64cFC",
-			"timestamp": "2021-12-16T06:08:19.365Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:07:57.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x6d985a2dd5fff022c8f43d0dd4a1a27e5b13588913150f5fe0094e4a122a9e8e",
 			"network": "ropsten"
 		},
 		"BlacklistManager": {
@@ -212,8 +212,8 @@
 			"address": "0x70B3fB148804eFD521BE7C58B07839cbD63360F3",
 			"source": "BlacklistManager",
 			"link": "https://ropsten.etherscan.io/address/0x70B3fB148804eFD521BE7C58B07839cbD63360F3",
-			"timestamp": "2021-12-16T06:08:51.465Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:08:43.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x59707bdff548b340ccde09fa1a8b1032c3b081999f746d2f17c19265391d439f",
 			"network": "ropsten"
 		},
 		"PeriFinance": {
@@ -221,8 +221,8 @@
 			"address": "0x5E01B82d6C18E0394a21084405ea2D39FCA1Ad6F",
 			"source": "PeriFinanceToEthereum",
 			"link": "https://ropsten.etherscan.io/address/0x5E01B82d6C18E0394a21084405ea2D39FCA1Ad6F",
-			"timestamp": "2021-12-16T06:14:08.333Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:14:04.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xc0ad457b7e57628d970be2d45b202894ebd592a0f74913c72ed78147d9eb1fa9",
 			"network": "ropsten"
 		},
 		"BridgeState": {
@@ -230,8 +230,8 @@
 			"address": "0xB291b19Fc8F896dD406eFA9EE216681a9e2EBF86",
 			"source": "BridgeState",
 			"link": "https://ropsten.etherscan.io/address/0xB291b19Fc8F896dD406eFA9EE216681a9e2EBF86",
-			"timestamp": "2021-12-16T06:15:08.023Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:14:58.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x2fb7c7ac8a3f3af1da0e23a89e98d6276d456167c1a28043e5692bb4b55c6fd2",
 			"network": "ropsten"
 		},
 		"DebtCache": {
@@ -248,8 +248,8 @@
 			"address": "0x86114673F574b0a885E64ccd51c4Bb0ffe82bcE3",
 			"source": "ExchangerWithVirtualPynth",
 			"link": "https://ropsten.etherscan.io/address/0x86114673F574b0a885E64ccd51c4Bb0ffe82bcE3",
-			"timestamp": "2021-12-16T06:18:15.047Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:18:03.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xc85a8aee656f5e0ba2f00640e8c39976005db99dd101912429fe2f034416c4ce",
 			"network": "ropsten"
 		},
 		"ExchangeState": {
@@ -257,8 +257,8 @@
 			"address": "0x3da35403E6A4B33623B27FCB693a5450175B3aa8",
 			"source": "ExchangeState",
 			"link": "https://ropsten.etherscan.io/address/0x3da35403E6A4B33623B27FCB693a5450175B3aa8",
-			"timestamp": "2021-12-16T06:18:22.531Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:18:13.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xdf209e8d9f44b99da8dbf2270abb3bbbe285dcbca8f41d6efdd043c44df52cc2",
 			"network": "ropsten"
 		},
 		"Issuer": {
@@ -266,8 +266,8 @@
 			"address": "0x6188D4837eF0Fd959EAF822587cE3178Fb2df06a",
 			"source": "Issuer",
 			"link": "https://ropsten.etherscan.io/address/0x6188D4837eF0Fd959EAF822587cE3178Fb2df06a",
-			"timestamp": "2021-12-16T06:18:41.042Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:18:33.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x2780e3e72a56c002624797de59a2e485968671ff352c77151389a264354ed56c",
 			"network": "ropsten"
 		},
 		"TradingRewards": {
@@ -275,8 +275,8 @@
 			"address": "0xcE954FC4c52A9E6e25306912A36eC59293da41E3",
 			"source": "TradingRewards",
 			"link": "https://ropsten.etherscan.io/address/0xcE954FC4c52A9E6e25306912A36eC59293da41E3",
-			"timestamp": "2021-12-16T06:19:03.183Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:18:43.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x35be0e3d52cf48cef7cc71f900399d7a3a723dfbef0de6190f5ca434f546087a",
 			"network": "ropsten"
 		},
 		"EscrowChecker": {
@@ -284,8 +284,8 @@
 			"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
 			"source": "EscrowChecker",
 			"link": "https://ropsten.etherscan.io/address/0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-			"timestamp": "2021-12-16T06:19:21.600Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:19:13.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x0f10d537d77cc2539e4a93255d406a38c4d891f02028e76af840ea02c909cfb0",
 			"network": "ropsten"
 		},
 		"SupplySchedule": {
@@ -293,8 +293,8 @@
 			"address": "0x2F328cDbbe840C02f58c7B76eA281634513d03c5",
 			"source": "SupplySchedule",
 			"link": "https://ropsten.etherscan.io/address/0x2F328cDbbe840C02f58c7B76eA281634513d03c5",
-			"timestamp": "2021-12-16T06:53:19.522Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:53:14.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x18b084689e172f9e89746eeaca820ef343937c4b9ef7281fa675b138f6003ee7",
 			"network": "ropsten"
 		},
 		"TokenStatepUSD": {
@@ -320,8 +320,8 @@
 			"address": "0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315",
 			"source": "MultiCollateralPynth",
 			"link": "https://ropsten.etherscan.io/address/0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315",
-			"timestamp": "2021-12-16T07:15:37.286Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:14:50.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x349d2905a345f25c984071571dfdbf5cc5d4d82e8ac0a5c38bb864aa16377c35",
 			"network": "ropsten"
 		},
 		"StakingState": {
@@ -329,8 +329,8 @@
 			"address": "0x7302F631d4Af72a6B20DdFD325d2B2844B21D4D2",
 			"source": "StakingState",
 			"link": "https://ropsten.etherscan.io/address/0x7302F631d4Af72a6B20DdFD325d2B2844B21D4D2",
-			"timestamp": "2021-12-16T06:24:36.819Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:24:34.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x8d79238d23736f45fc0539e7d20916b97c11084c2cd402dbb62edfb05758f8bc",
 			"network": "ropsten"
 		},
 		"ExternalTokenStakeManager": {
@@ -338,8 +338,8 @@
 			"address": "0x51DD8e18cB967323Bbc3160A56A020F476621d03",
 			"source": "ExternalTokenStakeManager",
 			"link": "https://ropsten.etherscan.io/address/0x51DD8e18cB967323Bbc3160A56A020F476621d03",
-			"timestamp": "2021-12-16T06:24:47.979Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:24:38.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x16ad7482aa96f82240b50b1d830e085570b5ed86339ca32d38ba2b7fceb11aec",
 			"network": "ropsten"
 		},
 		"USDC": {
@@ -365,8 +365,8 @@
 			"address": "0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f",
 			"source": "CrossChainState",
 			"link": "https://ropsten.etherscan.io/address/0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f",
-			"timestamp": "2021-12-16T06:58:15.905Z",
-			"txn": "",
+			"timestamp": "2021-12-16T06:58:06.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xa7400706b9f65161f8f6ce9cf5fb0bc3d6bf7edd3bbf662e955bc50b7ba0a106",
 			"network": "ropsten"
 		},
 		"BridgeStatepUSD": {
@@ -383,8 +383,8 @@
 			"address": "0x589f37D974e119426dC6f7aFbcEF59c9eb872cF2",
 			"source": "CrossChainManager",
 			"link": "https://ropsten.etherscan.io/address/0x589f37D974e119426dC6f7aFbcEF59c9eb872cF2",
-			"timestamp": "2021-12-16T07:18:28.352Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:18:25.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x5255a94b18e5e2bafc15fb79e35c63647a6a498fb66cd5c6b8bd06f5d998b025",
 			"network": "ropsten"
 		},
 		"Depot": {
@@ -392,8 +392,8 @@
 			"address": "0xc55191e5Fb4F31018319aaCF7909C999175070D1",
 			"source": "Depot",
 			"link": "https://ropsten.etherscan.io/address/0xc55191e5Fb4F31018319aaCF7909C999175070D1",
-			"timestamp": "2021-12-16T07:18:47.608Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:18:39.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x791886b9ccf0fac166d3291a6d4808767fa50eb3059d4fda890a5afc81766f13",
 			"network": "ropsten"
 		},
 		"EtherCollateral": {
@@ -401,8 +401,8 @@
 			"address": "0xD6133f1784825fE4D131a382D7cA7E0342907A0B",
 			"source": "EtherCollateral",
 			"link": "https://ropsten.etherscan.io/address/0xD6133f1784825fE4D131a382D7cA7E0342907A0B",
-			"timestamp": "2021-12-16T07:19:07.366Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:18:48.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x0bccb7f86900b98b6d29393571a4ac2b35b734d6203a20a5123537a7a0947332",
 			"network": "ropsten"
 		},
 		"EtherCollateralpUSD": {
@@ -410,8 +410,8 @@
 			"address": "0x29c81669Aae789B7E7DbFafA9aF419745F7Adb07",
 			"source": "EtherCollateralpUSD",
 			"link": "https://ropsten.etherscan.io/address/0x29c81669Aae789B7E7DbFafA9aF419745F7Adb07",
-			"timestamp": "2021-12-16T07:19:49.592Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:19:46.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0x059dd6741aad58e4fed080fcabef3f6324933c86f3c2e3404cb040d3f308247e",
 			"network": "ropsten"
 		},
 		"PeriFinanceBridgeToOptimism": {
@@ -419,8 +419,8 @@
 			"address": "0x20DB3790Daf1513925998806B0662f51a1CFbeE6",
 			"source": "PeriFinanceBridgeToOptimism",
 			"link": "https://ropsten.etherscan.io/address/0x20DB3790Daf1513925998806B0662f51a1CFbeE6",
-			"timestamp": "2021-12-16T07:20:22.245Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:20:19.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xe0e54f7336d20c4ed5df5f819dd419927e7c85ce58121cdae951715a890c3c94",
 			"network": "ropsten"
 		},
 		"PynthUtil": {
@@ -428,8 +428,8 @@
 			"address": "0x3B9697E10eC6DF68f2d7dBE587eEC0Ac3214638D",
 			"source": "PynthUtil",
 			"link": "https://ropsten.etherscan.io/address/0x3B9697E10eC6DF68f2d7dBE587eEC0Ac3214638D",
-			"timestamp": "2021-12-16T07:21:04.605Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:20:51.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xb433fee1ad608d03f167eefbbfda4aff7629001020d9f7cb1beb031affbad80c",
 			"network": "ropsten"
 		},
 		"DappMaintenance": {
@@ -437,8 +437,8 @@
 			"address": "0x6bA629E9df8dC7f4039e0FfD1Ff8FF08b609d11C",
 			"source": "DappMaintenance",
 			"link": "https://ropsten.etherscan.io/address/0x6bA629E9df8dC7f4039e0FfD1Ff8FF08b609d11C",
-			"timestamp": "2021-12-16T07:21:46.765Z",
-			"txn": "",
+			"timestamp": "2021-12-16T07:21:43.000Z",
+			"txn": "https://ropsten.etherscan.io/tx/0xef3a286d258e6b7854f623c6838b35a6cd4dd8fc1821c4bc253774d1d7f8d0a8",
 			"network": "ropsten"
 		},
 		"CollateralManagerState": {
