@@ -1490,8 +1490,9 @@
 			},
 			"PeriFinance": {
 				"address": "0x9Da1f4D8A7B5B517feBcFd0a462eEf2A51460937",
-				"status": "current",
-				"keccak256": "0x5f36b8e821425b0150096bec7d709584c17e4b189bb2e94a6985dd49ea0c54b9"
+				"status": "replaced",
+				"keccak256": "0x5f36b8e821425b0150096bec7d709584c17e4b189bb2e94a6985dd49ea0c54b9",
+				"replaced_in": "v0.2.11"
 			},
 			"BridgeState": {
 				"address": "0x7152FDa812fA3BDb34991beB62cd108404Aabf8D",
@@ -1648,8 +1649,9 @@
 			},
 			"CollateralManager": {
 				"address": "0x6c41845f11148a41bB52bDAE021D2afFc1029e4e",
-				"status": "current",
-				"keccak256": "0x78a31dee7e9c15b6f28be66bee1c4ca801e781dddbf184d01e69905f1db9d9ac"
+				"status": "replaced",
+				"keccak256": "0x78a31dee7e9c15b6f28be66bee1c4ca801e781dddbf184d01e69905f1db9d9ac",
+				"replaced_in": "v0.2.11"
 			},
 			"CollateralStateEth": {
 				"address": "0x9e689310B708Bd478BD9917bC18f8591461A5573",
@@ -1702,8 +1704,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x7c2D957105fD6070a18413710255e5D0f1685Ac0",
-				"status": "current",
-				"keccak256": "0xe2b40152f70cfa60acbe02bcacf508a00cb3b5a005a4b3919440736270af7989"
+				"status": "replaced",
+				"keccak256": "0xe2b40152f70cfa60acbe02bcacf508a00cb3b5a005a4b3919440736270af7989",
+				"replaced_in": "v0.2.11"
 			},
 			"CrossChainState": {
 				"address": "0x9C48Fd5C853823E380C965cbF47356a79B50c98f",
@@ -1712,8 +1715,38 @@
 			},
 			"CrossChainManager": {
 				"address": "0x5B343932D3f19852a271A0bD53EE2D8A2de99b8f",
+				"status": "replaced",
+				"keccak256": "0xeac0bf86059e7c7d6d3188c5e31060effe637a855955fef83efdde5489aaa1bd",
+				"replaced_in": "v0.2.11"
+			}
+		}
+	},
+	"v0.2.11": {
+		"tag": "v0.2.11",
+		"fulltag": "v0.2.11",
+		"network": "kovan",
+		"date": "2021-12-17T14:58:40+09:00",
+		"commit": "4f05fe08fbf552a7114bc60a4b1ae81d4b2a6083",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xBEC4F24743a684be5692F0C2a74847536e8448c6",
 				"status": "current",
-				"keccak256": "0xeac0bf86059e7c7d6d3188c5e31060effe637a855955fef83efdde5489aaa1bd"
+				"keccak256": "0x78ecc7646ec10fc4dc83b40fcb69ac3f29353b8243e3e1019740b9607f232265"
+			},
+			"Issuer": {
+				"address": "0xfF25081671468BAd6d7388099B840C4d8Ec7d458",
+				"status": "current",
+				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c"
+			},
+			"CrossChainManager": {
+				"address": "0x1FC625bA77ACCE55292C104e1d54C9D33DfB0FE8",
+				"status": "current",
+				"keccak256": "0x9cebb6140713cd0c4664c69a3ec4c34090a4b34129cabf0dbb9fb9ea00c93dc3"
+			},
+			"CollateralManager": {
+				"address": "0x8aA7aF0ec68a65e7d71F13959efA18e46133271e",
+				"status": "current",
+				"keccak256": "0x007a408d694b3aadbe51582ef929e758db97bfeb65e82663802bba7b8faa00fd"
 			}
 		}
 	}
