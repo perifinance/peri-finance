@@ -8,7 +8,7 @@ interface ICrossChainManager {
 
     function userIssuanceDataForTotalNetwork(address) external view returns (uint, uint);
 
-    function getTotalNetworkAdaptedTotalSystemValue() external view returns (uint);
+    function getTotalNetworkAdaptedTotalSystemValue(bytes32 currencyKey) external view returns (uint, bool);
 
     function currentTotalNetworkDebt() external view returns (uint);
 

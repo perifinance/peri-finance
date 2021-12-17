@@ -52,7 +52,7 @@ interface IIssuer {
 
     function pynthsByAddress(address pynthAddress) external view returns (bytes32);
 
-    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral) external view returns (uint);
+    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral) external view returns (uint, bool);
 
     function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance)
         external

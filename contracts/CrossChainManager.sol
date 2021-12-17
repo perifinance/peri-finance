@@ -8,6 +8,7 @@ import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/ICrossChainState.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IBridgeState.sol";
+import "./interfaces/IExchangeRates.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
@@ -23,6 +24,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_BRIDGESTATEPUSD = "BridgeStatepUSD";
+    bytes32 private constant CONTRACT_EXCHANGERATES = "ExchangeRates";
 
     constructor(
         address _owner,
@@ -36,9 +38,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](2);
+        addresses = new bytes32[](3);
         addresses[0] = CONTRACT_ISSUER;
         addresses[1] = CONTRACT_BRIDGESTATEPUSD;
+        addresses[2] = CONTRACT_EXCHANGERATES;
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -51,6 +54,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     function bridgeStatepUSD() internal view returns (IBridgeState) {
         return IBridgeState(requireAndGetAddress(CONTRACT_BRIDGESTATEPUSD));
+    }
+
+    function exchangeRates() internal view returns (IExchangeRates) {
+        return IExchangeRates(requireAndGetAddress(CONTRACT_EXCHANGERATES));
     }
 
     function crossChainState() external view returns (address) {
@@ -69,11 +76,25 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         (crossChainDebtEntryIndex, userStateDebtLedgerIndex) = state().getCrossNetworkUserData(account);
     }
 
-    function getTotalNetworkAdaptedTotalSystemValue() external view returns (uint totalSystemValue) {
+    function getTotalNetworkAdaptedTotalSystemValue(bytes32 currencyKey)
+        external
+        view
+        returns (uint totalSystemValue, bool anyRateIsInvalid)
+    {
         uint networkPercentage = _currentNetworkDebtPercentage();
+        (totalSystemValue, anyRateIsInvalid) = _getCurrentNetworkPreservedDebt();
+
         totalSystemValue = state().lastTotalNetworkDebtLedgerEntry() == 0
-            ? _getCurrentNetworkPreservedDebt()
+            ? totalSystemValue
             : state().lastTotalNetworkDebtLedgerEntry().multiplyDecimal(networkPercentage);
+
+        if (currencyKey == pUSD) {
+            return (totalSystemValue, anyRateIsInvalid);
+        }
+
+        (uint currencyRate, bool currencyRateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
+
+        return (totalSystemValue.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
     }
 
     /**
@@ -138,15 +159,14 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @param totalNetworkDebt uint
      * @return network debt ratio by total network debt
      */
-    function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint) {
-        return
-            totalNetworkDebt == 0
-                ? SafeDecimalMath.unit()
-                : _getCurrentNetworkPreservedDebt().divideDecimal(totalNetworkDebt);
+    function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint networkPercentage) {
+        (uint totalIssued, ) = _getCurrentNetworkPreservedDebt();
+
+        networkPercentage = totalNetworkDebt == 0 ? SafeDecimalMath.unit() : totalIssued.divideDecimal(totalNetworkDebt);
     }
 
-    function _getCurrentNetworkPreservedDebt() internal view returns (uint) {
-        uint currentNetworkDebt = issuer().totalIssuedPynths(pUSD, true);
+    function _getCurrentNetworkPreservedDebt() internal view returns (uint currentNetworkDebt, bool anyRateIsInvalid) {
+        (currentNetworkDebt, anyRateIsInvalid) = issuer().totalIssuedPynths(pUSD, true);
 
         uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
         uint inboundAmount = bridgeStatepUSD().getTotalInboundAmount();
@@ -158,8 +178,6 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         if (inboundAmount > 0) {
             currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
         }
-
-        return currentNetworkDebt;
     }
 
     // Mutative functions

@@ -236,8 +236,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
-        (, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, true);
-        totalSystemValue = crossChainManager().getTotalNetworkAdaptedTotalSystemValue();
+        (totalSystemValue, anyRateIsInvalid) = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(currencyKey);
 
         // If it's zero, they haven't issued, and they have no debt.
         // Note: it's more gas intensive to put this check here rather than before _totalIssuedPynths
@@ -422,8 +421,12 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (, anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(_availableCurrencyKeysWithOptionalPERI(true));
     }
 
-    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral) external view returns (uint totalIssued) {
-        (totalIssued, ) = _totalIssuedPynths(currencyKey, excludeEtherCollateral);
+    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral)
+        external
+        view
+        returns (uint totalIssued, bool anyRateIsInvalid)
+    {
+        (totalIssued, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, excludeEtherCollateral);
     }
 
     function lastIssueEvent(address account) external view returns (uint) {
