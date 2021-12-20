@@ -19,6 +19,7 @@ import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/ITradingRewards.sol";
 import "./interfaces/IVirtualPynth.sol";
+import "./interfaces/ICrossChainManager.sol";
 import "./Proxyable.sol";
 
 // Note: use OZ's IERC20 here as using ours will complain about conflicting names
@@ -95,6 +96,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
+    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -102,7 +104,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](9);
+        bytes32[] memory newAddresses = new bytes32[](10);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -112,6 +114,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
         newAddresses[7] = CONTRACT_ISSUER;
         newAddresses[8] = CONTRACT_DEBTCACHE;
+        newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -149,6 +152,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function debtCache() internal view returns (IExchangerInternalDebtCache) {
         return IExchangerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
+    }
+
+    function crossChainManager() internal view returns (ICrossChainManager) {
+        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
     function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) public view returns (uint) {
@@ -784,6 +791,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // burn amount from user
         issuer().pynths(currencyKey).burn(from, amount);
         IPeriFinanceInternal(address(periFinance())).emitExchangeReclaim(from, currencyKey, amount);
+
+        uint reclaimedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
+        crossChainManager().subtractTotalNetworkDebt(reclaimedDebtInpUSD);
     }
 
     function refund(
@@ -794,6 +804,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // issue amount to user
         issuer().pynths(currencyKey).issue(from, amount);
         IPeriFinanceInternal(address(periFinance())).emitExchangeRebate(from, currencyKey, amount);
+
+        uint refundedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
+        crossChainManager().addTotalNetworkDebt(refundedDebtInpUSD);
     }
 
     function secsLeftInWaitingPeriodForExchange(uint timestamp) internal view returns (uint) {
