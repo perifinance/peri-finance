@@ -61,6 +61,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     uint256 private _currentFeePeriod;
     bool private _everDistributedFeeRewards;
     bool private _everAllocatedFeeRewards;
+    uint256 public feeRewardsToBeAllocated;
 
     uint256 public quotaTolerance;
 
@@ -230,23 +231,38 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     function distributeFeeRewards() external optionalProxy onlyDebtManager {
+        require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
+        require(
+            _recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()),
+            "distributing fee reward not yet available"
+        );
+
         require(_everDistributedFeeRewards == false, "Distributing fee rewards is possible only once in a period");
         _everDistributedFeeRewards = true;
 
         uint _allocatedFeeRewards = _allocatedOtherNetworkFeeRewards();
 
+        if (_allocatedFeeRewards == 0) return;
+
         issuer().pynths(pUSD).burn(FEE_ADDRESS, _allocatedFeeRewards);
 
+        feeRewardsToBeAllocated = _allocatedFeeRewards;
         _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.sub(
             _allocatedFeeRewards
         );
     }
 
     function allocateFeeRewards(uint amount) external optionalProxy onlyDebtManager {
+        require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
+        require(
+            _recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()),
+            "allocating fee reward not yet available"
+        );
+
         require(_everAllocatedFeeRewards == false, "Allocating fee rewards is possible only once in a period");
         _everAllocatedFeeRewards = true;
 
-        require(amount > 0, "amount should be greater than 0");
+        if (amount == 0) return;
 
         uint currentNetworkAllocatedFeeRewards =
             amount.multiplyDecimalRound(crossChainManager().currentNetworkDebtPercentage());
@@ -312,6 +328,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function closeCurrentFeePeriod() external issuanceActive {
         require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
         require(_recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()), "Too early to close fee period");
+        require(
+            _everDistributedFeeRewards || _everAllocatedFeeRewards,
+            "fee rewards should be distributed or allocated before closing period"
+        );
 
         // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
         FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
