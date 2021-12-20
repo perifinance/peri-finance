@@ -26,6 +26,7 @@ import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/ICollateralManager.sol";
+import "./interfaces/ICrossChainManager.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/feepool
 contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePool {
@@ -58,6 +59,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     FeePeriod[FEE_PERIOD_LENGTH] private _recentFeePeriods;
     uint256 private _currentFeePeriod;
+    bool private _everDistributedFeeRewards;
+    bool private _everAllocatedFeeRewards;
 
     uint256 public quotaTolerance;
 
@@ -75,6 +78,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
+    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
 
@@ -93,7 +97,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](12);
+        bytes32[] memory newAddresses = new bytes32[](13);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_PERIFINANCE;
         newAddresses[2] = CONTRACT_FEEPOOLSTATE;
@@ -106,6 +110,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[9] = CONTRACT_ETH_COLLATERAL_PUSD;
         newAddresses[10] = CONTRACT_REWARDSDISTRIBUTION;
         newAddresses[11] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[12] = CONTRACT_CROSSCHAINMANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -135,6 +140,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function collateralManager() internal view returns (ICollateralManager) {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
+    }
+
+    function crossChainManager() internal view returns (ICrossChainManager) {
+        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -194,11 +203,60 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         );
     }
 
+    function everDistributedFeeRewards() external view returns (bool) {
+        return _everDistributedFeeRewards;
+    }
+
+    function everAllocatedFeeRewards() external view returns (bool) {
+        return _everAllocatedFeeRewards;
+    }
+
+    function allocatedOtherNetworkFeeRewards() external view returns (uint) {
+        return _allocatedOtherNetworkFeeRewards();
+    }
+
     function _recentFeePeriodsStorage(uint index) internal view returns (FeePeriod storage) {
         return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
     }
 
+    function _allocatedOtherNetworkFeeRewards() internal view returns (uint allocatedFeesForOtherNetworks) {
+        uint otherNetworksShare = SafeDecimalMath.unit().sub(crossChainManager().currentNetworkDebtPercentage());
+
+        allocatedFeesForOtherNetworks = _recentFeePeriodsStorage(0).feesToDistribute.multiplyDecimalRound(
+            otherNetworksShare
+        );
+    }
+
     /* ========== MUTATIVE FUNCTIONS ========== */
+
+    function distributeFeeRewards() external optionalProxy onlyDebtManager {
+        require(_everDistributedFeeRewards == false, "Distributing fee rewards is possible only once in a period");
+        _everDistributedFeeRewards = true;
+
+        uint _allocatedFeeRewards = _allocatedOtherNetworkFeeRewards();
+
+        issuer().pynths(pUSD).burn(FEE_ADDRESS, _allocatedFeeRewards);
+
+        _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.sub(
+            _allocatedFeeRewards
+        );
+    }
+
+    function allocateFeeRewards(uint amount) external optionalProxy onlyDebtManager {
+        require(_everAllocatedFeeRewards == false, "Allocating fee rewards is possible only once in a period");
+        _everAllocatedFeeRewards = true;
+
+        require(amount > 0, "amount should be greater than 0");
+
+        uint currentNetworkAllocatedFeeRewards =
+            amount.multiplyDecimalRound(crossChainManager().currentNetworkDebtPercentage());
+
+        issuer().pynths(pUSD).issue(FEE_ADDRESS, currentNetworkAllocatedFeeRewards);
+
+        _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.add(
+            currentNetworkAllocatedFeeRewards
+        );
+    }
 
     /**
      * @notice Logs an accounts issuance data per fee period
@@ -285,6 +343,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _recentFeePeriodsStorage(0).startingDebtIndex = uint64(periFinanceState().debtLedgerLength());
         _recentFeePeriodsStorage(0).startTime = uint64(now);
 
+        // allow fee rewards to be distributed when the period is closed
+        _everDistributedFeeRewards = false;
+        _everAllocatedFeeRewards = false;
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
     }
 
@@ -731,6 +792,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         );
     }
 
+    function _debtManager() internal view returns (address) {
+        return crossChainManager().debtManager();
+    }
+
     /* ========== Modifiers ========== */
     modifier onlyInternalContracts {
         bool isExchanger = msg.sender == address(exchanger());
@@ -746,6 +811,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         bool isIssuer = msg.sender == address(issuer());
         bool isPeriFinanceState = msg.sender == address(periFinanceState());
         require(isIssuer || isPeriFinanceState, "Issuer and PeriFinanceState only");
+        _;
+    }
+
+    modifier onlyDebtManager {
+        bool isDebtManager = messageSender == _debtManager();
+        require(isDebtManager, "debt manager only");
         _;
     }
 
