@@ -96,8 +96,9 @@
 			},
 			"FeePool": {
 				"address": "0x3e472c5B49Db249E0F692C37B7BD6929e83b4Fad",
-				"status": "current",
-				"keccak256": "0xca53bbf2abb338ba20119c92d82c6912b92d0ad6d01134a3ae2f48eb452af2df"
+				"status": "replaced",
+				"keccak256": "0xca53bbf2abb338ba20119c92d82c6912b92d0ad6d01134a3ae2f48eb452af2df",
+				"replaced_in": "v0.2.12"
 			},
 			"FeePoolState": {
 				"address": "0xb978238531b7691598b9c31e02d36A6e54FD83ca",
@@ -587,6 +588,20 @@
 				"address": "0x99c4bE14a264559045a4210893Afea52ADfEb9A0",
 				"status": "current",
 				"keccak256": "0x9cebb6140713cd0c4664c69a3ec4c34090a4b34129cabf0dbb9fb9ea00c93dc3"
+			}
+		}
+	},
+	"v0.2.12": {
+		"tag": "v0.2.12",
+		"fulltag": "v0.2.12",
+		"network": "goerli",
+		"date": "2021-12-17T14:58:40+09:00",
+		"commit": "4f05fe08fbf552a7114bc60a4b1ae81d4b2a6083",
+		"contracts": {
+			"FeePool": {
+				"address": "0xEA9Ac39457E3843c197d8A2d257EE047750e135d",
+				"status": "current",
+				"keccak256": "0xfc1b67b71fff1f915a2092b6a69ae77339e1cc44ff36551e1cc41f4f7f2ab34d"
 			}
 		}
 	}

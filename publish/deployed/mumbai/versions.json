@@ -1042,8 +1042,9 @@
 			},
 			"FeePool": {
 				"address": "0x93791781aF007c97b7ed614023D2FB55922c3C07",
-				"status": "current",
-				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5"
+				"status": "replaced",
+				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5",
+				"replaced_in": "v0.2.12"
 			},
 			"FeePoolState": {
 				"address": "0x24D16a8eDdBa6bbF5A4e2f4ee118274c7c21c03A",
@@ -1179,8 +1180,9 @@
 			},
 			"CrossChainState": {
 				"address": "0x5D0578c3d4863fEcc12541080a6Ac9B35Aac6fC3",
-				"status": "current",
-				"keccak256": "0xafdc7d60e7f55dfad981437c0e03df12438aa892062be052b413fef9b80450a2"
+				"status": "replaced",
+				"keccak256": "0xafdc7d60e7f55dfad981437c0e03df12438aa892062be052b413fef9b80450a2",
+				"replaced_in": "v0.2.12"
 			},
 			"CrossChainManager": {
 				"address": "0xf1B7f70B9624c3d672E15722c4E2951a1D93Bf87",
@@ -1312,6 +1314,25 @@
 				"address": "0x80E3368aA57adeB41761B0985D09A41be3c622a0",
 				"status": "current",
 				"keccak256": "0x007a408d694b3aadbe51582ef929e758db97bfeb65e82663802bba7b8faa00fd"
+			}
+		}
+	},
+	"v0.2.12": {
+		"tag": "v0.2.12",
+		"fulltag": "v0.2.12",
+		"network": "mumbai",
+		"date": "2021-12-17T19:05:33+09:00",
+		"commit": "70c405d5aebbc1a12845584f21241614c7b332e2",
+		"contracts": {
+			"FeePool": {
+				"address": "0xeb875F237dd051e6FB9ec51B6327183B0f89b1fa",
+				"status": "current",
+				"keccak256": "0xfc1b67b71fff1f915a2092b6a69ae77339e1cc44ff36551e1cc41f4f7f2ab34d"
+			},
+			"CrossChainState": {
+				"address": "0x90fA57c413E234E30ffbe27076Dac92fB2475eE4",
+				"status": "current",
+				"keccak256": "0xc3c6ec3c168753229d869971f2205d1f7561f960e44c4199082973ad4225a706"
 			}
 		}
 	}

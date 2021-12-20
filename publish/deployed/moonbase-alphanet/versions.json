@@ -680,8 +680,9 @@
 			},
 			"FeePool": {
 				"address": "0xBe84A90498d5f5507BDBb185fE973fbC834ba6EC",
-				"status": "current",
-				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5"
+				"status": "replaced",
+				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5",
+				"replaced_in": "v0.2.12"
 			},
 			"FeePoolState": {
 				"address": "0x04Cd1b48bc21d3079c62a7E87118A2A45aC6Cf6a",
@@ -912,6 +913,20 @@
 				"address": "0x132099ff76430b1C021741A919808eD43dbe7f0C",
 				"status": "current",
 				"keccak256": "0xb6bf1b3a73124b8c1c894cfa7b4e9036450aaf685152ee575ad99740cfeda16c"
+			}
+		}
+	},
+	"v0.2.12": {
+		"tag": "v0.2.12",
+		"fulltag": "v0.2.12",
+		"network": "moonbase-alphanet",
+		"date": "2021-12-16T18:11:46+09:00",
+		"commit": "2fef6a791baa54ad18ca698576318ccd0848cb08",
+		"contracts": {
+			"FeePool": {
+				"address": "0xC301dF8E2d9d1D22618B546dDae82C3a659D8Ee0",
+				"status": "current",
+				"keccak256": "0xfc1b67b71fff1f915a2092b6a69ae77339e1cc44ff36551e1cc41f4f7f2ab34d"
 			}
 		}
 	}

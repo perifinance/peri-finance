@@ -732,8 +732,9 @@
 			},
 			"FeePool": {
 				"address": "0x3F9B67487FE889b68E014Ab5c28956465a1279dF",
-				"status": "current",
-				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5"
+				"status": "replaced",
+				"keccak256": "0xeaedde926657c133e3ad32b1fb6365c76b52dbe2a17263fe8c7fe621ee7a73d5",
+				"replaced_in": "v0.2.12"
 			},
 			"FeePoolState": {
 				"address": "0x3ff6f927FCdD56eD9E3b65634b52BEb8D0d13110",
@@ -839,8 +840,9 @@
 			},
 			"CrossChainState": {
 				"address": "0x5B6D2110fBcdB4A5Ac82d90055778DA46Ba6D8aF",
-				"status": "current",
-				"keccak256": "0xafdc7d60e7f55dfad981437c0e03df12438aa892062be052b413fef9b80450a2"
+				"status": "replaced",
+				"keccak256": "0xafdc7d60e7f55dfad981437c0e03df12438aa892062be052b413fef9b80450a2",
+				"replaced_in": "v0.2.12"
 			},
 			"CrossChainManager": {
 				"address": "0x78Cd2BF20236118E4717f503BDE238fD071964FD",
@@ -972,6 +974,25 @@
 				"address": "0xe747680347a0E9bf06526054a68bcd2A42Af8a94",
 				"status": "current",
 				"keccak256": "0x007a408d694b3aadbe51582ef929e758db97bfeb65e82663802bba7b8faa00fd"
+			}
+		}
+	},
+	"v0.2.12": {
+		"tag": "v0.2.12",
+		"fulltag": "v0.2.12",
+		"network": "bsctest",
+		"date": "2021-12-17T19:05:33+09:00",
+		"commit": "70c405d5aebbc1a12845584f21241614c7b332e2",
+		"contracts": {
+			"FeePool": {
+				"address": "0x65327b0C95b8Ab78E1f6d730c2663E303B1231Aa",
+				"status": "current",
+				"keccak256": "0xfc1b67b71fff1f915a2092b6a69ae77339e1cc44ff36551e1cc41f4f7f2ab34d"
+			},
+			"CrossChainState": {
+				"address": "0xa6D2FC99Ae2A2BbE8C6CD7207457D08Db421F981",
+				"status": "current",
+				"keccak256": "0xc3c6ec3c168753229d869971f2205d1f7561f960e44c4199082973ad4225a706"
 			}
 		}
 	}
