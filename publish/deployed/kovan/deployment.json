@@ -281,11 +281,11 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0xA1D750ac268955099703f9277B54f4DdCD3A1eC6",
+			"address": "0x03f889cC3F6A00fC7213f06302c2a531A7bC2E63",
 			"source": "SupplySchedule",
-			"link": "https://kovan.etherscan.io/address/0xA1D750ac268955099703f9277B54f4DdCD3A1eC6",
-			"timestamp": "2021-12-20T11:50:24.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0x08c96b1d65f8353d352bf6e4579e2ced87b7937c99bfb5e74619be9f14578935",
+			"link": "https://kovan.etherscan.io/address/0x03f889cC3F6A00fC7213f06302c2a531A7bC2E63",
+			"timestamp": "2021-12-21T02:41:48.480Z",
+			"txn": "",
 			"network": "kovan"
 		},
 		"TokenStatepUSD": {

@@ -391,8 +391,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
-				"status": "current",
-				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+				"status": "replaced",
+				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303",
+				"replaced_in": "v0.2.14"
 			},
 			"TokenStatepUSD": {
 				"address": "0xa1f6B7Eb6f5A0a0a431A9e9230184A3f16621602",
@@ -413,6 +414,20 @@
 				"address": "0x3293B17c2ad3e49bDA42e8209db4EC5A56a8f393",
 				"status": "current",
 				"keccak256": "0x836fafe3421fd6d3d38e56d9427f8f3b4bf7a7a2de0674a7e3d1e12904dbab1f"
+			}
+		}
+	},
+	"v0.2.14": {
+		"tag": "v0.2.14",
+		"fulltag": "v0.2.14",
+		"network": "ropsten",
+		"date": "2021-12-20T21:26:57+09:00",
+		"commit": "987176822197aaff59f628092aea39f563a22cc9",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0xF04F0c23cB20e6718A17853959A05eD685499333",
+				"status": "current",
+				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
 			}
 		}
 	}

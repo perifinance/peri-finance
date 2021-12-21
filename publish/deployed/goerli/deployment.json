@@ -281,11 +281,11 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x7552E891112fc5cA2D8fA1D62BB74071e1334c9d",
+			"address": "0xa5FB89BB0BB8D6e24cF5CD26De6B79d2B5492308",
 			"source": "SupplySchedule",
-			"link": "https://goerli.etherscan.io/address/0x7552E891112fc5cA2D8fA1D62BB74071e1334c9d",
-			"timestamp": "2021-12-20T11:39:04.000Z",
-			"txn": "https://goerli.etherscan.io/tx/0x0e3673cf41c9ba4c688ab1662a6f9654d2a20e641ebeb82319d365b751c570a8",
+			"link": "https://goerli.etherscan.io/address/0xa5FB89BB0BB8D6e24cF5CD26De6B79d2B5492308",
+			"timestamp": "2021-12-21T02:44:51.532Z",
+			"txn": "",
 			"network": "goerli"
 		},
 		"TokenStatepUSD": {

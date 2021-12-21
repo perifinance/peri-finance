@@ -1052,8 +1052,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0xC301dF8E2d9d1D22618B546dDae82C3a659D8Ee0",
-				"status": "current",
-				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+				"status": "replaced",
+				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303",
+				"replaced_in": "v0.2.14"
 			},
 			"TokenStatepUSD": {
 				"address": "0xAc125f3fc15725b385E0E6d7CBfa7152B797bBc1",
@@ -1074,6 +1075,20 @@
 				"address": "0xaeE42E8BFFCA779D698F4503cFf3e19e22C27d8e",
 				"status": "current",
 				"keccak256": "0xc3c6ec3c168753229d869971f2205d1f7561f960e44c4199082973ad4225a706"
+			}
+		}
+	},
+	"v0.2.14": {
+		"tag": "v0.2.14",
+		"fulltag": "v0.2.14",
+		"network": "bsctest",
+		"date": "2021-12-20T21:26:57+09:00",
+		"commit": "987176822197aaff59f628092aea39f563a22cc9",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0xE5400F70cCC4d98530d7BAef647c3b89129C7Ee7",
+				"status": "current",
+				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
 			}
 		}
 	}

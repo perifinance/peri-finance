@@ -281,11 +281,11 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x164bca60358c3d8B38A1e4Fd10793d6B518100f7",
+			"address": "0xB9c08Ab64aa8AADd0B8c3A92FF91bc0778F53740",
 			"source": "SupplySchedule",
-			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0x164bca60358c3d8B38A1e4Fd10793d6B518100f7",
-			"timestamp": "2021-12-20T11:41:30.000Z",
-			"txn": "https://moonbase-blockscout.testnet.moonbeam.network/tx/0x31443e1eae7b7a4756e6a95da5fff8c5cee73069b48d8a2961aad5ba25fbbe6d",
+			"link": "https://moonbase-blockscout.testnet.moonbeam.network/address/0xB9c08Ab64aa8AADd0B8c3A92FF91bc0778F53740",
+			"timestamp": "2021-12-21T02:41:37.446Z",
+			"txn": "",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStatepUSD": {

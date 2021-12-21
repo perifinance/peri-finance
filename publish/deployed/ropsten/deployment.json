@@ -290,10 +290,10 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
+			"address": "0xF04F0c23cB20e6718A17853959A05eD685499333",
 			"source": "SupplySchedule",
-			"link": "https://ropsten.etherscan.io/address/0xF7007E9411CB52758c288f8F8CcC0629eEdf260B",
-			"timestamp": "2021-12-20T12:06:48.285Z",
+			"link": "https://ropsten.etherscan.io/address/0xF04F0c23cB20e6718A17853959A05eD685499333",
+			"timestamp": "2021-12-21T02:44:38.330Z",
 			"txn": "",
 			"network": "ropsten"
 		},

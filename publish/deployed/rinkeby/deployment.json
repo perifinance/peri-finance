@@ -290,10 +290,10 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x3Ef5BA1F779c702660697E0360256944D5e47A89",
+			"address": "0x319698299C080FEfC7854b4Bf7A0Fdf1f049B4e8",
 			"source": "SupplySchedule",
-			"link": "https://rinkeby.etherscan.io/address/0x3Ef5BA1F779c702660697E0360256944D5e47A89",
-			"timestamp": "2021-12-20T11:58:00.227Z",
+			"link": "https://rinkeby.etherscan.io/address/0x319698299C080FEfC7854b4Bf7A0Fdf1f049B4e8",
+			"timestamp": "2021-12-21T02:44:44.164Z",
 			"txn": "",
 			"network": "rinkeby"
 		},
