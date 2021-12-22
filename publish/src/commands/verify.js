@@ -31,8 +31,8 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 		? process.env.POLYGONSCAN_KEY
 		: ['bsc', 'bsctest'].includes(network)
 		? process.env.BSCSCAN_KEY
-		: ['moonbase-alphanet'].includes(network)
-		? process.env.SUBSCAN_KEY
+		: ['moonriver', 'moonbase-alphanet'].includes(network)
+		? process.env.MOONBEAMSCAN_KEY
 		: process.env.ETHERSCAN_KEY;
 
 	ensureNetwork(network);
@@ -66,7 +66,6 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	for (const name of Object.keys(config)) {
 		const { address } = deployment.targets[name];
 		// Check if this contract already has been verified.
-
 		let result = await axios.get(etherscanUrl, {
 			params: {
 				module: 'contract',
@@ -76,10 +75,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 			},
 		});
 
-		if (
-			result.data.result === 'Contract source code not verified' ||
-			result.data.message === 'Contract source code not verified'
-		) {
+		if (result.data.result === 'Contract source code not verified') {
 			const { source } = deployment.targets[name];
 			console.log(
 				gray(` - Contract ${name} not yet verified (source of "${source}.sol"). Verifying...`)
@@ -175,71 +171,33 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 				? CONTRACT_OVERRIDES[`${source}.sol`].runs
 				: optimizerRuns;
 
-			if (['moonbase-alphanet'].includes(network)) {
-				try {
-					result = await axios.post(
-						// etherscanUrl,
-						// 'https://moonbase-blockscout.testnet.moonbeam.network/verify_smart_contract/contract_verifications'
-						'https://blockscout.com/poa/sokol/api',
-						{
-							module: 'contract',
-							action: 'verify',
-							name: source,
-							addressHash: address,
-							contractSourceCode: warningHeader() + readFlattened(),
-							constructorArguments,
-							compilerVersion:
-								'v' +
-								solc
-									.version()
-									.replace('.Darwin.appleclang', '')
-									.replace('.Emscripten.clang', ''), // The version reported by solc-js is too verbose and needs a v at the front
-							optimization: true,
-							optimizationRuns: runs,
-							libraryName1: 'SafeDecimalMath',
-							libraryAddress1: deployment.targets['SafeDecimalMath'].address,
-						},
-						{
-							headers: {
-								'Content-Type': 'application/json',
-							},
-						}
-					);
-				} catch (e) {
-					console.log(e.response.status + ' ' + e.response.statusText);
-					continue;
+			result = await axios.post(
+				etherscanUrl,
+				qs.stringify({
+					module: 'contract',
+					action: 'verifysourcecode',
+					contractaddress: address,
+					sourceCode: warningHeader() + readFlattened(),
+					contractname: source,
+					// note: spelling mistake is on etherscan's side
+					constructorArguements: constructorArguments,
+					compilerversion: 'v' + solc.version().replace('.Emscripten.clang', ''), // The version reported by solc-js is too verbose and needs a v at the front
+					optimizationUsed: 1,
+					runs,
+					libraryname1: 'SafeDecimalMath',
+					libraryaddress1: deployment.targets['SafeDecimalMath'].address,
+					libraryname2: 'Math',
+					libraryaddress2: deployment.targets['Math'].address,
+					apikey: networkScanKey,
+				}),
+				{
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
 				}
-			} else {
-				result = await axios.post(
-					etherscanUrl,
-					qs.stringify({
-						module: 'contract',
-						action: 'verifysourcecode',
-						contractaddress: address,
-						sourceCode: warningHeader() + readFlattened(),
-						contractname: source,
-						// note: spelling mistake is on etherscan's side
-						constructorArguements: constructorArguments,
-						compilerversion: 'v' + solc.version().replace('.Emscripten.clang', ''), // The version reported by solc-js is too verbose and needs a v at the front
-						optimizationUsed: 1,
-						runs,
-						libraryname1: 'SafeDecimalMath',
-						libraryaddress1: deployment.targets['SafeDecimalMath'].address,
-						apikey: networkScanKey,
-					}),
-					{
-						headers: {
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-					}
-				);
-			}
+			);
 
-			if (['moonbase-alphanet'].includes(network)) {
-				console.log(gray(' - Got result:', result.data.message));
-			} else {
-				console.log(gray(' - Got result:', result.data.result));
-			}
+			console.log(gray(' - Got result:', result.data.result));
 
 			if (result.data.result === 'Contract source code already verified') {
 				console.log(green(` - Verified ${name}`));
@@ -247,50 +205,45 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 				tableData.push([name, address, 'Successfully verified']);
 				continue;
 			}
+			const guid = result.data.result;
 
-			if (['moonbase-alphanet'].includes(network)) {
-				tableData.push([name, address, result.data.message]);
-			} else {
-				const guid = result.data.result;
+			if (!result.data.status) {
+				tableData.push([name, address, `Unable to verify, Etherscan returned "${guid}`]);
+				continue;
+			} else if (!guid || guid.length !== 50) {
+				console.log(red(`Invalid GUID from Etherscan (see response above).`));
+				tableData.push([name, address, 'Unable to verify (invalid GUID)']);
+				continue;
+			}
 
-				if (!result.data.status) {
-					tableData.push([name, address, `Unable to verify, Etherscan returned "${guid}`]);
-					continue;
-				} else if (!guid || guid.length !== 50) {
-					console.log(red(`Invalid GUID from Etherscan (see response above).`));
-					tableData.push([name, address, 'Unable to verify (invalid GUID)']);
-					continue;
+			let status = '';
+			while (status !== 'Pass - Verified') {
+				console.log(gray(' - Checking verification status...'));
+
+				result = await axios.get(etherscanUrl, {
+					params: {
+						module: 'contract',
+						action: 'checkverifystatus',
+						guid,
+					},
+				});
+				status = result.data.result;
+
+				console.log(gray(` - "${status}" response from Etherscan`));
+
+				if (status === 'Fail - Unable to verify') {
+					console.log(red(` - Unable to verify ${name}.`));
+					tableData.push([name, address, 'Unable to verify']);
+
+					break;
 				}
 
-				let status = '';
-				while (status !== 'Pass - Verified') {
-					console.log(gray(' - Checking verification status...'));
-
-					result = await axios.get(etherscanUrl, {
-						params: {
-							module: 'contract',
-							action: 'checkverifystatus',
-							guid,
-						},
-					});
-					status = result.data.result;
-
-					console.log(gray(` - "${status}" response from Etherscan`));
-
-					if (status === 'Fail - Unable to verify') {
-						console.log(red(` - Unable to verify ${name}.`));
-						tableData.push([name, address, 'Unable to verify']);
-
-						break;
-					}
-
-					if (status !== 'Pass - Verified') {
-						console.log(gray(' - Sleeping for 5 seconds and re-checking.'));
-						await new Promise(resolve => setTimeout(resolve, 5000));
-					} else {
-						console.log(green(` - Verified ${name}`));
-						tableData.push([name, address, 'Successfully verified']);
-					}
+				if (status !== 'Pass - Verified') {
+					console.log(gray(' - Sleeping for 5 seconds and re-checking.'));
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				} else {
+					console.log(green(` - Verified ${name}`));
+					tableData.push([name, address, 'Successfully verified']);
 				}
 			}
 		} else {
