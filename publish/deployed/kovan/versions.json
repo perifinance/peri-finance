@@ -1856,8 +1856,23 @@
 		"contracts": {
 			"SupplySchedule": {
 				"address": "0x03f889cC3F6A00fC7213f06302c2a531A7bC2E63",
+				"status": "replaced",
+				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303",
+				"replaced_in": "v0.2.15"
+			}
+		}
+	},
+	"v0.2.15": {
+		"tag": "v0.2.15",
+		"fulltag": "v0.2.15",
+		"network": "kovan",
+		"date": "2021-12-22T16:47:18+09:00",
+		"commit": "e432c601faa3755bb8b3a0304632b2a518a46ba5",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0x2fc1b109c9390b7BAFC532064b4d2e16963033ac",
 				"status": "current",
-				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+				"keccak256": "0xc2ff33ee77f3c6a490862b037b73bc20c29246dcc13b6b7df10415e68e640ebe"
 			}
 		}
 	}
