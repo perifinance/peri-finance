@@ -284,8 +284,8 @@
 			"address": "0x29716d657d60C8adaBa1318f55f9cC41B93B3Ca5",
 			"source": "SupplySchedule",
 			"link": "https://moonbase.moonscan.io/address/0x29716d657d60C8adaBa1318f55f9cC41B93B3Ca5",
-			"timestamp": "2021-12-22T07:43:00.711Z",
-			"txn": "",
+			"timestamp": "2021-12-22T07:42:48.000Z",
+			"txn": "https://moonbase.moonscan.io/tx/0xd3c21d2e4363d6ff6d4057517bbb5dccc95f933098db7a745a3da5c296ac8471",
 			"network": "moonbase-alphanet"
 		},
 		"TokenStatepUSD": {
