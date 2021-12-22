@@ -186,8 +186,6 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 					runs,
 					libraryname1: 'SafeDecimalMath',
 					libraryaddress1: deployment.targets['SafeDecimalMath'].address,
-					libraryname2: 'Math',
-					libraryaddress2: deployment.targets['Math'].address,
 					apikey: networkScanKey,
 				}),
 				{
