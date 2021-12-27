@@ -152,9 +152,6 @@
 	"StakingState": {
 		"deploy": false
 	},
-	"StakingRewardsPeriMockLP": {
-		"deploy": true
-	},
 	"BridgeState": {
 		"deploy": false
 	},

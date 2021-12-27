@@ -155,27 +155,6 @@
 	"BridgeState": {
 		"deploy": false
 	},
-	"StakingRewardsPeriMockLP": {
-		"deploy": true
-	},
-	"TokenStatepBTC": {
-		"deploy": false
-	},
-	"ProxyERC20pBTC": {
-		"deploy": false
-	},
-	"PynthpBTC": {
-		"deploy": false
-	},
-	"TokenStatepETH": {
-		"deploy": false
-	},
-	"ProxyERC20pETH": {
-		"deploy": false
-	},
-	"PynthpETH": {
-		"deploy": false
-	},
 	"BridgeStatepUSD": {
 		"deploy": false
 	},
