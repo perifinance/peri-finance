@@ -256,21 +256,16 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         _;
     }
 
-    function _onlyIssuer() internal view {
-        require(msg.sender == address(issuer()), "Sender is not Issuer");
+    function _onlyIssuerOrExchangerorPynthpUSD() internal view {
+        IPynth pynthpUSD = issuer().pynths(pUSD);
+        require(
+            msg.sender == address(issuer()) || msg.sender == address(exchanger()) || msg.sender == address(pynthpUSD),
+            "Sender is not Issuer or Exchanger or pynthpUSD"
+        );
     }
 
-    modifier onlyIssuer() {
-        _onlyIssuer();
-        _;
-    }
-
-    function _onlyIssuerOrExchanger() internal view {
-        require(msg.sender == address(issuer()) || msg.sender == address(exchanger()), "Sender is not Issuer or Exchanger");
-    }
-
-    modifier onlyIssuerOrExchanger() {
-        _onlyIssuerOrExchanger();
+    modifier onlyIssuerOrExchangerPynthpUSD() {
+        _onlyIssuerOrExchangerorPynthpUSD();
         _;
     }
 }

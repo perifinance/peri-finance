@@ -45,7 +45,7 @@ contract DebtCache is BaseDebtCache {
         _updateCachedPynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     }
 
-    function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
+    function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuerOrExchangerPynthpUSD {
         bytes32[] memory pynthKeyArray = new bytes32[](1);
         pynthKeyArray[0] = currencyKey;
         uint[] memory pynthRateArray = new uint[](1);
@@ -55,12 +55,12 @@ contract DebtCache is BaseDebtCache {
 
     function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates)
         external
-        onlyIssuerOrExchanger
+        onlyIssuerOrExchangerPynthpUSD
     {
         _updateCachedPynthDebtsWithRates(currencyKeys, currencyRates, false);
     }
 
-    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuer {
+    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchangerPynthpUSD {
         _updateDebtCacheValidity(currentlyInvalid);
     }
 
