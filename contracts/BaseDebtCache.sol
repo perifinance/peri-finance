@@ -264,7 +264,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         );
     }
 
-    modifier onlyIssuerOrExchangerPynthpUSD() {
+    modifier onlyIssuerOrExchangerOrPynthpUSD() {
         _onlyIssuerOrExchangerorPynthpUSD();
         _;
     }
