@@ -498,8 +498,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x7f8bF39f15E831CbaF8c024F11b222F214cE51B1",
-				"status": "current",
-				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505"
+				"status": "replaced",
+				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505",
+				"replaced_in": "v0.2.16"
 			}
 		}
 	},
@@ -586,8 +587,9 @@
 			},
 			"Issuer": {
 				"address": "0x3Ab75FeA332CaEE5b7bCD9bdE48Be5f01c05d47e",
-				"status": "current",
-				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c"
+				"status": "replaced",
+				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c",
+				"replaced_in": "v0.2.16"
 			},
 			"CollateralManager": {
 				"address": "0xA93A2521676e837C67eEe5Fe0838871248C87053",
@@ -692,6 +694,25 @@
 				"address": "0xa5FB89BB0BB8D6e24cF5CD26De6B79d2B5492308",
 				"status": "current",
 				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+			}
+		}
+	},
+	"v0.2.16": {
+		"tag": "v0.2.16",
+		"fulltag": "v0.2.16",
+		"network": "goerli",
+		"date": "2021-12-21T11:48:13+09:00",
+		"commit": "dce7bbe4acad0e1547c4f12ee39d9e84251adb75",
+		"contracts": {
+			"Issuer": {
+				"address": "0x7cC07cCc602F62Bd63407b5293268cAbB02c7E09",
+				"status": "current",
+				"keccak256": "0x48892bf4c91cf22e861b36e223dd50be8f33bda3a5263fa10d6dd7829dc030ba"
+			},
+			"PynthpUSD": {
+				"address": "0x40DF73B1124dbFAE122560C8E5bd9a548CDa21c1",
+				"status": "current",
+				"keccak256": "0x9e89bc1104fb545f7cf151d91ddc965a71559626d24d65d0c44c3461a66d431e"
 			}
 		}
 	}

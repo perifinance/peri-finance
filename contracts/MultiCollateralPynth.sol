@@ -9,6 +9,9 @@ import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IBridgeState.sol";
 import "./interfaces/ISystemSettings.sol";
+import "./interfaces/IDebtCache.sol";
+
+import "./SafeDecimalMath.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/multicollateralpynth
 contract MultiCollateralPynth is Pynth {
@@ -18,6 +21,9 @@ contract MultiCollateralPynth is Pynth {
     bytes32 private constant CONTRACT_ETH_COLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
+    bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
+
+    bytes32 internal constant pUSD = "pUSD";
 
     address payable public bridgeValidator;
 
@@ -57,13 +63,18 @@ contract MultiCollateralPynth is Pynth {
         return ISystemSettings(requireAndGetAddress(CONTRACT_SYSTEMSETTINGS));
     }
 
+    function debtCache() internal view returns (IDebtCache) {
+        return IDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
+    }
+
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = Pynth.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](4);
+        bytes32[] memory newAddresses = new bytes32[](5);
         newAddresses[0] = CONTRACT_COLLATERALMANAGER;
         newAddresses[1] = CONTRACT_ETH_COLLATERAL;
         newAddresses[2] = CONTRACT_ETH_COLLATERAL_PUSD;
         newAddresses[3] = CONTRACT_SYSTEMSETTINGS;
+        newAddresses[4] = CONTRACT_DEBTCACHE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -100,6 +111,8 @@ contract MultiCollateralPynth is Pynth {
 
         require(_internalBurn(messageSender, _amount), "burning failed");
 
+        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
+
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
     }
 
@@ -124,6 +137,7 @@ contract MultiCollateralPynth is Pynth {
         bridgeState.claimInbound(_index, amount);
 
         _internalIssue(account, amount);
+        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
         return true;
     }

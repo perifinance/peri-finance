@@ -193,8 +193,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0xcaE80eA53B8801D89BBF07A0F01eB6daFB430f9C",
-				"status": "current",
-				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505"
+				"status": "replaced",
+				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505",
+				"replaced_in": "v0.2.16"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x15040a4bDE0731664373Fb46Ce233262A644DFcd",
@@ -323,8 +324,9 @@
 			},
 			"Issuer": {
 				"address": "0x160452Bee9DA103157EA1E512299728c46995157",
-				"status": "current",
-				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c"
+				"status": "replaced",
+				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c",
+				"replaced_in": "v0.2.16"
 			},
 			"CrossChainManager": {
 				"address": "0xcB26A7785Ead42BFf552d202742FEa67eb702971",
@@ -434,6 +436,25 @@
 				"address": "0x319698299C080FEfC7854b4Bf7A0Fdf1f049B4e8",
 				"status": "current",
 				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+			}
+		}
+	},
+	"v0.2.16": {
+		"tag": "v0.2.16",
+		"fulltag": "v0.2.16",
+		"network": "rinkeby",
+		"date": "2021-12-21T11:48:13+09:00",
+		"commit": "dce7bbe4acad0e1547c4f12ee39d9e84251adb75",
+		"contracts": {
+			"Issuer": {
+				"address": "0xFf54Ece25CfAe8CCCc9d580cCe4c3Aa9C3b8a47C",
+				"status": "current",
+				"keccak256": "0x48892bf4c91cf22e861b36e223dd50be8f33bda3a5263fa10d6dd7829dc030ba"
+			},
+			"PynthpUSD": {
+				"address": "0xC8CA872042cb1C6ce5d9bB0cF1C5642eBACfaE69",
+				"status": "current",
+				"keccak256": "0x9e89bc1104fb545f7cf151d91ddc965a71559626d24d65d0c44c3461a66d431e"
 			}
 		}
 	}

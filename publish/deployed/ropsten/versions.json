@@ -193,8 +193,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315",
-				"status": "current",
-				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505"
+				"status": "replaced",
+				"keccak256": "0xbfefbc274e9ea66551a148add3e675862082bfe03fa49119b2edbd72a89e6505",
+				"replaced_in": "v0.2.16"
 			},
 			"StakingState": {
 				"address": "0x7302F631d4Af72a6B20DdFD325d2B2844B21D4D2",
@@ -322,8 +323,9 @@
 			},
 			"Issuer": {
 				"address": "0xC960fF13b5E5803529913E182608BF64DAb3c217",
-				"status": "current",
-				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c"
+				"status": "replaced",
+				"keccak256": "0x66eaf413ae3d2d8fd75ca51c3a161c6ad8df8793c5f848cc37a7553c2c8b075c",
+				"replaced_in": "v0.2.16"
 			},
 			"CrossChainManager": {
 				"address": "0xEAae4EfD1CE446CF5A7E607eD505d1e3e5cF51E4",
@@ -428,6 +430,25 @@
 				"address": "0xF04F0c23cB20e6718A17853959A05eD685499333",
 				"status": "current",
 				"keccak256": "0xf039ac6ae7f449587dfe5dc22cb3df7521efeb91e9999fad6cd279efce1e3303"
+			}
+		}
+	},
+	"v0.2.16": {
+		"tag": "v0.2.16",
+		"fulltag": "v0.2.16",
+		"network": "ropsten",
+		"date": "2021-12-21T11:48:13+09:00",
+		"commit": "dce7bbe4acad0e1547c4f12ee39d9e84251adb75",
+		"contracts": {
+			"Issuer": {
+				"address": "0xa9dEF9b01dcd224FAADDbd75826034a2c4ff73d2",
+				"status": "current",
+				"keccak256": "0x48892bf4c91cf22e861b36e223dd50be8f33bda3a5263fa10d6dd7829dc030ba"
+			},
+			"PynthpUSD": {
+				"address": "0x97F0e77B53e310E8c3C08FD042EA43D319d1d4aE",
+				"status": "current",
+				"keccak256": "0x9e89bc1104fb545f7cf151d91ddc965a71559626d24d65d0c44c3461a66d431e"
 			}
 		}
 	}
