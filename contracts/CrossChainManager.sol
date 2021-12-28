@@ -81,16 +81,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         view
         returns (uint totalSystemValue, bool anyRateIsInvalid)
     {
-        uint networkPercentage = _currentNetworkDebtPercentage();
         (totalSystemValue, anyRateIsInvalid) = _getCurrentNetworkPreservedDebt();
-
-        totalSystemValue = state().lastTotalNetworkDebtLedgerEntry() == 0
-            ? totalSystemValue
-            : state()
-                .lastTotalNetworkDebtLedgerEntry()
-                .decimalToPreciseDecimal()
-                .multiplyDecimalRoundPrecise(networkPercentage)
-                .preciseDecimalToDecimal();
 
         if (currencyKey == pUSD) {
             return (totalSystemValue, anyRateIsInvalid);
