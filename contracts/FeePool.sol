@@ -221,11 +221,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _allocatedOtherNetworkFeeRewards() internal view returns (uint allocatedFeesForOtherNetworks) {
-        uint otherNetworksShare = SafeDecimalMath.unit().sub(crossChainManager().currentNetworkDebtPercentage());
+        uint otherNetworksShare = SafeDecimalMath.preciseUnit().sub(crossChainManager().currentNetworkDebtPercentage());
 
-        allocatedFeesForOtherNetworks = _recentFeePeriodsStorage(0).feesToDistribute.multiplyDecimalRound(
-            otherNetworksShare
-        );
+        allocatedFeesForOtherNetworks = _recentFeePeriodsStorage(0)
+            .feesToDistribute
+            .decimalToPreciseDecimal()
+            .multiplyDecimalRoundPrecise(otherNetworksShare)
+            .preciseDecimalToDecimal();
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -268,7 +270,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         if (amount == 0) return;
 
         uint currentNetworkAllocatedFeeRewards =
-            amount.multiplyDecimalRound(crossChainManager().currentNetworkDebtPercentage());
+            amount
+                .decimalToPreciseDecimal()
+                .multiplyDecimalRoundPrecise(crossChainManager().currentNetworkDebtPercentage())
+                .preciseDecimalToDecimal();
 
         issuer().pynths(pUSD).issue(FEE_ADDRESS, currentNetworkAllocatedFeeRewards);
 

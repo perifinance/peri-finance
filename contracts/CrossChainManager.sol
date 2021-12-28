@@ -86,7 +86,11 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
         totalSystemValue = state().lastTotalNetworkDebtLedgerEntry() == 0
             ? totalSystemValue
-            : state().lastTotalNetworkDebtLedgerEntry().multiplyDecimal(networkPercentage);
+            : state()
+                .lastTotalNetworkDebtLedgerEntry()
+                .decimalToPreciseDecimal()
+                .multiplyDecimalRoundPrecise(networkPercentage)
+                .preciseDecimalToDecimal();
 
         if (currencyKey == pUSD) {
             return (totalSystemValue, anyRateIsInvalid);
@@ -162,7 +166,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint networkPercentage) {
         (uint totalIssued, ) = _getCurrentNetworkPreservedDebt();
 
-        networkPercentage = totalNetworkDebt == 0 ? SafeDecimalMath.unit() : totalIssued.divideDecimal(totalNetworkDebt);
+        networkPercentage = totalNetworkDebt == 0
+            ? SafeDecimalMath.preciseUnit()
+            : totalIssued.decimalToPreciseDecimal().divideDecimalRoundPrecise(totalNetworkDebt.decimalToPreciseDecimal());
     }
 
     function _getCurrentNetworkPreservedDebt() internal view returns (uint currentNetworkDebt, bool anyRateIsInvalid) {
