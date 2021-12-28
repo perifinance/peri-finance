@@ -242,7 +242,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         uint _allocatedFeeRewards = _allocatedOtherNetworkFeeRewards();
 
-        if (_allocatedFeeRewards == 0) return;
+        if (_allocatedFeeRewards <= 0) {
+            feeRewardsToBeAllocated = 0;
+            return;
+        }
 
         issuer().pynths(pUSD).burn(FEE_ADDRESS, _allocatedFeeRewards);
 
