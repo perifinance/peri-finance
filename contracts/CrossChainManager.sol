@@ -9,6 +9,7 @@ import "./interfaces/ICrossChainState.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IBridgeState.sol";
 import "./interfaces/IExchangeRates.sol";
+import "./interfaces/IExchanger.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
@@ -23,6 +24,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     address internal _debtManager;
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
+    bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_BRIDGESTATEPUSD = "BridgeStatepUSD";
     bytes32 private constant CONTRACT_EXCHANGERATES = "ExchangeRates";
 
@@ -38,14 +40,19 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](3);
+        addresses = new bytes32[](4);
         addresses[0] = CONTRACT_ISSUER;
-        addresses[1] = CONTRACT_BRIDGESTATEPUSD;
-        addresses[2] = CONTRACT_EXCHANGERATES;
+        addresses[1] = CONTRACT_EXCHANGER;
+        addresses[2] = CONTRACT_BRIDGESTATEPUSD;
+        addresses[3] = CONTRACT_EXCHANGERATES;
     }
 
     function issuer() internal view returns (IIssuer) {
         return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
+    }
+
+    function exchanger() internal view returns (IExchanger) {
+        return IExchanger(requireAndGetAddress(CONTRACT_EXCHANGER));
     }
 
     function state() internal view returns (ICrossChainState) {
@@ -194,24 +201,26 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         state().appendTotalNetworkDebtLedger(totalNetworkDebt);
     }
 
-    function addTotalNetworkDebt(uint amount) external onlyIssuer {
+    function addTotalNetworkDebt(uint amount) external onlyIssuerOrExchanger {
         state().addTotalNetworkDebtLedger(amount);
     }
 
-    function subtractTotalNetworkDebt(uint amount) external onlyIssuer {
+    function subtractTotalNetworkDebt(uint amount) external onlyIssuerOrExchanger {
         state().subtractTotalNetworkDebtLedger(amount);
     }
 
-    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external onlyIssuer {
+    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external onlyIssuerOrExchanger {
         state().setCrossNetworkUserData(account, userStateDebtLedgerIndex);
     }
 
-    function clearCrossNetworkUserDebt(address account) external onlyIssuer {
+    function clearCrossNetworkUserDebt(address account) external onlyIssuerOrExchanger {
         state().clearCrossNetworkUserData(account);
     }
 
-    function _onlyIssuer() internal view {
-        require(msg.sender == address(issuer()), "CrossChainManager: Only the issuer contract can perform this action");
+    function _onlyIssuerOrExchanger() internal view {
+        bool isIssuer = msg.sender == address(issuer());
+        bool isExchanger = msg.sender == address(exchanger());
+        require(isIssuer || isExchanger, "CrossChainManager: Only the issuer or exchanger contract can perform this action");
     }
 
     // Modifiers
@@ -220,8 +229,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         _;
     }
 
-    modifier onlyIssuer() {
-        _onlyIssuer(); // Use an internal function to save code size.
+    modifier onlyIssuerOrExchanger() {
+        _onlyIssuerOrExchanger(); // Use an internal function to save code size.
         _;
     }
 }
