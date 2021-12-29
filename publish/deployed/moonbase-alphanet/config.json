@@ -181,5 +181,32 @@
 	},
 	"CrossChainState": {
 		"deploy": false
+	},
+	"TokenStatepBNB": {
+		"deploy": false
+	},
+	"ProxyERC20pBNB": {
+		"deploy": false
+	},
+	"PynthpBNB": {
+		"deploy": false
+	},
+	"TokenStatepDOT": {
+		"deploy": false
+	},
+	"ProxyERC20pDOT": {
+		"deploy": false
+	},
+	"PynthpDOT": {
+		"deploy": false
+	},
+	"TokenStatepLINK": {
+		"deploy": false
+	},
+	"ProxyERC20pLINK": {
+		"deploy": false
+	},
+	"PynthpLINK": {
+		"deploy": false
 	}
 }

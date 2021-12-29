@@ -20,5 +20,20 @@
 		"asset": "BTC",
 		"feed": "",
 		"standalone": true
+	},
+	"BNB": {
+		"asset": "BNB",
+		"feed": "",
+		"standalone": true
+	},
+	"DOT": {
+		"asset": "DOT",
+		"feed": "",
+		"standalone": true
+	},
+	"LINK": {
+		"asset": "LINK",
+		"feed": "",
+		"standalone": true
 	}
 }

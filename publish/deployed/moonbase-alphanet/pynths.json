@@ -13,5 +13,17 @@
 		"name": "pETH",
 		"asset": "ETH",
 		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB"
+	},
+	{
+		"name": "pDOT",
+		"asset": "DOT"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
 	}
 ]
