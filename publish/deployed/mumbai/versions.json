@@ -1637,8 +1637,9 @@
 			},
 			"FeePool": {
 				"address": "0x1483c48b13c12C5F595dEB32b34Cd672DBb89e4C",
-				"status": "current",
-				"keccak256": "0xc4bfc4772741bf2c0425f9709d78508a9d07203b2d7ffd8ec64f228f675434f4"
+				"status": "replaced",
+				"keccak256": "0xc4bfc4772741bf2c0425f9709d78508a9d07203b2d7ffd8ec64f228f675434f4",
+				"replaced_in": "v0.3.2"
 			},
 			"FeePoolState": {
 				"address": "0x1068d063c6e18E8C4B60675707eA19CE907E9a59",
@@ -1747,8 +1748,9 @@
 			},
 			"CrossChainManager": {
 				"address": "0xeA7F891823346d12e44B46A381ceae59AFaeB4e4",
-				"status": "current",
-				"keccak256": "0x9cebb6140713cd0c4664c69a3ec4c34090a4b34129cabf0dbb9fb9ea00c93dc3"
+				"status": "replaced",
+				"keccak256": "0x9cebb6140713cd0c4664c69a3ec4c34090a4b34129cabf0dbb9fb9ea00c93dc3",
+				"replaced_in": "v0.3.2"
 			},
 			"Depot": {
 				"address": "0x025d30e34813A1e7C89cFd6Ff5Df659D164Fd5fC",
@@ -1819,6 +1821,25 @@
 				"address": "0x94b5f782C84C8d0Cd5615D859cC551515d9970Bb",
 				"status": "current",
 				"keccak256": "0xb349115089550fbe9e59fc0aeb3a4f6c5ca3399f14bb6a1bef36966b91644627"
+			}
+		}
+	},
+	"v0.3.2": {
+		"tag": "v0.3.2",
+		"fulltag": "v0.3.2",
+		"network": "mumbai",
+		"date": "2021-12-28T12:11:08+09:00",
+		"commit": "8e38980480877d7eabc91f21d4d7b3aafae3b1af",
+		"contracts": {
+			"FeePool": {
+				"address": "0x8A52312C9c1c16036E78256018569Fad5663acbe",
+				"status": "current",
+				"keccak256": "0xcd5a4495660a04c348ec5b26e7cbbef5ac88bddfcfebdae293b3f534fd7bce86"
+			},
+			"CrossChainManager": {
+				"address": "0x41CE6E898535c32ED8Aa5968eFC5a147e3D0322D",
+				"status": "current",
+				"keccak256": "0x091a63c5e8e0ce354ae873c733514261ed9abf42330d087971618f0cef9191b2"
 			}
 		}
 	}
