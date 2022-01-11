@@ -263,10 +263,10 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x7708286E79eF5Ba910413436e7F290Db0dbbfAeA",
+			"address": "0xA8f79B5F72BBabCa3a9B01b8f6dE5e8Bf6AfA8b6",
 			"source": "Issuer",
-			"link": "https://moonbase.moonscan.io/address/0x7708286E79eF5Ba910413436e7F290Db0dbbfAeA",
-			"timestamp": "2022-01-11T04:32:10.624Z",
+			"link": "https://moonbase.moonscan.io/address/0xA8f79B5F72BBabCa3a9B01b8f6dE5e8Bf6AfA8b6",
+			"timestamp": "2022-01-11T06:47:49.108Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -317,10 +317,10 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x48f4891B1571A5fe6dBb6588EDEC78499f6eF35E",
+			"address": "0xf36a3f25E6ff40D824BD2657aCCe9fdD4d77faCf",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase.moonscan.io/address/0x48f4891B1571A5fe6dBb6588EDEC78499f6eF35E",
-			"timestamp": "2022-01-11T04:36:04.772Z",
+			"link": "https://moonbase.moonscan.io/address/0xf36a3f25E6ff40D824BD2657aCCe9fdD4d77faCf",
+			"timestamp": "2022-01-11T06:48:37.292Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -353,10 +353,10 @@
 		},
 		"PynthpBTC": {
 			"name": "PynthpBTC",
-			"address": "0xe083265903c713B68922B7F5f411367d92C7216d",
+			"address": "0x0b4b942d18c2c21E5738Bb63e9805B85dfD4a3a8",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase.moonscan.io/address/0xe083265903c713B68922B7F5f411367d92C7216d",
-			"timestamp": "2022-01-11T04:40:55.562Z",
+			"link": "https://moonbase.moonscan.io/address/0x0b4b942d18c2c21E5738Bb63e9805B85dfD4a3a8",
+			"timestamp": "2022-01-11T06:50:31.091Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -380,10 +380,10 @@
 		},
 		"PynthpETH": {
 			"name": "PynthpETH",
-			"address": "0x28C435Cee81b6Ad8C84C0A8762612D630d3CBFB5",
+			"address": "0x83532cE06e71046Ce9001f7D9d4d939CE71Adf05",
 			"source": "MultiCollateralPynth",
-			"link": "https://moonbase.moonscan.io/address/0x28C435Cee81b6Ad8C84C0A8762612D630d3CBFB5",
-			"timestamp": "2022-01-11T04:42:30.819Z",
+			"link": "https://moonbase.moonscan.io/address/0x83532cE06e71046Ce9001f7D9d4d939CE71Adf05",
+			"timestamp": "2022-01-11T06:51:49.380Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -569,10 +569,10 @@
 		},
 		"PynthpBNB": {
 			"name": "PynthpBNB",
-			"address": "0xaaD64286C0cB5F714a6DBB43004CECafbCd80415",
+			"address": "0xcee9a9422805aD92f7F39363F134DcC8E521601D",
 			"source": "Pynth",
-			"link": "https://moonbase.moonscan.io/address/0xaaD64286C0cB5F714a6DBB43004CECafbCd80415",
-			"timestamp": "2022-01-11T04:44:13.075Z",
+			"link": "https://moonbase.moonscan.io/address/0xcee9a9422805aD92f7F39363F134DcC8E521601D",
+			"timestamp": "2022-01-11T06:52:54.716Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -596,10 +596,10 @@
 		},
 		"PynthpDOT": {
 			"name": "PynthpDOT",
-			"address": "0x459f116b2421B9FE7d444Ca6bFb817833a18B3da",
+			"address": "0x535bFd64269f47A75b4726B6A1C7cF09e8067C82",
 			"source": "Pynth",
-			"link": "https://moonbase.moonscan.io/address/0x459f116b2421B9FE7d444Ca6bFb817833a18B3da",
-			"timestamp": "2022-01-11T04:45:49.207Z",
+			"link": "https://moonbase.moonscan.io/address/0x535bFd64269f47A75b4726B6A1C7cF09e8067C82",
+			"timestamp": "2022-01-11T06:54:12.987Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -623,10 +623,10 @@
 		},
 		"PynthpLINK": {
 			"name": "PynthpLINK",
-			"address": "0xC39Acf10eDA8508796927a90145cd8e62Db1e7B7",
+			"address": "0x21D2dBa3735f50c9322C82FF8c3f38795e935fFF",
 			"source": "Pynth",
-			"link": "https://moonbase.moonscan.io/address/0xC39Acf10eDA8508796927a90145cd8e62Db1e7B7",
-			"timestamp": "2022-01-11T04:47:25.319Z",
+			"link": "https://moonbase.moonscan.io/address/0x21D2dBa3735f50c9322C82FF8c3f38795e935fFF",
+			"timestamp": "2022-01-11T06:55:31.336Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		}

@@ -263,11 +263,11 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0xEcF95aD5446fca5AB7a56a0DfC46f452b161E51D",
+			"address": "0x11e5E2c58a698335214a0F413948F74147E9dDC6",
 			"source": "Issuer",
-			"link": "https://mumbai.polygonscan.com/address/0xEcF95aD5446fca5AB7a56a0DfC46f452b161E51D",
-			"timestamp": "2022-01-11T03:25:36.000Z",
-			"txn": "https://mumbai.polygonscan.com/tx/0x4676f6d97402ad6efaccafb803aeeb261e7149163255980de72cdb5384239d0b",
+			"link": "https://mumbai.polygonscan.com/address/0x11e5E2c58a698335214a0F413948F74147E9dDC6",
+			"timestamp": "2022-01-11T06:43:57.129Z",
+			"txn": "",
 			"network": "mumbai"
 		},
 		"TradingRewards": {
@@ -317,11 +317,11 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x414cd59D54f3cD7136a30F1451d1a2f9cFc34eaE",
+			"address": "0xa41d4a1b39e3F7002632A41e392B8c1d183530d7",
 			"source": "MultiCollateralPynth",
-			"link": "https://mumbai.polygonscan.com/address/0x414cd59D54f3cD7136a30F1451d1a2f9cFc34eaE",
-			"timestamp": "2022-01-11T03:26:12.000Z",
-			"txn": "https://mumbai.polygonscan.com/tx/0x5ada82e53518adf93ac293b0628448cd184afa2ac6af785f7e9e379d71238c8c",
+			"link": "https://mumbai.polygonscan.com/address/0xa41d4a1b39e3F7002632A41e392B8c1d183530d7",
+			"timestamp": "2022-01-11T06:44:09.547Z",
+			"txn": "",
 			"network": "mumbai"
 		},
 		"BridgeStatepUSD": {

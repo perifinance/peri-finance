@@ -263,11 +263,11 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0xF1000E349e62612e1c5E05657348FDE774F496e4",
+			"address": "0x577086e71f0405A53c9DE1dE4ffB234D01AE4FDA",
 			"source": "Issuer",
-			"link": "https://kovan.etherscan.io/address/0xF1000E349e62612e1c5E05657348FDE774F496e4",
-			"timestamp": "2022-01-11T02:51:36.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0x7812c54fcf382d673d42077a5ce3e8f043408fc93139ea969f79a12dc55d37eb",
+			"link": "https://kovan.etherscan.io/address/0x577086e71f0405A53c9DE1dE4ffB234D01AE4FDA",
+			"timestamp": "2022-01-11T06:31:55.572Z",
+			"txn": "",
 			"network": "kovan"
 		},
 		"TradingRewards": {
@@ -317,11 +317,11 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x4e1040605dbf9De9093015F6c9AC8BE4151db1A5",
+			"address": "0xcF2952059CBCF300Ab6F6415827B32Aa1fc713b6",
 			"source": "MultiCollateralPynth",
-			"link": "https://kovan.etherscan.io/address/0x4e1040605dbf9De9093015F6c9AC8BE4151db1A5",
-			"timestamp": "2022-01-11T02:52:40.000Z",
-			"txn": "https://kovan.etherscan.io/tx/0xbd02adfc4784acd7d2c90d2b209bb056cbd1b68e94d41aee1e0f4f279463b6c4",
+			"link": "https://kovan.etherscan.io/address/0xcF2952059CBCF300Ab6F6415827B32Aa1fc713b6",
+			"timestamp": "2022-01-11T06:29:55.903Z",
+			"txn": "",
 			"network": "kovan"
 		},
 		"BridgeStatepUSD": {

@@ -263,11 +263,11 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x702637AFED19B2428306D88E45014B1A7f2f0B66",
+			"address": "0x53013252357B8697cA9A5347b5610fBD2449A7aF",
 			"source": "Issuer",
-			"link": "https://testnet.bscscan.com/address/0x702637AFED19B2428306D88E45014B1A7f2f0B66",
-			"timestamp": "2022-01-11T03:16:06.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0xc92c72942119ab59e6760831f7389f498a6b0e735f7fb7e1d4208ff655f6b067",
+			"link": "https://testnet.bscscan.com/address/0x53013252357B8697cA9A5347b5610fBD2449A7aF",
+			"timestamp": "2022-01-11T06:45:40.875Z",
+			"txn": "",
 			"network": "bsctest"
 		},
 		"TradingRewards": {
@@ -317,11 +317,11 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x18Cb295Cb7F89Ade2bFDA2d474e749c690AA61f3",
+			"address": "0x8131347a212b55ECFF446ca11b729Da0e2D3C4EC",
 			"source": "MultiCollateralPynth",
-			"link": "https://testnet.bscscan.com/address/0x18Cb295Cb7F89Ade2bFDA2d474e749c690AA61f3",
-			"timestamp": "2022-01-11T03:17:00.000Z",
-			"txn": "https://testnet.bscscan.com/tx/0x64ef194e5fb10c791f1216d5a1e90d314d3d784bbd3654a29bbf606fc71668b1",
+			"link": "https://testnet.bscscan.com/address/0x8131347a212b55ECFF446ca11b729Da0e2D3C4EC",
+			"timestamp": "2022-01-11T06:45:53.602Z",
+			"txn": "",
 			"network": "bsctest"
 		},
 		"BridgeStatepUSD": {
