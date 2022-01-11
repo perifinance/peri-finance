@@ -155,6 +155,15 @@
 	"BridgeState": {
 		"deploy": false
 	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
+	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -171,15 +180,6 @@
 		"deploy": false
 	},
 	"PynthpETH": {
-		"deploy": false
-	},
-	"BridgeStatepUSD": {
-		"deploy": false
-	},
-	"CrossChainManager": {
-		"deploy": false
-	},
-	"CrossChainState": {
 		"deploy": false
 	},
 	"TokenStatepBNB": {

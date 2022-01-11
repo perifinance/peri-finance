@@ -2,9 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketData": {
-		"deploy": false
-	},
 	"CollateralManager": {
 		"deploy": false
 	},
@@ -149,10 +146,10 @@
 	"BlacklistManager": {
 		"deploy": false
 	},
-	"StakingState": {
+	"ExternalTokenStakeManager": {
 		"deploy": false
 	},
-	"ExternalTokenStakeManager": {
+	"StakingState": {
 		"deploy": false
 	},
 	"BridgeState": {
