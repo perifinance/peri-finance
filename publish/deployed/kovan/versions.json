@@ -2118,8 +2118,9 @@
 			},
 			"DebtCache": {
 				"address": "0x32992d7a2a48474e9C7A8efAAbf0053c82A73662",
-				"status": "current",
-				"keccak256": "0x360a5dbd04ddbba1cb87cf5430d63b8a4259430d5211c2217a2c6caee32352d1"
+				"status": "replaced",
+				"keccak256": "0x360a5dbd04ddbba1cb87cf5430d63b8a4259430d5211c2217a2c6caee32352d1",
+				"replaced_in": "v0.3.6"
 			},
 			"Exchanger": {
 				"address": "0x28c8eD0A572834F4CCcab62bfef464c195341114",
@@ -2398,6 +2399,20 @@
 				"address": "0x41991C7294e0e68c44c723B1566B85e97074f92A",
 				"status": "current",
 				"keccak256": "0xf393747c8467f8fcff17e73eb88d3cc20be070dab26da9c65f6500435a9b3c6f"
+			}
+		}
+	},
+	"v0.3.6": {
+		"tag": "v0.3.6",
+		"fulltag": "v0.3.6",
+		"network": "kovan",
+		"date": "2022-01-11T14:43:07+09:00",
+		"commit": "94a7bacddde6c113cd8b5f9c1e0a11b91591f741",
+		"contracts": {
+			"DebtCache": {
+				"address": "0xb0439E0f9782FDC789500FACA82Ad1Bd2477c2f4",
+				"status": "current",
+				"keccak256": "0x850da0bdf50e338a491a002d059f85f4c6ba02415b20dfadafb515971dbad3ae"
 			}
 		}
 	}
