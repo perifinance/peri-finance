@@ -125,9 +125,9 @@ contract('CrossChainManager', async accounts => {
 			});
 		});
 
-		it('addTotalNetworkDebt() only can be called by owner', async () => {
+		it('appendTotalNetworkDebt() only can be called by debtManager', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: crossChainManager.addTotalNetworkDebt,
+				fnc: crossChainManager.appendTotalNetworkDebt,
 				accounts,
 				args: [toUnit(10)],
 				address: debtManager,
@@ -157,7 +157,7 @@ contract('CrossChainManager', async accounts => {
 	describe('should fetch the data from contract', () => {
 		const networkTotalDebt = toUnit(10);
 		before(async () => {
-			await crossChainManager.addTotalNetworkDebt(networkTotalDebt, {
+			await crossChainManager.appendTotalNetworkDebt(networkTotalDebt, {
 				from: debtManager,
 			});
 		});
@@ -173,9 +173,6 @@ contract('CrossChainManager', async accounts => {
 		const accounts = [account1, account2, account3];
 
 		beforeEach(async () => {
-			await crossChainManager.addTotalNetworkDebt(toUnit('225'), {
-				from: debtManager,
-			});
 			const issueDebtForAccount = async (account, balance) => {
 				await periFinance.transfer(account, toUnit(balance), { from: owner });
 				await periFinance.issueMaxPynths({ from: account });
@@ -185,22 +182,15 @@ contract('CrossChainManager', async accounts => {
 				const account = accounts[index];
 				await issueDebtForAccount(account, 100 * (index + 1));
 			}
-
-			await crossChainManager.addTotalNetworkDebt(toUnit('450'), {
-				from: debtManager,
-			});
-
-			await crossChainManager.addTotalNetworkDebt(toUnit('225'), {
-				from: debtManager,
-			});
-			await crossChainManager.addTotalNetworkDebt(toUnit('200'), {
-				from: debtManager,
-			});
 		});
 
-		it.only('check if account`s debtBalance increased, c-ratio decreased', async () => {
+		it('check if account`s debtBalance increased, c-ratio decreased', async () => {
 			const { debt } = await debtCache.currentDebt();
 			console.log('currentDebt : ', fromUnit(debt).toString());
+
+			await crossChainManager.appendTotalNetworkDebt(toUnit('225'), {
+				from: debtManager,
+			});
 
 			const currentTotalNetworkDebt = await crossChainManager.currentTotalNetworkDebt();
 			console.log('currentTotalNetworkDebt : ' + fromUnit(currentTotalNetworkDebt).toString());
@@ -214,73 +204,9 @@ contract('CrossChainManager', async accounts => {
 			console.log(
 				'expectedNetworkDebtPercentage : ' + fromUnit(expectedNetworkDebtPercentage).toString()
 			);
-
-			const { initialDebtOwnership: initialDebtOwnership1 } = await periFinanceState.issuanceData(
-				account1
-			);
-			const { initialDebtOwnership: initialDebtOwnership2 } = await periFinanceState.issuanceData(
-				account2
-			);
-			const { initialDebtOwnership: initialDebtOwnership3 } = await periFinanceState.issuanceData(
-				account3
-			);
-
-			console.log('initialDebtOwnership 1 :' + initialDebtOwnership1.toString());
-			console.log('initialDebtOwnership 2 : ' + initialDebtOwnership2.toString());
-			console.log('initialDebtOwnership 3 : ' + initialDebtOwnership3.toString());
-
-			// TODO 브릿지로 토큰 이동 후 계산 할 것
-
-			const debtBefore = accounts.map(async account =>
-				(await periFinance.debtBalanceOf(account, pUSD)).toString()
-			);
-			// const cRatioBefore = accounts.map(async account =>
-			// 	(await periFinance.collateralisationRatio(account)).toString()
-			// );
-
-			const debtBeforeArr = await Promise.all(debtBefore);
-			// const cRatioBeforeArr = await Promise.all(cRatioBefore);
-
-			console.log(debtBeforeArr);
-			// console.log(cRatioBeforeArr);
-			// // apply changed debt value to current system cached debt
-			// await debtCache.takeDebtSnapshot();
-
-			// const debtAfter = accounts.map(async account =>
-			// 	(await periFinance.debtBalanceOf(account, pUSD)).toString()
-			// );
-			// const cRatioAfter = accounts.map(async account =>
-			// 	(await periFinance.collateralisationRatio(account)).toString()
-			// );
-
-			// const debtAfterArr = await Promise.all(debtAfter);
-			// const cRatioAfterArr = await Promise.all(cRatioAfter);
-			// console.log(debtAfterArr);
-			// console.log(cRatioAfterArr);
-
-			// // account debt ratio and collateral ratio should be changed along with the changes above
-			// for (let index = 0; index < accounts.length; index++) {
-			// 	const prevDebt = Number(debtBeforeArr[index]);
-			// 	const nextDebt = Number(debtAfterArr[index]);
-
-			// 	assert.equal(
-			// 		prevDebt,
-			// 		nextDebt,
-			// 		'The debt after snapshot taken should be more than prev debt'
-			// 	);
-
-			// 	const prevCRatio = 100 / fromUnit(cRatioBeforeArr[index]);
-			// 	const nextCRatio = 100 / fromUnit(cRatioAfterArr[index]);
-
-			// 	assert.equal(
-			// 		prevCRatio,
-			// 		nextCRatio,
-			// 		'The cRatio after snapshot taken should be lower than prev cRatio'
-			// 	);
-			// }
 		});
 
-		it.skip('check if account`s debtBalance decreased, c-ratio increased', async () => {
+		it('check if account`s debtBalance decreased, c-ratio increased', async () => {
 			const isDecreased = true;
 			await crossChainManager.setCrossChainState(toUnit('200'), isDecreased, {
 				from: owner,

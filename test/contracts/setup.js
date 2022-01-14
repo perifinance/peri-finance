@@ -184,6 +184,7 @@ const setupContract = async ({
 			tryGetAddressOf('AddressResolver'),
 			owner,
 			tryGetAddressOf('BlacklistManager'),
+			debtManager,
 		],
 		MintablePeriFinance: [
 			tryGetAddressOf('ProxyERC20MintablePeriFinance'),
