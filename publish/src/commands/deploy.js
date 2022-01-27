@@ -1465,6 +1465,15 @@ const deploy = async ({
 				writeArg: addressOf(externalTokenStakeManager),
 			});
 
+			await runStep({
+				contract: `ExternalTokenStakeManager`,
+				target: externalTokenStakeManager,
+				read: 'stakingState',
+				expected: input => input === addressOf(stakingState),
+				write: 'setStakingState',
+				writeArg: addressOf(stakingState),
+			});
+
 			// BSC pegged USDC has 18 decimals
 			const stakingStateCurrencies = [
 				{
