@@ -34,4 +34,37 @@ interface ICrossChainManager {
     function setCrossNetworkUserDebt(address, uint) external;
 
     function clearCrossNetworkUserDebt(address) external;
+
+    function setCrosschain(bytes32 _chainID) external;
+
+    function addCrosschain(bytes32 _chainID) external;
+
+    function setCrossNetworkIssuedDebt(bytes32 _chainID, uint _amount) external;
+
+    function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkActiveDebt(bytes32 _chainID, uint _amount) external;
+
+    function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkIssuedDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function getCrossNetworkIssuedDebtAll() external view returns (uint);
+
+    function setCrossNetworkActiveDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function getCrossNetworkActiveDebtAll() external view returns (uint);
+
+    function getCurrentNetworkIssuedDebt() external view returns (uint);
+
+    function getCurrentNetworkActiveDebt() external view returns (uint);
+
+    function addCurrentNetworkIssuedDebt(uint _amount) external;
+
+    function subtractCurrentNetworkIssuedDebt(uint _amount) external;
+
+    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
+        external
+        view
+        returns (uint totalSystemValue, bool anyRateIsInvalid);
 }

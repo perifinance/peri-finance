@@ -20,6 +20,10 @@ contract CrossChainState is Owned, State, ICrossChainState {
     mapping(address => CrossNetworkUserData) private _crossNetworkUserData;
 
     uint[] internal _totalNetworkDebtLedger;
+    mapping(bytes32 => uint) private _crossNetworkIssuedDebt;
+    mapping(bytes32 => uint) private _crossNetworkActiveDebt;
+    bytes32[] public crossChainIds;
+    bytes32 public chainId;
 
     constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {}
 
@@ -94,26 +98,149 @@ contract CrossChainState is Owned, State, ICrossChainState {
         emit UserCrossNetworkDataRemoved(from, block.timestamp);
     }
 
-    /**
-     * @notice append total network debt to the entry
-     * @param totalNetworkDebt uint
-     */
     function appendTotalNetworkDebtLedger(uint totalNetworkDebt) external onlyAssociatedContract {
         _totalNetworkDebtLedger.push(totalNetworkDebt);
 
         emit TotalNetworkDebtAdded(totalNetworkDebt, block.timestamp);
     }
 
-    function addTotalNetworkDebtLedger(uint amount) external {
-        require(_totalNetworkDebtLedger.length > 0, "total network debt should be appended first");
-
-        _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1] = _lastTotalNetworkDebtEntry().add(amount);
+    function addTotalNetworkDebtLedger(uint amount) external onlyAssociatedContract {
+        if (_totalNetworkDebtLedger.length == 0) {
+            _totalNetworkDebtLedger.push(amount);
+            emit TotalNetworkDebtAdded(amount, block.timestamp);
+        } else {
+            _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1] = _lastTotalNetworkDebtEntry().add(amount);
+        }
     }
 
-    function subtractTotalNetworkDebtLedger(uint amount) external {
+    function subtractTotalNetworkDebtLedger(uint amount) external onlyAssociatedContract {
         require(_totalNetworkDebtLedger.length > 0, "total network debt should be appended first");
 
         _totalNetworkDebtLedger[_totalNetworkDebtLedger.length - 1] = _lastTotalNetworkDebtEntry().sub(amount);
+    }
+
+    function setCrosschain(bytes32 _chainID) external onlyAssociatedContract {
+        chainId = _chainID;
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            if (crossChainIds[i] == _chainID) {
+                return;
+            }
+        }
+        crossChainIds.push(_chainID);
+    }
+
+    function addCrosschain(bytes32 _chainID) external onlyAssociatedContract {
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            if (crossChainIds[i] == _chainID) {
+                return;
+            }
+        }
+        crossChainIds.push(_chainID);
+    }
+
+    function setCrossNetworkIssuedDebt(bytes32 _chainID, uint amount) external onlyAssociatedContract {
+        require(_chainID != chainId, "impossible to set issuedDebt of the current chain");
+        _crossNetworkIssuedDebt[_chainID] = amount;
+    }
+
+    function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint) {
+        if (_chainID != chainId) {
+            return _crossNetworkIssuedDebt[_chainID];
+        }
+
+        return 0;
+    }
+
+    function setCrossNetworkActiveDebt(bytes32 _chainID, uint amount) external onlyAssociatedContract {
+        require(_chainID != chainId, "impossible to set activeDebt of the current chain");
+        _crossNetworkActiveDebt[_chainID] = amount;
+    }
+
+    function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint) {
+        if (_chainID != chainId) {
+            return _crossNetworkActiveDebt[_chainID];
+        }
+
+        return 0;
+    }
+
+    function setCrossNetworkIssuedDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts)
+        external
+        onlyAssociatedContract
+    {
+        for (uint i = 0; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] != chainId) {
+                _crossNetworkIssuedDebt[_chainIDs[i]] = _amounts[i];
+            }
+        }
+    }
+
+    function getCrossNetworkIssuedDebtAll() external view returns (uint) {
+        uint result = 0;
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            result += (_crossNetworkIssuedDebt[crossChainIds[i]]);
+        }
+        return result;
+    }
+
+    function setCrossNetworkActiveDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts)
+        external
+        onlyAssociatedContract
+    {
+        for (uint i = 0; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] != chainId) {
+                _crossNetworkActiveDebt[_chainIDs[i]] = _amounts[i];
+            }
+        }
+    }
+
+    function getCrossNetworkActiveDebtAll() external view returns (uint) {
+        uint result = 0;
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            result = result.add(_crossNetworkActiveDebt[crossChainIds[i]]);
+        }
+        return result;
+    }
+
+    function setCrossNetworkDebtsAll(
+        bytes32[] calldata _chainIDs,
+        uint[] calldata _debts,
+        uint[] calldata _activeDebts
+    ) external onlyAssociatedContract {
+        this.setCrossNetworkIssuedDebtAll(_chainIDs, _debts);
+        this.setCrossNetworkActiveDebtAll(_chainIDs, _activeDebts);
+    }
+
+    function getCurrentNetworkIssuedDebt() external view returns (uint) {
+        return _crossNetworkIssuedDebt[chainId];
+    }
+
+    function getTotalNetworkIssuedDebt() external view returns (uint) {
+        uint result = 0;
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            result += (_crossNetworkIssuedDebt[crossChainIds[i]]);
+        }
+        result += _crossNetworkIssuedDebt[chainId];
+        return result;
+    }
+
+    function addIssuedDebt(bytes32 _chainID, uint amount) external {
+        if (_crossNetworkIssuedDebt[_chainID] == 0) {
+            _crossNetworkIssuedDebt[_chainID] = amount;
+        } else {
+            _crossNetworkIssuedDebt[_chainID] += amount;
+        }
+    }
+
+    function subtractIssuedDebt(bytes32 _chainID, uint amount) external {
+        if (_crossNetworkIssuedDebt[_chainID] < amount) {
+            _crossNetworkIssuedDebt[_chainID] = 0;
+        }
+        _crossNetworkIssuedDebt[_chainID] -= amount;
+    }
+
+    function getChainID() external view returns (bytes32) {
+        return chainId;
     }
 
     // Events

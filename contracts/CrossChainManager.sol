@@ -14,6 +14,12 @@ import "./interfaces/IExchanger.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
+interface ICrossChainInternalDebtCache {
+    function cachedDebt() external view returns (uint);
+
+    function currentDebt() external view returns (uint debt, bool anyRateIsInvalid);
+}
+
 contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -27,6 +33,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_BRIDGESTATEPUSD = "BridgeStatepUSD";
     bytes32 private constant CONTRACT_EXCHANGERATES = "ExchangeRates";
+    bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
 
     constructor(
         address _owner,
@@ -40,11 +47,12 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     // View functions
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](4);
+        addresses = new bytes32[](5);
         addresses[0] = CONTRACT_ISSUER;
         addresses[1] = CONTRACT_EXCHANGER;
         addresses[2] = CONTRACT_BRIDGESTATEPUSD;
         addresses[3] = CONTRACT_EXCHANGERATES;
+        addresses[4] = CONTRACT_DEBTCACHE;
     }
 
     function issuer() internal view returns (IIssuer) {
@@ -65,6 +73,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     function exchangeRates() internal view returns (IExchangeRates) {
         return IExchangeRates(requireAndGetAddress(CONTRACT_EXCHANGERATES));
+    }
+
+    function debtCache() internal view returns (ICrossChainInternalDebtCache) {
+        return ICrossChainInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
     }
 
     function crossChainState() external view returns (address) {
@@ -217,6 +229,117 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         state().clearCrossNetworkUserData(account);
     }
 
+    function setCrosschain(bytes32 _chainID) external onlyOwner {
+        state().setCrosschain(_chainID);
+    }
+
+    function addCrosschain(bytes32 _chainID) external onlyOwner {
+        state().addCrosschain(_chainID);
+    }
+
+    function setCrossNetworkIssuedDebt(bytes32 _chainID, uint _amount) external onlyDebtManager {
+        state().setCrossNetworkIssuedDebt(_chainID, _amount);
+    }
+
+    function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint) {
+        return state().getCrossNetworkIssuedDebt(_chainID);
+    }
+
+    function setCrossNetworkActiveDebt(bytes32 _chainID, uint _amount) external onlyDebtManager {
+        state().setCrossNetworkActiveDebt(_chainID, _amount);
+    }
+
+    function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint) {
+        return state().getCrossNetworkActiveDebt(_chainID);
+    }
+
+    function setCrossNetworkIssuedDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external onlyDebtManager {
+        state().setCrossNetworkIssuedDebtAll(_chainIDs, _amounts);
+    }
+
+    function getCrossNetworkIssuedDebtAll() external view returns (uint) {
+        return state().getCrossNetworkIssuedDebtAll();
+    }
+
+    function setCrossNetworkActiveDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external onlyDebtManager {
+        state().setCrossNetworkActiveDebtAll(_chainIDs, _amounts);
+    }
+
+    function getCrossNetworkActiveDebtAll() external view returns (uint) {
+        return state().getCrossNetworkActiveDebtAll();
+    }
+
+    function setCrossNetworkDebtsAll(
+        bytes32[] calldata _chainIDs,
+        uint[] calldata _issuedDebts,
+        uint[] calldata _activeDebts
+    ) external onlyDebtManager {
+        state().setCrossNetworkDebtsAll(_chainIDs, _issuedDebts, _activeDebts);
+
+        uint crossIssuedDebt = state().getCrossNetworkIssuedDebtAll();
+        uint crossActiveDebt = state().getCrossNetworkActiveDebtAll();
+
+        emit TotalNetworkDebtUpdated(
+            this.getCurrentNetworkIssuedDebt(),
+            crossIssuedDebt,
+            this.getCurrentNetworkActiveDebt(),
+            crossActiveDebt,
+            now
+        );
+    }
+
+    function getCurrentNetworkIssuedDebt() external view returns (uint) {
+        return state().getCurrentNetworkIssuedDebt();
+    }
+
+    function getCurrentNetworkActiveDebt() external view returns (uint) {
+        uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
+        uint totalIssuedDebt = state().getTotalNetworkIssuedDebt();
+        if (totalIssuedDebt == 0) {
+            return 0;
+        }
+
+        // (uint totalIssued, ) = _getCurrentNetworkPreservedDebt();
+
+        uint currActiveDebt = debtCache().cachedDebt();
+        uint totalActiveDebt = state().getCrossNetworkActiveDebtAll() + currActiveDebt;
+
+        return totalActiveDebt.multiplyDecimal(currIssuedDebt).divideDecimalRound(totalIssuedDebt);
+    }
+
+    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
+        external
+        view
+        returns (uint totalSystemValue, bool anyRateIsInvalid)
+    {
+        anyRateIsInvalid = false;
+        totalSystemValue = this.getCurrentNetworkActiveDebt();
+
+        if (currencyKey == pUSD) {
+            return (totalSystemValue, anyRateIsInvalid);
+        }
+
+        (uint currencyRate, bool currencyRateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
+
+        return (totalSystemValue.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
+    }
+
+    function addIssuedDebt(bytes32 _chainID, uint _amount) external {
+        state().addIssuedDebt(_chainID, _amount);
+    }
+
+    function subtractIssuedDebt(bytes32 _chainID, uint _amount) external {
+        state().subtractIssuedDebt(_chainID, _amount);
+    }
+
+    function addCurrentNetworkIssuedDebt(uint _amount) external {
+        state().addIssuedDebt(state().getChainID(), _amount);
+    }
+
+    function subtractCurrentNetworkIssuedDebt(uint _amount) external {
+        state().subtractIssuedDebt(state().getChainID(), _amount);
+    }
+
     function _onlyIssuerOrExchanger() internal view {
         bool isIssuer = msg.sender == address(issuer());
         bool isExchanger = msg.sender == address(exchanger());
@@ -233,4 +356,12 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         _onlyIssuerOrExchanger(); // Use an internal function to save code size.
         _;
     }
+
+    event TotalNetworkDebtUpdated(
+        uint currentNetworkIssuedDebt,
+        uint crossNetworkIssuedDebt,
+        uint currentNetworkActiveDebt,
+        uint crossNetworkActiveDebt,
+        uint timestamp
+    );
 }

@@ -18,6 +18,14 @@ const {
 const GAS_PRICE = 20e9; // 20 GWEI
 const CACHE_FOLDER = 'cache';
 
+task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
+	const accounts = await hre.ethers.getSigners();
+
+	for (const account of accounts) {
+		console.log(account.address);
+	}
+});
+
 module.exports = {
 	GAS_PRICE,
 	ovm: {

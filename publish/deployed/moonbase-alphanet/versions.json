@@ -1633,8 +1633,9 @@
 			},
 			"BridgeState": {
 				"address": "0x8bcE0B324db3dAd9AE2bA14b701983c6b4A3EA68",
-				"status": "current",
-				"keccak256": "0x73f9cd2aee7b5a1949304018d7caaed10be6030a6597c676032a3071b7e34c1e"
+				"status": "replaced",
+				"keccak256": "0x73f9cd2aee7b5a1949304018d7caaed10be6030a6597c676032a3071b7e34c1e",
+				"replaced_in": "v0.3.9"
 			},
 			"ExchangeState": {
 				"address": "0x818f8f9016A68Ec984A6a0EE844eD9Eea21f012d",
@@ -1712,13 +1713,15 @@
 			},
 			"CrossChainState": {
 				"address": "0xdE3Fa88b5098c8D676B36fd439217732653aB64c",
-				"status": "current",
-				"keccak256": "0xf393747c8467f8fcff17e73eb88d3cc20be070dab26da9c65f6500435a9b3c6f"
+				"status": "replaced",
+				"keccak256": "0xf393747c8467f8fcff17e73eb88d3cc20be070dab26da9c65f6500435a9b3c6f",
+				"replaced_in": "v0.3.9"
 			},
 			"CrossChainManager": {
 				"address": "0xBC7DDAC127079C8FCb80c1CFD6564cA7a53Cb363",
-				"status": "current",
-				"keccak256": "0x39b6d297f9a9735edd201f61128e58e60b624481e7700be9310509b851bec729"
+				"status": "replaced",
+				"keccak256": "0x39b6d297f9a9735edd201f61128e58e60b624481e7700be9310509b851bec729",
+				"replaced_in": "v0.3.9"
 			},
 			"TokenStatepBNB": {
 				"address": "0xA91792B81fb9E806E43A883986a888E7AA9d8583",
@@ -1793,8 +1796,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0xA8f79B5F72BBabCa3a9B01b8f6dE5e8Bf6AfA8b6",
-				"status": "current",
-				"keccak256": "0x98baaa5380f92f9ff0c729c77c36e7df89355cea241128db3b0b4fe199924538"
+				"status": "replaced",
+				"keccak256": "0x98baaa5380f92f9ff0c729c77c36e7df89355cea241128db3b0b4fe199924538",
+				"replaced_in": "v0.3.9"
 			},
 			"PynthpUSD": {
 				"address": "0xf36a3f25E6ff40D824BD2657aCCe9fdD4d77faCf",
@@ -1839,6 +1843,35 @@
 				"address": "0x083e9ccC52d148E63737005181308386408F2779",
 				"status": "current",
 				"keccak256": "0xdbfc941420a6f10002966750dccec7fd5ca17456756349a56068224356f4d86e"
+			}
+		}
+	},
+	"v0.3.9": {
+		"tag": "v0.3.9",
+		"fulltag": "v0.3.9",
+		"network": "moonbase-alphanet",
+		"date": "2022-01-12T11:43:03+09:00",
+		"commit": "28f90e3c7708eb537055780c7352632093e458a9",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x0f9EF56CC550C4fe4A130135194fA81f52E56b29",
+				"status": "current",
+				"keccak256": "0x2da905c84871722362c025366f975825964fd7662064879bd8c6aca0e163934f"
+			},
+			"Issuer": {
+				"address": "0x6624968910E7c083266d7aA39Cef5525eb95cf1e",
+				"status": "current",
+				"keccak256": "0xa21793f62cf81a8ef3965c79bd7d38fd8c9d7015b927ea91bca7b7e5085aa7d2"
+			},
+			"CrossChainState": {
+				"address": "0xc78EEA940e343879DB4CeEF81764310e25d9cfda",
+				"status": "current",
+				"keccak256": "0xffb8869d089140a6e88954a089d115d398ef6aa7de43a9cd48d9cd806e8f40cf"
+			},
+			"CrossChainManager": {
+				"address": "0xd885EfAbe0EDbDB46Ca48e1fdcB2A4CbF8313804",
+				"status": "current",
+				"keccak256": "0xaec3d118307325410ef4e76fb46184397302d156836d2404741d3a65eb915939"
 			}
 		}
 	}
