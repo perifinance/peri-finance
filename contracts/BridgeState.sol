@@ -35,6 +35,8 @@ contract BridgeState is Owned, State {
         bool processed;
     }
 
+    enum Move {INBOUND, OUTBOUND}
+
     // Managing authorization
     mapping(bytes32 => mapping(address => bool)) public roles;
     // Network status. If false, network is not ready for bridge.
@@ -68,6 +70,9 @@ contract BridgeState is Owned, State {
 
     // Current Outbound PeriodId, starts from 0
     uint public currentOutboundPeriodId;
+
+    // uint(Move.INBOUND), uint(Move.OUTBOUND)
+    mapping(uint => mapping(uint => uint)) public movedAmounts;
 
     event SetRole(bytes32 role, address target, bool set);
     event OutboundingAppended(address indexed from, uint amount, uint destChainId, uint outboundId, uint periodId);
@@ -176,7 +181,6 @@ contract BridgeState is Owned, State {
         );
 
         _inbounding.claimed = true;
-        totalInboundAmount = totalInboundAmount.add(_amount);
 
         emit InboundingClaimed(_index);
 
@@ -252,6 +256,7 @@ contract BridgeState is Owned, State {
         outboundings.push(Outbounding(_account, _amount, _destChainId, currentOutboundPeriodId, _sign));
 
         totalOutboundAmount = totalOutboundAmount.add(_amount);
+        movedAmounts[uint(Move.OUTBOUND)][_destChainId] = movedAmounts[uint(Move.OUTBOUND)][_destChainId].add(_amount);
 
         // The first outbounding request will newly start the period
         if (outboundPeriods[currentOutboundPeriodId].outboundingIds.length == 0) {
@@ -278,6 +283,9 @@ contract BridgeState is Owned, State {
         uint nextInboundingId = inboundings.length;
         inboundings.push(Inbounding(_account, _amount, _srcChainId, _srcOutboundingId, false, _sign));
         accountInboundings[_account].push(nextInboundingId);
+
+        totalInboundAmount = totalInboundAmount.add(_amount);
+        movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
         emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
 
@@ -346,6 +354,10 @@ contract BridgeState is Owned, State {
         networkOpened[_chainId] = _setTo;
 
         emit NetworkStatusChanged(_chainId, _setTo);
+    }
+
+    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
+        return movedAmounts[_inboundOutbound][targetNetworkId];
     }
 
     modifier onlyValidator() {
