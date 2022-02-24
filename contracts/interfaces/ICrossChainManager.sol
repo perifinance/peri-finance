@@ -39,6 +39,10 @@ interface ICrossChainManager {
 
     function addCrosschain(bytes32 _chainID) external;
 
+    function addNetworkId(bytes32 _chainID, uint _networkId) external;
+
+    function getNetworkId(bytes32 _chainID) external view returns (uint);
+
     function setCrossNetworkIssuedDebt(bytes32 _chainID, uint _amount) external;
 
     function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);

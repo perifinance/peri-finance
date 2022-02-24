@@ -70,6 +70,8 @@ interface IBridgeState {
 
     function periodIdsToProcess() external view returns (uint[] memory);
 
+    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint);
+
     // ----MUTATIVES
 
     function appendOutboundingRequest(

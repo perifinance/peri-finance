@@ -24,6 +24,8 @@ contract CrossChainState is Owned, State, ICrossChainState {
     mapping(bytes32 => uint) private _crossNetworkActiveDebt;
     bytes32[] public crossChainIds;
     bytes32 public chainId;
+    mapping(bytes32 => uint) private _crossNetworkInbound;
+    mapping(bytes32 => uint) private _networkIds;
 
     constructor(address _owner, address _associatedContract) public Owned(_owner) State(_associatedContract) {}
 
@@ -138,6 +140,20 @@ contract CrossChainState is Owned, State, ICrossChainState {
         crossChainIds.push(_chainID);
     }
 
+    function getCrossChainIds() external view returns (bytes32[] memory) {
+        return crossChainIds;
+    }
+
+    function addNetworkId(bytes32 _chainID, uint _networkId) external onlyAssociatedContract {
+        if (_networkIds[_chainID] == 0) {
+            _networkIds[_chainID] = _networkId;
+        }
+    }
+
+    function getNetworkId(bytes32 _chainID) external view returns (uint) {
+        return _networkIds[_chainID];
+    }
+
     function setCrossNetworkIssuedDebt(bytes32 _chainID, uint amount) external onlyAssociatedContract {
         require(_chainID != chainId, "impossible to set issuedDebt of the current chain");
         _crossNetworkIssuedDebt[_chainID] = amount;
@@ -159,6 +175,19 @@ contract CrossChainState is Owned, State, ICrossChainState {
     function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint) {
         if (_chainID != chainId) {
             return _crossNetworkActiveDebt[_chainID];
+        }
+
+        return 0;
+    }
+
+    function setCrossNetworkInbound(bytes32 _chainID, uint amount) external onlyAssociatedContract {
+        require(_chainID != chainId, "impossible to set activeDebt of the current chain");
+        _crossNetworkInbound[_chainID] = amount;
+    }
+
+    function getCrossNetworkInbound(bytes32 _chainID) external view returns (uint) {
+        if (_chainID != chainId) {
+            return _crossNetworkInbound[_chainID];
         }
 
         return 0;
@@ -202,13 +231,34 @@ contract CrossChainState is Owned, State, ICrossChainState {
         return result;
     }
 
+    function setCrossNetworkInboundAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts)
+        external
+        onlyAssociatedContract
+    {
+        for (uint i = 0; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] != chainId) {
+                _crossNetworkInbound[_chainIDs[i]] = _amounts[i];
+            }
+        }
+    }
+
+    function getCrossNetworkInboundAll() external view returns (uint) {
+        uint result = 0;
+        for (uint i = 0; i < crossChainIds.length; ++i) {
+            result = result.add(_crossNetworkInbound[crossChainIds[i]]);
+        }
+        return result;
+    }
+
     function setCrossNetworkDebtsAll(
         bytes32[] calldata _chainIDs,
         uint[] calldata _debts,
-        uint[] calldata _activeDebts
+        uint[] calldata _activeDebts,
+        uint[] calldata _inbounds
     ) external onlyAssociatedContract {
         this.setCrossNetworkIssuedDebtAll(_chainIDs, _debts);
         this.setCrossNetworkActiveDebtAll(_chainIDs, _activeDebts);
+        this.setCrossNetworkInboundAll(_chainIDs, _inbounds);
     }
 
     function getCurrentNetworkIssuedDebt() external view returns (uint) {
@@ -237,6 +287,13 @@ contract CrossChainState is Owned, State, ICrossChainState {
             _crossNetworkIssuedDebt[_chainID] = 0;
         }
         _crossNetworkIssuedDebt[_chainID] -= amount;
+    }
+
+    function setInitialCurrentIssuedDebt(uint _amount) external {
+        // only initial possible
+        if (_crossNetworkIssuedDebt[chainId] == 0) {
+            _crossNetworkIssuedDebt[chainId] = _amount;
+        }
     }
 
     function getChainID() external view returns (bytes32) {

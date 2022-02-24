@@ -16,7 +16,5 @@
 	"ReadProxyAddressResolver",
 	"StakingStateUSDC",
 	"BlacklistManager",
-	"StakingState",
-	"BridgeState",
-	"CrossChainState"
+	"StakingState"
 ]
