@@ -1,4 +1,5 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 interface IBridgeState {
     // ----VIEWS
@@ -77,21 +78,24 @@ interface IBridgeState {
     function appendOutboundingRequest(
         address account,
         uint amount,
-        uint destChainIds
+        uint destChainIds,
+        bytes calldata sign
     ) external;
 
     function appendMultipleInboundingRequests(
         address[] calldata accounts,
         uint[] calldata amounts,
         uint[] calldata srcChainIds,
-        uint[] calldata srcOutboundingIds
+        uint[] calldata srcOutboundingIds,
+        bytes[] calldata signs
     ) external;
 
     function appendInboundingRequest(
         address account,
         uint amount,
         uint srcChainId,
-        uint srcOutboundingId
+        uint srcOutboundingId,
+        bytes calldata sign
     ) external;
 
     function claimInbound(uint index, uint _amount) external;
