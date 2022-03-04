@@ -310,7 +310,6 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         return state().getCurrentNetworkIssuedDebt();
     }
 
-    // bot writing 이후 현재 시점까지 inbound, outbound 제거해야함
     function getCurrentNetworkActiveDebt() external view returns (uint) {
         uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
         uint totalIssuedDebt = state().getTotalNetworkIssuedDebt();

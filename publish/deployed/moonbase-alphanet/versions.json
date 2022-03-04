@@ -1628,8 +1628,9 @@
 			},
 			"PeriFinance": {
 				"address": "0xfE92B3A1F19548a8fb7755A35F0917bDAc9e2005",
-				"status": "current",
-				"keccak256": "0x9da82889d69169926bb281b11020291f307ede7a055fa8954489d2296fbb35a3"
+				"status": "replaced",
+				"keccak256": "0x9da82889d69169926bb281b11020291f307ede7a055fa8954489d2296fbb35a3",
+				"replaced_in": "v0.3.17"
 			},
 			"BridgeState": {
 				"address": "0x8bcE0B324db3dAd9AE2bA14b701983c6b4A3EA68",
@@ -1862,8 +1863,9 @@
 			},
 			"Issuer": {
 				"address": "0x6624968910E7c083266d7aA39Cef5525eb95cf1e",
-				"status": "current",
-				"keccak256": "0xa21793f62cf81a8ef3965c79bd7d38fd8c9d7015b927ea91bca7b7e5085aa7d2"
+				"status": "replaced",
+				"keccak256": "0xa21793f62cf81a8ef3965c79bd7d38fd8c9d7015b927ea91bca7b7e5085aa7d2",
+				"replaced_in": "v0.3.17"
 			},
 			"CrossChainState": {
 				"address": "0xc78EEA940e343879DB4CeEF81764310e25d9cfda",
@@ -1942,8 +1944,9 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x7015546461Fb9FAe972423e28FB51cCf6226cC1F",
-				"status": "current",
-				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.17"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x8649dA0B1319090EbfB1954d9697BDAB3FadA135",
@@ -1983,6 +1986,30 @@
 				"address": "0xD9300EE27df1a2b859f6FDCF635B77CAC067c8E9",
 				"status": "current",
 				"keccak256": "0xfa239c3427626e37a647bd232234da1929814658bc04c6ac48cebdd79d335deb"
+			}
+		}
+	},
+	"v0.3.17": {
+		"tag": "v0.3.17",
+		"fulltag": "v0.3.17",
+		"network": "moonbase-alphanet",
+		"date": "2022-02-28T18:41:07+09:00",
+		"commit": "14a87efdef1060b1a5d6df22bc058ea38985ce51",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x75F71Cf2aBD529bBD9d2e3b00b028Ce0c40e0Ff0",
+				"status": "current",
+				"keccak256": "0x00b0239d783d815dd9249d7412f7f826ddc013a2b77d486200e3e3682f1cf33d"
+			},
+			"BridgeState": {
+				"address": "0xe981c260E74996Aa36772A9d048F8948862A3d3d",
+				"status": "current",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+			},
+			"Issuer": {
+				"address": "0x14c69DbfFB56c5a80e42ACab4441d0Bbf418fbd3",
+				"status": "current",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
 			}
 		}
 	}
