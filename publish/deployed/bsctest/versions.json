@@ -1766,11 +1766,32 @@
 			},
 			"BridgeState": {
 				"address": "0x7860B6f006F6682b3550a7934B8e4e709AdC9CC3",
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.19"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xC736Eef64136735Ba16a658f1b21c88B018c13c0",
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.19"
+			}
+		}
+	},
+	"v0.3.19": {
+		"tag": "v0.3.19",
+		"fulltag": "v0.3.19",
+		"network": "bsctest",
+		"date": "2022-03-04T16:19:19+09:00",
+		"commit": "2e7eff8da3b173d430afe77ebc1848ed81ba7ed7",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x00811E190f395124AAbdC981001b92cF4f404907",
 				"status": "current",
 				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
 			},
 			"BridgeStatepUSD": {
-				"address": "0xC736Eef64136735Ba16a658f1b21c88B018c13c0",
+				"address": "0x4E6b5884060291b907F69366f0B02e08501f8698",
 				"status": "current",
 				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
 			}
