@@ -384,7 +384,7 @@ contract BridgeState is Owned, State {
             v := byte(0, mload(add(sig, 0x60)))
         }
 
-        return _signer == verifyHash(_message, v, r, s);
+        return _signer == address(verifyHash(_message, v, r, s));
     }
 
     function verifyHash(

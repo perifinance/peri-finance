@@ -227,10 +227,10 @@
 		},
 		"BridgeState": {
 			"name": "BridgeState",
-			"address": "0x7860B6f006F6682b3550a7934B8e4e709AdC9CC3",
+			"address": "0x00811E190f395124AAbdC981001b92cF4f404907",
 			"source": "BridgeState",
-			"link": "https://testnet.bscscan.com/address/0x7860B6f006F6682b3550a7934B8e4e709AdC9CC3",
-			"timestamp": "2022-02-28T09:34:37.284Z",
+			"link": "https://testnet.bscscan.com/address/0x00811E190f395124AAbdC981001b92cF4f404907",
+			"timestamp": "2022-03-04T06:56:20.358Z",
 			"txn": "",
 			"network": "bsctest"
 		},
@@ -326,10 +326,10 @@
 		},
 		"BridgeStatepUSD": {
 			"name": "BridgeStatepUSD",
-			"address": "0xC736Eef64136735Ba16a658f1b21c88B018c13c0",
+			"address": "0x4E6b5884060291b907F69366f0B02e08501f8698",
 			"source": "BridgeState",
-			"link": "https://testnet.bscscan.com/address/0xC736Eef64136735Ba16a658f1b21c88B018c13c0",
-			"timestamp": "2022-02-28T09:35:28.752Z",
+			"link": "https://testnet.bscscan.com/address/0x4E6b5884060291b907F69366f0B02e08501f8698",
+			"timestamp": "2022-03-04T06:56:47.626Z",
 			"txn": "",
 			"network": "bsctest"
 		},

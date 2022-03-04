@@ -227,10 +227,10 @@
 		},
 		"BridgeState": {
 			"name": "BridgeState",
-			"address": "0xe981c260E74996Aa36772A9d048F8948862A3d3d",
+			"address": "0x5fa89BDBe896a84888d0E1D72b3989d441238CD4",
 			"source": "BridgeState",
-			"link": "https://moonbase.moonscan.io/address/0xe981c260E74996Aa36772A9d048F8948862A3d3d",
-			"timestamp": "2022-02-28T07:17:42.763Z",
+			"link": "https://moonbase.moonscan.io/address/0x5fa89BDBe896a84888d0E1D72b3989d441238CD4",
+			"timestamp": "2022-03-04T07:00:00.895Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -326,10 +326,10 @@
 		},
 		"BridgeStatepUSD": {
 			"name": "BridgeStatepUSD",
-			"address": "0x8649dA0B1319090EbfB1954d9697BDAB3FadA135",
+			"address": "0xAc7e089D8f96E963511761B351380C98BF8f50cc",
 			"source": "BridgeState",
-			"link": "https://moonbase.moonscan.io/address/0x8649dA0B1319090EbfB1954d9697BDAB3FadA135",
-			"timestamp": "2022-02-22T11:06:31.418Z",
+			"link": "https://moonbase.moonscan.io/address/0xAc7e089D8f96E963511761B351380C98BF8f50cc",
+			"timestamp": "2022-03-04T07:04:19.258Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
