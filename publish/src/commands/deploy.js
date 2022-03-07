@@ -1556,11 +1556,11 @@ const deploy = async ({
 		// 	});
 		// }
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'setInitialCurrentIssuedDebt',
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	write: 'setInitialCurrentIssuedDebt',
+		// });
 	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));

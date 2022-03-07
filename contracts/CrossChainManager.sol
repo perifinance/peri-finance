@@ -303,7 +303,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         uint[] calldata _activeDebts,
         uint[] calldata _inbounds
     ) external onlyDebtManager {
-        state().setCrossNetworkDebtsAll(_chainIDs, _issuedDebts, _activeDebts, _inbounds);
+        state().setCrossNetworkIssuedDebtAll(_chainIDs, _issuedDebts);
+        state().setCrossNetworkActiveDebtAll(_chainIDs, _activeDebts);
+        state().setCrossNetworkInboundAll(_chainIDs, _inbounds);
+        // state().setCrossNetworkDebtsAll(_chainIDs, _issuedDebts, _activeDebts, _inbounds);
     }
 
     function getCurrentNetworkIssuedDebt() external view returns (uint) {
