@@ -1748,8 +1748,9 @@
 		"contracts": {
 			"CrossChainManager": {
 				"address": "0x6D8a5D097F0F1D4df75567E8EE6955B16Af4dED9",
-				"status": "current",
-				"keccak256": "0xfa239c3427626e37a647bd232234da1929814658bc04c6ac48cebdd79d335deb"
+				"status": "replaced",
+				"keccak256": "0xfa239c3427626e37a647bd232234da1929814658bc04c6ac48cebdd79d335deb",
+				"replaced_in": "v0.3.21"
 			}
 		}
 	},
@@ -1807,8 +1808,43 @@
 		"contracts": {
 			"CrossChainState": {
 				"address": "0xfE92B3A1F19548a8fb7755A35F0917bDAc9e2005",
+				"status": "replaced",
+				"keccak256": "0x709b202d7a99c2570429bab46b3f2464369e2ca3d69a431757254b0402e816cd",
+				"replaced_in": "v0.3.22"
+			}
+		}
+	},
+	"v0.3.21": {
+		"tag": "v0.3.21",
+		"fulltag": "v0.3.21",
+		"network": "bsctest",
+		"date": "2022-03-07T12:07:48+09:00",
+		"commit": "8be800c57ae7a5a7b442d9605f168bdd81932e25",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0x2e80d3E2264A6fb440e8Dc5a09Fa27D9aedd8162",
+				"status": "replaced",
+				"keccak256": "0x0467e4159baba631ecac657ef589b5dc3a13eb1e916a41d686b871887fc810ef",
+				"replaced_in": "v0.3.22"
+			}
+		}
+	},
+	"v0.3.22": {
+		"tag": "v0.3.22",
+		"fulltag": "v0.3.22",
+		"network": "bsctest",
+		"date": "2022-03-07T12:07:48+09:00",
+		"commit": "8be800c57ae7a5a7b442d9605f168bdd81932e25",
+		"contracts": {
+			"CrossChainState": {
+				"address": "0xbF21353c9e6417697D39E9bb94989a854456aEc2",
 				"status": "current",
-				"keccak256": "0x709b202d7a99c2570429bab46b3f2464369e2ca3d69a431757254b0402e816cd"
+				"keccak256": "0xc9a70f20f7160c7c85860acfdb1faf3c6c388a98f5e676c2aa59a7dbb2045033"
+			},
+			"CrossChainManager": {
+				"address": "0xEb689CDBd8341bF0CB72BD4E1B5A86A21c5B7263",
+				"status": "current",
+				"keccak256": "0xe13d2119b48f23dafed579cb9ad03f74907ef31d40b61165191bdb5acc116946"
 			}
 		}
 	}
