@@ -256,9 +256,13 @@ contract CrossChainState is Owned, State, ICrossChainState {
         uint[] calldata _activeDebts,
         uint[] calldata _inbounds
     ) external onlyAssociatedContract {
-        this.setCrossNetworkIssuedDebtAll(_chainIDs, _debts);
-        this.setCrossNetworkActiveDebtAll(_chainIDs, _activeDebts);
-        this.setCrossNetworkInboundAll(_chainIDs, _inbounds);
+        for (uint i = 0; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] != chainId) {
+                _crossNetworkIssuedDebt[_chainIDs[i]] = _debts[i];
+                _crossNetworkActiveDebt[_chainIDs[i]] = _activeDebts[i];
+                _crossNetworkInbound[_chainIDs[i]] = _inbounds[i];
+            }
+        }
     }
 
     function getCurrentNetworkIssuedDebt() external view returns (uint) {
