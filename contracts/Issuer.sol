@@ -236,7 +236,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
-        (totalSystemValue, anyRateIsInvalid) = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(currencyKey);
+        //(totalSystemValue, anyRateIsInvalid) = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(currencyKey);
+        (totalSystemValue, anyRateIsInvalid) = crossChainManager().getCurrentNetworkAdaptedActiveDebtValue(currencyKey);
 
         // If it's zero, they haven't issued, and they have no debt.
         // Note: it's more gas intensive to put this check here rather than before _totalIssuedPynths
@@ -565,8 +566,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         availablePynths.push(pynth);
         pynths[currencyKey] = pynth;
         pynthsByAddress[address(pynth)] = currencyKey;
-
-        emit PynthAdded(currencyKey, address(pynth));
     }
 
     function addPynth(IPynth pynth) external onlyOwner {
@@ -613,8 +612,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // And remove it from the pynths mapping
         delete pynthsByAddress[pynthToRemove];
         delete pynths[currencyKey];
-
-        emit PynthRemoved(currencyKey, pynthToRemove);
     }
 
     function removePynth(bytes32 currencyKey) external onlyOwner {
@@ -973,7 +970,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Save the debt entry parameters
         state.setCurrentIssuanceData(from, debtPercentage);
 
-        crossChainManager().addTotalNetworkDebt(amount);
+        crossChainManager().addCurrentNetworkIssuedDebt(amount);
 
         // Save the total debt entry parameters
         crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
@@ -1029,7 +1026,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
         }
 
-        crossChainManager().subtractTotalNetworkDebt(debtToRemove);
+        crossChainManager().subtractCurrentNetworkIssuedDebt(debtToRemove);
 
         // Update our cumulative ledger. This is also a high precision integer.
         state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
@@ -1045,9 +1042,4 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _onlyPeriFinance(); // Use an internal function to save code size.
         _;
     }
-
-    /* ========== EVENTS ========== */
-
-    event PynthAdded(bytes32 currencyKey, address pynth);
-    event PynthRemoved(bytes32 currencyKey, address pynth);
 }

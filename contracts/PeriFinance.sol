@@ -139,7 +139,11 @@ contract PeriFinance is BasePeriFinance {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId) external payable optionalProxy {
+    function overchainTransfer(
+        uint _amount,
+        uint _destChainId,
+        bytes calldata _sign
+    ) external payable optionalProxy {
         require(_amount > 0, "Cannot transfer zero");
         (uint transferable, ) =
             issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
@@ -150,7 +154,7 @@ contract PeriFinance is BasePeriFinance {
 
         require(_burnByProxy(messageSender, _amount), "burning failed");
 
-        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
 
     function claimAllBridgedAmounts() external payable optionalProxy {

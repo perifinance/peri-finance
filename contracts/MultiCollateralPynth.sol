@@ -99,12 +99,11 @@ contract MultiCollateralPynth is Pynth {
     }
 
     // ------------- Bridge Experiment
-    function overchainTransfer(uint _amount, uint _destChainId)
-        external
-        payable
-        optionalProxy
-        onlyAvailableWhenBridgeStateSet
-    {
+    function overchainTransfer(
+        uint _amount,
+        uint _destChainId,
+        bytes calldata _sign
+    ) external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
         bridgeValidator.transfer(msg.value);
@@ -113,7 +112,7 @@ contract MultiCollateralPynth is Pynth {
 
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
-        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId);
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
 
     function claimAllBridgedAmounts() external payable optionalProxy onlyAvailableWhenBridgeStateSet {

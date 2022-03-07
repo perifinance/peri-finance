@@ -1538,6 +1538,38 @@ const deploy = async ({
 			write: 'setCrossChainState',
 			writeArg: addressOf(crossChainState),
 		});
+
+		// const chainIds = [
+		// 	{ networkId: 1, chainId: 'mainnet' },
+		// 	{ networkId: 3, chainId: 'ropsten' },
+		// 	{ networkId: 4, chainId: 'rinkeby' },
+		// 	{ networkId: 5, chainId: 'goerli' },
+		// 	{ networkId: 42, chainId: 'kovan' },
+		// 	{ networkId: 137, chainId: 'polygon' },
+		// 	{ networkId: 80001, chainId: 'mumbai' },
+		// 	{ networkId: 97, chainId: 'bsctest' },
+		// 	{ networkId: 56, chainId: 'bsc' },
+		// 	{ networkId: 81, chainId: 'shibuya' },
+		// 	{ networkId: 1287, chainId: 'moonbase-alphanet' },
+		// ];
+
+		// for (const { networkId, chainId } of chainIds) {
+		// 	await runStep({
+		// 		contract: 'CrossChainManager',
+		// 		target: crossChainManager,
+		// 		read: 'getNetworkId',
+		// 		readArg: toBytes32(chainId),
+		// 		expected: input => input === networkId,
+		// 		write: 'addNetworkId',
+		// 		writeArg: [toBytes32(chainId), networkId],
+		// 	});
+		// }
+
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	write: 'setInitialCurrentIssuedDebt',
+		// });
 	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));

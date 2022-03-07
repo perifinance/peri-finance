@@ -445,16 +445,21 @@ function estimatePolygonGasPice(network, priority) {
 }
 
 function estimateBSCGasPice(network, priority) {
-	const gasStationUrl = `https://bscgas.info/gas`;
+	const gasStationUrl = `https://api.bscscan.com/api`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
+
+	if (network === 'bsctest') return '10';
 
 	return axios
 		.get(gasStationUrl, {
 			params: {
+				module: 'gastracker',
+				action: 'gasoracle',
 				apikey: process.env.BSC_GASSTAION_API_KEY,
 			},
 		})
 		.then(({ data }) => {
+			console.log('bsc gas', data);
 			const { slow, standard, fast, instant } = data;
 
 			switch (priority) {

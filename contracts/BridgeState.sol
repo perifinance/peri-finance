@@ -1,4 +1,5 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 import "./SafeDecimalMath.sol";
 import "./State.sol";
@@ -14,6 +15,7 @@ contract BridgeState is Owned, State {
         uint amount;
         uint destChainId;
         uint periodId;
+        bytes sign;
     }
 
     // Getting coin data from external network
@@ -23,6 +25,7 @@ contract BridgeState is Owned, State {
         uint srcChainId;
         uint srcOutboundingId;
         bool claimed;
+        bytes sign;
     }
 
     struct OutboundPeriod {
@@ -31,6 +34,8 @@ contract BridgeState is Owned, State {
         uint[] outboundingIds;
         bool processed;
     }
+
+    enum Move {INBOUND, OUTBOUND}
 
     // Managing authorization
     mapping(bytes32 => mapping(address => bool)) public roles;
@@ -65,6 +70,9 @@ contract BridgeState is Owned, State {
 
     // Current Outbound PeriodId, starts from 0
     uint public currentOutboundPeriodId;
+
+    // uint(Move.INBOUND), uint(Move.OUTBOUND)
+    mapping(uint => mapping(uint => uint)) public movedAmounts;
 
     event SetRole(bytes32 role, address target, bool set);
     event OutboundingAppended(address indexed from, uint amount, uint destChainId, uint outboundId, uint periodId);
@@ -125,16 +133,18 @@ contract BridgeState is Owned, State {
     function appendOutboundingRequest(
         address _account,
         uint _amount,
-        uint _destChainIds
+        uint _destChainIds,
+        bytes calldata _sign
     ) external onlyAssociatedContract {
-        _appendOutboundingRequest(_account, _amount, _destChainIds);
+        _appendOutboundingRequest(_account, _amount, _destChainIds, _sign);
     }
 
     function appendMultipleInboundingRequests(
         address[] calldata _accounts,
         uint[] calldata _amounts,
         uint[] calldata _srcChainIds,
-        uint[] calldata _srcOutboundingIds
+        uint[] calldata _srcOutboundingIds,
+        bytes[] calldata _signs
     ) external onlyValidator {
         uint length = _accounts.length;
         require(length > 0, "Input length is invalid");
@@ -144,7 +154,7 @@ contract BridgeState is Owned, State {
         );
 
         for (uint i = 0; i < _amounts.length; i++) {
-            _appendInboundingRequest(_accounts[i], _amounts[i], _srcChainIds[i], _srcOutboundingIds[i]);
+            _appendInboundingRequest(_accounts[i], _amounts[i], _srcChainIds[i], _srcOutboundingIds[i], _signs[i]);
         }
     }
 
@@ -152,18 +162,25 @@ contract BridgeState is Owned, State {
         address _account,
         uint _amount,
         uint _srcChainId,
-        uint _srcOutboundingId
+        uint _srcOutboundingId,
+        bytes calldata _sign
     ) external onlyValidator {
-        require(_appendInboundingRequest(_account, _amount, _srcChainId, _srcOutboundingId), "Append inbounding failed");
+        require(
+            _appendInboundingRequest(_account, _amount, _srcChainId, _srcOutboundingId, _sign),
+            "Append inbounding failed"
+        );
     }
 
     function claimInbound(uint _index, uint _amount) external onlyAssociatedContract {
         Inbounding storage _inbounding = inboundings[_index];
 
         require(!_inbounding.claimed, "This inbounding has already been claimed");
+        require(
+            verify(_inbounding.account, keccak256(abi.encodePacked(_amount)), _inbounding.sign),
+            "the signature is not verified"
+        );
 
         _inbounding.claimed = true;
-        totalInboundAmount = totalInboundAmount.add(_amount);
 
         emit InboundingClaimed(_index);
 
@@ -227,7 +244,8 @@ contract BridgeState is Owned, State {
     function _appendOutboundingRequest(
         address _account,
         uint _amount,
-        uint _destChainId
+        uint _destChainId,
+        bytes memory _sign
     ) internal {
         require(networkOpened[_destChainId], "Invalid target network");
 
@@ -235,9 +253,10 @@ contract BridgeState is Owned, State {
 
         accountOutboundings[_account][currentOutboundPeriodId].push(nextOutboundingId);
 
-        outboundings.push(Outbounding(_account, _amount, _destChainId, currentOutboundPeriodId));
+        outboundings.push(Outbounding(_account, _amount, _destChainId, currentOutboundPeriodId, _sign));
 
         totalOutboundAmount = totalOutboundAmount.add(_amount);
+        movedAmounts[uint(Move.OUTBOUND)][_destChainId] = movedAmounts[uint(Move.OUTBOUND)][_destChainId].add(_amount);
 
         // The first outbounding request will newly start the period
         if (outboundPeriods[currentOutboundPeriodId].outboundingIds.length == 0) {
@@ -254,15 +273,19 @@ contract BridgeState is Owned, State {
         address _account,
         uint _amount,
         uint _srcChainId,
-        uint _srcOutboundingId
+        uint _srcOutboundingId,
+        bytes memory _sign
     ) internal returns (bool) {
         require(!srcOutboundingIdRegistered[_srcChainId][_srcOutboundingId], "Request id is already registered to inbound");
 
         srcOutboundingIdRegistered[_srcChainId][_srcOutboundingId] = true;
 
         uint nextInboundingId = inboundings.length;
-        inboundings.push(Inbounding(_account, _amount, _srcChainId, _srcOutboundingId, false));
+        inboundings.push(Inbounding(_account, _amount, _srcChainId, _srcOutboundingId, false, _sign));
         accountInboundings[_account].push(nextInboundingId);
+
+        totalInboundAmount = totalInboundAmount.add(_amount);
+        movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
         emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
 
@@ -333,8 +356,51 @@ contract BridgeState is Owned, State {
         emit NetworkStatusChanged(_chainId, _setTo);
     }
 
+    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
+        return movedAmounts[_inboundOutbound][targetNetworkId];
+    }
+
     modifier onlyValidator() {
         require(roles[ROLE_VALIDATOR][msg.sender], "Caller is not validator");
         _;
     }
+
+    function verify(
+        address _signer,
+        bytes32 _message,
+        bytes memory _signature
+    ) internal pure returns (bool) {
+        require(_signature.length == 65, "check the signature length");
+
+        bytes memory sig = _signature;
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+
+        // Split the signature into components r, s and v variables with inline assembly.
+        assembly {
+            r := mload(add(sig, 0x20))
+            s := mload(add(sig, 0x40))
+            v := byte(0, mload(add(sig, 0x60)))
+        }
+
+        return _signer == address(verifyHash(_message, v, r, s));
+    }
+
+    function verifyHash(
+        bytes32 hash,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal pure returns (address signer) {
+        bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+
+        return ecrecover(messageDigest, v, r, s);
+    }
+
+    // // js sign code
+    // let amount = 100;
+    // let messageHash = ethers.utils.solidityKeccak256(["string", "bytes"], ["\x19Ethereum Signed Message:\n32", ethers.utils.solidityKeccak256(["bytes"], [ethers.utils.solidityPack(["uint"], [amount])])]);
+    // let messageHashBytes = ethers.utils.arrayify(messageHash)
+    // let mySignature = await signer.signMessage(messageHashBytes);
 }

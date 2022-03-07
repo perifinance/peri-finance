@@ -27,4 +27,57 @@ interface ICrossChainState {
     function addTotalNetworkDebtLedger(uint amount) external;
 
     function subtractTotalNetworkDebtLedger(uint amount) external;
+
+    function setCrosschain(bytes32 _chainID) external;
+
+    function addCrosschain(bytes32 chainID) external;
+
+    function getCrossChainIds() external view returns (bytes32[] memory);
+
+    function addNetworkId(bytes32 _chainID, uint _networkId) external;
+
+    function getNetworkId(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkIssuedDebt(bytes32 _chainID, uint _amount) external;
+
+    function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkActiveDebt(bytes32 _chainID, uint _amount) external;
+
+    function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkInbound(bytes32 _chainID, uint _amount) external;
+
+    function getCrossNetworkInbound(bytes32 _chainID) external view returns (uint);
+
+    function setCrossNetworkIssuedDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function getCrossNetworkIssuedDebtAll() external view returns (uint);
+
+    function setCrossNetworkActiveDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function getCrossNetworkActiveDebtAll() external view returns (uint);
+
+    function setCrossNetworkInboundAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function getCrossNetworkInboundAll() external view returns (uint);
+
+    function setCrossNetworkDebtsAll(
+        bytes32[] calldata _chainIDs,
+        uint[] calldata _debts,
+        uint[] calldata _activeDebts,
+        uint[] calldata _inbounds
+    ) external;
+
+    function getCurrentNetworkIssuedDebt() external view returns (uint);
+
+    function getTotalNetworkIssuedDebt() external view returns (uint);
+
+    function addIssuedDebt(bytes32 _chainID, uint _amount) external;
+
+    function subtractIssuedDebt(bytes32 _chainID, uint _amount) external;
+
+    function setInitialCurrentIssuedDebt(uint _amount) external;
+
+    function getChainID() external view returns (bytes32);
 }

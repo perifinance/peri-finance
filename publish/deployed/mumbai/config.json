@@ -87,7 +87,7 @@
 		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": false
+		"deploy": true
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
@@ -153,7 +153,7 @@
 		"deploy": false
 	},
 	"BridgeState": {
-		"deploy": false
+		"deploy": true
 	},
 	"BridgeStatepUSD": {
 		"deploy": false
