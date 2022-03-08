@@ -2028,13 +2028,15 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x5fa89BDBe896a84888d0E1D72b3989d441238CD4",
-				"status": "current",
-				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.24"
 			},
 			"BridgeStatepUSD": {
 				"address": "0xAc7e089D8f96E963511761B351380C98BF8f50cc",
-				"status": "current",
-				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.24"
 			}
 		}
 	},
@@ -2103,6 +2105,25 @@
 				"address": "0x65799dd8c9Dce902e78BA014DBD07f0708f55b33",
 				"status": "current",
 				"keccak256": "0x876a0599f8c3e55eaf475d529df5e7f7b8f4c20ad52be2cae5bc5cfac0cfe32c"
+			}
+		}
+	},
+	"v0.3.24": {
+		"tag": "v0.3.24",
+		"fulltag": "v0.3.24",
+		"network": "moonbase-alphanet",
+		"date": "2022-03-08T15:43:35+09:00",
+		"commit": "362054498bc420ecc69861f3eafc92f9efc50f62",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x7d7163BA0Ed0A79BbdD4E5aA5Ed8018Db15A682d",
+				"status": "current",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xA5ad7c8bd507e976eb154Fbd47A8DcC54d716460",
+				"status": "current",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290"
 			}
 		}
 	}

@@ -227,10 +227,10 @@
 		},
 		"BridgeState": {
 			"name": "BridgeState",
-			"address": "0x3Cd9b4e8bC7ECbBc9F812932479eB5E2cD8Eb17c",
+			"address": "0x5FefD449B7C078bcd20D28a41126eC5786c1CdFa",
 			"source": "BridgeState",
-			"link": "https://mumbai.polygonscan.com/address/0x3Cd9b4e8bC7ECbBc9F812932479eB5E2cD8Eb17c",
-			"timestamp": "2022-03-08T02:54:40.863Z",
+			"link": "https://mumbai.polygonscan.com/address/0x5FefD449B7C078bcd20D28a41126eC5786c1CdFa",
+			"timestamp": "2022-03-08T07:11:36.302Z",
 			"txn": "",
 			"network": "mumbai"
 		},
@@ -326,10 +326,10 @@
 		},
 		"BridgeStatepUSD": {
 			"name": "BridgeStatepUSD",
-			"address": "0xE0b085737d9f9BCcB52228DC960010A711d0A647",
+			"address": "0xf9ABa2C428d7d0371AAD57a47e51BC5FD48492E2",
 			"source": "BridgeState",
-			"link": "https://mumbai.polygonscan.com/address/0xE0b085737d9f9BCcB52228DC960010A711d0A647",
-			"timestamp": "2022-03-08T02:57:17.242Z",
+			"link": "https://mumbai.polygonscan.com/address/0xf9ABa2C428d7d0371AAD57a47e51BC5FD48492E2",
+			"timestamp": "2022-03-08T07:12:16.394Z",
 			"txn": "",
 			"network": "mumbai"
 		},
