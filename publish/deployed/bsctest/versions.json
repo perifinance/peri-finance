@@ -1657,8 +1657,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0x8131347a212b55ECFF446ca11b729Da0e2D3C4EC",
-				"status": "current",
-				"keccak256": "0x001bb6af38a508e5eecc2f1740f9dde52933325f9811d058205a76895e934cfd"
+				"status": "replaced",
+				"keccak256": "0x001bb6af38a508e5eecc2f1740f9dde52933325f9811d058205a76895e934cfd",
+				"replaced_in": "v0.3.23"
 			}
 		}
 	},
@@ -1716,8 +1717,9 @@
 			},
 			"Issuer": {
 				"address": "0x1Edb9df12b12eFD11BF328719C44a6806C3a872b",
-				"status": "current",
-				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
+				"status": "replaced",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714",
+				"replaced_in": "v0.3.23"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x92D27Bae0BbdCB59bCd3b28da2ff963134AAeC84",
@@ -1845,6 +1847,25 @@
 				"address": "0xEb689CDBd8341bF0CB72BD4E1B5A86A21c5B7263",
 				"status": "current",
 				"keccak256": "0xe13d2119b48f23dafed579cb9ad03f74907ef31d40b61165191bdb5acc116946"
+			}
+		}
+	},
+	"v0.3.23": {
+		"tag": "v0.3.23",
+		"fulltag": "v0.3.23",
+		"network": "bsctest",
+		"date": "2022-03-07T15:10:31+09:00",
+		"commit": "9008a5dbd2d76fea5ac330960c0c926c5ec58454",
+		"contracts": {
+			"Issuer": {
+				"address": "0x48f4891B1571A5fe6dBb6588EDEC78499f6eF35E",
+				"status": "current",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
+			},
+			"PynthpUSD": {
+				"address": "0xfe429B9a2cA2662d94Cbc6BC808B3254f2D80A47",
+				"status": "current",
+				"keccak256": "0x876a0599f8c3e55eaf475d529df5e7f7b8f4c20ad52be2cae5bc5cfac0cfe32c"
 			}
 		}
 	}

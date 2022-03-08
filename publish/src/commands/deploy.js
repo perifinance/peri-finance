@@ -1559,6 +1559,8 @@ const deploy = async ({
 		// await runStep({
 		// 	contract: 'CrossChainManager',
 		// 	target: crossChainManager,
+		// 	read: 'getCurrentNetworkIssuedDebt',
+		// 	expected: input => input > 0,
 		// 	write: 'setInitialCurrentIssuedDebt',
 		// });
 	}
