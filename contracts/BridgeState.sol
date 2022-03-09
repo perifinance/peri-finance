@@ -149,7 +149,10 @@ contract BridgeState is Owned, State {
         uint length = _accounts.length;
         require(length > 0, "Input length is invalid");
         require(
-            _amounts.length == length && _srcChainIds.length == length && _srcOutboundingIds.length == length,
+            _amounts.length == length &&
+                _srcChainIds.length == length &&
+                _srcOutboundingIds.length == length &&
+                _signs.length == length,
             "Input length is not matched"
         );
 
@@ -256,7 +259,7 @@ contract BridgeState is Owned, State {
         outboundings.push(Outbounding(_account, _amount, _destChainId, currentOutboundPeriodId, _sign));
 
         totalOutboundAmount = totalOutboundAmount.add(_amount);
-        movedAmounts[uint(Move.OUTBOUND)][_destChainId] = movedAmounts[uint(Move.OUTBOUND)][_destChainId].add(_amount);
+        // movedAmounts[uint(Move.OUTBOUND)][_destChainId] = movedAmounts[uint(Move.OUTBOUND)][_destChainId].add(_amount);
 
         // The first outbounding request will newly start the period
         if (outboundPeriods[currentOutboundPeriodId].outboundingIds.length == 0) {
@@ -285,7 +288,7 @@ contract BridgeState is Owned, State {
         accountInboundings[_account].push(nextInboundingId);
 
         totalInboundAmount = totalInboundAmount.add(_amount);
-        movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
+        // movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
         emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
 
@@ -356,9 +359,9 @@ contract BridgeState is Owned, State {
         emit NetworkStatusChanged(_chainId, _setTo);
     }
 
-    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
-        return movedAmounts[_inboundOutbound][targetNetworkId];
-    }
+    // function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
+    //     return movedAmounts[_inboundOutbound][targetNetworkId];
+    // }
 
     modifier onlyValidator() {
         require(roles[ROLE_VALIDATOR][msg.sender], "Caller is not validator");
