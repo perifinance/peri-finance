@@ -2176,8 +2176,23 @@
 			},
 			"CrossChainManager": {
 				"address": "0x42E9050726fb3abbAEb0a45e18d6a1636a6BFeF1",
+				"status": "replaced",
+				"keccak256": "0x06743dce4a16b97b3f2aceb138a72e71c69957794b5f539bb7d185fa2b1e8c0e",
+				"replaced_in": "v0.3.27"
+			}
+		}
+	},
+	"v0.3.27": {
+		"tag": "v0.3.27",
+		"fulltag": "v0.3.27",
+		"network": "moonbase-alphanet",
+		"date": "2022-03-10T18:56:42+09:00",
+		"commit": "ef83abee91cf97b001832beedc8e6c8aa24cf91d",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0xDE76993c755763A711BB3e8f8eA986095496d994",
 				"status": "current",
-				"keccak256": "0x06743dce4a16b97b3f2aceb138a72e71c69957794b5f539bb7d185fa2b1e8c0e"
+				"keccak256": "0xb3bf19d71ec0a8f1f394ee059dbe6dfa4bb562efd201df54c3fcd6977ccf72b9"
 			}
 		}
 	}

@@ -205,7 +205,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
             currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
         }
 
-        require(inbound > inboundAmount, "inbound must larger than inboundAmount");
+        require(inbound >= inboundAmount, "inbound must larger than inboundAmount");
         currentNetworkDebt = currentNetworkDebt.sub(inbound.sub(inboundAmount)); //.sub(outbound);
     }
 
