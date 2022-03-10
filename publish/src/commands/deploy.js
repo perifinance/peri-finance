@@ -1530,6 +1530,69 @@ const deploy = async ({
 			writeArg: addressOf(crossChainState),
 		});
 
+		switch (network) {
+			case 'bsctest':
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'setCrosschain',
+					writeArg: [toBytes32('bsctest')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('moonbase-alphanet')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('mumbai')],
+				});
+				break;
+			case 'moonbase-alphanet':
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'setCrosschain',
+					writeArg: [toBytes32('moonbase-alphanet')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('bsctest')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('mumbai')],
+				});
+				break;
+			case 'mumbai':
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'setCrosschain',
+					writeArg: [toBytes32('mumbai')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('moonbase-alphanet')],
+				});
+				await runStep({
+					contract: 'CrossChainManager',
+					target: crossChainManager,
+					write: 'addCrosschain',
+					writeArg: [toBytes32('bsctest')],
+				});
+				break;
+		}
+
 		// const chainIds = [
 		// 	{ networkId: 1, chainId: 'mainnet' },
 		// 	{ networkId: 3, chainId: 'ropsten' },
@@ -1556,13 +1619,13 @@ const deploy = async ({
 		// 	});
 		// }
 
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	read: 'getCurrentNetworkIssuedDebt',
-		// 	expected: input => input > 0,
-		// 	write: 'setInitialCurrentIssuedDebt',
-		// });
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'getCurrentNetworkIssuedDebt',
+			expected: input => input > 0,
+			write: 'setInitialCurrentIssuedDebt',
+		});
 	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
