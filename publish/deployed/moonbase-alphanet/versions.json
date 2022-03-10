@@ -2171,8 +2171,9 @@
 			},
 			"CrossChainState": {
 				"address": "0x9fc2f91C2B4d661c0898B30b4133cDC27A5A52a5",
-				"status": "current",
-				"keccak256": "0xc9a70f20f7160c7c85860acfdb1faf3c6c388a98f5e676c2aa59a7dbb2045033"
+				"status": "replaced",
+				"keccak256": "0xc9a70f20f7160c7c85860acfdb1faf3c6c388a98f5e676c2aa59a7dbb2045033",
+				"replaced_in": "v0.3.28"
 			},
 			"CrossChainManager": {
 				"address": "0x42E9050726fb3abbAEb0a45e18d6a1636a6BFeF1",
@@ -2191,8 +2192,28 @@
 		"contracts": {
 			"CrossChainManager": {
 				"address": "0xDE76993c755763A711BB3e8f8eA986095496d994",
+				"status": "replaced",
+				"keccak256": "0xb3bf19d71ec0a8f1f394ee059dbe6dfa4bb562efd201df54c3fcd6977ccf72b9",
+				"replaced_in": "v0.3.28"
+			}
+		}
+	},
+	"v0.3.28": {
+		"tag": "v0.3.28",
+		"fulltag": "v0.3.28",
+		"network": "moonbase-alphanet",
+		"date": "2022-03-10T22:43:05+09:00",
+		"commit": "fe5df0dca63919cfe7b127566a64f4e858906c61",
+		"contracts": {
+			"CrossChainState": {
+				"address": "0x6849f1897c88E51EE360bEc256D22d83D27BdC81",
 				"status": "current",
-				"keccak256": "0xb3bf19d71ec0a8f1f394ee059dbe6dfa4bb562efd201df54c3fcd6977ccf72b9"
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+			},
+			"CrossChainManager": {
+				"address": "0xA66D52e6216BFC16E1B041069B7523404B3dB419",
+				"status": "current",
+				"keccak256": "0x6321cd0df6102eba9c09bbefec4ae8dd69da285213df97c796ab9e34c3d9e3fd"
 			}
 		}
 	}

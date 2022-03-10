@@ -181,6 +181,10 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
             : totalIssued.decimalToPreciseDecimal().divideDecimalRoundPrecise(totalNetworkDebt.decimalToPreciseDecimal());
     }
 
+    function getCurrentNetworkDebt() external view returns (uint currentNetworkDebt, bool anyRateIsInvalid) {
+        return _getCurrentNetworkPreservedDebt();
+    }
+
     function _getCurrentNetworkPreservedDebt() internal view returns (uint currentNetworkDebt, bool anyRateIsInvalid) {
         (currentNetworkDebt, anyRateIsInvalid) = issuer().totalIssuedPynths(pUSD, true);
 

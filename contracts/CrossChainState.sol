@@ -274,7 +274,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
         for (uint i = 0; i < crossChainIds.length; ++i) {
             result += (_crossNetworkIssuedDebt[crossChainIds[i]]);
         }
-        result += _crossNetworkIssuedDebt[chainId];
+        // result += _crossNetworkIssuedDebt[chainId];
         return result;
     }
 
