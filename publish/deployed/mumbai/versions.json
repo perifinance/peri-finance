@@ -2195,13 +2195,15 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x6c1da7D6e430240081ED41C978Db319e746e77a7",
-				"status": "current",
-				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4"
+				"status": "replaced",
+				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4",
+				"replaced_in": "v0.3.29"
 			},
 			"BridgeStatepUSD": {
 				"address": "0xdaB192C0eACE4Be3C90e16A788cFDce6ee40C7C0",
-				"status": "current",
-				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4"
+				"status": "replaced",
+				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4",
+				"replaced_in": "v0.3.29"
 			},
 			"CrossChainState": {
 				"address": "0x598Fda719704d19CdA271B51c3AC46d8878902F6",
@@ -2248,6 +2250,25 @@
 				"address": "0xce7c88AEDD1b2419E42d06Dc1877195405733Daf",
 				"status": "current",
 				"keccak256": "0x6321cd0df6102eba9c09bbefec4ae8dd69da285213df97c796ab9e34c3d9e3fd"
+			}
+		}
+	},
+	"v0.3.29": {
+		"tag": "v0.3.29",
+		"fulltag": "v0.3.29",
+		"network": "mumbai",
+		"date": "2022-03-10T23:40:35+09:00",
+		"commit": "ae646c89542a685c1341f5713479d4d33408d41b",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x37160fd30fc64af2e29649c51dBF34DCf088b30a",
+				"status": "current",
+				"keccak256": "0xc76c479aadd16e4f8073e2c58be1e98851683c7e0a948a840fbe7319d84787ac"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xc03f70D6A10477A59eA81A370BB9C3952Df82962",
+				"status": "current",
+				"keccak256": "0xc76c479aadd16e4f8073e2c58be1e98851683c7e0a948a840fbe7319d84787ac"
 			}
 		}
 	}

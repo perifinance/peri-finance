@@ -146,17 +146,17 @@ contract BridgeState is Owned, State {
         uint[] calldata _srcOutboundingIds,
         bytes[] calldata _signs
     ) external onlyValidator {
-        uint length = _accounts.length;
-        require(length > 0, "Input length is invalid");
+        // uint length = _accounts.length;
+        // require(length > 0, "Input length is invalid");
         require(
-            _amounts.length == length &&
-                _srcChainIds.length == length &&
-                _srcOutboundingIds.length == length &&
-                _signs.length == length,
+            _amounts.length == _accounts.length &&
+                _srcChainIds.length == _accounts.length &&
+                _srcOutboundingIds.length == _accounts.length &&
+                _signs.length == _accounts.length,
             "Input length is not matched"
         );
 
-        for (uint i = 0; i < _amounts.length; i++) {
+        for (uint i = 0; i < _accounts.length; i++) {
             _appendInboundingRequest(_accounts[i], _amounts[i], _srcChainIds[i], _srcOutboundingIds[i], _signs[i]);
         }
     }
@@ -283,14 +283,14 @@ contract BridgeState is Owned, State {
 
         srcOutboundingIdRegistered[_srcChainId][_srcOutboundingId] = true;
 
-        uint nextInboundingId = inboundings.length;
+        // uint nextInboundingId = inboundings.length;
         inboundings.push(Inbounding(_account, _amount, _srcChainId, _srcOutboundingId, false, _sign));
-        accountInboundings[_account].push(nextInboundingId);
+        accountInboundings[_account].push(inboundings.length);
 
         totalInboundAmount = totalInboundAmount.add(_amount);
         movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
-        emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
+        // emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
 
         return true;
     }
