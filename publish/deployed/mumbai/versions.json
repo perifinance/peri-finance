@@ -2246,13 +2246,15 @@
 		"contracts": {
 			"CrossChainState": {
 				"address": "0xAb3fDF639Fb952fB77504060056b47179C75293f",
-				"status": "current",
-				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.34"
 			},
 			"CrossChainManager": {
 				"address": "0xce7c88AEDD1b2419E42d06Dc1877195405733Daf",
-				"status": "current",
-				"keccak256": "0x6321cd0df6102eba9c09bbefec4ae8dd69da285213df97c796ab9e34c3d9e3fd"
+				"status": "replaced",
+				"keccak256": "0x6321cd0df6102eba9c09bbefec4ae8dd69da285213df97c796ab9e34c3d9e3fd",
+				"replaced_in": "v0.3.34"
 			}
 		}
 	},
@@ -2343,13 +2345,44 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0xFecDb465b9755003f84b6c87bab298D73E7e358d",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.34"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x050A368164A74270c89e2d4796FcF98189C16388",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.34"
+			}
+		}
+	},
+	"v0.3.34": {
+		"tag": "v0.3.34",
+		"fulltag": "v0.3.34",
+		"network": "mumbai",
+		"date": "2022-03-15T22:25:59+09:00",
+		"commit": "a67c33cdbec33db344ede050ca146155b2849ac6",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xDa0039051E83342B905Ddc301DC299672109AD3e",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
 			},
 			"BridgeStatepUSD": {
-				"address": "0x050A368164A74270c89e2d4796FcF98189C16388",
+				"address": "0x5145B45fA0F0df34f5ad1F368de1Ea4240C491BE",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
+			},
+			"CrossChainState": {
+				"address": "0x2adFe210ebF3a4B2FfE88FAB15217e0F3E7565E6",
+				"status": "current",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+			},
+			"CrossChainManager": {
+				"address": "0xD02EF9319671c51Bef83C57d47877F1bE39408EF",
+				"status": "current",
+				"keccak256": "0x5db4fb4a30a469af7f038364e4b704d0fd900dffc77a9b2893b9c5f514d559cc"
 			}
 		}
 	}

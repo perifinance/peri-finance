@@ -1619,13 +1619,13 @@ const deploy = async ({
 		// 	});
 		// }
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'getCurrentNetworkIssuedDebt',
-			expected: input => input > 0,
-			write: 'setInitialCurrentIssuedDebt',
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	read: 'getCurrentNetworkIssuedDebt',
+		// 	expected: input => input > 0,
+		// 	write: 'setInitialCurrentIssuedDebt',
+		// });
 	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
