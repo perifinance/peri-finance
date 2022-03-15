@@ -37,6 +37,12 @@ module.exports = {
 		compilers: [
 			{
 				version: '0.4.25',
+				// settings: {
+				// 	optimizer: {
+				// 		runs: 200,
+				// 		enabled: true
+				// 	}
+				// }
 			},
 			{
 				version: '0.5.16',

@@ -15,7 +15,7 @@ contract BridgeState is Owned, State {
         uint amount;
         uint destChainId;
         uint periodId;
-        bytes sign;
+        Signature sign;
     }
 
     // Getting coin data from external network
@@ -25,7 +25,7 @@ contract BridgeState is Owned, State {
         uint srcChainId;
         uint srcOutboundingId;
         bool claimed;
-        bytes sign;
+        Signature sign;
     }
 
     struct OutboundPeriod {
@@ -33,6 +33,12 @@ contract BridgeState is Owned, State {
         uint startTime;
         uint[] outboundingIds;
         bool processed;
+    }
+
+    struct Signature {
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
     }
 
     enum Move {INBOUND, OUTBOUND}
@@ -134,7 +140,7 @@ contract BridgeState is Owned, State {
         address _account,
         uint _amount,
         uint _destChainIds,
-        bytes calldata _sign
+        Signature calldata _sign
     ) external onlyAssociatedContract {
         _appendOutboundingRequest(_account, _amount, _destChainIds, _sign);
     }
@@ -144,20 +150,18 @@ contract BridgeState is Owned, State {
         uint[] calldata _amounts,
         uint[] calldata _srcChainIds,
         uint[] calldata _srcOutboundingIds,
-        bytes[] calldata _signs
+        Signature[] calldata _sign
     ) external onlyValidator {
-        // uint length = _accounts.length;
-        // require(length > 0, "Input length is invalid");
         require(
             _amounts.length == _accounts.length &&
                 _srcChainIds.length == _accounts.length &&
                 _srcOutboundingIds.length == _accounts.length &&
-                _signs.length == _accounts.length,
+                _sign.length == _accounts.length,
             "Input length is not matched"
         );
 
         for (uint i = 0; i < _accounts.length; i++) {
-            _appendInboundingRequest(_accounts[i], _amounts[i], _srcChainIds[i], _srcOutboundingIds[i], _signs[i]);
+            _appendInboundingRequest(_accounts[i], _amounts[i], _srcChainIds[i], _srcOutboundingIds[i], _sign[i]);
         }
     }
 
@@ -166,7 +170,7 @@ contract BridgeState is Owned, State {
         uint _amount,
         uint _srcChainId,
         uint _srcOutboundingId,
-        bytes calldata _sign
+        Signature calldata _sign
     ) external onlyValidator {
         require(
             _appendInboundingRequest(_account, _amount, _srcChainId, _srcOutboundingId, _sign),
@@ -179,7 +183,13 @@ contract BridgeState is Owned, State {
 
         require(!_inbounding.claimed, "This inbounding has already been claimed");
         require(
-            verify(_inbounding.account, keccak256(abi.encodePacked(_amount)), _inbounding.sign),
+            verify(
+                _inbounding.account,
+                keccak256(abi.encodePacked(_amount)),
+                _inbounding.sign.r,
+                _inbounding.sign.s,
+                _inbounding.sign.v
+            ),
             "the signature is not verified"
         );
 
@@ -248,7 +258,7 @@ contract BridgeState is Owned, State {
         address _account,
         uint _amount,
         uint _destChainId,
-        bytes memory _sign
+        Signature memory _sign
     ) internal {
         require(networkOpened[_destChainId], "Invalid target network");
 
@@ -277,7 +287,7 @@ contract BridgeState is Owned, State {
         uint _amount,
         uint _srcChainId,
         uint _srcOutboundingId,
-        bytes memory _sign
+        Signature memory _sign
     ) internal returns (bool) {
         require(!srcOutboundingIdRegistered[_srcChainId][_srcOutboundingId], "Request id is already registered to inbound");
 
@@ -371,30 +381,18 @@ contract BridgeState is Owned, State {
     function verify(
         address _signer,
         bytes32 _message,
-        bytes memory _signature
+        bytes32 _r,
+        bytes32 _s,
+        uint8 _v
     ) internal pure returns (bool) {
-        require(_signature.length == 65, "check the signature length");
-
-        bytes memory sig = _signature;
-        bytes32 r;
-        bytes32 s;
-        uint8 v;
-
-        // Split the signature into components r, s and v variables with inline assembly.
-        assembly {
-            r := mload(add(sig, 0x20))
-            s := mload(add(sig, 0x40))
-            v := byte(0, mload(add(sig, 0x60)))
-        }
-
-        return _signer == address(verifyHash(_message, v, r, s));
+        return _signer == address(verifyHash(_message, _r, _s, _v));
     }
 
     function verifyHash(
         bytes32 hash,
-        uint8 v,
         bytes32 r,
-        bytes32 s
+        bytes32 s,
+        uint8 v
     ) internal pure returns (address signer) {
         bytes32 messageDigest = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
 

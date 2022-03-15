@@ -142,7 +142,9 @@ contract PeriFinance is BasePeriFinance {
     function overchainTransfer(
         uint _amount,
         uint _destChainId,
-        bytes calldata _sign
+        bytes32 _r,
+        bytes32 _s,
+        uint8 _v
     ) external payable optionalProxy {
         require(_amount > 0, "Cannot transfer zero");
         (uint transferable, ) =
@@ -154,7 +156,7 @@ contract PeriFinance is BasePeriFinance {
 
         require(_burnByProxy(messageSender, _amount), "burning failed");
 
-        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _r, _s, _v);
     }
 
     function claimAllBridgedAmounts() external payable optionalProxy {
@@ -171,7 +173,7 @@ contract PeriFinance is BasePeriFinance {
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
         // Validations are checked from bridge state
-        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+        (address account, uint amount, , , , , , ) = bridgeState.inboundings(_index);
 
         require(account == messageSender, "Caller is not matched");
 

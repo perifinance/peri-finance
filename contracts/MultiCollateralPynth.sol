@@ -102,7 +102,9 @@ contract MultiCollateralPynth is Pynth {
     function overchainTransfer(
         uint _amount,
         uint _destChainId,
-        bytes calldata _sign
+        bytes32 _r,
+        bytes32 _s,
+        uint8 _v
     ) external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
@@ -112,7 +114,7 @@ contract MultiCollateralPynth is Pynth {
 
         debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
-        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
+        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _r, _s, _v);
     }
 
     function claimAllBridgedAmounts() external payable optionalProxy onlyAvailableWhenBridgeStateSet {
@@ -129,7 +131,7 @@ contract MultiCollateralPynth is Pynth {
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
         // Validations are checked from bridge state
-        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+        (address account, uint amount, , , , , , ) = bridgeState.inboundings(_index);
 
         require(account == messageSender, "Caller is not matched");
 

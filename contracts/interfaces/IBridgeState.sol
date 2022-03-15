@@ -22,7 +22,10 @@ interface IBridgeState {
             uint,
             uint,
             uint,
-            bool
+            bool,
+            bytes32,
+            bytes32,
+            uint8
         );
 
     function outboundings(uint index)
@@ -32,7 +35,10 @@ interface IBridgeState {
             address,
             uint,
             uint,
-            uint
+            uint,
+            bytes32,
+            bytes32,
+            uint8
         );
 
     function outboundPeriods(uint index)
@@ -79,7 +85,9 @@ interface IBridgeState {
         address account,
         uint amount,
         uint destChainIds,
-        bytes calldata sign
+        bytes32 r,
+        bytes32 s,
+        uint8 v
     ) external;
 
     function appendMultipleInboundingRequests(
@@ -87,7 +95,9 @@ interface IBridgeState {
         uint[] calldata amounts,
         uint[] calldata srcChainIds,
         uint[] calldata srcOutboundingIds,
-        bytes[] calldata signs
+        bytes32[] calldata r,
+        bytes32[] calldata s,
+        uint8[] calldata v
     ) external;
 
     function appendInboundingRequest(
@@ -95,7 +105,9 @@ interface IBridgeState {
         uint amount,
         uint srcChainId,
         uint srcOutboundingId,
-        bytes calldata sign
+        bytes32 r,
+        bytes32 s,
+        uint8 v
     ) external;
 
     function claimInbound(uint index, uint _amount) external;
