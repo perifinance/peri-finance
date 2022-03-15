@@ -2105,8 +2105,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x15CFd00598D8702a8A63F09e3609F50C60Aff57c",
-				"status": "current",
-				"keccak256": "0x705d8e04fea9a7066e3c218d1e4834dc6b60644c8bea94ff9b40b81490d12af2"
+				"status": "replaced",
+				"keccak256": "0x705d8e04fea9a7066e3c218d1e4834dc6b60644c8bea94ff9b40b81490d12af2",
+				"replaced_in": "v0.3.31"
 			},
 			"BridgeState": {
 				"address": "0x3Cd9b4e8bC7ECbBc9F812932479eB5E2cD8Eb17c",
@@ -2116,13 +2117,15 @@
 			},
 			"Issuer": {
 				"address": "0x297A043F6d92F0C689F5BCC3a9722E575d76FfB0",
-				"status": "current",
-				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
+				"status": "replaced",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714",
+				"replaced_in": "v0.3.31"
 			},
 			"PynthpUSD": {
 				"address": "0xD31Da8a475326a19dF75d3cF2084B1e5F0A6B221",
-				"status": "current",
-				"keccak256": "0x876a0599f8c3e55eaf475d529df5e7f7b8f4c20ad52be2cae5bc5cfac0cfe32c"
+				"status": "replaced",
+				"keccak256": "0x876a0599f8c3e55eaf475d529df5e7f7b8f4c20ad52be2cae5bc5cfac0cfe32c",
+				"replaced_in": "v0.3.31"
 			},
 			"BridgeStatepUSD": {
 				"address": "0xE0b085737d9f9BCcB52228DC960010A711d0A647",
@@ -2283,13 +2286,49 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0xEC4D8eC0D8de20acFeAf4331F888273cedf3aa43",
-				"status": "current",
-				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1"
+				"status": "replaced",
+				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1",
+				"replaced_in": "v0.3.31"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x0fe21011a0A6e75C36caBc0aB92897CaAa1ceb92",
+				"status": "replaced",
+				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1",
+				"replaced_in": "v0.3.31"
+			}
+		}
+	},
+	"v0.3.31": {
+		"tag": "v0.3.31",
+		"fulltag": "v0.3.31",
+		"network": "mumbai",
+		"date": "2022-03-15T17:56:39+09:00",
+		"commit": "cf6935238d86f452aaf36ca14cf5a3504a572467",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x5B316C0b8F4236520569B5d1Fff6A096be3126d0",
 				"status": "current",
-				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1"
+				"keccak256": "0xe91e6750f1de5ec0b6810966d2e9ef4d4df9c35608e5fda68e53d0076c46fa52"
+			},
+			"BridgeState": {
+				"address": "0x40e21648159Ed74E3FF4a9Ac7f62a55132da0dF5",
+				"status": "current",
+				"keccak256": "0x5645d0663b2f80df8d9f3683eac4ab8d03ee92beeb0088115df18500367e5af1"
+			},
+			"Issuer": {
+				"address": "0x6e800c065aE8009BC5BF74751cB27bCC7CEBE440",
+				"status": "current",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
+			},
+			"PynthpUSD": {
+				"address": "0xf45879C57a94532Fa60EaB54CE8Cb84CeE0D4a0E",
+				"status": "current",
+				"keccak256": "0x3d41a018d79b02d0599e798ded05d6f53cfc3f467b428c961e76bb09c701adfa"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xe3ED82f303830A83B58584FdC92db9fc548cC81a",
+				"status": "current",
+				"keccak256": "0x5645d0663b2f80df8d9f3683eac4ab8d03ee92beeb0088115df18500367e5af1"
 			}
 		}
 	}

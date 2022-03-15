@@ -4,6 +4,12 @@ pragma experimental ABIEncoderV2;
 interface IBridgeState {
     // ----VIEWS
 
+    struct Signature {
+        bytes32 r;
+        bytes32 s;
+        uint8 v;
+    }
+
     function networkOpened(uint chainId) external view returns (bool);
 
     function accountOutboundings(
@@ -23,9 +29,7 @@ interface IBridgeState {
             uint,
             uint,
             bool,
-            bytes32,
-            bytes32,
-            uint8
+            Signature memory
         );
 
     function outboundings(uint index)
@@ -36,9 +40,7 @@ interface IBridgeState {
             uint,
             uint,
             uint,
-            bytes32,
-            bytes32,
-            uint8
+            Signature memory
         );
 
     function outboundPeriods(uint index)
@@ -85,9 +87,7 @@ interface IBridgeState {
         address account,
         uint amount,
         uint destChainIds,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
+        Signature calldata sign
     ) external;
 
     function appendMultipleInboundingRequests(
@@ -95,9 +95,7 @@ interface IBridgeState {
         uint[] calldata amounts,
         uint[] calldata srcChainIds,
         uint[] calldata srcOutboundingIds,
-        bytes32[] calldata r,
-        bytes32[] calldata s,
-        uint8[] calldata v
+        Signature[] calldata sign
     ) external;
 
     function appendInboundingRequest(
