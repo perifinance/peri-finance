@@ -2036,8 +2036,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x791fCCA53D1966Ce37D186d75bbbEB7E782afD3A",
-				"status": "current",
-				"keccak256": "0xa689941f634a38d9fba967d144d6d8cd2a2e7fca9c41962d5047d54fbda449c4"
+				"status": "replaced",
+				"keccak256": "0xa689941f634a38d9fba967d144d6d8cd2a2e7fca9c41962d5047d54fbda449c4",
+				"replaced_in": "v0.3.32"
 			},
 			"BridgeState": {
 				"address": "0x5CBC3e64143d2Fe24f4863cc15f92DE6FB5B7588",
@@ -2058,6 +2059,20 @@
 				"address": "0xB370c9B54057c35F32e54CC0D062A8Cd6Bd7b2E0",
 				"status": "current",
 				"keccak256": "0x5645d0663b2f80df8d9f3683eac4ab8d03ee92beeb0088115df18500367e5af1"
+			}
+		}
+	},
+	"v0.3.32": {
+		"tag": "v0.3.32",
+		"fulltag": "v0.3.32",
+		"network": "bsctest",
+		"date": "2022-03-15T21:09:09+09:00",
+		"commit": "1b8997d4b05b8ce15b3a1db8e73aee73adbe5b19",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xFd8327746f177C029dC823fFfa90E77AF4DC9cB0",
+				"status": "current",
+				"keccak256": "0xa689941f634a38d9fba967d144d6d8cd2a2e7fca9c41962d5047d54fbda449c4"
 			}
 		}
 	}
