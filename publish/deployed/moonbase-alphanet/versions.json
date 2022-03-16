@@ -2332,23 +2332,56 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x3194DaF5cD2221D3FA26fFD88FB87A232F5dE4fC",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.35"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xa775896B64123685e7CCFeDecd5144e2fEa8E741",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.35"
+			},
+			"CrossChainState": {
+				"address": "0x7590D8BC4FF61144b5Fbd8A54Ec20E584702B51F",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.35"
+			},
+			"CrossChainManager": {
+				"address": "0x4Dd658b13d29390CEb476C6bFB8802b7b693b23c",
+				"status": "replaced",
+				"keccak256": "0x5db4fb4a30a469af7f038364e4b704d0fd900dffc77a9b2893b9c5f514d559cc",
+				"replaced_in": "v0.3.35"
+			}
+		}
+	},
+	"v0.3.35": {
+		"tag": "v0.3.35",
+		"fulltag": "v0.3.35",
+		"network": "moonbase-alphanet",
+		"date": "2022-03-15T23:10:17+09:00",
+		"commit": "ba197ea2665bc4443a9506740709c619ac5d8778",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x96d019D8938EF195DE10fAf88B22A77832991d22",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
 			},
 			"BridgeStatepUSD": {
-				"address": "0xa775896B64123685e7CCFeDecd5144e2fEa8E741",
+				"address": "0x27A4db37C44E0C00b1ef41470b36Cc51e2B1cB9A",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
 			},
 			"CrossChainState": {
-				"address": "0x7590D8BC4FF61144b5Fbd8A54Ec20E584702B51F",
+				"address": "0x200b4e3BE10BDdbd240A181Ec77524D10Ca7D4e9",
 				"status": "current",
 				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
 			},
 			"CrossChainManager": {
-				"address": "0x4Dd658b13d29390CEb476C6bFB8802b7b693b23c",
+				"address": "0x8331cd46b8176C79d082faE7D4e0BEf75B6f5B34",
 				"status": "current",
-				"keccak256": "0x5db4fb4a30a469af7f038364e4b704d0fd900dffc77a9b2893b9c5f514d559cc"
+				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4"
 			}
 		}
 	}

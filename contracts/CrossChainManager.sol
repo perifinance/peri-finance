@@ -191,13 +191,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
         uint inboundAmount = bridgeStatepUSD().getTotalInboundAmount();
 
-        // uint outbound = 0;
         uint inbound = 0;
         bytes32[] memory chainIds = state().getCrossChainIds();
         for (uint8 i = 0; i < chainIds.length; i++) {
-            // bytes32 chainId = chainIds[i];
-            // uint networkId = state().getNetworkId(chainId);
-            // outbound = outbound.add(bridgeStatepUSD().getMovedAmount(1, networkId));
             inbound = inbound.add(state().getCrossNetworkInbound(chainIds[i]));
         }
 
@@ -209,8 +205,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
             currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
         }
 
-        require(inbound >= inboundAmount, "inbound must larger than inboundAmount");
-        currentNetworkDebt = currentNetworkDebt.sub(inbound.sub(inboundAmount)); //.sub(outbound);
+        if (inbound >= inboundAmount) {
+            currentNetworkDebt = currentNetworkDebt.sub(inbound.sub(inboundAmount));
+        }
     }
 
     // Mutative functions
