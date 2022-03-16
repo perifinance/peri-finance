@@ -2399,21 +2399,54 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x8bb9683cBEC1d4C50Aa29ea308eCc9c1066778C7",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.36"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x2E64df8Aa36D532fac527485cC15350724bA5b54",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.36"
+			},
+			"CrossChainState": {
+				"address": "0xBF115d576c10D9926fC79fB9E78BffE1927461De",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.36"
+			},
+			"CrossChainManager": {
+				"address": "0x1Ec3B1fD21eF4cb62d4Ad377aC79A0cecf41B766",
+				"status": "replaced",
+				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4",
+				"replaced_in": "v0.3.36"
+			}
+		}
+	},
+	"v0.3.36": {
+		"tag": "v0.3.36",
+		"fulltag": "v0.3.36",
+		"network": "mumbai",
+		"date": "2022-03-16T12:30:21+09:00",
+		"commit": "03b59d3fd929443c10c7621131ee4f2077230925",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x034eabc9Fa618D9Ab15eEcC5Ec5e9c80dA4479BA",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
 			},
 			"BridgeStatepUSD": {
-				"address": "0x2E64df8Aa36D532fac527485cC15350724bA5b54",
+				"address": "0xD9bE8c1d031D66F02bd1e1551103AF9A58dC96F3",
 				"status": "current",
 				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
 			},
 			"CrossChainState": {
-				"address": "0xBF115d576c10D9926fC79fB9E78BffE1927461De",
+				"address": "0xEC97c32fdB3D2472C0A5cEF27102564309639926",
 				"status": "current",
 				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
 			},
 			"CrossChainManager": {
-				"address": "0x1Ec3B1fD21eF4cb62d4Ad377aC79A0cecf41B766",
+				"address": "0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
 				"status": "current",
 				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4"
 			}

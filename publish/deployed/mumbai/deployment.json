@@ -227,10 +227,10 @@
 		},
 		"BridgeState": {
 			"name": "BridgeState",
-			"address": "0x8bb9683cBEC1d4C50Aa29ea308eCc9c1066778C7",
+			"address": "0x034eabc9Fa618D9Ab15eEcC5Ec5e9c80dA4479BA",
 			"source": "BridgeState",
-			"link": "https://mumbai.polygonscan.com/address/0x8bb9683cBEC1d4C50Aa29ea308eCc9c1066778C7",
-			"timestamp": "2022-03-16T03:10:53.055Z",
+			"link": "https://mumbai.polygonscan.com/address/0x034eabc9Fa618D9Ab15eEcC5Ec5e9c80dA4479BA",
+			"timestamp": "2022-03-16T03:52:29.290Z",
 			"txn": "",
 			"network": "mumbai"
 		},
@@ -326,10 +326,10 @@
 		},
 		"BridgeStatepUSD": {
 			"name": "BridgeStatepUSD",
-			"address": "0x2E64df8Aa36D532fac527485cC15350724bA5b54",
+			"address": "0xD9bE8c1d031D66F02bd1e1551103AF9A58dC96F3",
 			"source": "BridgeState",
-			"link": "https://mumbai.polygonscan.com/address/0x2E64df8Aa36D532fac527485cC15350724bA5b54",
-			"timestamp": "2022-03-16T03:11:17.928Z",
+			"link": "https://mumbai.polygonscan.com/address/0xD9bE8c1d031D66F02bd1e1551103AF9A58dC96F3",
+			"timestamp": "2022-03-16T03:52:58.469Z",
 			"txn": "",
 			"network": "mumbai"
 		},
@@ -353,19 +353,19 @@
 		},
 		"CrossChainState": {
 			"name": "CrossChainState",
-			"address": "0xBF115d576c10D9926fC79fB9E78BffE1927461De",
+			"address": "0xEC97c32fdB3D2472C0A5cEF27102564309639926",
 			"source": "CrossChainState",
-			"link": "https://mumbai.polygonscan.com/address/0xBF115d576c10D9926fC79fB9E78BffE1927461De",
-			"timestamp": "2022-03-16T03:11:43.205Z",
+			"link": "https://mumbai.polygonscan.com/address/0xEC97c32fdB3D2472C0A5cEF27102564309639926",
+			"timestamp": "2022-03-16T03:53:19.256Z",
 			"txn": "",
 			"network": "mumbai"
 		},
 		"CrossChainManager": {
 			"name": "CrossChainManager",
-			"address": "0x1Ec3B1fD21eF4cb62d4Ad377aC79A0cecf41B766",
+			"address": "0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
 			"source": "CrossChainManager",
-			"link": "https://mumbai.polygonscan.com/address/0x1Ec3B1fD21eF4cb62d4Ad377aC79A0cecf41B766",
-			"timestamp": "2022-03-16T03:11:47.668Z",
+			"link": "https://mumbai.polygonscan.com/address/0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
+			"timestamp": "2022-03-16T03:53:23.730Z",
 			"txn": "",
 			"network": "mumbai"
 		},

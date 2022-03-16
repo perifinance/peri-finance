@@ -227,10 +227,10 @@
 		},
 		"BridgeState": {
 			"name": "BridgeState",
-			"address": "0x96d019D8938EF195DE10fAf88B22A77832991d22",
+			"address": "0x160Cc667b4f666e987aF179e9975054Acc1f877C",
 			"source": "BridgeState",
-			"link": "https://moonbase.moonscan.io/address/0x96d019D8938EF195DE10fAf88B22A77832991d22",
-			"timestamp": "2022-03-16T03:11:13.435Z",
+			"link": "https://moonbase.moonscan.io/address/0x160Cc667b4f666e987aF179e9975054Acc1f877C",
+			"timestamp": "2022-03-16T03:52:37.308Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -326,10 +326,10 @@
 		},
 		"BridgeStatepUSD": {
 			"name": "BridgeStatepUSD",
-			"address": "0x27A4db37C44E0C00b1ef41470b36Cc51e2B1cB9A",
+			"address": "0x74B33a915f23bd926e904EEDE377305A6773C177",
 			"source": "BridgeState",
-			"link": "https://moonbase.moonscan.io/address/0x27A4db37C44E0C00b1ef41470b36Cc51e2B1cB9A",
-			"timestamp": "2022-03-16T03:15:36.642Z",
+			"link": "https://moonbase.moonscan.io/address/0x74B33a915f23bd926e904EEDE377305A6773C177",
+			"timestamp": "2022-03-16T03:58:00.612Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
@@ -407,19 +407,19 @@
 		},
 		"CrossChainState": {
 			"name": "CrossChainState",
-			"address": "0x200b4e3BE10BDdbd240A181Ec77524D10Ca7D4e9",
+			"address": "0x37824515c95b97c04D623bC18e349ccF28A8EFB2",
 			"source": "CrossChainState",
-			"link": "https://moonbase.moonscan.io/address/0x200b4e3BE10BDdbd240A181Ec77524D10Ca7D4e9",
-			"timestamp": "2022-03-16T03:21:07.208Z",
+			"link": "https://moonbase.moonscan.io/address/0x37824515c95b97c04D623bC18e349ccF28A8EFB2",
+			"timestamp": "2022-03-16T04:02:55.084Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
 		"CrossChainManager": {
 			"name": "CrossChainManager",
-			"address": "0x8331cd46b8176C79d082faE7D4e0BEf75B6f5B34",
+			"address": "0x615f83995f2144CaEF3B4709C7B70Cd08444862e",
 			"source": "CrossChainManager",
-			"link": "https://moonbase.moonscan.io/address/0x8331cd46b8176C79d082faE7D4e0BEf75B6f5B34",
-			"timestamp": "2022-03-16T03:22:01.244Z",
+			"link": "https://moonbase.moonscan.io/address/0x615f83995f2144CaEF3B4709C7B70Cd08444862e",
+			"timestamp": "2022-03-16T04:03:19.173Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},
