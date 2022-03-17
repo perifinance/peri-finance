@@ -2432,23 +2432,56 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x034eabc9Fa618D9Ab15eEcC5Ec5e9c80dA4479BA",
-				"status": "current",
-				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.37"
 			},
 			"BridgeStatepUSD": {
 				"address": "0xD9bE8c1d031D66F02bd1e1551103AF9A58dC96F3",
-				"status": "current",
-				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f"
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.37"
 			},
 			"CrossChainState": {
 				"address": "0xEC97c32fdB3D2472C0A5cEF27102564309639926",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.37"
+			},
+			"CrossChainManager": {
+				"address": "0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
+				"status": "replaced",
+				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4",
+				"replaced_in": "v0.3.37"
+			}
+		}
+	},
+	"v0.3.37": {
+		"tag": "v0.3.37",
+		"fulltag": "v0.3.37",
+		"network": "mumbai",
+		"date": "2022-03-16T13:16:33+09:00",
+		"commit": "7c5fa8afec169b64f7a52872bb9b8e2b5f8c8559",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xaA3193e28Ca09f458B7f94dbB3e502bD1Bd45a4A",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x4b5C520FE21b75242c0128Ed6F4CEAeCb8448A70",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"CrossChainState": {
+				"address": "0x9Be75D8a923696B12B084798C5a74B8333624f0b",
 				"status": "current",
 				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
 			},
 			"CrossChainManager": {
-				"address": "0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
+				"address": "0xabcD4a30d41B07DAb7B0C3Dc63839Be273778E34",
 				"status": "current",
-				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4"
+				"keccak256": "0xf835fb66464bd94afb930d541745a57506239f2d94ca8daaa3a7cae02254ae95"
 			}
 		}
 	}

@@ -191,11 +191,11 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         uint outboundAmount = bridgeStatepUSD().getTotalOutboundAmount();
         uint inboundAmount = bridgeStatepUSD().getTotalInboundAmount();
 
-        uint inbound = 0;
-        bytes32[] memory chainIds = state().getCrossChainIds();
-        for (uint8 i = 0; i < chainIds.length; i++) {
-            inbound = inbound.add(state().getCrossNetworkInbound(chainIds[i]));
-        }
+        // uint inbound = 0;
+        // bytes32[] memory chainIds = state().getCrossChainIds();
+        // for (uint8 i = 0; i < chainIds.length; i++) {
+        //     inbound = inbound.add(state().getCrossNetworkInbound(chainIds[i]));
+        // }
 
         if (outboundAmount > 0) {
             currentNetworkDebt = currentNetworkDebt.add(outboundAmount);
@@ -205,9 +205,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
             currentNetworkDebt = currentNetworkDebt.sub(inboundAmount);
         }
 
-        if (inbound >= inboundAmount) {
-            currentNetworkDebt = currentNetworkDebt.sub(inbound.sub(inboundAmount));
-        }
+        // if (inbound >= inboundAmount) {
+        //     currentNetworkDebt = currentNetworkDebt.sub(inbound.sub(inboundAmount));
+        // }
     }
 
     // Mutative functions
@@ -253,6 +253,14 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
     function addNetworkId(bytes32 _chainID, uint _networkId) external onlyOwner {
         state().addNetworkId(_chainID, _networkId);
+    }
+
+    function addNetworkIds(bytes32[] calldata _chainIDs, uint[] calldata _networkIds) external onlyOwner {
+        require(_chainIDs.length == _networkIds.length, "param lengths not match");
+
+        for (uint i = 0; i < _chainIDs.length; i++) {
+            state().addNetworkId(_chainIDs[i], _networkIds[i]);
+        }
     }
 
     function getNetworkId(bytes32 _chainID) external view returns (uint) {

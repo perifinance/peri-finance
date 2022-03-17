@@ -194,6 +194,7 @@ contract BridgeState is Owned, State {
         );
 
         _inbounding.claimed = true;
+        totalInboundAmount = totalInboundAmount.add(_amount);
 
         emit InboundingClaimed(_index);
 
@@ -297,7 +298,6 @@ contract BridgeState is Owned, State {
         inboundings.push(Inbounding(_account, _amount, _srcChainId, _srcOutboundingId, false, _sign));
         accountInboundings[_account].push(nextInboundingId);
 
-        totalInboundAmount = totalInboundAmount.add(_amount);
         movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
         // emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
