@@ -25,5 +25,9 @@
 	{
 		"name": "pLINK",
 		"asset": "LINK"
+	},
+	{
+		"name": "pLUNA",
+		"asset": "LUNA"
 	}
 ]

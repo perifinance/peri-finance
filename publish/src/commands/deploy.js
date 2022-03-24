@@ -9,6 +9,14 @@ const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
+const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
+const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
+
+const polygon = ['polygon', 'mumbai'];
+const bsc = ['bsc', 'bsctest'];
+const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'];
+const moonriver = ['moonbase-alphanet', 'shibuya'];
+
 const {
 	ensureNetwork,
 	ensureDeploymentPath,
@@ -550,7 +558,7 @@ const deploy = async ({
 		args: [account],
 	});
 
-	if (!['mainnet', 'polygon', 'bsc'].includes(network) && systemStatus) {
+	if (!mainnet.includes(network) && systemStatus) {
 		// On testnet, give the deployer the rights to update status
 		await runStep({
 			contract: 'SystemStatus',
@@ -750,7 +758,7 @@ const deploy = async ({
 		({ roleKey }) => roleKey === 'Validator'
 	)[0].address;
 
-	if (['polygon', 'mumbai'].includes(network)) {
+	if (polygon.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinanceToPolygon',
@@ -777,7 +785,7 @@ const deploy = async ({
 				writeArg: childChainManagerAddress,
 			});
 		}
-	} else if (['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'].includes(network)) {
+	} else if (ethereum.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
@@ -804,7 +812,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (['bsc', 'bsctest'].includes(network)) {
+	} else if (bsc.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinanceToBSC',
@@ -831,7 +839,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (['moonbase-alphanet', 'shibuya'].includes(network)) {
+	} else if (moonriver.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinance',
@@ -1411,7 +1419,7 @@ const deploy = async ({
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
 	if (!USDC_ADDRESS || USDC_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)) {
+		if (mainnet.includes(network)) {
 			throw new Error('USDC address is not known');
 		}
 
@@ -1426,7 +1434,7 @@ const deploy = async ({
 
 	let DAI_ADDRESS = (await getDeployParameter('DAI_ERC20_ADDRESSES'))[network];
 	if (!DAI_ADDRESS || DAI_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon', 'bsc'].includes(network)) {
+		if (mainnet.includes(network)) {
 			throw new Error('DAI address is not known');
 		}
 
@@ -1530,94 +1538,48 @@ const deploy = async ({
 			writeArg: addressOf(crossChainState),
 		});
 
-		switch (network) {
-			case 'bsctest':
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'setCrosschain',
-					writeArg: [toBytes32('bsctest')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('moonbase-alphanet')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('mumbai')],
-				});
-				break;
-			case 'moonbase-alphanet':
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'setCrosschain',
-					writeArg: [toBytes32('moonbase-alphanet')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('bsctest')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('mumbai')],
-				});
-				break;
-			case 'mumbai':
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'setCrosschain',
-					writeArg: [toBytes32('mumbai')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('moonbase-alphanet')],
-				});
-				await runStep({
-					contract: 'CrossChainManager',
-					target: crossChainManager,
-					write: 'addCrosschain',
-					writeArg: [toBytes32('bsctest')],
-				});
-				break;
-		}
+		const networks = mainnet.includes(network)
+			? mainnet.filter(e => e !== network)
+			: testnet.filter(e => e !== network);
 
-		const chainIds = [
-			{ networkId: 1, chainId: 'mainnet' },
-			{ networkId: 3, chainId: 'ropsten' },
-			{ networkId: 4, chainId: 'rinkeby' },
-			{ networkId: 5, chainId: 'goerli' },
-			{ networkId: 42, chainId: 'kovan' },
-			{ networkId: 137, chainId: 'polygon' },
-			{ networkId: 80001, chainId: 'mumbai' },
-			{ networkId: 97, chainId: 'bsctest' },
-			{ networkId: 56, chainId: 'bsc' },
-			{ networkId: 81, chainId: 'shibuya' },
-			{ networkId: 1287, chainId: 'moonbase-alphanet' },
-		];
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			write: 'setCrosschain',
+			writeArg: [toBytes32(network)],
+		});
 
-		for (const { networkId, chainId } of chainIds) {
+		for (let crossNetwork of networks) {
 			await runStep({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
-				read: 'getNetworkId',
-				readArg: toBytes32(chainId),
-				expected: input => input === networkId,
-				write: 'addNetworkId',
-				writeArg: [toBytes32(chainId), networkId],
+				write: 'addCrosschain',
+				writeArg: [toBytes32(crossNetwork)],
 			});
 		}
+
+		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287];
+
+		const chainIds = [
+			toBytes32('mainnet'),
+			toBytes32('ropsten'),
+			toBytes32('rinkeby'),
+			toBytes32('goerli'),
+			toBytes32('kovan'),
+			toBytes32('polygon'),
+			toBytes32('mumbai'),
+			toBytes32('bsctest'),
+			toBytes32('bsc'),
+			toBytes32('shibuya'),
+			toBytes32('moonbase-alphanet'),
+		];
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			write: 'addNetworkIds',
+			writeArg: [chainIds, networkIds],
+		});
 
 		await runStep({
 			contract: 'CrossChainManager',
@@ -2387,10 +2349,7 @@ const deploy = async ({
 					);
 					// Then a new inverted pynth is being added (as there's no existing supply)
 					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-				} else if (
-					!['mainnet', 'polygon', 'bsc'].includes(network) &&
-					forceUpdateInversePynthsOnTestnet
-				) {
+				} else if (!mainnet.includes(network) && forceUpdateInversePynthsOnTestnet) {
 					// as we are on testnet and the flag is enabled, allow a mutative pricing change
 					console.log(
 						redBright(
@@ -2432,6 +2391,7 @@ const deploy = async ({
 		const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
 		// override individual currencyKey / pynths exchange rates
+		// raynear
 		const pynthExchangeRateOverride = {
 			pETH: w3utils.toWei('0.0025'),
 			iETH: w3utils.toWei('0.004'),
@@ -2447,6 +2407,7 @@ const deploy = async ({
 			pDASH: w3utils.toWei('0.009'),
 			iDASH: w3utils.toWei('0.009'),
 			pXRP: w3utils.toWei('0.009'),
+			pLUNA: w3utils.toWei('0.001'),
 		};
 
 		const pynthsRatesToUpdate = pynths

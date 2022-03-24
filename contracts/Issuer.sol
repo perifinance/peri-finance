@@ -651,7 +651,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
             (uint initialDebtOwnership, ) = periFinanceState().issuanceData(_issuer);
             // Condition of policy, user must have any amount of PERI locked before staking external token.
-            require(initialDebtOwnership > 0, "User has no debt");
+            _requireExistingDebt(initialDebtOwnership);
 
             exTokenStakeManager().stake(_issuer, amountToStake, _currencyKey, pUSD);
         }
@@ -681,7 +681,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
             _remainingIssuablePynths(_issuer);
         _requireRatesNotInvalid(anyRateIsInvalid);
-        require(existingDebt > 0, "User has no debt");
+        _requireExistingDebt(existingDebt);
 
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
         (uint issueAmountToQuota, uint stakeAmountToQuota) =
@@ -821,6 +821,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _requireCurrencyKeyIsNotpUSD(bytes32 _currencyKey) internal pure {
         require(_currencyKey != pUSD, "pUSD isn't stakable");
+    }
+
+    function _requireExistingDebt(uint existingDebt) internal pure {
+        require(existingDebt > 0, "User has no debt");
     }
 
     function _issuePynths(
