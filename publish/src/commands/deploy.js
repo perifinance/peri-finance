@@ -1549,7 +1549,7 @@ const deploy = async ({
 			writeArg: [toBytes32(network)],
 		});
 
-		for (let crossNetwork of networks) {
+		for (const crossNetwork of networks) {
 			await runStep({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
