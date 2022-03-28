@@ -123,16 +123,6 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         return state().getTotalNetworkDebtEntryAtIndex(index);
     }
 
-    /**
-     * @notice Get owned debt percentage of network by total networks
-     * @dev external function
-     * @param _index uint
-     * @return debt network ratio by total network debt at specific time
-     */
-    function networkDebtPercentageAtIndex(uint _index) external view returns (uint) {
-        return _networkDebtPercentageAtIndex(_index);
-    }
-
     function totalNetworkDebtEntryLength() external view returns (uint) {
         return state().totalNetworkDebtLedgerLength();
     }
@@ -147,25 +137,17 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     }
 
     /**
-     * @notice Get owned debt percentage of network by total networks
-     * @dev internal function
-     * @param _index uint
-     * @return debt network ratio by total network debt at specific time, and
-     */
-    function _networkDebtPercentageAtIndex(uint _index) internal view returns (uint) {
-        uint totalNetworkDebt = state().getTotalNetworkDebtEntryAtIndex(_index);
-
-        return _networkDebtPercentage(totalNetworkDebt);
-    }
-
-    /**
      * @notice Get CURRENT owned debt percentage of network by total networks
      * @return current debt ratio of network by total network debt
      */
     function _currentNetworkDebtPercentage() internal view returns (uint) {
-        uint totalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
+        // uint totalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
+        // (uint currActiveDebt, ) = _getCurrentNetworkPreservedDebt();
+        uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
 
-        return _networkDebtPercentage(totalNetworkDebt);
+        uint totalIssuedDebt = state().getCrossNetworkIssuedDebtAll() + currIssuedDebt;
+
+        return _networkDebtPercentage(totalIssuedDebt);
     }
 
     /**
@@ -174,11 +156,12 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return network debt ratio by total network debt
      */
     function _networkDebtPercentage(uint totalNetworkDebt) internal view returns (uint networkPercentage) {
-        (uint totalIssued, ) = _getCurrentNetworkPreservedDebt();
+        // (uint totalIssued, ) = _getCurrentNetworkPreservedDebt();
+        uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
 
         networkPercentage = totalNetworkDebt == 0
             ? SafeDecimalMath.preciseUnit()
-            : totalIssued.decimalToPreciseDecimal().divideDecimalRoundPrecise(totalNetworkDebt.decimalToPreciseDecimal());
+            : currIssuedDebt.decimalToPreciseDecimal().divideDecimalRoundPrecise(totalNetworkDebt.decimalToPreciseDecimal());
     }
 
     function getCurrentNetworkDebt() external view returns (uint currentNetworkDebt, bool anyRateIsInvalid) {

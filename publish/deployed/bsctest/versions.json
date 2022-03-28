@@ -2224,8 +2224,23 @@
 			},
 			"CrossChainManager": {
 				"address": "0x84DA2f9f94f37138d1E1516D18AAd77CDEF911cb",
+				"status": "replaced",
+				"keccak256": "0xf835fb66464bd94afb930d541745a57506239f2d94ca8daaa3a7cae02254ae95",
+				"replaced_in": "v0.3.39"
+			}
+		}
+	},
+	"v0.3.39": {
+		"tag": "v0.3.39",
+		"fulltag": "v0.3.39",
+		"network": "bsctest",
+		"date": "2022-03-17T11:37:46+09:00",
+		"commit": "e53be6972dc659c9d984f1a78a2d2060b089d2de",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0xa3A2914bE634ba66ECc8473cF6835fC40F3aEC3C",
 				"status": "current",
-				"keccak256": "0xf835fb66464bd94afb930d541745a57506239f2d94ca8daaa3a7cae02254ae95"
+				"keccak256": "0xa2ca36b4ce84dfac38a6a93fe81e9bbfe77a7d6106fe0d94741b3a76b71e7ea4"
 			}
 		}
 	}

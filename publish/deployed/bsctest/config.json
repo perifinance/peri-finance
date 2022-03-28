@@ -159,7 +159,7 @@
 		"deploy": false
 	},
 	"CrossChainManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"CrossChainState": {
 		"deploy": false
