@@ -2506,8 +2506,23 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x8B75231e8a95dfb1cE4551C85C45f9E9D6bdde22",
+				"status": "replaced",
+				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232",
+				"replaced_in": "v0.3.41"
+			}
+		}
+	},
+	"v0.3.41": {
+		"tag": "v0.3.41",
+		"fulltag": "v0.3.41",
+		"network": "moonbase-alphanet",
+		"date": "2022-03-30T11:56:03+09:00",
+		"commit": "176d3cb3b52d0d6197015a0d86cfd536415c7fe9",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xF3a285D72181674D9418c35423031b186bAad66a",
 				"status": "current",
-				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232"
+				"keccak256": "0x42686fe530fddc35d6db041c686b9a9d94874f59b3d5fe9ee3bcef99b0af0afe"
 			}
 		}
 	}
