@@ -2549,8 +2549,23 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x7B36B716AC52458A66327c17c3E17fc9c6f88173",
+				"status": "replaced",
+				"keccak256": "0x92a63006be38d1eb4ab148c348bfef634f813438b92472a325ac653d8999dd3a",
+				"replaced_in": "v0.3.44"
+			}
+		}
+	},
+	"v0.3.44": {
+		"tag": "v0.3.44",
+		"fulltag": "v0.3.44",
+		"network": "kovan",
+		"date": "2022-04-11T19:57:33+09:00",
+		"commit": "869289e0080988f684dda7321c33ac9e56d57a0b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x1820972bb5652c533AB809B4a562fA4e4975A1F6",
 				"status": "current",
-				"keccak256": "0x92a63006be38d1eb4ab148c348bfef634f813438b92472a325ac653d8999dd3a"
+				"keccak256": "0x626172845ab5a2601ffa3846d2815fc0cfd58576b7ccbe6842b315f19656cc21"
 			}
 		}
 	}

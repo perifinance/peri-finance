@@ -2593,8 +2593,23 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xF618fa2879623a75a20c28aE0a1BD8E0683a26E8",
+				"status": "replaced",
+				"keccak256": "0xd32a26a815672e5af83adbf4cf37306bc630b61d4b8045372d20b0bbbae1eab9",
+				"replaced_in": "v0.3.44"
+			}
+		}
+	},
+	"v0.3.44": {
+		"tag": "v0.3.44",
+		"fulltag": "v0.3.44",
+		"network": "moonbase-alphanet",
+		"date": "2022-04-11T19:57:33+09:00",
+		"commit": "869289e0080988f684dda7321c33ac9e56d57a0b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x377Dd8975D27042D3d7F387459d6A372075f177c",
 				"status": "current",
-				"keccak256": "0xd32a26a815672e5af83adbf4cf37306bc630b61d4b8045372d20b0bbbae1eab9"
+				"keccak256": "0x84cc52a1b1aa7ec1fa743d44057373559cf23e4186191d4074270147dfd7d9db"
 			}
 		}
 	}
