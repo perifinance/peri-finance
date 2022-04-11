@@ -218,10 +218,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0x553226b203341c3cd206c37175F3a39d854fAf1E",
+			"address": "0xF618fa2879623a75a20c28aE0a1BD8E0683a26E8",
 			"source": "PeriFinance",
-			"link": "https://moonbase.moonscan.io/address/0x553226b203341c3cd206c37175F3a39d854fAf1E",
-			"timestamp": "2022-04-06T06:43:55.357Z",
+			"link": "https://moonbase.moonscan.io/address/0xF618fa2879623a75a20c28aE0a1BD8E0683a26E8",
+			"timestamp": "2022-04-11T10:48:06.733Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},

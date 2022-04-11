@@ -218,10 +218,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0x07A45C02Bf03506233B5ca3679E1f4e1cbeaD6EF",
+			"address": "0x7B36B716AC52458A66327c17c3E17fc9c6f88173",
 			"source": "PeriFinanceToEthereum",
-			"link": "https://kovan.etherscan.io/address/0x07A45C02Bf03506233B5ca3679E1f4e1cbeaD6EF",
-			"timestamp": "2022-04-06T06:43:13.961Z",
+			"link": "https://kovan.etherscan.io/address/0x7B36B716AC52458A66327c17c3E17fc9c6f88173",
+			"timestamp": "2022-04-11T10:47:29.103Z",
 			"txn": "",
 			"network": "kovan"
 		},

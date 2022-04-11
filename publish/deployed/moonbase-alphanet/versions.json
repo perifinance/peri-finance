@@ -2548,8 +2548,9 @@
 			},
 			"PeriFinance": {
 				"address": "0x553226b203341c3cd206c37175F3a39d854fAf1E",
-				"status": "current",
-				"keccak256": "0xd32a26a815672e5af83adbf4cf37306bc630b61d4b8045372d20b0bbbae1eab9"
+				"status": "replaced",
+				"keccak256": "0xd32a26a815672e5af83adbf4cf37306bc630b61d4b8045372d20b0bbbae1eab9",
+				"replaced_in": "v0.3.43"
 			},
 			"BridgeState": {
 				"address": "0x90f224e249Bea1C432EEEB5E8e8C0c70c5d7aB7d",
@@ -2580,6 +2581,20 @@
 				"address": "0x2883184ab0f355FDA4078149fb68be52aA5AF5B1",
 				"status": "current",
 				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+			}
+		}
+	},
+	"v0.3.43": {
+		"tag": "v0.3.43",
+		"fulltag": "v0.3.43",
+		"network": "moonbase-alphanet",
+		"date": "2022-04-06T17:08:31+09:00",
+		"commit": "9293a0b7c9b1bf5fa5b74cb521bc1ced4a2d997b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xF618fa2879623a75a20c28aE0a1BD8E0683a26E8",
+				"status": "current",
+				"keccak256": "0xd32a26a815672e5af83adbf4cf37306bc630b61d4b8045372d20b0bbbae1eab9"
 			}
 		}
 	}

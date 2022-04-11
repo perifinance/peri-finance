@@ -218,10 +218,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0x7A8A9586C51ae6D7602A8af88336Ef2c777652D2",
+			"address": "0x34CF42388631B9d06580F952463681AfD38F3E75",
 			"source": "PeriFinanceToPolygon",
-			"link": "https://mumbai.polygonscan.com/address/0x7A8A9586C51ae6D7602A8af88336Ef2c777652D2",
-			"timestamp": "2022-04-06T06:43:16.449Z",
+			"link": "https://mumbai.polygonscan.com/address/0x34CF42388631B9d06580F952463681AfD38F3E75",
+			"timestamp": "2022-04-11T10:47:32.233Z",
 			"txn": "",
 			"network": "mumbai"
 		},
