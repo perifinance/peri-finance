@@ -80,7 +80,7 @@ contract PeriFinance is BasePeriFinance {
 
         // TODO: have to rollback / raynear
         // uint supplyToMint = _supplySchedule.mintableSupply();
-        uint supplyToMint = 100 ether;
+        uint supplyToMint = 10000 ether;
         supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
         require(supplyToMint > 0, "No supply is mintable");
 

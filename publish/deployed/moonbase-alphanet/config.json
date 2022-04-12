@@ -71,9 +71,6 @@
 	"FlexibleStorage": {
 		"deploy": false
 	},
-	"Issuer": {
-		"deploy": false
-	},
 	"EternalStorageLiquidations": {
 		"deploy": false
 	},
@@ -84,9 +81,6 @@
 		"deploy": false
 	},
 	"SupplySchedule": {
-		"deploy": false
-	},
-	"PeriFinance": {
 		"deploy": false
 	},
 	"PeriFinanceEscrow": {
@@ -152,18 +146,6 @@
 	"StakingState": {
 		"deploy": false
 	},
-	"BridgeState": {
-		"deploy": false
-	},
-	"BridgeStatepUSD": {
-		"deploy": false
-	},
-	"CrossChainManager": {
-		"deploy": false
-	},
-	"CrossChainState": {
-		"deploy": false
-	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -216,6 +198,24 @@
 		"deploy": false
 	},
 	"PynthpLUNA": {
+		"deploy": false
+	},
+	"Issuer": {
+		"deploy": false
+	},
+	"PeriFinance": {
+		"deploy": false
+	},
+	"BridgeState": {
+		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
 		"deploy": false
 	}
 }

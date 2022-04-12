@@ -2554,13 +2554,15 @@
 			},
 			"BridgeState": {
 				"address": "0x90f224e249Bea1C432EEEB5E8e8C0c70c5d7aB7d",
-				"status": "current",
-				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.45"
 			},
 			"Issuer": {
 				"address": "0x629C0617eCb0DA5e865A9C2a79E1CB7477dB37f6",
-				"status": "current",
-				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2"
+				"status": "replaced",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2",
+				"replaced_in": "v0.3.45"
 			},
 			"PynthpUSD": {
 				"address": "0x042893D0f45bDb324cD8d77312Db5D4F1C24e528",
@@ -2569,18 +2571,21 @@
 			},
 			"BridgeStatepUSD": {
 				"address": "0x69DB1284CA911fc009b9276Fd0e3f2eB236226F5",
-				"status": "current",
-				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.45"
 			},
 			"CrossChainState": {
 				"address": "0xC50b910D20de78647Eb7B48B9B3FE4cCb49a8269",
-				"status": "current",
-				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.45"
 			},
 			"CrossChainManager": {
 				"address": "0x2883184ab0f355FDA4078149fb68be52aA5AF5B1",
-				"status": "current",
-				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+				"status": "replaced",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7",
+				"replaced_in": "v0.3.45"
 			}
 		}
 	},
@@ -2608,8 +2613,48 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x377Dd8975D27042D3d7F387459d6A372075f177c",
+				"status": "replaced",
+				"keccak256": "0x84cc52a1b1aa7ec1fa743d44057373559cf23e4186191d4074270147dfd7d9db",
+				"replaced_in": "v0.3.45"
+			}
+		}
+	},
+	"v0.3.45": {
+		"tag": "v0.3.45",
+		"fulltag": "v0.3.45",
+		"network": "moonbase-alphanet",
+		"date": "2022-04-11T21:04:50+09:00",
+		"commit": "a0fcd8c4487499d63e8313bed603997aa22c9132",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x77CDFf22EDD15B6E897C32BBE2252FA1252F495F",
 				"status": "current",
-				"keccak256": "0x84cc52a1b1aa7ec1fa743d44057373559cf23e4186191d4074270147dfd7d9db"
+				"keccak256": "0xdd1a0265d5cef1655dc8c15ebfb3728ddb1b69319355ae6804d7053ac3ec786f"
+			},
+			"BridgeState": {
+				"address": "0xD9D2e23e9cdcDbA0f364D8e8b0BbE84A35868df5",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"Issuer": {
+				"address": "0xC645e3b3e1D061f6a45325A1Fe296012dF790Da9",
+				"status": "current",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x72045892Eb4c39D53b1fE6344661fa810D4d2190",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"CrossChainState": {
+				"address": "0xfF7322b57f0b00afdeD0d28640aA93398936C363",
+				"status": "current",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+			},
+			"CrossChainManager": {
+				"address": "0x650Bddf6883cc057bBe84A8ec1D3aD0c3500c0d2",
+				"status": "current",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
 			}
 		}
 	}
