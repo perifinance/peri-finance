@@ -1,3 +1,4 @@
+pragma experimental ABIEncoderV2;
 pragma solidity 0.5.16;
 
 // Inheritance
@@ -217,6 +218,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _recentFeePeriodsStorage(uint index) internal view returns (FeePeriod storage) {
+        return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
+    }
+
+    function recentFeePeriodsStorage(uint index) external view returns (FeePeriod memory) {
         return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
     }
 

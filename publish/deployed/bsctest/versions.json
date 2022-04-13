@@ -1513,8 +1513,9 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x09327D97Fda43B7bD0280b8aEc7F5B0D6748f0fa",
-				"status": "current",
-				"keccak256": "0xcd5a4495660a04c348ec5b26e7cbbef5ac88bddfcfebdae293b3f534fd7bce86"
+				"status": "replaced",
+				"keccak256": "0xcd5a4495660a04c348ec5b26e7cbbef5ac88bddfcfebdae293b3f534fd7bce86",
+				"replaced_in": "v0.3.46"
 			},
 			"CrossChainManager": {
 				"address": "0xe616C3e85E0E56887e1407c677DC7e824535c934",
@@ -2373,6 +2374,20 @@
 				"address": "0x3ec2Fc9588559e937d878a8B474Dd0bAFB9b37De",
 				"status": "current",
 				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+			}
+		}
+	},
+	"v0.3.46": {
+		"tag": "v0.3.46",
+		"fulltag": "v0.3.46",
+		"network": "bsctest",
+		"date": "2022-04-12T19:47:36+09:00",
+		"commit": "fab234e75ee5313f37e577e7527ce417e4813206",
+		"contracts": {
+			"FeePool": {
+				"address": "0x68a41036ea06519426d0fDc81f70717F43c05f92",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}
