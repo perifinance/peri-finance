@@ -323,11 +323,23 @@ const defaults = {
 	BRIDGE_NETWORK_STATUS: {
 		mainnet: [{ network: 'bsc', isOpened: true }],
 		bsc: [{ network: 'mainnet', isOpened: true }],
-		kovan: [{ network: 'moonbase-alphanet', isOpened: true }],
+		kovan: [
+			{ network: 'bsctest', isOpened: true },
+			{ network: 'mumbai', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
+		],
 		rinkeby: [{ network: 'moonbase-alphanet', isOpened: true }],
 		ropsten: [{ network: 'moonbase-alphanet', isOpened: true }],
-		bsctest: [{ network: 'moonbase-alphanet', isOpened: true }],
-		mumbai: [{ network: 'moonbase-alphanet', isOpened: true }],
+		bsctest: [
+			{ network: 'kovan', isOpened: true },
+			{ network: 'mumbai', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
+		],
+		mumbai: [
+			{ network: 'bsctest', isOpened: true },
+			{ network: 'kovan', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
+		],
 		polygon: [{ network: 'mainnet', isOpened: true }],
 		goerli: [{ network: 'moonbase-alphanet', isOpened: true }],
 		local: [
@@ -339,9 +351,6 @@ const defaults = {
 		'moonbase-alphanet': [
 			{ network: 'bsctest', isOpened: true },
 			{ network: 'kovan', isOpened: true },
-			{ network: 'goerli', isOpened: true },
-			{ network: 'ropsten', isOpened: true },
-			{ network: 'rinkeby', isOpened: true },
 			{ network: 'mumbai', isOpened: true },
 		],
 	},
