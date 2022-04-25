@@ -78,9 +78,7 @@ contract PeriFinance is BasePeriFinance {
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
-        // TODO: have to rollback / raynear
-        // uint supplyToMint = _supplySchedule.mintableSupply();
-        uint supplyToMint = 10000 ether;
+        uint supplyToMint = _supplySchedule.mintableSupply();
         supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
         require(supplyToMint > 0, "No supply is mintable");
 

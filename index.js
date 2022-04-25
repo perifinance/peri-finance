@@ -19,6 +19,7 @@ const data = {
 	bsc: require('./publish/deployed/bsc'),
 	shibuya: require('./publish/deployed/shibuya'),
 	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
+	moonriver: require('./publish/deployed/moonriver'),
 };
 
 const assets = require('./publish/assets.json');
@@ -40,6 +41,7 @@ const networks = [
 	'dusty',
 	'shibuya',
 	'moonbase-alphanet',
+	'moonriver',
 ];
 
 const chainIdMapping = Object.entries({
@@ -97,6 +99,9 @@ const chainIdMapping = Object.entries({
 	},
 	1287: {
 		network: 'moonbase-alphanet',
+	},
+	1285: {
+		network: 'moonriver',
 	},
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
@@ -163,6 +168,7 @@ const knownAccounts = {
 	bsctest: [],
 	bsc: [],
 	'moonbase-alphanet': [],
+	moonriver: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -190,8 +196,8 @@ const defaults = {
 		forex: w3utils.toWei('0.003'),
 		commodity: w3utils.toWei('0.003'),
 		equities: w3utils.toWei('0.003'),
-		crypto: w3utils.toWei('0.01'),
-		index: w3utils.toWei('0.01'),
+		crypto: w3utils.toWei('0.003'),
+		index: w3utils.toWei('0.003'),
 	},
 	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
@@ -211,6 +217,7 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
+		moonriver: constants.ZERO_ADDRESS,
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -224,6 +231,7 @@ const defaults = {
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
+		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -237,6 +245,7 @@ const defaults = {
 		bsctest: '0x52306d4521eFF70Ba555A578a66705b3352e8B3a',
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
+		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -250,6 +259,7 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
+		moonriver: constants.ZERO_ADDRESS,
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	DEBT_MANAGER_ADDRESS: {
@@ -264,6 +274,7 @@ const defaults = {
 		bsctest: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		shibuya: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		'moonbase-alphanet': '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
+		moonriver: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	INFLATION_MINTER_ADDRESS: {
@@ -278,6 +289,7 @@ const defaults = {
 		bsctest: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		shibuya: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		'moonbase-alphanet': '0x727bd962784C27C269E8287F9202312208B83FA7',
+		moonriver: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	ORACLE_ADDRESS: {
@@ -292,6 +304,7 @@ const defaults = {
 		bsctest: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		shibuya: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		'moonbase-alphanet': '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		moonriver: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	CHILD_CHAIN_MANAGER_ADDRESS: {
@@ -304,6 +317,8 @@ const defaults = {
 		polygon: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': constants.ZERO_ADDRESS,
+		moonriver: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
 		mainnet: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
@@ -319,10 +334,29 @@ const defaults = {
 		'moonbase-alphanet': [
 			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 		],
+		moonriver: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 	},
 	BRIDGE_NETWORK_STATUS: {
-		mainnet: [{ network: 'bsc', isOpened: true }],
-		bsc: [{ network: 'mainnet', isOpened: true }],
+		mainnet: [
+			{ network: 'bsc', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+		],
+		bsc: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+		],
+		polygon: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'bsc', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+		],
+		moonriver: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'bsc', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+		],
 		kovan: [
 			{ network: 'bsctest', isOpened: true },
 			{ network: 'mumbai', isOpened: true },
@@ -340,7 +374,6 @@ const defaults = {
 			{ network: 'kovan', isOpened: true },
 			{ network: 'moonbase-alphanet', isOpened: true },
 		],
-		polygon: [{ network: 'mainnet', isOpened: true }],
 		goerli: [{ network: 'moonbase-alphanet', isOpened: true }],
 		local: [
 			{ network: 'mumbai', isOpened: true },
@@ -699,6 +732,7 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 			owner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 		}),
 		mumbai: Object.assign({}, base),
+		moonriver: Object.assign({}, base),
 	};
 
 	const users = Object.entries(

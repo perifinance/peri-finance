@@ -15,7 +15,7 @@ const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 const polygon = ['polygon', 'mumbai'];
 const bsc = ['bsc', 'bsctest'];
 const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'];
-const moonriver = ['moonbase-alphanet', 'shibuya'];
+const moonriver = ['moonriver', 'moonbase-alphanet', 'shibuya'];
 
 const {
 	ensureNetwork,
@@ -1519,83 +1519,6 @@ const deploy = async ({
 		],
 	});
 
-	if (crossChainState && crossChainManager) {
-		await runStep({
-			contract: 'CrossChainState',
-			target: crossChainState,
-			read: 'associatedContract',
-			expected: input => input === addressOf(crossChainManager),
-			write: 'setAssociatedContract',
-			writeArg: addressOf(crossChainManager),
-		});
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'crossChainState',
-			expected: input => input === addressOf(crossChainState),
-			write: 'setCrossChainState',
-			writeArg: addressOf(crossChainState),
-		});
-
-		const networks = mainnet.includes(network)
-			? mainnet.filter(e => e !== network)
-			: testnet.filter(e => e !== network);
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'setCrosschain',
-			writeArg: [toBytes32(network)],
-		});
-
-		for (const crossNetwork of networks) {
-			await runStep({
-				contract: 'CrossChainManager',
-				target: crossChainManager,
-				write: 'addCrosschain',
-				writeArg: [toBytes32(crossNetwork)],
-			});
-		}
-
-		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287];
-
-		const chainIds = [
-			toBytes32('mainnet'),
-			toBytes32('ropsten'),
-			toBytes32('rinkeby'),
-			toBytes32('goerli'),
-			toBytes32('kovan'),
-			toBytes32('polygon'),
-			toBytes32('mumbai'),
-			toBytes32('bsctest'),
-			toBytes32('bsc'),
-			toBytes32('shibuya'),
-			toBytes32('moonbase-alphanet'),
-		];
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'addNetworkIds',
-			writeArg: [chainIds, networkIds],
-		});
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'rebuildCache',
-		});
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'getCurrentNetworkIssuedDebt',
-			expected: input => input > 0,
-			write: 'setInitialCurrentIssuedDebt',
-		});
-	}
-
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
 	await deployer.deployContract({
@@ -2393,21 +2316,21 @@ const deploy = async ({
 		// override individual currencyKey / pynths exchange rates
 		// raynear
 		const pynthExchangeRateOverride = {
-			pETH: w3utils.toWei('0.0025'),
-			iETH: w3utils.toWei('0.004'),
+			pETH: w3utils.toWei('0.003'),
+			iETH: w3utils.toWei('0.003'),
 			pBTC: w3utils.toWei('0.003'),
 			iBTC: w3utils.toWei('0.003'),
-			iBNB: w3utils.toWei('0.021'),
-			pXTZ: w3utils.toWei('0.0085'),
-			iXTZ: w3utils.toWei('0.0085'),
-			pEOS: w3utils.toWei('0.0085'),
-			iEOS: w3utils.toWei('0.009'),
-			pETC: w3utils.toWei('0.0085'),
-			pLINK: w3utils.toWei('0.0085'),
-			pDASH: w3utils.toWei('0.009'),
-			iDASH: w3utils.toWei('0.009'),
-			pXRP: w3utils.toWei('0.009'),
-			pLUNA: w3utils.toWei('0.001'),
+			iBNB: w3utils.toWei('0.003'),
+			pXTZ: w3utils.toWei('0.003'),
+			iXTZ: w3utils.toWei('0.003'),
+			pEOS: w3utils.toWei('0.003'),
+			iEOS: w3utils.toWei('0.003'),
+			pETC: w3utils.toWei('0.003'),
+			pLINK: w3utils.toWei('0.003'),
+			pDASH: w3utils.toWei('0.003'),
+			iDASH: w3utils.toWei('0.003'),
+			pXRP: w3utils.toWei('0.003'),
+			pLUNA: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2645,6 +2568,85 @@ const deploy = async ({
 				writeArg: aggregatorWarningFlags,
 			});
 		}
+	}
+
+	if (crossChainState && crossChainManager) {
+		console.log(gray(`\n------ SETUP CROSSCHAIN ------\n`));
+		await runStep({
+			contract: 'CrossChainState',
+			target: crossChainState,
+			read: 'associatedContract',
+			expected: input => input === addressOf(crossChainManager),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(crossChainManager),
+		});
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'crossChainState',
+			expected: input => input === addressOf(crossChainState),
+			write: 'setCrossChainState',
+			writeArg: addressOf(crossChainState),
+		});
+
+		const networks = mainnet.includes(network)
+			? mainnet.filter(e => e !== network)
+			: testnet.filter(e => e !== network);
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			write: 'setCrosschain',
+			writeArg: [toBytes32(network)],
+		});
+
+		for (const crossNetwork of networks) {
+			await runStep({
+				contract: 'CrossChainManager',
+				target: crossChainManager,
+				write: 'addCrosschain',
+				writeArg: [toBytes32(crossNetwork)],
+			});
+		}
+
+		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
+
+		const chainIds = [
+			toBytes32('mainnet'),
+			toBytes32('ropsten'),
+			toBytes32('rinkeby'),
+			toBytes32('goerli'),
+			toBytes32('kovan'),
+			toBytes32('polygon'),
+			toBytes32('mumbai'),
+			toBytes32('bsctest'),
+			toBytes32('bsc'),
+			toBytes32('shibuya'),
+			toBytes32('moonbase-alphanet'),
+			toBytes32('moonriver'),
+		];
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			write: 'addNetworkIds',
+			writeArg: [chainIds, networkIds],
+		});
+
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	write: 'rebuildCache',
+		// });
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'getCurrentNetworkIssuedDebt',
+			expected: input => input > 0,
+			write: 'setInitialCurrentIssuedDebt',
+		});
 	}
 
 	/*

@@ -1,0 +1,28 @@
+[
+	{
+		"name": "pUSD",
+		"asset": "USD",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB"
+	},
+	{
+		"name": "pDOT",
+		"asset": "DOT"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
+	}
+]

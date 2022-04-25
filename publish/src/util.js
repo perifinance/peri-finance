@@ -161,12 +161,14 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_SHIBUYA;
 		} else if (network === 'moonbase-alphanet') {
 			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
+		} else if (network === 'moonriver') {
+			providerUrl = process.env.PROVIDER_URL_MOONRIVER;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey = ['mainnet', 'polygon', 'bsc'].includes(network)
+	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)
 		? process.env.DEPLOY_PRIVATE_KEY
 		: ['dusty', 'shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
