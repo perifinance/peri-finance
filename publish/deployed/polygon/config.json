@@ -154,5 +154,17 @@
 	},
 	"StakingRewardsPeriMaticQuickSwap": {
 		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"BridgeState": {
+		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
 	}
 }

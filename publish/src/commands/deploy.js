@@ -1510,7 +1510,7 @@ const deploy = async ({
 	const crossChainManager = await deployer.deployContract({
 		name: 'CrossChainManager',
 		source: 'CrossChainManager',
-		deps: ['Issuer', 'CrossChainState', 'AddressResolver', 'BridgeStatepUSD'],
+		deps: ['Issuer', 'CrossChainState', 'AddressResolver'],
 		args: [
 			account,
 			addressOf(readProxyForResolver),
