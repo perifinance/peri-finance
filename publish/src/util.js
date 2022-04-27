@@ -462,17 +462,15 @@ function estimateBSCGasPice(network, priority) {
 		})
 		.then(({ data }) => {
 			console.log('bsc gas', data);
-			const { slow, standard, fast, instant } = data;
+			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
 
 			switch (priority) {
-				case 'fastest':
-					return instant;
 				case 'fast':
-					return fast;
+					return FastGasPrice;
 				case 'standard':
-					return standard;
+					return ProposeGasPrice;
 				default:
-					return slow;
+					return SafeGasPrice;
 			}
 		})
 		.catch(e => console.log(e));
