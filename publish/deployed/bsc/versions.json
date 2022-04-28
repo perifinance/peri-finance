@@ -441,8 +441,9 @@
 			},
 			"Issuer": {
 				"address": "0xd449891Cf9109325DBed863CfA56F8c63de5aA25",
-				"status": "current",
-				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2"
+				"status": "replaced",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2",
+				"replaced_in": "v0.4.3"
 			},
 			"PynthpUSD": {
 				"address": "0xC90F71ff2d94B166870E67810e0B7E032b4aA929",
@@ -466,13 +467,39 @@
 			},
 			"CrossChainState": {
 				"address": "0xC407d683d2299A30dC30D337b1F0CeB26ad02358",
-				"status": "current",
-				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.4.3"
 			},
 			"CrossChainManager": {
 				"address": "0x570E6310406953e25Efc7Fbbf41bE7CC0121c44c",
+				"status": "replaced",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7",
+				"replaced_in": "v0.4.3"
+			}
+		}
+	},
+	"v0.4.3": {
+		"tag": "v0.4.3",
+		"fulltag": "v0.4.3",
+		"network": "bsc",
+		"date": "2022-04-27T21:57:00+09:00",
+		"commit": "32ab48fb3e7fd9300ea837bac9d3c2e263ad51a2",
+		"contracts": {
+			"Issuer": {
+				"address": "0x44F7bF9Dcb7a4E0a99126eA0b30aA56AcBB92A7F",
 				"status": "current",
-				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+				"keccak256": "0xc0cca0a1cbc0c1ef3df663cb75309dcca126a384ed2047fb910df0d9f82c2aac"
+			},
+			"CrossChainState": {
+				"address": "0x297C479187d42b89E501C6B57D6e860F0A5299eA",
+				"status": "current",
+				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878"
+			},
+			"CrossChainManager": {
+				"address": "0x1dEf1270bA88150fdaA2061A566265c89765B747",
+				"status": "current",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
 			}
 		}
 	}

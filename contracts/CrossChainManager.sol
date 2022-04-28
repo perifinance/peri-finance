@@ -143,9 +143,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     function _currentNetworkDebtPercentage() internal view returns (uint) {
         // uint totalNetworkDebt = state().lastTotalNetworkDebtLedgerEntry();
         // (uint currActiveDebt, ) = _getCurrentNetworkPreservedDebt();
-        uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
+        // uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
 
-        uint totalIssuedDebt = state().getCrossNetworkIssuedDebtAll() + currIssuedDebt;
+        uint totalIssuedDebt = state().getCrossNetworkIssuedDebtAll(); // + currIssuedDebt;
 
         return _networkDebtPercentage(totalIssuedDebt);
     }

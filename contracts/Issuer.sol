@@ -624,20 +624,20 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _removePynth(currencyKey);
     }
 
-    function removePynths(bytes32[] calldata currencyKeys) external onlyOwner {
-        uint numKeys = currencyKeys.length;
+    // function removePynths(bytes32[] calldata currencyKeys) external onlyOwner {
+    //     uint numKeys = currencyKeys.length;
 
-        // Remove their contributions from the debt pool snapshot, and
-        // invalidate the cache to force a new snapshot.
-        IIssuerInternalDebtCache cache = debtCache();
-        uint[] memory zeroRates = new uint[](numKeys);
-        cache.updateCachedPynthDebtsWithRates(currencyKeys, zeroRates);
-        cache.updateDebtCacheValidity(true);
+    //     // Remove their contributions from the debt pool snapshot, and
+    //     // invalidate the cache to force a new snapshot.
+    //     IIssuerInternalDebtCache cache = debtCache();
+    //     uint[] memory zeroRates = new uint[](numKeys);
+    //     cache.updateCachedPynthDebtsWithRates(currencyKeys, zeroRates);
+    //     cache.updateDebtCacheValidity(true);
 
-        for (uint i = 0; i < numKeys; i++) {
-            _removePynth(currencyKeys[i]);
-        }
-    }
+    //     for (uint i = 0; i < numKeys; i++) {
+    //         _removePynth(currencyKeys[i]);
+    //     }
+    // }
 
     function issuePynths(
         address _issuer,
@@ -986,6 +986,30 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
         }
+    }
+
+    function fixDebtRegister(
+        uint prevLedgerValue,
+        address from,
+        uint amount,
+        uint existingDebt,
+        uint totalDebtIssued
+    ) external onlyOwner {
+        IPeriFinanceState state = periFinanceState();
+
+        uint newTotalDebtIssued = amount.add(totalDebtIssued);
+
+        uint debtPercentage = amount.divideDecimalRoundPrecise(newTotalDebtIssued);
+
+        debtPercentage = amount.add(existingDebt).divideDecimalRoundPrecise(newTotalDebtIssued);
+
+        state.setCurrentIssuanceData(from, debtPercentage);
+
+        state.appendDebtLedgerValue(
+            prevLedgerValue.multiplyDecimalRoundPrecise(SafeDecimalMath.preciseUnit().sub(debtPercentage))
+        );
+
+        _appendAccountIssuanceRecord(from);
     }
 
     function _removeFromDebtRegister(
