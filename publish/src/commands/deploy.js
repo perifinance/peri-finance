@@ -2634,17 +2634,11 @@ const deploy = async ({
 			writeArg: [chainIds, networkIds],
 		});
 
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	write: 'rebuildCache',
-		// });
-
 		await runStep({
 			contract: 'CrossChainManager',
 			target: crossChainManager,
 			read: 'getCurrentNetworkIssuedDebt',
-			expected: input => input > 0,
+			expected: issuedDebt => issuedDebt > 0,
 			write: 'setInitialCurrentIssuedDebt',
 		});
 	}

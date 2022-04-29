@@ -245,10 +245,10 @@
 		},
 		"Exchanger": {
 			"name": "Exchanger",
-			"address": "0x40eE175b073A1ac2A5dD02695c9A9612973C317A",
+			"address": "0x4d8B1cd12746311f7C9564dC3BdF9187d20305fE",
 			"source": "ExchangerWithVirtualPynth",
-			"link": "https://moonriver.moonscan.io/address/0x40eE175b073A1ac2A5dD02695c9A9612973C317A",
-			"timestamp": "2022-04-22T07:05:38.133Z",
+			"link": "https://moonriver.moonscan.io/address/0x4d8B1cd12746311f7C9564dC3BdF9187d20305fE",
+			"timestamp": "2022-04-29T15:15:31.724Z",
 			"txn": "",
 			"network": "moonriver"
 		},

@@ -2886,8 +2886,9 @@
 			},
 			"Exchanger": {
 				"address": "0x40eE175b073A1ac2A5dD02695c9A9612973C317A",
-				"status": "current",
-				"keccak256": "0x891bfbee26a06539a499e95bd7d98d285c4bf92b51b93eb7266d3af9a3861fd1"
+				"status": "replaced",
+				"keccak256": "0x891bfbee26a06539a499e95bd7d98d285c4bf92b51b93eb7266d3af9a3861fd1",
+				"replaced_in": "v0.4.5"
 			},
 			"ExchangeState": {
 				"address": "0x8C49D4289069A15Ba802980d8607C175a54c4C6A",
@@ -3119,6 +3120,20 @@
 				"address": "0x079D64Ff54A38398a1C071D705A8e8e2f10573dF",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.4.5": {
+		"tag": "v0.4.5",
+		"fulltag": "v0.4.5",
+		"network": "moonriver",
+		"date": "2022-04-29T15:07:02+09:00",
+		"commit": "516ee2e6046cdafcf3266aa6d28184478fc61138",
+		"contracts": {
+			"Exchanger": {
+				"address": "0x4d8B1cd12746311f7C9564dC3BdF9187d20305fE",
+				"status": "current",
+				"keccak256": "0x891bfbee26a06539a499e95bd7d98d285c4bf92b51b93eb7266d3af9a3861fd1"
 			}
 		}
 	}
