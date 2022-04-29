@@ -3132,8 +3132,23 @@
 		"contracts": {
 			"Exchanger": {
 				"address": "0x4d8B1cd12746311f7C9564dC3BdF9187d20305fE",
+				"status": "replaced",
+				"keccak256": "0x891bfbee26a06539a499e95bd7d98d285c4bf92b51b93eb7266d3af9a3861fd1",
+				"replaced_in": "v0.4.7"
+			}
+		}
+	},
+	"v0.4.7": {
+		"tag": "v0.4.7",
+		"fulltag": "v0.4.7",
+		"network": "moonriver",
+		"date": "2022-04-30T00:21:14+09:00",
+		"commit": "7284f4ce85f38b362a2c90a417680707f04da92c",
+		"contracts": {
+			"Exchanger": {
+				"address": "0x82995a4170318f5E26CA6b650A337738dcc8114c",
 				"status": "current",
-				"keccak256": "0x891bfbee26a06539a499e95bd7d98d285c4bf92b51b93eb7266d3af9a3861fd1"
+				"keccak256": "0x14f60452a4c1fc3af177af63793167ca4cf9be11b546df588831ad40f35ecb2e"
 			}
 		}
 	}
