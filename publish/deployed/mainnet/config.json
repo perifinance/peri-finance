@@ -2,12 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketFactory": {
-		"deploy": true
-	},
-	"BinaryOptionMarketManager": {
-		"deploy": true
-	},
 	"BinaryOptionMarketData": {
 		"deploy": false
 	},
@@ -155,10 +149,19 @@
 	"BridgeState": {
 		"deploy": false
 	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
 	"BlacklistManager": {
 		"deploy": false
 	},
 	"StakingRewardsPeriEthUniV2": {
-		"deploy": true
+		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
 	}
 }

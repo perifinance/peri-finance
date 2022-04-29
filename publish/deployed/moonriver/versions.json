@@ -2976,13 +2976,15 @@
 			},
 			"CrossChainState": {
 				"address": "0xA751ccdB1434cc355C44059c908ad7e04fAdB0B1",
-				"status": "current",
-				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.4.4"
 			},
 			"CrossChainManager": {
 				"address": "0x174bF91F02A2DC86B5d99C6789470C2449abF96f",
-				"status": "current",
-				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+				"status": "replaced",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7",
+				"replaced_in": "v0.4.4"
 			},
 			"Depot": {
 				"address": "0x4671d3cC4318831cE230CE3b958DD1276982AA9B",
@@ -3098,6 +3100,25 @@
 				"address": "0xA65780148dC6a36992D14A9c289de90aae3af1FB",
 				"status": "current",
 				"keccak256": "0xfd77683ce5669d8d733336d2feddcc0fc0c65cb2b8e00bd0a89aec2bad19140d"
+			}
+		}
+	},
+	"v0.4.4": {
+		"tag": "v0.4.4",
+		"fulltag": "v0.4.4",
+		"network": "moonriver",
+		"date": "2022-04-25T11:17:26+09:00",
+		"commit": "37c6f8d9b9f1759992c85c29915072f9aa6daa3c",
+		"contracts": {
+			"CrossChainState": {
+				"address": "0x38F384a515B3911C2E1f619b75316210D59c3a33",
+				"status": "current",
+				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878"
+			},
+			"CrossChainManager": {
+				"address": "0x079D64Ff54A38398a1C071D705A8e8e2f10573dF",
+				"status": "current",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
 			}
 		}
 	}

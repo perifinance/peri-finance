@@ -191,9 +191,6 @@
 	"PynthpLINK": {
 		"deploy": false
 	},
-	"TokenStatepLUNA": {
-		"deploy": true
-	},
 	"Issuer": {
 		"deploy": false
 	},
