@@ -168,8 +168,9 @@
 			},
 			"FeePool": {
 				"address": "0x7bf33Abe3F22B5b68BAc013958EE2f892EDeAAE2",
-				"status": "current",
-				"keccak256": "0xcb5afcc81fa667998e511f1867db335c17b76d4b799fe2b2006199c62ef8876c"
+				"status": "replaced",
+				"keccak256": "0xcb5afcc81fa667998e511f1867db335c17b76d4b799fe2b2006199c62ef8876c",
+				"replaced_in": "v0.4.7"
 			},
 			"ProxyFeePool": {
 				"address": "0x9082dE4E7bF8a4cB49C3f6c1229E9d78b207D936",
@@ -445,6 +446,20 @@
 				"address": "0xc1Ea777ab4F7c7fEb0912C110FB9Ac72612B2478",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.4.7": {
+		"tag": "v0.4.7",
+		"fulltag": "v0.4.7",
+		"network": "mainnet",
+		"date": "2022-04-29T15:07:02+09:00",
+		"commit": "516ee2e6046cdafcf3266aa6d28184478fc61138",
+		"contracts": {
+			"FeePool": {
+				"address": "0x5dd57c9F0F2D91b3735e11e1FA9A5992CA317d26",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}

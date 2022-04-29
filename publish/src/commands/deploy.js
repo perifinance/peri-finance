@@ -2590,57 +2590,57 @@ const deploy = async ({
 			writeArg: addressOf(crossChainState),
 		});
 
-		const networks = mainnet.includes(network)
-			? mainnet.filter(e => e !== network)
-			: testnet.filter(e => e !== network);
+		// const networks = mainnet.includes(network)
+		// 	? mainnet.filter(e => e !== network)
+		// 	: testnet.filter(e => e !== network);
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'setCrosschain',
-			writeArg: [toBytes32(network)],
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	write: 'setCrosschain',
+		// 	writeArg: [toBytes32(network)],
+		// });
 
-		for (const crossNetwork of networks) {
-			await runStep({
-				contract: 'CrossChainManager',
-				target: crossChainManager,
-				write: 'addCrosschain',
-				writeArg: [toBytes32(crossNetwork)],
-			});
-		}
+		// for (const crossNetwork of networks) {
+		// 	await runStep({
+		// 		contract: 'CrossChainManager',
+		// 		target: crossChainManager,
+		// 		write: 'addCrosschain',
+		// 		writeArg: [toBytes32(crossNetwork)],
+		// 	});
+		// }
 
-		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
+		// const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
 
-		const chainIds = [
-			toBytes32('mainnet'),
-			toBytes32('ropsten'),
-			toBytes32('rinkeby'),
-			toBytes32('goerli'),
-			toBytes32('kovan'),
-			toBytes32('polygon'),
-			toBytes32('mumbai'),
-			toBytes32('bsctest'),
-			toBytes32('bsc'),
-			toBytes32('shibuya'),
-			toBytes32('moonbase-alphanet'),
-			toBytes32('moonriver'),
-		];
+		// const chainIds = [
+		// 	toBytes32('mainnet'),
+		// 	toBytes32('ropsten'),
+		// 	toBytes32('rinkeby'),
+		// 	toBytes32('goerli'),
+		// 	toBytes32('kovan'),
+		// 	toBytes32('polygon'),
+		// 	toBytes32('mumbai'),
+		// 	toBytes32('bsctest'),
+		// 	toBytes32('bsc'),
+		// 	toBytes32('shibuya'),
+		// 	toBytes32('moonbase-alphanet'),
+		// 	toBytes32('moonriver'),
+		// ];
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			write: 'addNetworkIds',
-			writeArg: [chainIds, networkIds],
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	write: 'addNetworkIds',
+		// 	writeArg: [chainIds, networkIds],
+		// });
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'getCurrentNetworkIssuedDebt',
-			expected: issuedDebt => issuedDebt > 0,
-			write: 'setInitialCurrentIssuedDebt',
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	read: 'getCurrentNetworkIssuedDebt',
+		// 	expected: issuedDebt => issuedDebt > 0,
+		// 	write: 'setInitialCurrentIssuedDebt',
+		// });
 	}
 
 	/*

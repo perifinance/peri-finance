@@ -2841,8 +2841,9 @@
 			},
 			"FeePool": {
 				"address": "0x02eC0EA0aC42C1B02541e09D9Db4AA26D75EbdA6",
-				"status": "current",
-				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
+				"status": "replaced",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497",
+				"replaced_in": "v0.4.8"
 			},
 			"FeePoolState": {
 				"address": "0xf747063DA5721Cc9581D7D367aF58cc7ABd3077C",
@@ -3149,6 +3150,20 @@
 				"address": "0x82995a4170318f5E26CA6b650A337738dcc8114c",
 				"status": "current",
 				"keccak256": "0x14f60452a4c1fc3af177af63793167ca4cf9be11b546df588831ad40f35ecb2e"
+			}
+		}
+	},
+	"v0.4.8": {
+		"tag": "v0.4.8",
+		"fulltag": "v0.4.8",
+		"network": "moonriver",
+		"date": "2022-04-30T00:52:31+09:00",
+		"commit": "f4db849895793599f6d93f36688cd47ad368fa02",
+		"contracts": {
+			"FeePool": {
+				"address": "0xE30420761AB427044e45b681795f4248060C7909",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}

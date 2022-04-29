@@ -316,8 +316,9 @@
 			},
 			"FeePool": {
 				"address": "0x8B6C385CF1c4479a3F13Eb05c4AaF0B9CD30c148",
-				"status": "current",
-				"keccak256": "0xca53bbf2abb338ba20119c92d82c6912b92d0ad6d01134a3ae2f48eb452af2df"
+				"status": "replaced",
+				"keccak256": "0xca53bbf2abb338ba20119c92d82c6912b92d0ad6d01134a3ae2f48eb452af2df",
+				"replaced_in": "v0.4.7"
 			},
 			"StakingState": {
 				"address": "0x96E5c0b4644ab18A77AB2984f4CCDCDc56B62e14",
@@ -500,6 +501,20 @@
 				"address": "0x1dEf1270bA88150fdaA2061A566265c89765B747",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.4.7": {
+		"tag": "v0.4.7",
+		"fulltag": "v0.4.7",
+		"network": "bsc",
+		"date": "2022-04-29T00:57:40+09:00",
+		"commit": "8d245759eb5ba313831731b5351abbd89163027a",
+		"contracts": {
+			"FeePool": {
+				"address": "0x3Ab647fea13aB18c851bb60e31e506767D7b263e",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}

@@ -460,8 +460,9 @@
 			},
 			"FeePool": {
 				"address": "0xBf3BeEe52aa8cf367105647bC6C9235Caf6fD508",
-				"status": "current",
-				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
+				"status": "replaced",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497",
+				"replaced_in": "v0.4.7"
 			},
 			"PeriFinance": {
 				"address": "0x8B0c4F62265326BbE7470E7577A0FC18C591a1F4",
@@ -537,6 +538,20 @@
 				"address": "0xD7ad896B819d354c5110cBA982466945b0A31d4A",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.4.7": {
+		"tag": "v0.4.7",
+		"fulltag": "v0.4.7",
+		"network": "polygon",
+		"date": "2022-04-29T15:07:02+09:00",
+		"commit": "516ee2e6046cdafcf3266aa6d28184478fc61138",
+		"contracts": {
+			"FeePool": {
+				"address": "0x39EC7C3C52D4b99583d45ce4742cd8C04D43f21F",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}
