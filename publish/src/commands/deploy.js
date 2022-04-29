@@ -10,7 +10,7 @@ const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
 const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
-const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
+// const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 
 const polygon = ['polygon', 'mumbai'];
 const bsc = ['bsc', 'bsctest'];
