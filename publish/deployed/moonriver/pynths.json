@@ -18,11 +18,83 @@
 		"asset": "BNB"
 	},
 	{
-		"name": "pDOT",
-		"asset": "DOT"
+		"name": "pAVAX",
+		"asset": "AVAX"
+	},
+	{
+		"name": "pUNI",
+		"asset": "UNI"
+	},
+	{
+		"name": "pLUNA",
+		"asset": "LUNA"
+	},
+	{
+		"name": "pMKR",
+		"asset": "MKR"
+	},
+	{
+		"name": "pCAKE",
+		"asset": "CAKE"
+	},
+	{
+		"name": "pAAVE",
+		"asset": "AAVE"
+	},
+	{
+		"name": "pCOMP",
+		"asset": "COMP"
+	},
+	{
+		"name": "pSUSHI",
+		"asset": "SUSHI"
+	},
+	{
+		"name": "pSNX",
+		"asset": "SNX"
+	},
+	{
+		"name": "pCRV",
+		"asset": "CRV"
+	},
+	{
+		"name": "pYFI",
+		"asset": "YFI"
+	},
+	{
+		"name": "p1INCH",
+		"asset": "1INCH"
+	},
+	{
+		"name": "pANKR",
+		"asset": "ANKR"
 	},
 	{
 		"name": "pLINK",
 		"asset": "LINK"
+	},
+	{
+		"name": "pDOT",
+		"asset": "DOT"
+	},
+	{
+		"name": "pXRP",
+		"asset": "XRP"
+	},
+	{
+		"name": "pAXS",
+		"asset": "AXS"
+	},
+	{
+		"name": "pEUR",
+		"asset": "EUR"
+	},
+	{
+		"name": "pSAND",
+		"asset": "SAND"
+	},
+	{
+		"name": "pMANA",
+		"asset": "MANA"
 	}
 ]

@@ -2314,23 +2314,33 @@ const deploy = async ({
 		const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
 		// override individual currencyKey / pynths exchange rates
-		// raynear
 		const pynthExchangeRateOverride = {
-			pETH: w3utils.toWei('0.003'),
-			iETH: w3utils.toWei('0.003'),
 			pBTC: w3utils.toWei('0.003'),
 			iBTC: w3utils.toWei('0.003'),
+			pETH: w3utils.toWei('0.003'),
+			iETH: w3utils.toWei('0.003'),
+			pBNB: w3utils.toWei('0.003'),
 			iBNB: w3utils.toWei('0.003'),
-			pXTZ: w3utils.toWei('0.003'),
-			iXTZ: w3utils.toWei('0.003'),
-			pEOS: w3utils.toWei('0.003'),
-			iEOS: w3utils.toWei('0.003'),
-			pETC: w3utils.toWei('0.003'),
-			pLINK: w3utils.toWei('0.003'),
-			pDASH: w3utils.toWei('0.003'),
-			iDASH: w3utils.toWei('0.003'),
-			pXRP: w3utils.toWei('0.003'),
+			pAVAX: w3utils.toWei('0.003'),
+			pUNI: w3utils.toWei('0.003'),
 			pLUNA: w3utils.toWei('0.003'),
+			pMKR: w3utils.toWei('0.003'),
+			pCAKE: w3utils.toWei('0.003'),
+			pAAVE: w3utils.toWei('0.003'),
+			pCOMP: w3utils.toWei('0.003'),
+			pSUSHI: w3utils.toWei('0.003'),
+			pSNX: w3utils.toWei('0.003'),
+			pCRV: w3utils.toWei('0.003'),
+			pYFI: w3utils.toWei('0.003'),
+			p1INCH: w3utils.toWei('0.003'),
+			pANKR: w3utils.toWei('0.003'),
+			pLINK: w3utils.toWei('0.003'),
+			pDOT: w3utils.toWei('0.003'),
+			pXRP: w3utils.toWei('0.003'),
+			pAXS: w3utils.toWei('0.003'),
+			pEUR: w3utils.toWei('0.003'),
+			pSAND: w3utils.toWei('0.003'),
+			pMANA: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2597,6 +2607,15 @@ const deploy = async ({
 		// await runStep({
 		// 	contract: 'CrossChainManager',
 		// 	target: crossChainManager,
+		// 	// read: 'getCrossChainIds',
+		// 	// expect: (crossChainIds) => {
+		// 	// 	for(let crossChainId of crossChainIds) {
+		// 	// 		console.log("crossChainId", crossChainId);
+		// 	// 		if(crossChainId === toBytes32(network))
+		// 	// 			return true;
+		// 	// 	}
+		// 	// 	return false;
+		// 	// },
 		// 	write: 'setCrosschain',
 		// 	writeArg: [toBytes32(network)],
 		// });
@@ -2605,6 +2624,15 @@ const deploy = async ({
 		// 	await runStep({
 		// 		contract: 'CrossChainManager',
 		// 		target: crossChainManager,
+		// 		// read: 'getCrossChainIds',
+		// 		// expect: (crossChainIds) => {
+		// 		// 	for(let crossChainId of crossChainIds) {
+		// 		// 		console.log("crossChainId", crossChainId);
+		// 		// 		if(crossChainId === toBytes32(crossNetwork))
+		// 		// 			return true;
+		// 		// 	}
+		// 		// 	return false;
+		// 		// },
 		// 		write: 'addCrosschain',
 		// 		writeArg: [toBytes32(crossNetwork)],
 		// 	});
@@ -2630,6 +2658,12 @@ const deploy = async ({
 		// await runStep({
 		// 	contract: 'CrossChainManager',
 		// 	target: crossChainManager,
+		// 	read: 'getNetworkIds',
+		// 	readArg: [toBytes32('mainnet')],
+		// 	expect: (networkId) => {
+		// 		console.log("networkId", networkId)
+		// 		return networkId === 1
+		// 	},
 		// 	write: 'addNetworkIds',
 		// 	writeArg: [chainIds, networkIds],
 		// });
@@ -2638,7 +2672,10 @@ const deploy = async ({
 		// 	contract: 'CrossChainManager',
 		// 	target: crossChainManager,
 		// 	read: 'getCurrentNetworkIssuedDebt',
-		// 	expected: issuedDebt => issuedDebt > 0,
+		// 	expected: issuedDebt => {
+		// 		console.log("issuedDebt", issuedDebt)
+		// 		return issuedDebt > 0;
+		// 	},
 		// 	write: 'setInitialCurrentIssuedDebt',
 		// });
 	}

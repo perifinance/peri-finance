@@ -19,6 +19,58 @@
 		"asset": "BNB",
 		"feed": "0xD6B013A65C22C372F995864CcdAE202D0194f9bf"
 	},
+	"AVAX": {
+		"asset": "AVAX",
+		"feed": "0x992F9B8Aa09B8e084acf4e3213d8b2da5D366D6a"
+	},
+	"UNI": {
+		"asset": "UNI",
+		"feed": "0x05Ec3Fb5B7CB3bE9D7150FBA1Fb0749407e5Aa8a"
+	},
+	"LUNA": {
+		"asset": "LUNA",
+		"feed": "0x5F8E0c452EcA522a2208Fff7443515AaFF3cAaE6"
+	},
+	"MKR": {
+		"asset": "MKR",
+		"feed": "0xD8542f327FaD60b80D8C19025147E6b9d857bb99"
+	},
+	"CAKE": {
+		"asset": "CAKE",
+		"feed": "0xc44ecD8C11fd1F281A3d6044CA65e649484B228c"
+	},
+	"AAVE": {
+		"asset": "AAVE",
+		"feed": "0x37f35ef6735c594e6E803bC81577bAC759d8179C"
+	},
+	"COMP": {
+		"asset": "COMP",
+		"feed": "0x29710821d57a1Fc46E2D9FdDE65Df2cF205bad2A"
+	},
+	"SUSHI": {
+		"asset": "SUSHI",
+		"feed": "0x28A9E2747a10eE94D2d7359DEB60023D19FfdD96"
+	},
+	"SNX": {
+		"asset": "SNX",
+		"feed": "0x26E3F9273abC8a01228bE97a106E60FA38b98df2"
+	},
+	"CRV": {
+		"asset": "CRV",
+		"feed": "0x03d44d68EdF41c540A90C6eB2BE27C4a75ee689f"
+	},
+	"YFI": {
+		"asset": "YFI",
+		"feed": "0xE3324ea60FA272BBB4511dDBD4776feFE4674fa0"
+	},
+	"1INCH": {
+		"asset": "1INCH",
+		"feed": "0x1466b4bD0C4B6B8e1164991909961e0EE6a66d8c"
+	},
+	"ANKR": {
+		"asset": "ANKR",
+		"feed": "0x94Ee35E8b9B1b4Cd3BDB720242d6d1796b43C2Ff"
+	},
 	"LINK": {
 		"asset": "LINK",
 		"feed": "0xdD27789b504fEd690F406A82F16B45a0901172C0"
@@ -26,5 +78,25 @@
 	"DOT": {
 		"asset": "DOT",
 		"feed": "0x54B584eb643375C41c55ddD8Da4b90124b18d05c"
+	},
+	"XRP": {
+		"asset": "XRP",
+		"feed": "0x3FD363679fb59596d45881bbfBe4bb864f3545A2"
+	},
+	"AXS": {
+		"asset": "AXS",
+		"feed": "0x9322CeAd48BA0C76Fecc78e82499ce8a829Eab89"
+	},
+	"EUR": {
+		"asset": "EUR",
+		"feed": "0xe6Ccbe1Cb33dF799a59E37a1382c7009dbaBE9ff"
+	},
+	"SAND": {
+		"asset": "SAND",
+		"feed": "0x5403385DF6eb607fc1fA6983eF5801A11eC7fD9a"
+	},
+	"MANA": {
+		"asset": "MANA",
+		"feed": "0x424807fA7B16f747CbD30963fAe25fB8Db0b97bF"
 	}
 }
