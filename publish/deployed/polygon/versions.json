@@ -565,8 +565,23 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x6268bC16f01af8a822823905bCaCDB104332F3B3",
+				"status": "replaced",
+				"keccak256": "0x5dea5432205a2a2d3d26b1906af6944f3fe34702b871a5c6d85e5ceb646facfa",
+				"replaced_in": "v0.4.11"
+			}
+		}
+	},
+	"v0.4.11": {
+		"tag": "v0.4.11",
+		"fulltag": "v0.4.11",
+		"network": "polygon",
+		"date": "2022-05-06T15:49:19+09:00",
+		"commit": "1175c601219b4776bb364e7dddd591c6bac0fdaf",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xc4a8944e6a2042D823657556315e5855EfAE70Ff",
 				"status": "current",
-				"keccak256": "0x5dea5432205a2a2d3d26b1906af6944f3fe34702b871a5c6d85e5ceb646facfa"
+				"keccak256": "0x2c71b9e35abfad1cd1fc2014ec49ad9e36e7307227282198d444b1613d13b86b"
 			}
 		}
 	}

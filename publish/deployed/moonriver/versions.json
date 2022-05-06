@@ -3459,8 +3459,23 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x4A6AC152DA1E64aAd4B9da5DD04b879743c548c4",
+				"status": "replaced",
+				"keccak256": "0x507b103094d6b7793376991735369387e6fe55bf696fa2fa14c9125d2a7a3bff",
+				"replaced_in": "v0.4.11"
+			}
+		}
+	},
+	"v0.4.11": {
+		"tag": "v0.4.11",
+		"fulltag": "v0.4.11",
+		"network": "moonriver",
+		"date": "2022-05-06T15:49:19+09:00",
+		"commit": "1175c601219b4776bb364e7dddd591c6bac0fdaf",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x7965bF4b42a87Cad1eF5e8b59Fa891a130Cc9472",
 				"status": "current",
-				"keccak256": "0x507b103094d6b7793376991735369387e6fe55bf696fa2fa14c9125d2a7a3bff"
+				"keccak256": "0xb27c6a12c75e956fa61e9284e20209439c8b6f56a20077e4d56e2bfd6524b6d9"
 			}
 		}
 	}

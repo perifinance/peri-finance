@@ -44,9 +44,10 @@ contract PeriFinance is BasePeriFinance {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](2);
+        bytes32[] memory newAddresses = new bytes32[](3);
         newAddresses[0] = CONTRACT_REWARDESCROW_V2;
         newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
+        newAddresses[2] = CONTRACT_CROSSCHAINMANAGER;
         return combineArrays(existingAddresses, newAddresses);
     }
 
