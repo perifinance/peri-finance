@@ -9,11 +9,16 @@ import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
 
+interface ICrossChainManager {
+    function currentNetworkDebtPercentage() external view returns (uint);
+}
+
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
+    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     address public minterRole;
     address public inflationMinter;
@@ -55,6 +60,10 @@ contract PeriFinance is BasePeriFinance {
         return ISupplySchedule(requireAndGetAddress(CONTRACT_SUPPLYSCHEDULE));
     }
 
+    function crossChainManager() internal view returns (ICrossChainManager) {
+        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
+    }
+
     // ========== OVERRIDDEN FUNCTIONS ==========
 
     function settle(bytes32 currencyKey)
@@ -70,16 +79,18 @@ contract PeriFinance is BasePeriFinance {
         return exchanger().settle(messageSender, currencyKey);
     }
 
-    function inflationalMint(uint _networkDebtShare) external issuanceActive returns (bool) {
+    function inflationalMint() external issuanceActive returns (bool) {
         require(msg.sender == inflationMinter, "Not allowed to mint");
-        require(SafeDecimalMath.unit() >= _networkDebtShare, "Invalid network debt share");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
+        uint _currRate = SafeDecimalMath.preciseDecimalToDecimal(crossChainManager().currentNetworkDebtPercentage());
+        require(SafeDecimalMath.unit() >= _currRate, "Invalid network debt share");
+
         uint supplyToMint = _supplySchedule.mintableSupply();
-        supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
+        supplyToMint = supplyToMint.multiplyDecimal(_currRate);
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply

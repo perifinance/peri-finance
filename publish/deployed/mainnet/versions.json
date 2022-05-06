@@ -404,8 +404,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x40aF5ea5F929AA4Da758cA362332c32736b40f29",
-				"status": "current",
-				"keccak256": "0x92a63006be38d1eb4ab148c348bfef634f813438b92472a325ac653d8999dd3a"
+				"status": "replaced",
+				"keccak256": "0x92a63006be38d1eb4ab148c348bfef634f813438b92472a325ac653d8999dd3a",
+				"replaced_in": "v0.4.10"
 			},
 			"PynthpUSD": {
 				"address": "0x9766b0C6C61fDB1d8958c5f2b29999432183a4B2",
@@ -460,6 +461,20 @@
 				"address": "0x5dd57c9F0F2D91b3735e11e1FA9A5992CA317d26",
 				"status": "current",
 				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
+			}
+		}
+	},
+	"v0.4.10": {
+		"tag": "v0.4.10",
+		"fulltag": "v0.4.10",
+		"network": "mainnet",
+		"date": "2022-04-30T01:35:40+09:00",
+		"commit": "dbc8d0df654b1358524ef5b2a9a8e0568fad9a0b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x1B2635BEF448C611e1211677afe72ebfe6e51193",
+				"status": "current",
+				"keccak256": "0xfe53c80cfb5dafacaf4d61c015b4f519723ab6a0d6445dab5dcb81fb653ab279"
 			}
 		}
 	}
