@@ -87,11 +87,14 @@ contract PeriFinance is BasePeriFinance {
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
-        uint _currRate = SafeDecimalMath.preciseDecimalToDecimal(crossChainManager().currentNetworkDebtPercentage());
-        require(SafeDecimalMath.unit() >= _currRate, "Invalid network debt share");
+        uint _currRate = crossChainManager().currentNetworkDebtPercentage();
+        require(SafeDecimalMath.preciseUnit() >= _currRate, "Invalid network debt share");
 
         uint supplyToMint = _supplySchedule.mintableSupply();
-        supplyToMint = supplyToMint.multiplyDecimal(_currRate);
+        supplyToMint = supplyToMint
+            .decimalToPreciseDecimal()
+            .multiplyDecimalRoundPrecise(_currRate)
+            .preciseDecimalToDecimal();
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply

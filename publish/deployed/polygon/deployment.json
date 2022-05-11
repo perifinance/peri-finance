@@ -209,10 +209,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0xc4a8944e6a2042D823657556315e5855EfAE70Ff",
+			"address": "0xfeAdc7C53D831DD13C22f101E8b2FBb570ae0dC9",
 			"source": "PeriFinanceToPolygon",
-			"link": "https://polygonscan.com/address/0xc4a8944e6a2042D823657556315e5855EfAE70Ff",
-			"timestamp": "2022-05-06T07:25:08.740Z",
+			"link": "https://polygonscan.com/address/0xfeAdc7C53D831DD13C22f101E8b2FBb570ae0dC9",
+			"timestamp": "2022-05-11T08:54:16.601Z",
 			"txn": "",
 			"network": "polygon"
 		},

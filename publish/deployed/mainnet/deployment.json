@@ -74,10 +74,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0xCfa36F8484A873C70a8cc3C07F2Bd9bdFcc04467",
+			"address": "0xBf3BeEe52aa8cf367105647bC6C9235Caf6fD508",
 			"source": "PeriFinanceToEthereum",
-			"link": "https://etherscan.io/address/0xCfa36F8484A873C70a8cc3C07F2Bd9bdFcc04467",
-			"timestamp": "2022-05-06T07:25:09.510Z",
+			"link": "https://etherscan.io/address/0xBf3BeEe52aa8cf367105647bC6C9235Caf6fD508",
+			"timestamp": "2022-05-11T08:27:30.940Z",
 			"txn": "",
 			"network": "mainnet"
 		},

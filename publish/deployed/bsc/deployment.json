@@ -92,10 +92,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0xb4418543AF912E4fb7c59C539d1f7f51C637e854",
+			"address": "0x6e71E034b19b62ef00F5A3Df7A17761680B4Bd7c",
 			"source": "PeriFinanceToBSC",
-			"link": "https://bscscan.com/address/0xb4418543AF912E4fb7c59C539d1f7f51C637e854",
-			"timestamp": "2022-05-06T07:25:03.556Z",
+			"link": "https://bscscan.com/address/0x6e71E034b19b62ef00F5A3Df7A17761680B4Bd7c",
+			"timestamp": "2022-05-11T08:20:45.951Z",
 			"txn": "",
 			"network": "bsc"
 		},
