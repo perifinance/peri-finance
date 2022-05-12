@@ -99,7 +99,7 @@ interface IPeriFinance {
 
     function mint(address _user, uint _amount) external returns (bool);
 
-    function inflationalMint(uint _networkDebtShare) external returns (bool);
+    function inflationalMint() external returns (bool);
 
     function settle(bytes32 currencyKey)
         external

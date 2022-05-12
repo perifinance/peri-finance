@@ -161,12 +161,14 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_SHIBUYA;
 		} else if (network === 'moonbase-alphanet') {
 			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
+		} else if (network === 'moonriver') {
+			providerUrl = process.env.PROVIDER_URL_MOONRIVER;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey = ['mainnet', 'polygon', 'bsc'].includes(network)
+	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)
 		? process.env.DEPLOY_PRIVATE_KEY
 		: ['dusty', 'shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
@@ -460,17 +462,15 @@ function estimateBSCGasPice(network, priority) {
 		})
 		.then(({ data }) => {
 			console.log('bsc gas', data);
-			const { slow, standard, fast, instant } = data;
+			const { SafeGasPrice, ProposeGasPrice, FastGasPrice } = data.result;
 
 			switch (priority) {
-				case 'fastest':
-					return instant;
 				case 'fast':
-					return fast;
+					return FastGasPrice;
 				case 'standard':
-					return standard;
+					return ProposeGasPrice;
 				default:
-					return slow;
+					return SafeGasPrice;
 			}
 		})
 		.catch(e => console.log(e));

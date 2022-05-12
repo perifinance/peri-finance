@@ -1,6 +1,6 @@
 {
 	"name": "@perifinance/peri-finance",
-	"version": "0.3.22",
+	"version": "0.4.12",
 	"author": "perifinance",
 	"description": "The smart contracts which make up the Peri Finance system. (pynths.com)",
 	"license": "MIT",
@@ -39,7 +39,8 @@
 		"publish/deployed/bsctest/*",
 		"publish/deployed/bsc/*",
 		"publish/deployed/shibuya/*",
-		"publish/deployed/moonbase-alphanet/*"
+		"publish/deployed/moonbase-alphanet/*",
+		"publish/deployed/moonriver/*"
 	],
 	"bin": {
 		"peri": "bin.js"

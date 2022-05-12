@@ -35,5 +35,10 @@
 		"asset": "LINK",
 		"feed": "",
 		"standalone": true
+	},
+	"LUNA": {
+		"asset": "LUNA",
+		"feed": "",
+		"standalone": true
 	}
 }

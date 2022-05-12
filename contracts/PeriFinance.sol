@@ -1,4 +1,5 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./BasePeriFinance.sol";
@@ -8,11 +9,16 @@ import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
 
+interface ICrossChainManager {
+    function currentNetworkDebtPercentage() external view returns (uint);
+}
+
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
+    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     address public minterRole;
     address public inflationMinter;
@@ -38,9 +44,10 @@ contract PeriFinance is BasePeriFinance {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](2);
+        bytes32[] memory newAddresses = new bytes32[](3);
         newAddresses[0] = CONTRACT_REWARDESCROW_V2;
         newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
+        newAddresses[2] = CONTRACT_CROSSCHAINMANAGER;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -52,6 +59,10 @@ contract PeriFinance is BasePeriFinance {
 
     function supplySchedule() internal view returns (ISupplySchedule) {
         return ISupplySchedule(requireAndGetAddress(CONTRACT_SUPPLYSCHEDULE));
+    }
+
+    function crossChainManager() internal view returns (ICrossChainManager) {
+        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
     // ========== OVERRIDDEN FUNCTIONS ==========
@@ -69,16 +80,21 @@ contract PeriFinance is BasePeriFinance {
         return exchanger().settle(messageSender, currencyKey);
     }
 
-    function inflationalMint(uint _networkDebtShare) external issuanceActive returns (bool) {
+    function inflationalMint() external issuanceActive returns (bool) {
         require(msg.sender == inflationMinter, "Not allowed to mint");
-        require(SafeDecimalMath.unit() >= _networkDebtShare, "Invalid network debt share");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
+        uint _currRate = crossChainManager().currentNetworkDebtPercentage();
+        require(SafeDecimalMath.preciseUnit() >= _currRate, "Invalid network debt share");
+
         uint supplyToMint = _supplySchedule.mintableSupply();
-        supplyToMint = supplyToMint.multiplyDecimal(_networkDebtShare);
+        supplyToMint = supplyToMint
+            .decimalToPreciseDecimal()
+            .multiplyDecimalRoundPrecise(_currRate)
+            .preciseDecimalToDecimal();
         require(supplyToMint > 0, "No supply is mintable");
 
         // record minting event before mutation to token supply
@@ -142,7 +158,7 @@ contract PeriFinance is BasePeriFinance {
     function overchainTransfer(
         uint _amount,
         uint _destChainId,
-        bytes calldata _sign
+        IBridgeState.Signature calldata _sign
     ) external payable optionalProxy {
         require(_amount > 0, "Cannot transfer zero");
         (uint transferable, ) =
@@ -171,7 +187,7 @@ contract PeriFinance is BasePeriFinance {
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
         // Validations are checked from bridge state
-        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+        (address account, uint amount, , , , ) = bridgeState.inboundings(_index);
 
         require(account == messageSender, "Caller is not matched");
 

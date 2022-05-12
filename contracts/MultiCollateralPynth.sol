@@ -1,4 +1,5 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./Pynth.sol";
@@ -102,7 +103,7 @@ contract MultiCollateralPynth is Pynth {
     function overchainTransfer(
         uint _amount,
         uint _destChainId,
-        bytes calldata _sign
+        IBridgeState.Signature calldata _sign
     ) external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
@@ -129,7 +130,7 @@ contract MultiCollateralPynth is Pynth {
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
         // Validations are checked from bridge state
-        (address account, uint amount, , , ) = bridgeState.inboundings(_index);
+        (address account, uint amount, , , , ) = bridgeState.inboundings(_index);
 
         require(account == messageSender, "Caller is not matched");
 

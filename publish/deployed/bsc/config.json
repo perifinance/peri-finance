@@ -157,5 +157,14 @@
 	},
 	"StakingRewardsPeriBnbPancakeSwap": {
 		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
 	}
 }

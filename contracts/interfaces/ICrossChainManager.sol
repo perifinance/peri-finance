@@ -12,10 +12,6 @@ interface ICrossChainManager {
 
     function currentTotalNetworkDebt() external view returns (uint);
 
-    function totalNetworkDebtAtIndex(uint index) external view returns (uint);
-
-    function networkDebtPercentageAtIndex(uint) external view returns (uint);
-
     function totalNetworkDebtEntryLength() external view returns (uint);
 
     function currentNetworkDebtPercentage() external view returns (uint);

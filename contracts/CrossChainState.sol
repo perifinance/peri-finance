@@ -274,7 +274,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
         for (uint i = 0; i < crossChainIds.length; ++i) {
             result += (_crossNetworkIssuedDebt[crossChainIds[i]]);
         }
-        result += _crossNetworkIssuedDebt[chainId];
+        // result += _crossNetworkIssuedDebt[chainId];
         return result;
     }
 
@@ -293,7 +293,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
         _crossNetworkIssuedDebt[_chainID] -= amount;
     }
 
-    function setInitialCurrentIssuedDebt(uint _amount) external {
+    function setInitialCurrentIssuedDebt(uint _amount) external onlyAssociatedContract {
         // only initial possible
         if (_crossNetworkIssuedDebt[chainId] == 0) {
             _crossNetworkIssuedDebt[chainId] = _amount;

@@ -71,9 +71,6 @@
 	"FlexibleStorage": {
 		"deploy": false
 	},
-	"Issuer": {
-		"deploy": false
-	},
 	"EternalStorageLiquidations": {
 		"deploy": false
 	},
@@ -84,9 +81,6 @@
 		"deploy": false
 	},
 	"SupplySchedule": {
-		"deploy": false
-	},
-	"PeriFinance": {
 		"deploy": false
 	},
 	"PeriFinanceEscrow": {
@@ -150,6 +144,12 @@
 		"deploy": false
 	},
 	"StakingState": {
+		"deploy": false
+	},
+	"Issuer": {
+		"deploy": false
+	},
+	"PeriFinance": {
 		"deploy": false
 	},
 	"BridgeState": {

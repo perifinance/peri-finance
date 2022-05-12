@@ -9,6 +9,14 @@ const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
+const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
+// const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
+
+const polygon = ['polygon', 'mumbai'];
+const bsc = ['bsc', 'bsctest'];
+const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'];
+const moonriver = ['moonriver', 'moonbase-alphanet', 'shibuya'];
+
 const {
 	ensureNetwork,
 	ensureDeploymentPath,
@@ -550,7 +558,7 @@ const deploy = async ({
 		args: [account],
 	});
 
-	if (!['mainnet', 'polygon', 'bsc'].includes(network) && systemStatus) {
+	if (!mainnet.includes(network) && systemStatus) {
 		// On testnet, give the deployer the rights to update status
 		await runStep({
 			contract: 'SystemStatus',
@@ -750,7 +758,7 @@ const deploy = async ({
 		({ roleKey }) => roleKey === 'Validator'
 	)[0].address;
 
-	if (['polygon', 'mumbai'].includes(network)) {
+	if (polygon.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinanceToPolygon',
@@ -777,7 +785,7 @@ const deploy = async ({
 				writeArg: childChainManagerAddress,
 			});
 		}
-	} else if (['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'].includes(network)) {
+	} else if (ethereum.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: useOvm ? 'MintablePeriFinance' : 'PeriFinanceToEthereum',
@@ -804,7 +812,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (['bsc', 'bsctest'].includes(network)) {
+	} else if (bsc.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinanceToBSC',
@@ -831,7 +839,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (['moonbase-alphanet', 'shibuya'].includes(network)) {
+	} else if (moonriver.includes(network)) {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinance',
@@ -1411,7 +1419,7 @@ const deploy = async ({
 
 	let USDC_ADDRESS = (await getDeployParameter('USDC_ERC20_ADDRESSES'))[network];
 	if (!USDC_ADDRESS || USDC_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)) {
+		if (mainnet.includes(network)) {
 			throw new Error('USDC address is not known');
 		}
 
@@ -1426,7 +1434,7 @@ const deploy = async ({
 
 	let DAI_ADDRESS = (await getDeployParameter('DAI_ERC20_ADDRESSES'))[network];
 	if (!DAI_ADDRESS || DAI_ADDRESS === ZERO_ADDRESS) {
-		if (['mainnet', 'polygon', 'bsc'].includes(network)) {
+		if (mainnet.includes(network)) {
 			throw new Error('DAI address is not known');
 		}
 
@@ -1511,7 +1519,7 @@ const deploy = async ({
 	const crossChainManager = await deployer.deployContract({
 		name: 'CrossChainManager',
 		source: 'CrossChainManager',
-		deps: ['Issuer', 'CrossChainState', 'AddressResolver', 'BridgeStatepUSD'],
+		deps: ['Issuer', 'CrossChainState', 'AddressResolver'],
 		args: [
 			account,
 			addressOf(readProxyForResolver),
@@ -1519,58 +1527,6 @@ const deploy = async ({
 			debtManagerAddress,
 		],
 	});
-
-	if (crossChainState && crossChainManager) {
-		await runStep({
-			contract: 'CrossChainState',
-			target: crossChainState,
-			read: 'associatedContract',
-			expected: input => input === addressOf(crossChainManager),
-			write: 'setAssociatedContract',
-			writeArg: addressOf(crossChainManager),
-		});
-
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'crossChainState',
-			expected: input => input === addressOf(crossChainState),
-			write: 'setCrossChainState',
-			writeArg: addressOf(crossChainState),
-		});
-
-		// const chainIds = [
-		// 	{ networkId: 1, chainId: 'mainnet' },
-		// 	{ networkId: 3, chainId: 'ropsten' },
-		// 	{ networkId: 4, chainId: 'rinkeby' },
-		// 	{ networkId: 5, chainId: 'goerli' },
-		// 	{ networkId: 42, chainId: 'kovan' },
-		// 	{ networkId: 137, chainId: 'polygon' },
-		// 	{ networkId: 80001, chainId: 'mumbai' },
-		// 	{ networkId: 97, chainId: 'bsctest' },
-		// 	{ networkId: 56, chainId: 'bsc' },
-		// 	{ networkId: 81, chainId: 'shibuya' },
-		// 	{ networkId: 1287, chainId: 'moonbase-alphanet' },
-		// ];
-
-		// for (const { networkId, chainId } of chainIds) {
-		// 	await runStep({
-		// 		contract: 'CrossChainManager',
-		// 		target: crossChainManager,
-		// 		read: 'getNetworkId',
-		// 		readArg: toBytes32(chainId),
-		// 		expected: input => input === networkId,
-		// 		write: 'addNetworkId',
-		// 		writeArg: [toBytes32(chainId), networkId],
-		// 	});
-		// }
-
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	write: 'setInitialCurrentIssuedDebt',
-		// });
-	}
 
 	console.log(gray(`\n------ DEPLOY ANCILLARY CONTRACTS ------\n`));
 
@@ -2325,10 +2281,7 @@ const deploy = async ({
 					);
 					// Then a new inverted pynth is being added (as there's no existing supply)
 					await setInversePricing({ freezeAtUpperLimit: false, freezeAtLowerLimit: false });
-				} else if (
-					!['mainnet', 'polygon', 'bsc'].includes(network) &&
-					forceUpdateInversePynthsOnTestnet
-				) {
+				} else if (!mainnet.includes(network) && forceUpdateInversePynthsOnTestnet) {
 					// as we are on testnet and the flag is enabled, allow a mutative pricing change
 					console.log(
 						redBright(
@@ -2371,20 +2324,32 @@ const deploy = async ({
 
 		// override individual currencyKey / pynths exchange rates
 		const pynthExchangeRateOverride = {
-			pETH: w3utils.toWei('0.0025'),
-			iETH: w3utils.toWei('0.004'),
 			pBTC: w3utils.toWei('0.003'),
 			iBTC: w3utils.toWei('0.003'),
-			iBNB: w3utils.toWei('0.021'),
-			pXTZ: w3utils.toWei('0.0085'),
-			iXTZ: w3utils.toWei('0.0085'),
-			pEOS: w3utils.toWei('0.0085'),
-			iEOS: w3utils.toWei('0.009'),
-			pETC: w3utils.toWei('0.0085'),
-			pLINK: w3utils.toWei('0.0085'),
-			pDASH: w3utils.toWei('0.009'),
-			iDASH: w3utils.toWei('0.009'),
-			pXRP: w3utils.toWei('0.009'),
+			pETH: w3utils.toWei('0.003'),
+			iETH: w3utils.toWei('0.003'),
+			pBNB: w3utils.toWei('0.003'),
+			iBNB: w3utils.toWei('0.003'),
+			pAVAX: w3utils.toWei('0.003'),
+			pUNI: w3utils.toWei('0.003'),
+			pLUNA: w3utils.toWei('0.003'),
+			pMKR: w3utils.toWei('0.003'),
+			pCAKE: w3utils.toWei('0.003'),
+			pAAVE: w3utils.toWei('0.003'),
+			pCOMP: w3utils.toWei('0.003'),
+			pSUSHI: w3utils.toWei('0.003'),
+			pSNX: w3utils.toWei('0.003'),
+			pCRV: w3utils.toWei('0.003'),
+			pYFI: w3utils.toWei('0.003'),
+			p1INCH: w3utils.toWei('0.003'),
+			pANKR: w3utils.toWei('0.003'),
+			pLINK: w3utils.toWei('0.003'),
+			pDOT: w3utils.toWei('0.003'),
+			pXRP: w3utils.toWei('0.003'),
+			pAXS: w3utils.toWei('0.003'),
+			pEUR: w3utils.toWei('0.003'),
+			pSAND: w3utils.toWei('0.003'),
+			pMANA: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2622,6 +2587,106 @@ const deploy = async ({
 				writeArg: aggregatorWarningFlags,
 			});
 		}
+	}
+
+	if (crossChainState && crossChainManager) {
+		console.log(gray(`\n------ SETUP CROSSCHAIN ------\n`));
+		await runStep({
+			contract: 'CrossChainState',
+			target: crossChainState,
+			read: 'associatedContract',
+			expected: input => input === addressOf(crossChainManager),
+			write: 'setAssociatedContract',
+			writeArg: addressOf(crossChainManager),
+		});
+
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			read: 'crossChainState',
+			expected: input => input === addressOf(crossChainState),
+			write: 'setCrossChainState',
+			writeArg: addressOf(crossChainState),
+		});
+
+		// const networks = mainnet.includes(network)
+		// 	? mainnet.filter(e => e !== network)
+		// 	: testnet.filter(e => e !== network);
+
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	// read: 'getCrossChainIds',
+		// 	// expect: (crossChainIds) => {
+		// 	// 	for(let crossChainId of crossChainIds) {
+		// 	// 		console.log("crossChainId", crossChainId);
+		// 	// 		if(crossChainId === toBytes32(network))
+		// 	// 			return true;
+		// 	// 	}
+		// 	// 	return false;
+		// 	// },
+		// 	write: 'setCrosschain',
+		// 	writeArg: [toBytes32(network)],
+		// });
+
+		// for (const crossNetwork of networks) {
+		// 	await runStep({
+		// 		contract: 'CrossChainManager',
+		// 		target: crossChainManager,
+		// 		// read: 'getCrossChainIds',
+		// 		// expect: (crossChainIds) => {
+		// 		// 	for(let crossChainId of crossChainIds) {
+		// 		// 		console.log("crossChainId", crossChainId);
+		// 		// 		if(crossChainId === toBytes32(crossNetwork))
+		// 		// 			return true;
+		// 		// 	}
+		// 		// 	return false;
+		// 		// },
+		// 		write: 'addCrosschain',
+		// 		writeArg: [toBytes32(crossNetwork)],
+		// 	});
+		// }
+
+		// const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
+
+		// const chainIds = [
+		// 	toBytes32('mainnet'),
+		// 	toBytes32('ropsten'),
+		// 	toBytes32('rinkeby'),
+		// 	toBytes32('goerli'),
+		// 	toBytes32('kovan'),
+		// 	toBytes32('polygon'),
+		// 	toBytes32('mumbai'),
+		// 	toBytes32('bsctest'),
+		// 	toBytes32('bsc'),
+		// 	toBytes32('shibuya'),
+		// 	toBytes32('moonbase-alphanet'),
+		// 	toBytes32('moonriver'),
+		// ];
+
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	read: 'getNetworkIds',
+		// 	readArg: [toBytes32('mainnet')],
+		// 	expect: (networkId) => {
+		// 		console.log("networkId", networkId)
+		// 		return networkId === 1
+		// 	},
+		// 	write: 'addNetworkIds',
+		// 	writeArg: [chainIds, networkIds],
+		// });
+
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	read: 'getCurrentNetworkIssuedDebt',
+		// 	expected: issuedDebt => {
+		// 		console.log("issuedDebt", issuedDebt)
+		// 		return issuedDebt > 0;
+		// 	},
+		// 	write: 'setInitialCurrentIssuedDebt',
+		// });
 	}
 
 	/*

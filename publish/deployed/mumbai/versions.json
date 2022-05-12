@@ -1572,8 +1572,9 @@
 			},
 			"SystemSettings": {
 				"address": "0xbc72e98D10EB81c35272B468fA19e190d43D9F58",
-				"status": "current",
-				"keccak256": "0xf608ef790dc8ee027f15f5687c7b8005997845c2cd49d53d49399f8d3e7ef5ed"
+				"status": "replaced",
+				"keccak256": "0xf608ef790dc8ee027f15f5687c7b8005997845c2cd49d53d49399f8d3e7ef5ed",
+				"replaced_in": "v0.3.42"
 			},
 			"SystemStatus": {
 				"address": "0xAF149F6C9DE7376f8F5A69092fC9131480f34845",
@@ -1852,8 +1853,9 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x8A52312C9c1c16036E78256018569Fad5663acbe",
-				"status": "current",
-				"keccak256": "0xcd5a4495660a04c348ec5b26e7cbbef5ac88bddfcfebdae293b3f534fd7bce86"
+				"status": "replaced",
+				"keccak256": "0xcd5a4495660a04c348ec5b26e7cbbef5ac88bddfcfebdae293b3f534fd7bce86",
+				"replaced_in": "v0.3.46"
 			},
 			"CrossChainManager": {
 				"address": "0x41CE6E898535c32ED8Aa5968eFC5a147e3D0322D",
@@ -1907,8 +1909,9 @@
 			},
 			"PeriFinance": {
 				"address": "0x550F8766598b8785a613e92d12731Cd0a4E07E53",
-				"status": "current",
-				"keccak256": "0x70266771ffd76ba7443d37245701823c7cc810005b0653a33185fc86e8a2b16a"
+				"status": "replaced",
+				"keccak256": "0x70266771ffd76ba7443d37245701823c7cc810005b0653a33185fc86e8a2b16a",
+				"replaced_in": "v0.3.23"
 			},
 			"BridgeState": {
 				"address": "0xc855dc801aB53dc54baF0531eF2BA98Ec5724291",
@@ -1996,8 +1999,9 @@
 			},
 			"PynthpUSD": {
 				"address": "0xa41d4a1b39e3F7002632A41e392B8c1d183530d7",
-				"status": "current",
-				"keccak256": "0x001bb6af38a508e5eecc2f1740f9dde52933325f9811d058205a76895e934cfd"
+				"status": "replaced",
+				"keccak256": "0x001bb6af38a508e5eecc2f1740f9dde52933325f9811d058205a76895e934cfd",
+				"replaced_in": "v0.3.23"
 			}
 		}
 	},
@@ -2049,23 +2053,27 @@
 		"contracts": {
 			"BridgeState": {
 				"address": "0x9cefc88fB582ed3651628c863CEB0eC6d0F7C7e8",
-				"status": "current",
-				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.23"
 			},
 			"Issuer": {
 				"address": "0x60ea1fDec8578c7a810F4E5319d97025024644ae",
-				"status": "current",
-				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714"
+				"status": "replaced",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714",
+				"replaced_in": "v0.3.23"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x9f00eA4DCFcf65Ace9cd0Cf451328c424ddF1B8b",
-				"status": "current",
-				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362"
+				"status": "replaced",
+				"keccak256": "0x942b4029f20fda1d68e1c04c4655e0d7af58620c60a6896d0d0797fb164ff362",
+				"replaced_in": "v0.3.23"
 			},
 			"CrossChainState": {
 				"address": "0x8114a7eeA95D7D7D4a98899A63238a2F0A1Eb3E9",
-				"status": "current",
-				"keccak256": "0x01cc455be558c8cf54ae306d7e188213d627990a2fd45b0d93f394d306f54c4a"
+				"status": "replaced",
+				"keccak256": "0x01cc455be558c8cf54ae306d7e188213d627990a2fd45b0d93f394d306f54c4a",
+				"replaced_in": "v0.3.23"
 			},
 			"CrossChainManager": {
 				"address": "0xA718126C38CfF9FCd0f255D457f9118F8Ae0fb70",
@@ -2084,8 +2092,558 @@
 		"contracts": {
 			"CrossChainManager": {
 				"address": "0x93839FfF28168dA963D5e95c1403cce5D41b49E2",
+				"status": "replaced",
+				"keccak256": "0xfa239c3427626e37a647bd232234da1929814658bc04c6ac48cebdd79d335deb",
+				"replaced_in": "v0.3.23"
+			}
+		}
+	},
+	"v0.3.23": {
+		"tag": "v0.3.23",
+		"fulltag": "v0.3.23",
+		"network": "mumbai",
+		"date": "2022-02-24T18:43:17+09:00",
+		"commit": "fb82659195755ca31617936c3a37c0025c6c3640",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x15CFd00598D8702a8A63F09e3609F50C60Aff57c",
+				"status": "replaced",
+				"keccak256": "0x705d8e04fea9a7066e3c218d1e4834dc6b60644c8bea94ff9b40b81490d12af2",
+				"replaced_in": "v0.3.31"
+			},
+			"BridgeState": {
+				"address": "0x3Cd9b4e8bC7ECbBc9F812932479eB5E2cD8Eb17c",
+				"status": "replaced",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290",
+				"replaced_in": "v0.3.24"
+			},
+			"Issuer": {
+				"address": "0x297A043F6d92F0C689F5BCC3a9722E575d76FfB0",
+				"status": "replaced",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714",
+				"replaced_in": "v0.3.31"
+			},
+			"PynthpUSD": {
+				"address": "0xD31Da8a475326a19dF75d3cF2084B1e5F0A6B221",
+				"status": "replaced",
+				"keccak256": "0x876a0599f8c3e55eaf475d529df5e7f7b8f4c20ad52be2cae5bc5cfac0cfe32c",
+				"replaced_in": "v0.3.31"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xE0b085737d9f9BCcB52228DC960010A711d0A647",
+				"status": "replaced",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290",
+				"replaced_in": "v0.3.24"
+			},
+			"CrossChainState": {
+				"address": "0xa2cE491203976A2b913DEC36Df07F99B705BC83a",
+				"status": "replaced",
+				"keccak256": "0xc9a70f20f7160c7c85860acfdb1faf3c6c388a98f5e676c2aa59a7dbb2045033",
+				"replaced_in": "v0.3.26"
+			},
+			"CrossChainManager": {
+				"address": "0xf9ee4874d85e894980428fcA533317D9eb6a7783",
+				"status": "replaced",
+				"keccak256": "0xe13d2119b48f23dafed579cb9ad03f74907ef31d40b61165191bdb5acc116946",
+				"replaced_in": "v0.3.26"
+			}
+		}
+	},
+	"v0.3.24": {
+		"tag": "v0.3.24",
+		"fulltag": "v0.3.24",
+		"network": "mumbai",
+		"date": "2022-03-08T15:43:35+09:00",
+		"commit": "362054498bc420ecc69861f3eafc92f9efc50f62",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x5FefD449B7C078bcd20D28a41126eC5786c1CdFa",
+				"status": "replaced",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290",
+				"replaced_in": "v0.3.25"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xf9ABa2C428d7d0371AAD57a47e51BC5FD48492E2",
+				"status": "replaced",
+				"keccak256": "0x81e6d8b02b88f02f526778952e76ad2c88d0ee1b0e86c82ed6f7a3e2a804e290",
+				"replaced_in": "v0.3.25"
+			}
+		}
+	},
+	"v0.3.25": {
+		"tag": "v0.3.25",
+		"fulltag": "v0.3.25",
+		"network": "mumbai",
+		"date": "2022-03-08T16:26:56+09:00",
+		"commit": "052c64e854729597ba78bd9c435a5728d7ddab26",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x284e4886fdCB5FEeb9FB927E8bAb0f9986e96B1e",
+				"status": "replaced",
+				"keccak256": "0x5c94e9cd1e0a97443462d103352859f7d0362131e0c6f622f16ebc9a9ecb44cc",
+				"replaced_in": "v0.3.26"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x547E357EE9872DFc992f5c4893C5276f6378BB9D",
+				"status": "replaced",
+				"keccak256": "0x5c94e9cd1e0a97443462d103352859f7d0362131e0c6f622f16ebc9a9ecb44cc",
+				"replaced_in": "v0.3.26"
+			}
+		}
+	},
+	"v0.3.26": {
+		"tag": "v0.3.26",
+		"fulltag": "v0.3.26",
+		"network": "mumbai",
+		"date": "2022-03-09T10:41:00+09:00",
+		"commit": "40271bf70703fe81d9b2d28bbe4b003ab67a9217",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x6c1da7D6e430240081ED41C978Db319e746e77a7",
+				"status": "replaced",
+				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4",
+				"replaced_in": "v0.3.29"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xdaB192C0eACE4Be3C90e16A788cFDce6ee40C7C0",
+				"status": "replaced",
+				"keccak256": "0xe9dcbd6e63fcf3b6aedd762cb064ef20064262eca36ecb21c10d4b64cc7b4db4",
+				"replaced_in": "v0.3.29"
+			},
+			"CrossChainState": {
+				"address": "0x598Fda719704d19CdA271B51c3AC46d8878902F6",
+				"status": "replaced",
+				"keccak256": "0xc9a70f20f7160c7c85860acfdb1faf3c6c388a98f5e676c2aa59a7dbb2045033",
+				"replaced_in": "v0.3.28"
+			},
+			"CrossChainManager": {
+				"address": "0x3f7A6D008E3bDe97BbEBA8EE105b808F9a43e991",
+				"status": "replaced",
+				"keccak256": "0x06743dce4a16b97b3f2aceb138a72e71c69957794b5f539bb7d185fa2b1e8c0e",
+				"replaced_in": "v0.3.27"
+			}
+		}
+	},
+	"v0.3.27": {
+		"tag": "v0.3.27",
+		"fulltag": "v0.3.27",
+		"network": "mumbai",
+		"date": "2022-03-10T18:56:42+09:00",
+		"commit": "ef83abee91cf97b001832beedc8e6c8aa24cf91d",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0x024d5fA08A73bE67249580e114ed4b79EF876548",
+				"status": "replaced",
+				"keccak256": "0xb3bf19d71ec0a8f1f394ee059dbe6dfa4bb562efd201df54c3fcd6977ccf72b9",
+				"replaced_in": "v0.3.28"
+			}
+		}
+	},
+	"v0.3.28": {
+		"tag": "v0.3.28",
+		"fulltag": "v0.3.28",
+		"network": "mumbai",
+		"date": "2022-03-10T22:43:05+09:00",
+		"commit": "fe5df0dca63919cfe7b127566a64f4e858906c61",
+		"contracts": {
+			"CrossChainState": {
+				"address": "0xAb3fDF639Fb952fB77504060056b47179C75293f",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.34"
+			},
+			"CrossChainManager": {
+				"address": "0xce7c88AEDD1b2419E42d06Dc1877195405733Daf",
+				"status": "replaced",
+				"keccak256": "0x6321cd0df6102eba9c09bbefec4ae8dd69da285213df97c796ab9e34c3d9e3fd",
+				"replaced_in": "v0.3.34"
+			}
+		}
+	},
+	"v0.3.29": {
+		"tag": "v0.3.29",
+		"fulltag": "v0.3.29",
+		"network": "mumbai",
+		"date": "2022-03-10T23:40:35+09:00",
+		"commit": "ae646c89542a685c1341f5713479d4d33408d41b",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x37160fd30fc64af2e29649c51dBF34DCf088b30a",
+				"status": "replaced",
+				"keccak256": "0xc76c479aadd16e4f8073e2c58be1e98851683c7e0a948a840fbe7319d84787ac",
+				"replaced_in": "v0.3.30"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xc03f70D6A10477A59eA81A370BB9C3952Df82962",
+				"status": "replaced",
+				"keccak256": "0xc76c479aadd16e4f8073e2c58be1e98851683c7e0a948a840fbe7319d84787ac",
+				"replaced_in": "v0.3.30"
+			}
+		}
+	},
+	"v0.3.30": {
+		"tag": "v0.3.30",
+		"fulltag": "v0.3.30",
+		"network": "mumbai",
+		"date": "2022-03-14T13:53:16+09:00",
+		"commit": "5f9ba1b2c3da116b422ef6e7808c34cddf9c414e",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xEC4D8eC0D8de20acFeAf4331F888273cedf3aa43",
+				"status": "replaced",
+				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1",
+				"replaced_in": "v0.3.31"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x0fe21011a0A6e75C36caBc0aB92897CaAa1ceb92",
+				"status": "replaced",
+				"keccak256": "0x8db87836e83761bbd07895ff9d3afc7cd5d2580d6ed12ff486d1e5af608740c1",
+				"replaced_in": "v0.3.31"
+			}
+		}
+	},
+	"v0.3.31": {
+		"tag": "v0.3.31",
+		"fulltag": "v0.3.31",
+		"network": "mumbai",
+		"date": "2022-03-15T17:56:39+09:00",
+		"commit": "cf6935238d86f452aaf36ca14cf5a3504a572467",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x5B316C0b8F4236520569B5d1Fff6A096be3126d0",
+				"status": "replaced",
+				"keccak256": "0xe91e6750f1de5ec0b6810966d2e9ef4d4df9c35608e5fda68e53d0076c46fa52",
+				"replaced_in": "v0.3.42"
+			},
+			"BridgeState": {
+				"address": "0x40e21648159Ed74E3FF4a9Ac7f62a55132da0dF5",
+				"status": "replaced",
+				"keccak256": "0x5645d0663b2f80df8d9f3683eac4ab8d03ee92beeb0088115df18500367e5af1",
+				"replaced_in": "v0.3.33"
+			},
+			"Issuer": {
+				"address": "0x6e800c065aE8009BC5BF74751cB27bCC7CEBE440",
+				"status": "replaced",
+				"keccak256": "0x273e2a6a89f816b8b8659443817c97087b69eee49c7e4e8c2505810b504cd714",
+				"replaced_in": "v0.3.42"
+			},
+			"PynthpUSD": {
+				"address": "0xf45879C57a94532Fa60EaB54CE8Cb84CeE0D4a0E",
+				"status": "replaced",
+				"keccak256": "0x3d41a018d79b02d0599e798ded05d6f53cfc3f467b428c961e76bb09c701adfa",
+				"replaced_in": "v0.3.42"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xe3ED82f303830A83B58584FdC92db9fc548cC81a",
+				"status": "replaced",
+				"keccak256": "0x5645d0663b2f80df8d9f3683eac4ab8d03ee92beeb0088115df18500367e5af1",
+				"replaced_in": "v0.3.33"
+			}
+		}
+	},
+	"v0.3.33": {
+		"tag": "v0.3.33",
+		"fulltag": "v0.3.33",
+		"network": "mumbai",
+		"date": "2022-03-15T21:01:29+09:00",
+		"commit": "50bd8cc89b497405aed3c990db29027bc8e8268b",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xFecDb465b9755003f84b6c87bab298D73E7e358d",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.34"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x050A368164A74270c89e2d4796FcF98189C16388",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.34"
+			}
+		}
+	},
+	"v0.3.34": {
+		"tag": "v0.3.34",
+		"fulltag": "v0.3.34",
+		"network": "mumbai",
+		"date": "2022-03-15T22:25:59+09:00",
+		"commit": "a67c33cdbec33db344ede050ca146155b2849ac6",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xDa0039051E83342B905Ddc301DC299672109AD3e",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.35"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x5145B45fA0F0df34f5ad1F368de1Ea4240C491BE",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.35"
+			},
+			"CrossChainState": {
+				"address": "0x2adFe210ebF3a4B2FfE88FAB15217e0F3E7565E6",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.35"
+			},
+			"CrossChainManager": {
+				"address": "0xD02EF9319671c51Bef83C57d47877F1bE39408EF",
+				"status": "replaced",
+				"keccak256": "0x5db4fb4a30a469af7f038364e4b704d0fd900dffc77a9b2893b9c5f514d559cc",
+				"replaced_in": "v0.3.35"
+			}
+		}
+	},
+	"v0.3.35": {
+		"tag": "v0.3.35",
+		"fulltag": "v0.3.35",
+		"network": "mumbai",
+		"date": "2022-03-15T23:10:17+09:00",
+		"commit": "ba197ea2665bc4443a9506740709c619ac5d8778",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x8bb9683cBEC1d4C50Aa29ea308eCc9c1066778C7",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.36"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x2E64df8Aa36D532fac527485cC15350724bA5b54",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.36"
+			},
+			"CrossChainState": {
+				"address": "0xBF115d576c10D9926fC79fB9E78BffE1927461De",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.36"
+			},
+			"CrossChainManager": {
+				"address": "0x1Ec3B1fD21eF4cb62d4Ad377aC79A0cecf41B766",
+				"status": "replaced",
+				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4",
+				"replaced_in": "v0.3.36"
+			}
+		}
+	},
+	"v0.3.36": {
+		"tag": "v0.3.36",
+		"fulltag": "v0.3.36",
+		"network": "mumbai",
+		"date": "2022-03-16T12:30:21+09:00",
+		"commit": "03b59d3fd929443c10c7621131ee4f2077230925",
+		"contracts": {
+			"BridgeState": {
+				"address": "0x034eabc9Fa618D9Ab15eEcC5Ec5e9c80dA4479BA",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.37"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xD9bE8c1d031D66F02bd1e1551103AF9A58dC96F3",
+				"status": "replaced",
+				"keccak256": "0x9c0a630f6c2a8073bcbb06a6c6a44e5be179f253390c8b643328fdef79a5ce6f",
+				"replaced_in": "v0.3.37"
+			},
+			"CrossChainState": {
+				"address": "0xEC97c32fdB3D2472C0A5cEF27102564309639926",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.37"
+			},
+			"CrossChainManager": {
+				"address": "0x070aFc4AaF7f011110659a7c4dC6a41E243507BD",
+				"status": "replaced",
+				"keccak256": "0x60cfb42fbc57746f5d104f222710d140532e8b0c8a9922dafc825c02c08570d4",
+				"replaced_in": "v0.3.37"
+			}
+		}
+	},
+	"v0.3.37": {
+		"tag": "v0.3.37",
+		"fulltag": "v0.3.37",
+		"network": "mumbai",
+		"date": "2022-03-16T13:16:33+09:00",
+		"commit": "7c5fa8afec169b64f7a52872bb9b8e2b5f8c8559",
+		"contracts": {
+			"BridgeState": {
+				"address": "0xaA3193e28Ca09f458B7f94dbB3e502bD1Bd45a4A",
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.42"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x4b5C520FE21b75242c0128Ed6F4CEAeCb8448A70",
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.42"
+			},
+			"CrossChainState": {
+				"address": "0x9Be75D8a923696B12B084798C5a74B8333624f0b",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.42"
+			},
+			"CrossChainManager": {
+				"address": "0xabcD4a30d41B07DAb7B0C3Dc63839Be273778E34",
+				"status": "replaced",
+				"keccak256": "0xf835fb66464bd94afb930d541745a57506239f2d94ca8daaa3a7cae02254ae95",
+				"replaced_in": "v0.3.39"
+			}
+		}
+	},
+	"v0.3.39": {
+		"tag": "v0.3.39",
+		"fulltag": "v0.3.39",
+		"network": "mumbai",
+		"date": "2022-03-17T11:37:46+09:00",
+		"commit": "e53be6972dc659c9d984f1a78a2d2060b089d2de",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0xE7274BBB1B8a070a93D462Af583Fbb5c3CD7E22c",
+				"status": "replaced",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7",
+				"replaced_in": "v0.3.42"
+			}
+		}
+	},
+	"v0.3.42": {
+		"tag": "v0.3.42",
+		"fulltag": "v0.3.42",
+		"network": "mumbai",
+		"date": "2022-03-28T15:29:19+09:00",
+		"commit": "3ffd9b092b406e8e0b8dd08f0fba9e9661348f6e",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x489e863789C9A14C9f98692b977D461a9a3e2c32",
 				"status": "current",
-				"keccak256": "0xfa239c3427626e37a647bd232234da1929814658bc04c6ac48cebdd79d335deb"
+				"keccak256": "0x42686fe530fddc35d6db041c686b9a9d94874f59b3d5fe9ee3bcef99b0af0afe"
+			},
+			"PeriFinance": {
+				"address": "0x7A8A9586C51ae6D7602A8af88336Ef2c777652D2",
+				"status": "replaced",
+				"keccak256": "0xe91e6750f1de5ec0b6810966d2e9ef4d4df9c35608e5fda68e53d0076c46fa52",
+				"replaced_in": "v0.3.43"
+			},
+			"BridgeState": {
+				"address": "0xCfA99808a267a338fBF338A330c698F7d0E213F6",
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.45"
+			},
+			"Issuer": {
+				"address": "0xf8BE20BE611077e90993F0f2020381EB5AD51E68",
+				"status": "replaced",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2",
+				"replaced_in": "v0.3.45"
+			},
+			"PynthpUSD": {
+				"address": "0xEdF37019480A64185FF54f4b929ED0B9A0D77f88",
+				"status": "current",
+				"keccak256": "0x3d41a018d79b02d0599e798ded05d6f53cfc3f467b428c961e76bb09c701adfa"
+			},
+			"BridgeStatepUSD": {
+				"address": "0xa233F37AbC537bB9EbF08b124a349F9935F84Cb3",
+				"status": "replaced",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5",
+				"replaced_in": "v0.3.45"
+			},
+			"CrossChainState": {
+				"address": "0xd8e2b9B811D499997bcd7aE4aD054ACBa07a3745",
+				"status": "replaced",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d",
+				"replaced_in": "v0.3.45"
+			},
+			"CrossChainManager": {
+				"address": "0x39450e11fb93987A8f371663B94798Dc1aD3c9f4",
+				"status": "replaced",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7",
+				"replaced_in": "v0.3.45"
+			}
+		}
+	},
+	"v0.3.43": {
+		"tag": "v0.3.43",
+		"fulltag": "v0.3.43",
+		"network": "mumbai",
+		"date": "2022-04-06T17:08:31+09:00",
+		"commit": "9293a0b7c9b1bf5fa5b74cb521bc1ced4a2d997b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x34CF42388631B9d06580F952463681AfD38F3E75",
+				"status": "replaced",
+				"keccak256": "0xe91e6750f1de5ec0b6810966d2e9ef4d4df9c35608e5fda68e53d0076c46fa52",
+				"replaced_in": "v0.3.44"
+			}
+		}
+	},
+	"v0.3.44": {
+		"tag": "v0.3.44",
+		"fulltag": "v0.3.44",
+		"network": "mumbai",
+		"date": "2022-04-11T19:57:33+09:00",
+		"commit": "869289e0080988f684dda7321c33ac9e56d57a0b",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xbd5AC983227ddEd4Abba73230Aa994440b7f42D3",
+				"status": "replaced",
+				"keccak256": "0x36623ca65131844b0e79effb135bbb802f46aab4388f42f5ed9fb747c2a63cae",
+				"replaced_in": "v0.3.45"
+			}
+		}
+	},
+	"v0.3.45": {
+		"tag": "v0.3.45",
+		"fulltag": "v0.3.45",
+		"network": "mumbai",
+		"date": "2022-04-11T21:04:50+09:00",
+		"commit": "a0fcd8c4487499d63e8313bed603997aa22c9132",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x9cBeBa4d23bA7B5faD5D6B1fD5E55a168BFE34C5",
+				"status": "current",
+				"keccak256": "0xdaa0f5a83d3476807cba3431f2e37d4cf7ea1372bd86ee92bd57f02d57da3f9f"
+			},
+			"BridgeState": {
+				"address": "0xd05a46a5f7667FA053b75A648aA8B307C14bDd78",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"Issuer": {
+				"address": "0xf8513881Fa66225569cB169097d8ac3Bb028A801",
+				"status": "current",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2"
+			},
+			"BridgeStatepUSD": {
+				"address": "0x4C63AC7b472d94f7F17e8f5F91c10200B1189B44",
+				"status": "current",
+				"keccak256": "0xa5692622bc2d9a479a6a0ef279d70768286f58eeaed9442489430c8f4ca498c5"
+			},
+			"CrossChainState": {
+				"address": "0x7A4F6b1BD0fe2DdbafE2219C7bA6FcEa544CcB91",
+				"status": "current",
+				"keccak256": "0x305ef6ead4b0c19947fe8fc85ea30285c87cc1e200cd4775b889c209899e761d"
+			},
+			"CrossChainManager": {
+				"address": "0x3852b8aE5f0E508Ac889FB14820347376a22Fb37",
+				"status": "current",
+				"keccak256": "0x4d9aafbba9c136e5c6f2a7c9d1b466c965d6f3c571fbf28540b5eb975c43eda7"
+			}
+		}
+	},
+	"v0.3.46": {
+		"tag": "v0.3.46",
+		"fulltag": "v0.3.46",
+		"network": "mumbai",
+		"date": "2022-04-12T19:47:36+09:00",
+		"commit": "fab234e75ee5313f37e577e7527ce417e4813206",
+		"contracts": {
+			"FeePool": {
+				"address": "0x219C6980fCCBCEF8C241D28d3b539ab634281aCD",
+				"status": "current",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
 			}
 		}
 	}

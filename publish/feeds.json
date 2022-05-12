@@ -1,0 +1,30 @@
+{
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x7ba0e3EbCe25DD3b5A0f36dd7aB34019B863b08D"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0x12870664a77Dd55bBdcDe32f91EB3244F511eF2e"
+	},
+	"BTC": {
+		"asset": "BTC",
+		"feed": "0x1B5C6cF9Df1CBF30387C24CC7DB1787CCf65C797"
+	},
+	"ETH": {
+		"asset": "ETH",
+		"feed": "0xc3cF399566220dc5Ed6C8CFbf8247214Af103C72"
+	},
+	"BNB": {
+		"asset": "BNB",
+		"feed": "0xD6B013A65C22C372F995864CcdAE202D0194f9bf"
+	},
+	"LINK": {
+		"asset": "LINK",
+		"feed": "0xdD27789b504fEd690F406A82F16B45a0901172C0"
+	},
+	"DOT": {
+		"asset": "DOT",
+		"feed": "0x54B584eb643375C41c55ddD8Da4b90124b18d05c"
+	}
+}
