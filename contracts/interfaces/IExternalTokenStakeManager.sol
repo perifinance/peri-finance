@@ -51,9 +51,25 @@ contract IExternalTokenStakeManager {
         bytes32 _inputCurrency
     ) external;
 
+    function redeem(
+        address account,
+        uint totalRedeemed,
+        address liquidator
+    ) external returns (uint);
+
     function unstakeMultipleTokens(
         address _unstaker,
         uint _amount,
         bytes32 _inputCurrency
     ) external;
+
+    function unstakeAndLiquidate(
+        address _unstaker,
+        address _liquidator,
+        uint _amount,
+        bytes32 _targetCurrency,
+        bytes32 _inputCurrency
+    ) external;
+
+    function exit(address _from) external;
 }

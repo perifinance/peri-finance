@@ -182,8 +182,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         if (initialDebtOwnership > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
-            require(value <= transferable, "Cannot transfer staked or escrowed PERI");
-            require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
+            require(value <= transferable, "Can't transfer staked or escrowed PERI");
+            require(!anyRateIsInvalid, "Pynth or PERI rate is invalid");
         }
         return true;
     }

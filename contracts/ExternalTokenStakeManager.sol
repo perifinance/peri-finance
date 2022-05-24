@@ -89,6 +89,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         bytes32 _currencyKey,
         bytes32 _unitCurrency
     ) external view returns (uint) {
+        return _stakedAmountOf(_user, _currencyKey, _unitCurrency);
+    }
+
+    function _stakedAmountOf(
+        address _user,
+        bytes32 _currencyKey,
+        bytes32 _unitCurrency
+    ) internal view returns (uint) {
         if (_currencyKey == _unitCurrency) {
             return stakingState.stakedAmountOf(_currencyKey, _user);
         } else {
@@ -252,6 +260,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint stakingAmountConverted = _toCurrency(_inputCurrency, _targetCurrency, _amount);
 
         uint targetDecimals = stakingState.tokenDecimals(_targetCurrency);
+
         require(targetDecimals <= 18, "Invalid decimal number");
         uint stakingAmountConvertedRoundedUp = stakingAmountConverted.roundUpDecimal(uint(18).sub(targetDecimals));
 
@@ -275,7 +284,55 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) external onlyIssuer {
         uint unstakingAmountConverted = _toCurrency(_inputCurrency, _targetCurrency, _amount);
 
-        _unstakeAndRefund(_unstaker, unstakingAmountConverted, _targetCurrency);
+        _unstakeAndRefund(_unstaker, _unstaker, unstakingAmountConverted, _targetCurrency);
+    }
+
+    function unstakeAndLiquidate(
+        address _unstaker,
+        address _liquidator,
+        uint _amount,
+        bytes32 _targetCurrency,
+        bytes32 _inputCurrency
+    ) external onlyIssuer {
+        uint unstakingAmountConverted = _toCurrency(_inputCurrency, _targetCurrency, _amount);
+
+        _unstakeAndRefund(_unstaker, _liquidator, unstakingAmountConverted, _targetCurrency);
+    }
+
+    function redeem(
+        address account,
+        uint totalRedeemed,
+        address liquidator
+    ) external onlyIssuer returns (uint) {
+        bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
+
+        for (uint i = 0; i < tokenList.length; i++) {
+            if (tokenList[i] == PERI) {
+                continue;
+            }
+
+            if (totalRedeemed == 0) {
+                break;
+            }
+
+            uint stakingAmount = _stakedAmountOf(account, tokenList[i], tokenList[i]);
+
+            if (stakingAmount > 0) {
+                uint usdAmount = _toCurrency(tokenList[i], pUSD, stakingAmount);
+
+                if (totalRedeemed < usdAmount) {
+                    usdAmount = totalRedeemed;
+                    stakingAmount = _toCurrency(pUSD, tokenList[i], usdAmount);
+                }
+
+                //uint unstakingAmountConverted = _toCurrency(tokenList[i], pUSD, redeemed);
+                //_unstakeAndRefund(account, liquidator, unstakingAmountConverted, tokenList[i]);
+                _unstakeAndRefund(account, liquidator, stakingAmount, tokenList[i]);
+                totalRedeemed = totalRedeemed.sub(usdAmount);
+            }
+        }
+
+        return totalRedeemed;
     }
 
     /**
@@ -332,12 +389,13 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 continue;
             }
 
-            _unstakeAndRefund(_unstaker, unstakeAmountByCurrency[i], order[i]);
+            _unstakeAndRefund(_unstaker, _unstaker, unstakeAmountByCurrency[i], order[i]);
         }
     }
 
     function _unstakeAndRefund(
         address _unstaker,
+        address _liquidator,
         uint _amount,
         bytes32 _targetCurrency
     ) internal tokenRegistered(_targetCurrency) {
@@ -348,7 +406,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         stakingState.unstake(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedUp);
 
         require(
-            stakingState.refund(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedUp),
+            stakingState.refund(_targetCurrency, _liquidator, unstakingAmountConvertedRoundedUp),
             "Refund has been failed"
         );
     }
@@ -363,6 +421,19 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
     function setStakingState(address _stakingState) external onlyOwner {
         stakingState = IStakingState(_stakingState);
+    }
+
+    function exit(address _from) external onlyIssuer {
+        bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
+        for (uint i; i < tokenList.length; i++) {
+            uint stakedAmount = _stakedAmountOf(_from, tokenList[i], tokenList[i]);
+
+            if (stakedAmount == 0) {
+                continue;
+            }
+
+            _unstakeAndRefund(_from, _from, stakedAmount, tokenList[i]);
+        }
     }
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
