@@ -17,6 +17,7 @@
 		"quotes": ["error", "double"],
 		"reason-string": "off",
 		"var-name-mixedcase": "off",
-		"visibility-modifier-order": "off"
+		"visibility-modifier-order": "off",
+		"bracket-align": "off"
 	}
 }
