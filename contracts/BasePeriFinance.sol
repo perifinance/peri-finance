@@ -351,6 +351,16 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         issuer().fitToClaimable(messageSender);
     }
 
+    function forceFitToClaimable(address _target)
+        external
+        issuanceActive
+        optionalProxy
+        blacklisted(messageSender)
+        onlyOwner
+    {
+        issuer().fitToClaimable(_target);
+    }
+
     function exit() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().exit(messageSender);
     }

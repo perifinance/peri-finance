@@ -2157,6 +2157,7 @@ const deploy = async ({
 	const pynthChunkSize = 15;
 	for (let i = 0; i < filteredPynths.length; i += pynthChunkSize) {
 		const chunk = filteredPynths.slice(i, i + pynthChunkSize);
+		console.log('chunk', chunk);
 		await runStep({
 			contract: 'Issuer',
 			target: issuer,
