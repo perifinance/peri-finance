@@ -410,13 +410,15 @@
 			},
 			"PynthpUSD": {
 				"address": "0x9766b0C6C61fDB1d8958c5f2b29999432183a4B2",
-				"status": "current",
-				"keccak256": "0x3d41a018d79b02d0599e798ded05d6f53cfc3f467b428c961e76bb09c701adfa"
+				"status": "replaced",
+				"keccak256": "0x3d41a018d79b02d0599e798ded05d6f53cfc3f467b428c961e76bb09c701adfa",
+				"replaced_in": "v0.4.17"
 			},
 			"Issuer": {
 				"address": "0xf21B9c315Ae01d7e9eCB130dA89D0Ed025e1B4c6",
-				"status": "current",
-				"keccak256": "0xc0cca0a1cbc0c1ef3df663cb75309dcca126a384ed2047fb910df0d9f82c2aac"
+				"status": "replaced",
+				"keccak256": "0xc0cca0a1cbc0c1ef3df663cb75309dcca126a384ed2047fb910df0d9f82c2aac",
+				"replaced_in": "v0.4.17"
 			},
 			"SystemSettings": {
 				"address": "0xC02D2d849B168c37b4cf43635Dfb6b6e5d85fdcD",
@@ -503,8 +505,33 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xBf3BeEe52aa8cf367105647bC6C9235Caf6fD508",
+				"status": "replaced",
+				"keccak256": "0xdc60d175f43f5b22f498c697bac200f0ca1e55f52f3916c31b3de2919ee90bc9",
+				"replaced_in": "v0.4.17"
+			}
+		}
+	},
+	"v0.4.17": {
+		"tag": "v0.4.17",
+		"fulltag": "v0.4.17",
+		"network": "mainnet",
+		"date": "2022-05-11T17:57:13+09:00",
+		"commit": "fb800e2c789f6dd6a2da4dc6f316d315f03775a5",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x3bb0682bD2fD8a844bc6c84a068A2334587D93B4",
 				"status": "current",
-				"keccak256": "0xdc60d175f43f5b22f498c697bac200f0ca1e55f52f3916c31b3de2919ee90bc9"
+				"keccak256": "0x46f964196cf437498db2ccc20a3ca2062d1016d9f8f933c4568eb389708518a6"
+			},
+			"PynthpUSD": {
+				"address": "0x965d8f6BAe4AA2ee8f2B85077BdFc4a70DB542ef",
+				"status": "current",
+				"keccak256": "0x4dc71f0dd2957fb6e1a14f1e276528bed435551621b02a705e2882bd968a6878"
+			},
+			"Issuer": {
+				"address": "0x6ddacCF2A9aA2B3B1563Ff02AC53d85fce6bbe23",
+				"status": "current",
+				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
 			}
 		}
 	}
