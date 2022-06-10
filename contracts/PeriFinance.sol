@@ -81,14 +81,14 @@ contract PeriFinance is BasePeriFinance {
     }
 
     function inflationalMint() external issuanceActive returns (bool) {
-        require(msg.sender == inflationMinter, "Not allowed to mint");
+        require(msg.sender == inflationMinter, "Minter only");
         require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
         uint _currRate = crossChainManager().currentNetworkDebtPercentage();
-        require(SafeDecimalMath.preciseUnit() >= _currRate, "Invalid network debt share");
+        require(SafeDecimalMath.preciseUnit() >= _currRate, "Network debt rate invalid");
 
         uint supplyToMint = _supplySchedule.mintableSupply();
         supplyToMint = supplyToMint
@@ -127,7 +127,7 @@ contract PeriFinance is BasePeriFinance {
 
     function mint(address _user, uint _amount) external optionalProxy returns (bool) {
         require(minterRole != address(0), "Mint is not available");
-        require(minterRole == messageSender, "Caller is not allowed to mint");
+        require(minterRole == messageSender, "Caller is not minter");
 
         // It won't change totalsupply since it is only for bridge purpose.
         tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
@@ -160,12 +160,12 @@ contract PeriFinance is BasePeriFinance {
         uint _destChainId,
         IBridgeState.Signature calldata _sign
     ) external payable optionalProxy {
-        require(_amount > 0, "Cannot transfer zero");
+        require(_amount > 0, "Can't transfer zero");
         (uint transferable, ) =
             issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
-        require(transferable >= _amount, "Cannot transfer more than the transferrable");
+        require(transferable >= _amount, "Can't transfer more than the transferrable");
 
-        require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
+        require(msg.value >= systemSettings().bridgeTransferGasCost(), "Fee is not sufficient");
         bridgeValidator.transfer(msg.value);
 
         require(_burnByProxy(messageSender, _amount), "burning failed");
@@ -177,10 +177,10 @@ contract PeriFinance is BasePeriFinance {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "No claimable");
-        require(msg.value >= systemSettings().bridgeClaimGasCost(), "fee is not sufficient");
+        require(msg.value >= systemSettings().bridgeClaimGasCost(), "Fee is not sufficient");
         bridgeValidator.transfer(msg.value);
 
-        for (uint i = 0; i < applicableIds.length; i++) {
+        for (uint i; i < applicableIds.length; i++) {
             _claimBridgedAmount(applicableIds[i]);
         }
     }

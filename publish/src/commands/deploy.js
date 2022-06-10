@@ -84,7 +84,7 @@ const deploy = async ({
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
 	ensureDeploymentPath(deploymentPath);
 
-	// OVM uses a gas price of 0 (unless --gas explicitely defined).
+	// OVM uses a gas price of 0 (unless --gas explicitly defined).
 	if (useOvm && gasPrice === DEFAULTS.gasPrice) {
 		gasPrice = w3utils.toBN('0');
 	}
@@ -1174,7 +1174,7 @@ const deploy = async ({
 	// Skip setting unless redeploying either of these,
 	if (config['PeriFinance'].deploy || config['PeriFinanceEscrow'].deploy) {
 		// Note: currently on mainnet PeriFinanceEscrow.methods.periFinance() does NOT exist
-		// it is "havven" and the ABI we have here is not sufficient
+		// it is "haven" and the ABI we have here is not sufficient
 		await runStep({
 			contract: 'PeriFinanceEscrow',
 			target: periFinanceEscrow,
@@ -1661,7 +1661,7 @@ const deploy = async ({
 		}
 
 		if (!w3utils.isAddress(feed)) {
-			// set peri price by our own oracle as chainlink doesnt provide the price feed for PERI
+			// set peri price by our own oracle as chainlink doesn't provide the price feed for PERI
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,
@@ -1860,7 +1860,7 @@ const deploy = async ({
 		addressesAreImported = !pending;
 	}
 
-	// Whewn addresses
+	// When addresses
 	// This relies on the fact that runStep returns undefined if nothing needed to be done, a tx hash if the
 	// transaction could be mined, and true in other cases, including appending to the owner actions file.
 	// Note that this will also end the script in the case of manual transaction mining.
@@ -1932,7 +1932,7 @@ const deploy = async ({
 			if (unknownAddress) {
 				console.log(
 					redBright(
-						`WARINING: Not invoking ${name}.rebuildCache() because ${fromBytes32(
+						`WARNING: Not invoking ${name}.rebuildCache() because ${fromBytes32(
 							unknownAddress
 						)} is unknown. This contract requires: ${requiredAddresses.map(id => fromBytes32(id))}`
 					)
@@ -2157,6 +2157,7 @@ const deploy = async ({
 	const pynthChunkSize = 15;
 	for (let i = 0; i < filteredPynths.length; i += pynthChunkSize) {
 		const chunk = filteredPynths.slice(i, i + pynthChunkSize);
+		console.log('chunk', chunk);
 		await runStep({
 			contract: 'Issuer',
 			target: issuer,

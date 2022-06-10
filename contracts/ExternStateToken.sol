@@ -26,6 +26,8 @@ contract ExternStateToken is Owned, Proxyable {
     uint public totalSupply;
     uint8 public decimals;
 
+    mapping(address => bool) private _blockedAddress;
+
     constructor(
         address payable _proxy,
         TokenState _tokenState,
@@ -63,6 +65,10 @@ contract ExternStateToken is Owned, Proxyable {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
+    function setBlockedAddress(address _target, bool _set) external onlyOwner {
+        _blockedAddress[_target] = _set;
+    }
+
     /**
      * @notice Set the address of the TokenState contract.
      * @dev This can be used to "pause" transfer functionality, by pointing the tokenState at 0x000..
@@ -80,6 +86,8 @@ contract ExternStateToken is Owned, Proxyable {
     ) internal returns (bool) {
         /* Disallow transfers to irretrievable-addresses. */
         require(to != address(0) && to != address(this) && to != address(proxy), "Cannot transfer to this address");
+
+        require(_blockedAddress[from] == false, "Cannot transfer from blocked address");
 
         // Insufficient balance will be handled by the safe subtraction.
         tokenState.setBalanceOf(from, tokenState.balanceOf(from).sub(value));

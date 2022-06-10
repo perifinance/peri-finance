@@ -175,7 +175,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _availableCurrencyKeysWithOptionalPERI(bool withPERI) internal view returns (bytes32[] memory) {
         bytes32[] memory currencyKeys = new bytes32[](availablePynths.length + (withPERI ? 1 : 0));
 
-        for (uint i = 0; i < availablePynths.length; i++) {
+        for (uint i; i < availablePynths.length; i++) {
             currencyKeys[i] = pynthsByAddress[address(availablePynths[i])];
         }
 
@@ -308,11 +308,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
         // What is the value of their PERI balance in pUSD
         (uint periRate, bool periRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint periCollateral = _periToUSD(_collateral(_issuer), periRate);
 
         uint externalTokenStaked = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
 
-        uint destinationValue = periCollateral.add(externalTokenStaked);
+        uint destinationValue = _periToUSD(_collateral(_issuer), periRate).add(externalTokenStaked);
 
         // They're allowed to issue up to issuanceRatio of that value
         return (destinationValue.multiplyDecimal(getIssuanceRatio()), periRateIsInvalid);
@@ -327,9 +326,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // it's more gas intensive to put this check here if they have 0 PERI, but it complies with the interface
         if (totalOwnedPeriFinance == 0 && externalTokenStaked == 0) return (0, anyRateIsInvalid);
 
-        uint totalOwned = totalOwnedPeriFinance.add(externalTokenStaked);
-
-        return (debtBalance.divideDecimal(totalOwned), anyRateIsInvalid);
+        return (debtBalance.divideDecimal(totalOwnedPeriFinance.add(externalTokenStaked)), anyRateIsInvalid);
     }
 
     function _collateral(address account) internal view returns (uint) {
@@ -489,10 +486,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         _requireRatesNotInvalid(anyRateIsInvalid);
 
-        uint estimatedQuota =
+        return
             exTokenStakeManager().externalTokenQuota(_account, debtBalance, _additionalpUSD, _additionalExToken, _isIssue);
-
-        return estimatedQuota;
     }
 
     function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance)
@@ -520,9 +515,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             debtAppliedIssuanceRatio > externalTokenStaked ? debtAppliedIssuanceRatio.sub(externalTokenStaked) : 0;
 
         // If we exceed the balance, no PERI are transferable, otherwise the difference is.
-        if (lockedPeriFinanceValue >= balance) {
-            transferable = 0;
-        } else {
+        if (lockedPeriFinanceValue < balance) {
             transferable = balance.sub(lockedPeriFinanceValue);
         }
 
@@ -549,7 +542,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint numKeys = currencyKeys.length;
         IPynth[] memory addresses = new IPynth[](numKeys);
 
-        for (uint i = 0; i < numKeys; i++) {
+        for (uint i; i < numKeys; i++) {
             addresses[i] = pynths[currencyKeys[i]];
         }
 
@@ -568,17 +561,17 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         pynthsByAddress[address(pynth)] = currencyKey;
     }
 
-    function addPynth(IPynth pynth) external onlyOwner {
-        _addPynth(pynth);
-        // Invalidate the cache to force a snapshot to be recomputed. If a pynth were to be added
-        // back to the system and it still somehow had cached debt, this would force the value to be
-        // updated.
-        debtCache().updateDebtCacheValidity(true);
-    }
+    // function addPynth(IPynth pynth) external onlyOwner {
+    //     _addPynth(pynth);
+    //     // Invalidate the cache to force a snapshot to be recomputed. If a pynth were to be added
+    //     // back to the system and it still somehow had cached debt, this would force the value to be
+    //     // updated.
+    //     debtCache().updateDebtCacheValidity(true);
+    // }
 
     function addPynths(IPynth[] calldata pynthsToAdd) external onlyOwner {
         uint numPynths = pynthsToAdd.length;
-        for (uint i = 0; i < numPynths; i++) {
+        for (uint i; i < numPynths; i++) {
             _addPynth(pynthsToAdd[i]);
         }
 
@@ -593,7 +586,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(currencyKey != pUSD, "Cannot remove pynth");
 
         // Remove the pynth from the availablePynths array.
-        for (uint i = 0; i < availablePynths.length; i++) {
+        for (uint i; i < availablePynths.length; i++) {
             if (address(availablePynths[i]) == pynthToRemove) {
                 delete availablePynths[i];
 
@@ -634,7 +627,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //     cache.updateCachedPynthDebtsWithRates(currencyKeys, zeroRates);
     //     cache.updateDebtCacheValidity(true);
 
-    //     for (uint i = 0; i < numKeys; i++) {
+    //     for (uint i ; i < numKeys; i++) {
     //         _removePynth(currencyKeys[i]);
     //     }
     // }
@@ -707,10 +700,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) external onlyPeriFinance {
         _requireCurrencyKeyIsNotpUSD(_currencyKey);
 
-        uint remainingDebt = _voluntaryBurnPynths(_from, _burnAmount, false, false);
-
         if (_currencyKey == PERI) {
-            exTokenStakeManager().requireNotExceedsQuotaLimit(_from, remainingDebt, 0, 0, false);
+            exTokenStakeManager().requireNotExceedsQuotaLimit(
+                _from,
+                _voluntaryBurnPynths(_from, _burnAmount, false, false),
+                0,
+                0,
+                false
+            );
         } else {
             exTokenStakeManager().unstake(_from, _burnAmount.divideDecimalRound(getIssuanceRatio()), _currencyKey, pUSD);
         }
@@ -721,12 +718,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_from, pUSD);
 
         (uint periRate, bool isPeriInvalid) = exchangeRates().rateAndInvalid(PERI);
-        uint periCollateralToUSD = _periToUSD(_collateral(_from), periRate);
 
         _requireRatesNotInvalid(anyRateIsInvalid || isPeriInvalid);
 
         (uint burnAmount, uint amountToUnstake) =
-            _amountsToFitClaimable(debtBalance, combinedStakedAmount, periCollateralToUSD);
+            _amountsToFitClaimable(debtBalance, combinedStakedAmount, _periToUSD(_collateral(_from), periRate));
 
         _voluntaryBurnPynths(_from, burnAmount, true, false);
 
@@ -736,16 +732,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function exit(address _from) external onlyPeriFinance {
         _voluntaryBurnPynths(_from, 0, true, true);
 
-        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
-        for (uint i = 0; i < tokenList.length; i++) {
-            uint stakedAmount = exTokenStakeManager().stakedAmountOf(_from, tokenList[i], tokenList[i]);
-
-            if (stakedAmount == 0) {
-                continue;
-            }
-
-            exTokenStakeManager().unstake(_from, stakedAmount, tokenList[i], tokenList[i]);
-        }
+        exTokenStakeManager().exit(_from);
     }
 
     function liquidateDelinquentAccount(
@@ -762,44 +749,49 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // require liquidator has enough pUSD
         require(IERC20(address(pynths[pUSD])).balanceOf(liquidator) >= pusdAmount, "Not enough pUSD");
 
-        uint liquidationPenalty = liquidations().liquidationPenalty();
+        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
 
         // What is their debt in pUSD?
         (uint debtBalance, uint totalDebtIssued, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, pUSD);
         (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
 
-        uint collateralForAccount = _collateral(account);
-        uint amountToFixRatio =
-            liquidations().calculateAmountToFixCollateral(debtBalance, _periToUSD(collateralForAccount, periRate));
+        uint collateralForAccountinUSD = _periToUSD(_collateral(account), periRate);
+        for (uint i; i < tokenList.length; i++) {
+            if (tokenList[i] == PERI) {
+                continue;
+            }
+            collateralForAccountinUSD.add(exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD));
+        }
+
+        uint amountToFixRatioinUSD = liquidations().calculateAmountToFixCollateral(debtBalance, collateralForAccountinUSD);
 
         // Cap amount to liquidate to repair collateral ratio based on issuance ratio
-        amountToLiquidate = amountToFixRatio < pusdAmount ? amountToFixRatio : pusdAmount;
-
-        // what's the equivalent amount of peri for the amountToLiquidate?
-        uint periRedeemed = _usdToPeri(amountToLiquidate, periRate);
+        amountToLiquidate = amountToFixRatioinUSD < pusdAmount ? amountToFixRatioinUSD : pusdAmount;
 
         // Add penalty
-        totalRedeemed = periRedeemed.multiplyDecimal(SafeDecimalMath.unit().add(liquidationPenalty));
+        uint totalRedeemedinUSD =
+            amountToLiquidate.multiplyDecimal(SafeDecimalMath.unit().add(liquidations().liquidationPenalty()));
 
-        // if total PERI to redeem is greater than account's collateral
-        // account is under collateralised, liquidate all collateral and reduce pUSD to burn
-        if (totalRedeemed > collateralForAccount) {
-            // set totalRedeemed to all transferable collateral
-            totalRedeemed = collateralForAccount;
+        if (totalRedeemedinUSD > collateralForAccountinUSD) {
+            totalRedeemedinUSD = collateralForAccountinUSD;
 
-            // whats the equivalent pUSD to burn for all collateral less penalty
-            amountToLiquidate = _periToUSD(
-                collateralForAccount.divideDecimal(SafeDecimalMath.unit().add(liquidationPenalty)),
-                periRate
+            amountToLiquidate = collateralForAccountinUSD.divideDecimal(
+                SafeDecimalMath.unit().add(liquidations().liquidationPenalty())
             );
         }
+
+        totalRedeemedinUSD = exTokenStakeManager().redeem(account, totalRedeemedinUSD, liquidator);
+
+        // what's the equivalent amount of peri for the amountToLiquidate?
+        //uint periRedeemed = _usdToPeri(amountToLiquidate, periRate);
+        totalRedeemed = _usdToPeri(totalRedeemedinUSD, periRate);
 
         // burn pUSD from messageSender (liquidator) and reduce account's debt
         _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);
 
         // Remove liquidation flag if amount liquidated fixes ratio
-        if (amountToLiquidate == amountToFixRatio) {
+        if (amountToLiquidate == amountToFixRatioinUSD) {
             // Remove liquidation
             liquidations().removeAccountInLiquidation(account);
         }
@@ -875,7 +867,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint pUSDBalance = IERC20(address(pynths[pUSD])).balanceOf(burnAccount);
         uint deviation = pUSDBalance < amountBurnt ? amountBurnt.sub(pUSDBalance) : pUSDBalance.sub(amountBurnt);
-        amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
+
+        // amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
+        if (deviation < 10) {
+            amountBurnt = pUSDBalance;
+        }
 
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
@@ -1023,7 +1019,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // What will the new total after taking out the withdrawn amount
         uint newTotalDebtIssued = totalDebtIssued.sub(debtToRemove);
 
-        uint delta = 0;
+        uint delta;
 
         // What will the debt delta be if there is any debt left?
         // Set delta to 0 if no more debt left in system after user

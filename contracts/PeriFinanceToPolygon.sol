@@ -61,7 +61,7 @@ contract PeriFinanceToPolygon is PeriFinance {
     }
 
     function deposit(address _user, bytes calldata depositData) external optionalProxy {
-        require(messageSender == childChainManager, "Caller is not allowed to deposit");
+        require(messageSender == childChainManager, "Caller can't deposit");
 
         uint amount = abi.decode(depositData, (uint256));
 
