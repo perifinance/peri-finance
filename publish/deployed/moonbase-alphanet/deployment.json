@@ -398,10 +398,10 @@
 		},
 		"ExternalTokenStakeManager": {
 			"name": "ExternalTokenStakeManager",
-			"address": "0x78dB64A45d2aDb9A4688dfC55B96E1e75A6dff4b",
+			"address": "0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
 			"source": "ExternalTokenStakeManager",
-			"link": "https://moonbase.moonscan.io/address/0x78dB64A45d2aDb9A4688dfC55B96E1e75A6dff4b",
-			"timestamp": "2022-05-24T08:45:24.562Z",
+			"link": "https://moonbase.moonscan.io/address/0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
+			"timestamp": "2022-06-14T08:24:18.568Z",
 			"txn": "",
 			"network": "moonbase-alphanet"
 		},

@@ -763,23 +763,35 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             }
             collateralForAccountinUSD.add(exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD));
         }
+        // 37443180621810214640
 
         uint amountToFixRatioinUSD = liquidations().calculateAmountToFixCollateral(debtBalance, collateralForAccountinUSD);
 
+        // 37931034482758615586
+
+        // pusdAmount 36860795155452549960
+
         // Cap amount to liquidate to repair collateral ratio based on issuance ratio
         amountToLiquidate = amountToFixRatioinUSD < pusdAmount ? amountToFixRatioinUSD : pusdAmount;
+
+        // 36860795155452549960
 
         // Add penalty
         uint totalRedeemedinUSD =
             amountToLiquidate.multiplyDecimal(SafeDecimalMath.unit().add(liquidations().liquidationPenalty()));
 
+        // 405468746709978049560
+
         if (totalRedeemedinUSD > collateralForAccountinUSD) {
             totalRedeemedinUSD = collateralForAccountinUSD;
+
+            // totalRedeemedinUSD = 37443180621810214640
 
             amountToLiquidate = collateralForAccountinUSD.divideDecimal(
                 SafeDecimalMath.unit().add(liquidations().liquidationPenalty())
             );
         }
+        // amountToLiquidate = 3403925511073655876
 
         totalRedeemedinUSD = exTokenStakeManager().redeem(account, totalRedeemedinUSD, liquidator);
 

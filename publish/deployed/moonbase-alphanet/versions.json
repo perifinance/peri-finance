@@ -2737,8 +2737,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x78dB64A45d2aDb9A4688dfC55B96E1e75A6dff4b",
-				"status": "current",
-				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0"
+				"status": "replaced",
+				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0",
+				"replaced_in": "v0.4.20"
 			},
 			"CrossChainState": {
 				"address": "0x87B95c111cd1825f1FC0BB187A8298425335c282",
@@ -2826,6 +2827,20 @@
 				"address": "0x6a74F79A98D21D2DdBB96eA2DF731CB16303eF83",
 				"status": "current",
 				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
+			}
+		}
+	},
+	"v0.4.20": {
+		"tag": "v0.4.20",
+		"fulltag": "v0.4.20",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-14T15:02:35+09:00",
+		"commit": "be331526c71afcd568f7895b4e156ad6660ed13a",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
+				"status": "current",
+				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0"
 			}
 		}
 	}
