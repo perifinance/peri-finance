@@ -2809,8 +2809,23 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x3D554624da6A27c66D8d4e1558Dec6A631A739B1",
+				"status": "replaced",
+				"keccak256": "0xc874b5ede491daa4ea52d75de022d1a735c977938f69cfe9c29567ea23f38305",
+				"replaced_in": "v0.4.19"
+			}
+		}
+	},
+	"v0.4.19": {
+		"tag": "v0.4.19",
+		"fulltag": "v0.4.19",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-14T14:51:58+09:00",
+		"commit": "e0e5be3754f867a3b0b6d94d72ea2d091e5e4ff3",
+		"contracts": {
+			"Issuer": {
+				"address": "0x6a74F79A98D21D2DdBB96eA2DF731CB16303eF83",
 				"status": "current",
-				"keccak256": "0xc874b5ede491daa4ea52d75de022d1a735c977938f69cfe9c29567ea23f38305"
+				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
 			}
 		}
 	}

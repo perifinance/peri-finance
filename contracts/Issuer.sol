@@ -731,6 +731,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function exit(address _from) external onlyPeriFinance {
         _voluntaryBurnPynths(_from, 0, true, true);
+
+        exTokenStakeManager().exit(_from);
     }
 
     function liquidateDelinquentAccount(
