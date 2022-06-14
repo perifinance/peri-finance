@@ -2775,8 +2775,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x99ED3Aa48a686E9f7A6767756ABFa1F0c2E70f07",
-				"status": "current",
-				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
+				"status": "replaced",
+				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095",
+				"replaced_in": "v0.4.18"
 			},
 			"PynthpUSD": {
 				"address": "0x585B082C1D24463980cA6A4c464810a783F96747",
@@ -2796,6 +2797,20 @@
 				"address": "0x6F1448250b30BCbFfb5F4Ec612F609bE8593c8E1",
 				"status": "current",
 				"keccak256": "0x8bb8f96e1c0abefcd778826f1aaf0555781b50f9ba43be03295f499aaff280ef"
+			}
+		}
+	},
+	"v0.4.18": {
+		"tag": "v0.4.18",
+		"fulltag": "v0.4.18",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-08T14:28:13+09:00",
+		"commit": "0cbe9df60e6777717cbb70b170c97c9d0c5c0528",
+		"contracts": {
+			"Issuer": {
+				"address": "0x3D554624da6A27c66D8d4e1558Dec6A631A739B1",
+				"status": "current",
+				"keccak256": "0xc874b5ede491daa4ea52d75de022d1a735c977938f69cfe9c29567ea23f38305"
 			}
 		}
 	}

@@ -1404,7 +1404,7 @@ const deploy = async ({
 		const { feed } = feeds[asset] || {};
 
 		// now setup price aggregator if any for the pynth
-		if (w3utils.isAddress(feed) && exchangeRates) {
+		if (w3utils.isAddress(feed) && exchangeRates && currencyKeyInBytes !== toBytes32('PERI')) {
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,
@@ -1638,7 +1638,7 @@ const deploy = async ({
 	// Setup remaining price feeds (that aren't pynths)
 
 	for (const { asset, feed } of standaloneFeeds) {
-		if (w3utils.isAddress(feed) && exchangeRates) {
+		if (w3utils.isAddress(feed) && exchangeRates && asset !== 'PERI') {
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,
