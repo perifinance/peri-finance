@@ -758,10 +758,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint collateralForAccountinUSD = _periToUSD(_collateral(account), periRate);
         for (uint i; i < tokenList.length; i++) {
-            if (tokenList[i] == PERI) {
-                continue;
-            }
-            collateralForAccountinUSD.add(exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD));
+            collateralForAccountinUSD = collateralForAccountinUSD.add(
+                exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD)
+            );
         }
         // 37443180621810214640
 

@@ -2825,8 +2825,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x6a74F79A98D21D2DdBB96eA2DF731CB16303eF83",
-				"status": "current",
-				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
+				"status": "replaced",
+				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095",
+				"replaced_in": "v0.4.21"
 			}
 		}
 	},
@@ -2841,6 +2842,50 @@
 				"address": "0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
 				"status": "current",
 				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0"
+			}
+		}
+	},
+	"v0.4.21": {
+		"tag": "v0.4.21",
+		"fulltag": "v0.4.21",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-14T17:26:39+09:00",
+		"commit": "873388508ec2b5eddbffec3ecd2842e61888308f",
+		"contracts": {
+			"Issuer": {
+				"address": "0x8477B26DAb79a70F52EE6E81a00712252C2D1Bc0",
+				"status": "replaced",
+				"keccak256": "0xc5e9d2c31486dee036f614192e39dc7cacf2a2e1eb01fecebb2ced713f5478f7",
+				"replaced_in": "v0.4.22"
+			}
+		}
+	},
+	"v0.4.22": {
+		"tag": "v0.4.22",
+		"fulltag": "v0.4.22",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-14T17:26:39+09:00",
+		"commit": "873388508ec2b5eddbffec3ecd2842e61888308f",
+		"contracts": {
+			"Issuer": {
+				"address": "0x3d6831B7d477DfdC999E9fA73795F7055A8311Ab",
+				"status": "replaced",
+				"keccak256": "0xb113a949814b47941d8f297960812d720a138a425bfc1f5fc03b1caf44ce84a7",
+				"replaced_in": "v0.4.23"
+			}
+		}
+	},
+	"v0.4.23": {
+		"tag": "v0.4.23",
+		"fulltag": "v0.4.23",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-14T17:26:39+09:00",
+		"commit": "873388508ec2b5eddbffec3ecd2842e61888308f",
+		"contracts": {
+			"Issuer": {
+				"address": "0x4506A0f0A80e2DdC5cE771586b899D1614F1921A",
+				"status": "current",
+				"keccak256": "0xe988bc7b772164da265aedc1cef23edd099585f78a280ec939649c6aa25e6069"
 			}
 		}
 	}
