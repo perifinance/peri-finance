@@ -81,21 +81,21 @@ contract PeriFinance is BasePeriFinance {
     }
 
     function inflationalMint() external issuanceActive returns (bool) {
-        require(msg.sender == inflationMinter, "Minter only");
-        require(address(rewardsDistribution()) != address(0), "RewardsDistribution not set");
+        require(msg.sender == inflationMinter, "onlyMinter");
+        require(address(rewardsDistribution()) != address(0), "No RewardsDistribution");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
         uint _currRate = crossChainManager().currentNetworkDebtPercentage();
-        require(SafeDecimalMath.preciseUnit() >= _currRate, "Network debt rate invalid");
+        require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
 
         uint supplyToMint = _supplySchedule.mintableSupply();
         supplyToMint = supplyToMint
             .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(_currRate)
             .preciseDecimalToDecimal();
-        require(supplyToMint > 0, "No supply is mintable");
+        require(supplyToMint > 0, "No mintable supply");
 
         // record minting event before mutation to token supply
         _supplySchedule.recordMintEvent(supplyToMint);
@@ -126,8 +126,8 @@ contract PeriFinance is BasePeriFinance {
     }
 
     function mint(address _user, uint _amount) external optionalProxy returns (bool) {
-        require(minterRole != address(0), "Mint is not available");
-        require(minterRole == messageSender, "Caller is not minter");
+        require(minterRole != address(0), "0 address");
+        require(minterRole == messageSender, "onlyMinter");
 
         // It won't change totalsupply since it is only for bridge purpose.
         tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
@@ -160,15 +160,15 @@ contract PeriFinance is BasePeriFinance {
         uint _destChainId,
         IBridgeState.Signature calldata _sign
     ) external payable optionalProxy {
-        require(_amount > 0, "Can't transfer zero");
+        require(_amount > 0, "0 amount");
         (uint transferable, ) =
             issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
-        require(transferable >= _amount, "Can't transfer more than the transferrable");
+        require(transferable >= _amount, "CheckAmount");
 
-        require(msg.value >= systemSettings().bridgeTransferGasCost(), "Fee is not sufficient");
+        require(msg.value >= systemSettings().bridgeTransferGasCost(), "NoFee");
         bridgeValidator.transfer(msg.value);
 
-        require(_burnByProxy(messageSender, _amount), "burning failed");
+        require(_burnByProxy(messageSender, _amount), "BurnFail");
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
@@ -176,8 +176,8 @@ contract PeriFinance is BasePeriFinance {
     function claimAllBridgedAmounts() external payable optionalProxy {
         uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
 
-        require(applicableIds.length > 0, "No claimable");
-        require(msg.value >= systemSettings().bridgeClaimGasCost(), "Fee is not sufficient");
+        require(applicableIds.length > 0, "NoClaimable");
+        require(msg.value >= systemSettings().bridgeClaimGasCost(), "NoFee");
         bridgeValidator.transfer(msg.value);
 
         for (uint i; i < applicableIds.length; i++) {
@@ -189,11 +189,11 @@ contract PeriFinance is BasePeriFinance {
         // Validations are checked from bridge state
         (address account, uint amount, , , , ) = bridgeState.inboundings(_index);
 
-        require(account == messageSender, "Caller is not matched");
+        require(account == messageSender, "CheckAddress");
 
         bridgeState.claimInbound(_index, amount);
 
-        require(_mintByProxy(account, amount), "Mint failed");
+        require(_mintByProxy(account, amount), "MintFail");
 
         return true;
     }

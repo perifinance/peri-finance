@@ -2796,8 +2796,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x6F1448250b30BCbFfb5F4Ec612F609bE8593c8E1",
-				"status": "current",
-				"keccak256": "0x8bb8f96e1c0abefcd778826f1aaf0555781b50f9ba43be03295f499aaff280ef"
+				"status": "replaced",
+				"keccak256": "0x8bb8f96e1c0abefcd778826f1aaf0555781b50f9ba43be03295f499aaff280ef",
+				"replaced_in": "v0.4.24"
 			}
 		}
 	},
@@ -2884,8 +2885,28 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x4506A0f0A80e2DdC5cE771586b899D1614F1921A",
+				"status": "replaced",
+				"keccak256": "0xe988bc7b772164da265aedc1cef23edd099585f78a280ec939649c6aa25e6069",
+				"replaced_in": "v0.4.24"
+			}
+		}
+	},
+	"v0.4.24": {
+		"tag": "v0.4.24",
+		"fulltag": "v0.4.24",
+		"network": "moonbase-alphanet",
+		"date": "2022-06-15T16:25:17+09:00",
+		"commit": "31699681f98fc3d3eab0926788f01f54dfadc771",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x25E322a86FB964195393A32C3d3D8B769E389C2E",
 				"status": "current",
-				"keccak256": "0xe988bc7b772164da265aedc1cef23edd099585f78a280ec939649c6aa25e6069"
+				"keccak256": "0xf098fb8598bd826aeafc4155bac140b7508b1862459eabf760bbe349a07fd857"
+			},
+			"Issuer": {
+				"address": "0x3F725311B3aDF7809e18c35f6e43e3140e580Bd3",
+				"status": "current",
+				"keccak256": "0x7a0e587bdcd179ffd39164501798a2782cd837129252627e7a4253924c3f84ee"
 			}
 		}
 	}
