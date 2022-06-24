@@ -721,12 +721,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         _requireRatesNotInvalid(anyRateIsInvalid || isPeriInvalid);
 
-        (uint burnAmount, uint amountToUnstake) =
-            _amountsToFitClaimable(debtBalance, combinedStakedAmount, _periToUSD(_collateral(_from), periRate));
+        uint stakedAmount = _periToUSD(_collateral(_from), periRate);
 
-        _voluntaryBurnPynths(_from, burnAmount, true, false);
+        if (combinedStakedAmount.add(stakedAmount) == 0) {
+            _voluntaryBurnPynths(_from, 0, true, true);
+        } else {
+            (uint burnAmount, uint amountToUnstake) =
+                _amountsToFitClaimable(debtBalance, combinedStakedAmount, stakedAmount);
 
-        exTokenStakeManager().unstakeMultipleTokens(_from, amountToUnstake, pUSD);
+            _voluntaryBurnPynths(_from, burnAmount, true, false);
+
+            exTokenStakeManager().unstakeMultipleTokens(_from, amountToUnstake, pUSD);
+        }
     }
 
     function exit(address _from) external onlyPeriFinance {
@@ -758,10 +764,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint collateralForAccountinUSD = _periToUSD(_collateral(account), periRate);
         for (uint i; i < tokenList.length; i++) {
-            if (tokenList[i] == PERI) {
-                continue;
-            }
-            collateralForAccountinUSD.add(exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD));
+            collateralForAccountinUSD = collateralForAccountinUSD.add(
+                exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD)
+            );
         }
 
         uint amountToFixRatioinUSD = liquidations().calculateAmountToFixCollateral(debtBalance, collateralForAccountinUSD);

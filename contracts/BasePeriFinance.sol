@@ -182,8 +182,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         if (initialDebtOwnership > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
-            require(value <= transferable, "Can't transfer staked or escrowed PERI");
-            require(!anyRateIsInvalid, "Pynth or PERI rate is invalid");
+            require(value <= transferable, "Check Transferable");
+            require(!anyRateIsInvalid, "Rate invalid");
         }
         return true;
     }
@@ -191,7 +191,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     // ========== MUTATIVE FUNCTIONS ==========
 
     function setBlacklistManager(address _blacklistManager) external onlyOwner {
-        require(_blacklistManager != address(0), "address cannot be empty");
+        require(_blacklistManager != address(0), "0 address");
 
         blacklistManager = IBlacklistManager(_blacklistManager);
     }
@@ -351,6 +351,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         issuer().fitToClaimable(messageSender);
     }
 
+    function forceFitToClaimable(address _target) external onlyOwner {
+        issuer().fitToClaimable(_target);
+    }
+
     function exit() external issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().exit(messageSender);
     }
@@ -381,7 +385,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _notImplemented() internal pure {
-        revert("Cannot be run on this layer");
+        revert("Can't run");
     }
 
     // ========== MODIFIERS ==========
@@ -405,8 +409,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _blacklisted(address _account) private view {
-        require(address(blacklistManager) != address(0), "Required contract is not set yet");
-        require(!blacklistManager.flagged(_account), "Account is on blacklist");
+        require(address(blacklistManager) != address(0), "Contract not setted");
+        require(!blacklistManager.flagged(_account), "Blacklisted");
     }
 
     modifier blacklisted(address _account) {
@@ -429,7 +433,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _onlyExchanger() private view {
-        require(msg.sender == address(exchanger()), "Only Exchanger can invoke this");
+        require(msg.sender == address(exchanger()), "OnlyExchanger");
     }
 
     // ========== EVENTS ==========

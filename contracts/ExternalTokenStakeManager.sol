@@ -315,13 +315,19 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 break;
             }
 
+            // token staking amount
             uint stakingAmount = _stakedAmountOf(account, tokenList[i], tokenList[i]);
 
+            // staking 되어있으면.
             if (stakingAmount > 0) {
+                // stake된 token을 pUSD로 환산
                 uint usdAmount = _toCurrency(tokenList[i], pUSD, stakingAmount);
 
+                // 청산 금액보다 staking된 값이 크면
                 if (totalRedeemed < usdAmount) {
+                    // pUSD 환산 staking 금액을 totalRedeemed로 변경
                     usdAmount = totalRedeemed;
+                    // pUSD 환산 staking 금액을 token 단위로 변경
                     stakingAmount = _toCurrency(pUSD, tokenList[i], usdAmount);
                 }
 
