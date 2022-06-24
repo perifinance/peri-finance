@@ -1,8 +1,4 @@
 {
-	"PERI": {
-		"asset": "PERI",
-		"feed": "0xDC3EA94CD0AC27d9A86C180091e7f78C683d3699"
-	},
 	"DAI": {
 		"asset": "DAI",
 		"feed": "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9"

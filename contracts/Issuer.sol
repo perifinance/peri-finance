@@ -919,7 +919,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
-        require(existingDebt > amount, "burn amount is not matched");
         remainingDebt = existingDebt.sub(amount);
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths

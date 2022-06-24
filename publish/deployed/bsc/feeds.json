@@ -1,9 +1,4 @@
 {
-	"PERI": {
-		"asset": "PERI",
-		"feed": "",
-		"standalone": true
-	},
 	"USDC": {
 		"asset": "USDC",
 		"feed": "0x51597f405303C4377E36123cBc172b13269EA163"
