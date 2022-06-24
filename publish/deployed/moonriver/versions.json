@@ -2902,8 +2902,9 @@
 			},
 			"Issuer": {
 				"address": "0xC5dC6240f48268Ce285f46E4cF37d1dEf5347845",
-				"status": "current",
-				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2"
+				"status": "replaced",
+				"keccak256": "0x2e6159700e1c7cc0e21649b489d753bf69057279c9e6f6e1bb30844827fab7a2",
+				"replaced_in": "v0.5.0"
 			},
 			"TradingRewards": {
 				"address": "0xA590C980050d934c046920f8a9e0d9567536eDce",
@@ -2977,8 +2978,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x0C39D20CAF2521c0c9657caccF5Be0F207E37792",
-				"status": "current",
-				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480"
+				"status": "replaced",
+				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480",
+				"replaced_in": "v0.5.0"
 			},
 			"CrossChainState": {
 				"address": "0xA751ccdB1434cc355C44059c908ad7e04fAdB0B1",
@@ -3489,8 +3491,33 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x2d8F20369858a2173f6Ccac8687BdB73FdA14444",
+				"status": "replaced",
+				"keccak256": "0xb27c6a12c75e956fa61e9284e20209439c8b6f56a20077e4d56e2bfd6524b6d9",
+				"replaced_in": "v0.5.0"
+			}
+		}
+	},
+	"v0.5.0": {
+		"tag": "v0.5.0",
+		"fulltag": "v0.5.0",
+		"network": "moonriver",
+		"date": "2022-05-11T17:57:13+09:00",
+		"commit": "fb800e2c789f6dd6a2da4dc6f316d315f03775a5",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x6ddacCF2A9aA2B3B1563Ff02AC53d85fce6bbe23",
 				"status": "current",
-				"keccak256": "0xb27c6a12c75e956fa61e9284e20209439c8b6f56a20077e4d56e2bfd6524b6d9"
+				"keccak256": "0xf098fb8598bd826aeafc4155bac140b7508b1862459eabf760bbe349a07fd857"
+			},
+			"Issuer": {
+				"address": "0x215299bF3f6cE676a66B71FDfd58F9f98c7A9D35",
+				"status": "current",
+				"keccak256": "0xfb745c9cb0f6d897c305c38903de7f318c8f852a99151330b7758faced1d00ac"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0x9213c774AcC130f1A6192C76f97D9AD116625B9E",
+				"status": "current",
+				"keccak256": "0xd4b246fbc1d16aa2e193fc488717bd421cac333bb76c839d5786d2801a61ca7a"
 			}
 		}
 	}

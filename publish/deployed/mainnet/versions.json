@@ -432,8 +432,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x2dECA03453c3e4affa434a212ea6a3Fe81c7F1F7",
-				"status": "current",
-				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480"
+				"status": "replaced",
+				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480",
+				"replaced_in": "v0.5.0"
 			},
 			"BridgeStatepUSD": {
 				"address": "0x48d9489f37274a1EBcd93dC5f8423f070b4Cf467",
@@ -520,8 +521,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x3bb0682bD2fD8a844bc6c84a068A2334587D93B4",
-				"status": "current",
-				"keccak256": "0x46f964196cf437498db2ccc20a3ca2062d1016d9f8f933c4568eb389708518a6"
+				"status": "replaced",
+				"keccak256": "0x46f964196cf437498db2ccc20a3ca2062d1016d9f8f933c4568eb389708518a6",
+				"replaced_in": "v0.5.0"
 			},
 			"PynthpUSD": {
 				"address": "0x965d8f6BAe4AA2ee8f2B85077BdFc4a70DB542ef",
@@ -530,8 +532,33 @@
 			},
 			"Issuer": {
 				"address": "0x6ddacCF2A9aA2B3B1563Ff02AC53d85fce6bbe23",
+				"status": "replaced",
+				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095",
+				"replaced_in": "v0.5.0"
+			}
+		}
+	},
+	"v0.5.0": {
+		"tag": "v0.5.0",
+		"fulltag": "v0.5.0",
+		"network": "mainnet",
+		"date": "2022-06-09T10:47:28+09:00",
+		"commit": "0b0db17763e74a2e9adc84a632721b59453bb49f",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x67eB349a9fAC8bA00614051fb02d90a3cFeE45a8",
 				"status": "current",
-				"keccak256": "0xcf1f087c093b6e4bf62ea64918acfdb02ba576de0c59bb67d28b42d772664095"
+				"keccak256": "0xe73be95adef7269666719703c89f4b3199059bb043ba014185eb3a32d1b1e5c0"
+			},
+			"Issuer": {
+				"address": "0x5115F8287c908aE8C7407e417e8dD595b952B625",
+				"status": "current",
+				"keccak256": "0xfb745c9cb0f6d897c305c38903de7f318c8f852a99151330b7758faced1d00ac"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0x7EDD97cfE3605a609C1fbA852102Eb19b2a6f084",
+				"status": "current",
+				"keccak256": "0xd4b246fbc1d16aa2e193fc488717bd421cac333bb76c839d5786d2801a61ca7a"
 			}
 		}
 	}

@@ -454,8 +454,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0xE3B624871CaC0E10D2a27a0964665b45FbC3c805",
-				"status": "current",
-				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480"
+				"status": "replaced",
+				"keccak256": "0x226e39715d23aa3ace302e9456bece8ad1ced48f199b856147b80d1c8d4e6480",
+				"replaced_in": "v0.5.0"
 			},
 			"BridgeState": {
 				"address": "0x8b6f96a8112a541c1651471a3ec026ccaA96b586",
@@ -490,8 +491,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x44F7bF9Dcb7a4E0a99126eA0b30aA56AcBB92A7F",
-				"status": "current",
-				"keccak256": "0xc0cca0a1cbc0c1ef3df663cb75309dcca126a384ed2047fb910df0d9f82c2aac"
+				"status": "replaced",
+				"keccak256": "0xc0cca0a1cbc0c1ef3df663cb75309dcca126a384ed2047fb910df0d9f82c2aac",
+				"replaced_in": "v0.5.0"
 			},
 			"CrossChainState": {
 				"address": "0x297C479187d42b89E501C6B57D6e860F0A5299eA",
@@ -558,8 +560,33 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x6e71E034b19b62ef00F5A3Df7A17761680B4Bd7c",
+				"status": "replaced",
+				"keccak256": "0x67f555ab79541dc4aa8a0e4b6c88692371fdca72eee872afe6092c20e0b7d3c9",
+				"replaced_in": "v0.5.0"
+			}
+		}
+	},
+	"v0.5.0": {
+		"tag": "v0.5.0",
+		"fulltag": "v0.5.0",
+		"network": "bsc",
+		"date": "2022-05-11T17:57:13+09:00",
+		"commit": "fb800e2c789f6dd6a2da4dc6f316d315f03775a5",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0x80efb39D5e2dE8C3CA8FE94302435fF5723b8098",
 				"status": "current",
-				"keccak256": "0x67f555ab79541dc4aa8a0e4b6c88692371fdca72eee872afe6092c20e0b7d3c9"
+				"keccak256": "0x0b09da611f1b71d2b4887bb14bc82ecdcd721927105ef2ddde430753e51d026f"
+			},
+			"Issuer": {
+				"address": "0x81E593716DC004115E4Cd096237A24FAfe75b4C6",
+				"status": "current",
+				"keccak256": "0xfb745c9cb0f6d897c305c38903de7f318c8f852a99151330b7758faced1d00ac"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0x1AB92259a9259268a23Bf3E3Db5cFBA0B8D8C7f6",
+				"status": "current",
+				"keccak256": "0xd4b246fbc1d16aa2e193fc488717bd421cac333bb76c839d5786d2801a61ca7a"
 			}
 		}
 	}
