@@ -2762,8 +2762,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xF8Ee7311b6bd7307113A954085bDE3F4C46214a3",
-				"status": "current",
-				"keccak256": "0xe61326892721a3a2d36aeb365416d356bcad514585f4c44953e43a00cf5abdf1"
+				"status": "replaced",
+				"keccak256": "0xe61326892721a3a2d36aeb365416d356bcad514585f4c44953e43a00cf5abdf1",
+				"replaced_in": "v0.5.2"
 			}
 		}
 	},
@@ -2937,6 +2938,20 @@
 				"address": "0x09cEb533619a97519dA83434A095D96FC6ff1f00",
 				"status": "current",
 				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
+			}
+		}
+	},
+	"v0.5.2": {
+		"tag": "v0.5.2",
+		"fulltag": "v0.5.2",
+		"network": "moonbase-alphanet",
+		"date": "2022-07-01T11:52:25+09:00",
+		"commit": "ace168ec707da78b85bf8ac4f28089d15826be68",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xD41D351A75d3b4217d1fD72f5bf1cE04cae235b1",
+				"status": "current",
+				"keccak256": "0x1750b2af99da984502a7749ab51015a983cd7ae3acbd0edbe2987588aad308cd"
 			}
 		}
 	}

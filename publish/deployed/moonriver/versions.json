@@ -3511,13 +3511,28 @@
 			},
 			"Issuer": {
 				"address": "0x215299bF3f6cE676a66B71FDfd58F9f98c7A9D35",
-				"status": "current",
-				"keccak256": "0xfb745c9cb0f6d897c305c38903de7f318c8f852a99151330b7758faced1d00ac"
+				"status": "replaced",
+				"keccak256": "0xfb745c9cb0f6d897c305c38903de7f318c8f852a99151330b7758faced1d00ac",
+				"replaced_in": "v0.5.2"
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x9213c774AcC130f1A6192C76f97D9AD116625B9E",
 				"status": "current",
 				"keccak256": "0xd4b246fbc1d16aa2e193fc488717bd421cac333bb76c839d5786d2801a61ca7a"
+			}
+		}
+	},
+	"v0.5.2": {
+		"tag": "v0.5.2",
+		"fulltag": "v0.5.2",
+		"network": "moonriver",
+		"date": "2022-06-24T13:58:49+09:00",
+		"commit": "9a2d276a8b2398eb694487b03201b933c14881c1",
+		"contracts": {
+			"Issuer": {
+				"address": "0xd756C87658A8F4621822CA206fea02A550A59D2F",
+				"status": "current",
+				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
 			}
 		}
 	}
