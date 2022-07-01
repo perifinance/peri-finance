@@ -762,8 +762,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
 
-        uint periBalance = IERC20(address(periFinance())).balanceOf(account);
-        uint collateralForAccountinUSD = _periToUSD(periBalance, periRate);
+        // uint periBalance = IERC20(address(periFinance())).balanceOf(account);
+        uint collateralForAccountinUSD = _periToUSD(IERC20(address(periFinance())).balanceOf(account), periRate);
         for (uint i; i < tokenList.length; i++) {
             collateralForAccountinUSD = collateralForAccountinUSD.add(
                 exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD)

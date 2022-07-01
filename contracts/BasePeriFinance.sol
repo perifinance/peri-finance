@@ -1,5 +1,6 @@
 pragma solidity 0.5.16;
 
+import "hardhat/console.sol";
 // Inheritance
 import "./interfaces/IERC20.sol";
 import "./ExternStateToken.sol";
@@ -165,6 +166,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function collateral(address account) external view returns (uint) {
+        console.log("hahaha");
         return issuer().collateral(account);
     }
 
