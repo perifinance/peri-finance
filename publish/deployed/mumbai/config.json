@@ -36,7 +36,7 @@
 		"deploy": false
 	},
 	"DebtCache": {
-		"deploy": true
+		"deploy": false
 	},
 	"Depot": {
 		"deploy": false
@@ -102,7 +102,7 @@
 		"deploy": false
 	},
 	"PynthpUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"ProxyERC20": {
 		"deploy": false
@@ -141,27 +141,27 @@
 		"deploy": false
 	},
 	"ExternalTokenStakeManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"StakingState": {
 		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": true
+		"deploy": false
 	},
 	"Issuer": {
 		"deploy": false
 	},
 	"BridgeState": {
-		"deploy": true
+		"deploy": false
 	},
 	"BridgeStatepUSD": {
-		"deploy": true
+		"deploy": false
 	},
 	"CrossChainManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"CrossChainState": {
-		"deploy": true
+		"deploy": false
 	}
 }
