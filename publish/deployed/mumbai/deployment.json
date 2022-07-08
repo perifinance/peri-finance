@@ -353,19 +353,19 @@
 		},
 		"CrossChainState": {
 			"name": "CrossChainState",
-			"address": "0x7faFf8815feAf7Cd6b7a1742Cb3E3D5640Ad9A80",
+			"address": "0xa92F9E75760dB153E83c1b409cb5Cb7dB727a980",
 			"source": "CrossChainState",
-			"link": "https://mumbai.polygonscan.com/address/0x7faFf8815feAf7Cd6b7a1742Cb3E3D5640Ad9A80",
-			"timestamp": "2022-07-07T08:34:49.337Z",
+			"link": "https://mumbai.polygonscan.com/address/0xa92F9E75760dB153E83c1b409cb5Cb7dB727a980",
+			"timestamp": "2022-07-08T07:19:15.930Z",
 			"txn": "",
 			"network": "mumbai"
 		},
 		"CrossChainManager": {
 			"name": "CrossChainManager",
-			"address": "0x6aDD9029A6ae40c2C01C5ca9e21280E2A17Ca46a",
+			"address": "0x3b674319fd07043E9D0371Fb6c8F2c18ab8822A7",
 			"source": "CrossChainManager",
-			"link": "https://mumbai.polygonscan.com/address/0x6aDD9029A6ae40c2C01C5ca9e21280E2A17Ca46a",
-			"timestamp": "2022-07-07T08:34:58.934Z",
+			"link": "https://mumbai.polygonscan.com/address/0x3b674319fd07043E9D0371Fb6c8F2c18ab8822A7",
+			"timestamp": "2022-07-08T07:19:21.497Z",
 			"txn": "",
 			"network": "mumbai"
 		},
