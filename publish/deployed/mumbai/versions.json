@@ -2686,8 +2686,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xBDcCE44f8Bb1720E11feC82e2582142943E9598f",
-				"status": "current",
-				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460"
+				"status": "replaced",
+				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460",
+				"replaced_in": "v0.5.6"
 			},
 			"BridgeState": {
 				"address": "0x8fb97CAe1d7d2cbe2D0196d1C2df534A0a100f3D",
@@ -2701,13 +2702,15 @@
 			},
 			"Issuer": {
 				"address": "0x769196EBb2F6D15aB768Eed8232C8cC26dD0415F",
-				"status": "current",
-				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
+				"status": "replaced",
+				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee",
+				"replaced_in": "v0.5.6"
 			},
 			"PynthpUSD": {
 				"address": "0x04558b5B7db20CF5c0F46FD31672a60685315Af9",
-				"status": "current",
-				"keccak256": "0xbcdc723113b63a94656abbccaba4bc8320b34a82b05cc023d13842cc1550e31b"
+				"status": "replaced",
+				"keccak256": "0xbcdc723113b63a94656abbccaba4bc8320b34a82b05cc023d13842cc1550e31b",
+				"replaced_in": "v0.5.6"
 			},
 			"BridgeStatepUSD": {
 				"address": "0xAC2a653032aB6AB2C8C1AcF71f2bAD8DD4c26293",
@@ -2728,6 +2731,30 @@
 				"address": "0x6aDD9029A6ae40c2C01C5ca9e21280E2A17Ca46a",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.5.6": {
+		"tag": "v0.5.6",
+		"fulltag": "v0.5.6",
+		"network": "mumbai",
+		"date": "2022-07-07T17:57:58+09:00",
+		"commit": "b9fcb64bb6ed8ea773811f07617bafae7c387fa3",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xC1561F070051eE0469E59a49527D21B5e7E5e14A",
+				"status": "current",
+				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460"
+			},
+			"Issuer": {
+				"address": "0x52F817673064bf6C82aDAF0A316F84bd076dF255",
+				"status": "current",
+				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
+			},
+			"PynthpUSD": {
+				"address": "0xC6C3aee39921a0752b67bf0eF910AEb5E2Ed6D36",
+				"status": "current",
+				"keccak256": "0xbcdc723113b63a94656abbccaba4bc8320b34a82b05cc023d13842cc1550e31b"
 			}
 		}
 	}

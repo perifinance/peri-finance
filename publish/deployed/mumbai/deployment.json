@@ -218,10 +218,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0xBDcCE44f8Bb1720E11feC82e2582142943E9598f",
+			"address": "0xC1561F070051eE0469E59a49527D21B5e7E5e14A",
 			"source": "PeriFinanceToPolygon",
-			"link": "https://mumbai.polygonscan.com/address/0xBDcCE44f8Bb1720E11feC82e2582142943E9598f",
-			"timestamp": "2022-07-07T08:29:58.500Z",
+			"link": "https://mumbai.polygonscan.com/address/0xC1561F070051eE0469E59a49527D21B5e7E5e14A",
+			"timestamp": "2022-07-08T05:26:49.461Z",
 			"txn": "",
 			"network": "mumbai"
 		},
@@ -263,10 +263,10 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x769196EBb2F6D15aB768Eed8232C8cC26dD0415F",
+			"address": "0x52F817673064bf6C82aDAF0A316F84bd076dF255",
 			"source": "Issuer",
-			"link": "https://mumbai.polygonscan.com/address/0x769196EBb2F6D15aB768Eed8232C8cC26dD0415F",
-			"timestamp": "2022-07-07T08:54:27.227Z",
+			"link": "https://mumbai.polygonscan.com/address/0x52F817673064bf6C82aDAF0A316F84bd076dF255",
+			"timestamp": "2022-07-08T05:27:29.168Z",
 			"txn": "",
 			"network": "mumbai"
 		},
@@ -317,10 +317,10 @@
 		},
 		"PynthpUSD": {
 			"name": "PynthpUSD",
-			"address": "0x04558b5B7db20CF5c0F46FD31672a60685315Af9",
+			"address": "0xC6C3aee39921a0752b67bf0eF910AEb5E2Ed6D36",
 			"source": "MultiCollateralPynth",
-			"link": "https://mumbai.polygonscan.com/address/0x04558b5B7db20CF5c0F46FD31672a60685315Af9",
-			"timestamp": "2022-07-07T08:54:42.216Z",
+			"link": "https://mumbai.polygonscan.com/address/0xC6C3aee39921a0752b67bf0eF910AEb5E2Ed6D36",
+			"timestamp": "2022-07-08T05:28:28.900Z",
 			"txn": "",
 			"network": "mumbai"
 		},
