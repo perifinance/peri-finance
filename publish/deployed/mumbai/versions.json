@@ -2667,13 +2667,15 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0x809993A8c15155cb8d7322e34f89861aE701Ce9f",
-				"status": "current",
-				"keccak256": "0xfbc2700c0598891ebe026ef09a07c801b207f10a129e57ab55bbe3f72dd7a094"
+				"status": "replaced",
+				"keccak256": "0xfbc2700c0598891ebe026ef09a07c801b207f10a129e57ab55bbe3f72dd7a094",
+				"replaced_in": "v0.5.8"
 			},
 			"FeePool": {
 				"address": "0xeF6808Dd44cFe768029B7987372C92A4e913D2C2",
-				"status": "current",
-				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d"
+				"status": "replaced",
+				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d",
+				"replaced_in": "v0.5.8"
 			}
 		}
 	},
@@ -2776,6 +2778,25 @@
 				"address": "0x3b674319fd07043E9D0371Fb6c8F2c18ab8822A7",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.5.8": {
+		"tag": "v0.5.8",
+		"fulltag": "v0.5.8",
+		"network": "mumbai",
+		"date": "2022-07-08T16:27:41+09:00",
+		"commit": "c5fccddb643264330d7866e1f1fa802898a8283b",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xB021040A478b7AA4724A4C300a5906C30F171CD1",
+				"status": "current",
+				"keccak256": "0xf2d8cdb0acf107f8101a232aaf3e4d78ec4d4ab9bd1e50a32411cc800beaf72c"
+			},
+			"FeePool": {
+				"address": "0xD88F26Ab1eb2447C53A285C841b2EfC40740ebFb",
+				"status": "current",
+				"keccak256": "0x4d270249ca7569eb734da2ebbebed5a7483535dc8285d238a14c5f84d2403f66"
 			}
 		}
 	}
