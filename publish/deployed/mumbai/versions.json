@@ -1933,8 +1933,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0x41B3450d0806844A7745a53540024471dc626921",
-				"status": "current",
-				"keccak256": "0x52e435c3756bb79c34f2e326ede8303bb57472439af67b17262a8d9eab92a644"
+				"status": "replaced",
+				"keccak256": "0x52e435c3756bb79c34f2e326ede8303bb57472439af67b17262a8d9eab92a644",
+				"replaced_in": "v0.5.9"
 			},
 			"TokenStatepUSD": {
 				"address": "0x9Aa9060C640F10772F6Ebfd5091A037a638709ee",
@@ -2797,6 +2798,50 @@
 				"address": "0xD88F26Ab1eb2447C53A285C841b2EfC40740ebFb",
 				"status": "current",
 				"keccak256": "0x4d270249ca7569eb734da2ebbebed5a7483535dc8285d238a14c5f84d2403f66"
+			}
+		}
+	},
+	"v0.5.9": {
+		"tag": "v0.5.9",
+		"fulltag": "v0.5.9",
+		"network": "mumbai",
+		"date": "2022-07-13T18:23:46+09:00",
+		"commit": "3cfe8087aa500c3173566e1a36bcd2c03088b173",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0x140cB6a8F547e588766b734aD9B29ac01CC74bbd",
+				"status": "replaced",
+				"keccak256": "0xd0c0180c9e51e162509fd222ab6a0a7655f3ff188b751cb3e742183d6b49de1b",
+				"replaced_in": "v0.5.10"
+			}
+		}
+	},
+	"v0.5.10": {
+		"tag": "v0.5.10",
+		"fulltag": "v0.5.10",
+		"network": "mumbai",
+		"date": "2022-07-13T18:23:46+09:00",
+		"commit": "3cfe8087aa500c3173566e1a36bcd2c03088b173",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0xB54988fd76421368576Ed3A887b3f8f88DB60503",
+				"status": "replaced",
+				"keccak256": "0x296358be84836f5b996ad2feb0267d665447cfe3bd13ef70f52707eea99524a3",
+				"replaced_in": "v0.5.11"
+			}
+		}
+	},
+	"v0.5.11": {
+		"tag": "v0.5.11",
+		"fulltag": "v0.5.11",
+		"network": "mumbai",
+		"date": "2022-07-13T18:23:46+09:00",
+		"commit": "3cfe8087aa500c3173566e1a36bcd2c03088b173",
+		"contracts": {
+			"SupplySchedule": {
+				"address": "0xbe650701209a50918d22291283bDc18757FF77Ed",
+				"status": "current",
+				"keccak256": "0x6374e62e9bce5796cb006b9546b8e05950cb1e47c1bc42fa68fe38bb0b2cf982"
 			}
 		}
 	}
