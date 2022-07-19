@@ -1593,8 +1593,9 @@
 			},
 			"SupplySchedule": {
 				"address": "0x3Ff1eE599623dD402316Cac40F0b354838aB3a74",
-				"status": "current",
-				"keccak256": "0x52e435c3756bb79c34f2e326ede8303bb57472439af67b17262a8d9eab92a644"
+				"status": "replaced",
+				"keccak256": "0x52e435c3756bb79c34f2e326ede8303bb57472439af67b17262a8d9eab92a644",
+				"replaced_in": "v0.5.14"
 			},
 			"TokenStatepUSD": {
 				"address": "0xAcbee69d97BcB6CB85e61e19fBeF3E598F3CF3f8",
@@ -2410,13 +2411,15 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xF77e4fF74F0141fC33DE1709C5BE3B0b116e99D1",
-				"status": "current",
-				"keccak256": "0xfbc2700c0598891ebe026ef09a07c801b207f10a129e57ab55bbe3f72dd7a094"
+				"status": "replaced",
+				"keccak256": "0xfbc2700c0598891ebe026ef09a07c801b207f10a129e57ab55bbe3f72dd7a094",
+				"replaced_in": "v0.5.14"
 			},
 			"FeePool": {
 				"address": "0x7D0a7B2692EFaB2526346a0d2fAdb880F3df5b8A",
-				"status": "current",
-				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d"
+				"status": "replaced",
+				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d",
+				"replaced_in": "v0.5.14"
 			},
 			"PeriFinance": {
 				"address": "0x7eCDD6F6520369adeD8fDe311e6E4e9531cdc795",
@@ -2457,6 +2460,30 @@
 				"address": "0x3C9dA21a6945d05a1E81769997BB0Af7e5700B97",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.5.14": {
+		"tag": "v0.5.14",
+		"fulltag": "v0.5.14",
+		"network": "bsctest",
+		"date": "2022-07-07T17:18:31+09:00",
+		"commit": "28952b186b4afd5ebf3e2d6951d6a3fe59e2c0bc",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xeB94D788E7edff9E5058CB4ACCdBC36eE75cFB5f",
+				"status": "current",
+				"keccak256": "0xf2d8cdb0acf107f8101a232aaf3e4d78ec4d4ab9bd1e50a32411cc800beaf72c"
+			},
+			"FeePool": {
+				"address": "0xa16F930b72c1a59A07579bEf0b3f6d76331eA2d2",
+				"status": "current",
+				"keccak256": "0x4d270249ca7569eb734da2ebbebed5a7483535dc8285d238a14c5f84d2403f66"
+			},
+			"SupplySchedule": {
+				"address": "0x805E9A15A22d6B75Bf70466DcB5cdcB4a1b50102",
+				"status": "current",
+				"keccak256": "0x10a8fd7880cfd0c0c6751764a994fe841561ee13ce77f652231892fa786eb007"
 			}
 		}
 	}

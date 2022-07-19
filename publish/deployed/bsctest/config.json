@@ -60,7 +60,7 @@
 		"deploy": false
 	},
 	"FeePool": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePoolState": {
 		"deploy": false
@@ -81,7 +81,7 @@
 		"deploy": false
 	},
 	"SupplySchedule": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
@@ -90,7 +90,7 @@
 		"deploy": false
 	},
 	"SystemSettings": {
-		"deploy": true
+		"deploy": false
 	},
 	"SystemStatus": {
 		"deploy": false
