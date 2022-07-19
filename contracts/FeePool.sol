@@ -577,7 +577,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      */
     function _payRewards(address account, uint periAmount) internal notFeeAddress(account) {
         /* Escrow the tokens for 1 year. */
-        uint escrowDuration = 1 hours;
+        uint escrowDuration = 52 weeks;
 
         // Record vesting entry for claiming address and amount
         // PERI already minted to rewardEscrow balance

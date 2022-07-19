@@ -18,7 +18,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     uint public constant MAX_ISSUANCE_RATIO = 1e18;
 
     // The fee period must be between 1 day and 60 days.
-    uint public constant MIN_FEE_PERIOD_DURATION = 10 minutes;
+    uint public constant MIN_FEE_PERIOD_DURATION = 1 days;
     uint public constant MAX_FEE_PERIOD_DURATION = 60 days;
 
     uint public constant MAX_TARGET_THRESHOLD = 50;
@@ -30,7 +30,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     uint public constant RATIO_FROM_TARGET_BUFFER = 2e18; // 200% - mininimum buffer between issuance ratio and liquidation ratio
 
     uint public constant MAX_LIQUIDATION_DELAY = 30 days;
-    uint public constant MIN_LIQUIDATION_DELAY = 1 minutes;
+    uint public constant MIN_LIQUIDATION_DELAY = 1 hours;
 
     // Exchange fee may not exceed 10%.
     uint public constant MAX_EXCHANGE_FEE_RATE = 1e18 / 10;
