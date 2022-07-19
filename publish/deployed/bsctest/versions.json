@@ -2472,18 +2472,45 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xeB94D788E7edff9E5058CB4ACCdBC36eE75cFB5f",
-				"status": "current",
-				"keccak256": "0xf2d8cdb0acf107f8101a232aaf3e4d78ec4d4ab9bd1e50a32411cc800beaf72c"
+				"status": "replaced",
+				"keccak256": "0xf2d8cdb0acf107f8101a232aaf3e4d78ec4d4ab9bd1e50a32411cc800beaf72c",
+				"replaced_in": "v0.5.16"
 			},
 			"FeePool": {
 				"address": "0xa16F930b72c1a59A07579bEf0b3f6d76331eA2d2",
-				"status": "current",
-				"keccak256": "0x4d270249ca7569eb734da2ebbebed5a7483535dc8285d238a14c5f84d2403f66"
+				"status": "replaced",
+				"keccak256": "0x4d270249ca7569eb734da2ebbebed5a7483535dc8285d238a14c5f84d2403f66",
+				"replaced_in": "v0.5.16"
 			},
 			"SupplySchedule": {
 				"address": "0x805E9A15A22d6B75Bf70466DcB5cdcB4a1b50102",
+				"status": "replaced",
+				"keccak256": "0x10a8fd7880cfd0c0c6751764a994fe841561ee13ce77f652231892fa786eb007",
+				"replaced_in": "v0.5.16"
+			}
+		}
+	},
+	"v0.5.16": {
+		"tag": "v0.5.16",
+		"fulltag": "v0.5.16",
+		"network": "bsctest",
+		"date": "2022-07-19T11:00:42+09:00",
+		"commit": "fc7d50de9c2a2eeebf8da67a5d05813945e099a6",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x8BF470b654917E390deF4D494f6D7dCb698FDe7f",
 				"status": "current",
-				"keccak256": "0x10a8fd7880cfd0c0c6751764a994fe841561ee13ce77f652231892fa786eb007"
+				"keccak256": "0xe61326892721a3a2d36aeb365416d356bcad514585f4c44953e43a00cf5abdf1"
+			},
+			"FeePool": {
+				"address": "0x2E2768eCA3a83A6bEef490acF1d1EBf04f740E72",
+				"status": "current",
+				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d"
+			},
+			"SupplySchedule": {
+				"address": "0x42B4BafE53090Fb906E750b6fAE7815f740ddec6",
+				"status": "current",
+				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c"
 			}
 		}
 	}
