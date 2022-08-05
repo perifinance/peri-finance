@@ -36,10 +36,10 @@ contract SupplySchedule is Owned, ISupplySchedule {
     uint public constant MAX_MINTER_REWARD = 200 ether;
 
     // How long each inflation period is before mint can be called
-    uint public constant MINT_PERIOD_DURATION = 10 minutes;
+    uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
-    uint public constant INFLATION_START_DATE = 1659487843; // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
-    uint public constant MINT_BUFFER = 1 minutes;
+    uint public constant INFLATION_START_DATE = 1625875200; // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
+    uint public constant MINT_BUFFER = 1 days;
     uint8 public constant SUPPLY_DECAY_START = 52;
     uint8 public constant SUPPLY_DECAY_END = 172; // 40 months
 
@@ -102,11 +102,6 @@ contract SupplySchedule is Owned, ISupplySchedule {
         }
 
         return totalAmount;
-    }
-
-    function setLastMintEventForTest(uint time) public returns (uint) {
-        lastMintEvent = time;
-        return lastMintEvent;
     }
 
     /**
