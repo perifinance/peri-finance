@@ -2863,8 +2863,9 @@
 			},
 			"FeePool": {
 				"address": "0x09073a5fB5A4316761E29AD1AeF5C089FAb7776D",
-				"status": "current",
-				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d"
+				"status": "replaced",
+				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d",
+				"replaced_in": "v0.5.20"
 			},
 			"SupplySchedule": {
 				"address": "0x378e65245740B129CAcAa09Bf8Dd60d58091cFf6",
@@ -2904,13 +2905,39 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xFeBFaF872feb352A4b25b3469c72153eE092F5c3",
-				"status": "current",
-				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232"
+				"status": "replaced",
+				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232",
+				"replaced_in": "v0.5.20"
 			},
 			"SupplySchedule": {
 				"address": "0xF4829AEfd505eeC32A763AAea73FCF7DAcdBe76A",
+				"status": "replaced",
+				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c",
+				"replaced_in": "v0.5.20"
+			}
+		}
+	},
+	"v0.5.20": {
+		"tag": "v0.5.20",
+		"fulltag": "v0.5.20",
+		"network": "mumbai",
+		"date": "2022-08-05T11:03:07+09:00",
+		"commit": "b67d66959b78f0ac0f01fef4a3563f9be0232b00",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x7C63163c3b0f144129108B4bE435f1270aC7E3Ce",
 				"status": "current",
-				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c"
+				"keccak256": "0xf2391c28746849d2d59013d66b0dcd5dab44cc67dce8a03a74b2614e0301b9fe"
+			},
+			"FeePool": {
+				"address": "0x4afc559960B9EBDd244064ac921c658Da42a3c6c",
+				"status": "current",
+				"keccak256": "0xee4f0c08d44f278aa369673adcd17e8e92ddddc51a8ff6a71953267a7ec19d74"
+			},
+			"SupplySchedule": {
+				"address": "0xB40Ac8D22906Fc1Cfb0a64e1A0388281E9D37230",
+				"status": "current",
+				"keccak256": "0xb61e591c9cdee7c14e4fe578dbf293dee94e2ea36ecddf0a189dae216e94c70f"
 			}
 		}
 	}

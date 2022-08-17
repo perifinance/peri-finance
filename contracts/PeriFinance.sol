@@ -86,6 +86,7 @@ contract PeriFinance is BasePeriFinance {
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
+        IRewardEscrowV2 _rewardEscrowV2 = rewardEscrowV2();
 
         uint _currRate = crossChainManager().currentNetworkDebtPercentage();
         require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
@@ -94,8 +95,11 @@ contract PeriFinance is BasePeriFinance {
         supplyToMint = supplyToMint
             .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(_currRate)
-            .preciseDecimalToDecimal();
+            .preciseDecimalToDecimal()
+            .mul(_supplySchedule.weeksSinceLastIssuance());
         require(supplyToMint > 0, "No mintable supply");
+
+        uint utxClaim = this.balanceOf(address(_rewardEscrowV2)).sub(_rewardEscrowV2.totalEscrowedBalance());
 
         // record minting event before mutation to token supply
         _supplySchedule.recordMintEvent(supplyToMint);
@@ -104,7 +108,7 @@ contract PeriFinance is BasePeriFinance {
         // Minus the minterReward and set balance of minter to add reward
         uint minterReward = _supplySchedule.minterReward();
         // Get the remainder
-        uint amountToDistribute = supplyToMint.sub(minterReward);
+        uint amountToDistribute = supplyToMint.sub(minterReward).add(utxClaim);
 
         // Set the token balance to the RewardsDistribution contract
         tokenState.setBalanceOf(

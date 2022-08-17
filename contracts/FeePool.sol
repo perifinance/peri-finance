@@ -347,22 +347,22 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         );
 
         // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
-        FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
-        FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
+        // FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
+        // FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
 
         // Any unclaimed fees from the last period in the array roll back one period.
         // Because of the subtraction here, they're effectively proportionally redistributed to those who
         // have already claimed from the old period, available in the new period.
         // The subtraction is important so we don't create a ticking time bomb of an ever growing
         // number of fees that can never decrease and will eventually overflow at the end of the fee pool.
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
-            .feesToDistribute
-            .sub(periodToRollover.feesClaimed)
-            .add(periodClosing.feesToDistribute);
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
-            .rewardsToDistribute
-            .sub(periodToRollover.rewardsClaimed)
-            .add(periodClosing.rewardsToDistribute);
+        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
+        //     .feesToDistribute
+        //     .sub(periodToRollover.feesClaimed)
+        //     .add(periodClosing.feesToDistribute);
+        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
+        //     .rewardsToDistribute
+        //     .sub(periodToRollover.rewardsClaimed)
+        //     .add(periodClosing.rewardsToDistribute);
 
         // Shift the previous fee periods across to make room for the new one.
         _currentFeePeriod = _currentFeePeriod.add(FEE_PERIOD_LENGTH).sub(1).mod(FEE_PERIOD_LENGTH);
@@ -380,6 +380,11 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _everDistributedFeeRewards = false;
         _everAllocatedFeeRewards = false;
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
+    }
+
+    function repairRecentStartTime(uint64 _startTime) external onlyDebtManager returns (uint) {
+        _recentFeePeriodsStorage(0).startTime = _startTime;
+        return _startTime;
     }
 
     /**
@@ -577,7 +582,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      */
     function _payRewards(address account, uint periAmount) internal notFeeAddress(account) {
         /* Escrow the tokens for 1 year. */
-        uint escrowDuration = 52 weeks;
+        uint escrowDuration = 1 hours;
 
         // Record vesting entry for claiming address and amount
         // PERI already minted to rewardEscrow balance

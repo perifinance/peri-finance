@@ -9,6 +9,8 @@ interface ISupplySchedule {
 
     function minterReward() external view returns (uint);
 
+    function weeksSinceLastIssuance() external view returns (uint);
+
     // Mutative functions
     function recordMintEvent(uint supplyMinted) external returns (bool);
 }
