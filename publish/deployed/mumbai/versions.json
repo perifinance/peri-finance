@@ -2748,8 +2748,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xC1561F070051eE0469E59a49527D21B5e7E5e14A",
-				"status": "current",
-				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460"
+				"status": "replaced",
+				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460",
+				"replaced_in": "v0.5.21"
 			},
 			"Issuer": {
 				"address": "0x52F817673064bf6C82aDAF0A316F84bd076dF255",
@@ -2938,6 +2939,20 @@
 				"address": "0xB40Ac8D22906Fc1Cfb0a64e1A0388281E9D37230",
 				"status": "current",
 				"keccak256": "0xb61e591c9cdee7c14e4fe578dbf293dee94e2ea36ecddf0a189dae216e94c70f"
+			}
+		}
+	},
+	"v0.5.21": {
+		"tag": "v0.5.21",
+		"fulltag": "v0.5.21",
+		"network": "mumbai",
+		"date": "2022-08-17T16:23:39+09:00",
+		"commit": "586ca01f9fa88468617ef2b193ce35bc1c7ec0dd",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xe8A3A16e584D39F0e5f692A46e3A83576B2ee5cC",
+				"status": "current",
+				"keccak256": "0xdde0f6c80098bbcbf5e53ffe324255537dd347f16b7fdf2cc6b0a85e30eb5f1d"
 			}
 		}
 	}
