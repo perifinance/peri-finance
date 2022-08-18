@@ -2988,13 +2988,28 @@
 		"contracts": {
 			"RewardsDistribution": {
 				"address": "0xe431B9230F467ED1185946baE0EA75Cf14f3268E",
-				"status": "current",
-				"keccak256": "0x528ff610a40cade7e9d68d73f0ac3a048d5b56a6eb0c4e4eab77536366129b09"
+				"status": "replaced",
+				"keccak256": "0x528ff610a40cade7e9d68d73f0ac3a048d5b56a6eb0c4e4eab77536366129b09",
+				"replaced_in": "v0.5.24"
 			},
 			"PeriFinance": {
 				"address": "0x05790834A8Ae3628A9ECC49dDa570c82DE9fC908",
 				"status": "current",
 				"keccak256": "0x7421e6434effc1c9958ff214a52204125f56e5e135c09556eec0c6844fc0950c"
+			}
+		}
+	},
+	"v0.5.24": {
+		"tag": "v0.5.24",
+		"fulltag": "v0.5.24",
+		"network": "mumbai",
+		"date": "2022-08-18T12:26:37+09:00",
+		"commit": "7467e3eaf88470ed9eeb533502aedf2ea14f4dcd",
+		"contracts": {
+			"RewardsDistribution": {
+				"address": "0x2Fc3eC37Cb0265805735B4BAcc96Bf88F2a5B7E5",
+				"status": "current",
+				"keccak256": "0x251670012594c8634ea8a4b47c73f5f981d578e0e7b4a8fc22eb3b9bebc15b2b"
 			}
 		}
 	}
