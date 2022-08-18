@@ -11,6 +11,7 @@ import "./SafeDecimalMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IRewardsDistribution.sol";
+import "./interfaces/IRewardEscrowV2.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/rewardsdistribution
 contract RewardsDistribution is Owned, IRewardsDistribution {
@@ -174,11 +175,14 @@ contract RewardsDistribution is Owned, IRewardsDistribution {
             }
         }
 
+        uint utxClaim =
+            IERC20(periFinanceProxy).balanceOf(rewardEscrow).sub(IRewardEscrowV2(rewardEscrow).totalEscrowedBalance());
+
         // After all ditributions have been sent, send the remainder to the RewardsEscrow contract
         IERC20(periFinanceProxy).transfer(rewardEscrow, remainder);
 
         // Tell the FeePool how much it has to distribute to the stakers
-        IFeePool(feePoolProxy).setRewardsToDistribute(remainder);
+        IFeePool(feePoolProxy).setRewardsToDistribute(remainder.add(utxClaim));
 
         emit RewardsDistributed(amount);
         return true;

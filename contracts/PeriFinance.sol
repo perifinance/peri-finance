@@ -81,33 +81,30 @@ contract PeriFinance is BasePeriFinance {
     }
 
     function inflationalMint() external issuanceActive returns (bool) {
-        require(msg.sender == inflationMinter, "1");
-        require(address(rewardsDistribution()) != address(0), "2");
+        require(msg.sender == inflationMinter, "onlyMinter");
+        require(address(rewardsDistribution()) != address(0), "No RewardsDistribution");
 
         ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
-        IRewardEscrowV2 _rewardEscrowV2 = rewardEscrowV2();
 
         uint _currRate = crossChainManager().currentNetworkDebtPercentage();
-        require(SafeDecimalMath.preciseUnit() >= _currRate, "3");
+        require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
 
         uint supplyToMint = _supplySchedule.mintableSupply();
         supplyToMint = supplyToMint
             .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(_currRate)
             .preciseDecimalToDecimal();
-        require(supplyToMint > 0, "4");
-
-        uint utxClaim = this.balanceOf(address(_rewardEscrowV2)).sub(_rewardEscrowV2.totalEscrowedBalance());
+        require(supplyToMint > 0, "No mintable supply");
 
         // record minting event before mutation to token supply
         _supplySchedule.recordMintEvent(supplyToMint);
 
         // Set minted PERI balance to RewardEscrow's balance
         // Minus the minterReward and set balance of minter to add reward
-        // uint minterReward = _supplySchedule.minterReward();
+        uint minterReward = _supplySchedule.minterReward();
         // Get the remainder
-        uint amountToDistribute = supplyToMint.add(utxClaim);
+        uint amountToDistribute = supplyToMint.sub(minterReward);
 
         // Set the token balance to the RewardsDistribution contract
         tokenState.setBalanceOf(
@@ -120,22 +117,17 @@ contract PeriFinance is BasePeriFinance {
         _rewardsDistribution.distributeRewards(amountToDistribute);
 
         // Assign the minters reward.
-        // tokenState.setBalanceOf(msg.sender, tokenState.balanceOf(msg.sender).add(minterReward));
-        // emitTransfer(address(this), msg.sender, minterReward);
+        tokenState.setBalanceOf(msg.sender, tokenState.balanceOf(msg.sender).add(minterReward));
+        emitTransfer(address(this), msg.sender, minterReward);
 
         totalSupply = totalSupply.add(supplyToMint);
 
         return true;
     }
 
-    function a() public view returns (uint) {
-        // IRewardEscrowV2 _rewardEscrowV2 = rewardEscrowV2();
-        return this.balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
-    }
-
     function mint(address _user, uint _amount) external optionalProxy returns (bool) {
-        require(minterRole != address(0), "5");
-        require(minterRole == messageSender, "1");
+        require(minterRole != address(0), "0 address");
+        require(minterRole == messageSender, "onlyMinter");
 
         // It won't change totalsupply since it is only for bridge purpose.
         tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
@@ -171,12 +163,12 @@ contract PeriFinance is BasePeriFinance {
         require(_amount > 0, "0 amount");
         (uint transferable, ) =
             issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
-        require(transferable >= _amount, "NoAmount");
+        require(transferable >= _amount, "CheckAmount");
 
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "NoFee");
         bridgeValidator.transfer(msg.value);
 
-        require(_burnByProxy(messageSender, _amount), "6");
+        require(_burnByProxy(messageSender, _amount), "BurnFail");
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
@@ -197,11 +189,11 @@ contract PeriFinance is BasePeriFinance {
         // Validations are checked from bridge state
         (address account, uint amount, , , , ) = bridgeState.inboundings(_index);
 
-        require(account == messageSender, "NoAccount");
+        require(account == messageSender, "CheckAddress");
 
         bridgeState.claimInbound(_index, amount);
 
-        require(_mintByProxy(account, amount), "6");
+        require(_mintByProxy(account, amount), "MintFail");
 
         return true;
     }
