@@ -347,18 +347,18 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         );
 
         // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
-        // FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
-        // FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
+        FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
+        FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
 
         // Any unclaimed fees from the last period in the array roll back one period.
         // Because of the subtraction here, they're effectively proportionally redistributed to those who
         // have already claimed from the old period, available in the new period.
         // The subtraction is important so we don't create a ticking time bomb of an ever growing
         // number of fees that can never decrease and will eventually overflow at the end of the fee pool.
-        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
-        //     .feesToDistribute
-        //     .sub(periodToRollover.feesClaimed)
-        //     .add(periodClosing.feesToDistribute);
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
+            .feesToDistribute
+            .sub(periodToRollover.feesClaimed)
+            .add(periodClosing.feesToDistribute);
         // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
         //     .rewardsToDistribute
         //     .sub(periodToRollover.rewardsClaimed)

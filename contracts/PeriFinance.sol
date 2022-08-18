@@ -95,8 +95,7 @@ contract PeriFinance is BasePeriFinance {
         supplyToMint = supplyToMint
             .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(_currRate)
-            .preciseDecimalToDecimal()
-            .mul(_supplySchedule.weeksSinceLastIssuance());
+            .preciseDecimalToDecimal();
         require(supplyToMint > 0, "4");
 
         uint utxClaim = this.balanceOf(address(_rewardEscrowV2)).sub(_rewardEscrowV2.totalEscrowedBalance());
@@ -127,6 +126,11 @@ contract PeriFinance is BasePeriFinance {
         totalSupply = totalSupply.add(supplyToMint);
 
         return true;
+    }
+
+    function a() public view returns (uint) {
+        // IRewardEscrowV2 _rewardEscrowV2 = rewardEscrowV2();
+        return this.balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
 
     function mint(address _user, uint _amount) external optionalProxy returns (bool) {

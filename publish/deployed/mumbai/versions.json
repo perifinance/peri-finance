@@ -2932,8 +2932,9 @@
 			},
 			"FeePool": {
 				"address": "0x4afc559960B9EBDd244064ac921c658Da42a3c6c",
-				"status": "current",
-				"keccak256": "0xee4f0c08d44f278aa369673adcd17e8e92ddddc51a8ff6a71953267a7ec19d74"
+				"status": "replaced",
+				"keccak256": "0xee4f0c08d44f278aa369673adcd17e8e92ddddc51a8ff6a71953267a7ec19d74",
+				"replaced_in": "v0.5.22"
 			},
 			"SupplySchedule": {
 				"address": "0xB40Ac8D22906Fc1Cfb0a64e1A0388281E9D37230",
@@ -2951,8 +2952,28 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xe8A3A16e584D39F0e5f692A46e3A83576B2ee5cC",
+				"status": "replaced",
+				"keccak256": "0xdde0f6c80098bbcbf5e53ffe324255537dd347f16b7fdf2cc6b0a85e30eb5f1d",
+				"replaced_in": "v0.5.22"
+			}
+		}
+	},
+	"v0.5.22": {
+		"tag": "v0.5.22",
+		"fulltag": "v0.5.22",
+		"network": "mumbai",
+		"date": "2022-08-17T17:32:05+09:00",
+		"commit": "09c303491fb60836eaecdeb89af2ce039f8b3bb9",
+		"contracts": {
+			"FeePool": {
+				"address": "0x9EC0aB27269d1210Da02FFEB47fcF23ab61eb747",
 				"status": "current",
-				"keccak256": "0xdde0f6c80098bbcbf5e53ffe324255537dd347f16b7fdf2cc6b0a85e30eb5f1d"
+				"keccak256": "0x49f4591e9447fde1feab5906d9458a5ade4fc532776a83824f9ef57e1366f60a"
+			},
+			"PeriFinance": {
+				"address": "0xcd174e1840eF59E52f2c9383035e646bD299756c",
+				"status": "current",
+				"keccak256": "0x012a0d76864e23b11ca8dc113cc3c46f99997315df1932ff9f75c2af2004252d"
 			}
 		}
 	}
