@@ -336,6 +336,14 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
+     * @notice Fix the recent period start time.
+     */
+    function setRecentPeriodStartTime(uint64 _startTime) external onlyDebtManager {
+        require(now <= _startTime, "Cannot be more than the current time");
+        _recentFeePeriodsStorage(0).startTime = _startTime;
+    }
+
+    /**
      * @notice Close the current fee period and start a new one.
      */
     function closeCurrentFeePeriod() external issuanceActive {
@@ -384,11 +392,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _everDistributedFeeRewards = false;
         _everAllocatedFeeRewards = false;
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
-    }
-
-    function setRecentPeriodStartTime(uint64 _startTime) external onlyDebtManager returns (uint) {
-        _recentFeePeriodsStorage(0).startTime = _startTime;
-        return _startTime;
     }
 
     /**
@@ -586,7 +589,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      */
     function _payRewards(address account, uint periAmount) internal notFeeAddress(account) {
         /* Escrow the tokens for 1 year. */
-        uint escrowDuration = 1 hours;
+        uint escrowDuration = 52 weeks;
 
         // Record vesting entry for claiming address and amount
         // PERI already minted to rewardEscrow balance
