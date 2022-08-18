@@ -3023,8 +3023,23 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x5cf79A9dC6ddd0b85Bea0D09661f0073172513dD",
+				"status": "replaced",
+				"keccak256": "0x966d2ce3992b7ed7a901470736d5f2a6c7cb5eb1be9ccbcbf778ca03e5dc380f",
+				"replaced_in": "v0.5.26"
+			}
+		}
+	},
+	"v0.5.26": {
+		"tag": "v0.5.26",
+		"fulltag": "v0.5.26",
+		"network": "mumbai",
+		"date": "2022-08-18T14:07:19+09:00",
+		"commit": "e5b32e5bc32740be21cb7cd08bee5fb2d69c556f",
+		"contracts": {
+			"FeePool": {
+				"address": "0x587e9e7aaFe0fe17b00Ac71292c767827Fc7d394",
 				"status": "current",
-				"keccak256": "0x966d2ce3992b7ed7a901470736d5f2a6c7cb5eb1be9ccbcbf778ca03e5dc380f"
+				"keccak256": "0xd9589c9ef3a5e2ef3a79b8e2d4a15639c5ed5f6772d3cfe5ec1b73886e19b59d"
 			}
 		}
 	}

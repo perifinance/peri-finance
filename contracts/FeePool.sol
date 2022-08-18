@@ -366,8 +366,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         //     .add(periodClosing.rewardsToDistribute);
         _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
             .balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2))
-            .sub(rewardEscrowV2().totalEscrowedBalance())
-            .add(periodClosing.rewardsToDistribute);
+            .sub(rewardEscrowV2().totalEscrowedBalance());
 
         // Shift the previous fee periods across to make room for the new one.
         _currentFeePeriod = _currentFeePeriod.add(FEE_PERIOD_LENGTH).sub(1).mod(FEE_PERIOD_LENGTH);
