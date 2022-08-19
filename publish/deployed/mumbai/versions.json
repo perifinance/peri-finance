@@ -1654,8 +1654,9 @@
 			},
 			"RewardsDistribution": {
 				"address": "0xfc318611C3d81F8d05913190D0ec6c6D7B2D4783",
-				"status": "current",
-				"keccak256": "0xaa9e3cfe4fa176d831eb81c86bb05e401e1e2d19ce6f25e1c4dd404474a67e78"
+				"status": "replaced",
+				"keccak256": "0xaa9e3cfe4fa176d831eb81c86bb05e401e1e2d19ce6f25e1c4dd404474a67e78",
+				"replaced_in": "v0.5.23"
 			},
 			"ProxyERC20": {
 				"address": "0xd051B455a1328B4e2104f7661B9E5d77BFd048b0",
@@ -2748,8 +2749,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0xC1561F070051eE0469E59a49527D21B5e7E5e14A",
-				"status": "current",
-				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460"
+				"status": "replaced",
+				"keccak256": "0xbee38ba564974cdaa136fefa5721a5b78ddbb07a568cfcd606ffb7d67bcd7460",
+				"replaced_in": "v0.5.21"
 			},
 			"Issuer": {
 				"address": "0x52F817673064bf6C82aDAF0A316F84bd076dF255",
@@ -2857,18 +2859,214 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xA3221c9af9E1F9ECDcb1105dEe724EF901a3a0c0",
-				"status": "current",
-				"keccak256": "0xe61326892721a3a2d36aeb365416d356bcad514585f4c44953e43a00cf5abdf1"
+				"status": "replaced",
+				"keccak256": "0xe61326892721a3a2d36aeb365416d356bcad514585f4c44953e43a00cf5abdf1",
+				"replaced_in": "v0.5.18"
 			},
 			"FeePool": {
 				"address": "0x09073a5fB5A4316761E29AD1AeF5C089FAb7776D",
-				"status": "current",
-				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d"
+				"status": "replaced",
+				"keccak256": "0xba3d82a23c0715db76b98e350b109f9e78a320f153585395f22b930d79d8821d",
+				"replaced_in": "v0.5.20"
 			},
 			"SupplySchedule": {
 				"address": "0x378e65245740B129CAcAa09Bf8Dd60d58091cFf6",
+				"status": "replaced",
+				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c",
+				"replaced_in": "v0.5.18"
+			}
+		}
+	},
+	"v0.5.18": {
+		"tag": "v0.5.18",
+		"fulltag": "v0.5.18",
+		"network": "mumbai",
+		"date": "2022-07-19T17:07:43+09:00",
+		"commit": "4088e7594c520727950106bb0c60148eaa746eaf",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xe8b8342D654768222de0d362E3A813e6fA5aa417",
+				"status": "replaced",
+				"keccak256": "0xf2d8cdb0acf107f8101a232aaf3e4d78ec4d4ab9bd1e50a32411cc800beaf72c",
+				"replaced_in": "v0.5.19"
+			},
+			"SupplySchedule": {
+				"address": "0xe60Bc9bB31892d6C0a438A65B1a1800b903120f0",
+				"status": "replaced",
+				"keccak256": "0x5d1571a5d082a309a3dc306e036a6a8d619d9beefbd733280c29d1f71a62bcae",
+				"replaced_in": "v0.5.19"
+			}
+		}
+	},
+	"v0.5.19": {
+		"tag": "v0.5.19",
+		"fulltag": "v0.5.19",
+		"network": "mumbai",
+		"date": "2022-08-03T10:39:47+09:00",
+		"commit": "85a42947f1fe56ebfb0ba90f2f5fe001a93ad17c",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xFeBFaF872feb352A4b25b3469c72153eE092F5c3",
+				"status": "replaced",
+				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232",
+				"replaced_in": "v0.5.20"
+			},
+			"SupplySchedule": {
+				"address": "0xF4829AEfd505eeC32A763AAea73FCF7DAcdBe76A",
+				"status": "replaced",
+				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c",
+				"replaced_in": "v0.5.20"
+			}
+		}
+	},
+	"v0.5.20": {
+		"tag": "v0.5.20",
+		"fulltag": "v0.5.20",
+		"network": "mumbai",
+		"date": "2022-08-05T11:03:07+09:00",
+		"commit": "b67d66959b78f0ac0f01fef4a3563f9be0232b00",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x7C63163c3b0f144129108B4bE435f1270aC7E3Ce",
+				"status": "replaced",
+				"keccak256": "0xf2391c28746849d2d59013d66b0dcd5dab44cc67dce8a03a74b2614e0301b9fe",
+				"replaced_in": "v0.5.27"
+			},
+			"FeePool": {
+				"address": "0x4afc559960B9EBDd244064ac921c658Da42a3c6c",
+				"status": "replaced",
+				"keccak256": "0xee4f0c08d44f278aa369673adcd17e8e92ddddc51a8ff6a71953267a7ec19d74",
+				"replaced_in": "v0.5.22"
+			},
+			"SupplySchedule": {
+				"address": "0xB40Ac8D22906Fc1Cfb0a64e1A0388281E9D37230",
+				"status": "replaced",
+				"keccak256": "0xb61e591c9cdee7c14e4fe578dbf293dee94e2ea36ecddf0a189dae216e94c70f",
+				"replaced_in": "v0.5.27"
+			}
+		}
+	},
+	"v0.5.21": {
+		"tag": "v0.5.21",
+		"fulltag": "v0.5.21",
+		"network": "mumbai",
+		"date": "2022-08-17T16:23:39+09:00",
+		"commit": "586ca01f9fa88468617ef2b193ce35bc1c7ec0dd",
+		"contracts": {
+			"PeriFinance": {
+				"address": "0xe8A3A16e584D39F0e5f692A46e3A83576B2ee5cC",
+				"status": "replaced",
+				"keccak256": "0xdde0f6c80098bbcbf5e53ffe324255537dd347f16b7fdf2cc6b0a85e30eb5f1d",
+				"replaced_in": "v0.5.22"
+			}
+		}
+	},
+	"v0.5.22": {
+		"tag": "v0.5.22",
+		"fulltag": "v0.5.22",
+		"network": "mumbai",
+		"date": "2022-08-17T17:32:05+09:00",
+		"commit": "09c303491fb60836eaecdeb89af2ce039f8b3bb9",
+		"contracts": {
+			"FeePool": {
+				"address": "0x9EC0aB27269d1210Da02FFEB47fcF23ab61eb747",
+				"status": "replaced",
+				"keccak256": "0x49f4591e9447fde1feab5906d9458a5ade4fc532776a83824f9ef57e1366f60a",
+				"replaced_in": "v0.5.25"
+			},
+			"PeriFinance": {
+				"address": "0xcd174e1840eF59E52f2c9383035e646bD299756c",
+				"status": "replaced",
+				"keccak256": "0x012a0d76864e23b11ca8dc113cc3c46f99997315df1932ff9f75c2af2004252d",
+				"replaced_in": "v0.5.23"
+			}
+		}
+	},
+	"v0.5.23": {
+		"tag": "v0.5.23",
+		"fulltag": "v0.5.23",
+		"network": "mumbai",
+		"date": "2022-08-18T11:05:08+09:00",
+		"commit": "cb16d599e13fae0a677bb2c7126181a12ee27985",
+		"contracts": {
+			"RewardsDistribution": {
+				"address": "0xe431B9230F467ED1185946baE0EA75Cf14f3268E",
+				"status": "replaced",
+				"keccak256": "0x528ff610a40cade7e9d68d73f0ac3a048d5b56a6eb0c4e4eab77536366129b09",
+				"replaced_in": "v0.5.24"
+			},
+			"PeriFinance": {
+				"address": "0x05790834A8Ae3628A9ECC49dDa570c82DE9fC908",
 				"status": "current",
-				"keccak256": "0x5a93b1f907fa008fb39302f10372a45d4572c64e368d12fc536231ba27fdcf6c"
+				"keccak256": "0x7421e6434effc1c9958ff214a52204125f56e5e135c09556eec0c6844fc0950c"
+			}
+		}
+	},
+	"v0.5.24": {
+		"tag": "v0.5.24",
+		"fulltag": "v0.5.24",
+		"network": "mumbai",
+		"date": "2022-08-18T12:26:37+09:00",
+		"commit": "7467e3eaf88470ed9eeb533502aedf2ea14f4dcd",
+		"contracts": {
+			"RewardsDistribution": {
+				"address": "0x2Fc3eC37Cb0265805735B4BAcc96Bf88F2a5B7E5",
+				"status": "current",
+				"keccak256": "0x251670012594c8634ea8a4b47c73f5f981d578e0e7b4a8fc22eb3b9bebc15b2b"
+			}
+		}
+	},
+	"v0.5.25": {
+		"tag": "v0.5.25",
+		"fulltag": "v0.5.25",
+		"network": "mumbai",
+		"date": "2022-08-18T13:25:26+09:00",
+		"commit": "88064ad70924e00e9c089b1355a21960c3cc952d",
+		"contracts": {
+			"FeePool": {
+				"address": "0x5cf79A9dC6ddd0b85Bea0D09661f0073172513dD",
+				"status": "replaced",
+				"keccak256": "0x966d2ce3992b7ed7a901470736d5f2a6c7cb5eb1be9ccbcbf778ca03e5dc380f",
+				"replaced_in": "v0.5.26"
+			}
+		}
+	},
+	"v0.5.26": {
+		"tag": "v0.5.26",
+		"fulltag": "v0.5.26",
+		"network": "mumbai",
+		"date": "2022-08-18T14:07:19+09:00",
+		"commit": "e5b32e5bc32740be21cb7cd08bee5fb2d69c556f",
+		"contracts": {
+			"FeePool": {
+				"address": "0x587e9e7aaFe0fe17b00Ac71292c767827Fc7d394",
+				"status": "replaced",
+				"keccak256": "0xd9589c9ef3a5e2ef3a79b8e2d4a15639c5ed5f6772d3cfe5ec1b73886e19b59d",
+				"replaced_in": "v0.5.27"
+			}
+		}
+	},
+	"v0.5.27": {
+		"tag": "v0.5.27",
+		"fulltag": "v0.5.27",
+		"network": "mumbai",
+		"date": "2022-08-18T15:51:54+09:00",
+		"commit": "60fd34e009c4ae409d0bd4763a26fd369594a3f3",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0x1F7140f8DCc32726eb694fE38a840777269CCf02",
+				"status": "current",
+				"keccak256": "0xb5ed4bd37c1916fd784579447317a0d73dec2c860f84e78301bd2eb93c612232"
+			},
+			"FeePool": {
+				"address": "0x8118418363c9F31a683c885c93dd7DfFee7728Ee",
+				"status": "current",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
+			},
+			"SupplySchedule": {
+				"address": "0xbBB7d8A7ce464273ee9B24995735ee5954c779D7",
+				"status": "current",
+				"keccak256": "0x07f22d984ff54c7e5725012ba7f445719c79502352760119d677016327718201"
 			}
 		}
 	}
