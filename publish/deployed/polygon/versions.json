@@ -553,8 +553,9 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x39EC7C3C52D4b99583d45ce4742cd8C04D43f21F",
-				"status": "current",
-				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497"
+				"status": "replaced",
+				"keccak256": "0x813d998e115d3ca5b44d01b0ec887af10cd1110d1cd43567aee34705fc5de497",
+				"replaced_in": "v0.6.3"
 			}
 		}
 	},
@@ -639,6 +640,20 @@
 				"address": "0x3417E1Ba87Ac61630267e8db2100285460Ac5bC9",
 				"status": "current",
 				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
+			}
+		}
+	},
+	"v0.6.3": {
+		"tag": "v0.6.3",
+		"fulltag": "v0.6.3",
+		"network": "polygon",
+		"date": "2022-07-01T18:01:45+09:00",
+		"commit": "dd4967c8f0b9c7b3a67eb017d1121c4eaac45dc0",
+		"contracts": {
+			"FeePool": {
+				"address": "0xD2E71E6fe9E6704E33F30DBBC50a57E25C6da011",
+				"status": "current",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
 			}
 		}
 	}
