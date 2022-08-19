@@ -87,7 +87,7 @@ contract ExternStateToken is Owned, Proxyable {
         /* Disallow transfers to irretrievable-addresses. */
         require(to != address(0) && to != address(this) && to != address(proxy), "Cannot transfer to this address");
 
-        require(_blockedAddress[from] == false, "Cannot transfer from blocked address");
+        require(_blockedAddress[from] == false, "Blocked address");
 
         // Insufficient balance will be handled by the safe subtraction.
         tokenState.setBalanceOf(from, tokenState.balanceOf(from).sub(value));

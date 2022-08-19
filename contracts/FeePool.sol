@@ -336,6 +336,14 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     /**
+     * @notice Fix the recent period start time.
+     */
+    function setRecentPeriodStartTime(uint64 _startTime) external onlyDebtManager {
+        require(now <= _startTime, "Cannot be more than the current time");
+        _recentFeePeriodsStorage(0).startTime = _startTime;
+    }
+
+    /**
      * @notice Close the current fee period and start a new one.
      */
     function closeCurrentFeePeriod() external issuanceActive {
@@ -349,6 +357,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
         FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
         FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
+        IERC20 _perifinance = IERC20(requireAndGetAddress(CONTRACT_PERIFINANCE));
 
         // Any unclaimed fees from the last period in the array roll back one period.
         // Because of the subtraction here, they're effectively proportionally redistributed to those who
@@ -359,10 +368,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             .feesToDistribute
             .sub(periodToRollover.feesClaimed)
             .add(periodClosing.feesToDistribute);
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
-            .rewardsToDistribute
-            .sub(periodToRollover.rewardsClaimed)
-            .add(periodClosing.rewardsToDistribute);
+        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
+        //     .rewardsToDistribute
+        //     .sub(periodToRollover.rewardsClaimed)
+        //     .add(periodClosing.rewardsToDistribute);
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
+            .balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2))
+            .sub(rewardEscrowV2().totalEscrowedBalance());
 
         // Shift the previous fee periods across to make room for the new one.
         _currentFeePeriod = _currentFeePeriod.add(FEE_PERIOD_LENGTH).sub(1).mod(FEE_PERIOD_LENGTH);

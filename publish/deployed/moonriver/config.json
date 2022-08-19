@@ -54,13 +54,13 @@
 		"deploy": false
 	},
 	"Exchanger": {
-		"deploy": true
+		"deploy": false
 	},
 	"ExchangeState": {
 		"deploy": false
 	},
 	"FeePool": {
-		"deploy": true
+		"deploy": false
 	},
 	"FeePoolState": {
 		"deploy": false
@@ -141,7 +141,7 @@
 		"deploy": false
 	},
 	"ExternalTokenStakeManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"StakingState": {
 		"deploy": false
@@ -192,10 +192,10 @@
 		"deploy": false
 	},
 	"Issuer": {
-		"deploy": true
+		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": true
+		"deploy": false
 	},
 	"BridgeState": {
 		"deploy": false
@@ -204,10 +204,10 @@
 		"deploy": false
 	},
 	"CrossChainManager": {
-		"deploy": true
+		"deploy": false
 	},
 	"CrossChainState": {
-		"deploy": true
+		"deploy": false
 	},
 	"TokenStatepAVAX": {
 		"deploy": false

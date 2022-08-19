@@ -10,7 +10,7 @@ const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
 const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
-// const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
+const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 
 const polygon = ['polygon', 'mumbai'];
 const bsc = ['bsc', 'bsctest'];
@@ -1404,7 +1404,7 @@ const deploy = async ({
 		const { feed } = feeds[asset] || {};
 
 		// now setup price aggregator if any for the pynth
-		if (w3utils.isAddress(feed) && exchangeRates) {
+		if (w3utils.isAddress(feed) && exchangeRates && currencyKeyInBytes !== toBytes32('PERI')) {
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,
@@ -1638,7 +1638,7 @@ const deploy = async ({
 	// Setup remaining price feeds (that aren't pynths)
 
 	for (const { asset, feed } of standaloneFeeds) {
-		if (w3utils.isAddress(feed) && exchangeRates) {
+		if (w3utils.isAddress(feed) && exchangeRates && asset !== 'PERI') {
 			await runStep({
 				contract: `ExchangeRates`,
 				target: exchangeRates,
@@ -2157,7 +2157,6 @@ const deploy = async ({
 	const pynthChunkSize = 15;
 	for (let i = 0; i < filteredPynths.length; i += pynthChunkSize) {
 		const chunk = filteredPynths.slice(i, i + pynthChunkSize);
-		console.log('chunk', chunk);
 		await runStep({
 			contract: 'Issuer',
 			target: issuer,
@@ -2610,84 +2609,84 @@ const deploy = async ({
 			writeArg: addressOf(crossChainState),
 		});
 
-		// const networks = mainnet.includes(network)
-		// 	? mainnet.filter(e => e !== network)
-		// 	: testnet.filter(e => e !== network);
+		const networks = mainnet.includes(network)
+			? mainnet.filter(e => e !== network)
+			: testnet.filter(e => e !== network);
 
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	// read: 'getCrossChainIds',
-		// 	// expect: (crossChainIds) => {
-		// 	// 	for(let crossChainId of crossChainIds) {
-		// 	// 		console.log("crossChainId", crossChainId);
-		// 	// 		if(crossChainId === toBytes32(network))
-		// 	// 			return true;
-		// 	// 	}
-		// 	// 	return false;
-		// 	// },
-		// 	write: 'setCrosschain',
-		// 	writeArg: [toBytes32(network)],
-		// });
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			// read: 'getCrossChainIds',
+			// expect: (crossChainIds) => {
+			// 	for(let crossChainId of crossChainIds) {
+			// 		console.log("crossChainId", crossChainId);
+			// 		if(crossChainId === toBytes32(network))
+			// 			return true;
+			// 	}
+			// 	return false;
+			// },
+			write: 'setCrosschain',
+			writeArg: [toBytes32(network)],
+		});
 
-		// for (const crossNetwork of networks) {
-		// 	await runStep({
-		// 		contract: 'CrossChainManager',
-		// 		target: crossChainManager,
-		// 		// read: 'getCrossChainIds',
-		// 		// expect: (crossChainIds) => {
-		// 		// 	for(let crossChainId of crossChainIds) {
-		// 		// 		console.log("crossChainId", crossChainId);
-		// 		// 		if(crossChainId === toBytes32(crossNetwork))
-		// 		// 			return true;
-		// 		// 	}
-		// 		// 	return false;
-		// 		// },
-		// 		write: 'addCrosschain',
-		// 		writeArg: [toBytes32(crossNetwork)],
-		// 	});
-		// }
+		for (const crossNetwork of networks) {
+			await runStep({
+				contract: 'CrossChainManager',
+				target: crossChainManager,
+				// read: 'getCrossChainIds',
+				// expect: (crossChainIds) => {
+				// 	for(let crossChainId of crossChainIds) {
+				// 		console.log("crossChainId", crossChainId);
+				// 		if(crossChainId === toBytes32(crossNetwork))
+				// 			return true;
+				// 	}
+				// 	return false;
+				// },
+				write: 'addCrosschain',
+				writeArg: [toBytes32(crossNetwork)],
+			});
+		}
 
-		// const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
+		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
 
-		// const chainIds = [
-		// 	toBytes32('mainnet'),
-		// 	toBytes32('ropsten'),
-		// 	toBytes32('rinkeby'),
-		// 	toBytes32('goerli'),
-		// 	toBytes32('kovan'),
-		// 	toBytes32('polygon'),
-		// 	toBytes32('mumbai'),
-		// 	toBytes32('bsctest'),
-		// 	toBytes32('bsc'),
-		// 	toBytes32('shibuya'),
-		// 	toBytes32('moonbase-alphanet'),
-		// 	toBytes32('moonriver'),
-		// ];
+		const chainIds = [
+			toBytes32('mainnet'),
+			toBytes32('ropsten'),
+			toBytes32('rinkeby'),
+			toBytes32('goerli'),
+			toBytes32('kovan'),
+			toBytes32('polygon'),
+			toBytes32('mumbai'),
+			toBytes32('bsctest'),
+			toBytes32('bsc'),
+			toBytes32('shibuya'),
+			toBytes32('moonbase-alphanet'),
+			toBytes32('moonriver'),
+		];
 
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	read: 'getNetworkIds',
-		// 	readArg: [toBytes32('mainnet')],
-		// 	expect: (networkId) => {
-		// 		console.log("networkId", networkId)
-		// 		return networkId === 1
-		// 	},
-		// 	write: 'addNetworkIds',
-		// 	writeArg: [chainIds, networkIds],
-		// });
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			// read: 'getNetworkIds',
+			// readArg: [toBytes32('mainnet')],
+			// expect: (networkId) => {
+			// 	console.log("networkId", networkId)
+			// 	return networkId === 1
+			// },
+			write: 'addNetworkIds',
+			writeArg: [chainIds, networkIds],
+		});
 
-		// await runStep({
-		// 	contract: 'CrossChainManager',
-		// 	target: crossChainManager,
-		// 	read: 'getCurrentNetworkIssuedDebt',
-		// 	expected: issuedDebt => {
-		// 		console.log("issuedDebt", issuedDebt)
-		// 		return issuedDebt > 0;
-		// 	},
-		// 	write: 'setInitialCurrentIssuedDebt',
-		// });
+		await runStep({
+			contract: 'CrossChainManager',
+			target: crossChainManager,
+			// read: 'getCurrentNetworkIssuedDebt',
+			// expected: issuedDebt => {
+			// 	console.log("issuedDebt", issuedDebt)
+			// 	return issuedDebt > 0;
+			// },
+			write: 'setInitialCurrentIssuedDebt',
+		});
 	}
 
 	/*

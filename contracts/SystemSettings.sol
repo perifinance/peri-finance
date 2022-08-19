@@ -30,7 +30,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     uint public constant RATIO_FROM_TARGET_BUFFER = 2e18; // 200% - mininimum buffer between issuance ratio and liquidation ratio
 
     uint public constant MAX_LIQUIDATION_DELAY = 30 days;
-    uint public constant MIN_LIQUIDATION_DELAY = 1 hours;
+    uint public constant MIN_LIQUIDATION_DELAY = 1 days;
 
     // Exchange fee may not exceed 10%.
     uint public constant MAX_EXCHANGE_FEE_RATE = 1e18 / 10;
