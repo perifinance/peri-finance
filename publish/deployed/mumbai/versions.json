@@ -3060,13 +3060,28 @@
 			},
 			"FeePool": {
 				"address": "0x8118418363c9F31a683c885c93dd7DfFee7728Ee",
-				"status": "current",
-				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
+				"status": "replaced",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a",
+				"replaced_in": "v0.6.4"
 			},
 			"SupplySchedule": {
 				"address": "0xbBB7d8A7ce464273ee9B24995735ee5954c779D7",
 				"status": "current",
 				"keccak256": "0x07f22d984ff54c7e5725012ba7f445719c79502352760119d677016327718201"
+			}
+		}
+	},
+	"v0.6.4": {
+		"tag": "v0.6.4",
+		"fulltag": "v0.6.4",
+		"network": "mumbai",
+		"date": "2022-08-18T19:58:53+09:00",
+		"commit": "09ea90d696fe555fe413ea4eb4630f94fe9b5363",
+		"contracts": {
+			"FeePool": {
+				"address": "0xA8f9EDf39Af26A16e3E179Ee72F4a9e72893B08D",
+				"status": "current",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
 			}
 		}
 	}
