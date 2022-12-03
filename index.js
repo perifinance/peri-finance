@@ -218,6 +218,7 @@ const defaults = {
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
+		// local : '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D', <-- fork
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -232,6 +233,7 @@ const defaults = {
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
+		// local : '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', <-- fork
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -246,6 +248,7 @@ const defaults = {
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
+		// local : '0x6b175474e89094c44da98b954eedeac495271d0f', <-- fork
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -274,7 +277,7 @@ const defaults = {
 		bsctest: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		shibuya: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		'moonbase-alphanet': '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
-		moonriver: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
+		moonriver: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	INFLATION_MINTER_ADDRESS: {
@@ -715,13 +718,13 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 
 	const map = {
 		mainnet: Object.assign({}, base, {
-			owner: '0x918153D6e806dF9d4D33664D1cC580416171f720',
-			deployer: '0x918153D6e806dF9d4D33664D1cC580416171f720',
+			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 		}),
 		kovan: Object.assign({}, base),
 		'kovan-ovm': Object.assign({}, base),
 		'mainnet-ovm': Object.assign({}, base, {
-			owner: '0x918153D6e806dF9d4D33664D1cC580416171f720',
+			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 		}),
 		rinkeby: Object.assign({}, base),
 		ropsten: Object.assign({}, base),
