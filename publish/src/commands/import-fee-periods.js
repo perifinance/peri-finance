@@ -170,6 +170,7 @@ const importFeePeriods = async ({
 	console.log(gray(stringify(feePeriods)));
 
 	console.log(gray(`Gas Price: ${gasPrice} gwei`));
+	console.log(gray(`Gas Limit: ${gasLimit} wei`));
 
 	if (network !== 'local') {
 		saveFeePeriodsToFile({ network, feePeriods, sourceContractAddress });
@@ -232,7 +233,7 @@ module.exports = {
 				`Path to a folder that has your input configuration file (${CONFIG_FILENAME}) and where your ${DEPLOYMENT_FILENAME} files will go`
 			)
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
-			.option('-l, --gas-limit <value>', 'Gas limit', parseInt, DEFAULTS.gasLimit)
+			.option('-l, --gas-limit <value>', 'Gas limit', parseFloat, DEFAULTS.gasLimit)
 			.option('-s, --source-contract-address <value>', 'The Fee Pool source contract address')
 			.option(
 				'-n, --network <value>',

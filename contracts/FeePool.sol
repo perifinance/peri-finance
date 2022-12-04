@@ -338,8 +338,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /**
      * @notice Fix the recent period start time.
      */
-    function setRecentPeriodStartTime(uint64 _startTime) external onlyDebtManager {
-        require(now <= _startTime, "Cannot be more than the current time");
+    function setRecentPeriodStartTime(uint64 _startTime) external optionalProxy onlyDebtManager {
+        require(now >= _startTime, "Cannot be more than the current time");
         _recentFeePeriodsStorage(0).startTime = _startTime;
     }
 

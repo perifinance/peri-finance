@@ -2779,8 +2779,9 @@
 			},
 			"CrossChainManager": {
 				"address": "0x3b674319fd07043E9D0371Fb6c8F2c18ab8822A7",
-				"status": "current",
-				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+				"status": "replaced",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
+				"replaced_in": "v0.6.51"
 			}
 		}
 	},
@@ -3080,8 +3081,73 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0xA8f9EDf39Af26A16e3E179Ee72F4a9e72893B08D",
+				"status": "replaced",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a",
+				"replaced_in": "v0.6.5"
+			}
+		}
+	},
+	"v0.6.5": {
+		"tag": "v0.6.5",
+		"fulltag": "v0.6.5",
+		"network": "mumbai",
+		"date": "2022-11-09T17:06:52+09:00",
+		"commit": "ee4f7b12384723d56c5aa6a839ebf84536a13c1d",
+		"contracts": {
+			"FeePool": {
+				"address": "0x8b7099f65A14Fa3348b472B0ce2954b9A32137DA",
+				"status": "replaced",
+				"keccak256": "0xe577ac9c685d3be7120c7398c1f1a217d37a48c50e414b341affc4cdcd8036bc",
+				"replaced_in": "v0.6.52"
+			}
+		}
+	},
+	"v0.6.6": {
+		"tag": "v0.6.6",
+		"fulltag": "v0.6.6",
+		"network": "mumbai",
+		"date": "2022-11-09T17:06:52+09:00",
+		"commit": "ee4f7b12384723d56c5aa6a839ebf84536a13c1d",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0xaF9C26e2d8b5403C882Fb4C9408d1c5512FCd608",
+				"status": "replaced",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
+				"replaced_in": "v0.6.52"
+			}
+		}
+	},
+	"v0.6.7": {
+		"tag": "v0.6.7",
+		"fulltag": "v0.6.7",
+		"network": "mumbai",
+		"date": "2022-11-09T17:06:52+09:00",
+		"commit": "ee4f7b12384723d56c5aa6a839ebf84536a13c1d",
+		"contracts": {
+			"FeePool": {
+				"address": "0x0D69d019465551C929FbC4933207bb0ad81aa998",
 				"status": "current",
-				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
+				"keccak256": "0x5f66fa1c4889bdcc54b4286e539b63b403eed637181cedfa1de1642395e8a942"
+			},
+			"CrossChainManager": {
+				"address": "0x324F1851D25210dAEbeBCC2D78AbcC37d5dfF76C",
+				"status": "replaced",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
+				"replaced_in": "v0.6.53"
+			}
+		}
+	},
+	"v0.6.8": {
+		"tag": "v0.6.8",
+		"fulltag": "v0.6.8",
+		"network": "mumbai",
+		"date": "2022-11-09T17:06:52+09:00",
+		"commit": "ee4f7b12384723d56c5aa6a839ebf84536a13c1d",
+		"contracts": {
+			"CrossChainManager": {
+				"address": "0xd12Deeaa28bD4ED6F7BA139728B312a3A542c020",
+				"status": "current",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
 			}
 		}
 	}
