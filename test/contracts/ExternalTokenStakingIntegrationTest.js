@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 'use strict';
 
-const { contract } = require('hardhat');
+const { web3, contract } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts } = require('./setup');
@@ -12,7 +12,7 @@ const {
 	toBytes32,
 	// constants: { ZERO_ADDRESS },
 } = require('../..');
-const { web3 } = require('web3-utils');
+
 const {
 	currentTime,
 	toUnit,
@@ -421,9 +421,9 @@ contract('External token staking integrating test', async accounts => {
 					pUSDContract.balanceOf(users[0]),
 					dai.balanceOf(users[0]),
 					dai.balanceOf(stakingState.address),
-					// externalTokenStakeManager.stakedAmountOf(users[0], DAI, DAI),
+					externalTokenStakeManager.stakedAmountOf(users[0], DAI, DAI),
 					// externalTokenStakeManager.combinedStakedAmountOf(users[0], pUSD),
-					issuer.externalTokenQuota(users[0], 0, 0, true),
+					// issuer.externalTokenQuota(users[0], 0, 0, true),
 					feePool.issuanceRatio(),
 				]);
 				const daiStakedAmountEstimated = divideDecimalRound(
