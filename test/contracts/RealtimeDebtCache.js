@@ -57,20 +57,14 @@ contract('RealtimeDebtCache', async accounts => {
 			accounts,
 			pynths,
 			contracts: [
-				'PeriFinance',
-				'ExchangeRates',
-				'FeePoolEternalStorage',
 				'AddressResolver',
-				'RewardEscrow',
 				'PeriFinanceEscrow',
-				'SystemSettings',
-				'Issuer',
 				'DebtCache',
-				'Exchanger', // necessary for burnPynths to check settlement of pUSD
-				'DelegateApprovals', // necessary for *OnBehalf functions
-				'FlexibleStorage',
+				'Exchanger',
 				'CollateralManager',
-				'RewardEscrowV2', // necessary for issuer._collateral()
+				'RewardEscrowV2',
+				'StakingState',
+				'CrossChainManager',
 			],
 			stables: [],
 		}));
