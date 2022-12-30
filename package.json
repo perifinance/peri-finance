@@ -62,7 +62,7 @@
 		"solidity:prettier": "npx prettier --write 'contracts/**/*.sol'",
 		"prepublishOnly": "npm run describe && npm run pack",
 		"fork": "node --max-old-space-size=4096 ./node_modules/.bin/hardhat node --target-network mainnet",
-		"test": "npx hardhat test",
+		"test": "npx hardhat test --grep 'Pynth|Reward'",
 		"describe": "hardhat describe",
 		"test:gas": "hardhat test --gas --optimizer || cat test-gas-used.log",
 		"test:prod": "hardhat test:prod --network localhost --optimizer",
