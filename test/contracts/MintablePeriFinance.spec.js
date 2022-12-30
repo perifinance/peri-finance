@@ -14,7 +14,7 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 	let addressResolver;
 	let rewardsDistribution;
 	let rewardEscrow;
-	describe('when system is setup', () => {
+	describe.skip('when system is setup', () => {
 		before('deploy a new instance', async () => {
 			({
 				PeriFinance: mintablePeriFinance, // we request PeriFinance instead of MintablePeriFinance because it is renamed in setup.js

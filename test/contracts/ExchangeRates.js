@@ -9,18 +9,18 @@ const { currentTime, fastForward, toUnit, bytesToString } = require('../utils')(
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	onlyGivenAddressCanInvoke,
-	convertToDecimals,
+	// convertToDecimals,
 } = require('./helpers');
 
 const { setupContract, setupAllContracts } = require('./setup');
 
 const {
 	toBytes32,
-	constants: { ZERO_ADDRESS },
+	// constants: { ZERO_ADDRESS },
 	defaults: { RATE_STALE_PERIOD },
 } = require('../..');
 
-const { toBN } = require('web3-utils');
+// const { toBN } = require('web3-utils');
 
 const MockAggregator = artifacts.require('MockAggregatorV2V3');
 
@@ -50,13 +50,7 @@ const createRandomKeysAndRates = quantity => {
 
 contract('Exchange Rates', async accounts => {
 	const [deployerAccount, owner, oracle, accountOne, accountTwo] = accounts;
-	const [PERI, pUSD, pEUR, pAUD, fastGasPrice] = [
-		'PERI',
-		'pUSD',
-		'pEUR',
-		'pAUD',
-		'fastGasPrice',
-	].map(toBytes32);
+	const [PERI, pUSD, pEUR, pAUD] = ['PERI', 'pUSD', 'pEUR', 'pAUD', 'fastGasPrice'].map(toBytes32);
 	let instance;
 	let systemSettings;
 	let aggregatorJPY;

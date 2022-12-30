@@ -300,7 +300,7 @@ contract BridgeState is Owned, State {
 
         movedAmounts[uint(Move.INBOUND)][_srcChainId] = movedAmounts[uint(Move.INBOUND)][_srcChainId].add(_amount);
 
-        // emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
+        emit InboundingAppended(_account, _amount, _srcChainId, _srcOutboundingId, nextInboundingId);
 
         return true;
     }

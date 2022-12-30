@@ -120,9 +120,10 @@ contract('PurgeablePynth', accounts => {
 			const { pynth, tokenState, proxy } = await deployPynth({
 				currencyKey: 'iETH',
 			});
+			const pynths = [pynth.address];
 			await tokenState.setAssociatedContract(pynth.address, { from: owner });
 			await proxy.setTarget(pynth.address, { from: owner });
-			await issuer.addPynth(pynth.address, { from: owner });
+			await issuer.addPynths(pynths, { from: owner });
 
 			iETHContract = pynth;
 		});
@@ -449,7 +450,7 @@ contract('PurgeablePynth', accounts => {
 							});
 							describe('and it is added to PeriFinance', () => {
 								beforeEach(async () => {
-									await issuer.addPynth(this.replacement.address, { from: owner });
+									await issuer.addPynths([this.replacement.address], { from: owner });
 									await this.replacement.rebuildCache();
 								});
 

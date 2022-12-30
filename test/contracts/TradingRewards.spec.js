@@ -88,6 +88,8 @@ contract('TradingRewards', accounts => {
 					'AddressResolver',
 					'ExchangeRates',
 					'SystemSettings',
+					'StakingState',
+					'CrossChainManager',
 				],
 			}));
 		});

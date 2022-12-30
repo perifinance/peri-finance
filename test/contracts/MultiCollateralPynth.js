@@ -19,7 +19,7 @@ const {
 const { setupAllContracts, setupContract } = require('./setup');
 
 contract('MultiCollateralPynth @gas-skip', accounts => {
-	const [deployerAccount, owner, oracle, , account1] = accounts;
+	const [deployerAccount, owner, oracle, , account1, debtManager] = accounts;
 
 	const pETH = toBytes32('pETH');
 
@@ -33,6 +33,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		pUSDPynth,
 		feePool,
 		pynths;
+	// bridgeState;
 
 	const getid = async tx => {
 		const event = tx.logs.find(log => log.event === 'LoanCreated');
@@ -81,6 +82,8 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		CollateralState = artifacts.require('CollateralState');
 		CollateralManagerState = artifacts.require('CollateralManagerState');
 		CollateralManager = artifacts.require('CollateralManager');
+
+		MultiCollateralPynth.link(await artifacts.require('SafeDecimalMath').new());
 	});
 
 	before(async () => {
@@ -104,7 +107,8 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 				'Exchanger',
 				'FeePool',
 				'CollateralManager',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 
@@ -160,18 +164,13 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 
 	addSnapshotBeforeRestoreAfterEach();
 
-	const deployPynth = async ({ currencyKey, proxy, tokenState }) => {
+	const deployPynth = async ({ currencyKey }) => {
 		// As either of these could be legacy, we require them in the testing context (see buidler.config.js)
-		const TokenState = artifacts.require('TokenState');
-		const Proxy = artifacts.require('Proxy');
-
-		tokenState =
-			tokenState ||
-			(await TokenState.new(owner, ZERO_ADDRESS, {
-				from: deployerAccount,
-			}));
-
-		proxy = proxy || (await Proxy.new(owner, { from: deployerAccount }));
+		const proxy = await artifacts.require('ProxyERC20').new(owner, { from: deployerAccount });
+		// set associated contract as deployerAccount so we can setBalanceOf to the owner below
+		const tokenState = await artifacts
+			.require('TokenState')
+			.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
 		const pynth = await MultiCollateralPynth.new(
 			proxy.address,
@@ -182,6 +181,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			toBytes32(currencyKey),
 			web3.utils.toWei('0'),
 			resolver.address,
+			debtManager,
 			{
 				from: deployerAccount,
 			}
@@ -207,9 +207,10 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			const { pynth, tokenState, proxy } = await deployPynth({
 				currencyKey: 'sXYZ',
 			});
+			const pynths = [pynth.address];
 			await tokenState.setAssociatedContract(pynth.address, { from: owner });
 			await proxy.setTarget(pynth.address, { from: owner });
-			await issuer.addPynth(pynth.address, { from: owner });
+			await issuer.addPynths(pynths, { from: owner });
 			this.pynth = pynth;
 		});
 
@@ -217,7 +218,12 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			ensureOnlyExpectedMutativeFunctions({
 				abi: this.pynth.abi,
 				ignoreParents: ['Pynth'],
-				expected: [], // issue and burn are both overridden in MultiCollateral from Pynth
+				expected: [
+					'claimAllBridgedAmounts',
+					'overchainTransfer',
+					'setBridgeState',
+					'setBridgeValidator',
+				], // issue and burn are both overridden in MultiCollateral from Pynth
 			});
 		});
 

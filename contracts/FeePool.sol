@@ -221,9 +221,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
     }
 
-    function recentFeePeriodsStorage(uint index) external view returns (FeePeriod memory) {
-        return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
-    }
+    // function recentFeePeriodsStorage(uint index) external view returns (FeePeriod memory) {
+    //     return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
+    // }
 
     function _allocatedOtherNetworkFeeRewards() internal view returns (uint allocatedFeesForOtherNetworks) {
         uint otherNetworksShare = SafeDecimalMath.preciseUnit().sub(crossChainManager().currentNetworkDebtPercentage());

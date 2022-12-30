@@ -27,6 +27,7 @@ contract('ExchangerWithVirtualPynth (unit tests)', async accounts => {
 				'exchangeOnBehalfWithTracking',
 				'exchangeWithTracking',
 				'exchangeWithVirtual',
+				'resetLastExchangeRate',
 				'settle',
 				'suspendPynthWithInvalidRate',
 				'setLastExchangeRateForPynth',
@@ -34,7 +35,8 @@ contract('ExchangerWithVirtualPynth (unit tests)', async accounts => {
 		});
 	});
 
-	describe('when a contract is instantiated', () => {
+	// When VirtualPynths is implemented, we re-visit the test.
+	describe.skip('when a contract is instantiated', () => {
 		// ensure all of the behaviors are bound to "this" for sharing test state
 		const behaviors = require('./ExchangerWithVirtualPynth.behaviors').call(this, { accounts });
 

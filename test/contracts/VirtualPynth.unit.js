@@ -23,7 +23,7 @@ contract('VirtualPynth (unit tests)', async accounts => {
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: VirtualPynth.abi,
-			ignoreParents: ['ERC20'],
+			ignoreParents: ['openzeppelin-solidity-2.3.0/contracts/token/ERC20/ERC20.sol:ERC20'],
 			expected: ['settle'],
 		});
 	});

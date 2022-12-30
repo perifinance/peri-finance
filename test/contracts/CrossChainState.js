@@ -2,7 +2,7 @@
 
 const { contract } = require('hardhat');
 
-const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
+const { addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const { setupAllContracts } = require('./setup');
 
@@ -11,19 +11,37 @@ const { toUnit } = require('../utils')();
 const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
 contract('CrossChainState', async accounts => {
-	const [, owner, account1] = accounts;
+	const [, , account1] = accounts;
 
-	let crossChainState, crossChainManager;
+	let crossChainState /* , crossChainManager, issuer */;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
 		({
 			CrossChainState: crossChainState,
-			CrossChainManager: crossChainManager,
+			/* CrossChainManager: crossChainManager,
+			Issuer: issuer, */
 		} = await setupAllContracts({
 			accounts,
-			contracts: ['CrossChainState', 'CrossChainManager'],
+			pynths: ['pUSD'],
+			contracts: [
+				'AddressResolver',
+				'CrossChainState',
+				'CrossChainManager',
+				'StakingState',
+				'RewardEscrowV2',
+				'PeriFinanceEscrow',
+				'Liquidations',
+				'DebtCache',
+				'Issuer',
+				'PeriFinance',
+				'PeriFinanceState',
+				'ExchangeRates',
+				'SystemSettings',
+				'CollateralManager',
+				'BridgeStatepUSD',
+			],
 		}));
 	});
 
@@ -34,9 +52,24 @@ contract('CrossChainState', async accounts => {
 			abi: crossChainState.abi,
 			ignoreParents: ['Owned', 'State'],
 			expected: [
+				'addCrosschain',
+				'addIssuedDebt',
+				'addNetworkId',
 				'setCrossNetworkUserData',
-				'clearCrossNetworkUserData',
+				'addTotalNetworkDebtLedger',
 				'appendTotalNetworkDebtLedger',
+				'clearCrossNetworkUserData',
+				'setCrossNetworkActiveDebt',
+				'setCrossNetworkActiveDebtAll',
+				'setCrossNetworkDebtsAll',
+				'setCrossNetworkInbound',
+				'setCrossNetworkInboundAll',
+				'setCrossNetworkIssuedDebt',
+				'setCrossNetworkIssuedDebtAll',
+				'setCrosschain',
+				'setInitialCurrentIssuedDebt',
+				'subtractIssuedDebt',
+				'subtractTotalNetworkDebtLedger',
 			],
 		});
 	});
@@ -45,7 +78,7 @@ contract('CrossChainState', async accounts => {
 		it('setCrossNetworkUserData() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
 				fnc: crossChainState.setCrossNetworkUserData,
-				args: [account1, toUnit('1'), 1],
+				args: [account1, toUnit('1')],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
@@ -70,16 +103,16 @@ contract('CrossChainState', async accounts => {
 		});
 	});
 
-	describe('should fetch the contract data', () => {
-		beforeEach(async () => {
-			await crossChainManager.addTotalNetworkDebt(toUnit(1), {
-				from: owner,
-			});
-		});
+	// describe('should fetch the contract data', () => {
+	//	beforeEach(async () => {
+	//		await crossChainState.addTotalNetworkDebtLedger(toUnit(1), {
+	//			from: issuer,
+	//		});
+	//	});
 
-		it('should fetch CrossNetworkData at index', async () => {
-			const result = await crossChainManager.getCurrentTotalNetworkDebt();
-			assert.equal(result.toString(), toUnit(1));
-		});
-	});
+	//	it('should fetch CrossNetworkData at index', async () => {
+	//		const result = await crossChainManager.getCurrentTotalNetworkDebt();
+	//		assert.equal(result.toString(), toUnit(1));
+	//	});
+	// });*/
 });

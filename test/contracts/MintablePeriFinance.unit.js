@@ -14,7 +14,7 @@ const MintablePeriFinance = artifacts.require('MintablePeriFinance');
 contract('MintablePeriFinance (unit tests)', accounts => {
 	const [owner, periFinanceBridgeToBase, user1, mockAddress] = accounts;
 
-	it('ensure only known functions are mutative', () => {
+	it.skip('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: MintablePeriFinance.abi,
 			ignoreParents: ['BasePeriFinance'],
@@ -22,7 +22,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 		});
 	});
 
-	describe('initial setup, smock all deps', () => {
+	describe.skip('initial setup, smock all deps', () => {
 		let resolver;
 		let tokenState;
 		let proxy;

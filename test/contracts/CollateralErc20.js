@@ -146,7 +146,8 @@ contract('CollateralErc20', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'Exchanger',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 

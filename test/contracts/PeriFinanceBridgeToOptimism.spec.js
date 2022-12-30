@@ -16,7 +16,7 @@ contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
 
 	let periFinance, periFinanceBridgeToOptimism, systemSettings;
 
-	describe('when deploying the system', () => {
+	describe.skip('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
 				PeriFinance: periFinance,

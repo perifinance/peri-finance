@@ -19,6 +19,7 @@ const {
 const BN = require('bn.js');
 
 const { toBN, toWei, fromWei, hexToAscii } = require('web3-utils');
+
 const UNIT = toWei(new BN('1'), 'ether');
 
 const {
@@ -147,6 +148,9 @@ module.exports = ({ web3 } = {}) => {
 	 */
 	const toUnit = amount => toBN(toWei(amount.toString(), 'ether'));
 	const fromUnit = amount => fromWei(amount, 'ether');
+	const toBigNbr = amount => toBN(amount.toString());
+	// For USDC
+	const to3Unit = amount => toBN(amount.toString() + '000000');
 
 	/**
 	 *  Translates an amount to our canonical precise unit. We happen to use 10^27, which means we can
@@ -160,21 +164,21 @@ module.exports = ({ web3 } = {}) => {
 	const toPreciseUnit = amount => {
 		// Code is largely lifted from the guts of web3 toWei here:
 		// https://github.com/ethjs/ethjs-unit/blob/master/src/index.js
-		const amountString = amount.toString();
+		let amountString = amount.toString();
 
 		// Is it negative?
 		var negative = amountString.substring(0, 1) === '-';
 		if (negative) {
-			amount = amount.substring(1);
+			amountString = amountString.substring(1);
 		}
 
-		if (amount === '.') {
+		if (amountString === '.') {
 			throw new Error(`Error converting number ${amount} to precise unit, invalid value`);
 		}
 
 		// Split it into a whole and fractional part
 		// eslint-disable-next-line prefer-const
-		let [whole, fraction, ...rest] = amount.split('.');
+		let [whole, fraction, ...rest] = amountString.split('.');
 		if (rest.length > 0) {
 			throw new Error(`Error converting number ${amount} to precise unit, too many decimal points`);
 		}
@@ -263,11 +267,35 @@ module.exports = ({ web3 } = {}) => {
 	};
 
 	/*
+	 * Multiplies x and y interpreting them as fixed point decimal numbers,
+	 * with rounding.
+	 */
+	const multiplyDecimalRoundPrecise = (x, y) => {
+		let result = x.mul(y).div(toPreciseUnit(0.1));
+		if (result.mod(toBN(10)).gte(toBN(5))) {
+			result = result.add(toBN(10));
+		}
+		return result.div(toBN(10));
+	};
+
+	/*
 	 * Divides x and y interpreting them as fixed point decimal numbers,
 	 * with rounding.
 	 */
 	const divideDecimalRound = (x, y) => {
 		let result = x.mul(toUnit(10)).div(y);
+		if (result.mod(toBN(10)).gte(toBN(5))) {
+			result = result.add(toBN(10));
+		}
+		return result.div(toBN(10));
+	};
+
+	/*
+	 * Divides x and y interpreting them as fixed point decimal numbers,
+	 * with rounding.
+	 */
+	const divideDecimalRoundPrecise = (x, y) => {
+		let result = x.mul(toPreciseUnit(10)).div(y);
 		if (result.mod(toBN(10)).gte(toBN(5))) {
 			result = result.add(toBN(10));
 		}
@@ -478,10 +506,10 @@ module.exports = ({ web3 } = {}) => {
 			const result = typeof blockOrPromise === 'function' ? blockOrPromise() : blockOrPromise;
 			await result;
 		} catch (error) {
-			assert.include(error.message, 'revert');
-			if (reason) {
+			assert.include(error.message, 'revert', reason);
+			/* if (reason) {
 				assert.include(error.message, reason);
-			}
+			} */
 			errorCaught = true;
 		}
 
@@ -578,8 +606,12 @@ module.exports = ({ web3 } = {}) => {
 		divideDecimal,
 		multiplyDecimalRound,
 		divideDecimalRound,
+		multiplyDecimalRoundPrecise,
+		divideDecimalRoundPrecise,
 		powerToDecimal,
 
+		to3Unit,
+		toBigNbr,
 		toUnit,
 		fromUnit,
 

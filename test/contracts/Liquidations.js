@@ -25,7 +25,7 @@ const MockExchanger = artifacts.require('MockExchanger');
 const FlexibleStorage = artifacts.require('FlexibleStorage');
 
 contract('Liquidations', accounts => {
-	const [pUSD, PERI, USDC] = ['pUSD', 'PERI', 'USDC'].map(toBytes32);
+	const [pUSD, PERI, USDC, DAI] = ['pUSD', 'PERI', 'USDC', 'DAI'].map(toBytes32);
 	const [deployerAccount, owner, oracle, account1, alice, bob, carol, david] = accounts;
 	const week = 3600 * 24 * 7;
 	const pUSD100 = toUnit('100');
@@ -76,7 +76,8 @@ contract('Liquidations', accounts => {
 				'PeriFinanceState',
 				'CollateralManager',
 				'RewardEscrowV2', // required for Issuer._collateral() to load balances
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 
@@ -107,7 +108,7 @@ contract('Liquidations', accounts => {
 
 	const updateUSDCPrice = async rate => {
 		timestamp = await currentTime();
-		await exchangeRates.updateRates([USDC], [rate].map(toUnit), timestamp, {
+		await exchangeRates.updateRates([USDC, DAI], [rate, rate].map(toUnit), timestamp, {
 			from: oracle,
 		});
 		await debtCache.takeDebtSnapshot();
@@ -581,7 +582,7 @@ contract('Liquidations', accounts => {
 							let burnTransaction;
 							beforeEach(async () => {
 								await updatePERIPrice('1');
-								burnTransaction = await periFinance.burnPynthsAndUnstakeUSDCToTarget({
+								burnTransaction = await periFinance.fitToClaimable({
 									from: alice,
 								});
 							});
@@ -607,7 +608,7 @@ contract('Liquidations', accounts => {
 								await updatePERIPrice('1');
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 								amountToBurn = toUnit('10');
-								await periFinance.burnPynthsAndUnstakeUSDC(amountToBurn, 0, { from: alice });
+								await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
 							});
 							it('then alice debt balance is less amountToBurn', async () => {
 								assert.bnEqual(
@@ -634,7 +635,7 @@ contract('Liquidations', accounts => {
 								const maxIssuablePynths = await periFinance.maxIssuablePynths(alice);
 								amountToBurn = aliceDebtBalance.sub(maxIssuablePynths).abs();
 
-								await periFinance.burnPynthsAndUnstakeUSDC(amountToBurn, 0, { from: alice });
+								await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
 							});
 							it('then alice debt balance is less amountToBurn', async () => {
 								assert.bnEqual(
@@ -656,10 +657,11 @@ contract('Liquidations', accounts => {
 							let burnTransaction;
 							beforeEach(async () => {
 								await updatePERIPrice('1');
+								await updateUSDCPrice('1');
 
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 
-								burnTransaction = await periFinance.burnPynthsAndUnstakeUSDC(aliceDebtBalance, 0, {
+								burnTransaction = await periFinance.burnPynths(PERI, aliceDebtBalance, {
 									from: alice,
 								});
 							});
@@ -704,7 +706,7 @@ contract('Liquidations', accounts => {
 										from: owner,
 									});
 
-									await periFinance.issuePynthsAndStakeUSDC(pUSD99, 0, { from: bob });
+									await periFinance.issuePynths(PERI, pUSD99, { from: bob });
 
 									assert.bnEqual(await pUSDContract.balanceOf(bob), pUSD99);
 								});
@@ -742,7 +744,7 @@ contract('Liquidations', accounts => {
 										from: owner,
 									});
 
-									await periFinance.issuePynthsAndStakeUSDC(pUSD100, 0, { from: bob });
+									await periFinance.issuePynths(PERI, pUSD100, { from: bob });
 
 									assert.bnEqual(await pUSDContract.balanceOf(bob), pUSD100);
 
@@ -799,7 +801,7 @@ contract('Liquidations', accounts => {
 											from: owner,
 										});
 
-										await periFinance.issuePynthsAndStakeUSDC(pUSD50, 0, { from: carol });
+										await periFinance.issuePynths(PERI, pUSD50, { from: carol });
 										assert.bnEqual(await pUSDContract.balanceOf(carol), pUSD50);
 
 										// Record Alices state
@@ -913,7 +915,7 @@ contract('Liquidations', accounts => {
 													from: owner,
 												});
 
-												await periFinance.issuePynthsAndStakeUSDC(pUSD1000, 0, { from: bob });
+												await periFinance.issuePynths(PERI, pUSD1000, { from: bob });
 
 												bobPynthBalanceBefore = await pUSDContract.balanceOf(bob);
 												assert.bnEqual(bobPynthBalanceBefore, pUSD1000);
@@ -994,7 +996,7 @@ contract('Liquidations', accounts => {
 											from: owner,
 										});
 
-										await periFinance.issuePynthsAndStakeUSDC(pUSD1000, 0, { from: bob });
+										await periFinance.issuePynths(PERI, pUSD1000, { from: bob });
 
 										// Record Bob's state
 										bobPynthBalanceBefore = await pUSDContract.balanceOf(bob);
@@ -1106,6 +1108,7 @@ contract('Liquidations', accounts => {
 
 					// Drop PERI value to $0.1 after update rates resets to default
 					await updatePERIPrice('0.1');
+					await updateUSDCPrice('0.98');
 
 					// ensure Bob has enough pUSD
 					await periFinance.transfer(bob, toUnit('100000'), {

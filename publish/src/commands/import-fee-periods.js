@@ -92,8 +92,8 @@ const importFeePeriods = async ({
 
 		if (lastEntry.address !== targetContractAddress) {
 			sourceContractAddress = lastEntry.address;
-		} else if (secondLastEntry.address !== targetContractAddress) {
-			sourceContractAddress = targetContractAddress.address;
+		} else if (lastEntry.address === targetContractAddress) {
+			sourceContractAddress = secondLastEntry.address;
 		} else {
 			throw Error('Cannot determine which is the last version of FeePool for the network');
 		}

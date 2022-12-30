@@ -149,7 +149,8 @@ contract('ShortingRewards', accounts => {
 				'PeriFinance',
 				'SystemSettings',
 				'Exchanger',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 

@@ -516,8 +516,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     {
         _ensureCanExchange(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
 
-        // uint sourceAmountAfterSettlement = _settleAndCalcSourceAmountRemaining(sourceAmount, from, sourceCurrencyKey);
-        uint sourceAmountAfterSettlement = sourceAmount;
+        uint sourceAmountAfterSettlement = _settleAndCalcSourceAmountRemaining(sourceAmount, from, sourceCurrencyKey);
+        // uint sourceAmountAfterSettlement = sourceAmount;
 
         // If, after settlement the user has no balance left (highly unlikely), then return to prevent
         // emitting events of 0 and don't revert so as to ensure the settlement queue is emptied
@@ -841,8 +841,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // Is this a swing trade? long to short or short to long skipping pUSD.
         if (
-            (sourceCurrencyKey[0] == 0x73 && destinationCurrencyKey[0] == 0x69) ||
-            (sourceCurrencyKey[0] == 0x69 && destinationCurrencyKey[0] == 0x73)
+            (sourceCurrencyKey[0] == 0x70 && destinationCurrencyKey[0] == 0x69) ||
+            (sourceCurrencyKey[0] == 0x69 && destinationCurrencyKey[0] == 0x70)
         ) {
             // Double the exchange fee
             exchangeFeeRate = exchangeFeeRate.mul(2);

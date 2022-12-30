@@ -10,9 +10,9 @@ const data = {
 	ropsten: require('./publish/deployed/ropsten'),
 	mainnet: require('./publish/deployed/mainnet'),
 	goerli: require('./publish/deployed/goerli'),
-	'goerli-ovm': require('./publish/deployed/goerli-ovm'),
-	'kovan-ovm': require('./publish/deployed/kovan-ovm'),
-	'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
+	// 'goerli-ovm': require('./publish/deployed/goerli-ovm'),
+	// 'kovan-ovm': require('./publish/deployed/kovan-ovm'),
+	// 'mainnet-ovm': require('./publish/deployed/mainnet-ovm'),
 	polygon: require('./publish/deployed/polygon'),
 	mumbai: require('./publish/deployed/mumbai'),
 	bsctest: require('./publish/deployed/bsctest'),
@@ -38,7 +38,6 @@ const networks = [
 	'mumbai',
 	'bsctest',
 	'bsc',
-	'dusty',
 	'shibuya',
 	'moonbase-alphanet',
 	'moonriver',
@@ -67,7 +66,7 @@ const chainIdMapping = Object.entries({
 		fork: true,
 	},
 
-	// OVM networks: see https://github.com/ethereum-optimism/regenesis/
+	/* // OVM networks: see https://github.com/ethereum-optimism/regenesis/
 	10: {
 		network: 'mainnet',
 		useOvm: true,
@@ -80,7 +79,7 @@ const chainIdMapping = Object.entries({
 		// no chain ID for this currently
 		network: 'goerli',
 		useOvm: true,
-	},
+	}, */
 	// now append any defaults
 	137: {
 		network: 'polygon',
@@ -174,7 +173,7 @@ const knownAccounts = {
 // The solidity defaults are managed here in the same format they will be stored, hence all
 // numbers are converted to strings and those with 18 decimals are also converted to wei amounts
 const defaults = {
-	WAITING_PERIOD_SECS: (60 * 5).toString(), // 5 mins
+	WAITING_PERIOD_SECS: (60 * 10).toString(), // 5 mins
 	PRICE_DEVIATION_THRESHOLD_FACTOR: w3utils.toWei('3'),
 	TRADING_REWARDS_ENABLED: false,
 	ISSUANCE_RATIO: w3utils
@@ -188,7 +187,7 @@ const defaults = {
 		.toString(),
 	FEE_PERIOD_DURATION: (60 * 60 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
-	LIQUIDATION_DELAY: (60 * 60 * 1 * 1).toString(), // 1 days
+	LIQUIDATION_DELAY: (60 * 60 * 24 * 1).toString(), // 1 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
@@ -201,6 +200,7 @@ const defaults = {
 	},
 	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
+	// DEBT_SNAPSHOT_STALE_TIME: (3600 * 25 + 600).toString(), // 25 hour heartbeat + 10 minutes mining time
 	AGGREGATOR_WARNING_FLAGS: {
 		mainnet: '0x4A5b9B4aD08616D11F3A402FF7cBEAcB732a76C6',
 		kovan: '0x6292aa9a6650ae14fbf974e5029f36f95a1848fd',
@@ -722,14 +722,14 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 		}),
 		kovan: Object.assign({}, base),
-		'kovan-ovm': Object.assign({}, base),
-		'mainnet-ovm': Object.assign({}, base, {
-			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
-		}),
+		// 'kovan-ovm': Object.assign({}, base),
+		// 'mainnet-ovm': Object.assign({}, base, {
+		//	owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+		// }),
 		rinkeby: Object.assign({}, base),
 		ropsten: Object.assign({}, base),
 		goerli: Object.assign({}, base),
-		'goerli-ovm': Object.assign({}, base),
+		// 'goerli-ovm': Object.assign({}, base),
 		local: Object.assign({}, base, {
 			// Deterministic account #0 when using `npx hardhat node`
 			owner: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',

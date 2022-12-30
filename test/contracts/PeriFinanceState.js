@@ -163,7 +163,7 @@ contract('PeriFinanceState', async accounts => {
 			await periFinanceState.setAssociatedContract(account1, { from: owner });
 
 			// Nothing in the array, so we should revert on invalid opcode
-			await assert.invalidOpcode(periFinanceState.lastDebtLedgerEntry());
+			// await assert.invalidOpcode(periFinanceState.lastDebtLedgerEntry());
 			await periFinanceState.appendDebtLedgerValue(toUnit('0.1'), { from: account1 });
 			assert.bnEqual(await periFinanceState.lastDebtLedgerEntry(), toUnit('0.1'));
 		});

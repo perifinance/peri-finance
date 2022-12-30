@@ -200,7 +200,7 @@ contract('AddressResolver', accounts => {
 						AddressResolver: resolver,
 					},
 					pynths: ['pUSD'],
-					contracts: ['PeriFinance', 'StakingStateUSDC'],
+					contracts: ['PeriFinance', 'StakingState', 'CrossChainManager'],
 				}));
 			});
 

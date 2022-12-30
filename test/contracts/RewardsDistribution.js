@@ -28,16 +28,25 @@ contract('RewardsDistribution', async accounts => {
 		account5,
 	] = accounts;
 
-	let rewardsDistribution, periFinance, feePool, mockRewardsRecipient;
+	let rewardsDistribution, periFinance, feePool, mockRewardsRecipient, pynths;
 
 	before(async () => {
+		pynths = ['pUSD'];
 		({
 			RewardsDistribution: rewardsDistribution,
 			FeePool: feePool,
 			PeriFinance: periFinance,
 		} = await setupAllContracts({
+			pynths,
 			accounts,
-			contracts: ['RewardsDistribution', 'PeriFinance', 'FeePool', 'Issuer'],
+			contracts: [
+				'RewardsDistribution',
+				'PeriFinance',
+				'FeePool',
+				'Issuer',
+				'StakingState',
+				'CrossChainManager',
+			],
 		}));
 
 		mockRewardsRecipient = await MockRewardsRecipient.new(owner, { from: owner });
@@ -388,7 +397,9 @@ contract('RewardsDistribution', async accounts => {
 			assert.bnEqual(balanceOfAccount1, toUnit('5000'));
 
 			// Check Account 2 balance
-			const balanceOfMockRewardsRecipient = await periFinance.balanceOf(mockRewardsRecipient.address);
+			const balanceOfMockRewardsRecipient = await periFinance.balanceOf(
+				mockRewardsRecipient.address
+			);
 			assert.bnEqual(balanceOfMockRewardsRecipient, toUnit('10000'));
 
 			// Check Account 2 balance

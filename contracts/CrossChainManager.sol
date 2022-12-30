@@ -309,11 +309,17 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     function getCurrentNetworkActiveDebt() external view returns (uint) {
         uint currIssuedDebt = state().getCurrentNetworkIssuedDebt();
         uint totalIssuedDebt = state().getTotalNetworkIssuedDebt();
+        (uint currActiveDebt, ) = _getCurrentNetworkPreservedDebt();
+
         if (totalIssuedDebt == 0) {
+            // [RC] when totalIssuedDebt is 0 and currIssuedDebt != 0, the cross-chain
+            // synchonization hasn't executed yet. so, we need to assume
+            // current network's active debt is total active debt until the first run.
+            if (currIssuedDebt != 0) {
+                return currActiveDebt;
+            }
             return 0;
         }
-
-        (uint currActiveDebt, ) = _getCurrentNetworkPreservedDebt();
 
         uint totalActiveDebt = state().getCrossNetworkActiveDebtAll() + currActiveDebt;
 

@@ -28,22 +28,22 @@ contract('CrossChainManager', async accounts => {
 		crossChainState,
 		debtCache,
 		periFinance,
-		periFinanceState,
+		// periFinanceState,
 		exchangeRates,
-		systemSettings,
-		issuer,
-		bridgeStatepUSD;
+		systemSettings;
+	// issuer,
+	// bridgeStatepUSD;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
 	before(async () => {
 		({
-			BridgeStatepUSD: bridgeStatepUSD,
+			// BridgeStatepUSD: bridgeStatepUSD,
 			CrossChainManager: crossChainManager,
 			CrossChainState: crossChainState,
 			DebtCache: debtCache,
 			PeriFinance: periFinance,
-			PeriFinanceState: periFinanceState,
+			// PeriFinanceState: periFinanceState,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
@@ -52,7 +52,7 @@ contract('CrossChainManager', async accounts => {
 			contracts: [
 				'AddressResolver',
 				'DebtCache',
-				'BridgeStatepUSD',
+				'BridgeState',
 				'CrossChainState',
 				'CrossChainManager',
 				'Issuer',
@@ -95,11 +95,28 @@ contract('CrossChainManager', async accounts => {
 			abi: crossChainManager.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
-				'setCrossChainState',
-				'setDebtManager',
+				'addCrosschain',
+				'addCurrentNetworkIssuedDebt',
+				'addIssuedDebt',
+				'addNetworkId',
+				'addNetworkIds',
 				'addTotalNetworkDebt',
-				'setCrossNetworkUserDebt',
+				'appendTotalNetworkDebt',
 				'clearCrossNetworkUserDebt',
+				'setCrossChainState',
+				'setCrossNetworkActiveDebt',
+				'setCrossNetworkActiveDebtAll',
+				'setCrossNetworkDebtsAll',
+				'setCrossNetworkInboundAll',
+				'setCrossNetworkIssuedDebt',
+				'setCrossNetworkIssuedDebtAll',
+				'setCrossNetworkUserDebt',
+				'setCrosschain',
+				'setDebtManager',
+				'setInitialCurrentIssuedDebt',
+				'subtractCurrentNetworkIssuedDebt',
+				'subtractIssuedDebt',
+				'subtractTotalNetworkDebt',
 			],
 		});
 	});
@@ -206,11 +223,11 @@ contract('CrossChainManager', async accounts => {
 			);
 		});
 
-		it('check if account`s debtBalance decreased, c-ratio increased', async () => {
-			const isDecreased = true;
-			await crossChainManager.setCrossChainState(toUnit('200'), isDecreased, {
-				from: owner,
-			});
+		it.skip('check if account`s debtBalance decreased, c-ratio increased', async () => {
+			// const isDecreased = true;
+			// await crossChainManager.subtractTotalNetworkDebt(toUnit('200'), {
+			// 	from: debtManager,
+			// });
 
 			const debtBefore = accounts.map(async account =>
 				(await periFinance.debtBalanceOf(account, pUSD)).toString()

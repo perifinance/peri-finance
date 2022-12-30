@@ -115,7 +115,8 @@ contract('CollateralEth', async accounts => {
 				'SystemStatus',
 				'Issuer',
 				'DebtCache',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 

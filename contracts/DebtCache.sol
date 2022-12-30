@@ -63,7 +63,7 @@ contract DebtCache is BaseDebtCache {
         _updateCachedPynthDebtsWithRates(currencyKeys, currencyRates, false);
     }
 
-    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchangerOrPynthpUSD {
+    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchanger {
         _updateDebtCacheValidity(currentlyInvalid);
     }
 

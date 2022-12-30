@@ -12,12 +12,12 @@ require('solidity-coverage');
 require('hardhat-gas-reporter');
 
 const {
-	constants: { inflationStartTimestampInSecs, AST_FILENAME, AST_FOLDER, BUILD_FOLDER },
+	constants: { AST_FILENAME, AST_FOLDER, BUILD_FOLDER },
 } = require('.');
 
-console.log(inflationStartTimestampInSecs);
+// console.log(inflationStartTimestampInSecs);
 
-const GAS_PRICE = 20e9; // 20 GWEI
+const GAS_PRICE = 100e9; // 100 GWEI
 const CACHE_FOLDER = 'cache';
 
 // task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {

@@ -71,7 +71,9 @@ contract('Depot', async accounts => {
 				'SystemStatus',
 				'PeriFinance',
 				'Issuer',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
+				'ExternalTokenStakeManager',
 			],
 		}));
 	});

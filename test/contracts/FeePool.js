@@ -10,7 +10,7 @@ const FlexibleStorage = artifacts.require('FlexibleStorage');
 const {
 	currentTime,
 	fastForward,
-	fastForwardTo,
+	// fastForwardTo,
 	toUnit,
 	toPreciseUnit,
 	fromUnit,
@@ -32,14 +32,25 @@ const { setupAllContracts } = require('./setup');
 const {
 	toBytes32,
 	defaults: { ISSUANCE_RATIO, FEE_PERIOD_DURATION, TARGET_THRESHOLD },
-	constants: { inflationStartTimestampInSecs },
+	// constants: { inflationStartTimestampInSecs },
 } = require('../..');
 
 contract('FeePool', async accounts => {
 	// CURRENCIES
 	const [pUSD, pBTC, pETH, PERI, USDC] = ['pUSD', 'pBTC', 'pETH', 'PERI', 'USDC'].map(toBytes32);
 
-	const [deployerAccount, owner, oracle, account1, account2, account3] = accounts;
+	const [
+		deployerAccount,
+		owner,
+		oracle,
+		account1,
+		debtManager,
+		account2,
+		account3,
+		,
+		,
+		minterRole,
+	] = accounts;
 
 	// Updates rates with defaults so they're not stale.
 	const updateRatesWithDefaults = async () => {
@@ -56,11 +67,28 @@ contract('FeePool', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	};
 
-	const closeFeePeriod = async () => {
+	const closeFeePeriod = async (inflationMint, account) => {
 		const feePeriodDuration = await feePool.feePeriodDuration();
 		await fastForward(feePeriodDuration);
-		await feePool.closeCurrentFeePeriod({ from: account1 });
+
+		let mintAmount;
+		if (inflationMint) {
+			const supplyToMint = await supplySchedule.mintableSupply();
+			// console.log('supplyToMint', supplyToMint.toString());
+			assert.notEqual(
+				supplyToMint,
+				toUnit('0'),
+				'Amount to be minted can only be 0 when the total supply reaches to MAX.'
+			);
+			await periFinance.inflationalMint({ from: minterRole });
+			mintAmount = supplyToMint;
+		}
+
+		await feePool.distributeFeeRewards({ from: debtManager });
+		await feePool.closeCurrentFeePeriod({ from: account });
 		await updateRatesWithDefaults();
+
+		return { mintAmount };
 	};
 
 	async function getFeesAvailable(account, key) {
@@ -84,15 +112,16 @@ contract('FeePool', async accounts => {
 		feePoolState,
 		delegateApprovals,
 		pUSDContract,
-		pBTCContract,
-		pETHContract,
-		USDCContract,
+		// pBTCContract,
+		// pETHContract,
+		// USDCContract,
 		addressResolver,
-		stakingStateUSDC,
-		tempKovanOracle,
+		// stakingStateUSDC,
+		// tempKovanOracle,
 		supplySchedule,
 		rewardEscrowV2,
-		issuer,
+		// issuer,
+		// crossChainManager,
 		pynths;
 
 	beforeEach(async () => {
@@ -107,16 +136,18 @@ contract('FeePool', async accounts => {
 			ProxyFeePool: feePoolProxy,
 			PeriFinance: periFinance,
 			SystemSettings: systemSettings,
-			PynthpUSD: pUSDContract,
-			PynthpBTC: pBTCContract,
-			PynthpETH: pETHContract,
 			SystemStatus: systemStatus,
-			USDC: USDCContract,
-			StakingStateUSDC: stakingStateUSDC,
-			TempKovanOracle: tempKovanOracle,
+			PynthpUSD: pUSDContract,
+			// PynthpBTC: pBTCContract,
+			// PynthpETH: pETHContract,
+			SystemStatus: systemStatus,
+			// USDC: USDCContract,
+			// StakingStateUSDC: stakingStateUSDC,
+			// TempKovanOracle: tempKovanOracle,
 			SupplySchedule: supplySchedule,
 			RewardEscrowV2: rewardEscrowV2,
-			Issuer: issuer,
+			// Issuer: issuer,
+			// CrossChainManager: crossChainManager,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -163,65 +194,71 @@ contract('FeePool', async accounts => {
 		});
 	});
 
-	it('ensure only known functions are mutative', () => {
-		ensureOnlyExpectedMutativeFunctions({
-			abi: feePool.abi,
-			ignoreParents: ['Proxyable', 'LimitedSetup', 'MixinResolver'],
-			expected: [
-				'appendAccountIssuanceRecord',
-				'recordFeePaid',
-				'setRewardsToDistribute',
-				'closeCurrentFeePeriod',
-				'claimFees',
-				'claimOnBehalf',
-				'importFeePeriod',
-			],
-		});
-	});
-
-	it('should set constructor params on deployment', async () => {
-		FeePool.link(await artifacts.require('SafeDecimalMath').new());
-		const instance = await FeePool.new(
-			account1, // proxy
-			account2, // owner
-			addressResolver.address, // resolver
-			{
-				from: deployerAccount,
-			}
-		);
-
-		assert.equal(await instance.proxy(), account1);
-		assert.equal(await instance.owner(), account2);
-		assert.equal(await instance.resolver(), addressResolver.address);
-
-		// Assert that our first period is open.
-		assert.deepEqual(await instance.recentFeePeriods(0), {
-			feePeriodId: 1,
-			startingDebtIndex: 0,
-			feesToDistribute: 0,
-			feesClaimed: 0,
+	describe('The instance must be spawned correctly', () => {
+		it('ensure only known functions are mutative', () => {
+			ensureOnlyExpectedMutativeFunctions({
+				abi: feePool.abi,
+				ignoreParents: ['Proxyable', 'LimitedSetup', 'MixinResolver'],
+				expected: [
+					'allocateFeeRewards',
+					'appendAccountIssuanceRecord',
+					'claimFees',
+					'claimOnBehalf',
+					'closeCurrentFeePeriod',
+					'distributeFeeRewards',
+					'importFeePeriod',
+					'recordFeePaid',
+					'setQuotaTolerance',
+					'setRecentPeriodStartTime',
+					'setRewardsToDistribute',
+				],
+			});
 		});
 
-		// And that the second period is not yet open
-		assert.deepEqual(await instance.recentFeePeriods(1), {
-			feePeriodId: 0,
-			startTime: 0,
-			startingDebtIndex: 0,
-			feesToDistribute: 0,
-			feesClaimed: 0,
+		it('should set constructor params on deployment', async () => {
+			FeePool.link(await artifacts.require('SafeDecimalMath').new());
+			const instance = await FeePool.new(
+				account1, // proxy
+				account2, // owner
+				addressResolver.address, // resolver
+				{
+					from: deployerAccount,
+				}
+			);
+
+			assert.equal(await instance.proxy(), account1);
+			assert.equal(await instance.owner(), account2);
+			assert.equal(await instance.resolver(), addressResolver.address);
+
+			// Assert that our first period is open.
+			assert.deepEqual(await instance.recentFeePeriods(0), {
+				feePeriodId: 1,
+				startingDebtIndex: 0,
+				feesToDistribute: 0,
+				feesClaimed: 0,
+			});
+
+			// And that the second period is not yet open
+			assert.deepEqual(await instance.recentFeePeriods(1), {
+				feePeriodId: 0,
+				startTime: 0,
+				startingDebtIndex: 0,
+				feesToDistribute: 0,
+				feesClaimed: 0,
+			});
 		});
-	});
 
-	it('issuance ratio is correctly configured as a default', async () => {
-		assert.bnEqual(await feePool.issuanceRatio(), ISSUANCE_RATIO);
-	});
+		it('issuance ratio is correctly configured as a default', async () => {
+			assert.bnEqual(await feePool.issuanceRatio(), ISSUANCE_RATIO);
+		});
 
-	it('the default is set correctly', async () => {
-		assert.bnEqual(await feePool.targetThreshold(), toUnit(TARGET_THRESHOLD / 100));
-	});
+		it('the default is set correctly', async () => {
+			assert.bnEqual(await feePool.targetThreshold(), toUnit(TARGET_THRESHOLD / 100));
+		});
 
-	it('fee period duration is correctly configured as a default', async () => {
-		assert.bnEqual(await feePool.feePeriodDuration(), FEE_PERIOD_DURATION);
+		it('fee period duration is correctly configured as a default', async () => {
+			assert.bnEqual(await feePool.feePeriodDuration(), FEE_PERIOD_DURATION);
+		});
 	});
 
 	describe('restricted methods', () => {
@@ -236,449 +273,90 @@ contract('FeePool', async accounts => {
 	});
 
 	describe('when users claim', () => {
-		const oneThird = number => number.div(web3.utils.toBN('3'));
-		const inflationStartDate = inflationStartTimestampInSecs;
-		const DAY = 60 * 60 * 24;
-		const WEEK = 604800;
-
 		beforeEach(async () => {
 			await periFinance.transfer(account1, toUnit('20000'), { from: owner });
 			await periFinance.transfer(account2, toUnit('20000'), { from: owner });
 			await periFinance.transfer(account3, toUnit('20000'), { from: owner });
 
-			await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account1 });
-			await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account2 });
-			await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account3 });
-			const debtBalanceOfAccount1 = await issuer.debtBalanceOf(account1, pUSD);
-			const debtBalanceOfAccount2 = await issuer.debtBalanceOf(account2, pUSD);
-			const debtBalanceOfAccount3 = await issuer.debtBalanceOf(account3, pUSD);
-			console.log('debtBalanceOfAccount1 : ', debtBalanceOfAccount1.toString());
-			console.log('debtBalanceOfAccount2 : ', debtBalanceOfAccount2.toString());
-			console.log('debtBalanceOfAccount3 : ', debtBalanceOfAccount3.toString());
-
-			const feesClaimable1 = await feePool.isFeesClaimable(account1);
-			const feesClaimable2 = await feePool.isFeesClaimable(account2);
-			const feesClaimable3 = await feePool.isFeesClaimable(account3);
-			console.log('feesClaimable1 : ', feesClaimable1);
-			console.log('feesClaimable2 : ', feesClaimable2);
-			console.log('feesClaimable3 : ', feesClaimable3);
-
-			const debtEntry1 = await feePoolState.getAccountsDebtEntry(account1, 0);
-			const debtEntry2 = await feePoolState.getAccountsDebtEntry(account2, 0);
-			const debtEntry3 = await feePoolState.getAccountsDebtEntry(account3, 0);
-			console.log('1 ownership Percentage : ', debtEntry1[0].toString());
-			console.log('2 ownership Percentage : ', debtEntry2[0].toString());
-			console.log('3 ownership Percentage : ', debtEntry3[0].toString());
-			console.log('------------------------');
+			await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
+			await periFinance.issuePynths(PERI, toUnit('10000'), { from: account2 });
+			await periFinance.issuePynths(PERI, toUnit('10000'), { from: account3 });
 		});
 
-		it('when a user didnt claim a few times, check if the rewards still remained or not', async () => {
-			let feePeriod;
-
-			console.log('-------------FirstTime-----------');
-			const firstWeek = inflationStartDate + WEEK + DAY;
-			// const firstWeek = (await currentTime()) + WEEK;
-			await fastForwardTo(new Date(firstWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			const totalRewardsAvailable2 = await feePool.totalRewardsAvailable();
-			console.log('totalRewardsAvailable2 : ', totalRewardsAvailable2.toString());
-			console.log('------------------------');
-			const AvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log('availableRewards:', AvailableFeesOfAccount1[1].toString());
-			const AvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log('availableRewards:', AvailableFeesOfAccount2[1].toString());
-			const AvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log('availableRewards:', AvailableFeesOfAccount3[1].toString());
-
-			let escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			let escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			let escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-
-			console.log('');
-			console.log('After Claimed.....');
-
-			console.log('------------------------');
-			let afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			let afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			let afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			let totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			let escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			console.log('-------------Second Time (Account3 Didnt claim) -----------');
-
-			const secondWeek = firstWeek + WEEK + DAY;
-			await fastForwardTo(new Date(secondWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Third Time (Account3 Didnt claim) -----------');
-
-			const thirdWeek = secondWeek + WEEK + DAY;
-			await fastForwardTo(new Date(thirdWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Fourth Time (Account3 Didnt claim) -----------');
-
-			const fourthWeek = thirdWeek + WEEK + DAY;
-			await fastForwardTo(new Date(fourthWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Fifth Time (Account3 Didnt claim)-----------');
-
-			const fifthWeek = fourthWeek + WEEK + DAY;
-			await fastForwardTo(new Date(fifthWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Sixth Time (Account3 finally claimed)-----------');
-
-			const sixthWeek = fifthWeek + WEEK + DAY;
-			await fastForwardTo(new Date(sixthWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-			// await feePool.claimFees({ from: account3 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Seventh Time (Account3 finally claimed)-----------');
-
-			const seventhWeek = sixthWeek + WEEK + DAY;
-			await fastForwardTo(new Date(seventhWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-			// await feePool.claimFees({ from: account3 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
-
-			console.log('-------------Eighth Time (Account3 finally claimed)-----------');
-
-			const eighthWeek = seventhWeek + WEEK + DAY;
-			await fastForwardTo(new Date(eighthWeek * 1000));
-			await periFinance.mint({ from: account1 });
-			await feePool.closeCurrentFeePeriod({ from: account1 });
-			await updateRatesWithDefaults();
-
-			// await feePool.claimFees({ from: account1 });
-			// await feePool.claimFees({ from: account2 });
-			// await feePool.claimFees({ from: account3 });
-
-			afterClaimAvailableFeesOfAccount1 = await feePool.feesAvailable(account1);
-			console.log(
-				'afterClaimAvailableFeesOfAccount1:',
-				afterClaimAvailableFeesOfAccount1[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount2 = await feePool.feesAvailable(account2);
-			console.log(
-				'afterClaimAvailableFeesOfAccount2:',
-				afterClaimAvailableFeesOfAccount2[1].toString()
-			);
-			afterClaimAvailableFeesOfAccount3 = await feePool.feesAvailable(account3);
-			console.log(
-				'afterClaimAvailableFeesOfAccount3:',
-				afterClaimAvailableFeesOfAccount3[1].toString()
-			);
-
-			console.log('------------------------');
-
-			escrowedBalanceOfAccount1 = await rewardEscrowV2.balanceOf(account1);
-			escrowedBalanceOfAccount2 = await rewardEscrowV2.balanceOf(account2);
-			escrowedBalanceOfAccount3 = await rewardEscrowV2.balanceOf(account3);
-			console.log('escrowedBalanceOfAccount1:', escrowedBalanceOfAccount1.toString());
-			console.log('escrowedBalanceOfAccount2:', escrowedBalanceOfAccount2.toString());
-			console.log('escrowedBalanceOfAccount3:', escrowedBalanceOfAccount3.toString());
-
-			totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
-			console.log('totalEscrowedBalance: ', totalEscrowedBalance.toString());
-
-			escrowBalance = await periFinance.balanceOf(rewardEscrowV2.address);
-			console.log('escrowBalance : ', escrowBalance.toString());
-
-			feePeriod = await feePool.recentFeePeriods(1);
-			console.log('feePeriodId:', feePeriod[0].toString());
-			console.log('rewardsToDistribute:', feePeriod[5].toString());
-			console.log('rewardsClaimed:', feePeriod[6].toString());
+		describe('the reward is to be as followed', async () => {
+			beforeEach(async () => {
+				await closeFeePeriod(true, account1);
+				await updateRatesWithDefaults();
+			});
+			it('all claimed amount should be escrowed', async () => {
+				// get available rewards
+				const availableFees1 = await feePool.feesAvailable(account1);
+				const availableFees2 = await feePool.feesAvailable(account2);
+				const availableFees3 = await feePool.feesAvailable(account3);
+				const totalReward = await feePool.totalRewardsAvailable();
+
+				// claim reward on account1 and account2
+				await feePool.claimFees({ from: account1 });
+				await feePool.claimFees({ from: account2 });
+
+				const rewardEscrow1 = await rewardEscrowV2.balanceOf(account1);
+				const rewardEscrow2 = await rewardEscrowV2.balanceOf(account2);
+				const rewardEscrow3 = await rewardEscrowV2.balanceOf(account3);
+				const totalEscrowedBalance = await rewardEscrowV2.totalEscrowedBalance();
+				const remainedTotalReward = await feePool.totalRewardsAvailable();
+
+				const feePeriod = await feePool.recentFeePeriods(1);
+
+				// check escrowed balance that is to be as same as claimed reward.
+				assert.bnEqual(availableFees1[1], rewardEscrow1);
+				assert.bnEqual(availableFees2[1], rewardEscrow2);
+				assert.bnNotEqual(availableFees3[1], toUnit(0));
+				assert.bnEqual(rewardEscrow3, toUnit(0));
+
+				// total escrowed reward amount should be as same as total claimed reward amount
+				assert.bnEqual(totalEscrowedBalance, rewardEscrow1.add(rewardEscrow2));
+
+				// First period
+				assert.deepEqual(feePeriod, {
+					feePeriodId: 1,
+					startingDebtIndex: 0,
+					rewardsToDistribute: totalReward,
+					rewardsClaimed: availableFees1[1].add(availableFees2[1]),
+				});
+
+				const unclaimedReward = feePeriod[5].sub(feePeriod[6]);
+				assert.bnEqual(remainedTotalReward, unclaimedReward);
+			});
+
+			it('the ramnant rewards of a period should be added to next inflation reward', async () => {
+				// claim rewards on account1 and account2
+				await feePool.claimFees({ from: account1 });
+				await feePool.claimFees({ from: account2 });
+
+				const feePeriod = await feePool.recentFeePeriods(1);
+				const unclaimedReward = feePeriod[5].sub(feePeriod[6]);
+				const totalEscrowed1st = await rewardEscrowV2.totalEscrowedBalance();
+
+				// 2nd minting
+				const { mintAmount } = await closeFeePeriod(true, account1);
+				await updateRatesWithDefaults();
+
+				const totalReward = await feePool.totalRewardsAvailable();
+				assert.bnEqual(totalReward, mintAmount.add(unclaimedReward));
+
+				// claim rewards on account3 only
+				await feePool.claimFees({ from: account3 });
+
+				const totalEscrowed2nd = await rewardEscrowV2.totalEscrowedBalance();
+
+				// the claimed rewards = 2nd period's total escrowed balance of + 1st period's total escrowed balance
+				assert.deepEqual(await feePool.recentFeePeriods(1), {
+					feePeriodId: 2,
+					startingDebtIndex: 3,
+					rewardsToDistribute: mintAmount.add(unclaimedReward),
+					rewardsClaimed: totalEscrowed2nd.sub(totalEscrowed1st),
+				});
+			});
 		});
 	});
 
@@ -688,7 +366,7 @@ contract('FeePool', async accounts => {
 			await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
 		});
 
-		it.skip('should track fee withdrawals correctly', async () => {
+		it('should track fee withdrawals correctly', async () => {
 			const amount = toUnit('10000');
 
 			// Issue pUSD for two different accounts.
@@ -699,16 +377,16 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: account1 });
-			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: account2 });
+			await periFinance.issuePynths(PERI, amount, { from: account1 });
+			await periFinance.issuePynths(PERI, amount, { from: account2 });
 
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Generate a fee.
 			const exchange = toUnit('10');
 			await periFinance.exchange(pUSD, exchange, pBTC, { from: account1 });
 
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			await debtCache.takeDebtSnapshot();
 
@@ -748,7 +426,7 @@ contract('FeePool', async accounts => {
 			// And once we roll the periods forward enough we should be able to see the correct
 			// roll over happening.
 			for (let i = 0; i < length * 2; i++) {
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 			}
 
 			// All periods except last should now be 0
@@ -766,7 +444,7 @@ contract('FeePool', async accounts => {
 			});
 		});
 
-		it.skip('should correctly calculate the totalFeesAvailable for a single open period', async () => {
+		it('should correctly calculate the totalFeesAvailable for a single open period', async () => {
 			const amount = toUnit('10000');
 			const fee = amount.sub(amountReceivedFromExchange(amount));
 
@@ -775,8 +453,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
-			await periFinance.issuePynthsAndStakeUSDC(amount.mul(web3.utils.toBN('2')), toUnit('0'), {
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), {
 				from: account1,
 			});
 
@@ -787,13 +465,13 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
 
 			// So close out the period
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Now we should have some fees.
 			assert.bnEqual(await feePool.totalFeesAvailable(), fee);
 		});
 
-		it.skip('should correctly calculate the totalFeesAvailable for multiple periods', async () => {
+		it('should correctly calculate the totalFeesAvailable for multiple periods', async () => {
 			const amount1 = toUnit('10000');
 			const amount2 = amount1.mul(web3.utils.toBN('2'));
 			const fee1 = amount1.sub(amountReceivedFromExchange(amount1));
@@ -803,8 +481,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynthsAndStakeUSDC(amount1, toUnit('0'), { from: owner });
-			await periFinance.issuePynthsAndStakeUSDC(amount2, toUnit('0'), { from: account1 });
+			await periFinance.issuePynths(PERI, amount1, { from: owner });
+			await periFinance.issuePynths(PERI, amount2, { from: account1 });
 
 			// Generate a fee.
 			await periFinance.exchange(pUSD, amount1, pBTC, { from: owner });
@@ -813,7 +491,7 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(await feePool.totalFeesAvailable(), 0);
 
 			// So close out the period
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Now we should have some fees.
 			assert.bnEqual(await feePool.totalFeesAvailable(), fee1);
@@ -828,13 +506,13 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(await feePool.totalFeesAvailable(), fee1);
 
 			// Close out the period
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Now we should have both fees.
 			assert.bnClose(await feePool.totalFeesAvailable(), fee1.add(fee2));
 		});
 
-		it.skip('should correctly calculate the feesAvailable for a single user in an open period', async () => {
+		it('should correctly calculate the feesAvailable for a single user in an open period', async () => {
 			const amount = toUnit('10000');
 			const fee = amount.sub(amountReceivedFromExchange(amount));
 
@@ -843,13 +521,13 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
-			await periFinance.issuePynthsAndStakeUSDC(amount.mul(web3.utils.toBN('2')), toUnit('0'), {
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), {
 				from: account1,
 			});
 
 			// Close out the period to allow both users to be part of the whole fee period.
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Generate a fee.
 			await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
@@ -866,7 +544,7 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(feesAvailable[0], 0);
 
 			// Make the period no longer pending
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Now we should have some fees.
 			feesAvailable = await feePool.feesAvailable(owner);
@@ -884,7 +562,7 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(feesAvailable[0], 0);
 		});
 
-		it.skip('should correctly calculate the feesAvailable for a single user in multiple periods when fees are partially claimed', async () => {
+		it('should correctly calculate the feesAvailable for a single user in multiple periods when fees are partially claimed', async () => {
 			const oneThird = number => number.div(web3.utils.toBN('3'));
 			const twoThirds = number => oneThird(number).mul(web3.utils.toBN('2'));
 
@@ -897,13 +575,13 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
-			await periFinance.issuePynthsAndStakeUSDC(amount.mul(web3.utils.toBN('2')), toUnit('0'), {
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), {
 				from: account1,
 			});
 
 			// Close out the period to allow both users to be part of the whole fee period.
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Generate a fee.
 			await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
@@ -918,7 +596,7 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(feesAvailable[0], 0);
 
 			// Make the period no longer pending
-			await closeFeePeriod();
+			await closeFeePeriod(false, account1);
 
 			// Now we should have some fees.
 			feesAvailable = await feePool.feesAvailable(owner);
@@ -937,7 +615,7 @@ contract('FeePool', async accounts => {
 			// fee amount that was unclaimed will roll forward, but will get proportionally
 			// redistributed to everyone.
 			for (let i = 0; i < FEE_PERIOD_LENGTH; i++) {
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 			}
 
 			feesAvailable = await feePool.feesAvailable(account1);
@@ -949,7 +627,7 @@ contract('FeePool', async accounts => {
 			assert.bnEqual(feesAvailable[0], 0);
 		});
 
-		describe('closeFeePeriod()', () => {
+		describe('closeCurrentFeePeriod()', () => {
 			describe('fee period duration not set', () => {
 				beforeEach(async () => {
 					const storage = await FlexibleStorage.new(addressResolver.address, {
@@ -967,7 +645,7 @@ contract('FeePool', async accounts => {
 
 					await feePool.rebuildCache();
 				});
-				it('when closeFeePeriod() is invoked, it reverts with Fee Period Duration not set', async () => {
+				it('when closeCurrentFeePeriod() is invoked, it reverts with Fee Period Duration not set', async () => {
 					await assert.revert(
 						feePool.closeCurrentFeePeriod({ from: owner }),
 						'Fee Period Duration not set'
@@ -975,20 +653,25 @@ contract('FeePool', async accounts => {
 				});
 			});
 			describe('suspension conditions', () => {
+				beforeEach(async () => {
+					const feePeriodDuration = await feePool.feePeriodDuration();
+					await fastForward(feePeriodDuration);
+					await feePool.distributeFeeRewards({ from: debtManager });
+				});
 				['System', 'Issuance'].forEach(section => {
 					describe(`when ${section} is suspended`, () => {
 						beforeEach(async () => {
 							await setStatus({ owner, systemStatus, section, suspend: true });
 						});
 						it('then calling closeCurrentFeePeriod() reverts', async () => {
-							await assert.revert(closeFeePeriod(), 'Operation prohibited');
+							await assert.revert(closeFeePeriod(false, account1), 'Operation prohibited');
 						});
 						describe(`when ${section} is resumed`, () => {
 							beforeEach(async () => {
 								await setStatus({ owner, systemStatus, section, suspend: false });
 							});
 							it('then calling closeCurrentFeePeriod() succeeds', async () => {
-								await closeFeePeriod();
+								await feePool.closeCurrentFeePeriod({ from: account1 });
 							});
 						});
 					});
@@ -996,9 +679,10 @@ contract('FeePool', async accounts => {
 			});
 			it('should allow account1 to close the current fee period', async () => {
 				await fastForward(await feePool.feePeriodDuration());
-
+				await feePool.distributeFeeRewards({ from: debtManager });
 				const transaction = await feePool.closeCurrentFeePeriod({ from: account1 });
-				assert.eventEqual(transaction, 'FeePeriodClosed', { feePeriodId: 1 });
+
+				assert.eventEqual(await transaction, 'FeePeriodClosed', { feePeriodId: 1 });
 
 				// Assert that our first period is new.
 				assert.deepEqual(await feePool.recentFeePeriods(0), {
@@ -1018,8 +702,9 @@ contract('FeePool', async accounts => {
 
 				// fast forward and close another fee Period
 				await fastForward(await feePool.feePeriodDuration());
-
+				await feePool.distributeFeeRewards({ from: debtManager });
 				const secondPeriodClose = await feePool.closeCurrentFeePeriod({ from: account1 });
+
 				assert.eventEqual(secondPeriodClose, 'FeePeriodClosed', { feePeriodId: 2 });
 			});
 			it('should import feePeriods and close the current fee period correctly', async () => {
@@ -1065,7 +750,7 @@ contract('FeePool', async accounts => {
 				}
 
 				await fastForward(await feePool.feePeriodDuration());
-
+				await feePool.distributeFeeRewards({ from: debtManager });
 				const transaction = await feePool.closeCurrentFeePeriod({ from: account1 });
 				assert.eventEqual(transaction, 'FeePeriodClosed', { feePeriodId: 22 });
 
@@ -1081,19 +766,22 @@ contract('FeePool', async accounts => {
 				const feesToDistribute1 = web3.utils.toBN(feePeriodsImport[0].feesToDistribute, 'wei'); // 5800660797674490860
 				const feesToDistribute2 = web3.utils.toBN(feePeriodsImport[1].feesToDistribute, 'wei'); // 934419341128642893704
 				const rolledOverFees = feesToDistribute1.add(feesToDistribute2); // 940220001926317384564
+				const rewardsToDistribute = await rewardEscrowV2.totalEscrowedBalance();
 				assert.deepEqual(await feePool.recentFeePeriods(1), {
 					feePeriodId: 22,
 					startingDebtIndex: 0,
 					startTime: 1520859600,
 					feesToDistribute: rolledOverFees,
 					feesClaimed: '0',
-					rewardsToDistribute: '1442107692307692307692307',
+					rewardsToDistribute: rewardsToDistribute,
 					rewardsClaimed: '0',
 				});
 			});
 
 			it('should allow the feePoolProxy to close feePeriod', async () => {
 				await fastForward(await feePool.feePeriodDuration());
+
+				await feePool.distributeFeeRewards({ from: debtManager });
 
 				const { tx: hash } = await proxyThruTo({
 					proxy: feePoolProxy,
@@ -1130,11 +818,12 @@ contract('FeePool', async accounts => {
 			});
 			it('should correctly roll over unclaimed fees when closing fee periods', async () => {
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users are only entitled to fees when they've participated in a fee period in its
 				// entirety. Roll over the fee period so fees generated below count for owner.
-				await closeFeePeriod();
+
+				await closeFeePeriod(false, account1);
 
 				// Do a single transfer of all our pynths to generate a fee.
 				await pUSDContract.transfer(account1, toUnit('10000'), {
@@ -1151,11 +840,11 @@ contract('FeePool', async accounts => {
 				const length = await feePool.FEE_PERIOD_LENGTH();
 
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users have to have minted before the close of period. Close that fee period
 				// so that there won't be any fees in period. future fees are available.
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Do a single transfer of all our pynths to generate a fee.
 				await pUSDContract.transfer(account1, toUnit('10000'), {
@@ -1170,7 +859,7 @@ contract('FeePool', async accounts => {
 
 				// Now close FEE_PERIOD_LENGTH * 2 fee periods and assert that it is still in the last one.
 				for (let i = 0; i < length * 2; i++) {
-					await closeFeePeriod();
+					await closeFeePeriod(false, account1);
 				}
 
 				const feesByPeriod = await feePool.feesByPeriod(owner);
@@ -1198,14 +887,13 @@ contract('FeePool', async accounts => {
 				}
 
 				// Now create the first fee
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 				await pUSDContract.transfer(account1, toUnit('10000'), {
 					from: owner,
 				});
 				const fee = await pUSDContract.balanceOf(FEE_ADDRESS);
 
-				// And walk it forward one fee period.
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Assert that we have the correct state
 
@@ -1240,7 +928,7 @@ contract('FeePool', async accounts => {
 				const feePeriodDuration = await feePool.feePeriodDuration();
 
 				// Close the current one so we know exactly what we're dealing with
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Try to close the new fee period 5 seconds early
 				await fastForward(feePeriodDuration.sub(web3.utils.toBN('5')));
@@ -1256,6 +944,7 @@ contract('FeePool', async accounts => {
 				const feePeriodDuration = await feePool.feePeriodDuration();
 				await fastForward(feePeriodDuration.mul(web3.utils.toBN('500')));
 				await updateRatesWithDefaults();
+				await feePool.distributeFeeRewards({ from: debtManager });
 				await feePool.closeCurrentFeePeriod({ from: account1 });
 			});
 		});
@@ -1264,23 +953,23 @@ contract('FeePool', async accounts => {
 			describe('potential blocking conditions', () => {
 				beforeEach(async () => {
 					// ensure claimFees() can succeed by default (generate fees and close period)
-					await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+					await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 					await periFinance.exchange(pUSD, toUnit('10'), pBTC, { from: owner });
-					await closeFeePeriod();
+					await closeFeePeriod(false, account1);
 				});
 				['System', 'Issuance'].forEach(section => {
 					describe(`when ${section} is suspended`, () => {
 						beforeEach(async () => {
 							await setStatus({ owner, systemStatus, section, suspend: true });
 						});
-						it.skip('then calling claimFees() reverts', async () => {
+						it('then calling claimFees() reverts', async () => {
 							await assert.revert(feePool.claimFees({ from: owner }), 'Operation prohibited');
 						});
 						describe(`when ${section} is resumed`, () => {
 							beforeEach(async () => {
 								await setStatus({ owner, systemStatus, section, suspend: false });
 							});
-							it.skip('then calling claimFees() succeeds', async () => {
+							it('then calling claimFees() succeeds', async () => {
 								await feePool.claimFees({ from: owner });
 							});
 						});
@@ -1312,11 +1001,11 @@ contract('FeePool', async accounts => {
 						});
 
 						if (type === 'none') {
-							it.skip('allows claimFees', async () => {
+							it('allows claimFees', async () => {
 								await feePool.claimFees({ from: owner });
 							});
 						} else {
-							it.skip('reverts on claimFees', async () => {
+							it('reverts on claimFees', async () => {
 								await assert.revert(
 									feePool.claimFees({ from: owner }),
 									'A pynth or PERI rate is invalid'
@@ -1327,7 +1016,7 @@ contract('FeePool', async accounts => {
 				});
 			});
 
-			it.skip('should allow a user to claim their fees in pUSD @gasprofile', async () => {
+			it('should allow a user to claim their fees in pUSD @gasprofile', async () => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				// Issue 10,000 pUSD for two different accounts.
@@ -1335,8 +1024,8 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two exchange transfers, then close it off.
 				for (let i = 0; i <= length; i++) {
@@ -1346,7 +1035,7 @@ contract('FeePool', async accounts => {
 					await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 					await periFinance.exchange(pUSD, exchange2, pBTC, { from: account1 });
 
-					await closeFeePeriod();
+					await closeFeePeriod(false, account1);
 				}
 
 				// Assert that we have correct values in the fee pool
@@ -1366,13 +1055,13 @@ contract('FeePool', async accounts => {
 				assert.bnEqual(newUSDBalance, oldpUSDBalance.add(feesAvailableUSD[0]));
 			});
 
-			it.skip('should allow a user to claim their fees if they minted debt during period', async () => {
+			it('should allow a user to claim their fees if they minted debt during period', async () => {
 				// Issue 10,000 pUSD for two different accounts.
 				await periFinance.transfer(account1, toUnit('1000000'), {
 					from: owner,
 				});
 
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// For first fee period, do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
@@ -1383,7 +1072,7 @@ contract('FeePool', async accounts => {
 
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Assert that we have correct values in the fee pool
 				// Owner should have all fees as only minted during period
@@ -1400,13 +1089,13 @@ contract('FeePool', async accounts => {
 
 				// FeePeriod 2 - account 1 joins and mints 50% of the debt
 				totalFees = web3.utils.toBN('0');
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// Generate fees
 				await periFinance.exchange(pUSD, exchange1, pBTC, { from: owner });
 				totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				const issuanceDataOwner = await feePoolState.getAccountsDebtEntry(owner, 0);
 
@@ -1422,7 +1111,7 @@ contract('FeePool', async accounts => {
 				assert.bnClose(feesAvailableAcc1[0], totalFees.div(web3.utils.toBN('2')), '8');
 			});
 
-			it.skip('should allow a user to claim their fees in pUSD (as half of total) after some exchanging', async () => {
+			it('should allow a user to claim their fees in pUSD (as half of total) after some exchanging', async () => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				// Issue 10,000 pUSD for two different accounts.
@@ -1430,8 +1119,8 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
@@ -1446,7 +1135,7 @@ contract('FeePool', async accounts => {
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 					totalFees = totalFees.add(exchange2.sub(amountReceivedFromExchange(exchange2)));
 
-					await closeFeePeriod();
+					await closeFeePeriod(false, account1);
 				}
 
 				// issuanceData for Owner and Account1 should hold order of minting
@@ -1482,13 +1171,13 @@ contract('FeePool', async accounts => {
 				assert.bnEqual(await pUSDContract.balanceOf(owner), oldPynthBalance.add(feesAvailable[0]));
 			});
 
-			it.skip('should revert when a user tries to double claim their fees', async () => {
+			it('should revert when a user tries to double claim their fees', async () => {
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users are only allowed to claim fees in periods they had an issued balance
 				// for the entire period.
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Do a single exchange of all our pynths to generate a fee.
 				const exchange1 = toUnit(100);
@@ -1506,7 +1195,7 @@ contract('FeePool', async accounts => {
 					'No fees or rewards available for period, or fees already claimed'
 				);
 
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 
 				// Then claim them
 				await feePool.claimFees({ from: owner });
@@ -1521,7 +1210,7 @@ contract('FeePool', async accounts => {
 				);
 			});
 
-			it.skip('should revert when a user has no fees to claim but tries to claim them', async () => {
+			it('should revert when a user has no fees to claim but tries to claim them', async () => {
 				await assert.revert(
 					feePool.claimFees({ from: owner }),
 					'No fees or rewards available for period, or fees already claimed'
@@ -1623,7 +1312,7 @@ contract('FeePool', async accounts => {
 				}
 			});
 
-			it.skip('should revert when users try to claim fees with > 10% of threshold', async () => {
+			it('should revert when users try to claim fees with > 10% of threshold', async () => {
 				// Issue 10,000 pUSD for two different accounts.
 				await periFinance.transfer(account1, toUnit('1000000'), {
 					from: owner,
@@ -1631,8 +1320,8 @@ contract('FeePool', async accounts => {
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				const amount = await pUSDContract.balanceOf(account1);
-				await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
-				await closeFeePeriod();
+				await periFinance.issuePynths(PERI, amount, { from: owner });
+				await closeFeePeriod(false, account1);
 
 				// Do a transfer to generate fees
 				await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
@@ -1643,7 +1332,7 @@ contract('FeePool', async accounts => {
 
 				// Once the fee period is closed we should have half the fee available because we have
 				// half the collateral backing up the system.
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 				assert.bnClose(await getFeesAvailable(account1), fee.div(web3.utils.toBN('2')));
 
 				// But if the price of PERI decreases by 15%, we will lose all the fees.
@@ -1666,7 +1355,7 @@ contract('FeePool', async accounts => {
 				);
 			});
 
-			it.skip('should be able to set the Target threshold to 15% and claim fees', async () => {
+			it('should be able to set the Target threshold to 15% and claim fees', async () => {
 				// Issue 10,000 pUSD for two different accounts.
 				await periFinance.transfer(account1, toUnit('1000000'), {
 					from: owner,
@@ -1674,8 +1363,8 @@ contract('FeePool', async accounts => {
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				const amount = await pUSDContract.balanceOf(account1);
-				await periFinance.issuePynthsAndStakeUSDC(amount, toUnit('0'), { from: owner });
-				await closeFeePeriod();
+				await periFinance.issuePynths(PERI, amount, { from: owner });
+				await closeFeePeriod(false, account1);
 
 				// Do a transfer to generate fees
 				await periFinance.exchange(pUSD, amount, pBTC, { from: owner });
@@ -1686,7 +1375,7 @@ contract('FeePool', async accounts => {
 
 				// Once the fee period is closed we should have half the fee available because we have
 				// half the collateral backing up the system.
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 				assert.bnClose(await getFeesAvailable(account1), fee.div(web3.utils.toBN('2')));
 
 				// But if the price of PERI decreases by 15%, we will lose all the fees.
@@ -1744,7 +1433,7 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynthsAndStakeUSDC(toUnit('10000'), toUnit('0'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For first fee period, do one exchange.
 				const exchange1 = toUnit((10).toString());
@@ -1752,7 +1441,7 @@ contract('FeePool', async accounts => {
 				// generate fee
 				await periFinance.exchange(pUSD, exchange1, pBTC, { from: account1 });
 
-				await closeFeePeriod();
+				await closeFeePeriod(false, account1);
 			}
 
 			describe('potential blocking conditions', () => {
@@ -1769,7 +1458,7 @@ contract('FeePool', async accounts => {
 						beforeEach(async () => {
 							await setStatus({ owner, systemStatus, section, suspend: true });
 						});
-						it.skip('then calling claimOnBehalf() reverts', async () => {
+						it('then calling claimOnBehalf() reverts', async () => {
 							await assert.revert(
 								feePool.claimOnBehalf(authoriser, { from: delegate }),
 								'Operation prohibited'
@@ -1779,7 +1468,7 @@ contract('FeePool', async accounts => {
 							beforeEach(async () => {
 								await setStatus({ owner, systemStatus, section, suspend: false });
 							});
-							it.skip('then calling claimOnBehalf() succeeds', async () => {
+							it('then calling claimOnBehalf() succeeds', async () => {
 								await feePool.claimOnBehalf(authoriser, { from: delegate });
 							});
 						});
@@ -1811,11 +1500,11 @@ contract('FeePool', async accounts => {
 						});
 
 						if (type === 'none') {
-							it.skip('allows claimFees', async () => {
+							it('allows claimFees', async () => {
 								await feePool.claimOnBehalf(authoriser, { from: delegate });
 							});
 						} else {
-							it.skip('reverts on claimFees', async () => {
+							it('reverts on claimFees', async () => {
 								await assert.revert(
 									feePool.claimOnBehalf(authoriser, { from: delegate }),
 									'A pynth or PERI rate is invalid'
@@ -1826,7 +1515,7 @@ contract('FeePool', async accounts => {
 				});
 			});
 
-			it.skip('should approve a claim on behalf for account1 by account2 and have fees in wallet', async () => {
+			it('should approve a claim on behalf for account1 by account2 and have fees in wallet', async () => {
 				const authoriser = account1;
 				const delegate = account2;
 
@@ -1854,7 +1543,7 @@ contract('FeePool', async accounts => {
 					oldPynthBalance.add(feesAvailable[0])
 				);
 			});
-			it.skip('should revert if account2 tries to claimOnBehalf without approval', async () => {
+			it('should revert if account2 tries to claimOnBehalf without approval', async () => {
 				const authoriser = account1;
 				const delegate = account2;
 
@@ -1875,7 +1564,7 @@ contract('FeePool', async accounts => {
 		});
 
 		describe('reducing FEE_PERIOD_LENGTHS', async () => {
-			it.skip('should be able to get fees available when feePoolState issuanceData is 6 blocks', async () => {
+			it('should be able to get fees available when feePoolState issuanceData is 6 blocks', async () => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				await periFinance.transfer(account1, toUnit('1000000'), {
@@ -1892,8 +1581,8 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 
 					// Mint debt each period to fill up feelPoolState issuanceData to [6]
-					await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('0'), { from: owner });
-					await periFinance.issuePynthsAndStakeUSDC(toUnit('1000'), toUnit('0'), {
+					await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
+					await periFinance.issuePynths(PERI, toUnit('1000'), {
 						from: account1,
 					});
 
@@ -1901,7 +1590,7 @@ contract('FeePool', async accounts => {
 
 					totalFees = totalFees.add(exchange1.sub(amountReceivedFromExchange(exchange1)));
 
-					await closeFeePeriod();
+					await closeFeePeriod(false, account1);
 				}
 
 				// Assert that we have correct values in the fee pool

@@ -14,6 +14,10 @@ contract IExternalTokenStakeManager {
 
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
 
+    function compiledStakableAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
+
+    function getTokenPUSDValueOf(address _user, bytes32 _currencyKey) external view returns (uint);
+
     function stakedAmountOf(
         address _user,
         bytes32 _currencyKey,

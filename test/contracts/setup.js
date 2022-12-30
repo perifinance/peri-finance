@@ -6,6 +6,7 @@ const { toWei } = web3.utils;
 const { toUnit } = require('../utils')();
 const {
 	toBytes32,
+	// fromBytes32,
 	getUsers,
 	constants: { ZERO_ADDRESS },
 	defaults: {
@@ -109,7 +110,7 @@ const setupContract = async ({
 	skipPostDeploy = false,
 	properties = {},
 }) => {
-	const [deployerAccount, owner, oracle, fundsWallet, debtManager] = accounts;
+	const [deployerAccount, owner, oracle, fundsWallet, debtManager, , , , , minterRole] = accounts;
 
 	const artifact = artifacts.require(source || contract);
 
@@ -215,7 +216,7 @@ const setupContract = async ({
 		Pynth: [
 			tryGetAddressOf('ProxyERC20Pynth'),
 			tryGetAddressOf('TokenStatePynth'),
-			tryGetProperty({ property: 'name', otherwise: 'Pynthetic pUSD' }),
+			tryGetProperty({ property: 'name', otherwise: 'Pynth pUSD' }),
 			tryGetProperty({ property: 'symbol', otherwise: 'pUSD' }),
 			owner,
 			tryGetProperty({ property: 'currencyKey', otherwise: toBytes32('pUSD') }),
@@ -358,6 +359,8 @@ const setupContract = async ({
 						}) || []
 					)
 			);
+			// set InflationMinter
+			instance.setInflationMinter(minterRole, { from: owner });
 		},
 		async BasePeriFinance() {
 			// first give all PERI supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
@@ -577,9 +580,9 @@ const setupAllContracts = async ({
 	mocks = {},
 	contracts = [],
 	pynths = [],
+	stables = ['USDC', 'DAI'],
 }) => {
 	const [, owner] = accounts;
-
 	// Copy mocks into the return object, this allows us to include them in the
 	// AddressResolver
 	const returnObj = Object.assign({}, mocks, existing);
@@ -590,7 +593,7 @@ const setupAllContracts = async ({
 	const baseContracts = [
 		{ contract: 'AddressResolver' },
 		{ contract: 'BlacklistManager' },
-		{ contract: 'BridgeState' },
+		{ contract: 'BridgeState', forContract: 'PeriFinance' },
 		{ contract: 'BridgeState', forContract: 'Pynth' },
 		{ contract: 'SystemStatus' },
 		{ contract: 'ExchangeState' },
@@ -603,7 +606,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'ExchangeRates',
 			deps: ['AddressResolver', 'SystemSettings'],
-			mocks: ['Exchanger'],
+			mocks: ['Exchanger', 'Issuer'],
 		},
 		{ contract: 'PeriFinanceState' },
 		{ contract: 'SupplySchedule' },
@@ -636,7 +639,11 @@ const setupAllContracts = async ({
 			mocks: ['PeriFinance', 'FeePool', 'PeriFinanceBridgeToBase', 'Issuer'],
 		},
 		{ contract: 'PeriFinanceEscrow' },
-		{ contract: 'FeePoolEternalStorage' },
+		{
+			contract: 'FeePoolEternalStorage',
+			mocks: ['BridgeStatepUSD'],
+			deps: ['StakingState', 'CrossChainManager', 'Liquidations', 'PeriFinanceEscrow'],
+		},
 		{ contract: 'FeePoolState', mocks: ['FeePool'] },
 		{ contract: 'EternalStorage', forContract: 'DelegateApprovals' },
 		{ contract: 'DelegateApprovals', deps: ['EternalStorage'] },
@@ -646,18 +653,28 @@ const setupAllContracts = async ({
 			contract: 'RewardsDistribution',
 			mocks: ['PeriFinance', 'FeePool', 'RewardEscrow', 'RewardEscrowV2', 'ProxyFeePool'],
 		},
-		{ contract: 'Depot', deps: ['AddressResolver', 'SystemStatus'] },
+		{
+			contract: 'Depot',
+			mocks: ['BridgeStatepUSD'],
+			deps: ['AddressResolver', 'SystemStatus'],
+		},
 		{ contract: 'PynthUtil', deps: ['AddressResolver'] },
 		{ contract: 'DappMaintenance' },
 		{
 			contract: 'EtherCollateral',
 			mocks: ['Issuer', 'Depot'],
-			deps: ['AddressResolver', 'SystemStatus'],
+			deps: [
+				'AddressResolver',
+				'SystemStatus',
+				'StakingState',
+				'PeriFinanceEscrow',
+				'Liquidations',
+			],
 		},
 		{
 			contract: 'EtherCollateralpUSD',
-			mocks: ['Issuer', 'ExchangeRates', 'FeePool'],
-			deps: ['AddressResolver', 'SystemStatus'],
+			mocks: ['Issuer', 'ExchangeRates', 'FeePool', 'BridgeStatepUSD'],
+			deps: ['AddressResolver', 'SystemStatus', 'CrossChainManager'],
 		},
 		{
 			contract: 'DebtCache',
@@ -689,7 +706,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'Exchanger',
 			source: 'ExchangerWithVirtualPynth',
-			mocks: ['PeriFinance', 'FeePool', 'DelegateApprovals'],
+			mocks: ['PeriFinance', 'FeePool', 'DelegateApprovals', 'BridgeStatepUSD'],
 			deps: [
 				'AddressResolver',
 				'TradingRewards',
@@ -702,8 +719,15 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'Pynth',
-			mocks: ['Issuer', 'Exchanger', 'FeePool'],
-			deps: ['TokenState', 'ProxyERC20', 'SystemStatus', 'AddressResolver'],
+			mocks: ['Exchanger', 'FeePool'],
+			deps: [
+				'Issuer',
+				'TokenState',
+				'ProxyERC20',
+				'BridgeState',
+				'SystemStatus',
+				'AddressResolver',
+			],
 		}, // a generic pynth
 		{
 			contract: 'PeriFinance',
@@ -833,7 +857,7 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'CrossChainManager',
-			deps: ['AddressResolver', 'CrossChainState', 'Issuer', 'BridgeStatepUSD'],
+			deps: ['AddressResolver', 'CrossChainState', 'Issuer', 'BridgeStatepUSD', 'DebtCache'],
 		},
 	];
 
@@ -891,14 +915,17 @@ const setupAllContracts = async ({
 
 		// the name of the contract - the contract plus it's forContract
 		// (e.g. Proxy + FeePool)
-		const forContractName = forContract || '';
+		let forContractName = forContract || '';
 
 		// deploy the contract
 		// HACK: if MintablePeriFinance is deployed then rename it
 		let contractRegistered = contract;
 		if (contract === 'MintablePeriFinance' || contract === 'BasePeriFinance') {
 			contractRegistered = 'PeriFinance';
+		} else if (contract === 'BridgeState' && forContract === 'Pynth') {
+			forContractName = 'pUSD';
 		}
+
 		returnObj[contractRegistered + forContractName] = await setupContract({
 			accounts,
 			contract,
@@ -938,24 +965,35 @@ const setupAllContracts = async ({
 		pynthsToAdd.push(token.address);
 	}
 
-	const USDC = await artifacts.require('MockToken').new(
-		...['USDC', 'USDC', '6'].concat({
-			from: owner,
-		})
-	);
+	// stable tokens
+	for (const stable of stables) {
+		const sToken = await artifacts.require('MockToken').new(
+			...[stable, stable, stable === 'USDC' ? '6' : '18'].concat({
+				from: owner,
+			})
+		);
 
-	const DAI = await artifacts
-		.require('MockToken')
-		.new(...['Dai Stablecoin', 'DAI', '18'].concat({ from: owner }));
-
-	returnObj['USDC'] = USDC;
-	returnObj['DAI'] = DAI;
+		returnObj[`${stable}`] = sToken;
+	}
 
 	if (returnObj['StakingState']) {
 		returnObj['StakingState'].setAssociatedContract(
 			returnObj['ExternalTokenStakeManager'].address,
 			{ from: owner }
 		);
+
+		// make stable tokens to be allowed to get staked
+		for (const stable of stables) {
+			const tokenAddress = await returnObj['StakingState'].tokenAddress(toBytes32(stable));
+			if (tokenAddress !== ZERO_ADDRESS) continue;
+
+			await returnObj['StakingState'].setTargetToken(
+				toBytes32(await returnObj[`${stable}`].symbol()),
+				await returnObj[`${stable}`].address,
+				await returnObj[`${stable}`].decimals(),
+				{ from: owner }
+			);
+		}
 	}
 
 	if (returnObj['ExternalTokenStakeManager']) {
@@ -1009,11 +1047,11 @@ const setupAllContracts = async ({
 	// if deploying a real PeriFinance, then we add the pynths
 	if (returnObj['Issuer'] && !mocks['Issuer']) {
 		if (returnObj['Pynth']) {
-			returnObj['Issuer'].addPynth(returnObj['Pynth'].address, { from: owner });
+			returnObj['Issuer'].addPynths([returnObj['Pynth'].address], { from: owner });
 		}
 
-		for (const pynthAddress of pynthsToAdd) {
-			await returnObj['Issuer'].addPynth(pynthAddress, { from: owner });
+		if (pynthsToAdd.length > 0) {
+			await returnObj['Issuer'].addPynths(pynthsToAdd, { from: owner });
 		}
 	}
 

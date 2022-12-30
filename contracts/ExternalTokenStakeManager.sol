@@ -84,6 +84,26 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return _combinedStakedAmountOf(_user, _unitCurrency);
     }
 
+    function compiledStakableAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint) {
+        return _compiledStakableAmountOf(_user, _unitCurrency);
+    }
+
+    function getTokenPUSDValueOf(address _user, bytes32 _currencyKey) external view returns (uint) {
+        return _tokenPUSDValueOf(_user, _currencyKey);
+    }
+
+    function _tokenPUSDValueOf(address _user, bytes32 _currencyKey) internal view returns (uint) {
+        (uint tokenRate, bool rateIsInvalid) = exchangeRates().rateAndInvalid(_currencyKey);
+
+        _requireRatesNotInvalid(rateIsInvalid);
+
+        IERC20 exToken = tokenInstance(_currencyKey);
+
+        uint balance = exToken.balanceOf(_user).mul(10**(uint(18).sub(exToken.decimals())));
+
+        return balance.multiplyDecimal(tokenRate);
+    }
+
     function stakedAmountOf(
         address _user,
         bytes32 _currencyKey,
@@ -193,6 +213,29 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
     }
 
+    /**
+     * @notice for calculating stakable amount of the external tokens in the staker's wallet.
+     */
+    function _compiledStakableAmountOf(address _user, bytes32 _unitCurrency)
+        internal
+        view
+        returns (uint compiledStakableAmount)
+    {
+        bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
+
+        for (uint i = 0; i < tokenList.length; i++) {
+            uint _stakedAmount = stakingState.stakedAmountOf(tokenList[i], _user);
+
+            uint _stakableAmount =
+                tokenInstance(tokenList[i]).balanceOf(_user).mul(10**(18 - (uint)(tokenInstance(tokenList[i]).decimals()))) -
+                    _stakedAmount;
+
+            uint stakableAmount = _toCurrency(tokenList[i], _unitCurrency, _stakableAmount);
+
+            compiledStakableAmount = compiledStakableAmount.add(stakableAmount);
+        }
+    }
+
     function _toCurrency(
         bytes32 _fromCurrencyKey,
         bytes32 _toCurrencyKey,
@@ -269,11 +312,13 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 _staker,
                 address(stakingState),
                 stakingAmountConvertedRoundedUp.div(10**(uint(18).sub(targetDecimals)))
+                // stakingAmountConverted.div(10**(uint(18).sub(targetDecimals)))
             ),
             "Transferring staking token has been failed"
         );
 
         stakingState.stake(_targetCurrency, _staker, stakingAmountConvertedRoundedUp);
+        // stakingState.stake(_targetCurrency, _staker, stakingAmountConverted);
     }
 
     function unstake(
@@ -407,12 +452,17 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) internal tokenRegistered(_targetCurrency) {
         uint targetDecimals = stakingState.tokenDecimals(_targetCurrency);
         require(targetDecimals <= 18, "Invalid decimal number");
-        uint unstakingAmountConvertedRoundedUp = _amount.roundUpDecimal(uint(18).sub(targetDecimals));
 
-        stakingState.unstake(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedUp);
+        // We don't have to round up for staking or unstaking amount.
+        // uint unstakingAmountConvertedRoundedUp = _amount.roundUpDecimal(uint(18).sub(targetDecimals));
+        uint unstakingAmountConvertedRoundedDown = _amount.roundDownDecimal(uint(18).sub(targetDecimals));
+
+        // stakingState.unstake(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedUp);
+        stakingState.unstake(_targetCurrency, _unstaker, unstakingAmountConvertedRoundedDown);
 
         require(
-            stakingState.refund(_targetCurrency, _liquidator, unstakingAmountConvertedRoundedUp),
+            // stakingState.refund(_targetCurrency, _liquidator, unstakingAmountConvertedRoundedUp),
+            stakingState.refund(_targetCurrency, _liquidator, unstakingAmountConvertedRoundedDown),
             "Refund has been failed"
         );
     }

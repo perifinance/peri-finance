@@ -155,8 +155,6 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_BSC;
 		} else if (network === 'bsctest') {
 			providerUrl = process.env.PROVIDER_URL_BSCTEST;
-		} else if (network === 'dusty') {
-			providerUrl = process.env.PROVIDER_URL_DUSTY;
 		} else if (network === 'shibuya') {
 			providerUrl = process.env.PROVIDER_URL_SHIBUYA;
 		} else if (network === 'moonbase-alphanet') {
@@ -170,7 +168,7 @@ const loadConnections = ({ network, useFork }) => {
 
 	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)
 		? process.env.DEPLOY_PRIVATE_KEY
-		: ['dusty', 'shibuya'].includes(network)
+		: ['shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
 		: process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
@@ -185,7 +183,7 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
 			: ['moonbase-alphanet', 'moonriver'].includes(network)
 			? `https://api-${network === 'moonriver' ? network : 'moonbase'}.moonscan.io/api`
-			: ['dusty', 'shibuya'].includes(network)
+			: ['shibuya'].includes(network)
 			? `https://${network}.api.subscan.io`
 			: '';
 

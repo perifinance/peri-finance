@@ -147,7 +147,8 @@ contract('CollateralManager', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'Exchanger',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 

@@ -29,7 +29,7 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 			args
 		);
 
-	describe('when all the deps are (s)mocked', () => {
+	describe.skip('when all the deps are (s)mocked', () => {
 		let messenger;
 		let mintablePeriFinance;
 		let resolver;
@@ -72,7 +72,9 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 			mintablePeriFinance.smocked.burnSecondary.will.return.with(() => {});
 			mintablePeriFinance.smocked.mintSecondary.will.return.with(() => {});
 			mintablePeriFinance.smocked.balanceOf.will.return.with(() => web3.utils.toWei('1'));
-			mintablePeriFinance.smocked.transferablePeriFinance.will.return.with(() => web3.utils.toWei('1'));
+			mintablePeriFinance.smocked.transferablePeriFinance.will.return.with(() =>
+				web3.utils.toWei('1')
+			);
 			messenger.smocked.sendMessage.will.return.with(() => {});
 			messenger.smocked.xDomainMessageSender.will.return.with(() => periBridgeToOptimism);
 			rewardEscrow.smocked.importVestingEntries.will.return.with(() => {});

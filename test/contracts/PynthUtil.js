@@ -13,7 +13,7 @@ contract('PynthUtil', accounts => {
 	const [, ownerAccount, oracle, account2] = accounts;
 	let pynthUtil, pUSDContract, periFinance, exchangeRates, timestamp, systemSettings, debtCache;
 
-	const [pUSD, pBTC, iBTC] = ['pUSD', 'pBTC', 'iBTC'].map(toBytes32);
+	const [PERI, pUSD, pBTC, iBTC] = ['PERI', 'pUSD', 'pBTC', 'iBTC'].map(toBytes32);
 	const pynthKeys = [pUSD, pBTC, iBTC];
 	const pynthPrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
@@ -70,7 +70,7 @@ contract('PynthUtil', accounts => {
 		const amountToExchange = toUnit('50');
 		const pUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await periFinance.issuePynthsAndStakeUSDC(pUSDMinted, toUnit('0'), {
+			await periFinance.issuePynths(PERI, pUSDMinted, {
 				from: ownerAccount,
 			});
 			await pUSDContract.transfer(account2, pUSDAmount, { from: ownerAccount });

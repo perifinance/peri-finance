@@ -388,18 +388,27 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint _stakedAmount,
         bytes32 _currencyKey
     ) internal view returns (uint issueAmount, uint stakeAmount) {
+        // get TagetRatio and the Quota
         uint targetRatio = getIssuanceRatio();
         uint quotaLimit = getExternalTokenQuota();
 
+        // calculate the debt amount of ex-token's to be staked
+        // ex-token's debt = exsting debt * quota,
+        // ex-token's staked value = ex-token's debt / target ratio
+        // this code is for comparing current ex-token staked value to its max allowed staking value
         uint maxAllowedStakingAmount = _debtBalance.multiplyDecimal(quotaLimit).divideDecimal(targetRatio);
+
+        // if ex-token quota is over, there is none additioinal debt nor stakable ex-tokens
         if (_stakedAmount >= maxAllowedStakingAmount) {
             return (0, 0);
         }
 
-        stakeAmount = ((maxAllowedStakingAmount).sub(_stakedAmount)).divideDecimal(SafeDecimalMath.unit().sub(quotaLimit));
+        // ex-token's stakable value derived from existing debt + the max quota debt
+        stakeAmount = (maxAllowedStakingAmount.sub(_stakedAmount)).divideDecimal(SafeDecimalMath.unit().sub(quotaLimit));
 
-        uint balance = IERC20(exTokenStakeManager().getTokenAddress(_currencyKey)).balanceOf(_from);
-        stakeAmount = balance < stakeAmount ? balance : stakeAmount;
+        // we need to consider the decimals of the ex-token.
+        uint tokenPUSDValue = exTokenStakeManager().getTokenPUSDValueOf(_from, _currencyKey);
+        stakeAmount = tokenPUSDValue < stakeAmount ? tokenPUSDValue : stakeAmount;
         issueAmount = stakeAmount.multiplyDecimal(targetRatio);
     }
 
@@ -440,7 +449,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         view
         returns (uint cratio, bool anyRateIsInvalid)
     {
-        return _collateralisationRatio(_issuer);
+        // [RC] When DebtCache is staled, the rate should be treated as invalid.
+        (, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
+
+        (uint collarteralRatio, bool rateIsInvalid) = _collateralisationRatio(_issuer);
+
+        anyRateIsInvalid = (cacheIsInvalid || cacheIsStale) ? true : anyRateIsInvalid || rateIsInvalid;
+        cratio = collarteralRatio;
     }
 
     function collateral(address account) external view returns (uint) {
@@ -632,6 +647,15 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //     }
     // }
 
+    // function stake(
+    //     address _staker,
+    //     uint _amount,
+    //     bytes32 _targetCurrency,
+    //     bytes32 _inputCurrency
+    // ) external {
+    //     exTokenStakeManager().stake(_staker, _amount, _targetCurrency, _inputCurrency);
+    // }
+    //
     function issuePynths(
         address _issuer,
         bytes32 _currencyKey,
@@ -651,6 +675,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
             _remainingIssuablePynths(_issuer);
+
+        // USDC, DAI currency rate validation
+        // bool rateIsInvalid = exchangeRates().rateIsInvalid(_currencyKey);
+
+        // _requireRatesNotInvalid(anyRateIsInvalid||rateIsInvalid);
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         uint afterDebtBalance = _issuePynths(_issuer, _issueAmount, maxIssuable, existingDebt, totalSystemDebt, false);
@@ -662,26 +691,41 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function issueMaxPynths(address _issuer) external onlyPeriFinance {
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
             _remainingIssuablePynths(_issuer);
+
         _requireRatesNotInvalid(anyRateIsInvalid);
 
         _issuePynths(_issuer, 0, maxIssuable, existingDebt, totalSystemDebt, true);
     }
 
+    // function maxExternalTokenStakeAmount(
+    //     address _from,
+    //     uint _debtBalance,
+    //     uint _stakedAmount,
+    //     bytes32 _currencyKey
+    // ) external view returns (uint issueAmount, uint stakeAmount) {
+    //     return _maxExternalTokenStakeAmount(_from, _debtBalance, _stakedAmount, _currencyKey);
+    // }
+
+    // this senario only possible when prices of ex-token(stable coin) is down or staked debt from ex-token is not reache the quota.
+    // leaving a room for extra debt.
     function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external onlyPeriFinance {
         _requireCurrencyKeyIsNotpUSD(_currencyKey);
         require(_currencyKey != PERI, "Only external token allowed to stake");
 
+        // get existing debt and total system debt
         (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
             _remainingIssuablePynths(_issuer);
         _requireRatesNotInvalid(anyRateIsInvalid);
         _requireExistingDebt(existingDebt);
 
+        // now get to-be-issued debt and to-be-staked amount of tokens
         uint combinedStakedAmount = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
         (uint issueAmountToQuota, uint stakeAmountToQuota) =
             _maxExternalTokenStakeAmount(_issuer, existingDebt, combinedStakedAmount, _currencyKey);
 
         require(issueAmountToQuota > 0 && stakeAmountToQuota > 0, "Not available to stake");
 
+        // stake more amount of ex-tokens
         exTokenStakeManager().stake(_issuer, stakeAmountToQuota, _currencyKey, pUSD);
 
         // maxIssuable should be increased for increased collateral
@@ -709,6 +753,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
                 false
             );
         } else {
+            // [RC] when stable coins are burnt, the debt must be burnt as well
+            _voluntaryBurnPynths(_from, _burnAmount, false, false);
             exTokenStakeManager().unstake(_from, _burnAmount.divideDecimalRound(getIssuanceRatio()), _currencyKey, pUSD);
         }
     }

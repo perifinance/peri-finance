@@ -27,7 +27,8 @@ contract('StakingRewards', accounts => {
 		rewardsDistribution,
 		systemSettings,
 		feePool,
-		stakingStateUSDC;
+		// stakingStateUSDC,
+		pynths;
 
 	const DAY = 86400;
 	const ZERO_BN = toBN(0);
@@ -51,6 +52,7 @@ contract('StakingRewards', accounts => {
 	addSnapshotBeforeRestoreAfterEach();
 
 	before(async () => {
+		pynths = ['pUSD'];
 		({ token: stakingToken } = await mockToken({
 			accounts,
 			name: 'Staking Token',
@@ -69,15 +71,17 @@ contract('StakingRewards', accounts => {
 			PeriFinance: rewardsToken,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
-			StakingStateUSDC: stakingStateUSDC,
+			// StakingStateUSDC: stakingStateUSDC,
 		} = await setupAllContracts({
+			pynths,
 			accounts,
 			contracts: [
 				'RewardsDistribution',
 				'PeriFinance',
 				'FeePool',
 				'SystemSettings',
-				'StakingStateUSDC',
+				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 

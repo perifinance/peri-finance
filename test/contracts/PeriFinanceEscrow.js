@@ -4,7 +4,7 @@ const { contract } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { mockToken, setupAllContracts } = require('./setup');
+const { setupAllContracts } = require('./setup');
 
 const { currentTime, fastForward, toUnit } = require('../utils')();
 
@@ -18,7 +18,7 @@ contract('PeriFinanceEscrow', async accounts => {
 	const YEAR = 31556926;
 
 	const [, owner, , account1, account2] = accounts;
-	let escrow, periFinance;
+	let escrow, periFinance, pynths;
 
 	const getYearFromNow = async () => {
 		const timestamp = await currentTime();
@@ -32,9 +32,11 @@ contract('PeriFinanceEscrow', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
+		pynths = ['pUSD'];
 		({ PeriFinanceEscrow: escrow, PeriFinance: periFinance } = await setupAllContracts({
+			pynths,
 			accounts,
-			contracts: ['PeriFinanceEscrow', 'PeriFinance', 'StakingStateUSDC'],
+			contracts: ['PeriFinanceEscrow', 'PeriFinance', 'StakingState', 'CrossChainManager'],
 		}));
 	});
 

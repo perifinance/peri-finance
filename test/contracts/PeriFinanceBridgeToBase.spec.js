@@ -16,7 +16,7 @@ contract('PeriFinanceBridgeToBase (spec tests)', accounts => {
 
 	let mintablePeriFinance, periFinanceBridgeToBase, systemSettings;
 
-	describe('when deploying the system', () => {
+	describe.skip('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
 				PeriFinance: mintablePeriFinance, // we request PeriFinance instead of MintablePeriFinance because it is renamed in setup.js
