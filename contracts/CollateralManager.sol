@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity ^0.5.16;
 
 // Inheritance
 import "./Owned.sol";
@@ -43,6 +43,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all collateral contracts.
     AddressSetLib.AddressSet internal _collaterals;
 
+    // The set of all available currency keys.
+    Bytes32SetLib.Bytes32Set internal _currencyKeys;
+
     // The set of all pynths issuable by the various collateral contracts
     Bytes32SetLib.Bytes32Set internal _pynths;
 
@@ -52,13 +55,16 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all pynths that are shortable.
     Bytes32SetLib.Bytes32Set internal _shortablePynths;
 
-    mapping(bytes32 => bytes32) public pynthToInversePynth;
+    mapping(bytes32 => bytes32) public shortablePynthsByKey;
 
     // The factor that will scale the utilisation ratio.
     uint public utilisationMultiplier = 1e18;
 
     // The maximum amount of debt in pUSD that can be issued by non peri collateral.
     uint public maxDebt;
+
+    // The rate that determines the skew limit maximum.
+    uint public maxSkewRate;
 
     // The base interest rate applied to all borrows.
     uint public baseBorrowRate;
@@ -79,6 +85,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         address _owner,
         address _resolver,
         uint _maxDebt,
+        uint _maxSkewRate,
         uint _baseBorrowRate,
         uint _baseShortRate
     ) public Owned(_owner) Pausable() MixinResolver(_resolver) {
@@ -86,6 +93,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         state = _state;
 
         setMaxDebt(_maxDebt);
+        setMaxSkewRate(_maxSkewRate);
         setBaseBorrowRate(_baseBorrowRate);
         setBaseShortRate(_baseShortRate);
 
@@ -99,16 +107,14 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         staticAddresses[0] = CONTRACT_ISSUER;
         staticAddresses[1] = CONTRACT_EXRATES;
 
-        // we want to cache the name of the pynth and the name of its corresponding iPynth
         bytes32[] memory shortAddresses;
         uint length = _shortablePynths.elements.length;
 
         if (length > 0) {
-            shortAddresses = new bytes32[](length * 2);
+            shortAddresses = new bytes32[](length);
 
             for (uint i = 0; i < length; i++) {
                 shortAddresses[i] = _shortablePynths.elements[i];
-                shortAddresses[i + length] = pynthToInversePynth[_shortablePynths.elements[i]];
             }
         }
 
@@ -166,11 +172,11 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function totalLong() public view returns (uint pusdValue, bool anyRateIsInvalid) {
-        bytes32[] memory pynths = _pynths.elements;
+        bytes32[] memory pynths = _currencyKeys.elements;
 
         if (pynths.length > 0) {
             for (uint i = 0; i < pynths.length; i++) {
-                bytes32 pynth = _pynth(pynths[i]).currencyKey();
+                bytes32 pynth = pynths[i];
                 if (pynth == pUSD) {
                     pusdValue = pusdValue.add(state.long(pynth));
                 } else {
@@ -201,7 +207,23 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         }
     }
 
-    function getBorrowRate() external view returns (uint borrowRate, bool anyRateIsInvalid) {
+    function totalLongAndShort() public view returns (uint pusdValue, bool anyRateIsInvalid) {
+        bytes32[] memory currencyKeys = _currencyKeys.elements;
+
+        if (currencyKeys.length > 0) {
+            (uint[] memory rates, bool invalid) = _exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
+            for (uint i = 0; i < rates.length; i++) {
+                uint longAmount = state.long(currencyKeys[i]).multiplyDecimal(rates[i]);
+                uint shortAmount = state.short(currencyKeys[i]).multiplyDecimal(rates[i]);
+                pusdValue = pusdValue.add(longAmount).add(shortAmount);
+                if (invalid) {
+                    anyRateIsInvalid = true;
+                }
+            }
+        }
+    }
+
+    function getBorrowRate() public view returns (uint borrowRate, bool anyRateIsInvalid) {
         // get the peri backed debt.
         (uint periDebt, ) = _issuer().totalIssuedPynths(pUSD, true);
 
@@ -223,34 +245,33 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         anyRateIsInvalid = ratesInvalid;
     }
 
-    function getShortRate(bytes32 pynth) external view returns (uint shortRate, bool rateIsInvalid) {
-        bytes32 pynthKey = _pynth(pynth).currencyKey();
-
+    function getShortRate(bytes32 pynthKey) public view returns (uint shortRate, bool rateIsInvalid) {
         rateIsInvalid = _exchangeRates().rateIsInvalid(pynthKey);
 
-        // get the spot supply of the pynth, its iPynth
-        uint longSupply = IERC20(address(_pynth(pynth))).totalSupply();
-        uint inverseSupply = IERC20(address(_pynth(pynthToInversePynth[pynth]))).totalSupply();
-        // add the iPynth to supply properly reflect the market skew.
-        uint shortSupply = state.short(pynthKey).add(inverseSupply);
+        // Get the long and short supply.
+        uint longSupply = IERC20(address(_pynth(shortablePynthsByKey[pynthKey]))).totalSupply();
+        uint shortSupply = state.short(pynthKey);
 
-        // in this case, the market is skewed long so its free to short.
+        // In this case, the market is skewed long so its free to short.
         if (longSupply > shortSupply) {
             return (0, rateIsInvalid);
         }
 
-        // otherwise workout the skew towards the short side.
+        // Otherwise workout the skew towards the short side.
         uint skew = shortSupply.sub(longSupply);
 
-        // divide through by the size of the market
+        // Divide through by the size of the market.
         uint proportionalSkew = skew.divideDecimal(longSupply.add(shortSupply)).divideDecimal(SECONDS_IN_A_YEAR);
 
-        // finally, add the base short rate.
-        shortRate = proportionalSkew.add(baseShortRate);
+        // Enforce a skew limit maximum.
+        uint maxSkewLimit = proportionalSkew.multiplyDecimal(maxSkewRate);
+
+        // Finally, add the base short rate.
+        shortRate = maxSkewLimit.add(baseShortRate);
     }
 
     function getRatesAndTime(uint index)
-        external
+        public
         view
         returns (
             uint entryRate,
@@ -263,7 +284,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function getShortRatesAndTime(bytes32 currency, uint index)
-        external
+        public
         view
         returns (
             uint entryRate,
@@ -278,12 +299,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     function exceedsDebtLimit(uint amount, bytes32 currency) external view returns (bool canIssue, bool anyRateIsInvalid) {
         uint usdAmount = _exchangeRates().effectiveValue(currency, amount, pUSD);
 
-        (uint longValue, bool longInvalid) = totalLong();
-        (uint shortValue, bool shortInvalid) = totalShort();
+        (uint longAndShortValue, bool invalid) = totalLongAndShort();
 
-        anyRateIsInvalid = longInvalid || shortInvalid;
-
-        return (longValue.add(shortValue).add(usdAmount) <= maxDebt, anyRateIsInvalid);
+        return (longAndShortValue.add(usdAmount) <= maxDebt, invalid);
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -293,12 +311,18 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     function setUtilisationMultiplier(uint _utilisationMultiplier) public onlyOwner {
         require(_utilisationMultiplier > 0, "Must be greater than 0");
         utilisationMultiplier = _utilisationMultiplier;
+        emit UtilisationMultiplierUpdated(utilisationMultiplier);
     }
 
     function setMaxDebt(uint _maxDebt) public onlyOwner {
         require(_maxDebt > 0, "Must be greater than 0");
         maxDebt = _maxDebt;
         emit MaxDebtUpdated(maxDebt);
+    }
+
+    function setMaxSkewRate(uint _maxSkewRate) public onlyOwner {
+        maxSkewRate = _maxSkewRate;
+        emit MaxSkewRateUpdated(maxSkewRate);
     }
 
     function setBaseBorrowRate(uint _baseBorrowRate) public onlyOwner {
@@ -338,14 +362,19 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function addPynths(bytes32[] calldata pynthNamesInResolver, bytes32[] calldata pynthKeys) external onlyOwner {
+        require(pynthNamesInResolver.length == pynthKeys.length, "Input array length mismatch");
+
         for (uint i = 0; i < pynthNamesInResolver.length; i++) {
             if (!_pynths.contains(pynthNamesInResolver[i])) {
                 bytes32 pynthName = pynthNamesInResolver[i];
                 _pynths.add(pynthName);
+                _currencyKeys.add(pynthKeys[i]);
                 pynthsByKey[pynthKeys[i]] = pynthName;
                 emit PynthAdded(pynthName);
             }
         }
+
+        rebuildCache();
     }
 
     function arePynthsAndCurrenciesSet(bytes32[] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys)
@@ -369,38 +398,35 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         return true;
     }
 
-    function removePynths(bytes32[] calldata pynths, bytes32[] calldata pynthKeys) external onlyOwner {
-        for (uint i = 0; i < pynths.length; i++) {
-            if (_pynths.contains(pynths[i])) {
+    function removePynths(bytes32[] calldata pynthNamesInResolver, bytes32[] calldata pynthKeys) external onlyOwner {
+        require(pynthNamesInResolver.length == pynthKeys.length, "Input array length mismatch");
+
+        for (uint i = 0; i < pynthNamesInResolver.length; i++) {
+            if (_pynths.contains(pynthNamesInResolver[i])) {
                 // Remove it from the the address set lib.
-                _pynths.remove(pynths[i]);
+                _pynths.remove(pynthNamesInResolver[i]);
+                _currencyKeys.remove(pynthKeys[i]);
                 delete pynthsByKey[pynthKeys[i]];
 
-                emit PynthRemoved(pynths[i]);
+                emit PynthRemoved(pynthNamesInResolver[i]);
             }
         }
     }
 
-    // When we add a shortable pynth, we need to know the iPynth as well
-    // This is so we can get the proper skew for the short rate.
-    function addShortablePynths(bytes32[2][] calldata requiredPynthAndInverseNamesInResolver, bytes32[] calldata pynthKeys)
+    function addShortablePynths(bytes32[] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys)
         external
         onlyOwner
     {
-        require(requiredPynthAndInverseNamesInResolver.length == pynthKeys.length, "Input array length mismatch");
+        require(requiredPynthNamesInResolver.length == pynthKeys.length, "Input array length mismatch");
 
-        for (uint i = 0; i < requiredPynthAndInverseNamesInResolver.length; i++) {
-            // setting these explicitly for clarity
-            // Each entry in the array is [Pynth, iPynth]
-            bytes32 pynth = requiredPynthAndInverseNamesInResolver[i][0];
-            bytes32 iPynth = requiredPynthAndInverseNamesInResolver[i][1];
+        for (uint i = 0; i < requiredPynthNamesInResolver.length; i++) {
+            bytes32 pynth = requiredPynthNamesInResolver[i];
 
             if (!_shortablePynths.contains(pynth)) {
                 // Add it to the address set lib.
                 _shortablePynths.add(pynth);
 
-                // store the mapping to the iPynth so we can get its total supply for the borrow rate.
-                pynthToInversePynth[pynth] = iPynth;
+                shortablePynthsByKey[pynthKeys[i]] = pynth;
 
                 emit ShortablePynthAdded(pynth);
 
@@ -423,14 +449,6 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
             return false;
         }
 
-        // first check contract state
-        for (uint i = 0; i < requiredPynthNamesInResolver.length; i++) {
-            bytes32 pynthName = requiredPynthNamesInResolver[i];
-            if (!_shortablePynths.contains(pynthName) || pynthToInversePynth[pynthName] == bytes32(0)) {
-                return false;
-            }
-        }
-
         // now check everything added to external state contract
         for (uint i = 0; i < pynthKeys.length; i++) {
             if (state.getShortRatesLength(pynthKeys[i]) == 0) {
@@ -449,10 +467,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
                 bytes32 pynthKey = _pynth(pynths[i]).currencyKey();
 
-                state.removeShortCurrency(pynthKey);
+                delete shortablePynthsByKey[pynthKey];
 
-                // remove the inverse mapping.
-                delete pynthToInversePynth[pynths[i]];
+                state.removeShortCurrency(pynthKey);
 
                 emit ShortablePynthRemoved(pynths[i]);
             }
@@ -461,11 +478,19 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     /* ---------- STATE MUTATIONS ---------- */
 
-    function updateBorrowRates(uint rate) external onlyCollateral {
+    function updateBorrowRates(uint rate) internal {
         state.updateBorrowRates(rate);
     }
 
-    function updateShortRates(bytes32 currency, uint rate) external onlyCollateral {
+    function updateShortRates(bytes32 currency, uint rate) internal {
+        state.updateShortRates(currency, rate);
+    }
+
+    function updateBorrowRatesCollateral(uint rate) external onlyCollateral {
+        state.updateBorrowRates(rate);
+    }
+
+    function updateShortRatesCollateral(bytes32 currency, uint rate) external onlyCollateral {
         state.updateShortRates(currency, rate);
     }
 
@@ -485,6 +510,34 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         state.decrementShorts(pynth, amount);
     }
 
+    function accrueInterest(
+        uint interestIndex,
+        bytes32 currency,
+        bool isShort
+    ) external onlyCollateral returns (uint difference, uint index) {
+        // 1. Get the rates we need.
+        (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) =
+            isShort ? getShortRatesAndTime(currency, interestIndex) : getRatesAndTime(interestIndex);
+
+        // 2. Get the instantaneous rate.
+        (uint rate, bool invalid) = isShort ? getShortRate(currency) : getBorrowRate();
+
+        require(!invalid, "Invalid rate");
+
+        // 3. Get the time since we last updated the rate.
+        uint timeDelta = block.timestamp.sub(lastUpdated).mul(1e18);
+
+        // 4. Get the latest cumulative rate. F_n+1 = F_n + F_last
+        uint latestCumulative = lastRate.add(rate.multiplyDecimal(timeDelta));
+
+        // 5. Return the rate differential and the new interest index.
+        difference = latestCumulative.sub(entryRate);
+        index = newIndex;
+
+        // 5. Update rates with the lastest cumulative rate. This also updates the time.
+        isShort ? updateShortRates(currency, latestCumulative) : updateBorrowRates(latestCumulative);
+    }
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyCollateral {
@@ -496,9 +549,11 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // ========== EVENTS ==========
     event MaxDebtUpdated(uint maxDebt);
+    event MaxSkewRateUpdated(uint maxSkewRate);
     event LiquidationPenaltyUpdated(uint liquidationPenalty);
     event BaseBorrowRateUpdated(uint baseBorrowRate);
     event BaseShortRateUpdated(uint baseShortRate);
+    event UtilisationMultiplierUpdated(uint utilisationMultiplier);
 
     event CollateralAdded(address collateral);
     event CollateralRemoved(address collateral);

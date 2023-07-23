@@ -7,6 +7,7 @@ const { gray, cyan, yellow, redBright, green } = require('chalk');
 const { table } = require('table');
 const w3utils = require('web3-utils');
 const axios = require('axios');
+const ethers = require('ethers');
 
 const {
 	constants: {
@@ -37,6 +38,8 @@ const {
 
 const { networks } = require('../..');
 const stringify = input => JSON.stringify(input, null, '\t') + '\n';
+
+const allowZeroOrUpdateIfNonZero = param => input => param === '0' || input !== '0';
 
 const ensureNetwork = network => {
 	if (!networks.includes(network)) {
@@ -240,6 +243,7 @@ const performTransactionalStep = async ({
 	target,
 	read,
 	readArg, // none, 1 or an array of args, array will be spread into params
+	readTarget = target,
 	expected,
 	write,
 	writeArg, // none, 1 or an array of args, array will be spread into params
@@ -252,6 +256,7 @@ const performTransactionalStep = async ({
 	encodeABI,
 	nonceManager,
 	publiclyCallable,
+	useFork,
 }) => {
 	const argumentsForWriteFunction = [].concat(writeArg).filter(entry => entry !== undefined); // reduce to array of args
 	const action = `${contract}.${write}(${argumentsForWriteFunction.map(arg =>
@@ -264,9 +269,39 @@ const performTransactionalStep = async ({
 	if (read) {
 		// web3 counts provided arguments - even undefined ones - and they must match the expected args, hence the below
 		const argumentsForReadFunction = [].concat(readArg).filter(entry => entry !== undefined); // reduce to array of args
-		const response = await target.methods[read](...argumentsForReadFunction).call();
+		// const response = await target.methods[read](...argumentsForReadFunction).call();
 
-		if (expected(response)) {
+		// if (expected(response)) {
+		// 	console.log(gray(`Nothing required for this action.`));
+		// 	return { noop: true };
+		// }
+
+		let response;
+		try {
+			response = await readTarget[read](...argumentsForReadFunction);
+		} catch (err) {
+			if (useFork) {
+				console.log(
+					gray(
+						`Warning: Could not read ${contract}.${read}(). Proceeding as though this value is not set.`
+					)
+				);
+			} else {
+				throw err;
+			}
+		}
+
+		// Ethers returns uints as BigNumber objects, while web3 stringified them.
+		// This can cause BigNumber(0) !== '0' and make runStep think there is nothing to do
+		// in some edge cases.
+		// To avoid using .toString() on runStep calls, we do the check here.
+		if (ethers.BigNumber.isBigNumber(response)) {
+			response = response.toString();
+		}
+
+		// if an error is thrown above then response is undefined, never consider that sufficient
+		// reason to skip
+		if (response !== undefined && expected(response)) {
 			console.log(gray(`Nothing required for this action.`));
 			return { noop: true };
 		}
@@ -526,6 +561,7 @@ function sleep(ms) {
 
 module.exports = {
 	ensureNetwork,
+	allowZeroOrUpdateIfNonZero,
 	ensureDeploymentPath,
 	getDeploymentPathForNetwork,
 	loadAndCheckRequiredSources,

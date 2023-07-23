@@ -7,7 +7,6 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { toBytes32 } = require('../..');
 
 const {
-	currentTime,
 	fastForward,
 	toUnit,
 	// fromUnit,
@@ -20,7 +19,11 @@ const {
 	// divideDecimalRoundPrecise,
 } = require('../utils')();
 
-const { setExchangeFeeRateForPynths } = require('./helpers');
+const {
+	setExchangeFeeRateForPynths,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
 
@@ -59,31 +62,36 @@ contract('Rewards Integration Tests', accounts => {
 	// };
 
 	// CURRENCIES
-	const [pUSD, pAUD, pEUR, pBTC, PERI, iBTC, pETH, ETH, USDC] = [
+	const [pUSD, pAUD, pEUR, pBTC, PERI, pETH, USDC] = [
 		'pUSD',
 		'pAUD',
 		'pEUR',
 		'pBTC',
 		'PERI',
-		'iBTC',
 		'pETH',
-		'ETH',
 		'USDC',
 	].map(toBytes32);
 
-	const pynthKeys = [pUSD, pAUD, pEUR, pBTC, iBTC, pETH, ETH];
+	const pynthKeys = [pUSD, pAUD, pEUR, pBTC, pETH];
 
 	// Updates rates with defaults so they're not stale.
 	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
+		// const timestamp = await currentTime();
 
-		await exchangeRates.updateRates(
-			[pAUD, pEUR, PERI, pBTC, iBTC, pETH, ETH, USDC],
-			['0.5', '1.25', '0.1', '5000', '4000', '172', '172', '0.9'].map(toUnit),
-			timestamp,
-			{
-				from: oracle,
-			}
+		// await exchangeRates.updateRates(
+		// 	[pAUD, pEUR, PERI, pBTC, pETH, USDC],
+		// 	['0.5', '1.25', '0.1', '5000', '172', '0.9'].map(toUnit),
+		// 	timestamp,
+		// 	{
+		// 		from: oracle,
+		// 	}
+		// );
+
+		await updateAggregatorRates(
+			exchangeRates,
+			null,
+			[pAUD, pEUR, PERI, pBTC, pETH, USDC],
+			['0.5', '1.25', '0.1', '5000', '172', '0.9'].map(toUnit)
 		);
 
 		await debtCache.takeDebtSnapshot();
@@ -147,7 +155,7 @@ contract('Rewards Integration Tests', accounts => {
 	const [
 		,
 		owner,
-		oracle,
+		,
 		feeAuthority,
 		debtManager,
 		account1,
@@ -201,7 +209,7 @@ contract('Rewards Integration Tests', accounts => {
 			// PeriFinanceState: periFinanceState,
 		} = await setupAllContracts({
 			accounts,
-			pynths: ['pUSD', 'pAUD', 'pEUR', 'pBTC', 'iBTC', 'pETH'],
+			pynths: ['pUSD', 'pAUD', 'pEUR', 'pBTC', 'pETH'],
 			contracts: [
 				'AddressResolver',
 				'Exchanger', // necessary for burnPynthsAndUnstakeUSDC to check settlement of pUSD
@@ -220,6 +228,7 @@ contract('Rewards Integration Tests', accounts => {
 				'USDC',
 				'Issuer',
 			],
+			stables: ['USDC'],
 		}));
 
 		MINTER_PERI_REWARD = await supplySchedule.minterReward();
@@ -230,6 +239,8 @@ contract('Rewards Integration Tests', accounts => {
 			pynthKeys,
 			exchangeFeeRates: pynthKeys.map(() => exchangeFeeRate),
 		});
+
+		await setupPriceAggregators(exchangeRates, owner, [pAUD, pEUR, pBTC, pETH, USDC]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -325,17 +336,13 @@ contract('Rewards Integration Tests', accounts => {
 		});
 
 		it('should revert when the USDC Quota is above 20%', async () => {
-			await exchangeRates.updateRates([USDC], [toUnit('1')], await currentTime(), {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [USDC], [toUnit('1')]);
 
 			await periFinance.issuePynths(PERI, toUnit('666'), { from: account1 });
 			await periFinance.issuePynthsToMaxQuota(USDC, { from: account1 });
 
 			// make USDC quota above 20%
-			await exchangeRates.updateRates([USDC], [toUnit('1.2')], await currentTime(), {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [USDC], [toUnit('1.2')]);
 
 			await assert.revert(feePool.claimFees({ from: account1 }), 'C-Ratio below penalty threshold');
 		});
@@ -743,10 +750,7 @@ contract('Rewards Integration Tests', accounts => {
 			);
 
 			// Increase pBTC price by 100%
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([pBTC], ['10000'].map(toUnit), timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pBTC], ['10000'].map(toUnit));
 			await debtCache.takeDebtSnapshot();
 
 			// Account 3 (enters the system and) mints 10K pUSD (minus half of an exchange fee - to balance the fact
@@ -1062,10 +1066,7 @@ contract('Rewards Integration Tests', accounts => {
 			const currentRate = await exchangeRates.rateForCurrency(PERI);
 			const newRate = currentRate.sub(multiplyDecimal(currentRate, toUnit('0.009')));
 
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([PERI], [newRate], timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [PERI], [newRate]);
 
 			// we will be able to claim fees
 			assert.equal(await feePool.isFeesClaimable(account1), true);
@@ -1106,10 +1107,7 @@ contract('Rewards Integration Tests', accounts => {
 
 			// But if the price of PERI decreases a lot...
 			const newRate = (await exchangeRates.rateForCurrency(PERI)).sub(toUnit('0.09'));
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([PERI], [newRate], timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [PERI], [newRate]);
 
 			// we will fall into the >100% bracket
 			assert.equal(await feePool.isFeesClaimable(account1), false);

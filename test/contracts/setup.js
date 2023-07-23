@@ -4,6 +4,7 @@ const { artifacts, web3, log } = require('hardhat');
 
 const { toWei } = web3.utils;
 const { toUnit } = require('../utils')();
+const { setupPriceAggregators, updateAggregatorRates } = require('./helpers');
 const {
 	toBytes32,
 	// fromBytes32,
@@ -18,7 +19,12 @@ const {
 		TARGET_THRESHOLD,
 		LIQUIDATION_DELAY,
 		LIQUIDATION_RATIO,
+		LIQUIDATION_ESCROW_DURATION,
 		LIQUIDATION_PENALTY,
+		PERI_LIQUIDATION_PENALTY,
+		SELF_LIQUIDATION_PENALTY,
+		FLAG_REWARD,
+		LIQUIDATE_REWARD,
 		RATE_STALE_PERIOD,
 		MINIMUM_STAKE_TIME,
 		DEBT_SNAPSHOT_STALE_TIME,
@@ -241,6 +247,7 @@ const setupContract = async ({
 			toWei('0.02'), // refund fee
 		],
 		BinaryOptionMarketData: [],
+		CollateralManagerState: [owner, tryGetAddressOf('CollateralManager')],
 		CollateralManager: [
 			tryGetAddressOf('CollateralManagerState'),
 			owner,
@@ -248,6 +255,32 @@ const setupContract = async ({
 			toUnit(50000000),
 			0,
 			0,
+			0,
+		],
+		CollateralUtil: [tryGetAddressOf('AddressResolver')],
+		Collateral: [
+			owner,
+			tryGetAddressOf('CollateralManager'),
+			tryGetAddressOf('AddressResolver'),
+			toBytes32('pUSD'),
+			toUnit(1.3),
+			toUnit(100),
+		],
+		CollateralEth: [
+			owner,
+			tryGetAddressOf('CollateralManager'),
+			tryGetAddressOf('AddressResolver'),
+			toBytes32('pETH'),
+			toUnit(1.3),
+			toUnit(2),
+		],
+		CollateralShort: [
+			owner,
+			tryGetAddressOf('CollateralManager'),
+			tryGetAddressOf('AddressResolver'),
+			toBytes32('pUSD'),
+			toUnit(1.2),
+			toUnit(100),
 		],
 		StakingState: [owner, owner],
 		ExternalTokenStakeManager: [
@@ -580,7 +613,8 @@ const setupAllContracts = async ({
 	mocks = {},
 	contracts = [],
 	pynths = [],
-	stables = ['USDC', 'DAI'],
+	stables = [],
+	feeds = [],
 }) => {
 	const [, owner] = accounts;
 	// Copy mocks into the return object, this allows us to include them in the
@@ -656,7 +690,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'Depot',
 			mocks: ['BridgeStatepUSD'],
-			deps: ['AddressResolver', 'SystemStatus'],
+			deps: ['AddressResolver', 'SystemStatus', 'ExchangeRates'],
 		},
 		{ contract: 'PynthUtil', deps: ['AddressResolver'] },
 		{ contract: 'DappMaintenance' },
@@ -845,8 +879,37 @@ const setupAllContracts = async ({
 			deps: ['BinaryOptionMarketManager', 'BinaryOptionMarket', 'BinaryOption'],
 		},
 		{
+			contract: 'CollateralManagerState',
+			deps: [],
+		},
+		{
+			contract: 'CollateralUtil',
+			deps: ['AddressResolver', 'ExchangeRates'],
+		},
+		{
 			contract: 'CollateralManager',
-			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
+			deps: [
+				'AddressResolver',
+				'SystemStatus',
+				'Issuer',
+				'ExchangeRates',
+				'DebtCache',
+				'CollateralUtil',
+				'CollateralManagerState',
+				'StakingState',
+			],
+		},
+		{
+			contract: 'Collateral',
+			deps: ['CollateralManager', 'AddressResolver', 'CollateralUtil'],
+		},
+		{
+			contract: 'CollateralEth',
+			deps: ['Collateral', 'CollateralManager', 'AddressResolver', 'CollateralUtil'],
+		},
+		{
+			contract: 'CollateralShort',
+			deps: ['Collateral', 'CollateralManager', 'AddressResolver', 'CollateralUtil'],
 		},
 		{
 			contract: 'StakingState',
@@ -1085,7 +1148,20 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setTargetThreshold(TARGET_THRESHOLD, { from: owner }),
 			returnObj['SystemSettings'].setLiquidationDelay(LIQUIDATION_DELAY, { from: owner }),
 			returnObj['SystemSettings'].setLiquidationRatio(LIQUIDATION_RATIO, { from: owner }),
-			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, { from: owner }),
+			returnObj['SystemSettings'].setLiquidationEscrowDuration(LIQUIDATION_ESCROW_DURATION, {
+				from: owner,
+			}),
+			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, {
+				from: owner,
+			}),
+			returnObj['SystemSettings'].setPeriLiquidationPenalty(PERI_LIQUIDATION_PENALTY, {
+				from: owner,
+			}),
+			returnObj['SystemSettings'].setSelfLiquidationPenalty(SELF_LIQUIDATION_PENALTY, {
+				from: owner,
+			}),
+			returnObj['SystemSettings'].setFlagReward(FLAG_REWARD, { from: owner }),
+			returnObj['SystemSettings'].setLiquidateReward(LIQUIDATE_REWARD, { from: owner }),
 			returnObj['SystemSettings'].setRateStalePeriod(RATE_STALE_PERIOD, { from: owner }),
 			returnObj['SystemSettings'].setMinimumStakeTime(MINIMUM_STAKE_TIME, { from: owner }),
 			returnObj['SystemSettings'].setDebtSnapshotStaleTime(DEBT_SNAPSHOT_STALE_TIME, {
@@ -1100,6 +1176,19 @@ const setupAllContracts = async ({
 			.filter(contract => contract.setSystemStatus)
 			.map(mock => mock.setSystemStatus(returnObj['SystemStatus'].address))
 	);
+
+	if (returnObj['ExchangeRates']) {
+		// setup SNX price feed and any other feeds
+		const keys = ['PERI', ...(feeds || [])].map(toBytes32);
+		const prices = ['0.2', ...(feeds || []).map(() => '1.0')].map(toUnit);
+		await setupPriceAggregators(returnObj['ExchangeRates'], owner, keys);
+		await updateAggregatorRates(
+			returnObj['ExchangeRates'],
+			returnObj['CircuitBreaker'],
+			keys,
+			prices
+		);
+	}
 
 	return returnObj;
 };

@@ -80,23 +80,52 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getTargetThreshold();
     }
 
-    // SIP-15 Liquidations
     // liquidation time delay after address flagged (seconds)
     function liquidationDelay() external view returns (uint) {
         return getLiquidationDelay();
     }
 
-    // SIP-15 Liquidations
     // issuance ratio when account can be flagged for liquidation (with 18 decimals), e.g 0.5 issuance ratio
     // when flag means 1/0.5 = 200% cratio
     function liquidationRatio() external view returns (uint) {
         return getLiquidationRatio();
     }
 
-    // SIP-15 Liquidations
     // penalty taken away from target of liquidation (with 18 decimals). E.g. 10% is 0.1e18
     function liquidationPenalty() external view returns (uint) {
         return getLiquidationPenalty();
+    }
+
+    // Differentiate Liquidation Penalties
+    // penalty taken away from target of SNX liquidation (with 18 decimals). E.g. 30% is 0.3e18
+    function periLiquidationPenalty() external view returns (uint) {
+        return getPeriLiquidationPenalty();
+    }
+
+    /* ========== Upgrade Liquidation Mechanism ========== */
+
+    /// @notice Get the escrow duration for liquidation rewards
+    /// @return The escrow duration for liquidation rewards
+    function liquidationEscrowDuration() external view returns (uint) {
+        return getLiquidationEscrowDuration();
+    }
+
+    /// @notice Get the penalty for self liquidation
+    /// @return The self liquidation penalty
+    function selfLiquidationPenalty() external view returns (uint) {
+        return getSelfLiquidationPenalty();
+    }
+
+    /// @notice Get the reward for flagging an account for liquidation
+    /// @return The reward for flagging an account
+    function flagReward() external view returns (uint) {
+        return getFlagReward();
+    }
+
+    /// @notice Get the reward for liquidating an account
+    /// @return The reward for performing a forced liquidation
+    function liquidateReward() external view returns (uint) {
+        return getLiquidateReward();
     }
 
     // How long will the ExchangeRates contract assume the rate of any asset is correct
@@ -232,12 +261,37 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit LiquidationRatioUpdated(_liquidationRatio);
     }
 
+    function setLiquidationEscrowDuration(uint duration) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_ESCROW_DURATION, duration);
+        emit LiquidationEscrowDurationUpdated(duration);
+    }
+
+    function setPeriLiquidationPenalty(uint penalty) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_PERI_LIQUIDATION_PENALTY, penalty);
+        emit PeriLiquidationPenaltyUpdated(penalty);
+    }
+
     function setLiquidationPenalty(uint penalty) external onlyOwner {
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 
         flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_PENALTY, penalty);
 
         emit LiquidationPenaltyUpdated(penalty);
+    }
+
+    function setSelfLiquidationPenalty(uint penalty) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_SELF_LIQUIDATION_PENALTY, penalty);
+        emit SelfLiquidationPenaltyUpdated(penalty);
+    }
+
+    function setFlagReward(uint reward) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_FLAG_REWARD, reward);
+        emit FlagRewardUpdated(reward);
+    }
+
+    function setLiquidateReward(uint reward) external onlyOwner {
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATE_REWARD, reward);
+        emit LiquidateRewardUpdated(reward);
     }
 
     function setRateStalePeriod(uint period) external onlyOwner {
@@ -295,6 +349,16 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_BRIDGE_CLAIM_GAS_COST, _gasCost);
     }
 
+    function setInteractionDelay(address _collateral, uint _interactionDelay) external onlyOwner {
+        require(_interactionDelay <= SafeDecimalMath.unit() * 3600, "Max 1 hour");
+        flexibleStorage().setUIntValue(
+            SETTING_CONTRACT_NAME,
+            keccak256(abi.encodePacked(SETTING_INTERACTION_DELAY, _collateral)),
+            _interactionDelay
+        );
+        emit InteractionDelayUpdated(_interactionDelay);
+    }
+
     // ========== EVENTS ==========
     event CrossDomainMessageGasLimitChanged(CrossDomainMessageGasLimits gasLimitType, uint newLimit);
     event TradingRewardsEnabled(bool enabled);
@@ -305,11 +369,17 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event TargetThresholdUpdated(uint newTargetThreshold);
     event LiquidationDelayUpdated(uint newDelay);
     event LiquidationRatioUpdated(uint newRatio);
+    event LiquidationEscrowDurationUpdated(uint newDuration);
     event LiquidationPenaltyUpdated(uint newPenalty);
+    event PeriLiquidationPenaltyUpdated(uint newPenalty);
+    event SelfLiquidationPenaltyUpdated(uint newPenalty);
+    event FlagRewardUpdated(uint newReward);
+    event LiquidateRewardUpdated(uint newReward);
     event RateStalePeriodUpdated(uint rateStalePeriod);
     event ExchangeFeeUpdated(bytes32 pynthKey, uint newExchangeFeeRate);
     event MinimumStakeTimeUpdated(uint minimumStakeTime);
     event DebtSnapshotStaleTimeUpdated(uint debtSnapshotStaleTime);
     event AggregatorWarningFlagsUpdated(address flags);
     event ExternalTokenQuotaUpdated(uint quota);
+    event InteractionDelayUpdated(uint interactionDelay);
 }

@@ -11,6 +11,8 @@ const { currentTime, multiplyDecimal, divideDecimal, toUnit, fastForward } = req
 const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	setStatus,
 } = require('./helpers');
 
@@ -26,7 +28,7 @@ const FlexibleStorage = artifacts.require('FlexibleStorage');
 
 contract('Liquidations', accounts => {
 	const [pUSD, PERI, USDC, DAI] = ['pUSD', 'PERI', 'USDC', 'DAI'].map(toBytes32);
-	const [deployerAccount, owner, oracle, account1, alice, bob, carol, david] = accounts;
+	const [deployerAccount, owner, , account1, alice, bob, carol, david] = accounts;
 	const week = 3600 * 24 * 7;
 	const pUSD100 = toUnit('100');
 
@@ -40,8 +42,7 @@ contract('Liquidations', accounts => {
 		systemStatus,
 		feePoolState,
 		debtCache,
-		issuer,
-		timestamp;
+		issuer;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
@@ -82,6 +83,7 @@ contract('Liquidations', accounts => {
 		}));
 
 		await systemSettings.setLiquidationRatio(toUnit('0.5'), { from: owner });
+		await setupPriceAggregators(exchangeRates, owner, [USDC, DAI]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -92,25 +94,32 @@ contract('Liquidations', accounts => {
 	};
 
 	const updateRatesWithDefaults = async () => {
-		timestamp = await currentTime();
+		// timestamp = await currentTime();
 		// PERI is 6 dolla
-		await updatePERIPrice('6');
-		await updateUSDCPrice('1');
-	};
-
-	const updatePERIPrice = async rate => {
-		timestamp = await currentTime();
-		await exchangeRates.updateRates([PERI], [rate].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		// await updatePERIPrice('6');
+		// await updateUSDCPrice('1');
+		await updateAggregatorRates(exchangeRates, null, [PERI, USDC], ['6', '1'].map(toUnit));
 		await debtCache.takeDebtSnapshot();
 	};
 
-	const updateUSDCPrice = async rate => {
-		timestamp = await currentTime();
-		await exchangeRates.updateRates([USDC, DAI], [rate, rate].map(toUnit), timestamp, {
-			from: oracle,
-		});
+	const updatePERIPrice = async rate => {
+		// timestamp = await currentTime();
+		// await exchangeRates.updateRates([PERI], [rate].map(toUnit), timestamp, {
+		// 	from: oracle,
+		// });
+		await updateAggregatorRates(exchangeRates, null, [PERI], [rate].map(toUnit));
+
+		await debtCache.takeDebtSnapshot();
+	};
+
+	const updateStableCoinsPrice = async rate => {
+		// timestamp = await currentTime();
+		// await exchangeRates.updateRates([USDC, DAI], [rate, rate].map(toUnit), timestamp, {
+		// 	from: oracle,
+		// });
+
+		await updateAggregatorRates(exchangeRates, null, [USDC, DAI], [rate, rate].map(toUnit));
+
 		await debtCache.takeDebtSnapshot();
 	};
 
@@ -657,7 +666,7 @@ contract('Liquidations', accounts => {
 							let burnTransaction;
 							beforeEach(async () => {
 								await updatePERIPrice('1');
-								await updateUSDCPrice('1');
+								await updateStableCoinsPrice('1');
 
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 
@@ -1108,7 +1117,7 @@ contract('Liquidations', accounts => {
 
 					// Drop PERI value to $0.1 after update rates resets to default
 					await updatePERIPrice('0.1');
-					await updateUSDCPrice('0.98');
+					await updateStableCoinsPrice('0.98');
 
 					// ensure Bob has enough pUSD
 					await periFinance.transfer(bob, toUnit('100000'), {

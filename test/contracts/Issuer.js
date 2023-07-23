@@ -27,8 +27,8 @@ const {
 const {
 	// setExchangeWaitingPeriod,
 	setExchangeFeeRateForPynths,
-	// getDecodedLogs,
-	// decodedEventEqual,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
@@ -51,7 +51,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 	const [pUSD, pETH, PERI, USDC, DAI] = ['pUSD', 'pETH', 'PERI', 'USDC', 'DAI'].map(toBytes32);
 	const pynthKeys = [pUSD, pETH];
 
-	const [, owner, oracle, account1, account2, account3, account6] = accounts;
+	const [, owner, , account1, account2, account3, account6] = accounts;
 
 	let periFinance,
 		exchangeRates,
@@ -63,7 +63,6 @@ contract('Issuer (via PeriFinance)', async accounts => {
 		pUSDContract,
 		escrow,
 		rewardEscrowV2,
-		timestamp,
 		debtCache,
 		issuer,
 		pynths,
@@ -172,20 +171,17 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			],
 			stables,
 		}));
+		await setupPriceAggregators(exchangeRates, owner, [USDC, DAI, pETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-
-		await exchangeRates.updateRates(
+		await updateAggregatorRates(
+			exchangeRates,
+			null,
 			[PERI, USDC, DAI, pETH],
-			['0.2', '0.98', '0.99', '1200'].map(toUnit),
-			timestamp,
-			{
-				from: oracle,
-			}
+			['0.2', '0.98', '0.99', '1200'].map(toUnit)
 		);
 
 		// set a 0.3% default exchange fee rate
@@ -361,9 +357,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					beforeEach(async () => {
 						await fastForward(10);
 						// Send a price update to give the pynth rates
-						await exchangeRates.updateRates([PERI], ['1'].map(toUnit), await currentTime(), {
-							from: oracle,
-						});
+						await updateAggregatorRates(exchangeRates, null, [PERI], ['1'].map(toUnit));
 						await debtCache.takeDebtSnapshot();
 					});
 
@@ -412,7 +406,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				// it('should not change debt balance % if exchange rates change', async () => {
 				// 	let newPeriRate = toUnit('1');
 				// 	let timestamp = await currentTime();
-				// 	await exchangeRates.updateRates([PERI], [newPeriRate], timestamp, { from: oracle });
+				// 	await updateAggregatorRates(exchangeRates, null, [PERI], [newPeriRate]);
 				// 	await debtCache.takeDebtSnapshot();
 
 				// 	await periFinance.transfer(account1, toUnit('20000'), {
@@ -445,7 +439,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 				// 	timestamp = await currentTime();
 				// 	newPeriRate = toUnit('1');
-				// 	await exchangeRates.updateRates([pUSD], [newPeriRate], timestamp, { from: oracle });
+				// 	await updateAggregatorRates(exchangeRates, null, [pUSD], [newPeriRate]);
 				// 	await debtCache.takeDebtSnapshot();
 
 				// 	totalIssuedPynthpUSD = await periFinance.totalIssuedPynths(pUSD);
@@ -1007,17 +1001,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 									key => key !== 'pUSD' && ![].concat(type).includes(key)
 								);
 
-								// console.log(`ratesToUpdate is ${ratesToUpdate}`);
-
-								const timestamp = await currentTime();
-
-								await exchangeRates.updateRates(
+								await updateAggregatorRates(
+									exchangeRates,
+									null,
 									ratesToUpdate.map(toBytes32),
-									ratesToUpdate.map(() => toUnit('1')),
-									timestamp,
-									{
-										from: oracle,
-									}
+									ratesToUpdate.map(() => toUnit('1'))
 								);
 								await debtCache.takeDebtSnapshot();
 							});
@@ -1158,9 +1146,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 				beforeEach(async () => {
 					// Setting USD/PERI exchange rate to 10
-					// await tempKovanOracle.setRate(PERI, toUnit('10'));
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI], [toUnit('10')], timestamp, { from: oracle });
+					// await tempKovanOracle.setRate(PERI, toUnit('10'))
+					await updateAggregatorRates(exchangeRates, null, [PERI], [toUnit('10')]);
 
 					// Give some PERI to account1
 					await periFinance.transfer(account1, toUnit('10000'), {
@@ -1215,12 +1202,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 			describe('issuance USDC staking', () => {
 				beforeEach(async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
 						[PERI, USDC, DAI],
-						['10', '0.9', '1'].map(toUnit),
-						timestamp,
-						{ from: oracle }
+						['10', '0.9', '1'].map(toUnit)
 					);
 
 					// await usdc.faucet(owner);
@@ -1486,10 +1472,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				});
 
 				it('should issue pynths when USDC quota exceeds threshold', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
+						[PERI, USDC],
+						[toUnit('10'), toUnit('1')]
+					);
 
 					const initDebtUSDC = toUnit('250');
 					const initDebtPERI = toUnit('1000');
@@ -1499,10 +1487,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					assert.bnEqual(await issuer.externalTokenQuota(account1, 0, 0, true), toUnit('0.2'));
 
-					const timestamp2 = await currentTime();
-					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [USDC], [toUnit('1.2')]);
 
 					const quotaPreIssue = await issuer.externalTokenQuota(account1, 0, 0, true);
 					const cRatioPreIssue = await periFinance.collateralisationRatio(account1);
@@ -1596,10 +1581,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						from: account1,
 					});
 
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
+						[PERI, USDC],
+						[toUnit('10'), toUnit('1')]
+					);
 					const initDebtUSDC = toUnit('250');
 					const initDebtPERI = toUnit('1000');
 					const targetRatio = await systemSettings.issuanceRatio();
@@ -1612,10 +1599,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const prevDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
 					// const prevUSDCAmount = await stakingState.stakedAmountOf(USDC, account1);
 
-					const timestamp2 = await currentTime();
-					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [USDC], [toUnit('1.2')]);
 
 					const midDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnEqual(midDebtAmount, prevDebtAmount);
@@ -1670,10 +1654,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				const debtExToken = toUnit('1000');
 				const debtPERI = toUnit('4000');
 				beforeEach(async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], ['10', '1'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI, USDC], ['10', '1'].map(toUnit));
 
 					await usdc.faucet(accounts[0]);
 					await periFinance.transfer(account1, toUnit('10000'), { from: owner });
@@ -1770,10 +1751,12 @@ contract('Issuer (via PeriFinance)', async accounts => {
 			describe('burning', () => {
 				describe('potential blocking conditions', () => {
 					beforeEach(async () => {
-						const timestamp = await currentTime();
-						await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
-							from: oracle,
-						});
+						await updateAggregatorRates(
+							exchangeRates,
+							null,
+							[PERI, USDC],
+							[toUnit('10'), toUnit('1')]
+						);
 						// ensure user has pynths to burb
 						await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 						await periFinance.issueMaxPynths({ from: account1 });
@@ -1803,12 +1786,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 									await periFinance.burnPynths(PERI, toUnit('1'), { from: account1 });
 								});
 								it('and calling fitToClaimable() succeeds', async () => {
-									const timestamp = await currentTime();
-									await exchangeRates.updateRates(
+									await updateAggregatorRates(
+										exchangeRates,
+										null,
 										[PERI, USDC],
-										[toUnit('9'), toUnit('0.9')],
-										timestamp,
-										{ from: oracle }
+										[toUnit('9'), toUnit('0.9')]
 									);
 									await debtCache.takeDebtSnapshot();
 									await periFinance.fitToClaimable({ from: account1 });
@@ -1827,15 +1809,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 									.concat(pynths)
 									.filter(key => key !== 'pUSD' && ![].concat(type).includes(key));
 
-								const timestamp = await currentTime();
-
-								await exchangeRates.updateRates(
+								await updateAggregatorRates(
+									exchangeRates,
+									null,
 									ratesToUpdate.map(toBytes32),
-									ratesToUpdate.map(rate => toUnit(rate === 'PERI' ? '0.1' : '1')),
-									timestamp,
-									{
-										from: oracle,
-									}
+									ratesToUpdate.map(rate => toUnit(rate === 'PERI' ? '0.1' : '1'))
 								);
 								await debtCache.takeDebtSnapshot();
 							});
@@ -2167,9 +2145,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							from: owner,
 						});
 						// Set PERI price to 1
-						await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, {
-							from: oracle,
-						});
+						await updateAggregatorRates(exchangeRates, null, [PERI], ['1'].map(toUnit));
 						// Issue
 						await periFinance.issueMaxPynths({ from: account1 });
 						assert.bnClose(await periFinance.debtBalanceOf(account1, pUSD), toUnit('8000'));
@@ -2181,9 +2157,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					describe('when the PERI price drops 50%', () => {
 						let maxIssuablePynths;
 						beforeEach(async () => {
-							await exchangeRates.updateRates([PERI], ['.5'].map(toUnit), timestamp, {
-								from: oracle,
-							});
+							await updateAggregatorRates(exchangeRates, null, [PERI], ['.5'].map(toUnit));
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
 							assert.equal(await feePool.isFeesClaimable(account1), false);
 						});
@@ -2204,9 +2178,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					describe('when the PERI price drops 10%', () => {
 						let maxIssuablePynths;
 						beforeEach(async () => {
-							await exchangeRates.updateRates([PERI], ['.9'].map(toUnit), timestamp, {
-								from: oracle,
-							});
+							await updateAggregatorRates(exchangeRates, null, [PERI], ['.9'].map(toUnit));
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
 						});
 
@@ -2226,9 +2198,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					describe('when the PERI price drops 90%', () => {
 						let maxIssuablePynths;
 						beforeEach(async () => {
-							await exchangeRates.updateRates([PERI], ['.1'].map(toUnit), timestamp, {
-								from: oracle,
-							});
+							await updateAggregatorRates(exchangeRates, null, [PERI], ['.1'].map(toUnit));
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
 						});
 
@@ -2248,9 +2218,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					describe('when the PERI price increases 100%', () => {
 						let maxIssuablePynths;
 						beforeEach(async () => {
-							await exchangeRates.updateRates([PERI], ['2'].map(toUnit), timestamp, {
-								from: oracle,
-							});
+							await updateAggregatorRates(exchangeRates, null, [PERI], ['2'].map(toUnit));
 							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
 						});
 
@@ -2269,14 +2237,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 			describe('burning and unstake USDC', () => {
 				const updateRates = async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
 						[PERI, USDC, DAI],
-						['10', '0.9', '1'].map(toUnit),
-						timestamp,
-						{
-							from: oracle,
-						}
+						['10', '0.9', '1'].map(toUnit)
 					);
 				};
 
@@ -2517,10 +2482,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// As Peri price is going down, C-Ratio decreases.
 					// Meanwhile, usdc quota is not be changed.
 					await fastForward(86400 + 1);
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], ['5', '0.9'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI, USDC], ['5', '0.9'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					const prevCRatio = await periFinance.collateralisationRatio(account1);
@@ -2549,10 +2511,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// As Peri price is going up, C-Ratio would be increased.
 					// Meanwhile, usdc quota is not be changed.
 					await fastForward(86400 + 1);
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], ['10', '1.2'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI, USDC], ['10', '1.2'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					const [prevQuote, prevCRatio] = await Promise.all([
@@ -2589,14 +2548,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// As USDC Price going up, its debt quota would also be increased.
 					// C-Ratio is expected to be larger than 400%, meanwhile quota is above threshold)
 					await fastForward(86400 + 1);
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
 						[PERI, USDC, DAI],
-						['10', '0.8', '0.9'].map(toUnit),
-						timestamp,
-						{
-							from: oracle,
-						}
+						['10', '0.8', '0.9'].map(toUnit)
 					);
 					await debtCache.takeDebtSnapshot();
 

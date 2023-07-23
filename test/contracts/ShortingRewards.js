@@ -5,20 +5,24 @@ const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
-const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
+const {
+	onlyGivenAddressCanInvoke,
+	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts, setupContract } = require('./setup');
 const { currentTime, toUnit, fastForward } = require('../utils')();
 
 let CollateralManager;
-let CollateralState;
 let CollateralManagerState;
 
 contract('ShortingRewards', accounts => {
 	const [
 		deployerAccount,
 		owner,
-		oracle,
+		,
 		authority,
 		rewardEscrowAddress,
 		account1,
@@ -32,6 +36,7 @@ contract('ShortingRewards', accounts => {
 
 	// PeriFinance is the rewardsToken
 	let rewardsToken,
+		rewardsTokenProxy,
 		exchangeRates,
 		shortingRewards,
 		rewardsDistribution,
@@ -39,7 +44,6 @@ contract('ShortingRewards', accounts => {
 		feePool,
 		pynths,
 		short,
-		state,
 		pUSDPynth,
 		pBTCPynth,
 		pETHPynth,
@@ -59,32 +63,15 @@ contract('ShortingRewards', accounts => {
 		return event.args.id;
 	};
 
-	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates([pETH], ['100'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-
-		const pBTC = toBytes32('pBTC');
-
-		await exchangeRates.updateRates([pBTC], ['10000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-	};
-
 	const setRewardsTokenExchangeRate = async ({ rateStaleDays } = { rateStaleDays: 7 }) => {
 		const rewardsTokenIdentifier = await rewardsToken.symbol();
 
 		await systemSettings.setRateStalePeriod(DAY * rateStaleDays, { from: owner });
-		const updatedTime = await currentTime();
-		await exchangeRates.updateRates(
+		await updateAggregatorRates(
+			exchangeRates,
+			null,
 			[toBytes32(rewardsTokenIdentifier)],
-			[toUnit('2')],
-			updatedTime,
-			{
-				from: oracle,
-			}
+			[toUnit('2')]
 		);
 		assert.equal(await exchangeRates.rateIsStale(toBytes32(rewardsTokenIdentifier)), false);
 	};
@@ -104,11 +91,11 @@ contract('ShortingRewards', accounts => {
 		await pETHPynth.issue(receiver, issueAmount, { from: owner });
 	};
 
-	const deployShort = async ({ state, owner, manager, resolver, collatKey, minColat, minSize }) => {
+	const deployShort = async ({ owner, manager, resolver, collatKey, minColat, minSize }) => {
 		return setupContract({
 			accounts,
 			contract: 'CollateralShort',
-			args: [state, owner, manager, resolver, collatKey, minColat, minSize],
+			args: [owner, manager, resolver, collatKey, minColat, minSize],
 		});
 	};
 
@@ -116,12 +103,11 @@ contract('ShortingRewards', accounts => {
 
 	before(async () => {
 		CollateralManager = artifacts.require(`CollateralManager`);
-		CollateralState = artifacts.require(`CollateralState`);
 		CollateralManagerState = artifacts.require('CollateralManagerState');
 	});
 
 	before(async () => {
-		pynths = ['pUSD', 'pBTC', 'pETH', 'iBTC', 'iETH'];
+		pynths = ['pUSD', 'pBTC', 'pETH'];
 		({
 			ExchangeRates: exchangeRates,
 			PynthpUSD: pUSDPynth,
@@ -133,6 +119,7 @@ contract('ShortingRewards', accounts => {
 			DebtCache: debtCache,
 			RewardsDistribution: rewardsDistribution,
 			PeriFinance: rewardsToken,
+			ProxyERC20PeriFinance: rewardsTokenProxy,
 			SystemSettings: systemSettings,
 		} = await setupAllContracts({
 			accounts,
@@ -146,13 +133,19 @@ contract('ShortingRewards', accounts => {
 				'Issuer',
 				'DebtCache',
 				'RewardsDistribution',
-				'PeriFinance',
 				'SystemSettings',
 				'Exchanger',
+				'CollateralUtil',
 				'StakingState',
 				'CrossChainManager',
 			],
+			stables: [],
 		}));
+
+		// use implementation ABI on the proxy address to simplify calling
+		rewardsToken = await artifacts.require('PeriFinance').at(rewardsTokenProxy.address);
+
+		await setupPriceAggregators(exchangeRates, owner, [pBTC, pETH]);
 
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
@@ -165,6 +158,7 @@ contract('ShortingRewards', accounts => {
 			maxDebt,
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}
@@ -172,10 +166,7 @@ contract('ShortingRewards', accounts => {
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
-		state = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
 		short = await deployShort({
-			state: state.address,
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
@@ -183,8 +174,6 @@ contract('ShortingRewards', accounts => {
 			minColat: toUnit(1.5),
 			minSize: toUnit(0.1),
 		});
-
-		await state.setAssociatedContract(short.address, { from: owner });
 
 		await addressResolver.importAddresses(
 			[toBytes32('CollateralShort'), toBytes32('CollateralManager')],
@@ -208,14 +197,9 @@ contract('ShortingRewards', accounts => {
 		);
 
 		await manager.addShortablePynths(
-			[
-				[toBytes32('PynthpBTC'), toBytes32('PynthiBTC')],
-				[toBytes32('PynthpETH'), toBytes32('PynthiETH')],
-			],
+			['PynthpBTC', 'PynthpETH'].map(toBytes32),
 			['pBTC', 'pETH'].map(toBytes32),
-			{
-				from: owner,
-			}
+			{ from: owner }
 		);
 
 		await pUSDPynth.approve(short.address, toUnit(100000), { from: account1 });
@@ -245,7 +229,7 @@ contract('ShortingRewards', accounts => {
 	});
 
 	beforeEach(async () => {
-		await updateRatesWithDefaults();
+		await updateAggregatorRates(exchangeRates, null, [pETH, pBTC], [100, 10000].map(toUnit));
 
 		await issuepUSDToAccount(toUnit(100000), owner);
 		await issuepBTCtoAccount(toUnit(10), owner);
@@ -412,13 +396,6 @@ contract('ShortingRewards', accounts => {
 				'Only Short Contract'
 			);
 		});
-
-		it('getReward() can only be called by the short contract', async () => {
-			await assert.revert(
-				shortingRewards.getReward(account1, { from: account1 }),
-				'Only Short Contract'
-			);
-		});
 	});
 
 	describe('enrol()', () => {
@@ -463,10 +440,7 @@ contract('ShortingRewards', accounts => {
 			await fastForward(DAY);
 
 			// Make the short so underwater it must get closed.
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([pBTC], ['20000'].map(toUnit), timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pBTC], ['20000'].map(toUnit));
 
 			// close the loan via liquidation
 			await issuepBTCtoAccount(toUnit(1), account2);
@@ -485,10 +459,7 @@ contract('ShortingRewards', accounts => {
 			await fastForward(DAY);
 
 			// Make the short so underwater it must get closed.
-			const timestamp = await currentTime();
-			await exchangeRates.updateRates([pBTC], ['20000'].map(toUnit), timestamp, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pBTC], ['20000'].map(toUnit));
 
 			// close the loan via liquidation
 			await issuepBTCtoAccount(toUnit(1), account2);
@@ -588,7 +559,7 @@ contract('ShortingRewards', accounts => {
 
 			await issuepBTCtoAccount(toUnit(1), account1);
 			await short.close(id, { from: account1 });
-			await short.getReward(pBTC, account1, { from: account1 });
+			await shortingRewards.getReward(account1);
 
 			const postRewardBal = await rewardsToken.balanceOf(account1);
 			const postEarnedBal = await shortingRewards.earned(account1);
@@ -665,7 +636,7 @@ contract('ShortingRewards', accounts => {
 			});
 
 			await fastForward(DAY * 4);
-			await short.getReward(pBTC, account1, { from: account1 });
+			await shortingRewards.getReward(account1);
 			await fastForward(DAY * 4);
 
 			// New Rewards period much lower
@@ -683,7 +654,7 @@ contract('ShortingRewards', accounts => {
 			});
 
 			await fastForward(DAY * 71);
-			await short.getReward(pBTC, account1, { from: account1 });
+			await shortingRewards.getReward(account1);
 		});
 	});
 
@@ -741,7 +712,7 @@ contract('ShortingRewards', accounts => {
 			const initialRewardBal = await rewardsToken.balanceOf(account1);
 			const initialEarnedBal = await shortingRewards.earned(account1);
 			await short.close(id, { from: account1 });
-			await short.getReward(pBTC, account1, { from: account1 });
+			await shortingRewards.getReward(account1);
 			const postRewardBal = await rewardsToken.balanceOf(account1);
 			const postEarnedBal = await shortingRewards.earned(account1);
 

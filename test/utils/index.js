@@ -612,6 +612,7 @@ module.exports = ({ web3 } = {}) => {
 
 		to3Unit,
 		toBigNbr,
+		toBN,
 		toUnit,
 		fromUnit,
 

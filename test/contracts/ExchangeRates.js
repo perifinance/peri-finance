@@ -9,7 +9,7 @@ const { currentTime, fastForward, toUnit, bytesToString } = require('../utils')(
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	onlyGivenAddressCanInvoke,
-	// convertToDecimals,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { setupContract, setupAllContracts } = require('./setup');
@@ -746,11 +746,12 @@ contract('Exchange Rates', async accounts => {
 				await fastForward(await instance.rateStalePeriod());
 
 				await instance.updateRates(
-					[PERI, toBytes32('GOLD')],
-					[web3.utils.toWei('0.1', 'ether'), web3.utils.toWei('0.2', 'ether')],
+					[toBytes32('GOLD')],
+					[web3.utils.toWei('0.2', 'ether')],
 					await currentTime(),
 					{ from: oracle }
 				);
+				await updateAggregatorRates(instance, null, [PERI], ['0.1'].map(toUnit));
 
 				// Even though pUSD hasn't been updated since the stale rate period has expired,
 				// we expect that pUSD remains "not stale"
@@ -982,11 +983,13 @@ contract('Exchange Rates', async accounts => {
 			beforeEach(async () => {
 				// Send a price update to guarantee we're not depending on values from outside this test.
 				await instance.updateRates(
-					['pAUD', 'pEUR', 'PERI'].map(toBytes32),
-					['0.5', '1.25', '0.1'].map(toUnit),
+					['pAUD', 'pEUR'].map(toBytes32),
+					['0.5', '1.25'].map(toUnit),
 					timestamp,
 					{ from: oracle }
 				);
+
+				await updateAggregatorRates(instance, null, [PERI], ['0.1'].map(toUnit));
 			});
 			it('should correctly calculate an exchange rate in effectiveValue()', async () => {
 				// 1 pUSD should be worth 2 pAUD.
@@ -1006,9 +1009,10 @@ contract('Exchange Rates', async accounts => {
 				timestamp = await currentTime();
 
 				// Update all rates except pUSD.
-				await instance.updateRates([pEUR, PERI], ['1.25', '0.1'].map(toUnit), timestamp, {
+				await instance.updateRates([pEUR], ['1.25'].map(toUnit), timestamp, {
 					from: oracle,
 				});
+				await updateAggregatorRates(instance, null, [PERI], ['0.1'].map(toUnit));
 
 				const amountOfPeriFinances = toUnit('10');
 				const amountOfEur = toUnit('0.8');

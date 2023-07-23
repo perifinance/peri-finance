@@ -33,6 +33,7 @@ const {
 const {
 	toBytes32,
 	fromBytes32,
+	allowZeroOrUpdateIfNonZero,
 	constants: {
 		BUILD_FOLDER,
 		CONFIG_FILENAME,
@@ -2313,11 +2314,29 @@ const deploy = async ({
 	if (systemSettings) {
 		console.log(gray(`\n------ CONFIGURE SYSTEM SETTINGS ------\n`));
 
+		let previousSystemSettings = deployer.getExistingContract({ contract: 'SystemSettings' });
+
+		// when there is no new system settings, or when not doing generateSolidity, than just read from ourself
+		if (systemSettings.address === previousSystemSettings.address) {
+			previousSystemSettings = undefined;
+		} else {
+			// otherwise when there's a new system setting, we want to be reading from the old
+			// this is useful when generatingSolidity so we can understand what needs to be added in solidity
+			// when upgrading SystemSettings
+			console.log(
+				gray(
+					`New SystemSettings detected. Using the existing one at ${previousSystemSettings.address} to read from`
+				)
+			);
+		}
+
 		// Now ensure all the fee rates are set for various pynths (this must be done after the AddressResolver
 		// has populated all references).
 		// Note: this populates rates for new pynths regardless of the addNewPynths flag
 		const pynthRates = await Promise.all(
-			pynths.map(({ name }) => systemSettings.methods.exchangeFeeRate(toBytes32(name)).call())
+			pynths.map(({ name }) =>
+				(previousSystemSettings || systemSettings).methods.exchangeFeeRate(toBytes32(name)).call()
+			)
 		);
 
 		const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
@@ -2332,7 +2351,7 @@ const deploy = async ({
 			iBNB: w3utils.toWei('0.003'),
 			pAVAX: w3utils.toWei('0.003'),
 			pUNI: w3utils.toWei('0.003'),
-			pLUNA: w3utils.toWei('0.003'),
+			// pLUNA: w3utils.toWei('0.003'),
 			pMKR: w3utils.toWei('0.003'),
 			pCAKE: w3utils.toWei('0.003'),
 			pAAVE: w3utils.toWei('0.003'),
@@ -2385,6 +2404,7 @@ const deploy = async ({
 				gasLimit: Math.max(methodCallGasLimit, 150e3 * pynthsRatesToUpdate.length), // higher gas required, 150k per pynth is sufficient (in OVM)
 				contract: 'SystemSettings',
 				target: systemSettings,
+				readTarget: previousSystemSettings,
 				write: 'setExchangeFeeRateForPynths',
 				writeArg: [
 					pynthsRatesToUpdate.map(({ name }) => toBytes32(name)),
@@ -2398,6 +2418,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'waitingPeriodSecs',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0',
 			write: 'setWaitingPeriodSecs',
 			writeArg: await getDeployParameter('WAITING_PERIOD_SECS'),
@@ -2407,6 +2428,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'priceDeviationThresholdFactor',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setPriceDeviationThresholdFactor',
 			writeArg: await getDeployParameter('PRICE_DEVIATION_THRESHOLD_FACTOR'),
@@ -2417,6 +2439,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'tradingRewardsEnabled',
+			readTarget: previousSystemSettings,
 			expected: input => input === tradingRewardsEnabled, // only change if non-default
 			write: 'setTradingRewardsEnabled',
 			writeArg: tradingRewardsEnabled,
@@ -2426,6 +2449,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'issuanceRatio',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setIssuanceRatio',
 			writeArg: await getDeployParameter('ISSUANCE_RATIO'),
@@ -2435,6 +2459,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'externalTokenQuota',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setExternalTokenQuota',
 			writeArg: await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA'),
@@ -2444,6 +2469,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'feePeriodDuration',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setFeePeriodDuration',
 			writeArg: await getDeployParameter('FEE_PERIOD_DURATION'),
@@ -2453,6 +2479,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'targetThreshold',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setTargetThreshold',
 			writeArg: await getDeployParameter('TARGET_THRESHOLD'),
@@ -2462,6 +2489,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'liquidationDelay',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setLiquidationDelay',
 			writeArg: await getDeployParameter('LIQUIDATION_DELAY'),
@@ -2471,6 +2499,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'liquidationRatio',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setLiquidationRatio',
 			writeArg: await getDeployParameter('LIQUIDATION_RATIO'),
@@ -2480,15 +2509,85 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'liquidationPenalty',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setLiquidationPenalty',
 			writeArg: await getDeployParameter('LIQUIDATION_PENALTY'),
 		});
 
+		const periLiquidationPenalty = await getDeployParameter('PERI_LIQUIDATION_PENALTY');
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'periLiquidationPenalty',
+			readTarget: previousSystemSettings,
+			expected: allowZeroOrUpdateIfNonZero(periLiquidationPenalty),
+			write: 'setSnxLiquidationPenalty',
+			writeArg: periLiquidationPenalty,
+			comment: 'Set the penalty amount of PERI from a liquidated account',
+		});
+
+		if (systemSettings.selfLiquidationPenalty) {
+			const selfLiquidationPenalty = await getDeployParameter('SELF_LIQUIDATION_PENALTY');
+			await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'selfLiquidationPenalty',
+				readTarget: previousSystemSettings,
+				expected: allowZeroOrUpdateIfNonZero(selfLiquidationPenalty),
+				write: 'setSelfLiquidationPenalty',
+				writeArg: selfLiquidationPenalty,
+				comment: 'Set the penalty for self liquidation of an account',
+			});
+		}
+
+		if (systemSettings.liquidationEscrowDuration) {
+			const liquidationEscrowDuration = await getDeployParameter('LIQUIDATION_ESCROW_DURATION');
+			await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'liquidationEscrowDuration',
+				readTarget: previousSystemSettings,
+				expected: allowZeroOrUpdateIfNonZero(liquidationEscrowDuration),
+				write: 'setLiquidationEscrowDuration',
+				writeArg: liquidationEscrowDuration,
+				comment: 'Set the duration of how long liquidation rewards are escrowed for',
+			});
+		}
+
+		if (systemSettings.flagReward) {
+			const flagReward = await getDeployParameter('FLAG_REWARD');
+			await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'flagReward',
+				readTarget: previousSystemSettings,
+				expected: allowZeroOrUpdateIfNonZero(flagReward),
+				write: 'setFlagReward',
+				writeArg: flagReward,
+				comment: 'Set the reward amount for flagging an account for liquidation',
+			});
+		}
+
+		if (systemSettings.liquidateReward) {
+			const liquidateReward = await getDeployParameter('LIQUIDATE_REWARD');
+			await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'liquidateReward',
+				readTarget: previousSystemSettings,
+				expected: allowZeroOrUpdateIfNonZero(liquidateReward),
+				write: 'setLiquidateReward',
+				writeArg: liquidateReward,
+				comment: 'Set the reward amount for peforming a liquidation',
+			});
+		}
+
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'rateStalePeriod',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setRateStalePeriod',
 			writeArg: await getDeployParameter('RATE_STALE_PERIOD'),
@@ -2498,6 +2597,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'minimumStakeTime',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setMinimumStakeTime',
 			writeArg: await getDeployParameter('MINIMUM_STAKE_TIME'),
@@ -2507,6 +2607,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'debtSnapshotStaleTime',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setDebtSnapshotStaleTime',
 			writeArg: await getDeployParameter('DEBT_SNAPSHOT_STALE_TIME'),
@@ -2516,6 +2617,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'bridgeClaimGasCost',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setBridgeClaimGasCost',
 			writeArg: (
@@ -2528,6 +2630,7 @@ const deploy = async ({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'bridgeTransferGasCost',
+			readTarget: previousSystemSettings,
 			expected: input => input !== '0', // only change if zero
 			write: 'setBridgeTransferGasCost',
 			writeArg: (
@@ -2535,6 +2638,21 @@ const deploy = async ({
 				(await checkGasPrice(network, 'standard'))
 			).toString(), // multiply by gasPrice
 		});
+
+		if (systemSettings.interactionDelay) {
+			const interactionDelay = (await getDeployParameter('COLLATERAL_SHORT'))['INTERACTION_DELAY'];
+			await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'interactionDelay',
+				readArg: addressOf(collateralShort),
+				readTarget: previousSystemSettings,
+				expected: allowZeroOrUpdateIfNonZero(interactionDelay),
+				write: 'setInteractionDelay',
+				writeArg: [collateralShort.address, interactionDelay],
+				comment: 'Ensure the CollateralShort contract has an interaction delay of zero on the OVM',
+			});
+		}
 
 		// await runStep({
 		// 	contract: 'SystemSettings',
@@ -2575,18 +2693,19 @@ const deploy = async ({
 		// 	writeArg: [3, await getDeployParameter('CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT')],
 		// });
 
-		const aggregatorWarningFlags = (await getDeployParameter('AGGREGATOR_WARNING_FLAGS'))[network];
-		// If deploying to OVM avoid ivoking setAggregatorWarningFlags for now.
-		if (aggregatorWarningFlags && !useOvm) {
-			await runStep({
-				contract: 'SystemSettings',
-				target: systemSettings,
-				read: 'aggregatorWarningFlags',
-				expected: input => input !== ZERO_ADDRESS, // only change if zero
-				write: 'setAggregatorWarningFlags',
-				writeArg: aggregatorWarningFlags,
-			});
-		}
+		// const aggregatorWarningFlags = (await getDeployParameter('AGGREGATOR_WARNING_FLAGS'))[network];
+		// // If deploying to OVM avoid ivoking setAggregatorWarningFlags for now.
+		// if (aggregatorWarningFlags && !useOvm) {
+		// 	await runStep({
+		// 		contract: 'SystemSettings',
+		// 		target: systemSettings,
+		// 		read: 'aggregatorWarningFlags',
+		// 		readTarget: previousSystemSettings,
+		// 		expected: input => input !== ZERO_ADDRESS, // only change if zero
+		// 		write: 'setAggregatorWarningFlags',
+		// 		writeArg: aggregatorWarningFlags,
+		// 	});
+		// }
 	}
 
 	if (crossChainState && crossChainManager) {

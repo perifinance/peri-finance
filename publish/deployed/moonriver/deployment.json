@@ -630,33 +630,6 @@
 			"txn": "",
 			"network": "moonriver"
 		},
-		"TokenStatepLUNA": {
-			"name": "TokenStatepLUNA",
-			"address": "0x4714ca039Da99986a15862f785555a44e702D972",
-			"source": "TokenState",
-			"link": "https://moonriver.moonscan.io/address/0x4714ca039Da99986a15862f785555a44e702D972",
-			"timestamp": "2022-05-03T05:08:37.347Z",
-			"txn": "",
-			"network": "moonriver"
-		},
-		"ProxyERC20pLUNA": {
-			"name": "ProxyERC20pLUNA",
-			"address": "0xd449891Cf9109325DBed863CfA56F8c63de5aA25",
-			"source": "ProxyERC20",
-			"link": "https://moonriver.moonscan.io/address/0xd449891Cf9109325DBed863CfA56F8c63de5aA25",
-			"timestamp": "2022-05-03T05:09:07.311Z",
-			"txn": "",
-			"network": "moonriver"
-		},
-		"PynthpLUNA": {
-			"name": "PynthpLUNA",
-			"address": "0x15a4aACcc973694362Db86e8B05EFa32f9fFB540",
-			"source": "Pynth",
-			"link": "https://moonriver.moonscan.io/address/0x15a4aACcc973694362Db86e8B05EFa32f9fFB540",
-			"timestamp": "2022-05-03T05:10:01.393Z",
-			"txn": "",
-			"network": "moonriver"
-		},
 		"TokenStatepAVAX": {
 			"name": "TokenStatepAVAX",
 			"address": "0xb52EaC31b40F9d79e426c5d2E6AC654BDe85c0E9",

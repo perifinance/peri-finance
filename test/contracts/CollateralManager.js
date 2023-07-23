@@ -1,42 +1,42 @@
 'use strict';
 
-const { artifacts, contract } = require('hardhat');
+const { contract } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { toUnit, currentTime, fastForward } = require('../utils')();
+const { toUnit, fastForward } = require('../utils')();
 
-const { setupAllContracts, setupContract } = require('./setup');
+const { setupAllContracts, setupContract, mockToken } = require('./setup');
 
-const { ensureOnlyExpectedMutativeFunctions } = require('./helpers');
+const {
+	ensureOnlyExpectedMutativeFunctions,
+	onlyGivenAddressCanInvoke,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 
 const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
 
-let CollateralManager;
-let CollateralState;
-let CollateralManagerState;
-
 contract('CollateralManager', async accounts => {
-	const [deployerAccount, owner, oracle, , account1] = accounts;
+	const [, owner, , , account1] = accounts;
 
 	const pETH = toBytes32('pETH');
 	const pUSD = toBytes32('pUSD');
 	const pBTC = toBytes32('pBTC');
+
+	const name = 'Some name';
+	const symbol = 'TOKEN';
 
 	const INTERACTION_DELAY = 300;
 
 	const oneRenBTC = 100000000;
 
 	let ceth,
-		mcstate,
-		mcstateErc20,
 		cerc20,
-		proxy,
 		renBTC,
-		tokenState,
 		manager,
 		managerState,
 		addressResolver,
@@ -49,7 +49,6 @@ contract('CollateralManager', async accounts => {
 		pynths,
 		maxDebt,
 		short,
-		shortState,
 		debtCache,
 		tx,
 		id;
@@ -59,24 +58,20 @@ contract('CollateralManager', async accounts => {
 		return event.args.id;
 	};
 
-	const deployEthCollateral = async ({
-		mcState,
-		owner,
-		manager,
-		resolver,
-		collatKey,
-		minColat,
-		minSize,
-	}) => {
-		return setupContract({
-			accounts,
-			contract: 'CollateralEth',
-			args: [mcState, owner, manager, resolver, collatKey, minColat, minSize],
-		});
+	const issue = async (pynth, issueAmount, receiver) => {
+		await pynth.issue(receiver, issueAmount, { from: owner });
 	};
 
-	const deployErc20Collateral = async ({
-		mcState,
+	const updateRatesWithDefaults = async () => {
+		await updateAggregatorRates(exchangeRates, null, [pETH, pBTC], [100, 10000].map(toUnit));
+	};
+
+	const fastForwardAndUpdateRates = async seconds => {
+		await fastForward(seconds);
+		await updateRatesWithDefaults();
+	};
+
+	const deployCollateral = async ({
 		owner,
 		manager,
 		resolver,
@@ -89,39 +84,8 @@ contract('CollateralManager', async accounts => {
 		return setupContract({
 			accounts,
 			contract: 'CollateralErc20',
-			args: [mcState, owner, manager, resolver, collatKey, minColat, minSize, underCon, decimals],
+			args: [owner, manager, resolver, collatKey, minColat, minSize, underCon, decimals],
 		});
-	};
-
-	const deployShort = async ({ state, owner, manager, resolver, collatKey, minColat, minSize }) => {
-		return setupContract({
-			accounts,
-			contract: 'CollateralShort',
-			args: [state, owner, manager, resolver, collatKey, minColat, minSize],
-		});
-	};
-
-	const issue = async (pynth, issueAmount, receiver) => {
-		await pynth.issue(receiver, issueAmount, { from: owner });
-	};
-
-	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates([pETH], ['100'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-
-		const pBTC = toBytes32('pBTC');
-
-		await exchangeRates.updateRates([pBTC], ['10000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-	};
-
-	const fastForwardAndUpdateRates = async seconds => {
-		await fastForward(seconds);
-		await updateRatesWithDefaults();
 	};
 
 	const setupManager = async () => {
@@ -135,6 +99,10 @@ contract('CollateralManager', async accounts => {
 			AddressResolver: addressResolver,
 			Issuer: issuer,
 			DebtCache: debtCache,
+			CollateralManager: manager,
+			CollateralManagerState: managerState,
+			CollateralEth: ceth,
+			CollateralShort: short,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -147,80 +115,29 @@ contract('CollateralManager', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'Exchanger',
+				'CollateralManager',
+				'CollateralManagerState',
+				'CollateralEth',
+				'CollateralShort',
 				'StakingState',
 				'CrossChainManager',
 			],
 		}));
 
-		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
+		await setupPriceAggregators(exchangeRates, owner, [pBTC, pETH]);
 
 		maxDebt = toUnit(50000000);
 
-		manager = await CollateralManager.new(
-			managerState.address,
-			owner,
-			addressResolver.address,
-			maxDebt,
-			// 5% / 31536000 (seconds in common year)
-			1585489599,
-			0,
-			{
-				from: deployerAccount,
-			}
-		);
-
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
-		mcstate = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
+		({ token: renBTC } = await mockToken({
+			accounts,
+			name,
+			symbol,
+			supply: 1e6,
+		}));
 
-		ceth = await deployEthCollateral({
-			mcState: mcstate.address,
-			owner: owner,
-			manager: manager.address,
-			resolver: addressResolver.address,
-			collatKey: pETH,
-			minColat: toUnit(1.5),
-			minSize: toUnit(1),
-		});
-
-		await mcstate.setAssociatedContract(ceth.address, { from: owner });
-
-		mcstateErc20 = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
-		const ProxyERC20 = artifacts.require(`ProxyERC20`);
-		const TokenState = artifacts.require(`TokenState`);
-
-		// the owner is the associated contract, so we can simulate
-		proxy = await ProxyERC20.new(owner, {
-			from: deployerAccount,
-		});
-		tokenState = await TokenState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
-		const PublicEST8Decimals = artifacts.require('PublicEST8Decimals');
-
-		renBTC = await PublicEST8Decimals.new(
-			proxy.address,
-			tokenState.address,
-			'Some Token',
-			'TOKEN',
-			toUnit('1000'),
-			owner,
-			{
-				from: deployerAccount,
-			}
-		);
-
-		await tokenState.setAssociatedContract(owner, { from: owner });
-		await tokenState.setBalanceOf(owner, toUnit('1000'), { from: owner });
-		await tokenState.setAssociatedContract(renBTC.address, { from: owner });
-
-		await proxy.setTarget(renBTC.address, { from: owner });
-
-		// Issue ren and set allowance
-		await renBTC.transfer(account1, toUnit(100), { from: owner });
-
-		cerc20 = await deployErc20Collateral({
-			mcState: mcstateErc20.address,
+		cerc20 = await deployCollateral({
 			owner: owner,
 			manager: manager.address,
 			resolver: addressResolver.address,
@@ -231,21 +148,8 @@ contract('CollateralManager', async accounts => {
 			decimals: 8,
 		});
 
-		await mcstateErc20.setAssociatedContract(cerc20.address, { from: owner });
-
-		shortState = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
-		short = await deployShort({
-			state: shortState.address,
-			owner: owner,
-			manager: manager.address,
-			resolver: addressResolver.address,
-			collatKey: pUSD,
-			minColat: toUnit(1.5),
-			minSize: toUnit(0.1),
-		});
-
-		await shortState.setAssociatedContract(short.address, { from: owner });
+		// Issue ren and set allowance
+		await renBTC.transfer(account1, toUnit(100), { from: owner });
 
 		await addressResolver.importAddresses(
 			[
@@ -295,21 +199,25 @@ contract('CollateralManager', async accounts => {
 		);
 
 		await manager.addShortablePynths(
-			[
-				[toBytes32('PynthpBTC'), toBytes32('PynthiBTC')],
-				[toBytes32('PynthpETH'), toBytes32('PynthiETH')],
-			],
-			['pBTC', 'pETH'].map(toBytes32),
+			[toBytes32('PynthpETH'), toBytes32('PynthpBTC')],
+			[pETH, pBTC],
 			{
 				from: owner,
 			}
 		);
 
-		// check pynths are set and currencyKeys set
+		// check pynths, currencies, and shortable pynths are set
 		assert.isTrue(
 			await manager.arePynthsAndCurrenciesSet(
 				['PynthpUSD', 'PynthpBTC', 'PynthpETH'].map(toBytes32),
 				['pUSD', 'pBTC', 'pETH'].map(toBytes32)
+			)
+		);
+
+		assert.isTrue(
+			await manager.areShortablePynthsSet(
+				['PynthpBTC', 'PynthpETH'].map(toBytes32),
+				['pBTC', 'pETH'].map(toBytes32)
 			)
 		);
 
@@ -318,10 +226,6 @@ contract('CollateralManager', async accounts => {
 	};
 
 	before(async () => {
-		CollateralManager = artifacts.require(`CollateralManager`);
-		CollateralState = artifacts.require(`CollateralState`);
-		CollateralManagerState = artifacts.require('CollateralManagerState');
-
 		await setupManager();
 	});
 
@@ -350,6 +254,7 @@ contract('CollateralManager', async accounts => {
 			expected: [
 				'setUtilisationMultiplier',
 				'setMaxDebt',
+				'setMaxSkewRate',
 				'setBaseBorrowRate',
 				'setBaseShortRate',
 				'getNewLoanId',
@@ -357,10 +262,11 @@ contract('CollateralManager', async accounts => {
 				'removeCollaterals',
 				'addPynths',
 				'removePynths',
+				'accrueInterest',
 				'addShortablePynths',
 				'removeShortablePynths',
-				'updateBorrowRates',
-				'updateShortRates',
+				'updateBorrowRatesCollateral',
+				'updateShortRatesCollateral',
 				'incrementLongs',
 				'decrementLongs',
 				'incrementShorts',
@@ -382,6 +288,71 @@ contract('CollateralManager', async accounts => {
 		it('should add the collaterals during construction', async () => {
 			assert.isTrue(await manager.hasCollateral(ceth.address));
 			assert.isTrue(await manager.hasCollateral(cerc20.address));
+			assert.isTrue(await manager.hasCollateral(short.address));
+		});
+	});
+
+	describe('adding pynths', async () => {
+		it('should add the pynths during construction', async () => {
+			assert.isTrue(await manager.isPynthManaged(pUSD));
+			assert.isTrue(await manager.isPynthManaged(pBTC));
+			assert.isTrue(await manager.isPynthManaged(pETH));
+		});
+		it('should not allow duplicate pynths to be added', async () => {
+			await manager.addPynths([toBytes32('PynthpUSD')], [toBytes32('pUSD')], {
+				from: owner,
+			});
+			assert.isTrue(
+				await manager.arePynthsAndCurrenciesSet(
+					['PynthpUSD', 'PynthpBTC', 'PynthpETH'].map(toBytes32),
+					['pUSD', 'pBTC', 'pETH'].map(toBytes32)
+				)
+			);
+		});
+		it('should revert when input array lengths dont match', async () => {
+			await assert.revert(
+				manager.addPynths([toBytes32('PynthpUSD'), toBytes32('PynthpBTC')], [toBytes32('pUSD')], {
+					from: owner,
+				}),
+				'Input array length mismatch'
+			);
+		});
+	});
+
+	describe('removing pynths', async () => {
+		after('restore removed pynth', async () => {
+			await manager.addPynths([toBytes32('PynthpETH')], [toBytes32('pETH')], {
+				from: owner,
+			});
+			assert.isTrue(
+				await manager.arePynthsAndCurrenciesSet(
+					['PynthpUSD', 'PynthpBTC', 'PynthpETH'].map(toBytes32),
+					['pUSD', 'pBTC', 'pETH'].map(toBytes32)
+				)
+			);
+		});
+		it('should successfully remove a pynth', async () => {
+			await manager.removePynths([toBytes32('PynthpETH')], [toBytes32('pETH')], {
+				from: owner,
+			});
+			assert.isTrue(
+				await manager.arePynthsAndCurrenciesSet(
+					['PynthpUSD', 'PynthpBTC'].map(toBytes32),
+					['pUSD', 'pBTC'].map(toBytes32)
+				)
+			);
+		});
+		it('should revert when input array lengths dont match', async () => {
+			await assert.revert(
+				manager.removePynths(
+					[toBytes32('PynthpUSD'), toBytes32('PynthpBTC')],
+					[toBytes32('pUSD')],
+					{
+						from: owner,
+					}
+				),
+				'Input array length mismatch'
+			);
 		});
 	});
 
@@ -449,6 +420,13 @@ contract('CollateralManager', async accounts => {
 			const debt = total.pusdValue;
 
 			assert.bnEqual(debt, toUnit(100));
+		});
+
+		it('should get the total long and short balance in pUSD correctly', async () => {
+			const total = await manager.totalLongAndShort();
+			const debt = total.pusdValue;
+
+			assert.bnEqual(debt, toUnit(500));
 		});
 
 		it('should report if a rate is invalid', async () => {
@@ -530,6 +508,29 @@ contract('CollateralManager', async accounts => {
 			});
 		});
 
+		describe('setMaxSkewRate', async () => {
+			describe('revert condtions', async () => {
+				it('should fail if not called by the owner', async () => {
+					await assert.revert(
+						manager.setMaxSkewRate(toUnit(0.2), { from: account1 }),
+						'Only the contract owner may perform this action'
+					);
+				});
+			});
+			describe('when it succeeds', async () => {
+				beforeEach(async () => {
+					await manager.setMaxSkewRate(toUnit(0.2), { from: owner });
+				});
+				it('should update the max skew rate', async () => {
+					assert.bnEqual(await manager.maxSkewRate(), toUnit(0.2));
+				});
+				it('should allow the max skew rate to be 0', async () => {
+					await manager.setMaxSkewRate(toUnit(0), { from: owner });
+					assert.bnEqual(await manager.maxSkewRate(), toUnit(0));
+				});
+			});
+		});
+
 		describe('setBaseBorrowRate', async () => {
 			describe('revert condtions', async () => {
 				it('should fail if not called by the owner', async () => {
@@ -546,9 +547,78 @@ contract('CollateralManager', async accounts => {
 				it('should update the base interest rate', async () => {
 					assert.bnEqual(await manager.baseBorrowRate(), toUnit(2));
 				});
-				it('should allow the base interest rate to be  0', async () => {
+				it('should allow the base interest rate to be 0', async () => {
 					await manager.setBaseBorrowRate(toUnit(0), { from: owner });
 					assert.bnEqual(await manager.baseBorrowRate(), toUnit(0));
+				});
+			});
+		});
+
+		describe('setBaseShortRate', async () => {
+			describe('revert condtions', async () => {
+				it('should fail if not called by the owner', async () => {
+					await assert.revert(
+						manager.setBaseShortRate(toUnit(1), { from: account1 }),
+						'Only the contract owner may perform this action'
+					);
+				});
+			});
+			describe('when it succeeds', async () => {
+				beforeEach(async () => {
+					await manager.setBaseShortRate(toUnit(2), { from: owner });
+				});
+				it('should update the base short rate', async () => {
+					assert.bnEqual(await manager.baseShortRate(), toUnit(2));
+				});
+				it('should allow the base short rate to be 0', async () => {
+					await manager.setBaseShortRate(toUnit(0), { from: owner });
+					assert.bnEqual(await manager.baseShortRate(), toUnit(0));
+				});
+			});
+		});
+
+		describe('updateBorrowRatesCollateral', async () => {
+			describe('revert condtions', async () => {
+				it('should fail if not called by the collateral contract', async () => {
+					await assert.revert(
+						manager.updateBorrowRatesCollateral(toUnit(1), { from: owner }),
+						'Only collateral contracts'
+					);
+				});
+			});
+			describe('when it succeeds', async () => {
+				it('updateBorrowRatesCollateral() can only be invoked by collateral', async () => {
+					await onlyGivenAddressCanInvoke({
+						fnc: manager.updateBorrowRatesCollateral,
+						accounts,
+						args: [toUnit(1)],
+						address: short.address,
+						skipPassCheck: true,
+						reason: 'Only collateral contracts',
+					});
+				});
+			});
+		});
+
+		describe('updateShortRatesCollateral', async () => {
+			describe('revert condtions', async () => {
+				it('should fail if not called by the collateral contract', async () => {
+					await assert.revert(
+						manager.updateShortRatesCollateral(pETH, toUnit(1), { from: owner }),
+						'Only collateral contracts'
+					);
+				});
+			});
+			describe('when it succeeds', async () => {
+				it('updateShortRatesCollateral() can only be invoked by collateral', async () => {
+					await onlyGivenAddressCanInvoke({
+						fnc: manager.updateShortRatesCollateral,
+						accounts,
+						args: [pETH, toUnit(1)],
+						address: short.address,
+						skipPassCheck: true,
+						reason: 'Only collateral contracts',
+					});
 				});
 			});
 		});
@@ -634,15 +704,12 @@ contract('CollateralManager', async accounts => {
 		});
 
 		describe('when a shortable pynth is removed', async () => {
-			beforeEach(async () => {
-				await manager.removeShortablePynths([toBytes32('PynthpBTC')], { from: owner });
-			});
+			it('should emit the ShortablePynthRemoved event', async () => {
+				const txn = await manager.removeShortablePynths([toBytes32('PynthpBTC')], { from: owner });
 
-			it('should zero out the inverse mapping', async () => {
-				assert.equal(
-					await manager.pynthToInversePynth(toBytes32('PynthpBTC')),
-					'0x0000000000000000000000000000000000000000000000000000000000000000'
-				);
+				assert.eventEqual(txn, 'ShortablePynthRemoved', {
+					pynth: toBytes32('PynthpBTC'),
+				});
 			});
 		});
 	});

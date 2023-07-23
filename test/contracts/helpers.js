@@ -6,9 +6,65 @@ const { smockit } = require('@eth-optimism/smock');
 const { assert } = require('./common');
 
 const { currentTime, toUnit } = require('../utils')();
-const { toBytes32 } = require('../..');
+const {
+	toBytes32,
+	constants: { ZERO_ADDRESS },
+} = require('../..');
+
+const MockAggregator = artifacts.require('MockAggregatorV2V3');
+
+/// utility function to setup price aggregators
+/// @param exchangeRates instance of ExchangeRates contract
+/// @param owner owner account of exchangeRates contract for adding an aggregator
+/// @param keys array of bytes32 currency keys
+/// @param decimalsArray optional array of ints for each key, defaults to 18 decimals
+async function setupPriceAggregators(exchangeRates, owner, keys, decimalsArray = []) {
+	let aggregator;
+	for (let i = 0; i < keys.length; i++) {
+		aggregator = await MockAggregator.new({ from: owner });
+		await aggregator.setDecimals(decimalsArray.length > 0 ? decimalsArray[i] : 18);
+		await exchangeRates.addAggregator(keys[i], aggregator.address, { from: owner });
+	}
+}
+
+/// same as setupPriceAggregators, but checks if an aggregator for that currency is already setup up
+async function setupMissingPriceAggregators(exchangeRates, owner, keys) {
+	const missingKeys = [];
+	for (let i = 0; i < keys.length; i++) {
+		if ((await exchangeRates.aggregators(keys[i])) === ZERO_ADDRESS) {
+			missingKeys.push(keys[i]);
+		}
+	}
+	await setupPriceAggregators(exchangeRates, owner, missingKeys);
+}
 
 module.exports = {
+	setupPriceAggregators,
+	setupMissingPriceAggregators,
+	// utility function update rates for aggregators that are already set up
+	/// @param exchangeRates instance of ExchangeRates contract
+	/// @param owner owner account of exchangeRates contract for adding an aggregator
+	/// @param keys array of bytes32 currency keys
+	/// @param rates array of BN rates
+	/// @param timestamp optional timestamp for the update, currentTime() is used by default
+	async updateAggregatorRates(exchangeRates, circuitBreaker, keys, rates, timestamp = undefined) {
+		timestamp = timestamp || (await currentTime());
+		for (let i = 0; i < keys.length; i++) {
+			const aggregatorAddress = await exchangeRates.aggregators(keys[i]);
+			if (aggregatorAddress === ZERO_ADDRESS) {
+				throw new Error(`Aggregator set to zero address, use "setupPriceAggregators" to set it up`);
+			}
+			const aggregator = await MockAggregator.at(aggregatorAddress);
+			// set the rate
+			await aggregator.setLatestAnswer(rates[i], timestamp);
+
+			if (circuitBreaker) {
+				await circuitBreaker.resetLastValue([aggregatorAddress], [rates[i]], {
+					from: await circuitBreaker.owner(),
+				});
+			}
+		}
+	},
 	/**
 	 * the truffle transaction does not return all events logged, only those from the invoked
 	 * contract and ERC20 Transfer events (see https://github.com/trufflesuite/truffle/issues/555),

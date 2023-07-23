@@ -40,19 +40,11 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		return event.args.id;
 	};
 
-	const deployCollateral = async ({
-		state,
-		owner,
-		manager,
-		resolver,
-		collatKey,
-		minColat,
-		minSize,
-	}) => {
+	const deployCollateral = async ({ owner, manager, resolver, collatKey, minColat, minSize }) => {
 		return setupContract({
 			accounts,
 			contract: 'CollateralEth',
-			args: [state, owner, manager, resolver, collatKey, minColat, minSize],
+			args: [owner, manager, resolver, collatKey, minColat, minSize],
 		});
 	};
 
@@ -121,6 +113,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			toUnit(10000),
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}
@@ -131,7 +124,6 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		const state = await CollateralState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
 		ceth = await deployCollateral({
-			state: state.address,
 			owner: owner,
 			manager: manager.address,
 			resolver: resolver.address,

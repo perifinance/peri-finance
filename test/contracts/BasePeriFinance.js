@@ -15,14 +15,17 @@ const { currentTime, fastForward, toUnit } = require('../utils')();
 const {
 	ensureOnlyExpectedMutativeFunctions,
 	onlyGivenAddressCanInvoke,
-	updateRatesWithDefaults,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	setStatus,
 } = require('./helpers');
 
 const { toBytes32 } = require('../..');
 
 contract('BasePeriFinance', async accounts => {
-	const [pUSD, pAUD, pEUR, PERI, pETH] = ['pUSD', 'pAUD', 'pEUR', 'PERI', 'pETH'].map(toBytes32);
+	const [pUSD, pAUD, pEUR, PERI, pBTC, pETH] = ['pUSD', 'pAUD', 'pEUR', 'PERI', 'pBTC', 'pETH'].map(
+		toBytes32
+	);
 
 	const [, owner, account1, account2, account3, , , , , minterRole] = accounts;
 
@@ -30,8 +33,6 @@ contract('BasePeriFinance', async accounts => {
 		exchangeRates,
 		debtCache,
 		escrow,
-		oracle,
-		timestamp,
 		addressResolver,
 		systemSettings,
 		systemStatus,
@@ -74,9 +75,19 @@ contract('BasePeriFinance', async accounts => {
 		}));
 
 		// Send a price update to guarantee we're not stale.
-		oracle = account1;
-		timestamp = await currentTime();
+		await setupPriceAggregators(exchangeRates, owner, [pAUD, pEUR, pBTC, pETH]);
 	});
+
+	const updateRatesWithDefaults = async () => {
+		await updateAggregatorRates(
+			exchangeRates,
+			null,
+			[PERI, pAUD, pEUR, pBTC, pETH],
+			['0.1', '0.5', '1.25', '5000', '172'].map(toUnit)
+		);
+
+		await debtCache.takeDebtSnapshot();
+	};
 
 	addSnapshotBeforeRestoreAfterEach();
 
@@ -446,14 +457,13 @@ contract('BasePeriFinance', async accounts => {
 				// fast forward to get past initial PERI setting
 				await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-				timestamp = await currentTime();
-
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					null,
 					[pAUD, pEUR, pETH],
-					['0.5', '1.25', '100'].map(toUnit),
-					timestamp,
-					{ from: oracle }
+					['0.5', '1.25', '100'].map(toUnit)
 				);
+
 				await debtCache.takeDebtSnapshot();
 			});
 			it('should still have stale rates', async () => {
@@ -461,9 +471,7 @@ contract('BasePeriFinance', async accounts => {
 			});
 			describe('when PERI is also set', () => {
 				beforeEach(async () => {
-					timestamp = await currentTime();
-
-					await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, { from: oracle });
+					await updateAggregatorRates(exchangeRates, null, [PERI], [1].map(toUnit));
 				});
 				it('then no stale rates', async () => {
 					assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), false);
@@ -472,12 +480,12 @@ contract('BasePeriFinance', async accounts => {
 				describe('when only some pynths are updated', () => {
 					beforeEach(async () => {
 						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
-
-						timestamp = await currentTime();
-
-						await exchangeRates.updateRates([PERI, pAUD], ['0.1', '0.78'].map(toUnit), timestamp, {
-							from: oracle,
-						});
+						await updateAggregatorRates(
+							exchangeRates,
+							null,
+							[PERI, pAUD],
+							['0.1', '0.78'].map(toUnit)
+						);
 					});
 
 					it('then anyPynthOrPERIRateIsInvalid() returns true', async () => {
@@ -550,7 +558,7 @@ contract('BasePeriFinance', async accounts => {
 
 		beforeEach(async () => {
 			// Ensure all pynths have rates to allow issuance
-			await updateRatesWithDefaults({ exchangeRates, oracle, debtCache });
+			await updateRatesWithDefaults();
 		});
 
 		it('should transfer using the ERC20 transfer function @gasprofile', async () => {
@@ -749,29 +757,25 @@ contract('BasePeriFinance', async accounts => {
 				it('should not allow transfer if the exchange rate for PERI is stale', async () => {
 					await ensureTransferReverts();
 
-					const timestamp = await currentTime();
-
 					// now give some pynth rates
-					await exchangeRates.updateRates([pAUD, pEUR], ['0.5', '1.25'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
+						[pAUD, pEUR],
+						['0.5', '1.25'].map(toUnit)
+					);
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// the remainder of the pynths have prices
-					await exchangeRates.updateRates([pETH], ['100'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [pETH], ['100'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// now give PERI rate
-					await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, {
-						from: oracle,
-					});
-
+					await updateAggregatorRates(exchangeRates, null, [PERI], [1].map(toUnit));
 					// now PERI transfer should work
 					await basePeriFinance.transfer(account2, value, { from: account1 });
 					await basePeriFinance.transferFrom(account2, account1, value, {
@@ -786,25 +790,24 @@ contract('BasePeriFinance', async accounts => {
 					const timestamp = await currentTime();
 
 					// now give PERI rate
-					await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI], [1].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// now give some pynth rates
-					await exchangeRates.updateRates([pAUD, pEUR], ['0.5', '1.25'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(
+						exchangeRates,
+						null,
+						[pAUD, pEUR],
+						['0.5', '1.25'].map(toUnit)
+					);
 					await debtCache.takeDebtSnapshot();
 
 					await ensureTransferReverts();
 
 					// now give the remainder of pynths rates
-					await exchangeRates.updateRates([pETH], ['100'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [pETH], ['100'].map(toUnit));
 					await debtCache.takeDebtSnapshot();
 
 					// now PERI transfer should work
@@ -897,10 +900,7 @@ contract('BasePeriFinance', async accounts => {
 		// currently exchange does not support
 		it.skip("should lock newly received periFinance if the user's collaterisation is too high", async () => {
 			// Set pEUR for purposes of this test
-			const timestamp1 = await currentTime();
-			await exchangeRates.updateRates([pEUR], [toUnit('0.75')], timestamp1, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pEUR], [toUnit('0.75')]);
 			await debtCache.takeDebtSnapshot();
 
 			const issuedPeriFinances = web3.utils.toBN('200000');
@@ -932,10 +932,7 @@ contract('BasePeriFinance', async accounts => {
 			});
 
 			// Increase the value of pEUR relative to periFinance
-			const timestamp2 = await currentTime();
-			await exchangeRates.updateRates([pEUR], [toUnit('2.10')], timestamp2, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pEUR], [toUnit('2.10')]);
 			await debtCache.takeDebtSnapshot();
 
 			// Ensure that the new periFinance account1 receives cannot be transferred out.
@@ -953,12 +950,9 @@ contract('BasePeriFinance', async accounts => {
 			});
 
 			// Set pAUD for purposes of this test
-			const timestamp1 = await currentTime();
 			const aud2usdrate = toUnit('2');
 
-			await exchangeRates.updateRates([pAUD], [aud2usdrate], timestamp1, {
-				from: oracle,
-			});
+			await updateAggregatorRates(exchangeRates, null, [pAUD], [aud2usdrate]);
 			await debtCache.takeDebtSnapshot();
 
 			const issuedPeriFinances = web3.utils.toBN('200000');
@@ -982,9 +976,8 @@ contract('BasePeriFinance', async accounts => {
 			});
 
 			// Increase the value of pAUD relative to periFinance
-			const timestamp2 = await currentTime();
 			const newAUDExchangeRate = toUnit('1');
-			await exchangeRates.updateRates([pAUD], [newAUDExchangeRate], timestamp2, { from: oracle });
+			await updateAggregatorRates(exchangeRates, null, [pAUD], [newAUDExchangeRate]);
 			await debtCache.takeDebtSnapshot();
 
 			const transferable2 = await basePeriFinance.transferablePeriFinance(account1);

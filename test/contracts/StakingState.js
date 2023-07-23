@@ -1,6 +1,6 @@
 'use strict';
 
-const { artifacts, contract } = require('hardhat');
+const { web3, artifacts, contract } = require('hardhat');
 const { assert } = require('./common');
 
 const StakingState = artifacts.require('StakingState');
@@ -10,7 +10,7 @@ const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
-const { currentTime, toUnit, fastForward } = require('../utils')();
+const { toUnit } = require('../utils')();
 
 const [USDC, DAI, KRW] = [toBytes32('USDC'), toBytes32('DAI'), toBytes32('KRW')];
 
@@ -178,30 +178,30 @@ contract('StakingState', accounts => {
 
 		describe('stake', async () => {
 			it('should stake', async () => {
-				const staker_1 = accounts[5];
-				const stakingAmount_1 = toUnit('100');
+				const staker1 = accounts[5];
+				const stakingAmount1 = toUnit('100');
 
-				await stakingState.stake(USDC, staker_1, stakingAmount_1, { from: Issuer });
+				await stakingState.stake(USDC, staker1, stakingAmount1, { from: Issuer });
 
-				const stakedAmount_1 = await stakingState.stakedAmountOf(USDC, staker_1);
+				const stakedAmount1 = await stakingState.stakedAmountOf(USDC, staker1);
 				const totalStakedAmount = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_1, stakingAmount_1);
-				assert.bnEqual(totalStakedAmount, stakingAmount_1);
+				assert.bnEqual(stakedAmount1, stakingAmount1);
+				assert.bnEqual(totalStakedAmount, stakingAmount1);
 				assert.bnEqual(totalStakerCount, web3.utils.toBN('1'));
 
-				const staker_2 = accounts[6];
-				const stakingAmount_2 = toUnit('10');
+				const staker2 = accounts[6];
+				const stakingAmount2 = toUnit('10');
 
-				await stakingState.stake(USDC, staker_2, stakingAmount_2, { from: Issuer });
+				await stakingState.stake(USDC, staker2, stakingAmount2, { from: Issuer });
 
-				const stakedAmount_2 = await stakingState.stakedAmountOf(USDC, staker_2);
+				const stakedAmount2 = await stakingState.stakedAmountOf(USDC, staker2);
 				const totalStakedAmount2 = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount2 = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_2, stakingAmount_2);
-				assert.bnEqual(totalStakedAmount2, stakingAmount_1.add(stakingAmount_2));
+				assert.bnEqual(stakedAmount2, stakingAmount2);
+				assert.bnEqual(totalStakedAmount2, stakingAmount1.add(stakingAmount2));
 				assert.bnEqual(totalStakerCount2, web3.utils.toBN('2'));
 			});
 
@@ -227,101 +227,98 @@ contract('StakingState', accounts => {
 			});
 
 			it('should stake multiple tokens', async () => {
-				const staker_1 = accounts[5];
-				const stakingAmount_1 = toUnit('100');
+				const staker1 = accounts[5];
+				const stakingAmount1 = toUnit('100');
 
-				await stakingState.stake(USDC, staker_1, stakingAmount_1, { from: Issuer });
+				await stakingState.stake(USDC, staker1, stakingAmount1, { from: Issuer });
 
-				const stakedAmount_1 = await stakingState.stakedAmountOf(USDC, staker_1);
+				const stakedAmount1 = await stakingState.stakedAmountOf(USDC, staker1);
 				const totalStakedAmount = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_1, stakingAmount_1);
-				assert.bnEqual(totalStakedAmount, stakingAmount_1);
+				assert.bnEqual(stakedAmount1, stakingAmount1);
+				assert.bnEqual(totalStakedAmount, stakingAmount1);
 				assert.bnEqual(totalStakerCount, web3.utils.toBN('1'));
 
-				const staker_2 = accounts[6];
-				const stakingAmount_2 = toUnit('10');
+				const staker2 = accounts[6];
+				const stakingAmount2 = toUnit('10');
 
-				await stakingState.stake(USDC, staker_2, stakingAmount_2, { from: Issuer });
+				await stakingState.stake(USDC, staker2, stakingAmount2, { from: Issuer });
 
-				const stakedAmount_2 = await stakingState.stakedAmountOf(USDC, staker_2);
+				const stakedAmount2 = await stakingState.stakedAmountOf(USDC, staker2);
 				const totalStakedAmount2 = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount2 = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_2, stakingAmount_2);
-				assert.bnEqual(totalStakedAmount2, stakingAmount_1.add(stakingAmount_2));
+				assert.bnEqual(stakedAmount2, stakingAmount2);
+				assert.bnEqual(totalStakedAmount2, stakingAmount1.add(stakingAmount2));
 				assert.bnEqual(totalStakerCount2, web3.utils.toBN('2'));
 
-				const stakingAmount_3 = toUnit('1');
+				const stakingAmount3 = toUnit('1');
 
-				await stakingState.stake(DAI, staker_2, stakingAmount_3, { from: Issuer });
+				await stakingState.stake(DAI, staker2, stakingAmount3, { from: Issuer });
 
-				const stakedAmount_3 = await stakingState.stakedAmountOf(DAI, staker_2);
+				const stakedAmount3 = await stakingState.stakedAmountOf(DAI, staker2);
 				const totalStakedAmount3 = await stakingState.totalStakedAmount(DAI);
 				const totalStakerCount3 = await stakingState.totalStakerCount(DAI);
 
-				assert.bnEqual(stakedAmount_3, stakingAmount_3);
-				assert.bnEqual(totalStakedAmount3, stakingAmount_3);
+				assert.bnEqual(stakedAmount3, stakingAmount3);
+				assert.bnEqual(totalStakedAmount3, stakingAmount3);
 				assert.bnEqual(totalStakerCount3, web3.utils.toBN('1'));
 			});
 		});
 
 		describe('unstake', async () => {
-			let staker_1, staker_2, stakingAmount_1, stakingAmount_2;
+			let staker1, staker2, stakingAmount1, stakingAmount2;
 
 			beforeEach(async () => {
-				staker_1 = accounts[5];
-				staker_2 = accounts[6];
-				stakingAmount_1 = toUnit('100');
-				stakingAmount_2 = toUnit('10');
+				staker1 = accounts[5];
+				staker2 = accounts[6];
+				stakingAmount1 = toUnit('100');
+				stakingAmount2 = toUnit('10');
 
 				await Promise.all([
-					stakingState.stake(USDC, staker_1, stakingAmount_1, { from: Issuer }),
-					stakingState.stake(USDC, staker_2, stakingAmount_2, { from: Issuer }),
+					stakingState.stake(USDC, staker1, stakingAmount1, { from: Issuer }),
+					stakingState.stake(USDC, staker2, stakingAmount2, { from: Issuer }),
 				]);
 			});
 
 			it('should unstake', async () => {
-				const unstakingAmount_1 = toUnit('3');
-				const unstakingAmount_2 = toUnit('10');
+				const unstakingAmount1 = toUnit('3');
+				const unstakingAmount2 = toUnit('10');
 
-				await stakingState.unstake(USDC, staker_1, unstakingAmount_1, { from: Issuer });
+				await stakingState.unstake(USDC, staker1, unstakingAmount1, { from: Issuer });
 
-				const stakedAmount_1 = await stakingState.stakedAmountOf(USDC, staker_1);
+				const stakedAmount1 = await stakingState.stakedAmountOf(USDC, staker1);
 				const totalStakedAmount = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_1, stakingAmount_1.sub(unstakingAmount_1));
-				assert.bnEqual(
-					totalStakedAmount,
-					stakingAmount_1.add(stakingAmount_2).sub(unstakingAmount_1)
-				);
+				assert.bnEqual(stakedAmount1, stakingAmount1.sub(unstakingAmount1));
+				assert.bnEqual(totalStakedAmount, stakingAmount1.add(stakingAmount2).sub(unstakingAmount1));
 				assert.bnEqual(totalStakerCount, web3.utils.toBN('2'));
 
-				await stakingState.unstake(USDC, staker_2, unstakingAmount_2, { from: Issuer });
+				await stakingState.unstake(USDC, staker2, unstakingAmount2, { from: Issuer });
 
-				const stakedAmount_2 = await stakingState.stakedAmountOf(USDC, staker_2);
+				const stakedAmount2 = await stakingState.stakedAmountOf(USDC, staker2);
 				const totalStakedAmount2 = await stakingState.totalStakedAmount(USDC);
 				const totalStakerCount2 = await stakingState.totalStakerCount(USDC);
 
-				assert.bnEqual(stakedAmount_2, web3.utils.toBN('0'));
-				assert.bnEqual(totalStakedAmount2, totalStakedAmount.sub(unstakingAmount_2));
+				assert.bnEqual(stakedAmount2, web3.utils.toBN('0'));
+				assert.bnEqual(totalStakedAmount2, totalStakedAmount.sub(unstakingAmount2));
 				assert.bnEqual(totalStakerCount2, web3.utils.toBN('1'));
 			});
 
 			it('should NOT unstake', async () => {
 				// not associated contract
-				const unstakingAmount_2 = toUnit('11');
+				const unstakingAmount2 = toUnit('11');
 
 				await assert.revert(
-					stakingState.unstake(USDC, staker_2, 1, { from: owner }),
+					stakingState.unstake(USDC, staker2, 1, { from: owner }),
 					'Only the associated contract can perform this action'
 				);
 
 				// not enough staked amount
 				await assert.revert(
-					stakingState.unstake(USDC, staker_2, unstakingAmount_2, { from: Issuer }),
+					stakingState.unstake(USDC, staker2, unstakingAmount2, { from: Issuer }),
 					"Account doesn't have enough staked amount"
 				);
 			});
@@ -340,37 +337,34 @@ contract('StakingState', accounts => {
 
 			it('should refund', async () => {
 				const recipient = accounts[5];
-				const refundAmount_usdc = toUnit('5');
-				const refundAmount_dai = toUnit('3');
+				const refundAmountUSDC = toUnit('5');
+				const refundAmountDAI = toUnit('3');
 
-				const balance_usdc_recipient_before = await usdc.balanceOf(recipient);
-				const balance_usdc_stakingState_before = await usdc.balanceOf(stakingState.address);
-				const balance_dai_recipient_before = await dai.balanceOf(recipient);
-				const balance_dai_stakingState_before = await dai.balanceOf(stakingState.address);
+				const balanceUSDCRecipientBefore = await usdc.balanceOf(recipient);
+				const balanceUSDCStakingStateBefore = await usdc.balanceOf(stakingState.address);
+				const balanceDAIRecipientBefore = await dai.balanceOf(recipient);
+				const balanceDAIStakingStateBefore = await dai.balanceOf(stakingState.address);
 
-				await stakingState.refund(USDC, recipient, refundAmount_usdc, { from: Issuer });
-				await stakingState.refund(DAI, recipient, refundAmount_dai, { from: Issuer });
+				await stakingState.refund(USDC, recipient, refundAmountUSDC, { from: Issuer });
+				await stakingState.refund(DAI, recipient, refundAmountDAI, { from: Issuer });
 
-				const balance_usdc_recipient_after = await usdc.balanceOf(recipient);
-				const balance_usdc_stakingState_after = await usdc.balanceOf(stakingState.address);
-				const balance_dai_recipient_after = await dai.balanceOf(recipient);
-				const balance_dai_stakingState_after = await dai.balanceOf(stakingState.address);
+				const balanceUSDCRecipientAfter = await usdc.balanceOf(recipient);
+				const balanceUSDCStakingStateAfter = await usdc.balanceOf(stakingState.address);
+				const balanceDAIRecipientAfter = await dai.balanceOf(recipient);
+				const balanceDAIStakingStateAfter = await dai.balanceOf(stakingState.address);
 
 				assert.bnEqual(
-					balance_usdc_recipient_before.add(refundAmount_usdc.div(web3.utils.toBN(10 ** 12))),
-					balance_usdc_recipient_after
+					balanceUSDCRecipientBefore.add(refundAmountUSDC.div(web3.utils.toBN(10 ** 12))),
+					balanceUSDCRecipientAfter
 				);
 				assert.bnEqual(
-					balance_usdc_stakingState_before.sub(refundAmount_usdc.div(web3.utils.toBN(10 ** 12))),
-					balance_usdc_stakingState_after
+					balanceUSDCStakingStateBefore.sub(refundAmountUSDC.div(web3.utils.toBN(10 ** 12))),
+					balanceUSDCStakingStateAfter
 				);
+				assert.bnEqual(balanceDAIRecipientBefore.add(refundAmountDAI), balanceDAIRecipientAfter);
 				assert.bnEqual(
-					balance_dai_recipient_before.add(refundAmount_dai),
-					balance_dai_recipient_after
-				);
-				assert.bnEqual(
-					balance_dai_stakingState_before.sub(refundAmount_dai),
-					balance_dai_stakingState_after
+					balanceDAIStakingStateBefore.sub(refundAmountDAI),
+					balanceDAIStakingStateAfter
 				);
 			});
 

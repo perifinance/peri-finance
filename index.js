@@ -188,8 +188,13 @@ const defaults = {
 	FEE_PERIOD_DURATION: (60 * 60 * 24 * 7).toString(), // 1 week
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (60 * 60 * 24 * 1).toString(), // 1 days
-	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
+	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666').toString(), // 150% cratio
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
+	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
+	PERI_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for PERI Liquidations)
+	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
+	FLAG_REWARD: w3utils.toWei('10'), // 10 PERI
+	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 PERI
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
 		forex: w3utils.toWei('0.003'),
@@ -218,7 +223,7 @@ const defaults = {
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
-		// local : '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D', <-- fork
+		local: '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D',
 	},
 	USDC_ERC20_ADDRESSES: {
 		mainnet: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -233,7 +238,7 @@ const defaults = {
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
-		// local : '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', <-- fork
+		local: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
 	},
 	DAI_ERC20_ADDRESSES: {
 		mainnet: '0x6b175474e89094c44da98b954eedeac495271d0f',
@@ -248,7 +253,7 @@ const defaults = {
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
-		// local : '0x6b175474e89094c44da98b954eedeac495271d0f', <-- fork
+		local: '0x6b175474e89094c44da98b954eedeac495271d0f',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -322,6 +327,7 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
+		local: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
 		mainnet: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],

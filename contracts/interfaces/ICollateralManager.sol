@@ -63,15 +63,11 @@ interface ICollateralManager {
 
     function removePynths(bytes32[] calldata pynths, bytes32[] calldata pynthKeys) external;
 
-    function addShortablePynths(bytes32[2][] calldata requiredPynthAndInverseNamesInResolver, bytes32[] calldata pynthKeys)
-        external;
+    function addShortablePynths(bytes32[] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys) external;
 
     function removeShortablePynths(bytes32[] calldata pynths) external;
 
     // State mutative
-    function updateBorrowRates(uint rate) external;
-
-    function updateShortRates(bytes32 currency, uint rate) external;
 
     function incrementLongs(bytes32 pynth, uint amount) external;
 
@@ -80,4 +76,14 @@ interface ICollateralManager {
     function incrementShorts(bytes32 pynth, uint amount) external;
 
     function decrementShorts(bytes32 pynth, uint amount) external;
+
+    function accrueInterest(
+        uint interestIndex,
+        bytes32 currency,
+        bool isShort
+    ) external returns (uint difference, uint index);
+
+    function updateBorrowRatesCollateral(uint rate) external;
+
+    function updateShortRatesCollateral(bytes32 currency, uint rate) external;
 }

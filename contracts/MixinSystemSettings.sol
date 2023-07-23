@@ -16,7 +16,12 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_TARGET_THRESHOLD = "targetThreshold";
     bytes32 internal constant SETTING_LIQUIDATION_DELAY = "liquidationDelay";
     bytes32 internal constant SETTING_LIQUIDATION_RATIO = "liquidationRatio";
+    bytes32 internal constant SETTING_LIQUIDATION_ESCROW_DURATION = "liquidationEscrowDuration";
     bytes32 internal constant SETTING_LIQUIDATION_PENALTY = "liquidationPenalty";
+    bytes32 internal constant SETTING_PERI_LIQUIDATION_PENALTY = "periLiquidationPenalty";
+    bytes32 internal constant SETTING_SELF_LIQUIDATION_PENALTY = "selfLiquidationPenalty";
+    bytes32 internal constant SETTING_FLAG_REWARD = "flagReward";
+    bytes32 internal constant SETTING_LIQUIDATE_REWARD = "liquidateReward";
     bytes32 internal constant SETTING_RATE_STALE_PERIOD = "rateStalePeriod";
     bytes32 internal constant SETTING_EXCHANGE_FEE_RATE = "exchangeFeeRate";
     bytes32 internal constant SETTING_MINIMUM_STAKE_TIME = "minimumStakeTime";
@@ -30,7 +35,7 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_EXTERNAL_TOKEN_QUOTA = "externalTokenQuota";
     bytes32 internal constant SETTING_BRIDGE_TRANSFER_GAS_COST = "bridgeTransferGasCost";
     bytes32 internal constant SETTING_BRIDGE_CLAIM_GAS_COST = "bridgeClaimGasCost";
-
+    bytes32 internal constant SETTING_INTERACTION_DELAY = "interactionDelay";
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
     enum CrossDomainMessageGasLimits {Deposit, Escrow, Reward, Withdrawal}
@@ -99,8 +104,28 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_RATIO);
     }
 
+    function getLiquidationEscrowDuration() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_ESCROW_DURATION);
+    }
+
     function getLiquidationPenalty() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_PENALTY);
+    }
+
+    function getPeriLiquidationPenalty() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_PERI_LIQUIDATION_PENALTY);
+    }
+
+    function getSelfLiquidationPenalty() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_SELF_LIQUIDATION_PENALTY);
+    }
+
+    function getFlagReward() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_FLAG_REWARD);
+    }
+
+    function getLiquidateReward() internal view returns (uint) {
+        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATE_REWARD);
     }
 
     function getRateStalePeriod() internal view returns (uint) {
@@ -137,5 +162,13 @@ contract MixinSystemSettings is MixinResolver {
 
     function getBridgeClaimGasCost() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_BRIDGE_CLAIM_GAS_COST);
+    }
+
+    function getInteractionDelay(address collateral) internal view returns (uint) {
+        return
+            flexibleStorage().getUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_INTERACTION_DELAY, collateral))
+            );
     }
 }

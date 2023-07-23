@@ -5,7 +5,6 @@ const { contract, web3 } = require('hardhat');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const {
-	currentTime,
 	fastForward,
 	getEthBalance,
 	toUnit,
@@ -16,6 +15,8 @@ const {
 const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	setStatus,
 } = require('./helpers');
 
@@ -76,19 +77,17 @@ contract('Depot', async accounts => {
 				'ExternalTokenStakeManager',
 			],
 		}));
+
+		await setupPriceAggregators(exchangeRates, owner, [ETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		const timestamp = await currentTime();
-
 		periRate = toUnit('0.1');
 		ethRate = toUnit('172');
 
-		await exchangeRates.updateRates([PERI, ETH], [periRate, ethRate], timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(exchangeRates, null, [PERI, ETH], [periRate, ethRate]);
 	});
 
 	it('should set constructor params on deployment', async () => {
@@ -775,10 +774,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, ETH], ['0.1', '134'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
 						depot.exchangeEtherForPynthsAtRate(ethRate, payload),
 						'Guaranteed rate would not be received'
@@ -827,10 +823,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, ETH], ['0.1', '134'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI, ETH], ['0.1', '134'].map(toUnit));
 					await assert.revert(
 						depot.exchangeEtherForPERIAtRate(ethRate, periRate, ethToSendFromPurchaser),
 						'Guaranteed ether rate would not be received'
@@ -891,10 +884,7 @@ contract('Depot', async accounts => {
 					);
 				});
 				it('when the purchaser supplies a rate and the rate is changed in by the oracle', async () => {
-					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI], ['0.05'].map(toUnit), timestamp, {
-						from: oracle,
-					});
+					await updateAggregatorRates(exchangeRates, null, [PERI], ['0.05'].map(toUnit));
 					await assert.revert(
 						depot.exchangePynthsForPERIAtRate(pynthsToSend, periRate, fromPurchaser),
 						'Guaranteed rate would not be received'

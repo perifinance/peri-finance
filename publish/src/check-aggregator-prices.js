@@ -53,6 +53,8 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 				}
 			}
 
+			console.log(gray(`- ${currencyKey} aggregator feed: ${feed}`));
+
 			const liveAggregator = new web3.eth.Contract(abi, feed);
 
 			const [
@@ -67,6 +69,8 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 
 			let answer = (aggAnswerRaw / 1e8).toString();
 
+			console.log(gray(`- ${currencyKey} aggregator answer: ${answer}`));
+
 			// do a quick calculation of he inverted number
 			if (inverted) {
 				answer = 2 * inverted.entryPoint - answer;
@@ -75,6 +79,8 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 			}
 
 			const existing = web3.utils.fromWei(exRatesAnswerRaw);
+
+			console.log(gray(`- ${currencyKey} exrates answer: ${existing}`));
 
 			if (answer === existing) {
 				output.push(

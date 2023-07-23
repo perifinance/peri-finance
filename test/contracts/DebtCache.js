@@ -14,6 +14,8 @@ const {
 	decodedEventEqual,
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
 	setStatus,
 } = require('./helpers');
 
@@ -28,7 +30,7 @@ contract('DebtCache', async accounts => {
 	);
 	const pynthKeys = [pUSD, pEUR, USDC, pBTC, pETH];
 
-	const [, owner, oracle, account1, account2] = accounts;
+	const [, owner, , account1, account2] = accounts;
 
 	let periFinance,
 		systemStatus,
@@ -39,7 +41,6 @@ contract('DebtCache', async accounts => {
 		pEURContract,
 		pBTCContract,
 		pETHContract,
-		timestamp,
 		debtCache,
 		issuer,
 		pynths,
@@ -89,21 +90,21 @@ contract('DebtCache', async accounts => {
 				'CrossChainManager',
 			],
 		}));
+		await setupPriceAggregators(exchangeRates, owner, [pEUR, USDC, pBTC, pETH]);
 	});
+
+	const updateRates = async (_keys, _rates, _snapshot) => {
+		await updateAggregatorRates(exchangeRates, null, _keys, _rates.map(toUnit));
+
+		if (_snapshot) {
+			return debtCache.takeDebtSnapshot();
+		}
+	};
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-
-		await exchangeRates.updateRates(
-			[PERI, USDC, pBTC, pETH],
-			['4', '0.98', '20000', '1200'].map(toUnit),
-			timestamp,
-			{
-				from: oracle,
-			}
-		);
+		await updateRates([PERI, USDC, pBTC, pETH], ['4', '0.98', '20000', '1200'], false);
 
 		// set a 0.3% default exchange fee rate
 		const exchangeFeeRate = toUnit('0.003');
@@ -187,13 +188,11 @@ contract('DebtCache', async accounts => {
 			// set default issuance ratio of 0.2
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 			// set up initial prices
-			await exchangeRates.updateRates(
+			await updateRates(
 				[PERI, pEUR, USDC, pBTC, pETH],
-				['4', '1.1', '0.98', '20000', '1200'].map(toUnit),
-				await currentTime(),
-				{ from: oracle }
+				['4', '1.1', '0.98', '20000', '1200'],
+				true
 			);
-			await debtCache.takeDebtSnapshot();
 
 			// Issue 1000 pUSD worth of tokens to a user
 			await pUSDContract.issue(account1, toUnit(100)); // arbitrary issued pynth doesnt calculate exchange rates
@@ -241,16 +240,8 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(result[0], toUnit(210));
 				assert.isFalse(result[1]);
 
-				await exchangeRates.updateRates(
-					[pEUR, pBTC, pETH],
-					['1.2', '20001', '1203'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pEUR, pBTC, pETH], ['1.2', '20001', '1203'], true);
 
-				await debtCache.takeDebtSnapshot();
 				assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(220));
 				result = await debtCache.currentDebt();
 				assert.bnEqual(result[0], toUnit(220));
@@ -271,15 +262,7 @@ contract('DebtCache', async accounts => {
 			});
 
 			it('updates the cached values for all individual pynths', async () => {
-				await exchangeRates.updateRates(
-					[pEUR, USDC],
-					['1.3', '0.89'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
-				await debtCache.takeDebtSnapshot();
+				await updateRates([pEUR, USDC], ['1.3', '0.89'], true);
 				let debts = await debtCache.currentPynthDebts([pUSD, pEUR]);
 				assert.bnEqual(debts[0][0], toUnit(100));
 
@@ -299,13 +282,11 @@ contract('DebtCache', async accounts => {
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 
 				// Revalidate the cache once rates are no longer stale
-				await exchangeRates.updateRates(
+				const tx2 = await updateRates(
 					[PERI, USDC, pEUR, pBTC, pETH],
-					['4', '0.99', '1.4', '20002', '1201'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
+					['4', '0.99', '1.4', '20002', '1201'],
+					true
 				);
-				const tx2 = await debtCache.takeDebtSnapshot();
 				assert.isFalse((await debtCache.cacheInfo()).isInvalid);
 
 				assert.eventEqual(tx1.logs[2], 'DebtCacheValidityChanged', [true]);
@@ -320,12 +301,7 @@ contract('DebtCache', async accounts => {
 				const rateStaleTime = await systemSettings.rateStalePeriod();
 
 				// ensure no actual rates are stale.
-				await exchangeRates.updateRates(
-					[PERI, USDC],
-					['4', '0.98'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
-				);
+				await updateRates([PERI, USDC], ['4', '0.98'].map(toUnit), false);
 
 				await fastForward(snapshotStaleTime + 10);
 
@@ -396,11 +372,10 @@ contract('DebtCache', async accounts => {
 				const snapshotStaleTime = await systemSettings.debtSnapshotStaleTime();
 				await fastForward(snapshotStaleTime + 10);
 				// ensure no actual rates are stale.
-				/* await exchangeRates.updateRates(
+				/* await updateRates(
 					[PERI, USDC],
 					['0.5', '0.5'].map(toUnit),
-					await currentTime(),
-					{ from: oracle }
+					false
 				); */
 
 				await assert.revert(
@@ -439,14 +414,7 @@ contract('DebtCache', async accounts => {
 			it('allows resynchronisation of subsets of pynths', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
-					[pEUR, pBTC, pETH],
-					['1.4', '20000', '1205'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pEUR, pBTC, pETH], ['1.4', '20000', '1205'], false);
 
 				// First try a single currency, ensuring that the others have not been altered.
 				const expectedDebts = await debtCache.currentPynthDebts([pUSD, pEUR]);
@@ -484,14 +452,7 @@ contract('DebtCache', async accounts => {
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 
 				// But even if we update all rates, we can't revalidate the cache using the partial update function
-				await exchangeRates.updateRates(
-					[pBTC, pETH],
-					['20000', '1205'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pBTC, pETH], ['20000', '1205'], false);
 				const tx2 = await debtCache.updateCachedPynthDebts([pBTC]);
 				assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 				assert.eventEqual(tx1.logs[0], 'DebtCacheValidityChanged', [true]);
@@ -501,14 +462,7 @@ contract('DebtCache', async accounts => {
 			it('properly emits events', async () => {
 				await debtCache.takeDebtSnapshot();
 
-				await exchangeRates.updateRates(
-					[pEUR, pETH],
-					['1.2210', '1204'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pEUR, pETH], ['1.2210', '1204'], false);
 
 				const tx = await debtCache.updateCachedPynthDebts([pEUR, pETH]);
 				assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(222.1)]);
@@ -537,14 +491,7 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 				await periFinance.transfer(account1, toUnit('1000000'), { from: owner });
 
-				await exchangeRates.updateRates(
-					[PERI, pBTC, pETH],
-					['4', '20000', '1200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([PERI, pBTC, pETH], ['4', '20000', '1200'], false);
 			});
 			it('issuing pUSD updates the debt total', async () => {
 				const issued = (await debtCache.cacheInfo())[0];
@@ -652,28 +599,13 @@ contract('DebtCache', async accounts => {
 				await pBTCContract.issue(account1, toUnit(20));
 				await debtCache.takeDebtSnapshot();
 				const issued = (await debtCache.cacheInfo())[0];
-				await exchangeRates.updateRates(
-					[pBTC, pETH],
-					['19920', '1200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pBTC, pETH], ['19920', '1200'], false);
 
 				await periFinance.exchange(pBTC, toUnit(10), pETH, { from: account1 });
 				const debts = await debtCache.cachedPynthDebts([pBTC, pETH]);
 
-				await exchangeRates.updateRates(
-					[pBTC, pETH],
-					['21600', '1150'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pBTC, pETH], ['21600', '1150'], true);
 
-				await debtCache.takeDebtSnapshot();
 				const postDebts = await debtCache.cachedPynthDebts([pBTC, pETH]);
 
 				// pBTC: (1680 * 10) - 1600 = 15200, pETH: -50 * (19920*10/1200) = -8300
@@ -699,14 +631,7 @@ contract('DebtCache', async accounts => {
 
 				const debts = await debtCache.cachedPynthDebts([pBTC, pETH]);
 
-				await exchangeRates.updateRates(
-					[pBTC, pETH],
-					['20002', '1200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
-				);
+				await updateRates([pBTC, pETH], ['20002', '1200'], false);
 
 				const tx = await exchanger.settle(account1, pBTC);
 				const logs = await getDecodedLogs({

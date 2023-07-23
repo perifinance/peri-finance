@@ -13,6 +13,8 @@ const {
 	// constants: { ZERO_ADDRESS },
 } = require('../..');
 
+const { setupPriceAggregators, updateAggregatorRates } = require('./helpers');
+
 const {
 	currentTime,
 	toUnit,
@@ -26,12 +28,13 @@ const {
 
 const toBN = _val => web3.utils.toBN(String(_val));
 
-const [pUSD, PERI, USDC, DAI, KRW] = [
+const [pUSD, PERI, USDC, DAI, KRW, AUD] = [
 	toBytes32('pUSD'),
 	toBytes32('PERI'),
 	toBytes32('USDC'),
 	toBytes32('DAI'),
 	toBytes32('KRW'),
+	toBytes32('AUD'),
 ];
 
 const tokenInfos = {
@@ -137,14 +140,18 @@ contract('External token staking integrating test', async accounts => {
 		// 	)
 		// );
 		await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
+
+		await setupPriceAggregators(exchangeRates, owner, [USDC, DAI, KRW, AUD]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	const updateRates = async (_keys, _rates) => {
-		const timestamp = await currentTime();
+		// const timestamp = await currentTime();
 
-		await exchangeRates.updateRates(_keys, _rates.map(toUnit), timestamp, { from: oracle });
+		// await exchangeRates.updateRates(_keys, _rates.map(toUnit), timestamp, { from: oracle });
+
+		await updateAggregatorRates(exchangeRates, null, _keys, _rates.map(toUnit));
 
 		await debtCache.takeDebtSnapshot();
 	};
