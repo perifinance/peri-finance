@@ -16,7 +16,6 @@ const {
 const { setupPriceAggregators, updateAggregatorRates } = require('./helpers');
 
 const {
-	currentTime,
 	toUnit,
 	// fromUnit,
 	fastForward,
@@ -46,7 +45,7 @@ const tokenInfos = {
 const keys = ['USDC', 'DAI', 'KRW'];
 
 contract('External token staking integrating test', async accounts => {
-	const [deployerAccount, owner, oracle] = accounts;
+	const [deployerAccount, owner] = accounts;
 	const users = new Array(7).fill(null).map((_el, idx) => accounts[idx + 3]);
 
 	let periFinance,

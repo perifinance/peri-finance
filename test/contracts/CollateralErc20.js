@@ -8,7 +8,7 @@ const BN = require('bn.js');
 
 const PublicEST8Decimals = artifacts.require('PublicEST8Decimals');
 
-const { fastForward, toUnit, currentTime } = require('../utils')();
+const { fastForward, toUnit } = require('../utils')();
 
 const { setupAllContracts, setupContract } = require('./setup');
 

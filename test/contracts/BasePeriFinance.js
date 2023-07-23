@@ -10,7 +10,7 @@ require('./common'); // import common test scaffolding
 
 const { setupContract, setupAllContracts } = require('./setup');
 
-const { currentTime, fastForward, toUnit } = require('../utils')();
+const { fastForward, toUnit } = require('../utils')();
 
 const {
 	ensureOnlyExpectedMutativeFunctions,
@@ -787,7 +787,7 @@ contract('BasePeriFinance', async accounts => {
 				it.skip('should not allow transfer if the exchange rate for any pynth is stale', async () => {
 					await ensureTransferReverts();
 
-					const timestamp = await currentTime();
+					// const timestamp = await currentTime();
 
 					// now give PERI rate
 					await updateAggregatorRates(exchangeRates, null, [PERI], [1].map(toUnit));

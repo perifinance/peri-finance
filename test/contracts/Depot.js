@@ -29,7 +29,7 @@ const { toBytes32 } = require('../..');
 contract('Depot', async accounts => {
 	let periFinance, pynth, depot, addressResolver, systemStatus, exchangeRates, ethRate, periRate;
 
-	const [, owner, oracle, fundsWallet, address1, address2, address3] = accounts;
+	const [, owner, , fundsWallet, address1, address2, address3] = accounts;
 
 	const [PERI, ETH] = ['PERI', 'ETH'].map(toBytes32);
 
