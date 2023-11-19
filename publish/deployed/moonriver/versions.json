@@ -3183,17 +3183,17 @@
 		"contracts": {
 			"TokenStatepLUNA": {
 				"address": "0x4714ca039Da99986a15862f785555a44e702D972",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xb00263af32f19bdeebe627e21a84394e5468c5867e63f4ce8aefb669cd2bbc21"
 			},
 			"ProxyERC20pLUNA": {
 				"address": "0xd449891Cf9109325DBed863CfA56F8c63de5aA25",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xd779b6db1780a4017fd7d037fa124f4048c0c142a4250ce4d67bd7493dba1365"
 			},
 			"PynthpLUNA": {
 				"address": "0x15a4aACcc973694362Db86e8B05EFa32f9fFB540",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xfd77683ce5669d8d733336d2feddcc0fc0c65cb2b8e00bd0a89aec2bad19140d"
 			},
 			"TokenStatepAVAX": {
@@ -3546,8 +3546,23 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x11436e0f546A4A13abF7D346eC0F75D57DBa1757",
+				"status": "replaced",
+				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a",
+				"replaced_in": "v0.6.14"
+			}
+		}
+	},
+	"v0.6.14": {
+		"tag": "v0.6.14",
+		"fulltag": "v0.6.14",
+		"network": "moonriver",
+		"date": "2022-08-19T11:12:04+09:00",
+		"commit": "29d7e2d59e761383cc4d7abb30938210b3c4080a",
+		"contracts": {
+			"FeePool": {
+				"address": "0x28aedc42917239b556dC366880c4e11Bbe05184e",
 				"status": "current",
-				"keccak256": "0xd921f40dc1453830dbafba0def1fc0c074c7d1ac17135fe6b4ef8cd62d85780a"
+				"keccak256": "0xc71bcc4ac36ba2202cf8fafe5485b6403608e8813478fe38af6221a00365bdb7"
 			}
 		}
 	}

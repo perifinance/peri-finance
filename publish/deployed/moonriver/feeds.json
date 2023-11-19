@@ -27,10 +27,6 @@
 		"asset": "UNI",
 		"feed": "0x05Ec3Fb5B7CB3bE9D7150FBA1Fb0749407e5Aa8a"
 	},
-	"LUNA": {
-		"asset": "LUNA",
-		"feed": "0x5F8E0c452EcA522a2208Fff7443515AaFF3cAaE6"
-	},
 	"MKR": {
 		"asset": "MKR",
 		"feed": "0xD8542f327FaD60b80D8C19025147E6b9d857bb99"

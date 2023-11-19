@@ -227,15 +227,6 @@
 	"PynthpUNI": {
 		"deploy": false
 	},
-	"TokenStatepLUNA": {
-		"deploy": false
-	},
-	"ProxyERC20pLUNA": {
-		"deploy": false
-	},
-	"PynthpLUNA": {
-		"deploy": false
-	},
 	"TokenStatepMKR": {
 		"deploy": false
 	},
