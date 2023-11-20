@@ -191,15 +191,20 @@ Using semantic versioning ([semver](https://semver.org/)): `v[MAJOR].[MINOR].[PA
 ### Examples
 
 - Say `v3.1.8` is a mainnet release
-- `v3.1.9-alpha` is a Kovan deployment of new pynths (no contract changes)
-- `v3.1.9-beta` is additionally a Rinkeby deployment of new pynths
-- `v3.1.9-rc3` is the fourth release of a release candidate with all testnets having the deployment
-- `v3.1.9` is the mainnet release with all environments
+- `v3.1.9-goerli` is a Goerli deployment of new pynths (no contract changes)
+- `v3.1.9-mumbai` is a Mumbai deployment of new pynths
+- `v3.1.9-bsctest`is a BSCtest deployment of new pynths
+- `v3.1.9-moombase`is a Moombase deployment of new pynths
+- `v3.1.9-rc` is the fourth release of a release candidate with all testnets having the deployment
+- `v3.1.9-eth` is Ethereum release with all environments
+- `v3.1.9-polygon` is Polygon release with all environments
+- `v3.1.9-bsc` is BSC release with all environments
+- `v3.1.9-moonriver` is Moonriver release with all environments
 
 ### Example
 
 ```bash
-node publish release --version 2.22.0 --branch master --release Altair
+node publish versions-update --version v0.6.14 --branch main --release peri-mumbai
 ```
 
 # When adding new pynths

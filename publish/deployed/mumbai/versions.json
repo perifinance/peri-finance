@@ -3098,7 +3098,7 @@
 				"address": "0x8b7099f65A14Fa3348b472B0ce2954b9A32137DA",
 				"status": "replaced",
 				"keccak256": "0xe577ac9c685d3be7120c7398c1f1a217d37a48c50e414b341affc4cdcd8036bc",
-				"replaced_in": "v0.6.52"
+				"replaced_in": "v0.6.7"
 			}
 		}
 	},
@@ -3113,7 +3113,7 @@
 				"address": "0xaF9C26e2d8b5403C882Fb4C9408d1c5512FCd608",
 				"status": "replaced",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
-				"replaced_in": "v0.6.52"
+				"replaced_in": "v0.6.7"
 			}
 		}
 	},
@@ -3126,14 +3126,15 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x0D69d019465551C929FbC4933207bb0ad81aa998",
-				"status": "current",
-				"keccak256": "0x5f66fa1c4889bdcc54b4286e539b63b403eed637181cedfa1de1642395e8a942"
+				"status": "replaced",
+				"keccak256": "0x5f66fa1c4889bdcc54b4286e539b63b403eed637181cedfa1de1642395e8a942",
+				"replaced_in": "v0.6.14-mumbai"
 			},
 			"CrossChainManager": {
 				"address": "0x324F1851D25210dAEbeBCC2D78AbcC37d5dfF76C",
 				"status": "replaced",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
-				"replaced_in": "v0.6.53"
+				"replaced_in": "v0.6.8"
 			}
 		}
 	},
@@ -3148,6 +3149,81 @@
 				"address": "0xd12Deeaa28bD4ED6F7BA139728B312a3A542c020",
 				"status": "current",
 				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+			}
+		}
+	},
+	"v0.6.14-mumbai": {
+		"tag": "v0.6.14-mumbai",
+		"fulltag": "v0.6.14-mumbai",
+		"release": "peri-mumbai",
+		"network": "mumbai",
+		"date": "2022-12-04T11:12:50+09:00",
+		"commit": "b714dc451b7db988e8496374c5f30e60e625c766",
+		"contracts": {
+			"FeePool": {
+				"address": "0xb20A4abe49270CCCc87D9a97598a6F85de55654e",
+				"status": "current",
+				"keccak256": "0xc71bcc4ac36ba2202cf8fafe5485b6403608e8813478fe38af6221a00365bdb7"
+			},
+			"TokenStatepBTC": {
+				"address": "0x4553FA7e3EeE48aE1EabC05cCdeB5527Fc907374",
+				"status": "current",
+				"keccak256": "0xabe39a92203ae4f0e0e4d894d45b77c88ba03cebb4dbe5b109dcd6c914133afd"
+			},
+			"ProxyERC20pBTC": {
+				"address": "0xE876b7AC1d494b5a04E8825be42Aa31766D8A163",
+				"status": "current",
+				"keccak256": "0x4ee55f23dc2908768ecec4e68cdf09573a0c1038caa3bbf2a755d08f782e4dad"
+			},
+			"PynthpBTC": {
+				"address": "0xf947FFE62739b698d2dd042C77e6c471a7fFC7bc",
+				"status": "current",
+				"keccak256": "0x835ef1db967b6441a31d7f7f50430a31ede5584efcadb476d1a6afdd6fc488fb"
+			},
+			"TokenStatepETH": {
+				"address": "0xD53CE30aeffA749b9dA522CeE94Ff95F3cf3CCA9",
+				"status": "current",
+				"keccak256": "0xabe39a92203ae4f0e0e4d894d45b77c88ba03cebb4dbe5b109dcd6c914133afd"
+			},
+			"ProxyERC20pETH": {
+				"address": "0x06D2616343589C986c91b0EA756E18A594258AB2",
+				"status": "current",
+				"keccak256": "0x4ee55f23dc2908768ecec4e68cdf09573a0c1038caa3bbf2a755d08f782e4dad"
+			},
+			"PynthpETH": {
+				"address": "0x858D7F7226E44FF52f67DBF51AE45d984d2448F4",
+				"status": "current",
+				"keccak256": "0x67d8cf2957b67b94e8cdb895f55e65678298fcbdf33ea1d1e6234736e30f7f06"
+			},
+			"TokenStatepBNB": {
+				"address": "0x0268F6451263428C7AFf1Dee7cdEC801EEA276f5",
+				"status": "current",
+				"keccak256": "0xabe39a92203ae4f0e0e4d894d45b77c88ba03cebb4dbe5b109dcd6c914133afd"
+			},
+			"ProxyERC20pBNB": {
+				"address": "0x4B84D9De63F1C855Cd56ddd263B0086B9FA0b4a6",
+				"status": "current",
+				"keccak256": "0x4ee55f23dc2908768ecec4e68cdf09573a0c1038caa3bbf2a755d08f782e4dad"
+			},
+			"PynthpBNB": {
+				"address": "0x902e2dcde05Ae5F2e6B7D75D40D80A4421678FeE",
+				"status": "current",
+				"keccak256": "0x67d8cf2957b67b94e8cdb895f55e65678298fcbdf33ea1d1e6234736e30f7f06"
+			},
+			"TokenStatepAVAX": {
+				"address": "0xc6C4fec0D4eE5EEEE7b270552e01a68B9e9B8014",
+				"status": "current",
+				"keccak256": "0xabe39a92203ae4f0e0e4d894d45b77c88ba03cebb4dbe5b109dcd6c914133afd"
+			},
+			"ProxyERC20pAVAX": {
+				"address": "0x0Da880dB7fB6Ef0F9F45d8fb618bE84109713973",
+				"status": "current",
+				"keccak256": "0x4ee55f23dc2908768ecec4e68cdf09573a0c1038caa3bbf2a755d08f782e4dad"
+			},
+			"PynthpAVAX": {
+				"address": "0x13a984Ba04327F7Cb2319eA070C80c7305892033",
+				"status": "current",
+				"keccak256": "0x67d8cf2957b67b94e8cdb895f55e65678298fcbdf33ea1d1e6234736e30f7f06"
 			}
 		}
 	}

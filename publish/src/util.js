@@ -194,6 +194,7 @@ const loadConnections = ({ network, useFork }) => {
 		debtManager: process.env.DEBT_MANAGER_PRIVATE_KEY,
 		feePeriodManager: process.env.FEE_PERIOD_MANAGER_PRIVATE_KEY,
 		minterManager: process.env.MINTER_MANAGER_PRIVATE_KEY,
+		validator: process.env.VALIDATOR_PRIVATE_KEY,
 	};
 
 	return { providerUrl, privateKey, etherscanUrl, etherscanLinkPrefix, rolePrivateKeys };
@@ -420,25 +421,24 @@ function estimateEtherGasPice(network, priority) {
 }
 
 function estimatePolygonGasPice(network, priority) {
-	const gasStationUrl = `https://gasstation-${network === 'polygon' ? 'mainnet' : network}.matic.${
-		network === 'polygon' ? 'network' : 'today'
-	}`;
+	const gasStationUrl = `https://${
+		network === 'polygon' ? 'gasstation' : 'gasstation-testnet'
+	}.polygon.technology/v2`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
 		.get(gasStationUrl)
 		.then(({ data }) => {
-			const { safeLow, standard, fast, fastest } = data;
+			const { safeLow, standard, fast } = data;
 
 			switch (priority) {
 				case 'fastest':
-					return fastest;
 				case 'fast':
-					return fast;
+					return fast.maxFee;
 				case 'standard':
-					return standard;
+					return standard.maxFee;
 				default:
-					return safeLow;
+					return safeLow.maxFee;
 			}
 		})
 		.catch(e => console.log(e));

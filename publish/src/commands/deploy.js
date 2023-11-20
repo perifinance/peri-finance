@@ -2332,7 +2332,6 @@ const deploy = async ({
 			iBNB: w3utils.toWei('0.003'),
 			pAVAX: w3utils.toWei('0.003'),
 			pUNI: w3utils.toWei('0.003'),
-			pLUNA: w3utils.toWei('0.003'),
 			pMKR: w3utils.toWei('0.003'),
 			pCAKE: w3utils.toWei('0.003'),
 			pAAVE: w3utils.toWei('0.003'),
@@ -2342,7 +2341,6 @@ const deploy = async ({
 			pCRV: w3utils.toWei('0.003'),
 			pYFI: w3utils.toWei('0.003'),
 			p1INCH: w3utils.toWei('0.003'),
-			pANKR: w3utils.toWei('0.003'),
 			pLINK: w3utils.toWei('0.003'),
 			pDOT: w3utils.toWei('0.003'),
 			pXRP: w3utils.toWei('0.003'),
@@ -2350,6 +2348,7 @@ const deploy = async ({
 			pEUR: w3utils.toWei('0.003'),
 			pSAND: w3utils.toWei('0.003'),
 			pMANA: w3utils.toWei('0.003'),
+			pSOL: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths

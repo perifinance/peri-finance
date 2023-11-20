@@ -229,7 +229,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 
 				console.log(gray(` - "${status}" response from Etherscan`));
 
-				if (status === 'Fail - Unable to verify') {
+				if (status.includes('Fail - Unable to verify')) {
 					console.log(red(` - Unable to verify ${name}.`));
 					tableData.push([name, address, 'Unable to verify']);
 

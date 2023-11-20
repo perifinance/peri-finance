@@ -38,7 +38,7 @@ const owner = async ({
 	newOwner,
 	deploymentPath,
 	gasPrice = DEFAULTS.gasPrice,
-	gasLimit = DEFAULTS.gasLimit,
+	gasLimit = 15e4,
 	privateKey,
 	yes,
 	useOvm,
@@ -87,6 +87,7 @@ const owner = async ({
 
 	const code = await web3.eth.getCode(newOwner);
 	const isContract = code !== '0x';
+	isContract && console.log(gray(`New owner is a contract: ${isContract}`));
 	if (!isContract && !yes) {
 		try {
 			await confirmAction(
@@ -110,7 +111,7 @@ const owner = async ({
 		);
 	}
 
-	console.log(gray(`Gas Price: ${gasPrice} gwei`));
+	console.log(gray(`Gas Price: ${gasPrice} gwei Limit: ${gasLimit}`));
 
 	let lastNonce;
 	let protocolDaoContract;
@@ -179,8 +180,9 @@ const owner = async ({
 			if (existingTx) continue;
 		}
 
-		await confirmOrEnd(yellow('Confirm: ') + `Stage ${bgYellow(black(key))} to (${target})`);
+		await confirmOrEnd(yellow('Confirm: ') + `Stage ${bgYellow(black(key))} to (${target})?`);
 
+		// console.log(`with ${account}, limit:${gasLimit}, gasPrice:${gasPrice}, data:${data}`);
 		try {
 			let newNonce;
 			if (isContract) {
@@ -313,7 +315,7 @@ module.exports = {
 			)
 			.option('-v, --private-key [value]', 'The private key of wallet to stage with.')
 			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
-			.option('-l, --gas-limit <value>', 'Gas limit', parseInt, DEFAULTS.gasLimit)
+			.option('-l, --gas-limit <value>', 'Gas limit', Number, 15e4)
 			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
