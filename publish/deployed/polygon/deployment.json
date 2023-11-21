@@ -527,7 +527,601 @@
 			"address": "0xD7ad896B819d354c5110cBA982466945b0A31d4A",
 			"source": "CrossChainManager",
 			"link": "https://polygonscan.com/address/0xD7ad896B819d354c5110cBA982466945b0A31d4A",
-			"timestamp": "2022-04-29T06:00:30.075Z",
+			"timestamp": "2022-04-29T06:00:29.000Z",
+			"txn": "https://polygonscan.com/tx/0xe6b413fca54489f1ea47d5fdc99e8654f4cd22fe62c83a40c84224b8952b81a7",
+			"network": "polygon"
+		},
+		"TokenStatepBTC": {
+			"name": "TokenStatepBTC",
+			"address": "0xE3F2537C139C0d058a8654c738685326B876301e",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xE3F2537C139C0d058a8654c738685326B876301e",
+			"timestamp": "2023-11-19T12:48:09.000Z",
+			"txn": "https://polygonscan.com/tx/0xec459f417f1e480c4d4a4c4f8a71f78f481e964e025f5fc4be9fa2349d07c42c",
+			"network": "polygon"
+		},
+		"ProxyERC20pBTC": {
+			"name": "ProxyERC20pBTC",
+			"address": "0x2d4Ae3BC90D6E627266Aa3d35c1bccd7ee998201",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x2d4Ae3BC90D6E627266Aa3d35c1bccd7ee998201",
+			"timestamp": "2023-11-19T12:48:15.000Z",
+			"txn": "https://polygonscan.com/tx/0xf530bd9f3b3e1733e2405809f06a79e1ec641c6d1e1da81d38b7c377e984df40",
+			"network": "polygon"
+		},
+		"PynthpBTC": {
+			"name": "PynthpBTC",
+			"address": "0x37EE2018a1dE2cB3081fa7B8E36bEA6B6afc6c4C",
+			"source": "MultiCollateralPynth",
+			"link": "https://polygonscan.com/address/0x37EE2018a1dE2cB3081fa7B8E36bEA6B6afc6c4C",
+			"timestamp": "2023-11-19T12:48:21.000Z",
+			"txn": "https://polygonscan.com/tx/0x3bc8903aa5b0f8e430725def1adec73d67b3f61becb01b4a8e72ce4bb5ab8c5e",
+			"network": "polygon"
+		},
+		"TokenStatepETH": {
+			"name": "TokenStatepETH",
+			"address": "0x59975be68E87138094365B7043A1dC64BA4129EA",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x59975be68E87138094365B7043A1dC64BA4129EA",
+			"timestamp": "2023-11-19T12:48:41.039Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pETH": {
+			"name": "ProxyERC20pETH",
+			"address": "0xb6B87d400ED27EEc3fe7D796AbC36658D775Ad85",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xb6B87d400ED27EEc3fe7D796AbC36658D775Ad85",
+			"timestamp": "2023-11-19T13:12:58.034Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpETH": {
+			"name": "PynthpETH",
+			"address": "0x5687Fa980F968684cd756D5dF0a62a634EFcAec3",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x5687Fa980F968684cd756D5dF0a62a634EFcAec3",
+			"timestamp": "2023-11-19T13:13:01.000Z",
+			"txn": "https://polygonscan.com/tx/0xf2455c70a6bfd189e13c19b16f185ec71f7d5a252cf6931b2bb42d12f784d312",
+			"network": "polygon"
+		},
+		"TokenStatepBNB": {
+			"name": "TokenStatepBNB",
+			"address": "0xF7BC6eC93BCd79c78CDFDe84bdBe1Ca31f449535",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xF7BC6eC93BCd79c78CDFDe84bdBe1Ca31f449535",
+			"timestamp": "2023-11-19T13:32:17.040Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pBNB": {
+			"name": "ProxyERC20pBNB",
+			"address": "0x5b44D511B0E6fd0182642058AD9C4F99f27B940E",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x5b44D511B0E6fd0182642058AD9C4F99f27B940E",
+			"timestamp": "2023-11-19T13:32:25.414Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpBNB": {
+			"name": "PynthpBNB",
+			"address": "0xE2c75130E10eA5A3C618eAcA2177772963B2A9cE",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xE2c75130E10eA5A3C618eAcA2177772963B2A9cE",
+			"timestamp": "2023-11-19T13:32:32.800Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepAVAX": {
+			"name": "TokenStatepAVAX",
+			"address": "0xDCff5d5fC6c968D90B52B17322E00c9791E10F63",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xDCff5d5fC6c968D90B52B17322E00c9791E10F63",
+			"timestamp": "2023-11-19T13:32:51.233Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pAVAX": {
+			"name": "ProxyERC20pAVAX",
+			"address": "0xb9740b8BD4f996D26dDABF5696453A7Cd2b67F38",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xb9740b8BD4f996D26dDABF5696453A7Cd2b67F38",
+			"timestamp": "2023-11-19T13:32:57.593Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpAVAX": {
+			"name": "PynthpAVAX",
+			"address": "0x33B3Fb81C2a9cC5903C67F4Ec8aF88f961d48F8C",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x33B3Fb81C2a9cC5903C67F4Ec8aF88f961d48F8C",
+			"timestamp": "2023-11-19T13:33:02.959Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepUNI": {
+			"name": "TokenStatepUNI",
+			"address": "0xE08f9DE0A3086d0f0E6dD9334e0fA93955F64Afa",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xE08f9DE0A3086d0f0E6dD9334e0fA93955F64Afa",
+			"timestamp": "2023-11-19T13:33:19.167Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pUNI": {
+			"name": "ProxyERC20pUNI",
+			"address": "0xf23d4A7570C1f62488712d480dd6540F134945fC",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xf23d4A7570C1f62488712d480dd6540F134945fC",
+			"timestamp": "2023-11-19T13:33:25.367Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpUNI": {
+			"name": "PynthpUNI",
+			"address": "0x1410232232FaD23ff40FB248407E45d2A4c96746",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x1410232232FaD23ff40FB248407E45d2A4c96746",
+			"timestamp": "2023-11-19T13:33:31.689Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepMKR": {
+			"name": "TokenStatepMKR",
+			"address": "0x4e125a112B4059fd896e33FB21bF8d81f0586108",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x4e125a112B4059fd896e33FB21bF8d81f0586108",
+			"timestamp": "2023-11-19T13:33:49.202Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pMKR": {
+			"name": "ProxyERC20pMKR",
+			"address": "0xb5D3064595D5BDCeB2a9f87CEAeE5Ca1986089cf",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xb5D3064595D5BDCeB2a9f87CEAeE5Ca1986089cf",
+			"timestamp": "2023-11-19T13:33:55.551Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpMKR": {
+			"name": "PynthpMKR",
+			"address": "0xB284699F47Eb3dfc93693c7E08279A65a908BC05",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xB284699F47Eb3dfc93693c7E08279A65a908BC05",
+			"timestamp": "2023-11-19T13:34:01.812Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepCAKE": {
+			"name": "TokenStatepCAKE",
+			"address": "0x517a705e2b8e09C07642b737E9963e5E22DF2da6",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x517a705e2b8e09C07642b737E9963e5E22DF2da6",
+			"timestamp": "2023-11-19T13:34:21.581Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pCAKE": {
+			"name": "ProxyERC20pCAKE",
+			"address": "0x992f395f1Da7Aa06005C0ceddb4C9fD826e4EfCF",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x992f395f1Da7Aa06005C0ceddb4C9fD826e4EfCF",
+			"timestamp": "2023-11-19T13:34:27.908Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpCAKE": {
+			"name": "PynthpCAKE",
+			"address": "0xb15C46B15bF07EaE70Af24d98D4F3Dd30a7026dc",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xb15C46B15bF07EaE70Af24d98D4F3Dd30a7026dc",
+			"timestamp": "2023-11-19T13:34:35.283Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepAAVE": {
+			"name": "TokenStatepAAVE",
+			"address": "0x027b717b277D792ac7D0A922F01f8225087Ab008",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x027b717b277D792ac7D0A922F01f8225087Ab008",
+			"timestamp": "2023-11-19T13:34:51.885Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pAAVE": {
+			"name": "ProxyERC20pAAVE",
+			"address": "0x2af8e54D17f4cb9C687252E3CdBEEeD959395be3",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x2af8e54D17f4cb9C687252E3CdBEEeD959395be3",
+			"timestamp": "2023-11-19T13:34:56.149Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpAAVE": {
+			"name": "PynthpAAVE",
+			"address": "0x0c348964066b671e7ACF4f37D886115fE475bFCd",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x0c348964066b671e7ACF4f37D886115fE475bFCd",
+			"timestamp": "2023-11-19T13:35:02.623Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepCOMP": {
+			"name": "TokenStatepCOMP",
+			"address": "0xE87515d118673aA41D54b09cb695527810673AB2",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xE87515d118673aA41D54b09cb695527810673AB2",
+			"timestamp": "2023-11-19T13:35:17.986Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pCOMP": {
+			"name": "ProxyERC20pCOMP",
+			"address": "0xC216f52B3bc6265aeD6d18b7d4d30643797051A9",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xC216f52B3bc6265aeD6d18b7d4d30643797051A9",
+			"timestamp": "2023-11-19T13:35:22.282Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpCOMP": {
+			"name": "PynthpCOMP",
+			"address": "0xb66Ac4150e9b68AaEeEC52C5d195282270f6b221",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xb66Ac4150e9b68AaEeEC52C5d195282270f6b221",
+			"timestamp": "2023-11-19T13:35:28.634Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepSUSHI": {
+			"name": "TokenStatepSUSHI",
+			"address": "0xB06db9136A12530E5fe91b9E71b0835BC24c481e",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xB06db9136A12530E5fe91b9E71b0835BC24c481e",
+			"timestamp": "2023-11-19T13:35:46.037Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pSUSHI": {
+			"name": "ProxyERC20pSUSHI",
+			"address": "0xF4eF07E9E2A2dd35B7ff0048772eA1FA97c4C6c7",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xF4eF07E9E2A2dd35B7ff0048772eA1FA97c4C6c7",
+			"timestamp": "2023-11-19T13:35:50.440Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpSUSHI": {
+			"name": "PynthpSUSHI",
+			"address": "0x08ffa9B2B821d03e5983D6a519fdb3ad286243Ca",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x08ffa9B2B821d03e5983D6a519fdb3ad286243Ca",
+			"timestamp": "2023-11-19T13:35:53.711Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepSNX": {
+			"name": "TokenStatepSNX",
+			"address": "0xd22945328a8d8ab206b110cC777e7cc4E3A82b67",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xd22945328a8d8ab206b110cC777e7cc4E3A82b67",
+			"timestamp": "2023-11-19T13:36:12.151Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pSNX": {
+			"name": "ProxyERC20pSNX",
+			"address": "0x5f533cC501a8193C161f188A115712D1aAe653da",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x5f533cC501a8193C161f188A115712D1aAe653da",
+			"timestamp": "2023-11-19T13:36:19.383Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpSNX": {
+			"name": "PynthpSNX",
+			"address": "0xD44f8bB4E3dC4dB7d9b1835872A66fa5caAbd4E8",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xD44f8bB4E3dC4dB7d9b1835872A66fa5caAbd4E8",
+			"timestamp": "2023-11-19T13:36:24.635Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepCRV": {
+			"name": "TokenStatepCRV",
+			"address": "0xc1af7E4bB98965d5622A936935261D86fDfA4468",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xc1af7E4bB98965d5622A936935261D86fDfA4468",
+			"timestamp": "2023-11-19T13:38:06.842Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pCRV": {
+			"name": "ProxyERC20pCRV",
+			"address": "0xb01b117FaE95B4848B2E63dDa06f72826C4aCE5D",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xb01b117FaE95B4848B2E63dDa06f72826C4aCE5D",
+			"timestamp": "2023-11-19T13:38:12.371Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpCRV": {
+			"name": "PynthpCRV",
+			"address": "0x48A7aB01BB8D0847bB5D2a391b84f751668b12d0",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x48A7aB01BB8D0847bB5D2a391b84f751668b12d0",
+			"timestamp": "2023-11-19T13:38:18.925Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepYFI": {
+			"name": "TokenStatepYFI",
+			"address": "0x496346b55a7b9D1c9dD0BBEb5287137eE2bd4b56",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x496346b55a7b9D1c9dD0BBEb5287137eE2bd4b56",
+			"timestamp": "2023-11-19T13:40:43.641Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pYFI": {
+			"name": "ProxyERC20pYFI",
+			"address": "0x40E617348944Cc6811A4C8C5B8C5C1a96B926FF4",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x40E617348944Cc6811A4C8C5B8C5C1a96B926FF4",
+			"timestamp": "2023-11-19T13:40:52.014Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpYFI": {
+			"name": "PynthpYFI",
+			"address": "0x6D4ED9b8D1Fe8e9F4437eDDBA6c86a1304F90f89",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x6D4ED9b8D1Fe8e9F4437eDDBA6c86a1304F90f89",
+			"timestamp": "2023-11-19T13:41:02.267Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatep1INCH": {
+			"name": "TokenStatep1INCH",
+			"address": "0x2801696745823492A9E1d3D6B6835b5216Af6D58",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x2801696745823492A9E1d3D6B6835b5216Af6D58",
+			"timestamp": "2023-11-19T13:41:16.510Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20p1INCH": {
+			"name": "ProxyERC20p1INCH",
+			"address": "0x9a70dA89b6898E1171f5a9aA5aA8D82E2814B0fe",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x9a70dA89b6898E1171f5a9aA5aA8D82E2814B0fe",
+			"timestamp": "2023-11-19T14:00:27.785Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"Pynthp1INCH": {
+			"name": "Pynthp1INCH",
+			"address": "0xCEd7a239fd128A17B709c5FAECd7614cf7D984fA",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xCEd7a239fd128A17B709c5FAECd7614cf7D984fA",
+			"timestamp": "2023-11-19T14:00:33.213Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepLINK": {
+			"name": "TokenStatepLINK",
+			"address": "0xB1fe493f97ce9205A7FA49E2c9D67d4cf80D47aB",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xB1fe493f97ce9205A7FA49E2c9D67d4cf80D47aB",
+			"timestamp": "2023-11-19T14:08:38.429Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pLINK": {
+			"name": "ProxyERC20pLINK",
+			"address": "0xC3245A0d0c2289C3879CBADC8eD45cc49800cdf3",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xC3245A0d0c2289C3879CBADC8eD45cc49800cdf3",
+			"timestamp": "2023-11-19T14:08:43.705Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpLINK": {
+			"name": "PynthpLINK",
+			"address": "0xCc0A54caFe778ed20D92e6c82f7De6813618761C",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0xCc0A54caFe778ed20D92e6c82f7De6813618761C",
+			"timestamp": "2023-11-19T14:08:50.937Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepDOT": {
+			"name": "TokenStatepDOT",
+			"address": "0xDe9324D88a171BF001D1bB073141aD9E5DaD45A7",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xDe9324D88a171BF001D1bB073141aD9E5DaD45A7",
+			"timestamp": "2023-11-19T14:09:08.232Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pDOT": {
+			"name": "ProxyERC20pDOT",
+			"address": "0x1b0A0d114c362BbB65ffeE8595fff0714176d7eC",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x1b0A0d114c362BbB65ffeE8595fff0714176d7eC",
+			"timestamp": "2023-11-19T14:09:50.619Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpDOT": {
+			"name": "PynthpDOT",
+			"address": "0x8F23846886eB7C3bAb5da516BE8696CF3eb4e15C",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x8F23846886eB7C3bAb5da516BE8696CF3eb4e15C",
+			"timestamp": "2023-11-19T14:09:55.895Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepXRP": {
+			"name": "TokenStatepXRP",
+			"address": "0xAC1EF7F56491B1Ae1bE51c45ed43a9992CeeD67f",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0xAC1EF7F56491B1Ae1bE51c45ed43a9992CeeD67f",
+			"timestamp": "2023-11-19T14:10:12.534Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pXRP": {
+			"name": "ProxyERC20pXRP",
+			"address": "0x62a700Ec1Bc2F77a48d6B0129fae868a0B355013",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x62a700Ec1Bc2F77a48d6B0129fae868a0B355013",
+			"timestamp": "2023-11-19T14:10:18.032Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpXRP": {
+			"name": "PynthpXRP",
+			"address": "0x845324B5612B756032acDFA1bD261c21408E7F82",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x845324B5612B756032acDFA1bD261c21408E7F82",
+			"timestamp": "2023-11-19T14:10:22.370Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepAXS": {
+			"name": "TokenStatepAXS",
+			"address": "0x9eC282BBf28FeE4ED44c17bced0118fE66EeB199",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x9eC282BBf28FeE4ED44c17bced0118fE66EeB199",
+			"timestamp": "2023-11-19T14:10:41.871Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pAXS": {
+			"name": "ProxyERC20pAXS",
+			"address": "0x176e6486Eb3f66F0498259e4C9f1E92A53c2B131",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x176e6486Eb3f66F0498259e4C9f1E92A53c2B131",
+			"timestamp": "2023-11-19T14:10:47.095Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpAXS": {
+			"name": "PynthpAXS",
+			"address": "0x8b860D6A747c74b0130135297d6A1B8027ad4DF9",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x8b860D6A747c74b0130135297d6A1B8027ad4DF9",
+			"timestamp": "2023-11-19T14:10:50.388Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepEUR": {
+			"name": "TokenStatepEUR",
+			"address": "0x20f30842E793ecF7C009EF58A27fc0b6baCd4e79",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x20f30842E793ecF7C009EF58A27fc0b6baCd4e79",
+			"timestamp": "2023-11-19T14:12:39.100Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pEUR": {
+			"name": "ProxyERC20pEUR",
+			"address": "0xFbA3Ff8aFe745923B9496cc4460D82EBfe34Bef6",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xFbA3Ff8aFe745923B9496cc4460D82EBfe34Bef6",
+			"timestamp": "2023-11-19T14:12:46.432Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpEUR": {
+			"name": "PynthpEUR",
+			"address": "0x20fBD0f600bFda5D0721Ddd805b08Ab358E60487",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x20fBD0f600bFda5D0721Ddd805b08Ab358E60487",
+			"timestamp": "2023-11-19T14:12:51.700Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepSAND": {
+			"name": "TokenStatepSAND",
+			"address": "0x3AFfB0f3617b6B524b103eb732462b80B763C450",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x3AFfB0f3617b6B524b103eb732462b80B763C450",
+			"timestamp": "2023-11-19T14:14:16.425Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pSAND": {
+			"name": "ProxyERC20pSAND",
+			"address": "0xaEE9A331C42C747333530BCD5bF1db8C500e72F2",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0xaEE9A331C42C747333530BCD5bF1db8C500e72F2",
+			"timestamp": "2023-11-19T14:14:20.620Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpSAND": {
+			"name": "PynthpSAND",
+			"address": "0x586C160aC62831ddD1f5e49070A20Ec9b5eEC2C5",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x586C160aC62831ddD1f5e49070A20Ec9b5eEC2C5",
+			"timestamp": "2023-11-19T14:14:28.941Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepMANA": {
+			"name": "TokenStatepMANA",
+			"address": "0x4844754b5E43b365BF262043f697b8A86B50aB1C",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x4844754b5E43b365BF262043f697b8A86B50aB1C",
+			"timestamp": "2023-11-19T14:14:46.560Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pMANA": {
+			"name": "ProxyERC20pMANA",
+			"address": "0x43883ffDb3d1835B75c4C3cdF26DE9B23a6B7C61",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x43883ffDb3d1835B75c4C3cdF26DE9B23a6B7C61",
+			"timestamp": "2023-11-19T14:14:51.708Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpMANA": {
+			"name": "PynthpMANA",
+			"address": "0x291717289CebA5F13c90841eC11f247cb43262Bf",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x291717289CebA5F13c90841eC11f247cb43262Bf",
+			"timestamp": "2023-11-19T14:14:55.971Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"TokenStatepSOL": {
+			"name": "TokenStatepSOL",
+			"address": "0x05A660e8419dB32A36831D0bA27E60220113A65a",
+			"source": "TokenState",
+			"link": "https://polygonscan.com/address/0x05A660e8419dB32A36831D0bA27E60220113A65a",
+			"timestamp": "2023-11-19T14:15:14.306Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"ProxyERC20pSOL": {
+			"name": "ProxyERC20pSOL",
+			"address": "0x2Cbf9d377b7540842A0DE09eEf4a1dd6A7577173",
+			"source": "ProxyERC20",
+			"link": "https://polygonscan.com/address/0x2Cbf9d377b7540842A0DE09eEf4a1dd6A7577173",
+			"timestamp": "2023-11-19T14:15:20.451Z",
+			"txn": "",
+			"network": "polygon"
+		},
+		"PynthpSOL": {
+			"name": "PynthpSOL",
+			"address": "0x41709Ea05a75c85eDEF88a3A346dDc49715aFd96",
+			"source": "Pynth",
+			"link": "https://polygonscan.com/address/0x41709Ea05a75c85eDEF88a3A346dDc49715aFd96",
+			"timestamp": "2023-11-19T14:15:25.653Z",
 			"txn": "",
 			"network": "polygon"
 		}
