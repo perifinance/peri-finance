@@ -236,7 +236,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
-        //(totalSystemValue, anyRateIsInvalid) = crossChainManager().getTotalNetworkAdaptedTotalSystemValue(currencyKey);
         (totalSystemValue, anyRateIsInvalid) = crossChainManager().getCurrentNetworkAdaptedActiveDebtValue(currencyKey);
 
         // If it's zero, they haven't issued, and they have no debt.
@@ -267,7 +266,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _canBurnPynths(address account) internal view returns (bool) {
-        return now >= _lastIssueEvent(account).add(getMinimumStakeTime());
+        return now >= _lastIssueEvent(account).add(getMinimumStakeTime()) || !crossChainManager().syncStale();
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {
@@ -598,7 +597,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         address pynthToRemove = address(pynths[currencyKey]);
         require(pynthToRemove != address(0), "Pynth doesn't exist");
         require(IERC20(pynthToRemove).totalSupply() == 0, "Pynth supply exists");
-        require(currencyKey != pUSD, "Cannot remove pynth");
+        // require(currencyKey != pUSD, "Cannot remove pynth");
 
         // Remove the pynth from the availablePynths array.
         for (uint i; i < availablePynths.length; i++) {
@@ -782,7 +781,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function exit(address _from) external onlyPeriFinance {
-        _voluntaryBurnPynths(_from, 0, true, true);
+        _voluntaryBurnPynths(_from, 0, false, true);
 
         exTokenStakeManager().exit(_from);
     }
@@ -920,9 +919,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint deviation = pUSDBalance < amountBurnt ? amountBurnt.sub(pUSDBalance) : pUSDBalance.sub(amountBurnt);
 
         // amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
-        if (deviation < 10) {
+        if (deviation < 100) {
             amountBurnt = pUSDBalance;
         }
+
+        require(amountBurnt <= pUSDBalance, "Trying to burn more than you have");
 
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
@@ -965,7 +966,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
 
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
-        remainingDebt = existingDebt.sub(amount);
+        remainingDebt = existingDebt.sub(amountBurnt);
 
         // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
@@ -1021,10 +1022,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Save the debt entry parameters
         state.setCurrentIssuanceData(from, debtPercentage);
 
+        // doing nothing just left for version compatibility
         crossChainManager().addCurrentNetworkIssuedDebt(amount);
 
-        // Save the total debt entry parameters
-        crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
+        // doing nothing just left for version compatibility
+        // crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
 
         // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
         // the change for the rest of the debt holders. The debt ledger holds high precision integers.
@@ -1089,7 +1091,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             state.setCurrentIssuanceData(from, 0);
             state.decrementTotalIssuerCount();
 
-            crossChainManager().clearCrossNetworkUserDebt(from);
+            // doing nothing just left for version compatibility
+            // crossChainManager().clearCrossNetworkUserDebt(from);
         } else {
             // What percentage of the debt will they be left with?
             uint newDebt = existingDebt.sub(debtToRemove);
@@ -1098,9 +1101,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Store the debt percentage and debt ledger as high precision integers
             state.setCurrentIssuanceData(from, newDebtPercentage);
 
-            crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
+            // doing nothing just left for version compatibility
+            // crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
         }
 
+        // update current network issued debt
         crossChainManager().subtractCurrentNetworkIssuedDebt(debtToRemove);
 
         // Update our cumulative ledger. This is also a high precision integer.

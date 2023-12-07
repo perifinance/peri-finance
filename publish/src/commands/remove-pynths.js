@@ -27,6 +27,15 @@ const DEFAULTS = {
 	gasPrice: '1',
 };
 
+const ProxyERC20 = {
+	mainnet: 'PeriFinanceToEthereum',
+	goerli: 'PeriFinanceToEthereum',
+	bsc: 'PeriFinanceToBSC',
+	bsctest: 'PeriFinanceToBSC',
+	polygon: 'PeriFinanceToPolygon',
+	moonriver: 'PeriFinance',
+};
+
 const removePynths = async ({
 	network = DEFAULTS.network,
 	deploymentPath,
@@ -104,8 +113,10 @@ const removePynths = async ({
 		}
 	}
 
+	console.log(gray(`Removing pynths from PeriFinance contract, ${ProxyERC20[network]}...`));
+
 	const PeriFinance = new web3.eth.Contract(
-		deployment.sources['PeriFinance'].abi,
+		deployment.sources[ProxyERC20[network]].abi,
 		deployment.targets['PeriFinance'].address
 	);
 
@@ -129,45 +140,53 @@ const removePynths = async ({
 		const currentPynthInPERI = await PeriFinance.methods.pynths(toBytes32(currencyKey)).call();
 
 		if (pynthAddress !== currentPynthInPERI) {
-			console.error(
-				red(
-					`Pynth address in PeriFinance for ${currencyKey} is different from what's deployed in PeriFinance to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
-						currentPynthInPERI
-					)}\nlocal:    ${yellow(pynthAddress)}`
-				)
-			);
-			process.exitCode = 1;
-			return;
+			try {
+				await confirmAction(
+					red(
+						`${yellow(
+							'⚠ WARNING'
+						)}: Pynth address in PeriFinance for ${currencyKey} is different from what's deployed in PeriFinance to the local ${DEPLOYMENT_FILENAME} of ${network} \ndeployed: ${yellow(
+							currentPynthInPERI
+						)}\nlocal:    ${yellow(pynthAddress)}`
+					) + '\nDo you want to continue? (y/n) '
+				);
+			} catch (err) {
+				console.log(gray('Operation cancelled'));
+				process.exitCode = 1;
+				return;
+			}
 		}
 
-		// now check total supply (is required in PeriFinance.removePynth)
-		const totalSupply = w3utils.fromWei(await Pynth.methods.totalSupply().call());
-		if (Number(totalSupply) > 0) {
-			console.error(
-				red(
-					`Cannot remove as Pynth${currencyKey}.totalSupply is non-zero: ${yellow(
-						totalSupply
-					)}\nThe Pynth must be purged of holders.`
-				)
-			);
-			process.exitCode = 1;
-			return;
-		}
+		if (pynthAddress === currentPynthInPERI) {
+			// now check total supply (is required in PeriFinance.removePynth)
+			const totalSupply = w3utils.fromWei(await Pynth.methods.totalSupply().call());
+			if (Number(totalSupply) > 0) {
+				console.error(
+					red(
+						`Cannot remove as Pynth${currencyKey}.totalSupply is non-zero: ${yellow(
+							totalSupply
+						)}\nThe Pynth must be purged of holders.`
+					)
+				);
+				process.exitCode = 1;
+				return;
+			}
 
-		// perform transaction if owner of PeriFinance or append to owner actions list
-		await performTransactionalStep({
-			account,
-			contract: 'Issuer',
-			target: Issuer,
-			write: 'removePynth',
-			writeArg: toBytes32(currencyKey),
-			gasLimit,
-			gasPrice,
-			etherscanLinkPrefix,
-			ownerActions,
-			ownerActionsFile,
-			encodeABI: network === 'mainnet',
-		});
+			// perform transaction if owner of PeriFinance or append to owner actions list
+			await performTransactionalStep({
+				account,
+				contract: 'Issuer',
+				target: Issuer,
+				write: 'removePynth',
+				writeArg: toBytes32(currencyKey),
+				gasLimit,
+				gasPrice,
+				etherscanLinkPrefix,
+				ownerActions,
+				ownerActionsFile,
+				encodeABI: network === 'mainnet',
+			});
+		}
 
 		// now update the config and deployment JSON files
 		const contracts = ['ProxyERC20', 'TokenState', 'Pynth'].map(name => `${name}${currencyKey}`);
@@ -175,9 +194,10 @@ const removePynths = async ({
 			delete updatedConfig[contract];
 			delete updatedDeployment.targets[contract];
 		}
-		fs.writeFileSync(configFile, stringify(updatedConfig));
-		fs.writeFileSync(deploymentFile, stringify(updatedDeployment));
-
+		if (contracts) {
+			fs.writeFileSync(configFile, stringify(updatedConfig));
+			fs.writeFileSync(deploymentFile, stringify(updatedDeployment));
+		}
 		// and update the pynths.json file
 		updatedPynths = updatedPynths.filter(({ name }) => name !== currencyKey);
 		fs.writeFileSync(pynthsFile, stringify(updatedPynths));

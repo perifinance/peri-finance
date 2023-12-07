@@ -19,7 +19,7 @@ const {
 const { setupAllContracts, setupContract } = require('./setup');
 
 contract('MultiCollateralPynth @gas-skip', accounts => {
-	const [deployerAccount, owner, oracle, , account1, debtManager] = accounts;
+	const [deployerAccount, owner, oracle, , , validator, account1] = accounts;
 
 	const pETH = toBytes32('pETH');
 
@@ -56,12 +56,12 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		});
 	};
 
-	const issuepUSDToAccount = async (issueAmount, receiver) => {
+	/* const issuepUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of pynths to deposit.
 		await pUSDPynth.issue(receiver, issueAmount, {
-			from: owner,
+			from: issuer.address,
 		});
-	};
+	}; */
 
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
@@ -87,7 +87,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 	});
 
 	before(async () => {
-		pynths = ['pUSD'];
+		pynths = ['pUSD', 'pETH', 'pBTC'];
 		({
 			AddressResolver: resolver,
 			Issuer: issuer,
@@ -95,6 +95,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			ExchangeRates: exchangeRates,
 			DebtCache: debtCache,
 			FeePool: feePool,
+			CollateralManager: manager,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -153,12 +154,13 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		await manager.rebuildCache();
 		await feePool.rebuildCache();
 		await debtCache.rebuildCache();
+		await pUSDPynth.rebuildCache();
 
-		await manager.addCollaterals([ceth.address], { from: owner });
+		await manager.addCollaterals([ceth.address, pUSDPynth.address], { from: owner });
 
 		await updateRatesWithDefaults();
 
-		await issuepUSDToAccount(toUnit(1000), owner);
+		// await issuepUSDToAccount(toUnit(1000), owner);
 		await debtCache.takeDebtSnapshot();
 	});
 
@@ -181,7 +183,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			toBytes32(currencyKey),
 			web3.utils.toWei('0'),
 			resolver.address,
-			debtManager,
+			validator,
 			{
 				from: deployerAccount,
 			}

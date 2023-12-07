@@ -10,7 +10,7 @@ const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
 const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
-const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
+// const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 
 const polygon = ['polygon', 'mumbai'];
 const bsc = ['bsc', 'bsctest'];
@@ -28,6 +28,7 @@ const {
 	parameterNotice,
 	reportDeployedContracts,
 	checkGasPrice,
+	sleep,
 } = require('../util');
 
 const {
@@ -53,7 +54,7 @@ const DEFAULTS = {
 	methodCallGasLimit: 250e3, // 250k
 	contractDeploymentGasLimit: 6.9e6, // TODO split out into separate limits for different contracts, Proxys, Pynths, PeriFinance
 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot
-	network: 'kovan',
+	network: 'goerli',
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 };
 
@@ -1226,9 +1227,10 @@ const deploy = async ({
 
 		// track the original supply if we're deploying a new pynth contract for an existing pynth
 		let originalTotalSupply = 0;
+		let oldPynth;
 		if (pynthConfig.deploy) {
 			try {
-				const oldPynth = deployer.getExistingContract({ contract: `Pynth${currencyKey}` });
+				oldPynth = deployer.getExistingContract({ contract: `Pynth${currencyKey}` });
 				originalTotalSupply = await oldPynth.methods.totalSupply().call();
 			} catch (err) {
 				if (!freshDeploy) {
@@ -1248,7 +1250,7 @@ const deploy = async ({
 							`Pynth${currencyKey} totalSupply is ${originalTotalSupply} \n`
 					) +
 						gray('-'.repeat(50)) +
-						'\nDo you want to continue? (y/n) '
+						'\nDo you want to replace it with the new? (y/n) '
 				);
 			} catch (err) {
 				console.log(gray('Operation cancelled'));
@@ -1398,6 +1400,9 @@ const deploy = async ({
 			pynthsToAdd.push({
 				pynth,
 				currencyKeyInBytes,
+				oldPynth,
+				sourceContract,
+				originalTotalSupply,
 			});
 		}
 
@@ -1511,7 +1516,7 @@ const deploy = async ({
 	const crossChainState = await deployer.deployContract({
 		name: 'CrossChainState',
 		source: 'CrossChainState',
-		args: [account, ZERO_ADDRESS],
+		args: [account, ZERO_ADDRESS, networkToChainId[network]],
 	});
 
 	const debtManagerAddress = (await getDeployParameter('DEBT_MANAGER_ADDRESS'))[network];
@@ -2143,15 +2148,47 @@ const deploy = async ({
 	// First filter out all those pynths which are already properly imported
 	console.log(gray('Filtering pynths to add to the issuer.'));
 	const filteredPynths = [];
+	const replacingPynths = [];
 	for (const pynth of pynthsToAdd) {
 		const issuerPynthAddress = await issuer.methods.pynths(pynth.currencyKeyInBytes).call();
 		const currentPynthAddress = addressOf(pynth.pynth);
 		if (issuerPynthAddress === currentPynthAddress) {
 			console.log(gray(`${currentPynthAddress} requires no action`));
+		} else if (pynth.originalTotalSupply > '0') {
+			// the pynth is already in the issuer, we need to replace it
+			console.log(gray(`${currentPynthAddress} will be replaced from the issuer.`));
+			replacingPynths.push(pynth);
 		} else {
 			console.log(gray(`${currentPynthAddress} will be added to the issuer.`));
 			filteredPynths.push(pynth);
 		}
+	}
+
+	for (const pynth of replacingPynths) {
+		// STEPS
+		// 1. set old ExternTokenState.setTotalSupply(0) // owner
+		await runStep({
+			contract: pynth.sourceContract,
+			target: pynth.oldPynth,
+			read: 'totalSupply',
+			expected: input => input === '0',
+			write: 'setTotalSupply',
+			writeArg: '0',
+		});
+
+		// 2. invoke Issuer.removePynth(currencyKey) // owner
+		await runStep({
+			contract: 'Issuer',
+			target: issuer,
+			read: 'pynths',
+			readArg: pynth.currencyKeyInBytes,
+			expected: input => input === ZERO_ADDRESS,
+			write: 'removePynth',
+			writeArg: pynth.currencyKeyInBytes,
+		});
+
+		filteredPynths.push(pynth);
+		sleep(1000);
 	}
 
 	const pynthChunkSize = 15;
@@ -2608,47 +2645,45 @@ const deploy = async ({
 			writeArg: addressOf(crossChainState),
 		});
 
-		const networks = mainnet.includes(network)
+		/* const networks = mainnet.includes(network)
 			? mainnet.filter(e => e !== network)
-			: testnet.filter(e => e !== network);
+			: testnet.filter(e => e !== network); */
 
-		await runStep({
+		/* await runStep({
 			contract: 'CrossChainManager',
 			target: crossChainManager,
-			// read: 'getCrossChainIds',
-			// expect: (crossChainIds) => {
-			// 	for(let crossChainId of crossChainIds) {
-			// 		console.log("crossChainId", crossChainId);
-			// 		if(crossChainId === toBytes32(network))
-			// 			return true;
-			// 	}
-			// 	return false;
-			// },
+			read: 'getCrossChainIds',
+			expected: crossChainIds => {
+				for (const crossChainId of crossChainIds) {
+					console.log('crossChainId', crossChainId);
+					if (crossChainId === toBytes32(network)) return true;
+				}
+				return false;
+			},
 			write: 'setCrosschain',
 			writeArg: [toBytes32(network)],
-		});
+		}); */
 
-		for (const crossNetwork of networks) {
+		/* for (const crossNetwork of networks) {
 			await runStep({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
-				// read: 'getCrossChainIds',
-				// expect: (crossChainIds) => {
-				// 	for(let crossChainId of crossChainIds) {
-				// 		console.log("crossChainId", crossChainId);
-				// 		if(crossChainId === toBytes32(crossNetwork))
-				// 			return true;
-				// 	}
-				// 	return false;
-				// },
+				read: 'getCrossChainIds',
+				expected: crossChainIds => {
+					for (const crossChainId of crossChainIds) {
+						console.log('crossChainId', crossChainId);
+						if (crossChainId === toBytes32(network)) return true;
+					}
+					return false;
+				},
 				write: 'addCrosschain',
 				writeArg: [toBytes32(crossNetwork)],
 			});
-		}
+		} */
 
-		const networkIds = [1, 3, 4, 5, 42, 137, 80001, 97, 56, 81, 1287, 1285];
+		const networkIds = [1, /* 3, 4, */ 5, /* 42, */ 137, 80001, 97, 56, /* 81, */ 1287, 1285];
 
-		const chainIds = [
+		/* const chainIds = [
 			toBytes32('mainnet'),
 			toBytes32('ropsten'),
 			toBytes32('rinkeby'),
@@ -2658,32 +2693,32 @@ const deploy = async ({
 			toBytes32('mumbai'),
 			toBytes32('bsctest'),
 			toBytes32('bsc'),
-			toBytes32('shibuya'),
+			oBytes32('shibuya'), 
 			toBytes32('moonbase-alphanet'),
 			toBytes32('moonriver'),
-		];
+		]; */
 
 		await runStep({
 			contract: 'CrossChainManager',
 			target: crossChainManager,
-			// read: 'getNetworkIds',
-			// readArg: [toBytes32('mainnet')],
-			// expect: (networkId) => {
-			// 	console.log("networkId", networkId)
-			// 	return networkId === 1
-			// },
+			read: 'crossChainCount',
+			expected: count => {
+				console.log('Cross chain count: ', count);
+				return count > 1;
+			},
 			write: 'addNetworkIds',
-			writeArg: [chainIds, networkIds],
+			writeArg: [networkIds],
 		});
 
+		// ----------------
 		await runStep({
 			contract: 'CrossChainManager',
 			target: crossChainManager,
-			// read: 'getCurrentNetworkIssuedDebt',
-			// expected: issuedDebt => {
-			// 	console.log("issuedDebt", issuedDebt)
-			// 	return issuedDebt > 0;
-			// },
+			read: 'getCurrentNetworkIssuedDebt',
+			expected: issuedDebt => {
+				console.log('Issued Debt', issuedDebt);
+				return issuedDebt > 0;
+			},
 			write: 'setInitialCurrentIssuedDebt',
 		});
 	}

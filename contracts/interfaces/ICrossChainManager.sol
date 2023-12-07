@@ -6,65 +6,79 @@ interface ICrossChainManager {
 
     function debtManager() external view returns (address);
 
-    function userIssuanceDataForTotalNetwork(address) external view returns (uint, uint);
+    // supply schedule wrapper functions
+    // function mintableSupply() external view returns (uint);
+    // // supply schedule wrapper functions
+    // function isMintable() external view returns (bool);
+    // // supply schedule wrapper functions
+    // function minterReward() external view returns (uint);
 
-    function getTotalNetworkAdaptedTotalSystemValue(bytes32 currencyKey) external view returns (uint, bool);
+    // function getCrossChainIds() external view returns (bytes32[] memory);
 
-    function currentTotalNetworkDebt() external view returns (uint);
+    // function getNetworkId(bytes32 _chainID) external view returns (uint);
 
-    function totalNetworkDebtEntryLength() external view returns (uint);
+    function getCurrentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+
+    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+
+    function getCurrentNetworkIssuedDebt() external view returns (uint);
+
+    function getCurrentNetworkActiveDebt() external view returns (uint);
+
+    // function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);
+
+    // function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint);
+
+    function getCrossNetworkIssuedDebtAll() external view returns (uint);
+
+    function getCrossNetworkActiveDebtAll() external view returns (uint);
 
     function currentNetworkDebtPercentage() external view returns (uint);
+
+    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint);
+
+    function getOutboundSumToCurrentNetwork() external view returns (uint);
+
+    function syncTimestamp() external view returns (uint);
+
+    function syncStale() external view returns (bool);
 
     // Mutative functions
     function setCrossChainState(address) external;
 
     function setDebtManager(address) external;
 
-    function appendTotalNetworkDebt(uint) external;
+    // supply schedule wrapper functions
+    // function recordMintEvent(uint supplyMinted) external returns (bool);
 
-    function addTotalNetworkDebt(uint) external;
+    // function setCrosschain(bytes32 _chainID) external;
 
-    function subtractTotalNetworkDebt(uint) external;
+    // function addCrosschain(bytes32 _chainID) external;
 
-    function setCrossNetworkUserDebt(address, uint) external;
+    // function addNetworkId(bytes32 _chainID, uint _networkId) external;
 
-    function clearCrossNetworkUserDebt(address) external;
-
-    function setCrosschain(bytes32 _chainID) external;
-
-    function addCrosschain(bytes32 _chainID) external;
-
-    function addNetworkId(bytes32 _chainID, uint _networkId) external;
-
-    function getNetworkId(bytes32 _chainID) external view returns (uint);
-
-    function setCrossNetworkIssuedDebt(bytes32 _chainID, uint _amount) external;
-
-    function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);
-
-    function setCrossNetworkActiveDebt(bytes32 _chainID, uint _amount) external;
-
-    function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint);
-
-    function setCrossNetworkIssuedDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
-
-    function getCrossNetworkIssuedDebtAll() external view returns (uint);
-
-    function setCrossNetworkActiveDebtAll(bytes32[] calldata _chainIDs, uint[] calldata _amounts) external;
-
-    function getCrossNetworkActiveDebtAll() external view returns (uint);
-
-    function getCurrentNetworkIssuedDebt() external view returns (uint);
-
-    function getCurrentNetworkActiveDebt() external view returns (uint);
+    function addNetworkIds(uint[] calldata _networkIds) external;
 
     function addCurrentNetworkIssuedDebt(uint _amount) external;
 
     function subtractCurrentNetworkIssuedDebt(uint _amount) external;
 
-    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
-        external
-        view
-        returns (uint totalSystemValue, bool anyRateIsInvalid);
+    function setCrossNetworkIssuedDebtAll(uint[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function setCrossNetworkActiveDebtAll(uint[] calldata _chainIDs, uint[] calldata _amounts) external;
+
+    function setOutboundSumToCurrentNetwork(uint _amount) external;
+
+    // deprecated functions --> to be removed. they do nothing inside the contract
+    // for backwards compatibility with Exchanger
+    function addTotalNetworkDebt(uint amount) external;
+
+    // for backwards compatibility with Exchanger
+    function subtractTotalNetworkDebt(uint amount) external;
+
+    // for backwards compatibility with Issuer
+    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external;
+
+    // for backwards compatibility with Issuer
+    function clearCrossNetworkUserDebt(address account) external;
 }

@@ -736,6 +736,10 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		}),
 		mumbai: Object.assign({}, base),
 		moonriver: Object.assign({}, base),
+		polygon: Object.assign({}, base, {
+			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+		}),
 	};
 
 	const users = Object.entries(

@@ -17,7 +17,7 @@ const {
 
 // console.log(inflationStartTimestampInSecs);
 
-const GAS_PRICE = 100e9; // 100 GWEI
+const GAS_PRICE = 300e9; // 100 GWEI
 const CACHE_FOLDER = 'cache';
 
 // task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
@@ -71,7 +71,7 @@ module.exports = {
 			initialDate: new Date().toISOString(), // new Date(inflationStartTimestampInSecs * 1000).toISOString(),
 			// Note: forking settings are injected at runtime by hardhat/tasks/task-node.js
 			forking: {
-				url: 'https://eth-mainnet.g.alchemy.com/v2/Rd7_uSzw7GvZ330qEkAUyLiC25kZB8VA',
+				url: process.env.PROVIDER_URL_POLYGON,
 			},
 		},
 	},

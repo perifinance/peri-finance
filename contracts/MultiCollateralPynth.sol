@@ -107,6 +107,10 @@ contract MultiCollateralPynth is Pynth {
     ) external payable optionalProxy onlyAvailableWhenBridgeStateSet {
         require(_amount > 0, "Cannot transfer zero");
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "fee is not sufficient");
+
+        // any traders having traded for the past waiting period should wait for maxSecsLeftInWaitingPeriod
+        _ensureCanTransfer(messageSender, _amount);
+
         bridgeValidator.transfer(msg.value);
 
         require(_internalBurn(messageSender, _amount), "burning failed");

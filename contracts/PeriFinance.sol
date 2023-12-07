@@ -6,18 +6,22 @@ import "./BasePeriFinance.sol";
 
 // Internal references
 import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/ISupplySchedule.sol";
+// import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
 
 interface ICrossChainManager {
-    function currentNetworkDebtPercentage() external view returns (uint);
+    function mintableSupply() external view returns (uint);
+
+    function minterReward() external view returns (uint);
+
+    function recordMintEvent(uint supplyMinted) external returns (bool);
 }
 
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
-    bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
+    // bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
 
     address public minterRole;
@@ -44,10 +48,10 @@ contract PeriFinance is BasePeriFinance {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](3);
+        bytes32[] memory newAddresses = new bytes32[](2);
         newAddresses[0] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
-        newAddresses[2] = CONTRACT_CROSSCHAINMANAGER;
+        // newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
+        newAddresses[1] = CONTRACT_CROSSCHAINMANAGER;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -57,9 +61,9 @@ contract PeriFinance is BasePeriFinance {
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
 
-    function supplySchedule() internal view returns (ISupplySchedule) {
-        return ISupplySchedule(requireAndGetAddress(CONTRACT_SUPPLYSCHEDULE));
-    }
+    // function supplySchedule() internal view returns (ISupplySchedule) {
+    //     return ISupplySchedule(requireAndGetAddress(CONTRACT_SUPPLYSCHEDULE));
+    // }
 
     function crossChainManager() internal view returns (ICrossChainManager) {
         return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
@@ -84,25 +88,31 @@ contract PeriFinance is BasePeriFinance {
         require(msg.sender == inflationMinter, "onlyMinter");
         require(address(rewardsDistribution()) != address(0), "No RewardsDistribution");
 
-        ISupplySchedule _supplySchedule = supplySchedule();
+        // ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 
-        uint _currRate = crossChainManager().currentNetworkDebtPercentage();
-        require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
+        // require(crossChainManager().syncStale() == false, 'Cross-chain debt is stale');
+        // uint _currRate = crossChainManager().currentNetworkDebtPercentage();
+        // require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
 
-        uint supplyToMint = _supplySchedule.mintableSupply();
-        supplyToMint = supplyToMint
-            .decimalToPreciseDecimal()
-            .multiplyDecimalRoundPrecise(_currRate)
-            .preciseDecimalToDecimal();
-        require(supplyToMint > 0, "No mintable supply");
+        // uint supplyToMint = _supplySchedule.mintableSupply();
+        // supplyToMint = supplyToMint
+        //     .decimalToPreciseDecimal()
+        //     .multiplyDecimalRoundPrecise(_currRate)
+        //     .preciseDecimalToDecimal();
+        // require(supplyToMint > 0, "No mintable supply");
+
+        uint supplyToMint = crossChainManager().mintableSupply();
 
         // record minting event before mutation to token supply
-        _supplySchedule.recordMintEvent(supplyToMint);
+        // _supplySchedule.recordMintEvent(supplyToMint);
+        crossChainManager().recordMintEvent(supplyToMint);
 
         // Set minted PERI balance to RewardEscrow's balance
         // Minus the minterReward and set balance of minter to add reward
-        uint minterReward = _supplySchedule.minterReward();
+        // uint minterReward = _supplySchedule.minterReward();
+        uint minterReward = crossChainManager().minterReward();
+
         // Get the remainder
         uint amountToDistribute = supplyToMint.sub(minterReward);
 

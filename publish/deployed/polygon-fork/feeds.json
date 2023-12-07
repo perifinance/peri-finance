@@ -1,0 +1,94 @@
+{
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0xfE4A8cc5b5B2366C1B58Bea3858e81843581b2F7"
+	},
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x4746DeC9e833A82EC7C2C1356372CcF2cfcD2F3D"
+	},
+	"pBTC": {
+		"asset": "BTC",
+		"feed": "0xc907E116054Ad103354f2D350FD2514433D57F6f"
+	},
+	"pETH": {
+		"asset": "ETH",
+		"feed": "0xF9680D99D6C9589e2a93a78A04A279e509205945"
+	},
+	"pBNB": {
+		"asset": "BNB",
+		"feed": "0x82a6c4AF830caa6c97bb504425f6A66165C2c26e"
+	},
+	"pAVAX": {
+		"asset": "AVAX",
+		"feed": "0xe01eA2fbd8D76ee323FbEd03eB9a8625EC981A10"
+	},
+	"pUNI": {
+		"asset": "UNI",
+		"feed": "0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C"
+	},
+	"pMKR": {
+		"asset": "MKR",
+		"feed": "0xa070427bF5bA5709f70e98b94Cb2F435a242C46C"
+	},
+	"pAAVE": {
+		"asset": "AAVE",
+		"feed": "0x72484B12719E23115761D5DA1646945632979bB6"
+	},
+	"pCOMP": {
+		"asset": "COMP",
+		"feed": "0x2A8758b7257102461BC958279054e372C2b1bDE6"
+	},
+	"pSUSHI": {
+		"asset": "SUSHI",
+		"feed": "0x49B0c695039243BBfEb8EcD054EB70061fd54aa0"
+	},
+	"pSNX": {
+		"asset": "SNX",
+		"feed": "0xbF90A5D9B6EE9019028dbFc2a9E50056d5252894"
+	},
+	"pCRV": {
+		"asset": "CRV",
+		"feed": "0x336584C8E6Dc19637A5b36206B1c79923111b405"
+	},
+	"pYFI": {
+		"asset": "YFI",
+		"feed": "0x9d3A43c111E7b2C6601705D9fcF7a70c95b1dc55"
+	},
+	"p1INCH": {
+		"asset": "1INCH",
+		"feed": "0x443C5116CdF663Eb387e72C688D276e702135C87"
+	},
+	"pLINK": {
+		"asset": "LINK",
+		"feed": "0xd9FFdb71EbE7496cC440152d43986Aae0AB76665"
+	},
+	"pDOT": {
+		"asset": "DOT",
+		"feed": "0xacb51F1a83922632ca02B25a8164c10748001BdE"
+	},
+	"pXRP": {
+		"asset": "XRP",
+		"feed": "0x785ba89291f676b5386652eB12b30cF361020694"
+	},
+	"pAXS": {
+		"asset": "AXS",
+		"feed": "0x9c371aE34509590E10aB98205d2dF5936A1aD875"
+	},
+	"pEUR": {
+		"asset": "EUR",
+		"feed": "0x73366Fe0AA0Ded304479862808e02506FE556a98"
+	},
+	"pSAND": {
+		"asset": "SAND",
+		"feed": "0x3D49406EDd4D52Fb7FFd25485f32E073b529C924"
+	},
+	"pMANA": {
+		"asset": "MANA",
+		"feed": "0xA1CbF3Fe43BC3501e3Fc4b573e822c70e76A7512"
+	},
+	"pSOL": {
+		"asset": "SOL",
+		"feed": "0x10C8264C0935b3B9870013e057f330Ff3e9C56dC"
+	}
+}

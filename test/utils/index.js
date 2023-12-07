@@ -149,6 +149,8 @@ module.exports = ({ web3 } = {}) => {
 	const toUnit = amount => toBN(toWei(amount.toString(), 'ether'));
 	const fromUnit = amount => fromWei(amount, 'ether');
 	const toBigNbr = amount => toBN(amount.toString());
+	const unitToPreciseUnit = amount => toBN(amount.toString() + '000000000');
+	const preciseUnitToUnit = amount => toBN(amount.toString().slice(0, -9));
 	// For USDC
 	const to3Unit = amount => toBN(amount.toString() + '000000');
 
@@ -617,6 +619,8 @@ module.exports = ({ web3 } = {}) => {
 
 		toPreciseUnit,
 		fromPreciseUnit,
+		unitToPreciseUnit,
+		preciseUnitToUnit,
 
 		assertEventEqual,
 		assertEventsEqual,

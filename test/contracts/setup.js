@@ -1,6 +1,6 @@
 'use strict';
 
-const { artifacts, web3, log } = require('hardhat');
+const { artifacts, web3, log, config } = require('hardhat');
 
 const { toWei } = web3.utils;
 const { toUnit } = require('../utils')();
@@ -28,6 +28,7 @@ const {
 		CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT,
 	},
 } = require('../../');
+// const { leftPad } = require('web3-utils');
 
 const SUPPLY_100M = toWei((1e8).toString()); // 100M
 
@@ -41,6 +42,8 @@ const mockToken = async ({
 	symbol = 'ABC',
 	supply = 1e8,
 	skipInitialAllocation = false,
+	resolver,
+	validator,
 }) => {
 	const [deployerAccount, owner] = accounts;
 
@@ -60,18 +63,51 @@ const mockToken = async ({
 		.require('BridgeState')
 		.new(owner, deployerAccount, { from: deployerAccount });
 
-	const token = await artifacts.require(pynth ? 'MockPynth' : 'PublicEST').new(
-		...[proxy.address, tokenState.address, name, symbol, totalSupply, owner]
-			// add pynth as currency key if needed
-			.concat(pynth ? toBytes32(pynth) : [])
-			.concat({
+	let token =
+		pynth === 'pUSD'
+			? await artifacts.require('MultiCollateralPynth')
+			: await artifacts.require(pynth ? 'MockPynth' : 'PublicEST');
+
+	if (pynth === 'pUSD') {
+		await token.link(await artifacts.require('SafeDecimalMath').new());
+		token = await token.new(
+			proxy.address,
+			tokenState.address,
+			name,
+			symbol,
+			owner,
+			toBytes32(symbol),
+			web3.utils.toWei('0'),
+			resolver.address,
+			validator,
+			{
 				from: deployerAccount,
-			})
-	);
+			}
+		);
+	} else {
+		token = await token.new(
+			...[proxy.address, tokenState.address, name, symbol, totalSupply, owner]
+				// add pynth as currency key if needed
+				.concat(pynth ? toBytes32(pynth) : [])
+				.concat({
+					from: deployerAccount,
+				})
+		);
+	}
+
 	await Promise.all([
 		tokenState.setAssociatedContract(token.address, { from: owner }),
 		proxy.setTarget(token.address, { from: owner }),
 	]);
+
+	if (pynth === 'pUSD') {
+		await Promise.all([
+			token.setBridgeState(bridgeState.address, { from: owner }),
+			token.setBridgeValidator(validator, { from: owner }),
+			bridgeState.setAssociatedContract(token.address, { from: owner }),
+			bridgeState.setRole(toBytes32('Validator'), validator, true, { from: owner }),
+		]);
+	}
 
 	return { token, tokenState, proxy, bridgeState };
 };
@@ -110,14 +146,14 @@ const setupContract = async ({
 	skipPostDeploy = false,
 	properties = {},
 }) => {
-	const [deployerAccount, owner, oracle, fundsWallet, debtManager, , , , , minterRole] = accounts;
+	const [deployer, owner, oracle, fundsWallet, , validator, , , , minterRole] = accounts;
 
 	const artifact = artifacts.require(source || contract);
 
 	const create = ({ constructorArgs }) => {
 		return artifact.new(
 			...constructorArgs.concat({
-				from: deployerAccount,
+				from: deployer,
 			})
 		);
 	};
@@ -185,7 +221,7 @@ const setupContract = async ({
 			tryGetAddressOf('AddressResolver'),
 			owner,
 			tryGetAddressOf('BlacklistManager'),
-			debtManager,
+			validator,
 		],
 		MintablePeriFinance: [
 			tryGetAddressOf('ProxyERC20MintablePeriFinance'),
@@ -208,7 +244,7 @@ const setupContract = async ({
 		ImportableRewardEscrowV2: [owner, tryGetAddressOf('AddressResolver')],
 		PeriFinanceEscrow: [owner, tryGetAddressOf('PeriFinance'), owner],
 		// use deployerAccount as associated contract to allow it to call setBalanceOf()
-		TokenState: [owner, deployerAccount],
+		TokenState: [owner, deployer],
 		EtherCollateral: [owner, tryGetAddressOf('AddressResolver')],
 		EtherCollateralpUSD: [owner, tryGetAddressOf('AddressResolver')],
 		FeePoolState: [owner, tryGetAddressOf('FeePool')],
@@ -258,12 +294,12 @@ const setupContract = async ({
 		BlacklistManager: [owner],
 		BridgeState: [owner, tryGetAddressOf('PeriFinance')],
 		BridgeStatepUSD: [owner, tryGetAddressOf('Pynth')],
-		CrossChainState: [owner, tryGetAddressOf('CrossChainManager')],
+		CrossChainState: [owner, tryGetAddressOf('CrossChainManager'), config.networks.hardhat.chainId],
 		CrossChainManager: [
 			owner,
 			tryGetAddressOf('AddressResolver'),
 			tryGetAddressOf('CrossChainState'),
-			debtManager,
+			validator,
 		],
 	};
 
@@ -306,7 +342,7 @@ const setupContract = async ({
 			// first give all PERI supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStatePeriFinance'].setBalanceOf(owner, SUPPLY_100M, {
-				from: deployerAccount,
+				from: deployer,
 			});
 
 			// then configure everything else (including setting the associated contract of TokenState back to the PeriFinance contract)
@@ -366,7 +402,7 @@ const setupContract = async ({
 			// first give all PERI supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStateBasePeriFinance'].setBalanceOf(owner, SUPPLY_100M, {
-				from: deployerAccount,
+				from: deployer,
 			});
 
 			// then configure everything else (including setting the associated contract of TokenState back to the PeriFinance contract)
@@ -402,7 +438,7 @@ const setupContract = async ({
 			// first give all PERI supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
 			await cache['TokenStateMintablePeriFinance'].setBalanceOf(owner, SUPPLY_100M, {
-				from: deployerAccount,
+				from: deployer,
 			});
 
 			// then configure everything else (including setting the associated contract of TokenState back to the PeriFinance contract)
@@ -561,6 +597,12 @@ const setupContract = async ({
 						fncName: 'isPynthManaged',
 						returns: [false],
 					}),
+					mockGenericContractFnc({
+						instance,
+						mock,
+						fncName: 'totalShort',
+						returns: ['0', true],
+					}),
 				]);
 			}
 		},
@@ -582,7 +624,7 @@ const setupAllContracts = async ({
 	pynths = [],
 	stables = ['USDC', 'DAI'],
 }) => {
-	const [, owner] = accounts;
+	const [, owner, , , , validator] = accounts;
 	// Copy mocks into the return object, this allows us to include them in the
 	// AddressResolver
 	const returnObj = Object.assign({}, mocks, existing);
@@ -693,15 +735,8 @@ const setupAllContracts = async ({
 				'FeePool',
 				'DelegateApprovals',
 				'FlexibleStorage',
-				'ExternalTokenStakeManager',
 			],
-			deps: [
-				'AddressResolver',
-				'SystemStatus',
-				'FlexibleStorage',
-				'DebtCache',
-				'ExternalTokenStakeManager',
-			],
+			deps: ['AddressResolver', 'SystemStatus', 'FlexibleStorage', 'DebtCache'],
 		},
 		{
 			contract: 'Exchanger',
@@ -953,6 +988,8 @@ const setupAllContracts = async ({
 			skipInitialAllocation: true,
 			name: `Pynth ${pynth}`,
 			symbol: pynth,
+			resolver: returnObj['AddressResolver'],
+			validator,
 		});
 
 		returnObj[`ProxyERC20${pynth}`] = proxy;
@@ -996,7 +1033,7 @@ const setupAllContracts = async ({
 		}
 	}
 
-	if (returnObj['ExternalTokenStakeManager']) {
+	if (returnObj['ExternalTokenStakeManager'] && returnObj['StakingState']) {
 		returnObj['ExternalTokenStakeManager'].setStakingState(returnObj['StakingState'].address, {
 			from: owner,
 		});

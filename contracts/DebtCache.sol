@@ -9,12 +9,18 @@ contract DebtCache is BaseDebtCache {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    // This function exists in case a pynth is ever somehow removed without its snapshot being updated.
+    /**
+     * @notice This function exists in case a pynth is ever somehow removed without its snapshot being updated.
+     * @param currencyKey The pynth to remove the debt cache for
+     */
     function purgeCachedPynthDebt(bytes32 currencyKey) external onlyOwner {
         require(issuer().pynths(currencyKey) == IPynth(0), "Pynth exists");
         delete _cachedPynthDebt[currencyKey];
     }
 
+    /**
+     * @notice take a snapshot of the debt. This is callable by anyone, but is owner
+     */
     function takeDebtSnapshot() external requireSystemActiveIfNotOwner {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory values, bool isInvalid) = _currentPynthDebts(currencyKeys);
@@ -40,11 +46,19 @@ contract DebtCache is BaseDebtCache {
         _updateDebtCacheValidity(isInvalid);
     }
 
+    /**
+     * @notice update cached pynths' debt when when pynth rates have changed beyond a threshold like 5%
+     * @param currencyKeys the pynths to update the cached debt for
+     */
     function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
         (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
         _updateCachedPynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     }
 
+    /**
+     * @notice update cached pynths' debt when only a external sourced pynth rate has changed beyond a threshold like 5%
+     * @param currencyKey the pynth to update the cached debt for
+     */
     function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate)
         external
         onlyIssuerOrExchangerOrPynthpUSD
@@ -56,6 +70,10 @@ contract DebtCache is BaseDebtCache {
         _updateCachedPynthDebtsWithRates(pynthKeyArray, pynthRateArray, false);
     }
 
+    /**
+     * @notice update cached pynths' debt when external sourced pynths have been changed beyond a threshold like 5%
+     * @param currencyKeys the pynths to update the cached debt for and their currency rates
+     */
     function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates)
         external
         onlyIssuerOrExchangerOrPynthpUSD
@@ -63,6 +81,10 @@ contract DebtCache is BaseDebtCache {
         _updateCachedPynthDebtsWithRates(currencyKeys, currencyRates, false);
     }
 
+    /**
+     * @notice invalidate the cached debt if needed
+     * @dev
+     */
     function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchanger {
         _updateDebtCacheValidity(currentlyInvalid);
     }
@@ -76,6 +98,10 @@ contract DebtCache is BaseDebtCache {
         }
     }
 
+    /**
+     * @notice update cached pynths' debt with given keys and rates
+     * @dev
+     */
     function _updateCachedPynthDebtsWithRates(
         bytes32[] memory currencyKeys,
         uint[] memory currentRates,

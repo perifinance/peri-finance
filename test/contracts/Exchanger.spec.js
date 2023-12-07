@@ -53,7 +53,7 @@ contract('Exchanger (spec tests)', async accounts => {
 
 	const pynthKeys = [pUSD, pAUD, pEUR, pBTC, iBTC, pETH, iETH];
 
-	const [, owner, account1, account2, debtManager, account3] = accounts;
+	const [, owner, account1, account2, /* debtManager, */ account3] = accounts;
 
 	let periFinance,
 		exchangeRates,
@@ -76,8 +76,7 @@ contract('Exchanger (spec tests)', async accounts => {
 		resolver,
 		debtCache,
 		issuer,
-		flexibleStorage,
-		crossChainManager;
+		flexibleStorage;
 
 	const itReadsTheWaitingPeriod = () => {
 		describe('waitingPeriodSecs', () => {
@@ -3770,7 +3769,7 @@ contract('Exchanger (spec tests)', async accounts => {
 				DebtCache: debtCache,
 				Issuer: issuer,
 				FlexibleStorage: flexibleStorage,
-				CrossChainManager: crossChainManager,
+				/* CrossChainManager: crossChainManager, */
 			} = await setupAllContracts({
 				accounts,
 				pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD', 'pBTC', 'iBTC', 'pTRX'],
@@ -3802,9 +3801,9 @@ contract('Exchanger (spec tests)', async accounts => {
 			await pUSDContract.issue(account1, amountIssued);
 			await pUSDContract.issue(account2, amountIssued);
 
-			await crossChainManager.appendTotalNetworkDebt(amountIssued.add(amountIssued), {
-				from: debtManager,
-			});
+			// await crossChainManager.appendTotalNetworkDebt(amountIssued.add(amountIssued), {
+			// 	from: debtManager,
+			// });
 		});
 
 		addSnapshotBeforeRestoreAfterEach();
@@ -3909,9 +3908,9 @@ contract('Exchanger (spec tests)', async accounts => {
 			await pUSDContract.issue(account1, amountIssued);
 			await pUSDContract.issue(account2, amountIssued);
 
-			await crossChainManager.appendTotalNetworkDebt(amountIssued * 2, {
-				from: debtManager,
-			});
+			// await crossChainManager.appendTotalNetworkDebt(amountIssued * 2, {
+			// 	from: debtManager,
+			// });
 		});
 
 		addSnapshotBeforeRestoreAfterEach();
