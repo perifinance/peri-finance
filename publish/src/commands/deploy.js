@@ -2572,6 +2572,15 @@ const deploy = async ({
 			).toString(), // multiply by gasPrice
 		});
 
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'syncStaleThreshold',
+			expected: input => input !== '0', // only change if zero
+			write: 'setSyncStaleThreshold',
+			writeArg: await getDeployParameter('SYNC_STALE_THRESHOLD'),
+		});
+
 		// await runStep({
 		// 	contract: 'SystemSettings',
 		// 	target: systemSettings,

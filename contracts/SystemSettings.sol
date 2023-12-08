@@ -43,6 +43,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     uint public constant MAX_EXTERNAL_TOKEN_QUOTA = 8e17;
 
+    uint public constant MAX_SYNC_STALE_THRESHOLD = 1e18 / 10; // 10% cross chain sync threshold
+
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
     // ========== VIEWS ==========
@@ -140,6 +142,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     function bridgeClaimGasCost() external view returns (uint) {
         return getBridgeClaimGasCost();
+    }
+
+    function syncStalThreshold() external view returns (uint) {
+        return getSyncStaleThreshold();
     }
 
     // ========== RESTRICTED ==========
@@ -295,6 +301,14 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_BRIDGE_CLAIM_GAS_COST, _gasCost);
     }
 
+    function setSyncStaleThreshold(uint _percent) external onlyOwner {
+        require(_percent <= MAX_SYNC_STALE_THRESHOLD, "new threshold exceeds maximum 100 percentage");
+
+        flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_SYNC_STALE_THRESHOLD, _percent);
+
+        emit SyncStaleThresholdUpdated(_percent);
+    }
+
     // ========== EVENTS ==========
     event CrossDomainMessageGasLimitChanged(CrossDomainMessageGasLimits gasLimitType, uint newLimit);
     event TradingRewardsEnabled(bool enabled);
@@ -312,4 +326,5 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event DebtSnapshotStaleTimeUpdated(uint debtSnapshotStaleTime);
     event AggregatorWarningFlagsUpdated(address flags);
     event ExternalTokenQuotaUpdated(uint quota);
+    event SyncStaleThresholdUpdated(uint newRatio);
 }

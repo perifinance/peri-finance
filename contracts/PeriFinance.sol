@@ -88,6 +88,8 @@ contract PeriFinance is BasePeriFinance {
         require(msg.sender == inflationMinter, "onlyMinter");
         require(address(rewardsDistribution()) != address(0), "No RewardsDistribution");
 
+        // those commented linse are now moved to crossChainManager same logic but different place
+        // so PeriFinance contract will not be deployed for this change.
         // ISupplySchedule _supplySchedule = supplySchedule();
         IRewardsDistribution _rewardsDistribution = rewardsDistribution();
 

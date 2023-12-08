@@ -30,4 +30,8 @@ interface ISystemSettings {
     function bridgeTransferGasCost() external view returns (uint);
 
     function bridgeClaimGasCost() external view returns (uint);
+
+    function syncStaleThreshold() external view returns (uint);
+
+    function debtSnapshotStaleTime() external view returns (uint);
 }

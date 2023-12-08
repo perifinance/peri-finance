@@ -793,6 +793,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         issuer().pynths(currencyKey).burn(from, amount);
         IPeriFinanceInternal(address(periFinance())).emitExchangeReclaim(from, currencyKey, amount);
 
+        // updating crosschainmanager's debt is not required as it is only used for issued debt.
+        // these 2 lines are kept for version compatibility
         uint reclaimedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
         crossChainManager().subtractTotalNetworkDebt(reclaimedDebtInpUSD);
     }
@@ -806,6 +808,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         issuer().pynths(currencyKey).issue(from, amount);
         IPeriFinanceInternal(address(periFinance())).emitExchangeRebate(from, currencyKey, amount);
 
+        // updating crosschainmanager's debt is not required as it is only used for issued debt.
+        // these 2 lines are kept for version compatibility
         uint refundedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
         crossChainManager().addTotalNetworkDebt(refundedDebtInpUSD);
     }

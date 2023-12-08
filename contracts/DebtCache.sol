@@ -83,7 +83,6 @@ contract DebtCache is BaseDebtCache {
 
     /**
      * @notice invalidate the cached debt if needed
-     * @dev
      */
     function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchanger {
         _updateDebtCacheValidity(currentlyInvalid);
@@ -100,7 +99,6 @@ contract DebtCache is BaseDebtCache {
 
     /**
      * @notice update cached pynths' debt with given keys and rates
-     * @dev
      */
     function _updateCachedPynthDebtsWithRates(
         bytes32[] memory currencyKeys,
