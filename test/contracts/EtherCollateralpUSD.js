@@ -1346,7 +1346,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					assert.bnEqual(await etherCollateral.totalIssuedPynths(), ZERO_BN);
 				});
 
-				xit('increase the FeePool pUSD balance', async () => {
+				xit('increase the feePool pUSD balance', async () => {
 					// TODO Need to include the minting fee
 					const feePoolBalance = await pUSDPynth.balanceOf(FEE_ADDRESS);
 					console.log('expectedFeepUSD', expectedFeepUSD.toString());
@@ -1356,7 +1356,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					assert.bnEqual(feePoolBalance, expectedFeepUSD);
 				});
 
-				xit('record the fees in the FeePool.feesToDistribute', async () => {
+				xit('record the fees in the feePool.feesToDistribute', async () => {
 					// TODO Need to include the minting fee
 					const currentFeePeriod = await feePool.recentFeePeriods(0);
 					assert.bnEqual(currentFeePeriod.feesToDistribute, expectedFeepUSD);

@@ -13,15 +13,15 @@ interface ICrossChainState {
 
     function crossChainCount() external view returns (uint);
 
-    function getCurrentNetworkIssuedDebt() external view returns (uint);
+    function currentNetworkIssuedDebt() external view returns (uint);
 
-    function getTotalNetworkIssuedDebt() external view returns (uint);
+    function totalNetworkIssuedDebt() external view returns (uint);
 
-    function getCrossNetworkIssuedDebtAll() external view returns (uint);
+    function crossNetworkIssuedDebtAll() external view returns (uint);
 
-    function getCrossNetworkActiveDebtAll() external view returns (uint);
+    function crossNetworkActiveDebtAll() external view returns (uint);
 
-    function getOutboundSumToCurrentNetwork() external view returns (uint);
+    function outboundSumToCurrentNetwork() external view returns (uint);
 
     // Mutative functions
     function addNetworkId(uint _networkId) external;

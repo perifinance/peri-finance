@@ -21,7 +21,7 @@ interface IFeePool {
 
     function everDistributedFeeRewards() external view returns (bool);
 
-    function everAllocatedFeeRewards() external view returns (bool);
+    // function everAllocatedFeeRewards() external view returns (bool);
 
     // Mutative Functions
     function claimFees() external returns (bool);
@@ -41,7 +41,7 @@ interface IFeePool {
 
     function setRewardsToDistribute(uint amount) external;
 
-    function distributeFeeRewards() external;
+    function distributeFeeRewards(uint[] calldata feeRewards) external;
 
-    function allocateFeeRewards(uint amount) external;
+    function recentFeePeriods(uint index) external view returns (uint64, uint64, uint64, uint, uint, uint, uint);
 }

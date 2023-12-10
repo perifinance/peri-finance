@@ -144,7 +144,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getBridgeClaimGasCost();
     }
 
-    function syncStalThreshold() external view returns (uint) {
+    function syncStaleThreshold() external view returns (uint) {
         return getSyncStaleThreshold();
     }
 

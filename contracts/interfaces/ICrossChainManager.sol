@@ -17,27 +17,27 @@ interface ICrossChainManager {
 
     // function getNetworkId(bytes32 _chainID) external view returns (uint);
 
-    function getCurrentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+    function currentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey) external view returns (uint, bool);
 
-    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+    function currentNetworkAdaptedActiveDebtValue(bytes32 currencyKey) external view returns (uint, bool);
 
-    function getCurrentNetworkIssuedDebt() external view returns (uint);
+    function currentNetworkIssuedDebt() external view returns (uint);
 
-    function getCurrentNetworkActiveDebt() external view returns (uint);
+    function currentNetworkActiveDebt() external view returns (uint);
 
     // function getCrossNetworkIssuedDebt(bytes32 _chainID) external view returns (uint);
 
     // function getCrossNetworkActiveDebt(bytes32 _chainID) external view returns (uint);
 
-    function getCrossNetworkIssuedDebtAll() external view returns (uint);
+    function crossNetworkIssuedDebtAll() external view returns (uint);
 
-    function getCrossNetworkActiveDebtAll() external view returns (uint);
+    function crossNetworkActiveDebtAll() external view returns (uint);
 
     function currentNetworkDebtPercentage() external view returns (uint);
 
-    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint);
+    function movedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint);
 
-    function getOutboundSumToCurrentNetwork() external view returns (uint);
+    function outboundSumToCurrentNetwork() external view returns (uint);
 
     function syncTimestamp() external view returns (uint);
 

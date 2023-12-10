@@ -3,6 +3,7 @@ pragma solidity 0.5.16;
 // Inheritance
 import "./Owned.sol";
 import "./MixinResolver.sol";
+import "./LimitedSetup.sol";
 
 import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/ICrossChainState.sol";
@@ -14,7 +15,11 @@ import "./interfaces/ISystemSettings.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
-contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
+interface IOldCrossChainState {
+    function getCurrentNetworkIssuedDebt() external view returns (uint);
+}
+
+contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainManager {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
@@ -37,7 +42,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         address _resolver,
         address _crossChainStateAddress,
         address _debtManagerAddress
-    ) public Owned(_owner) MixinResolver(_resolver) {
+    ) public Owned(_owner) MixinResolver(_resolver) LimitedSetup(2 weeks) {
         _crossChainState = _crossChainStateAddress;
         _debtManager = _debtManagerAddress;
     }
@@ -111,10 +116,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return mintable supply
      */
     function mintableSupply() external view returns (uint) {
-        require(_syncStale(_syncTimestamp) == false, "Cross chain debt is stale");
-
         uint _currRate = _currentNetworkDebtPercentage();
         require(SafeDecimalMath.preciseUnit() >= _currRate, "Network rate invalid");
+        require(!_syncStale(_syncTimestamp) || SafeDecimalMath.preciseUnit() == _currRate, "Cross chain debt is stale");
 
         uint supplyToMint = supplySchedule().mintableSupply();
         supplyToMint = supplyToMint
@@ -190,7 +194,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return totalSystemValue debt,
      * @return anyRateIsInvalid any rate is invalid
      */
-    function getCurrentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey)
+    function currentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey)
         external
         view
         returns (uint totalSystemValue, bool anyRateIsInvalid)
@@ -212,7 +216,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return totalSystemValue debt,
      * @return anyRateIsInvalid any rate is invalid
      */
-    function getCurrentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
+    function currentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
         external
         view
         returns (uint totalSystemValue, bool anyRateIsInvalid)
@@ -233,9 +237,9 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev deprecated
      * @return outbound amount
      */
-    function getCurrentNetworkIssuedDebt() external view returns (uint) {
-        uint currentNetworkIssuedDebt = _currentNetworkIssuedDebt();
-        return currentNetworkIssuedDebt;
+    function currentNetworkIssuedDebt() external view returns (uint) {
+        uint issuedDebt = _currentNetworkIssuedDebt();
+        return issuedDebt;
     }
 
     /**
@@ -243,17 +247,17 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev needs to consider issued debt change by staking and burning between the cross chain synchronization
      * @return outbound amount
      */
-    function getCurrentNetworkActiveDebt() external view returns (uint) {
-        (uint currentNetworkActiveDebt, ) = _currentNetworkActiveDebt();
-        return currentNetworkActiveDebt;
+    function currentNetworkActiveDebt() external view returns (uint) {
+        (uint activeDebt, ) = _currentNetworkActiveDebt();
+        return activeDebt;
     }
 
     /**
      * @notice Get connected chain's total issued debt
      * @return issued debt
      */
-    function getCrossNetworkIssuedDebtAll() external view returns (uint) {
-        return state().getCrossNetworkIssuedDebtAll();
+    function crossNetworkIssuedDebtAll() external view returns (uint) {
+        return state().crossNetworkIssuedDebtAll();
     }
 
     /**
@@ -261,8 +265,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev may need more robust way of secure the crosschain debts
      * @return active debt
      */
-    function getCrossNetworkActiveDebtAll() external view returns (uint) {
-        return state().getCrossNetworkActiveDebtAll();
+    function crossNetworkActiveDebtAll() external view returns (uint) {
+        return state().crossNetworkActiveDebtAll();
     }
 
     /**
@@ -279,7 +283,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev used for cross chain debt synchronization
      * @return outbound amount
      */
-    function getMovedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
+    function movedAmount(uint _inboundOutbound, uint targetNetworkId) external view returns (uint) {
         return bridgeStatepUSD().getMovedAmount(_inboundOutbound, targetNetworkId);
     }
 
@@ -288,8 +292,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev used for cross chain debt synchronization
      * @return inbound amount
      */
-    function getOutboundSumToCurrentNetwork() external view returns (uint) {
-        return state().getOutboundSumToCurrentNetwork();
+    function outboundSumToCurrentNetwork() external view returns (uint) {
+        return state().outboundSumToCurrentNetwork();
     }
 
     /**
@@ -298,7 +302,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return inbound amount
      */
     function syncStale() external view returns (bool) {
-        return _syncStale(_syncTimestamp);
+        return _syncStale(_syncTimestamp) && SafeDecimalMath.preciseUnit() != _currentNetworkDebtPercentage();
     }
 
     // ********************* Internal View functions ***************************
@@ -309,8 +313,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @return current debt ratio of network by total network debt
      */
     function _currentNetworkDebtPercentage() internal view returns (uint networkPercentage) {
-        // uint currIssuedDebt = _currentNetworkIssuedDebt();
-        uint totalIssuedDebt = state().getTotalNetworkIssuedDebt();
+        uint totalIssuedDebt = state().totalNetworkIssuedDebt();
 
         networkPercentage = totalIssuedDebt == 0
             ? SafeDecimalMath.preciseUnit()
@@ -324,15 +327,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      * @dev internal function
      * @return currentNetworkIssuedDebt current network's issued debt
      */
-    function _currentNetworkIssuedDebt() internal view returns (uint currentNetworkIssuedDebt) {
-        currentNetworkIssuedDebt = state().getCurrentNetworkIssuedDebt();
-
-        /* if (currentNetworkIssuedDebt != 0) {
-            // adjustedAmount should be positive otherwise something's wrong 
-            int adjustedAmount = _getInOutNetAmount() + int(currentNetworkIssuedDebt);
-            require(adjustedAmount >= 0, "Network Issued Debt is corrupted");
-            currentNetworkIssuedDebt = uint(adjustedAmount);
-        } */
+    function _currentNetworkIssuedDebt() internal view returns (uint networkIssuedDebt) {
+        networkIssuedDebt = state().currentNetworkIssuedDebt();
     }
 
     /**
@@ -349,7 +345,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
         // get current network's active debt after multiplying the debt percentage to the total active debt
         currentNetworActivekDebt = currentNetworActivekDebt
-            .add(state().getCrossNetworkActiveDebtAll())
+            .add(state().crossNetworkActiveDebtAll())
             .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(_currentNetworkDebtPercentage())
             .preciseDecimalToDecimal();
@@ -366,7 +362,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         inboundAmount = bridgeStatepUSD().getTotalInboundAmount();
 
         // if the amount is less than the amount comiled by the other networks, which means bridge is not synchronized yet
-        uint outboundFromOtherNetwork = state().getOutboundSumToCurrentNetwork();
+        uint outboundFromOtherNetwork = state().outboundSumToCurrentNetwork();
         // so, we need to use the-others's sum of outbound targeted to current network
         inboundAmount = inboundAmount < outboundFromOtherNetwork ? outboundFromOtherNetwork : inboundAmount;
     }
@@ -398,15 +394,6 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
     }
 
     /**
-     * @notice record mint event
-     * @dev called by inFlationalMint
-     * @param supplyMinted minted supply amount
-     */
-    function recordMintEvent(uint supplyMinted) external returns (bool) {
-        return supplySchedule().recordMintEvent(supplyMinted);
-    }
-
-    /**
      * @notice add multiple connected chain name ids and network ids for cross chain state management
      * @param _networkIds network ids
      */
@@ -426,7 +413,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
         _setStaleByDebtChangeRate(_amount);
 
-        emit IssuedDebtAdded(_amount, state().getCurrentNetworkIssuedDebt(), block.timestamp, _isStale);
+        emit IssuedDebtAdded(_amount, state().currentNetworkIssuedDebt(), block.timestamp, _isStale);
     }
 
     /**
@@ -439,7 +426,7 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
 
         _setStaleByDebtChangeRate(_amount);
 
-        emit IssuedDebtSubtracted(_amount, state().getCurrentNetworkIssuedDebt(), block.timestamp, _isStale);
+        emit IssuedDebtSubtracted(_amount, state().currentNetworkIssuedDebt(), block.timestamp, _isStale);
     }
 
     /**
@@ -493,19 +480,19 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
         _isStale = false;
 
         for (uint i = 0; i < _chainIDs.length; i++) {
-            emit CrossChainSynced(_chainIDs[i], _issuedDebts[i], _issuedDebts[i], block.timestamp);
+            emit CrossChainSynced(_chainIDs[i], _issuedDebts[i], _activeDebts[i], block.timestamp);
         }
     }
 
     /**
      * @notice set current network's issued debt
-     * @dev calling the function should be effective only at deployment
+     * @dev calling the function is strictly limited to the setup period
+    //**** When upgrading the contract, the function SHOULD BE NOT BE CALLED AGAIN.
+     *      Instead, you need move to previose network's issued debt to the new contract 
      */
-    function setInitialCurrentIssuedDebt() external onlyOwner {
-        uint currIssuedDebt = _currentNetworkIssuedDebt();
-
-        (uint debt, ) = issuer().totalIssuedPynths(pUSD, true);
-        if (currIssuedDebt <= 0) state().setInitialCurrentIssuedDebt(debt);
+    function setInitialCurrentIssuedDebt(address _prevState, bool _old) external onlyOwner onlyDuringSetup {
+        _old ? state().setInitialCurrentIssuedDebt(IOldCrossChainState(_prevState).getCurrentNetworkIssuedDebt()) :
+            state().setInitialCurrentIssuedDebt(ICrossChainState(_prevState).currentNetworkIssuedDebt());
     }
 
     /**
@@ -525,8 +512,8 @@ contract CrossChainManager is Owned, MixinResolver, ICrossChainManager {
      */
     function _setStaleByDebtChangeRate(uint _amount) internal {
         if (
-            state().getCurrentNetworkIssuedDebt() > 0 &&
-            _amount.divideDecimalRound(state().getCurrentNetworkIssuedDebt()) > systemSettings().syncStaleThreshold()
+            state().currentNetworkIssuedDebt() > 0 &&
+            _amount.divideDecimalRound(state().totalNetworkIssuedDebt()) > systemSettings().syncStaleThreshold()
         ) {
             _isStale = true;
         }

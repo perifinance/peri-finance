@@ -1226,7 +1226,7 @@ contract('EtherCollateral', async accounts => {
 					assert.bnEqual(await etherCollateral.totalIssuedPynths(), ZERO_BN);
 				});
 
-				it('increase the FeePool pUSD balance', async () => {
+				it('increase the feePool pUSD balance', async () => {
 					assert.bnEqual(await pUSDPynth.balanceOf(FEE_ADDRESS), expectedFeepUSD);
 				});
 
@@ -1238,7 +1238,7 @@ contract('EtherCollateral', async accounts => {
 					);
 				});
 
-				xit('record the fees in the FeePool.feesToDistribute', async () => {
+				xit('record the fees in the feePool.feesToDistribute', async () => {
 					// Test is not possible with a mock ERC20 Token.
 					// This needs to use Pynth.sol which handles sending fees to the feepool
 					// and recording them in feePool.recentFeePeriods(0)

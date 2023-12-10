@@ -58,6 +58,8 @@ const DEFAULTS = {
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
 };
 
+// const debtHolder = require('../../debtholders.json');
+
 const deploy = async ({
 	addNewPynths,
 	gasPrice = DEFAULTS.gasPrice,
@@ -673,11 +675,24 @@ const deploy = async ({
 		args: [account, ZERO_ADDRESS],
 	});
 
+	const oldFeePool = config[`FeePool`].deploy
+		? await deployer.getExistingContract({ contract: 'FeePool' })
+		: undefined;
+
 	const feePool = await deployer.deployContract({
 		name: 'FeePool',
 		deps: ['ProxyFeePool', 'AddressResolver'],
 		args: [addressOf(proxyFeePool), account, addressOf(readProxyForResolver)],
 	});
+
+	if (feePool && oldFeePool) {
+		await runStep({
+			contract: 'FeePool',
+			target: feePool,
+			write: 'setInitialFeePeriods',
+			writeArg: addressOf(oldFeePool),
+		});
+	}
 
 	if (proxyFeePool && feePool) {
 		await runStep({
@@ -1513,6 +1528,24 @@ const deploy = async ({
 
 	console.log(gray(`\n------ Deploy multi chain debt share related contracts ------\n`));
 
+	const crossStateConfig = config[`CrossChainState`] || {};
+	let oldCrossChainState;
+	let bOldVersion = false;
+	if (crossStateConfig.deploy) {
+		try {
+			oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
+			const chinId = await oldCrossChainState.methods.getChainID().call();
+			if (typeof chinId === 'string') {
+				bOldVersion = true;
+			}
+		} catch (err) {
+			if (!freshDeploy) {
+				// only throw if not local - allows local environments to handle both new
+				// and updating configurations
+				throw err;
+			}
+		}
+	}
 	const crossChainState = await deployer.deployContract({
 		name: 'CrossChainState',
 		source: 'CrossChainState',
@@ -2430,6 +2463,7 @@ const deploy = async ({
 		}
 
 		// setup initial values if they are unset
+		// Note: when upgrading system settings, set input !== 'getDeployParameter('SETUP_VALUE') to set initial values
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
@@ -2720,16 +2754,14 @@ const deploy = async ({
 		});
 
 		// ----------------
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'getCurrentNetworkIssuedDebt',
-			expected: issuedDebt => {
-				console.log('Issued Debt', issuedDebt);
-				return issuedDebt > 0;
-			},
-			write: 'setInitialCurrentIssuedDebt',
-		});
+		if (crossStateConfig.deploy && oldCrossChainState) {
+			await runStep({
+				contract: 'CrossChainManager',
+				target: crossChainManager,
+				write: 'setInitialCurrentIssuedDebt',
+				writeArg: [addressOf(oldCrossChainState), bOldVersion],
+			});
+		}
 	}
 
 	/*

@@ -156,7 +156,6 @@ contract('CrossChainManager', async accounts => {
 			abi: crossChainManager.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
-				'recordMintEvent',
 				'setCrossChainState',
 				'setDebtManager',
 				'addNetworkIds',
@@ -202,8 +201,8 @@ contract('CrossChainManager', async accounts => {
 			await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 			const debt = debtCache.currentDebt();
 			// set initial issued debt for self chain
-			await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
-			const issuedDebt = await crossChainManager.getCurrentNetworkIssuedDebt();
+			// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
+			const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
 			assert.bnEqual(issuedDebt, debt);
 		});
 	});
@@ -220,13 +219,13 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.transfer(account, stakingAmount, { from: owner });
 			}
 			// set initial issued debt for self chain
-			await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
+			// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
 		});
 
 		describe('when pynths are issued by staking', async () => {
 			it('ISSUED and ACTIVE DEBT should be INCREASED as SAME AMOUNT as THE STAKED AMOUNT', async () => {
-				const issuedDebt = await crossChainManager.getCurrentNetworkIssuedDebt();
-				const activeDebt = await crossChainManager.getCurrentNetworkActiveDebt();
+				const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
+				const activeDebt = await crossChainManager.currentNetworkActiveDebt();
 
 				const rate = await exchangeRates.rateForCurrency(toBytes32('PERI'));
 				const issuedPeriFinances = toUnit('1000');
@@ -243,15 +242,15 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
 
-				const issuedDebtL = await crossChainManager.getCurrentNetworkIssuedDebt();
-				const activeDebtL = await crossChainManager.getCurrentNetworkActiveDebt();
-				const crossIssuedDebt = await crossChainManager.getCrossNetworkIssuedDebtAll();
+				const issuedDebtL = await crossChainManager.currentNetworkIssuedDebt();
+				const activeDebtL = await crossChainManager.currentNetworkActiveDebt();
+				const crossIssuedDebt = await crossChainManager.crossNetworkIssuedDebtAll();
 				const curNetDebtRateL = await crossChainManager.currentNetworkDebtPercentage();
 				const curNetDebtRate = await divideDecimalRoundPrecise(
 					issuedDebtL,
 					crossIssuedDebt.add(issuedDebtL)
 				);
-				const crossActiveDebts = await crossChainManager.getCrossNetworkActiveDebtAll();
+				const crossActiveDebts = await crossChainManager.crossNetworkActiveDebtAll();
 				const expectedActiveDebt = await multiplyDecimalRoundPrecise(
 					activeDebt.add(expectedIssuablePynths).add(crossActiveDebts),
 					curNetDebtRate
@@ -281,21 +280,21 @@ contract('CrossChainManager', async accounts => {
 
 				await debtCache.takeDebtSnapshot();
 
-				const issuedDebt = await crossChainManager.getCurrentNetworkIssuedDebt();
-				// const activeDebt = await crossChainManager.getCurrentNetworkActiveDebt();
+				const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
+				// const activeDebt = await crossChainManager.currentNetworkActiveDebt();
 
 				await periFinance.burnPynths(PERI, toUnit('50'), { from: account1 });
 
-				const issuedDebtL = await crossChainManager.getCurrentNetworkIssuedDebt();
-				const activeDebtL = await crossChainManager.getCurrentNetworkActiveDebt();
-				const crossIssuedDebt = await crossChainManager.getCrossNetworkIssuedDebtAll();
+				const issuedDebtL = await crossChainManager.currentNetworkIssuedDebt();
+				const activeDebtL = await crossChainManager.currentNetworkActiveDebt();
+				const crossIssuedDebt = await crossChainManager.crossNetworkIssuedDebtAll();
 				const curNetDebtRateL = await crossChainManager.currentNetworkDebtPercentage();
 				const expectedIssuedDebt = issuedDebt.sub(toUnit('50'));
 				const curNetDebtRate = await divideDecimalRoundPrecise(
 					expectedIssuedDebt,
 					expectedIssuedDebt.add(crossIssuedDebt)
 				);
-				const crossActiveDebts = await crossChainManager.getCrossNetworkActiveDebtAll();
+				const crossActiveDebts = await crossChainManager.crossNetworkActiveDebtAll();
 				const totalIssuedPynths = await periFinance.totalIssuedPynthsExcludeEtherCollateral(
 					toBytes32('pUSD')
 				);
@@ -337,10 +336,10 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
 
-				const adaptedDebt = await crossChainManager.getCurrentNetworkAdaptedActiveDebtValue(
+				const adaptedDebt = await crossChainManager.currentNetworkAdaptedActiveDebtValue(
 					toBytes32('pUSD')
 				);
-				const adaptedIssuedDebt = await crossChainManager.getCurrentNetworkAdaptedIssuedDebtValue(
+				const adaptedIssuedDebt = await crossChainManager.currentNetworkAdaptedIssuedDebtValue(
 					toBytes32('pUSD')
 				);
 
@@ -351,10 +350,10 @@ contract('CrossChainManager', async accounts => {
 					{ from: account1 }
 				);
 
-				const adaptedDebtBridged = await crossChainManager.getCurrentNetworkAdaptedActiveDebtValue(
+				const adaptedDebtBridged = await crossChainManager.currentNetworkAdaptedActiveDebtValue(
 					toBytes32('pUSD')
 				);
-				const adaptedIssuedDebtBridged = await crossChainManager.getCurrentNetworkAdaptedIssuedDebtValue(
+				const adaptedIssuedDebtBridged = await crossChainManager.currentNetworkAdaptedIssuedDebtValue(
 					toBytes32('pUSD')
 				);
 
@@ -377,7 +376,7 @@ contract('CrossChainManager', async accounts => {
 					await periFinance.transfer(account, stakingAmount, { from: owner });
 				}
 				// set initial issued debt for self chain
-				await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
+				// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
 			});
 
 			it('ISSUED DEBTs should not be affected by price change', async () => {
@@ -390,8 +389,8 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
 
-				const issuedDebt = await crossChainManager.getCurrentNetworkIssuedDebt();
-				const adaptedIssuedDebt = await crossChainManager.getCurrentNetworkAdaptedIssuedDebtValue(
+				const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
+				const adaptedIssuedDebt = await crossChainManager.currentNetworkAdaptedIssuedDebtValue(
 					toBytes32('pUSD')
 				);
 
@@ -409,8 +408,8 @@ contract('CrossChainManager', async accounts => {
 
 				debtCache.takeDebtSnapshot();
 
-				const issuedDebtBridged = await crossChainManager.getCurrentNetworkIssuedDebt();
-				const adaptedIssuedDebtBridged = await crossChainManager.getCurrentNetworkAdaptedIssuedDebtValue(
+				const issuedDebtBridged = await crossChainManager.currentNetworkIssuedDebt();
+				const adaptedIssuedDebtBridged = await crossChainManager.currentNetworkAdaptedIssuedDebtValue(
 					toBytes32('pUSD')
 				);
 
@@ -457,11 +456,11 @@ contract('CrossChainManager', async accounts => {
 				const pETHTopUSDTValue = multiplyDecimal(pETHBalanceOfAcc1, toUnit(eTHPrice));
 				const pBTCTopUSDTValue = multiplyDecimal(pBTCBalanceOfAcc2, toUnit(bTCPrice));
 
-				const adaptedDebtBridged = await crossChainManager.getCurrentNetworkAdaptedActiveDebtValue(
+				const adaptedDebtBridged = await crossChainManager.currentNetworkAdaptedActiveDebtValue(
 					toBytes32('pUSD')
 				);
 
-				const crossActiveDebt = await crossChainManager.getCrossNetworkActiveDebtAll();
+				const crossActiveDebt = await crossChainManager.crossNetworkActiveDebtAll();
 				const curNetDebtRate = await crossChainManager.currentNetworkDebtPercentage();
 				const totalActiveDebt = multiplyDecimalRoundPrecise(
 					crossActiveDebt
@@ -487,7 +486,7 @@ contract('CrossChainManager', async accounts => {
 					await periFinance.transfer(account, stakingAmount, { from: owner });
 				}
 				// set initial issued debt for self chain
-				await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
+				// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
 			});
 
 			describe('when self debts are changed over 1% by issuing', async () => {
@@ -557,11 +556,11 @@ contract('CrossChainManager', async accounts => {
 						{ from: account1 }
 					);
 
-					const crossActiveDebt = await crossChainManager.getCrossNetworkActiveDebtAll();
+					const crossActiveDebt = await crossChainManager.crossNetworkActiveDebtAll();
 					const issuedPynths = await periFinance.totalIssuedPynthsExcludeEtherCollateral(
 						toBytes32('pUSD')
 					);
-					const inFromCrossedChain = await crossChainManager.getOutboundSumToCurrentNetwork();
+					const inFromCrossedChain = await crossChainManager.outboundSumToCurrentNetwork();
 					let inBound = await bridgeStatepUSD.getTotalInboundAmount();
 					inBound = inFromCrossedChain > inBound ? inFromCrossedChain : inBound;
 					const outBound = await bridgeStatepUSD.getTotalOutboundAmount();
@@ -571,7 +570,7 @@ contract('CrossChainManager', async accounts => {
 					const curNetDebtRate = await crossChainManager.currentNetworkDebtPercentage();
 					selfActiveDebt = multiplyDecimalRoundPrecise(totalActiveDebt, curNetDebtRate);
 
-					const activeDebt = await crossChainManager.getCurrentNetworkActiveDebt();
+					const activeDebt = await crossChainManager.currentNetworkActiveDebt();
 					assert.bnEqual(activeDebt, selfActiveDebt);
 				});
 
@@ -587,11 +586,11 @@ contract('CrossChainManager', async accounts => {
 
 					debtCache.takeDebtSnapshot();
 
-					const crossActiveDebt = await crossChainManager.getCrossNetworkActiveDebtAll();
+					const crossActiveDebt = await crossChainManager.crossNetworkActiveDebtAll();
 					const issuedPynths = await periFinance.totalIssuedPynthsExcludeEtherCollateral(
 						toBytes32('pUSD')
 					);
-					const inFromCrossedChain = await crossChainManager.getOutboundSumToCurrentNetwork();
+					const inFromCrossedChain = await crossChainManager.outboundSumToCurrentNetwork();
 					let inBound = await bridgeStatepUSD.getTotalInboundAmount();
 					inBound = inFromCrossedChain > inBound ? inFromCrossedChain : inBound;
 					const outBound = await bridgeStatepUSD.getTotalOutboundAmount();
@@ -600,7 +599,7 @@ contract('CrossChainManager', async accounts => {
 					const curNetDebtRate = await crossChainManager.currentNetworkDebtPercentage();
 					selfActiveDebt = multiplyDecimalRoundPrecise(totalActiveDebt, curNetDebtRate);
 
-					const activeDebt = await crossChainManager.getCurrentNetworkActiveDebt();
+					const activeDebt = await crossChainManager.currentNetworkActiveDebt();
 					assert.bnEqual(activeDebt, selfActiveDebt);
 				});
 			});

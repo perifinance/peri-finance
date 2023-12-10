@@ -173,7 +173,7 @@ const knownAccounts = {
 // The solidity defaults are managed here in the same format they will be stored, hence all
 // numbers are converted to strings and those with 18 decimals are also converted to wei amounts
 const defaults = {
-	WAITING_PERIOD_SECS: (60 * 10).toString(), // 5 mins
+	WAITING_PERIOD_SECS: (60 * 5).toString(), // 5 mins
 	PRICE_DEVIATION_THRESHOLD_FACTOR: w3utils.toWei('3'),
 	TRADING_REWARDS_ENABLED: false,
 	ISSUANCE_RATIO: w3utils
@@ -185,7 +185,7 @@ const defaults = {
 		.toBN(2)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
-	FEE_PERIOD_DURATION: (60 * 60 * 24 * 7).toString(), // 1 week
+	FEE_PERIOD_DURATION: (60 * 60 * (24 * 7 - 3)).toString(), // 1 week - 3 hours
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (60 * 60 * 24 * 1).toString(), // 1 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
@@ -395,8 +395,8 @@ const defaults = {
 			{ network: 'mumbai', isOpened: true },
 		],
 	},
-	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`176946`, 'gwei'), // processOutboundPeriod + closeOutboundPeriod = 51453 + 125493 = 176946
-	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`176993`, 'gwei'), // appendInboundingRequest = 176993
+	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
+	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
 	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,

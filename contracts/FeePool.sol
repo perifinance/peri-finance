@@ -16,7 +16,7 @@ import "./SafeDecimalMath.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IPynth.sol";
 import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IPeriFinance.sol";
+// import "./interfaces/IPeriFinance.sol";
 import "./FeePoolState.sol";
 import "./FeePoolEternalStorage.sol";
 import "./interfaces/IExchanger.sol";
@@ -61,15 +61,15 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     FeePeriod[FEE_PERIOD_LENGTH] private _recentFeePeriods;
     uint256 private _currentFeePeriod;
     bool private _everDistributedFeeRewards;
-    bool private _everAllocatedFeeRewards;
-    uint256 public feeRewardsToBeAllocated;
+    // bool private _everAllocatedFeeRewards;
+    uint256 private _feeRewardsToBeAllocated;
 
     uint256 public quotaTolerance;
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_PERIFINANCE = "PeriFinance";
+    // bytes32 private constant CONTRACT_PERIFINANCE = "PeriFinance";
     bytes32 private constant CONTRACT_FEEPOOLSTATE = "FeePoolState";
     bytes32 private constant CONTRACT_FEEPOOLETERNALSTORAGE = "FeePoolEternalStorage";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
@@ -99,20 +99,20 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](13);
+        bytes32[] memory newAddresses = new bytes32[](12);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[1] = CONTRACT_PERIFINANCE;
-        newAddresses[2] = CONTRACT_FEEPOOLSTATE;
-        newAddresses[3] = CONTRACT_FEEPOOLETERNALSTORAGE;
-        newAddresses[4] = CONTRACT_EXCHANGER;
-        newAddresses[5] = CONTRACT_ISSUER;
-        newAddresses[6] = CONTRACT_PERIFINANCESTATE;
-        newAddresses[7] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[8] = CONTRACT_DELEGATEAPPROVALS;
-        newAddresses[9] = CONTRACT_ETH_COLLATERAL_PUSD;
-        newAddresses[10] = CONTRACT_REWARDSDISTRIBUTION;
-        newAddresses[11] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[12] = CONTRACT_CROSSCHAINMANAGER;
+        // newAddresses[1] = CONTRACT_PERIFINANCE;
+        newAddresses[1] = CONTRACT_FEEPOOLSTATE;
+        newAddresses[2] = CONTRACT_FEEPOOLETERNALSTORAGE;
+        newAddresses[3] = CONTRACT_EXCHANGER;
+        newAddresses[4] = CONTRACT_ISSUER;
+        newAddresses[5] = CONTRACT_PERIFINANCESTATE;
+        newAddresses[6] = CONTRACT_REWARDESCROW_V2;
+        newAddresses[7] = CONTRACT_DELEGATEAPPROVALS;
+        newAddresses[8] = CONTRACT_ETH_COLLATERAL_PUSD;
+        newAddresses[9] = CONTRACT_REWARDSDISTRIBUTION;
+        newAddresses[10] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[11] = CONTRACT_CROSSCHAINMANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -120,9 +120,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    function periFinance() internal view returns (IPeriFinance) {
-        return IPeriFinance(requireAndGetAddress(CONTRACT_PERIFINANCE));
-    }
+    // function periFinance() internal view returns (IPeriFinance) {
+    //     return IPeriFinance(requireAndGetAddress(CONTRACT_PERIFINANCE));
+    // }
 
     function feePoolState() internal view returns (FeePoolState) {
         return FeePoolState(requireAndGetAddress(CONTRACT_FEEPOOLSTATE));
@@ -209,35 +209,34 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return _everDistributedFeeRewards;
     }
 
-    function everAllocatedFeeRewards() external view returns (bool) {
-        return _everAllocatedFeeRewards;
-    }
+    // function everAllocatedFeeRewards() external view returns (bool) {
+    //     return _everAllocatedFeeRewards;
+    // }
 
-    function allocatedOtherNetworkFeeRewards() external view returns (uint) {
-        return _allocatedOtherNetworkFeeRewards();
+    function feeRewardsToBeAllocated() external view returns (uint) {
+        // when _everDistributedFeeRewards is true, _feeRewardsToBeAllocated has the right value
+        // since _recentFeePeriodsStorage(0).feesToDistribute has the fee for the current network at the moment.
+        return _everDistributedFeeRewards || (_recentFeePeriodsStorage(0).startTime > (now - getFeePeriodDuration())) 
+            ? _feeRewardsToBeAllocated : _recentFeePeriodsStorage(0).feesToDistribute;
     }
 
     function _recentFeePeriodsStorage(uint index) internal view returns (FeePeriod storage) {
         return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
     }
 
-    // function recentFeePeriodsStorage(uint index) external view returns (FeePeriod memory) {
-    //     return _recentFeePeriods[(_currentFeePeriod + index) % FEE_PERIOD_LENGTH];
+    // function _allocatedOtherNetworkFeeRewards() internal view returns (uint allocatedFeesForOtherNetworks) {
+    //     uint otherNetworksShare = SafeDecimalMath.preciseUnit().sub(crossChainManager().currentNetworkDebtPercentage());
+
+    //     allocatedFeesForOtherNetworks = _recentFeePeriodsStorage(0)
+    //         .feesToDistribute
+    //         .decimalToPreciseDecimal()
+    //         .multiplyDecimalRoundPrecise(otherNetworksShare)
+    //         .preciseDecimalToDecimal();
     // }
-
-    function _allocatedOtherNetworkFeeRewards() internal view returns (uint allocatedFeesForOtherNetworks) {
-        uint otherNetworksShare = SafeDecimalMath.preciseUnit().sub(crossChainManager().currentNetworkDebtPercentage());
-
-        allocatedFeesForOtherNetworks = _recentFeePeriodsStorage(0)
-            .feesToDistribute
-            .decimalToPreciseDecimal()
-            .multiplyDecimalRoundPrecise(otherNetworksShare)
-            .preciseDecimalToDecimal();
-    }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function distributeFeeRewards() external optionalProxy onlyDebtManager {
+    function distributeFeeRewards(uint[] calldata feeRewards) external optionalProxy onlyDebtManager {
         require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
         require(
             _recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()),
@@ -247,45 +246,65 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         require(_everDistributedFeeRewards == false, "Distributing fee rewards is possible only once in a period");
         _everDistributedFeeRewards = true;
 
-        uint _allocatedFeeRewards = _allocatedOtherNetworkFeeRewards();
+        // backup the fees from self network from last period.
+        _feeRewardsToBeAllocated = _recentFeePeriodsStorage(0).feesToDistribute;
 
-        if (_allocatedFeeRewards <= 0) {
-            feeRewardsToBeAllocated = 0;
-            return;
+        uint totalFeeRewards = 0;
+        // Add up the fees from other networks
+        for (uint i = 0; i < feeRewards.length; i++) {
+            totalFeeRewards = totalFeeRewards.add(feeRewards[i]);
+        }
+        // Add up the fees from self networks
+        totalFeeRewards = totalFeeRewards.add(_feeRewardsToBeAllocated);
+
+        // Set the proportionate rewards for self network
+        _recentFeePeriodsStorage(0).feesToDistribute = totalFeeRewards.decimalToPreciseDecimal()
+            .multiplyDecimalRoundPrecise(crossChainManager().currentNetworkDebtPercentage())
+            .preciseDecimalToDecimal();
+
+        if (_feeRewardsToBeAllocated > _recentFeePeriodsStorage(0).feesToDistribute) {
+            // Burn the distributed rewards to other networks
+            issuer().pynths(pUSD).burn(FEE_ADDRESS, _feeRewardsToBeAllocated.sub(_recentFeePeriodsStorage(0).feesToDistribute));
+        } else if (_feeRewardsToBeAllocated < _recentFeePeriodsStorage(0).feesToDistribute){
+            // Mint the extra rewards from other networks
+            issuer().pynths(pUSD).issue(FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute.sub(_feeRewardsToBeAllocated));
         }
 
-        issuer().pynths(pUSD).burn(FEE_ADDRESS, _allocatedFeeRewards);
+        // // If there are fees to be allocated to other networks, we need to burn them and subtract from feesToDistribute
+        // if (_feeRewardsToBeAllocated > 0) {
+        //     issuer().pynths(pUSD).burn(FEE_ADDRESS, _feeRewardsToBeAllocated);
 
-        feeRewardsToBeAllocated = _allocatedFeeRewards;
-        _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.sub(
-            _allocatedFeeRewards
-        );
+        //     _feeRewardsToBeAllocated = _feeRewardsToBeAllocated;
+        //     _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.sub(
+        //         _feeRewardsToBeAllocated
+        //     );
+        // }
     }
 
-    function allocateFeeRewards(uint amount) external optionalProxy onlyDebtManager {
-        require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
-        require(
-            _recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()),
-            "allocating fee reward not yet available"
-        );
+    // function allocateFeeRewards(uint amount) external optionalProxy onlyDebtManager {
+    //     require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
+    //     require(
+    //         _recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()),
+    //         "allocating fee reward not yet available"
+    //     );
 
-        require(_everAllocatedFeeRewards == false, "Allocating fee rewards is possible only once in a period");
-        _everAllocatedFeeRewards = true;
+    //     require(_everAllocatedFeeRewards == false, "Allocating fee rewards is possible only once in a period");
+    //     _everAllocatedFeeRewards = true;
 
-        if (amount == 0) return;
+    //     if (amount == 0) return;
 
-        uint currentNetworkAllocatedFeeRewards =
-            amount
-                .decimalToPreciseDecimal()
-                .multiplyDecimalRoundPrecise(crossChainManager().currentNetworkDebtPercentage())
-                .preciseDecimalToDecimal();
+    //     uint currentNetworkAllocatedFeeRewards =
+    //         amount
+    //             .decimalToPreciseDecimal()
+    //             .multiplyDecimalRoundPrecise(crossChainManager().currentNetworkDebtPercentage())
+    //             .preciseDecimalToDecimal();
 
-        issuer().pynths(pUSD).issue(FEE_ADDRESS, currentNetworkAllocatedFeeRewards);
+    //     issuer().pynths(pUSD).issue(FEE_ADDRESS, currentNetworkAllocatedFeeRewards);
 
-        _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.add(
-            currentNetworkAllocatedFeeRewards
-        );
-    }
+    //     _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.add(
+    //         currentNetworkAllocatedFeeRewards
+    //     );
+    // }
 
     /**
      * @notice Logs an accounts issuance data per fee period
@@ -349,32 +368,32 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function closeCurrentFeePeriod() external issuanceActive {
         require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
         require(_recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()), "Too early to close fee period");
-        require(
-            _everDistributedFeeRewards || _everAllocatedFeeRewards,
-            "fee rewards should be distributed or allocated before closing period"
+        require(_everDistributedFeeRewards || crossChainManager().currentNetworkDebtPercentage() == SafeDecimalMath.preciseUnit(), 
+            "fee rewards should be distributed before closing period"
         );
 
         // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
         FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
         FeePeriod storage periodToRollover = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 1);
-        IERC20 _perifinance = IERC20(requireAndGetAddress(CONTRACT_PERIFINANCE));
+        // IERC20 _perifinance = IERC20(requireAndGetAddress(CONTRACT_PERIFINANCE));
 
         // Any unclaimed fees from the last period in the array roll back one period.
         // Because of the subtraction here, they're effectively proportionally redistributed to those who
         // have already claimed from the old period, available in the new period.
         // The subtraction is important so we don't create a ticking time bomb of an ever growing
         // number of fees that can never decrease and will eventually overflow at the end of the fee pool.
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodClosing
             .feesToDistribute
-            .sub(periodToRollover.feesClaimed)
-            .add(periodClosing.feesToDistribute);
-        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
-        //     .rewardsToDistribute
-        //     .sub(periodToRollover.rewardsClaimed)
-        //     .add(periodClosing.rewardsToDistribute);
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
-            .balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2))
-            .sub(rewardEscrowV2().totalEscrowedBalance());
+            .add(periodToRollover.feesToDistribute)
+            .sub(periodToRollover.feesClaimed);
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodClosing
+            .rewardsToDistribute
+            .add(periodToRollover.rewardsToDistribute)
+            .sub(periodToRollover.rewardsClaimed);
+            
+        // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
+        //     .balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2))
+        //     .sub(rewardEscrowV2().totalEscrowedBalance());
 
         // Shift the previous fee periods across to make room for the new one.
         _currentFeePeriod = _currentFeePeriod.add(FEE_PERIOD_LENGTH).sub(1).mod(FEE_PERIOD_LENGTH);
@@ -390,7 +409,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // allow fee rewards to be distributed when the period is closed
         _everDistributedFeeRewards = false;
-        _everAllocatedFeeRewards = false;
+        // _everAllocatedFeeRewards = false;
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
     }
 
@@ -462,7 +481,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /**
      * @notice Admin function to import the FeePeriod data from the previous contract
      */
-    function importFeePeriod(
+    /* function importFeePeriod(
         uint feePeriodIndex,
         uint feePeriodId,
         uint startingDebtIndex,
@@ -483,6 +502,23 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             rewardsToDistribute: rewardsToDistribute,
             rewardsClaimed: rewardsClaimed
         });
+    } */
+
+    function setInitialFeePeriods(address prevFeePool) external optionalProxy_onlyOwner onlyDuringSetup {
+        require(prevFeePool != address(0), "Previous FeePool address must be set");
+
+        for (uint i = 0; i < FEE_PERIOD_LENGTH; i++) {
+            (uint64 feePeriodId, uint64 startingDebtIndex, uint64 startTime, uint feesToDistribute, 
+                uint feesClaimed, uint rewardsToDistribute, uint rewardsClaimed) = IFeePool(prevFeePool).recentFeePeriods(i);
+
+                _recentFeePeriodsStorage(i).feePeriodId = feePeriodId;
+                _recentFeePeriodsStorage(i).startingDebtIndex = startingDebtIndex;
+                _recentFeePeriodsStorage(i).startTime = startTime;
+                _recentFeePeriodsStorage(i).feesToDistribute = feesToDistribute;
+                _recentFeePeriodsStorage(i).feesClaimed = feesClaimed;
+                _recentFeePeriodsStorage(i).rewardsToDistribute = rewardsToDistribute;
+                _recentFeePeriodsStorage(i).rewardsClaimed = rewardsClaimed;
+        }
     }
 
     /**
