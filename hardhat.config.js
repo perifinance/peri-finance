@@ -71,7 +71,7 @@ module.exports = {
 			initialDate: new Date().toISOString(), // new Date(inflationStartTimestampInSecs * 1000).toISOString(),
 			// Note: forking settings are injected at runtime by hardhat/tasks/task-node.js
 			forking: {
-				url: process.env.PROVIDER_URL_POLYGON,
+				url: 'https://polygon-bor.publicnode.com',
 			},
 		},
 	},

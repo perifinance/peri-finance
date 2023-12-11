@@ -4,6 +4,8 @@ const { connectContract } = require('./connectContract');
 const { web3 } = require('hardhat');
 const { toBN } = web3.utils;
 const { knownAccounts, wrap, toBytes32 } = require('../../..');
+const { toUnit } = require('../../utils')();
+
 const { gray } = require('chalk');
 
 const knownMainnetAccount = knownAccounts['mainnet'].find(a => a.name === 'binance').address;

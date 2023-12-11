@@ -2,6 +2,7 @@ const ethers = require('ethers');
 const { assert } = require('../contracts/common');
 const { connectContract } = require('./utils/connectContract');
 const { toBytes32, getUsers } = require('../..');
+const { toUnit } = require('../utils')();
 const { assertRevertOptimism } = require('./utils/revertOptimism');
 
 const itCanPerformPynthExchange = ({ ctx }) => {

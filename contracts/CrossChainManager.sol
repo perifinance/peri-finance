@@ -45,6 +45,8 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
     ) public Owned(_owner) MixinResolver(_resolver) LimitedSetup(2 weeks) {
         _crossChainState = _crossChainStateAddress;
         _debtManager = _debtManagerAddress;
+        _syncTimestamp = block.timestamp;
+        _isStale = false;
     }
 
     //*********************** View functions ***************************
