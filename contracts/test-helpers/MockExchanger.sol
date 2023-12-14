@@ -1,6 +1,6 @@
 pragma solidity 0.5.16;
 
-import "../interfaces/IPeriFinance.sol";
+import "../interfaces/IIssuer.sol";
 
 contract MockExchanger {
     uint256 private _mockReclaimAmount;
@@ -8,10 +8,10 @@ contract MockExchanger {
     uint256 private _mockNumEntries;
     uint256 private _mockMaxSecsLeft;
 
-    IPeriFinance public periFinance;
+    IIssuer public issuer;
 
-    constructor(IPeriFinance _periFinance) public {
-        periFinance = _periFinance;
+    constructor(IIssuer _issuer) public {
+        issuer = _issuer;
     }
 
     // Mock settle function
@@ -24,11 +24,11 @@ contract MockExchanger {
         )
     {
         if (_mockReclaimAmount > 0) {
-            periFinance.pynths(currencyKey).burn(from, _mockReclaimAmount);
+            issuer.pynths(currencyKey).burn(from, _mockReclaimAmount);
         }
 
         if (_mockRefundAmount > 0) {
-            periFinance.pynths(currencyKey).issue(from, _mockRefundAmount);
+            issuer.pynths(currencyKey).issue(from, _mockRefundAmount);
         }
 
         _mockMaxSecsLeft = 0;

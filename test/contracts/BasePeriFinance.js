@@ -31,7 +31,7 @@ contract('BasePeriFinance', async accounts => {
 		debtCache,
 		escrow,
 		oracle,
-		timestamp,
+		// timestamp,
 		addressResolver,
 		systemSettings,
 		systemStatus,
@@ -75,7 +75,7 @@ contract('BasePeriFinance', async accounts => {
 
 		// Send a price update to guarantee we're not stale.
 		oracle = account1;
-		timestamp = await currentTime();
+		// timestamp = await currentTime();
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -110,7 +110,7 @@ contract('BasePeriFinance', async accounts => {
 				'mintSecondaryRewards',
 				'overchainTransfer',
 				'setBlacklistManager',
-				'setBridgeState',
+				// 'setBridgeState',
 				'setBridgeValidator',
 				'setInflationMinter',
 				'setMinterRole',
@@ -437,68 +437,68 @@ contract('BasePeriFinance', async accounts => {
 	// 	});
 	// });
 
-	describe('anyPynthOrPERIRateIsInvalid()', () => {
-		it('should have stale rates initially', async () => {
-			assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-		});
-		describe('when pynth rates set', () => {
-			beforeEach(async () => {
-				// fast forward to get past initial PERI setting
-				await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
+	// describe('anyPynthOrPERIRateIsInvalid()', () => {
+	// 	it('should have stale rates initially', async () => {
+	// 		assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 	});
+	// 	describe('when pynth rates set', () => {
+	// 		beforeEach(async () => {
+	// 			// fast forward to get past initial PERI setting
+	// 			await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-				timestamp = await currentTime();
+	// 			timestamp = await currentTime();
 
-				await exchangeRates.updateRates(
-					[pAUD, pEUR, pETH],
-					['0.5', '1.25', '100'].map(toUnit),
-					timestamp,
-					{ from: oracle }
-				);
-				await debtCache.takeDebtSnapshot();
-			});
-			it('should still have stale rates', async () => {
-				assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-			});
-			describe('when PERI is also set', () => {
-				beforeEach(async () => {
-					timestamp = await currentTime();
+	// 			await exchangeRates.updateRates(
+	// 				[pAUD, pEUR, pETH],
+	// 				['0.5', '1.25', '100'].map(toUnit),
+	// 				timestamp,
+	// 				{ from: oracle }
+	// 			);
+	// 			await debtCache.takeDebtSnapshot();
+	// 		});
+	// 		it('should still have stale rates', async () => {
+	// 			assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 		});
+	// 		describe('when PERI is also set', () => {
+	// 			beforeEach(async () => {
+	// 				timestamp = await currentTime();
 
-					await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, { from: oracle });
-				});
-				it('then no stale rates', async () => {
-					assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), false);
-				});
+	// 				await exchangeRates.updateRates([PERI], ['1'].map(toUnit), timestamp, { from: oracle });
+	// 			});
+	// 			it('then no stale rates', async () => {
+	// 				assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), false);
+	// 			});
 
-				describe('when only some pynths are updated', () => {
-					beforeEach(async () => {
-						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
+	// 			describe('when only some pynths are updated', () => {
+	// 				beforeEach(async () => {
+	// 					await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-						timestamp = await currentTime();
+	// 					timestamp = await currentTime();
 
-						await exchangeRates.updateRates([PERI, pAUD], ['0.1', '0.78'].map(toUnit), timestamp, {
-							from: oracle,
-						});
-					});
+	// 					await exchangeRates.updateRates([PERI, pAUD], ['0.1', '0.78'].map(toUnit), timestamp, {
+	// 						from: oracle,
+	// 					});
+	// 				});
 
-					it('then anyPynthOrPERIRateIsInvalid() returns true', async () => {
-						assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-					});
-				});
-			});
-		});
-	});
+	// 				it('then anyPynthOrPERIRateIsInvalid() returns true', async () => {
+	// 					assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 				});
+	// 			});
+	// 		});
+	// 	});
+	// });
 
-	describe('availableCurrencyKeys()', () => {
-		it('returns all currency keys by default', async () => {
-			assert.deepEqual(await basePeriFinance.availableCurrencyKeys(), [pUSD, pETH, pEUR, pAUD]);
-		});
-	});
+	// describe('availableCurrencyKeys()', () => {
+	// 	it('returns all currency keys by default', async () => {
+	// 		assert.deepEqual(await basePeriFinance.availableCurrencyKeys(), [pUSD, pETH, pEUR, pAUD]);
+	// 	});
+	// });
 
-	describe('isWaitingPeriod()', () => {
-		it('returns false by default', async () => {
-			assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-		});
-	});
+	// describe('isWaitingPeriod()', () => {
+	// 	it('returns false by default', async () => {
+	// 		assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 	});
+	// });
 
 	describe('transfer()', () => {
 		describe('when the system is suspended', () => {

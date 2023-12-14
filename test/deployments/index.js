@@ -138,7 +138,7 @@ describe('deployments', () => {
 					pynths.forEach(({ name, inverted, feed, index }) => {
 						describe(name, () => {
 							it('PeriFinance has the pynth added', async () => {
-								const foundPynth = await contracts.PeriFinance.methods.pynths(toBytes32(name)).call();
+								const foundPynth = await contracts.Issuer.methods.pynths(toBytes32(name)).call();
 								assert.strictEqual(foundPynth, targets[`Pynth${name}`].address);
 							});
 							if (inverted) {

@@ -20,12 +20,13 @@ contract PeriFinance is BasePeriFinance {
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_SUPPLYSCHEDULE = "SupplySchedule";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
+    bytes32 private constant CONTRACT_BRIDGESTATE = "BridgeState";
 
     address public minterRole;
     address public inflationMinter;
     address payable public bridgeValidator;
 
-    IBridgeState public bridgeState;
+    // IBridgeState public bridgeState;
 
     // ========== CONSTRUCTOR ==========
 
@@ -45,10 +46,11 @@ contract PeriFinance is BasePeriFinance {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BasePeriFinance.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](3);
+        bytes32[] memory newAddresses = new bytes32[](4);
         newAddresses[0] = CONTRACT_REWARDESCROW_V2;
         newAddresses[1] = CONTRACT_SUPPLYSCHEDULE;
         newAddresses[2] = CONTRACT_CROSSCHAINMANAGER;
+        newAddresses[3] = CONTRACT_BRIDGESTATE;
         return combineArrays(existingAddresses, newAddresses);
     }
 
@@ -64,6 +66,10 @@ contract PeriFinance is BasePeriFinance {
 
     function crossChainManager() internal view returns (ICrossChainManager) {
         return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
+    }
+
+    function bridgeState() internal view returns (IBridgeState) {
+        return IBridgeState(requireAndGetAddress(CONTRACT_BRIDGESTATE));
     }
 
     // ========== OVERRIDDEN FUNCTIONS ==========
@@ -179,11 +185,11 @@ contract PeriFinance is BasePeriFinance {
 
         require(_burnByProxy(messageSender, _amount), "BurnFail");
 
-        bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
+        bridgeState().appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
 
     function claimAllBridgedAmounts() external payable optionalProxy {
-        uint[] memory applicableIds = bridgeState.applicableInboundIds(messageSender);
+        uint[] memory applicableIds = bridgeState().applicableInboundIds(messageSender);
 
         require(applicableIds.length > 0, "NoClaimable");
         require(msg.value >= systemSettings().bridgeClaimGasCost(), "NoFee");
@@ -196,11 +202,11 @@ contract PeriFinance is BasePeriFinance {
 
     function _claimBridgedAmount(uint _index) internal returns (bool) {
         // Validations are checked from bridge state
-        (address account, uint amount, , , , ) = bridgeState.inboundings(_index);
+        (address account, uint amount, , , , ) = bridgeState().inboundings(_index);
 
         require(account == messageSender, "CheckAddress");
 
-        bridgeState.claimInbound(_index, amount);
+        bridgeState().claimInbound(_index, amount);
 
         require(_mintByProxy(account, amount), "MintFail");
 
@@ -220,9 +226,9 @@ contract PeriFinance is BasePeriFinance {
         inflationMinter = _newInflationMinter;
     }
 
-    function setBridgeState(address _newBridgeState) external onlyOwner {
-        bridgeState = IBridgeState(_newBridgeState);
-    }
+    // function setBridgeState(address _newBridgeState) external onlyOwner {
+    //     bridgeState = IBridgeState(_newBridgeState);
+    // }
 
     // ========== EVENTS ==========
     event AccountLiquidated(address indexed account, uint periRedeemed, uint amountLiquidated, address liquidator);

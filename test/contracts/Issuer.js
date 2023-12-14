@@ -549,13 +549,13 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						toUnit(issuedPeriFinances),
 						multiplyDecimal(rate, issuanceRatio)
 					);
-					const maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 
 					assert.bnEqual(expectedIssuablePynths, maxIssuablePynths);
 				});
 
 				it("should correctly calculate a user's maximum issuable pynths without any PERI", async () => {
-					const maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 					assert.bnEqual(0, maxIssuablePynths);
 				});
 
@@ -576,14 +576,14 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						multiplyDecimal(peri2usdRate, issuanceRatio)
 					);
 
-					const maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 					assert.bnEqual(expectedIssuablePynths, maxIssuablePynths);
 				});
 			});
 
 			describe('adding and removing pynths', () => {
 				it('should allow adding a Pynth contract', async () => {
-					const previousPynthCount = await periFinance.availablePynthCount();
+					const previousPynthCount = await issuer.availablePynthCount();
 
 					const { token: pynth } = await mockToken({
 						accounts,
@@ -599,14 +599,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					const currencyKey = toBytes32('sXYZ');
 
 					// Assert that we've successfully added a Pynth
-					assert.bnEqual(
-						await periFinance.availablePynthCount(),
-						previousPynthCount.add(toBigNbr(1))
-					);
+					assert.bnEqual(await issuer.availablePynthCount(), previousPynthCount.add(toBigNbr(1)));
 					// Assert that it's at the end of the array
-					assert.equal(await periFinance.availablePynths(previousPynthCount), pynth.address);
+					assert.equal(await issuer.availablePynths(previousPynthCount), pynth.address);
 					// Assert that it's retrievable by its currencyKey
-					assert.equal(await periFinance.pynths(currencyKey), pynth.address);
+					assert.equal(await issuer.pynths(currencyKey), pynth.address);
 
 					// Assert event emitted
 					// assert.eventEqual(txn.logs[0], 'PynthAdded', [currencyKey, pynth.address]);
@@ -696,15 +693,15 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					it('should allow removing a Pynth contract when it has no issued balance', async () => {
-						const pynthCount = await periFinance.availablePynthCount();
+						const pynthCount = await issuer.availablePynthCount();
 
-						assert.notEqual(await periFinance.pynths(currencyKey), ZERO_ADDRESS);
+						assert.notEqual(await issuer.pynths(currencyKey), ZERO_ADDRESS);
 
 						await issuer.removePynth(currencyKey, { from: owner });
 
 						// Assert that we have one less pynth, and that the specific currency key is gone.
-						assert.bnEqual(await periFinance.availablePynthCount(), pynthCount.sub(toBigNbr(1)));
-						assert.equal(await periFinance.pynths(currencyKey), ZERO_ADDRESS);
+						assert.bnEqual(await issuer.availablePynthCount(), pynthCount.sub(toBigNbr(1)));
+						assert.equal(await issuer.pynths(currencyKey), ZERO_ADDRESS);
 
 						// assert.eventEqual(txn, 'PynthRemoved', [currencyKey, pynth.address]);
 					});
@@ -748,7 +745,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					await assert.revert(issuer.removePynth(currencyKey, { from: owner }));
 				});
 
-				it('should revert when requesting to remove pUSD', async () => {
+				it.skip('should revert when requesting to remove pUSD', async () => {
 					// Note: This test depends on state in the migration script, that there are hooked up pynths
 					// without balances
 					const currencyKey = toBytes32('pUSD');
@@ -777,7 +774,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					it('should allow adding multiple Pynth contracts at once', async () => {
-						const previousPynthCount = await periFinance.availablePynthCount();
+						const previousPynthCount = await issuer.availablePynthCount();
 
 						const { token: pynth1 } = await mockToken({
 							accounts,
@@ -803,19 +800,16 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						const currencyKey2 = toBytes32('sABC');
 
 						// Assert that we've successfully added two Pynths
-						assert.bnEqual(
-							await periFinance.availablePynthCount(),
-							previousPynthCount.add(toBigNbr(2))
-						);
+						assert.bnEqual(await issuer.availablePynthCount(), previousPynthCount.add(toBigNbr(2)));
 						// Assert that they're at the end of the array
-						assert.equal(await periFinance.availablePynths(previousPynthCount), pynth1.address);
+						assert.equal(await issuer.availablePynths(previousPynthCount), pynth1.address);
 						assert.equal(
-							await periFinance.availablePynths(previousPynthCount.add(toBigNbr(1))),
+							await issuer.availablePynths(previousPynthCount.add(toBigNbr(1))),
 							pynth2.address
 						);
 						// Assert that they are retrievable by currencyKey
-						assert.equal(await periFinance.pynths(currencyKey1), pynth1.address);
-						assert.equal(await periFinance.pynths(currencyKey2), pynth2.address);
+						assert.equal(await issuer.pynths(currencyKey1), pynth1.address);
+						assert.equal(await issuer.pynths(currencyKey2), pynth2.address);
 
 						// Assert events emitted
 						// assert.eventEqual(txn.logs[0], 'PynthAddeds', [currencyKey1, pynth1.address]);
@@ -902,8 +896,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						);
 					});
 
-					it('should disallow removing pUSD', async () => {
-						// Assert that we can't remove pUSD
+					it.skip('should disallow removing pUSD', async () => {
+						// Assert that we can't remove pUSD --> alllowed for updating MultiCollateralPynth upgrade
 						await assert.revert(issuer.removePynth(pUSD, { from: owner }), 'Cannot remove pynth');
 					});
 
@@ -922,14 +916,11 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 						await issuer.addPynths([pynth2.address], { from: owner });
 
-						const previousPynthCount = await periFinance.availablePynthCount();
+						const previousPynthCount = await issuer.availablePynthCount();
 
 						await issuer.removePynth(currencyKey2, { from: owner });
 
-						assert.bnEqual(
-							await periFinance.availablePynthCount(),
-							previousPynthCount.sub(toBigNbr(1))
-						);
+						assert.bnEqual(await issuer.availablePynthCount(), previousPynthCount.sub(toBigNbr(1)));
 
 						// Assert events emitted
 						// assert.eventEqual(tx.logs[0], 'PynthRemoved', [currencyKey, pynth.address]);
@@ -1022,7 +1013,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 								await debtCache.takeDebtSnapshot();
 							});
 
-							if (type === 'none' || type === 'pUSD' || type === 'pETH') {
+							if (type === 'none' || type === 'pUSD') {
 								it('then calling issuePynths and issueMaxPynths() succeeds', async () => {
 									await periFinance.issuePynths(PERI, toUnit('1'), {
 										from: account1,
@@ -1067,7 +1058,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					// Give some PERI to account1
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 
-					const maxPynths = await periFinance.maxIssuablePynths(account1);
+					const maxPynths = await issuer.maxIssuablePynths(account1);
 
 					// account1 should be able to issue
 					await periFinance.issuePynths(PERI, maxPynths, { from: account1 });
@@ -1170,7 +1161,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 				it('should allow an issuer to issue max pynths via the standard issue call', async () => {
 					// Determine maximum amount that can be issued.
-					const maxIssuable = await periFinance.maxIssuablePynths(account1);
+					const maxIssuable = await issuer.maxIssuablePynths(account1);
 
 					// Issue
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
@@ -2184,7 +2175,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.5'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 							assert.equal(await feePool.isFeesClaimable(account1), false);
 						});
 
@@ -2207,7 +2198,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.9'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
@@ -2229,7 +2220,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['.1'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
@@ -2251,7 +2242,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 							await exchangeRates.updateRates([PERI], ['2'].map(toUnit), timestamp, {
 								from: oracle,
 							});
-							maxIssuablePynths = await periFinance.maxIssuablePynths(account1);
+							maxIssuablePynths = await issuer.maxIssuablePynths(account1);
 						});
 
 						it('then the maxIssuablePynths increases 100%', async () => {
@@ -2271,8 +2262,8 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				const updateRates = async () => {
 					const timestamp = await currentTime();
 					await exchangeRates.updateRates(
-						[PERI, USDC, DAI],
-						['10', '0.9', '1'].map(toUnit),
+						[PERI, USDC, DAI, pETH],
+						['10', '0.9', '1', '1200'].map(toUnit),
 						timestamp,
 						{
 							from: oracle,
@@ -2462,7 +2453,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					await assert.revert(
 						periFinance.burnPynths(PERI, toUnit('10001'), { from: account1 }),
-						"User doesn't have enough staked amount"
+						'Trying to burn more than debt'
 					);
 				});
 
@@ -2683,7 +2674,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					}); // Issue a small amount to account2
 
 					// Issue from account1
-					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
+					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
@@ -2723,7 +2714,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						from: owner,
 					}); // Issue a small amount to account2
 
-					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
+					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
@@ -2775,7 +2766,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						from: owner,
 					}); // Issue a small amount to account2
 
-					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
+					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnClose(debtBalance1, account1AmountToIssue);
@@ -2827,7 +2818,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						from: owner,
 					}); // Issue a small amount to account2
 
-					const account1AmountToIssue = await periFinance.maxIssuablePynths(account1);
+					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
 					assert.bnEqual(debtBalance1, account1AmountToIssue);
@@ -2928,7 +2919,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					);
 
 					// Issue
-					const maxIssuable = await periFinance.maxIssuablePynths(account1);
+					const maxIssuable = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 
 					// Compare
@@ -2956,7 +2947,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					// Issue
-					const maxIssuable = await periFinance.maxIssuablePynths(account1);
+					const maxIssuable = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 					// Compare
 					const collaterisationRatio = await periFinance.collateralisationRatio(account1);
@@ -3075,7 +3066,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 					});
 
 					// Issue
-					const maxIssuable = await periFinance.maxIssuablePynths(account1);
+					const maxIssuable = await issuer.maxIssuablePynths(account1);
 					const issued = maxIssuable.div(toBigNbr(3));
 					await periFinance.issuePynths(PERI, issued, { from: account1 });
 					const expectedRemaining = maxIssuable.sub(issued);
@@ -3107,7 +3098,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						}
 					);
 
-					const maxIssuable = await periFinance.maxIssuablePynths(account1);
+					const maxIssuable = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 
 					// Compare

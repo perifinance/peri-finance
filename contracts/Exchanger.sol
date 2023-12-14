@@ -62,6 +62,14 @@ interface IExchangerInternalDebtCache {
     function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external;
 }
 
+interface IExchangerInternalVirtualPynthIssuer {
+    function createVirtualPynth(
+        IERC20 pynth,
+        address recipient,
+        uint amount,
+        bytes32 currencyKey
+    ) external returns (IVirtualPynth);
+}
 // https://docs.peri.finance/contracts/source/contracts/exchanger
 contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     using SafeMath for uint;
@@ -97,6 +105,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
+    bytes32 private constant CONTRACT_VIRTUALPYNTHISSUER = "VirtualPynthIssuer";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -104,7 +113,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](10);
+        bytes32[] memory newAddresses = new bytes32[](11);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -115,6 +124,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[7] = CONTRACT_ISSUER;
         newAddresses[8] = CONTRACT_DEBTCACHE;
         newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
+        newAddresses[10] = CONTRACT_VIRTUALPYNTHISSUER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -172,6 +182,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function priceDeviationThresholdFactor() external view returns (uint) {
         return getPriceDeviationThresholdFactor();
+    }
+
+    function virtualPynthIssuer() internal view returns (IExchangerInternalVirtualPynthIssuer) {
+        return IExchangerInternalVirtualPynthIssuer(requireAndGetAddress(CONTRACT_VIRTUALPYNTHISSUER));
     }
 
     function settlementOwing(address account, bytes32 currencyKey)
@@ -631,12 +645,12 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function _createVirtualPynth(
-        IERC20,
-        address,
-        uint,
-        bytes32
+        IERC20 pynth,
+		address recipient,
+		uint amount,
+		bytes32 currencyKey
     ) internal returns (IVirtualPynth) {
-        revert("Cannot be run on this layer");
+        virtualPynthIssuer().createVirtualPynth(pynth, recipient, amount, currencyKey);
     }
 
     // Note: this function can intentionally be called by anyone on behalf of anyone else (the caller just pays the gas)
@@ -671,7 +685,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         require(!anyRateInvalid, "Rates for given synths not valid");
 
-        for (uint i = 0; i < currencyKeys.length; i++) {
+        for (uint i; i < currencyKeys.length; i++) {
             lastExchangeRate[currencyKeys[i]] = rates[i];
         }
     }
@@ -764,7 +778,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
 
         // emit settlement event for each settled exchange entry
-        for (uint i = 0; i < settlements.length; i++) {
+        for (uint i; i < settlements.length; i++) {
             emit ExchangeEntrySettled(
                 from,
                 settlements[i].src,
@@ -969,9 +983,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     // ========== MODIFIERS ==========
 
     modifier onlyPeriFinanceorPynth() {
-        IPeriFinance _periFinance = periFinance();
         require(
-            msg.sender == address(_periFinance) || _periFinance.pynthsByAddress(msg.sender) != bytes32(0),
+            msg.sender == address(periFinance()) || issuer().pynthsByAddress(msg.sender) != bytes32(0),
             "Exchanger: Only periFinance or a pynth contract can perform this action"
         );
         _;

@@ -10,13 +10,13 @@ const { toUnit } = require('../../utils')();
 const { gray } = require('chalk');
 
 async function checkRates({ network, deploymentPath }) {
-	const PeriFinance = await connectContract({
+	const Issuer = await connectContract({
 		network,
 		deploymentPath,
-		contractName: 'PeriFinance',
+		contractName: 'Issuer',
 	});
 
-	const rateInvalid = await PeriFinance.anyPynthOrPERIRateIsInvalid();
+	const rateInvalid = await Issuer.anyPynthOrPERIRateIsInvalid();
 
 	return !rateInvalid;
 }

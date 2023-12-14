@@ -502,7 +502,7 @@ contract('Pynth', async accounts => {
 				// this could use GenericMock if we added the ability for generic functions
 				// to emit events and listened to those instead (so here, for Exchanger.settle() we'd
 				// need to be sure it was invoked during transferAndSettle())
-				exchanger = await MockExchanger.new(periFinance.address);
+				exchanger = await MockExchanger.new(issuer.address);
 
 				await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [exchanger.address], {
 					from: owner,

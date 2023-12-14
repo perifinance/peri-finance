@@ -20,8 +20,11 @@ interface ILiquidations {
     // Mutative Functions
     function flagAccountForLiquidation(address account) external;
 
-    // Restricted: used internally to PeriFinance
+    // Restricted: used internally to Issuer
     function removeAccountInLiquidation(address account) external;
+
+    function liquidateAccount(address account, uint pusdAmount, uint debtBalance) 
+        external returns (uint totalRedeemedinUSD, uint amountToLiquidate);
 
     function checkAndRemoveAccountInLiquidation(address account) external;
 }

@@ -116,33 +116,33 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (totalIssued, ) = issuer().totalIssuedPynths(currencyKey, true);
     }
 
-    function availableCurrencyKeys() external view returns (bytes32[] memory) {
-        return issuer().availableCurrencyKeys();
-    }
+    // function availableCurrencyKeys() external view returns (bytes32[] memory) {
+    //     return issuer().availableCurrencyKeys();
+    // }
 
-    function availablePynthCount() external view returns (uint) {
-        return issuer().availablePynthCount();
-    }
+    // function availablePynthCount() external view returns (uint) {
+    //     return issuer().availablePynthCount();
+    // }
 
-    function availablePynths(uint index) external view returns (IPynth) {
-        return issuer().availablePynths(index);
-    }
+    // function availablePynths(uint index) external view returns (IPynth) {
+    //     return issuer().availablePynths(index);
+    // }
 
-    function pynths(bytes32 currencyKey) external view returns (IPynth) {
-        return issuer().pynths(currencyKey);
-    }
+    // function pynths(bytes32 currencyKey) external view returns (IPynth) {
+    //     return issuer().pynths(currencyKey);
+    // }
 
-    function pynthsByAddress(address pynthAddress) external view returns (bytes32) {
-        return issuer().pynthsByAddress(pynthAddress);
-    }
+    // function pynthsByAddress(address pynthAddress) external view returns (bytes32) {
+    //     return issuer().pynthsByAddress(pynthAddress);
+    // }
 
     function isWaitingPeriod(bytes32 currencyKey) external view returns (bool) {
         return exchanger().maxSecsLeftInWaitingPeriod(messageSender, currencyKey) > 0;
     }
 
-    function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid) {
-        return issuer().anyPynthOrPERIRateIsInvalid();
-    }
+    // function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid) {
+    //     return issuer().anyPynthOrPERIRateIsInvalid();
+    // }
 
     function maxIssuablePynths(address account) external view returns (uint maxIssuable) {
         return issuer().maxIssuablePynths(account);

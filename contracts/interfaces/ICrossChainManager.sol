@@ -57,7 +57,7 @@ interface ICrossChainManager {
 
     // function addNetworkId(bytes32 _chainID, uint _networkId) external;
 
-    function addNetworkIds(uint[] calldata _networkIds) external;
+    // function addNetworkIds(uint[] calldata _networkIds) external;
 
     function addCurrentNetworkIssuedDebt(uint _amount) external;
 

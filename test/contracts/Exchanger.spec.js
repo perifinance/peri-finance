@@ -78,6 +78,8 @@ contract('Exchanger (spec tests)', async accounts => {
 		issuer,
 		flexibleStorage;
 
+	let aggregator;
+
 	const itReadsTheWaitingPeriod = () => {
 		describe('waitingPeriodSecs', () => {
 			it('the default is configured correctly', async () => {
@@ -2611,10 +2613,10 @@ contract('Exchanger (spec tests)', async accounts => {
 
 			describe('edge case: when an aggregator has a 0 rate', () => {
 				describe('when an aggregator is added to the exchangeRates', () => {
-					let aggregator;
+					// let aggregator;
 
 					beforeEach(async () => {
-						aggregator = await MockAggregator.new({ from: owner });
+						// aggregator = await MockAggregator.new({ from: owner });
 						await exchangeRates.addAggregator(pETH, aggregator.address, { from: owner });
 						// set a 0 rate to prevent invalid rate from causing a revert on exchange
 						await aggregator.setLatestAnswer('0', await currentTime());
@@ -3527,10 +3529,10 @@ contract('Exchanger (spec tests)', async accounts => {
 
 						describe('edge case: aggregator returns 0 for settlement price', () => {
 							describe('when an aggregator is added to the exchangeRates', () => {
-								let aggregator;
+								// let aggregator;
 
 								beforeEach(async () => {
-									aggregator = await MockAggregator.new({ from: owner });
+									// aggregator = await MockAggregator.new({ from: owner });
 									await exchangeRates.addAggregator(pETH, aggregator.address, { from: owner });
 								});
 
@@ -3801,6 +3803,8 @@ contract('Exchanger (spec tests)', async accounts => {
 			await pUSDContract.issue(account1, amountIssued);
 			await pUSDContract.issue(account2, amountIssued);
 
+			aggregator = await MockAggregator.new({ from: owner });
+
 			// await crossChainManager.appendTotalNetworkDebt(amountIssued.add(amountIssued), {
 			// 	from: debtManager,
 			// });
@@ -3854,7 +3858,7 @@ contract('Exchanger (spec tests)', async accounts => {
 		itPricesSpikeDeviation();
 
 		itSetsExchangeFeeRateForPynths();
-	});
+	}).timeout(90e3);
 
 	describe.skip('When using MintablePeriFinance', () => {
 		before(async () => {

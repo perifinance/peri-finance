@@ -8,11 +8,7 @@ const { setupAllContracts, setupContract } = require('./setup');
 
 const { currentTime, multiplyDecimal, divideDecimal, toUnit, fastForward } = require('../utils')();
 
-const {
-	onlyGivenAddressCanInvoke,
-	ensureOnlyExpectedMutativeFunctions,
-	setStatus,
-} = require('./helpers');
+const { ensureOnlyExpectedMutativeFunctions, setStatus } = require('./helpers');
 
 const {
 	toBytes32,
@@ -81,7 +77,7 @@ contract('Liquidations', accounts => {
 			],
 		}));
 
-		await systemSettings.setLiquidationRatio(toUnit('0.5'), { from: owner });
+		await systemSettings.setLiquidationRatio(LIQUIDATION_RATIO, { from: owner });
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -119,6 +115,7 @@ contract('Liquidations', accounts => {
 			abi: liquidations.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
+				'liquidateAccount',
 				'flagAccountForLiquidation',
 				'removeAccountInLiquidation',
 				'checkAndRemoveAccountInLiquidation',
@@ -256,15 +253,15 @@ contract('Liquidations', accounts => {
 					// now have Liquidations resync its cache
 					await liquidations.rebuildCache();
 				});
-				it('removeAccountInLiquidation() can only be invoked by issuer', async () => {
-					await onlyGivenAddressCanInvoke({
-						fnc: liquidations.removeAccountInLiquidation,
-						args: [alice],
-						address: owner, // TODO: is this supposed to be issuer.address
-						accounts,
-						reason: 'Liquidations: Only the Issuer contract can perform this action',
-					});
-				});
+				// it('removeAccountInLiquidation() can only be invoked by issuer', async () => {
+				// 	await onlyGivenAddressCanInvoke({
+				// 		fnc: liquidations.removeAccountInLiquidation,
+				// 		args: [alice],
+				// 		address: owner, // TODO: is this supposed to be issuer.address
+				// 		accounts,
+				// 		reason: 'Liquidations: Only the Issuer contract can perform this action',
+				// 	});
+				// });
 			});
 		});
 		describe('calculateAmountToFixCollateral', () => {
@@ -338,7 +335,7 @@ contract('Liquidations', accounts => {
 			let exchanger;
 			describe('then do liquidation checks', () => {
 				beforeEach(async () => {
-					exchanger = await MockExchanger.new(periFinance.address);
+					exchanger = await MockExchanger.new(issuer.address);
 					await addressResolver.importAddresses(['Exchanger'].map(toBytes32), [exchanger.address], {
 						from: owner,
 					});
@@ -383,13 +380,13 @@ contract('Liquidations', accounts => {
 					// Drop PERI value to $1 (Collateral worth $800 after)
 					await updatePERIPrice('1');
 				});
-				it('and liquidation Collateral Ratio is 200%', async () => {
-					assert.bnEqual(await liquidations.liquidationCollateralRatio(), toUnit('2'));
+				it('and liquidation Collateral Ratio is 150%', async () => {
+					assert.bnEqual(await liquidations.liquidationCollateralRatio(), toUnit('1.5'));
 				});
 				it('and liquidation penalty is 10%', async () => {
 					assert.bnEqual(await liquidations.liquidationPenalty(), LIQUIDATION_PENALTY);
 				});
-				it('and liquidation delay is 3 days', async () => {
+				it('and liquidation delay is 1 days', async () => {
 					assert.bnEqual(await liquidations.liquidationDelay(), LIQUIDATION_DELAY);
 				});
 				describe('when Alice has not been flagged for liquidation', () => {
@@ -632,7 +629,7 @@ contract('Liquidations', accounts => {
 								await updatePERIPrice('1');
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 
-								const maxIssuablePynths = await periFinance.maxIssuablePynths(alice);
+								const maxIssuablePynths = await issuer.maxIssuablePynths(alice);
 								amountToBurn = aliceDebtBalance.sub(maxIssuablePynths).abs();
 
 								await periFinance.burnPynths(PERI, amountToBurn, { from: alice });

@@ -205,7 +205,7 @@ contract PeriFinanceBridgeToOptimism is Owned, MixinSystemSettings, IPeriFinance
 
     function _initiateEscrowMigration(uint256[][] memory _entryIDs) private {
         // loop through the entryID array
-        for (uint256 i = 0; i < _entryIDs.length; i++) {
+        for (uint256 i; i < _entryIDs.length; i++) {
             // Cannot send more than MAX_ENTRIES_MIGRATED_PER_MESSAGE entries due to ovm gas restrictions
             require(_entryIDs[i].length <= MAX_ENTRIES_MIGRATED_PER_MESSAGE, "Exceeds max entries per migration");
             // Burn their reward escrow first

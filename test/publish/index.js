@@ -1369,9 +1369,9 @@ describe('publish scripts', () => {
 				beforeEach(async () => {
 					mockAggregator = await createMockAggregator();
 				});
-				describe('when PeriFinance.anyPynthOrPERIRateIsInvalid() is invoked', () => {
+				describe('when Issuer.anyPynthOrPERIRateIsInvalid() is invoked', () => {
 					it('then it returns true as expected', async () => {
-						const response = await PeriFinance.methods.anyPynthOrPERIRateIsInvalid().call();
+						const response = await Issuer.methods.anyPynthOrPERIRateIsInvalid().call();
 						assert.strictEqual(response, true, 'anyPynthOrPERIRateIsInvalid must be true');
 					});
 				});
@@ -1423,9 +1423,9 @@ describe('publish scripts', () => {
 									await setAggregatorAnswer({ asset, rate: 1 });
 								}
 							});
-							describe('when PeriFinance.anyPynthOrPERIRateIsInvalid() is invoked', () => {
+							describe('when Issuer.anyPynthOrPERIRateIsInvalid() is invoked', () => {
 								it('then it returns true as pEUR still is', async () => {
-									const response = await PeriFinance.methods.anyPynthOrPERIRateIsInvalid().call();
+									const response = await Issuer.methods.anyPynthOrPERIRateIsInvalid().call();
 									assert.strictEqual(response, true, 'anyPynthOrPERIRateIsInvalid must be true');
 								});
 							});
@@ -1452,9 +1452,9 @@ describe('publish scripts', () => {
 									});
 								});
 
-								describe('when PeriFinance.anyPynthOrPERIRateIsInvalid() is invoked', () => {
+								describe('when Issuer.anyPynthOrPERIRateIsInvalid() is invoked', () => {
 									it('then it returns false as expected', async () => {
-										const response = await PeriFinance.methods.anyPynthOrPERIRateIsInvalid().call();
+										const response = await Issuer.methods.anyPynthOrPERIRateIsInvalid().call();
 										assert.strictEqual(
 											response,
 											false,

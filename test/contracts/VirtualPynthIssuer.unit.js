@@ -8,37 +8,27 @@ const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = requi
 
 const { toBytes32 } = require('../..');
 
-let ExchangerWithVirtualPynth;
+let VirtualPynthIssuer;
 
-contract('ExchangerWithVirtualPynth (unit tests)', async accounts => {
+contract('VirtualPynthIssuer (unit tests)', async accounts => {
 	const [, owner] = accounts;
 
 	before(async () => {
-		ExchangerWithVirtualPynth = artifacts.require('ExchangerWithVirtualPynth');
+		VirtualPynthIssuer = artifacts.require('VirtualPynthIssuer');
 	});
 
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
-			abi: ExchangerWithVirtualPynth.abi,
+			abi: VirtualPynthIssuer.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
-			expected: [
-				'exchange',
-				'exchangeOnBehalf',
-				'exchangeOnBehalfWithTracking',
-				'exchangeWithTracking',
-				'exchangeWithVirtual',
-				'resetLastExchangeRate',
-				'settle',
-				'suspendPynthWithInvalidRate',
-				'setLastExchangeRateForPynth',
-			],
+			expected: ['createVirtualPynth'],
 		});
 	});
 
 	// When VirtualPynths is implemented, we re-visit the test.
 	describe.skip('when a contract is instantiated', () => {
 		// ensure all of the behaviors are bound to "this" for sharing test state
-		const behaviors = require('./ExchangerWithVirtualPynth.behaviors').call(this, { accounts });
+		const behaviors = require('./VirtualPynthIssuer.behaviors').call(this, { accounts });
 
 		describe('exchanging', () => {
 			describe('exchangeWithVirtual', () => {

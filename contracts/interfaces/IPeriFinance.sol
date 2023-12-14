@@ -8,13 +8,13 @@ interface IPeriFinance {
     // Views
     function getRequiredAddress(bytes32 contractName) external view returns (address);
 
-    function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
+    // function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
 
-    function availableCurrencyKeys() external view returns (bytes32[] memory);
+    // function availableCurrencyKeys() external view returns (bytes32[] memory);
 
-    function availablePynthCount() external view returns (uint);
+    // function availablePynthCount() external view returns (uint);
 
-    function availablePynths(uint index) external view returns (IPynth);
+    // function availablePynths(uint index) external view returns (IPynth);
 
     function collateral(address account) external view returns (uint);
 
@@ -35,9 +35,9 @@ interface IPeriFinance {
             uint totalSystemDebt
         );
 
-    function pynths(bytes32 currencyKey) external view returns (IPynth);
+    // function pynths(bytes32 currencyKey) external view returns (IPynth);
 
-    function pynthsByAddress(address pynthAddress) external view returns (bytes32);
+    // function pynthsByAddress(address pynthAddress) external view returns (bytes32);
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint);
 

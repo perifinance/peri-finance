@@ -249,9 +249,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // backup the fees from self network from last period.
         _feeRewardsToBeAllocated = _recentFeePeriodsStorage(0).feesToDistribute;
 
-        uint totalFeeRewards = 0;
+        uint totalFeeRewards;
         // Add up the fees from other networks
-        for (uint i = 0; i < feeRewards.length; i++) {
+        for (uint i; i < feeRewards.length; i++) {
             totalFeeRewards = totalFeeRewards.add(feeRewards[i]);
         }
         // Add up the fees from self networks
@@ -507,7 +507,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function setInitialFeePeriods(address prevFeePool) external optionalProxy_onlyOwner onlyDuringSetup {
         require(prevFeePool != address(0), "Previous FeePool address must be set");
 
-        for (uint i = 0; i < FEE_PERIOD_LENGTH; i++) {
+        for (uint i; i < FEE_PERIOD_LENGTH; i++) {
             (uint64 feePeriodId, uint64 startingDebtIndex, uint64 startTime, uint feesToDistribute, 
                 uint feesClaimed, uint rewardsToDistribute, uint rewardsClaimed) = IFeePool(prevFeePool).recentFeePeriods(i);
 
@@ -525,11 +525,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * @notice Record the fee payment in our recentFeePeriods.
      * @param pUSDAmount The amount of fees priced in pUSD.
      */
-    function _recordFeePayment(uint pUSDAmount) internal returns (uint) {
+    function _recordFeePayment(uint pUSDAmount) internal returns (uint feesPaid) {
         // Don't assign to the parameter
         uint remainingToAllocate = pUSDAmount;
 
-        uint feesPaid;
         // Start at the oldest period and record the amount, moving to newer periods
         // until we've exhausted the amount.
         // The condition checks for overflow because we're going to 0 with an unsigned int.
@@ -556,18 +555,18 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             }
         }
 
-        return feesPaid;
+        // return feesPaid;
     }
 
     /**
      * @notice Record the reward payment in our recentFeePeriods.
      * @param periAmount The amount of PERI tokens.
      */
-    function _recordRewardPayment(uint periAmount) internal returns (uint) {
+    function _recordRewardPayment(uint periAmount) internal returns (uint rewardPaid) {
         // Don't assign to the parameter
         uint remainingToAllocate = periAmount;
 
-        uint rewardPaid;
+        // uint rewardPaid;
 
         // Start at the oldest period and record the amount, moving to newer periods
         // until we've exhausted the amount.
@@ -595,7 +594,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
                 }
             }
         }
-        return rewardPaid;
+        // return rewardPaid;
     }
 
     /**
@@ -650,28 +649,21 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /**
      * @notice The total PERI rewards available in the system to be withdrawn
      */
-    function totalRewardsAvailable() external view returns (uint) {
-        uint totalRewards = 0;
-
+    function totalRewardsAvailable() external view returns (uint totalRewards) {
         // Rewards in fee period [0] are not yet available for withdrawal
         for (uint i = 1; i < FEE_PERIOD_LENGTH; i++) {
             totalRewards = totalRewards.add(_recentFeePeriodsStorage(i).rewardsToDistribute);
             totalRewards = totalRewards.sub(_recentFeePeriodsStorage(i).rewardsClaimed);
         }
-
-        return totalRewards;
     }
 
     /**
      * @notice The fees available to be withdrawn by a specific account, priced in pUSD
      * @dev Returns two amounts, one for fees and one for PERI rewards
      */
-    function feesAvailable(address account) public view returns (uint, uint) {
+    function feesAvailable(address account) public view returns (uint totalFees, uint totalRewards) {
         // Add up the fees
         uint[2][FEE_PERIOD_LENGTH] memory userFees = feesByPeriod(account);
-
-        uint totalFees = 0;
-        uint totalRewards = 0;
 
         // Fees & Rewards in fee period [0] are not yet available for withdrawal
         for (uint i = 1; i < FEE_PERIOD_LENGTH; i++) {
@@ -681,10 +673,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // And convert totalFees to pUSD
         // Return totalRewards as is in PERI amount
-        return (totalFees, totalRewards);
+        // return (totalFees, totalRewards);
     }
 
-    function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool, bool) {
+    function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool feesClaimable, bool anyRateIsInvalid) {
         // External token staked amount should not over the quota limit.
         uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
         if (
@@ -693,15 +685,17 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             return (false, false);
         }
 
+        uint ratio;
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
         //  0  <  10%:   Claimable
         // 10% > above:  Unable to claim
-        (uint ratio, bool anyRateIsInvalid) = issuer().collateralisationRatioAndAnyRatesInvalid(account);
+        (ratio, anyRateIsInvalid) = issuer().collateralisationRatioAndAnyRatesInvalid(account);
         uint targetRatio = getIssuanceRatio();
 
+        feesClaimable = true;
         // Claimable if collateral ratio below target ratio
         if (ratio < targetRatio) {
-            return (true, anyRateIsInvalid);
+            return (feesClaimable, anyRateIsInvalid);
         }
 
         // Calculate the threshold for collateral ratio before fees can't be claimed.
@@ -709,10 +703,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // Not claimable if collateral ratio above threshold
         if (ratio > ratio_threshold) {
-            return (false, anyRateIsInvalid);
+            feesClaimable = false;
         }
-
-        return (true, anyRateIsInvalid);
     }
 
     function isFeesClaimable(address account) external view returns (bool feesClaimable) {

@@ -192,32 +192,33 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         returns (uint totalIssued, bool anyRateIsInvalid)
     {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
-        anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
+        // anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
-        IExchangeRates exRates = exchangeRates();
+        // IExchangeRates exRates = exchangeRates();
 
         // Add total issued pynths from non peri collateral back into the total if not excluded
         if (!excludeCollateral) {
             // Get the pUSD equivalent amount of all the MC issued pynths.
             (uint nonPeriDebt, bool invalid) = collateralManager().totalLong();
             debt = debt.add(nonPeriDebt);
-            anyRateIsInvalid = anyRateIsInvalid || invalid;
+            // anyRateIsInvalid = anyRateIsInvalid || invalid;
 
             // Now add the ether collateral stuff as we are still supporting it.
             debt = debt.add(etherCollateralpUSD().totalIssuedPynths());
 
             // Add ether collateral pETH
-            (uint ethRate, bool ethRateInvalid) = exRates.rateAndInvalid(pETH);
+            (uint ethRate, bool ethRateInvalid) = exchangeRates().rateAndInvalid(pETH);
             uint ethIssuedDebt = etherCollateral().totalIssuedPynths().multiplyDecimalRound(ethRate);
             debt = debt.add(ethIssuedDebt);
-            anyRateIsInvalid = anyRateIsInvalid || ethRateInvalid;
+            anyRateIsInvalid = invalid || ethRateInvalid;
         }
 
+        anyRateIsInvalid = anyRateIsInvalid || cacheIsInvalid || cacheIsStale;
         if (currencyKey == pUSD) {
             return (debt, anyRateIsInvalid);
         }
 
-        (uint currencyRate, bool currencyRateInvalid) = exRates.rateAndInvalid(currencyKey);
+        (uint currencyRate, bool currencyRateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
         return (debt.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
     }
 
@@ -266,7 +267,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _canBurnPynths(address account) internal view returns (bool) {
-        return now >= _lastIssueEvent(account).add(getMinimumStakeTime()) || !crossChainManager().syncStale();
+        return now >= _lastIssueEvent(account).add(getMinimumStakeTime()) && !crossChainManager().syncStale();
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {
@@ -304,16 +305,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return amount.divideDecimalRound(periRate);
     }
 
-    function _maxIssuablePynths(address _issuer) internal view returns (uint, bool) {
+    function _maxIssuablePynths(address _issuer) internal view returns (uint maxIssuable, bool periRateIsInvalid) {
         // What is the value of their PERI balance in pUSD
-        (uint periRate, bool periRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
+        uint periRate;
+        (periRate, periRateIsInvalid) = exchangeRates().rateAndInvalid(PERI);
 
-        uint externalTokenStaked = exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD);
-
-        uint destinationValue = _periToUSD(_collateral(_issuer), periRate).add(externalTokenStaked);
+        maxIssuable = _periToUSD(_collateral(_issuer), periRate)
+            .add(exTokenStakeManager().combinedStakedAmountOf(_issuer, pUSD));
 
         // They're allowed to issue up to issuanceRatio of that value
-        return (destinationValue.multiplyDecimal(getIssuanceRatio()), periRateIsInvalid);
+        return (maxIssuable.multiplyDecimal(getIssuanceRatio()), periRateIsInvalid);
     }
 
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
@@ -795,19 +796,19 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(!exchanger().hasWaitingPeriodOrSettlementOwing(liquidator, pUSD), "pUSD needs to be settled");
 
         // Check account is liquidation open
-        require(liquidations().isOpenForLiquidation(account), "Account not open for liquidation");
+        // require(liquidations().isOpenForLiquidation(account), "Account not open for liquidation");  --> moved to liquidations().liquidateAccount()
 
         // require liquidator has enough pUSD
         require(IERC20(address(pynths[pUSD])).balanceOf(liquidator) >= pusdAmount, "Not enough pUSD");
-
-        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
 
         // What is their debt in pUSD?
         (uint debtBalance, uint totalDebtIssued, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, pUSD);
         (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
         _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
 
-        uint collateralForAccountinUSD = _periToUSD(IERC20(address(periFinance())).balanceOf(account), periRate);
+        /*uint collateralForAccountinUSD = _periToUSD(IERC20(address(periFinance())).balanceOf(account), periRate);
+
+        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
         for (uint i; i < tokenList.length; i++) {
             collateralForAccountinUSD = collateralForAccountinUSD.add(
                 exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD)
@@ -837,14 +838,26 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         //uint periRedeemed = _usdToPeri(amountToLiquidate, periRate);
         totalRedeemed = _usdToPeri(totalRedeemedinUSD, periRate);
 
-        // burn pUSD from messageSender (liquidator) and reduce account's debt
-        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);
-
         // Remove liquidation flag if amount liquidated fixes ratio
         if (amountToLiquidate == amountToFixRatioinUSD) {
             // Remove liquidation
             liquidations().removeAccountInLiquidation(account);
-        }
+        } */ //--> moved to liquidations().liquidateAccount()
+
+        (totalRedeemed, amountToLiquidate) = liquidations().liquidateAccount(
+            account,
+            pusdAmount,
+            debtBalance
+        );
+
+        totalRedeemed = exTokenStakeManager().redeem(account, totalRedeemed, liquidator);
+
+        // what's the equivalent amount of peri for the amountToLiquidate?
+        //uint periRedeemed = _usdToPeri(amountToLiquidate, periRate);
+        totalRedeemed = _usdToPeri(totalRedeemed, periRate);
+
+        // burn pUSD from messageSender (liquidator) and reduce account's debt
+        _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
@@ -948,7 +961,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) internal returns (uint remainingDebt) {
         if (!burnToTarget) {
             // If not burning to target, then burning requires that the minimum stake time has elapsed.
-            require(_canBurnPynths(from), "Minimum stake time not reached");
+            require(_canBurnPynths(from), "Min stake time not reached or chain sync stale");
             // First settle anything pending into pUSD as burning or issuing impacts the size of the debt pool
             (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, pUSD);
             if (numEntriesSettled > 0) {

@@ -24,7 +24,7 @@ const {
 } = require('../utils')();
 
 contract('CrossChainManager', async accounts => {
-	const [, /* deployer */ owner, oracle, , , debtManager, account1, account2, account3] = accounts;
+	const [, owner, oracle, , , debtManager, account1, account2, account3, minterRole] = accounts;
 
 	const [pUSD, pETH, pBTC, PERI] = ['pUSD', 'pETH', 'pBTC', 'PERI'].map(toBytes32);
 	const pynthKeys = [pUSD, pETH, pBTC];
@@ -35,7 +35,7 @@ contract('CrossChainManager', async accounts => {
 		periFinance,
 		/* periFinanceState, */
 		bridgeStatepUSD,
-		/* issuer, */
+		supplySchedule,
 		exchangeRates,
 		pUSDPynth,
 		pBTCPynth,
@@ -88,10 +88,11 @@ contract('CrossChainManager', async accounts => {
 			PynthpUSD: pUSDPynth,
 			PynthpBTC: pBTCPynth,
 			PynthpETH: pETHPynth,
-			/* Issuer: issuer, */
+			SupplySchedule: supplySchedule,
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD', 'pBTC', 'pETH'],
+			isPUSDMock: false,
 			contracts: [
 				'AddressResolver',
 				'CrossChainManager',
@@ -102,6 +103,7 @@ contract('CrossChainManager', async accounts => {
 				'PeriFinance',
 				'ExchangeRates',
 				'SystemSettings',
+				'SupplySchedule',
 				/* 'EtherCollateral',
 				'EtherCollateralsUSD', */
 				'CollateralManager',
@@ -116,7 +118,7 @@ contract('CrossChainManager', async accounts => {
 		// default set up for cross chain
 		const tChainIds = ['1287', '97', '5'].map(toUnit);
 
-		await crossChainManager.addNetworkIds(tChainIds, { from: owner });
+		// await crossChainManager.addNetworkIds(tChainIds, { from: owner });
 
 		const tIssuedDebt = [
 			'318229466389837023940',
@@ -158,7 +160,6 @@ contract('CrossChainManager', async accounts => {
 			expected: [
 				'setCrossChainState',
 				'setDebtManager',
-				'addNetworkIds',
 				'addCurrentNetworkIssuedDebt',
 				'subtractCurrentNetworkIssuedDebt',
 				'setCrossNetworkIssuedDebtAll',
@@ -193,17 +194,6 @@ contract('CrossChainManager', async accounts => {
 				address: owner,
 				reason: 'Only the contract owner may perform this action',
 			});
-		});
-	});
-
-	describe('when initial debts are set', () => {
-		it.skip('should set self network active debt as the issued debt', async () => {
-			await periFinance.transfer(account1, toUnit('1000'), { from: owner });
-			const debt = debtCache.currentDebt();
-			// set initial issued debt for self chain
-			// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
-			const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
-			assert.bnEqual(issuedDebt, debt);
 		});
 	});
 
@@ -265,7 +255,9 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.issueMaxPynths({ from: account1 });
 
 				const minStakingPeriod = await systemSettings.minimumStakeTime();
-				await fastForward(minStakingPeriod);
+				await fastForward(minStakingPeriod + 10);
+
+				syncNetworks(true);
 
 				const timestamp = await currentTime();
 
@@ -320,10 +312,16 @@ contract('CrossChainManager', async accounts => {
 				assert.bnGt(curNetDebtRateL, curNetDebtRate);
 			});
 
-			it.skip('DEBT RATE against total network debt should be DECREASED by CLAIM', async () => {
+			it('DEBT RATE against total network debt should be DECREASED by CLAIM', async () => {
 				await periFinance.issueMaxPynths({ from: account1 });
 
 				const curNetDebtRate = await crossChainManager.currentNetworkDebtPercentage();
+
+				const minStakingPeriod = await systemSettings.minimumStakeTime();
+
+				await fastForward(minStakingPeriod);
+				await debtCache.takeDebtSnapshot();
+				syncNetworks(false);
 
 				await periFinance.exit({ from: account1 });
 
@@ -489,9 +487,32 @@ contract('CrossChainManager', async accounts => {
 				// await crossChainManager.setInitialCurrentIssuedDebt({ from: owner });
 			});
 
-			describe('when self debts are changed over 1% by issuing', async () => {
+			describe('when self debts are changed over 5% by issuing', async () => {
 				beforeEach(async () => {
 					await periFinance.issueMaxPynths({ from: account1 });
+					const minStakingPeriod = await systemSettings.minimumStakeTime();
+					await fastForward(minStakingPeriod);
+
+					const timestamp = await currentTime();
+
+					await exchangeRates.updateRates(
+						[pBTC, pETH, PERI],
+						['4100', '2010', '0.5'].map(toUnit),
+						timestamp,
+						{
+							from: oracle,
+						}
+					);
+
+					await debtCache.takeDebtSnapshot();
+					syncNetworks(true);
+
+					const { debt } = await debtCache.currentDebt();
+					const currentDebt = multiplyDecimal(debt, toUnit('0.051'));
+					// increase self network's issued debt over 1%
+					await periFinance.issuePynths(PERI, currentDebt, {
+						from: account3,
+					});
 				});
 
 				it('should not be able to claim', async () => {
@@ -522,7 +543,7 @@ contract('CrossChainManager', async accounts => {
 					);
 				});
 
-				describe('after synchronized and active debt is larger than issued debt', async () => {
+				describe('then synchronized with other networks which have BIGGER active debt than issued debt', async () => {
 					beforeEach(async () => {
 						syncNetworks(true);
 					});
@@ -531,11 +552,39 @@ contract('CrossChainManager', async accounts => {
 						await periFinance.burnPynths(PERI, toUnit('10'), { from: account1 });
 					});
 
-					it('however, increased active debt blocks to the exit', async () => {
+					it('active debt is LARGER than issued debt', async () => {
+						const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
+						const activeDebt = await crossChainManager.currentNetworkActiveDebt();
+
+						assert.bnGt(activeDebt, issuedDebt);
+					});
+
+					it('that causes active debt is increased, which blocks from exitting', async () => {
 						await assert.revert(
 							periFinance.exit({ from: account1 }),
 							'Trying to burn more than you have'
 						);
+					});
+				});
+
+				describe('then synchronized with other networks which have SMALLER active debt than issued debt', async () => {
+					beforeEach(async () => {
+						syncNetworks(false);
+					});
+
+					it('the claiming is now working', async () => {
+						await periFinance.burnPynths(PERI, toUnit('10'), { from: account1 });
+					});
+
+					it('active debt is SMALLER than issued debt', async () => {
+						const issuedDebt = await crossChainManager.currentNetworkIssuedDebt();
+						const activeDebt = await crossChainManager.currentNetworkActiveDebt();
+
+						assert.bnLt(activeDebt, issuedDebt);
+					});
+
+					it('that causes active debt is decreased, the exit works fine', async () => {
+						await periFinance.exit({ from: account1 });
 					});
 				});
 			});
@@ -602,6 +651,39 @@ contract('CrossChainManager', async accounts => {
 					const activeDebt = await crossChainManager.currentNetworkActiveDebt();
 					assert.bnEqual(activeDebt, selfActiveDebt);
 				});
+			});
+		});
+		describe('when inflational mint', async () => {
+			beforeEach(async () => {
+				await periFinance.issueMaxPynths({ from: account1 });
+				await periFinance.issueMaxPynths({ from: account2 });
+
+				syncNetworks(true);
+			});
+			it('inflation should be failed if crosschain synchronization is stale', async () => {
+				const syncStaleThreshold = await systemSettings.debtSnapshotStaleTime();
+				await fastForward(syncStaleThreshold + 1);
+				await assert.revert(
+					periFinance.inflationalMint({ from: minterRole }),
+					'Cross chain debt is stale'
+				);
+			});
+			it('inflation should be success if crosschain synchronization is not stale', async () => {
+				await periFinance.inflationalMint({ from: minterRole });
+			});
+			it('minterable supply should be proportional to the debt rate', async () => {
+				const totalSupply = await periFinance.totalSupply();
+				const weeklyMintableSupply = await supplySchedule.mintableSupply();
+				const debtRate = await crossChainManager.currentNetworkDebtPercentage();
+				const expectedMintableSupply = multiplyDecimalRoundPrecise(weeklyMintableSupply, debtRate);
+				const mintableSupply = await crossChainManager.mintableSupply();
+
+				await periFinance.inflationalMint({ from: minterRole });
+
+				const totalSupplyL = await periFinance.totalSupply();
+
+				assert.bnEqual(mintableSupply, expectedMintableSupply);
+				assert.bnEqual(totalSupplyL, totalSupply.add(expectedMintableSupply));
 			});
 		});
 	});

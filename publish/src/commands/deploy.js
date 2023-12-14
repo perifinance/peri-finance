@@ -987,14 +987,14 @@ const deploy = async ({
 			}
 		}
 
-		await runStep({
-			contract: 'PeriFinance',
-			target: periFinance,
-			read: 'bridgeState',
-			expected: input => input === addressOf(periBridgeState),
-			write: 'setBridgeState',
-			writeArg: addressOf(periBridgeState),
-		});
+		// await runStep({
+		// 	contract: 'PeriFinance',
+		// 	target: periFinance,
+		// 	read: 'bridgeState',
+		// 	expected: input => input === addressOf(periBridgeState),
+		// 	write: 'setBridgeState',
+		// 	writeArg: addressOf(periBridgeState),
+		// });
 	}
 
 	const debtCache = await deployer.deployContract({
@@ -1006,7 +1006,7 @@ const deploy = async ({
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
-		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualPynth',
+		source: useOvm ? 'Exchanger' : 'VirtualPynthIssuer',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
@@ -1530,14 +1530,9 @@ const deploy = async ({
 
 	const crossStateConfig = config[`CrossChainState`] || {};
 	let oldCrossChainState;
-	let bOldVersion = false;
 	if (crossStateConfig.deploy) {
 		try {
 			oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
-			const chinId = await oldCrossChainState.methods.getChainID().call();
-			if (typeof chinId === 'string') {
-				bOldVersion = true;
-			}
 		} catch (err) {
 			if (!freshDeploy) {
 				// only throw if not local - allows local environments to handle both new
@@ -1667,9 +1662,9 @@ const deploy = async ({
 		args: [account],
 	});
 
-	await deployer.deployContract({
-		name: 'BinaryOptionMarketData',
-	});
+	// await deployer.deployContract({
+	// 	name: 'BinaryOptionMarketData',
+	// });
 
 	console.log(gray(`\n------ CONFIGURE STANDALONE FEEDS ------\n`));
 
@@ -2724,7 +2719,7 @@ const deploy = async ({
 			});
 		} */
 
-		const networkIds = [1, /* 3, 4, */ 5, /* 42, */ 137, 80001, 97, 56, /* 81, */ 1287, 1285];
+		// const networkIds = [1, /* 3, 4, */ 5, /* 42, */ 137, 80001, 97, 56, /* 81, */ 1287, 1285];
 
 		/* const chainIds = [
 			toBytes32('mainnet'),
@@ -2741,17 +2736,17 @@ const deploy = async ({
 			toBytes32('moonriver'),
 		]; */
 
-		await runStep({
-			contract: 'CrossChainManager',
-			target: crossChainManager,
-			read: 'crossChainCount',
-			expected: count => {
-				console.log('Cross chain count: ', count);
-				return count > 1;
-			},
-			write: 'addNetworkIds',
-			writeArg: [networkIds],
-		});
+		// await runStep({
+		// 	contract: 'CrossChainManager',
+		// 	target: crossChainManager,
+		// 	read: 'getCrossChainCount',
+		// 	expected: count => {
+		// 		console.log('Cross chain count: ', count);
+		// 		return count > 1;
+		// 	},
+		// 	write: 'addNetworkIds',
+		// 	writeArg: [networkIds],
+		// });
 
 		// ----------------
 		if (crossStateConfig.deploy && oldCrossChainState) {
@@ -2759,7 +2754,7 @@ const deploy = async ({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
 				write: 'setInitialCurrentIssuedDebt',
-				writeArg: [addressOf(oldCrossChainState), bOldVersion],
+				writeArg: addressOf(oldCrossChainState),
 			});
 		}
 	}

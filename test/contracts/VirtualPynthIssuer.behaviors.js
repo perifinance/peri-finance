@@ -5,11 +5,12 @@ const { smockit } = require('@eth-optimism/smock');
 const { toBytes32 } = require('../..');
 const { prepareSmocks } = require('./helpers');
 
-let ExchangerWithVirtualPynth;
+let VirtualPynthIssuer, PeriFinance;
 
 module.exports = function({ accounts }) {
 	before(async () => {
-		ExchangerWithVirtualPynth = artifacts.require('ExchangerWithVirtualPynth');
+		// VirtualPynthIssuer = artifacts.require('VirtualPynthIssuer');
+		PeriFinance = artifacts.require('PeriFinance');
 	});
 
 	beforeEach(async () => {
@@ -22,7 +23,8 @@ module.exports = function({ accounts }) {
 				'FeePool',
 				'FlexibleStorage',
 				'Issuer',
-				'PeriFinance',
+				// 'PeriFinance',
+				'VirtualPynthIssuer',
 				'SystemStatus',
 				'TradingRewards',
 			],
@@ -31,14 +33,14 @@ module.exports = function({ accounts }) {
 	});
 
 	before(async () => {
-		ExchangerWithVirtualPynth.link(await artifacts.require('SafeDecimalMath').new());
+		VirtualPynthIssuer.link(await artifacts.require('SafeDecimalMath').new());
 	});
 
 	return {
 		whenInstantiated: ({ owner }, cb) => {
 			describe(`when instantiated`, () => {
 				beforeEach(async () => {
-					this.instance = await ExchangerWithVirtualPynth.new(owner, this.resolver.address);
+					this.instance = await PeriFinance.new(owner, this.resolver.address);
 					await this.instance.rebuildCache();
 				});
 				cb();
@@ -47,7 +49,7 @@ module.exports = function({ accounts }) {
 		whenMockedToAllowChecks: cb => {
 			describe(`when mocked to allow invocation checks`, () => {
 				beforeEach(async () => {
-					this.mocks.PeriFinance.smocked.pynthsByAddress.will.return.with(toBytes32());
+					this.mocks.Issuer.smocked.pynthsByAddress.will.return.with(toBytes32());
 				});
 				cb();
 			});

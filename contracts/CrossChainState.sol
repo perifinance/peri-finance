@@ -17,12 +17,16 @@ contract CrossChainState is Owned, State, ICrossChainState {
     using SafeMath for uint;
 
     uint private _selfId;
-    uint[] private _networkIds;
+    // uint[] private _networkIds;
     // current network's inbound amount compiled by other networks
-    uint public outboundSumToCurrentNetwork;
+    uint private _outboundSumToCurrentNetwork;
 
-    mapping(uint => uint) private _crossNetworkIssuedDebt;
-    mapping(uint => uint) private _crossNetworkActiveDebt;
+    // mapping(uint => uint) private _crossNetworkIssuedDebt;
+    // mapping(uint => uint) private _crossNetworkActiveDebt;
+    uint private _crossNetworkIssuedDebt;
+    uint private _crossNetworkActiveDebt;
+    uint private _selfNetworkIssuedDebt;
+    uint private _selfNetworkActiveDebt;
 
     // the total network debt and current network debt percentage
     // uint[] internal _totalNetworkDebtLedger;
@@ -34,7 +38,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
         uint _chainId
     ) public Owned(_owner) State(_associatedContract) {
         _selfId = _chainId;
-        _networkIds.push(_chainId);
+        // _networkIds.push(_chainId);
     }
 
     // View functions
@@ -43,46 +47,36 @@ contract CrossChainState is Owned, State, ICrossChainState {
         return _selfId;
     }
 
-    function crossChainCount() external view returns (uint) {
-        return _networkIds.length;
-    }
+    // function getCrossChainCount() external view returns (uint) {
+    //     return _networkIds.length;
+    // }
 
     /**
      * @notice returns current network's issued debt
      * @return uint
      */
-    function currentNetworkIssuedDebt() external view returns (uint) {
-        return _crossNetworkIssuedDebt[_selfId];
+    function getCurrentNetworkIssuedDebt() external view returns (uint) {
+        return _selfNetworkIssuedDebt;
     }
 
     /**
      * @notice returns total network's issued debt
      * @return uint
      */
-    function totalNetworkIssuedDebt() external view returns (uint) {
-        uint result = 0;
-        for (uint i = 0; i < _networkIds.length; ++i) {
-            result += (_crossNetworkIssuedDebt[_networkIds[i]]);
-        }
-        return result;
+    function getTotalNetworkIssuedDebt() external view returns (uint) {
+        return _crossNetworkIssuedDebt.add(_selfNetworkIssuedDebt);
     }
 
-    function crossNetworkIssuedDebtAll() external view returns (uint) {
-        uint result = 0;
-        for (uint i = 0; i < _networkIds.length; ++i) {
-            if (_networkIds[i] == _selfId) continue;
-            result += (_crossNetworkIssuedDebt[_networkIds[i]]);
-        }
-        return result;
+    function getCrossNetworkIssuedDebtAll() external view returns (uint) {
+        return _crossNetworkIssuedDebt;
     }
 
-    function crossNetworkActiveDebtAll() external view returns (uint) {
-        uint result = 0;
-        for (uint i = 0; i < _networkIds.length; ++i) {
-            if (_networkIds[i] == _selfId) continue;
-            result = result.add(_crossNetworkActiveDebt[_networkIds[i]]);
-        }
-        return result;
+    function getCrossNetworkActiveDebtAll() external view returns (uint) {
+        return _crossNetworkActiveDebt;
+    }
+
+    function getOutboundSumToCurrentNetwork() external view returns (uint) {
+        return _outboundSumToCurrentNetwork;
     }
 
     //************************ Mutative functions *****************************//
@@ -90,14 +84,14 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @notice add a cross chain network id
      * @param _networkId id of the cross chain network
      */
-    function addNetworkId(uint _networkId) external onlyAssociatedContract {
-        for (uint i = 0; i < _networkIds.length; ++i) {
-            if (_networkIds[i] == _networkId) {
-                return;
-            }
-        }
-        _networkIds.push(_networkId);
-    }
+    // function addNetworkId(uint _networkId) external onlyAssociatedContract {
+    //     for (uint i = 0; i < _networkIds.length; ++i) {
+    //         if (_networkIds[i] == _networkId) {
+    //             return;
+    //         }
+    //     }
+    //     _networkIds.push(_networkId);
+    // }
 
     /**
      * @notice add cross chain networks' issued debts
@@ -107,9 +101,13 @@ contract CrossChainState is Owned, State, ICrossChainState {
         external
         onlyAssociatedContract
     {
-        for (uint i = 0; i < _chainIDs.length; ++i) {
-            if (_chainIDs[i] != _selfId) {
-                _crossNetworkIssuedDebt[_chainIDs[i]] = _amounts[i];
+        _crossNetworkIssuedDebt = 0;
+        for (uint i; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] == _selfId) {
+                _selfNetworkIssuedDebt = _amounts[i];
+            }
+            else{
+                _crossNetworkIssuedDebt = _crossNetworkIssuedDebt.add(_amounts[i]);
             }
         }
     }
@@ -123,9 +121,12 @@ contract CrossChainState is Owned, State, ICrossChainState {
         external
         onlyAssociatedContract
     {
-        for (uint i = 0; i < _chainIDs.length; ++i) {
-            if (_chainIDs[i] != _selfId) {
-                _crossNetworkActiveDebt[_chainIDs[i]] = _amounts[i];
+        _crossNetworkActiveDebt = 0;
+        for (uint i; i < _chainIDs.length; ++i) {
+            if (_chainIDs[i] == _selfId) {
+                _selfNetworkActiveDebt = _amounts[i];
+            } else {
+                _crossNetworkActiveDebt = _crossNetworkActiveDebt.add(_amounts[i]);
             }
         }
     }
@@ -143,13 +144,15 @@ contract CrossChainState is Owned, State, ICrossChainState {
         uint[] calldata _activeDebts,
         uint _inbound
     ) external onlyAssociatedContract {
-        for (uint i = 0; i < _chainIDs.length; ++i) {
+        _crossNetworkIssuedDebt = 0;
+        _crossNetworkActiveDebt = 0;
+        for (uint i; i < _chainIDs.length; ++i) {
             if (_chainIDs[i] != _selfId) {
-                _crossNetworkIssuedDebt[_chainIDs[i]] = _debts[i];
-                _crossNetworkActiveDebt[_chainIDs[i]] = _activeDebts[i];
+                _crossNetworkIssuedDebt = _crossNetworkIssuedDebt.add(_debts[i]);
+                _crossNetworkActiveDebt = _crossNetworkActiveDebt.add(_activeDebts[i]);
             }
         }
-        outboundSumToCurrentNetwork = _inbound;
+        _outboundSumToCurrentNetwork = _inbound;
     }
 
     /**
@@ -159,31 +162,31 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @param _issuedDebt uint
      * @param _activeDebt uint
      */
-    function addCrossNetworkNDebts(
-        uint _chainID,
-        uint _issuedDebt,
-        uint _activeDebt
-    ) external onlyAssociatedContract {
-        for (uint i = 0; i < _networkIds.length; ++i) {
-            if (_networkIds[i] == _chainID) {
-                revert("network id already exists");
-            }
-        }
+    // function addCrossNetworkNDebts(
+    //     uint _chainID,
+    //     uint _issuedDebt,
+    //     uint _activeDebt
+    // ) external onlyAssociatedContract {
+    //     for (uint i = 0; i < _networkIds.length; ++i) {
+    //         if (_networkIds[i] == _chainID) {
+    //             revert("network id already exists");
+    //         }
+    //     }
 
-        _networkIds.push(_chainID);
-        _crossNetworkIssuedDebt[_chainID] = _issuedDebt;
-        _crossNetworkActiveDebt[_chainID] = _activeDebt;
-    }
+    //     _networkIds.push(_chainID);
+    //     _crossNetworkIssuedDebt[_chainID] = _issuedDebt;
+    //     _crossNetworkActiveDebt[_chainID] = _activeDebt;
+    // }
 
     /**
      * @notice add current network's issued debt
      * @param _amount uint
      */
     function addIssuedDebt(uint _chainID, uint _amount) external onlyAssociatedContract {
-        if (_crossNetworkIssuedDebt[_chainID] == 0) {
-            _crossNetworkIssuedDebt[_chainID] = _amount;
+        if (_chainID == _selfId) {
+            _selfNetworkIssuedDebt = _selfNetworkIssuedDebt.add(_amount);
         } else {
-            _crossNetworkIssuedDebt[_chainID] += _amount;
+            _crossNetworkIssuedDebt = _crossNetworkIssuedDebt.add(_amount);
         }
     }
 
@@ -192,10 +195,13 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @param _amount uint
      */
     function subtractIssuedDebt(uint _chainID, uint _amount) external onlyAssociatedContract {
-        if (_crossNetworkIssuedDebt[_chainID] < _amount) {
-            _crossNetworkIssuedDebt[_chainID] = 0;
+        if (_chainID == _selfId) {
+            require(_selfNetworkIssuedDebt >= _amount, "subtracted amount exceeds current network's issued debt");
+            _selfNetworkIssuedDebt = _selfNetworkIssuedDebt.sub(_amount);
+        } else {
+            require(_crossNetworkIssuedDebt >= _amount, "subtracted amount exceeds cross network's issued debt");
+            _crossNetworkIssuedDebt = _crossNetworkIssuedDebt.sub(_amount);
         }
-        _crossNetworkIssuedDebt[_chainID] -= _amount;
     }
 
     /**
@@ -203,7 +209,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
      * @param _amount uint
      */
     function setOutboundSumToCurrentNetwork(uint _amount) external onlyAssociatedContract {
-        outboundSumToCurrentNetwork = _amount;
+        _outboundSumToCurrentNetwork = _amount;
     }
 
     /**
@@ -213,8 +219,8 @@ contract CrossChainState is Owned, State, ICrossChainState {
      */
     function setInitialCurrentIssuedDebt(uint _amount) external onlyAssociatedContract {
         // only initial possible
-        if (_crossNetworkIssuedDebt[_selfId] == 0) {
-            _crossNetworkIssuedDebt[_selfId] = _amount;
+        if (_selfNetworkIssuedDebt == 0) {
+            _selfNetworkIssuedDebt = _amount;
         }
     }
 

@@ -12,7 +12,7 @@ task('test')
 		const { gas, grep, native, gasOutputFile } = taskArguments;
 
 		// apply a 90s timeout unless already set (for coverage say)
-		hre.config.mocha.timeout = hre.config.mocha.timeout || 90e3;
+		hre.config.mocha.timeout = /* hre.config.mocha.timeout || */ 90e3;
 
 		if (native) {
 			hre.config.solc.native = true;

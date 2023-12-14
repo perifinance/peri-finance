@@ -142,7 +142,7 @@ task('test:prod', 'run poduction tests against a running fork')
 		bre.config.paths.tests = './test/prod/';
 
 		// Prod tests use forking, which means some txs could last minutes.
-		const timeout = 5 * 60 * 1000; // 5 minutes
+		const timeout = 10 * 60 * 1000; // 5 minutes
 		bre.config.mocha.timeout = timeout;
 		bre.config.networks.localhost.timeout = timeout;
 
@@ -319,7 +319,7 @@ task('test')
 				bre.config.mocha.grep = '@ovm-skip';
 				bre.config.mocha.invert = true;
 			}
-			bre.config.mocha.timeout = 10000000;
+			bre.config.mocha.timeout = 100e3;
 		}
 
 		if (native) {

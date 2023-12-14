@@ -17,7 +17,7 @@ const {
 
 // console.log(inflationStartTimestampInSecs);
 
-const GAS_PRICE = 300e9; // 100 GWEI
+const GAS_PRICE = 600e9; // 100 GWEI
 const CACHE_FOLDER = 'cache';
 
 // task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
@@ -76,10 +76,11 @@ module.exports = {
 		},
 	},
 	gasReporter: {
-		enabled: false,
+		enabled: process.env.REPORT_GAS,
 		showTimeSpent: true,
 		currency: 'USD',
 		maxMethodDiff: 25, // CI will fail if gas usage is > than this %
 		outputFile: 'test-gas-used.log',
+		coinmarketcap: process.env.COINMARKETCAP_API_KEY,
 	},
 };

@@ -35,7 +35,7 @@ const {
 } = require('../..');
 const { logger } = require('ethers');
 
-contract('FeePool ', async accounts => {
+contract('Fee Pool', async accounts => {
 	// CURRENCIES
 	const [pUSD, pBTC, pETH, PERI, USDC] = ['pUSD', 'pBTC', 'pETH', 'PERI', 'USDC'].map(toBytes32);
 
@@ -195,7 +195,7 @@ contract('FeePool ', async accounts => {
 		});
 	});
 
-	describe.skip('The instance must be spawned correctly', () => {
+	describe('The instance must be spawned correctly', () => {
 		it('ensure only known functions are mutative', () => {
 			ensureOnlyExpectedMutativeFunctions({
 				abi: feePool.abi,
@@ -261,7 +261,7 @@ contract('FeePool ', async accounts => {
 		});
 	});
 
-	describe.skip('restricted methods', () => {
+	describe('restricted methods', () => {
 		it('appendAccountIssuanceRecord() cannot be invoked directly by any account', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: feePool.appendAccountIssuanceRecord,
@@ -272,7 +272,7 @@ contract('FeePool ', async accounts => {
 		});
 	});
 
-	describe.skip('when users claim', () => {
+	describe('when users claim', () => {
 		beforeEach(async () => {
 			await periFinance.transfer(account1, toUnit('20000'), { from: owner });
 			await periFinance.transfer(account2, toUnit('20000'), { from: owner });
@@ -360,7 +360,7 @@ contract('FeePool ', async accounts => {
 		});
 	});
 
-	describe.skip('when the issuanceRatio is 0.25', () => {
+	describe('when the issuanceRatio is 0.25', () => {
 		beforeEach(async () => {
 			// set default issuance ratio of 0.2
 			await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
@@ -1544,7 +1544,7 @@ contract('FeePool ', async accounts => {
 		beforeEach(async () => {
 			const tChainIds = ['1287', '97', '5'].map(toUnit);
 
-			await crossChainManager.addNetworkIds(tChainIds, { from: owner });
+			// await crossChainManager.addNetworkIds(tChainIds, { from: owner });
 
 			const tIssuedDebt = [
 				'3000000000000000000000',

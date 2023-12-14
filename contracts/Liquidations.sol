@@ -15,6 +15,8 @@ import "./interfaces/IPeriFinance.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/ISystemStatus.sol";
+import "./interfaces/IERC20.sol";
+import "./interfaces/IExternalTokenStakeManager.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/liquidations
 contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
@@ -25,6 +27,8 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         uint deadline;
         address caller;
     }
+    bytes32 internal constant pUSD = "pUSD";
+    bytes32 internal constant PERI = "PERI";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -33,6 +37,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     bytes32 private constant CONTRACT_ETERNALSTORAGE_LIQUIDATIONS = "EternalStorageLiquidations";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
+    bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "ExternalTokenStakeManager";
 
     /* ========== CONSTANTS ========== */
 
@@ -45,12 +50,13 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](5);
+        bytes32[] memory newAddresses = new bytes32[](6);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_PERIFINANCE;
         newAddresses[2] = CONTRACT_ETERNALSTORAGE_LIQUIDATIONS;
         newAddresses[3] = CONTRACT_ISSUER;
         newAddresses[4] = CONTRACT_EXRATES;
+        newAddresses[5] = CONTRACT_EXTOKENSTAKEMANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -73,6 +79,10 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     // refactor to periFinance storage eternal storage contract once that's ready
     function eternalStorageLiquidations() internal view returns (EternalStorage) {
         return EternalStorage(requireAndGetAddress(CONTRACT_ETERNALSTORAGE_LIQUIDATIONS));
+    }
+
+    function exTokenStakeManager() internal view returns (IExternalTokenStakeManager) {
+        return IExternalTokenStakeManager(requireAndGetAddress(CONTRACT_EXTOKENSTAKEMANAGER));
     }
 
     function issuanceRatio() external view returns (uint) {
@@ -101,21 +111,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     }
 
     function isOpenForLiquidation(address account) external view returns (bool) {
-        uint accountCollateralisationRatio = periFinance().collateralisationRatio(account);
-
-        // Liquidation closed if collateral ratio less than or equal target issuance Ratio
-        // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        if (accountCollateralisationRatio <= getIssuanceRatio()) {
-            return false;
-        }
-
-        LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
-
-        // liquidation cap at issuanceRatio is checked above
-        if (_deadlinePassed(liquidation.deadline)) {
-            return true;
-        }
-        return false;
+        return _isOpenForLiquidation(account);
     }
 
     function isLiquidationDeadlinePassed(address account) external view returns (bool) {
@@ -129,6 +125,10 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         return deadline > 0 && now > deadline;
     }
 
+    function calculateAmountToFixCollateral(uint debtBalance, uint collateral) external view returns (uint) {
+        return _calculateAmountToFixCollateral(debtBalance, collateral);
+    }
+    
     /**
      * r = target issuance ratio
      * D = debt balance
@@ -136,7 +136,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
      * P = liquidation penalty
      * Calculates amount of pynths = (D - V * r) / (1 - (1 + P) * r)
      */
-    function calculateAmountToFixCollateral(uint debtBalance, uint collateral) external view returns (uint) {
+    function _calculateAmountToFixCollateral(uint debtBalance, uint collateral) internal view returns (uint) {
         uint ratio = getIssuanceRatio();
         uint unit = SafeDecimalMath.unit();
 
@@ -157,6 +157,24 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     function _getKey(bytes32 _scope, address _account) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(_scope, _account));
+    }
+
+    function _isOpenForLiquidation(address account) internal view returns (bool) {
+        uint accountCollateralisationRatio = periFinance().collateralisationRatio(account);
+
+        // Liquidation closed if collateral ratio less than or equal target issuance Ratio
+        // Account with no peri collateral will also not be open for liquidation (ratio is 0)
+        if (accountCollateralisationRatio <= getIssuanceRatio()) {
+            return false;
+        }
+
+        LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
+
+        // liquidation cap at issuanceRatio is checked above
+        if (_deadlinePassed(liquidation.deadline)) {
+            return true;
+        }
+        return false;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -189,11 +207,8 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     // Internal function to remove account from liquidations
     // Does not check collateral ratio is fixed
-    function removeAccountInLiquidation(address account) external onlyIssuer {
-        LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
-        if (liquidation.deadline > 0) {
-            _removeLiquidationEntry(account);
-        }
+        function removeAccountInLiquidation(address account) external onlyIssuer {
+        _removeAccountInLiquidation(account);
     }
 
     // Public function to allow an account to remove from liquidations
@@ -210,6 +225,58 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
         // Remove from liquidations if accountsCollateralisationRatio is fixed (less than equal target issuance ratio)
         if (accountsCollateralisationRatio <= getIssuanceRatio()) {
+            _removeLiquidationEntry(account);
+        }
+    }
+
+    function liquidateAccount(address account, uint pusdAmount, uint debtBalance) 
+    external onlyIssuer
+    returns (uint totalRedeemedinUSD, uint amountToLiquidate)  {
+        require(_isOpenForLiquidation(account), "Account not open for liquidation");
+        (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
+        require(!periRateInvalid, "PERI rate is invalid");
+
+        uint collateralForAccountinUSD = IERC20(address(periFinance())).balanceOf(account).multiplyDecimalRound(periRate);
+        bytes32[] memory tokenList = exTokenStakeManager().getTokenList();
+        for (uint i; i < tokenList.length; i++) {
+            collateralForAccountinUSD = collateralForAccountinUSD.add(
+                exTokenStakeManager().stakedAmountOf(account, tokenList[i], pUSD)
+            );
+        }
+
+        uint amountToFixRatioinUSD = _calculateAmountToFixCollateral(debtBalance, collateralForAccountinUSD);
+
+        // Cap amount to liquidate to repair collateral ratio based on issuance ratio
+        amountToLiquidate = amountToFixRatioinUSD < pusdAmount ? amountToFixRatioinUSD : pusdAmount;
+
+        // Add penalty
+        totalRedeemedinUSD =
+            amountToLiquidate.multiplyDecimal(SafeDecimalMath.unit().add(getLiquidationPenalty()));
+
+        if (totalRedeemedinUSD > collateralForAccountinUSD) {
+            totalRedeemedinUSD = collateralForAccountinUSD;
+
+            amountToLiquidate = collateralForAccountinUSD.divideDecimal(
+                SafeDecimalMath.unit().add(getLiquidationPenalty())
+            );
+        }
+
+        // totalRedeemedinUSD = exTokenStakeManager().redeem(account, totalRedeemedinUSD, liquidator);
+
+        // // what's the equivalent amount of peri for the amountToLiquidate?
+        // //uint periRedeemed = _usdToPeri(amountToLiquidate, periRate);
+        // totalRedeemed = totalRedeemedinUSD.divideDecimalRound(periRate);
+
+        // Remove liquidation flag if amount liquidated fixes ratio
+        if (amountToLiquidate == amountToFixRatioinUSD) {
+            // Remove liquidation
+            _removeAccountInLiquidation(account);
+        }
+    }
+
+    function _removeAccountInLiquidation(address account) internal {
+        LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
+        if (liquidation.deadline > 0) {
             _removeLiquidationEntry(account);
         }
     }

@@ -28,7 +28,7 @@ contract PeriFinanceToBSC is PeriFinance {
         require(_recipients.length == _amounts.length, "length is not matched");
 
         bool transferResult = true;
-        for (uint i = 0; i < _recipients.length; i++) {
+        for (uint i; i < _recipients.length; i++) {
             if (_recipients[i] == address(0) || _amounts[i] == 0) {
                 continue;
             }

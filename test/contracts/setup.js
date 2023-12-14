@@ -30,7 +30,7 @@ const {
 } = require('../../');
 // const { leftPad } = require('web3-utils');
 
-const SUPPLY_100M = toWei((1e8).toString()); // 100M
+const SUPPLY_100M = toWei((11e6).toString()); // 100M
 
 /**
  * Create a mock ExternStateToken - useful to mock PeriFinance or a pynth
@@ -44,6 +44,7 @@ const mockToken = async ({
 	skipInitialAllocation = false,
 	resolver,
 	validator,
+	isPUSDMock,
 }) => {
 	const [deployerAccount, owner] = accounts;
 
@@ -64,11 +65,11 @@ const mockToken = async ({
 		.new(owner, deployerAccount, { from: deployerAccount });
 
 	let token =
-		pynth === 'pUSD'
+		!isPUSDMock && pynth === 'pUSD'
 			? await artifacts.require('MultiCollateralPynth')
 			: await artifacts.require(pynth ? 'MockPynth' : 'PublicEST');
 
-	if (pynth === 'pUSD') {
+	if (!isPUSDMock && pynth === 'pUSD') {
 		await token.link(await artifacts.require('SafeDecimalMath').new());
 		token = await token.new(
 			proxy.address,
@@ -100,10 +101,9 @@ const mockToken = async ({
 		proxy.setTarget(token.address, { from: owner }),
 	]);
 
-	if (pynth === 'pUSD') {
+	if (!isPUSDMock && pynth === 'pUSD') {
 		await Promise.all([
 			token.setBridgeState(bridgeState.address, { from: owner }),
-			token.setBridgeValidator(validator, { from: owner }),
 			bridgeState.setAssociatedContract(token.address, { from: owner }),
 			bridgeState.setRole(toBytes32('Validator'), validator, true, { from: owner }),
 		]);
@@ -301,6 +301,7 @@ const setupContract = async ({
 			tryGetAddressOf('CrossChainState'),
 			validator,
 		],
+		VirtualPynthIssuer: [owner, tryGetAddressOf('AddressResolver')],
 	};
 
 	let instance;
@@ -604,6 +605,15 @@ const setupContract = async ({
 						returns: ['0', true],
 					}),
 				]);
+			} else if (mock === 'RewardsDistribution') {
+				await Promise.all([
+					mockGenericContractFnc({
+						instance,
+						mock,
+						fncName: 'distributeRewards',
+						returns: [true],
+					}),
+				]);
 			}
 		},
 	};
@@ -623,6 +633,7 @@ const setupAllContracts = async ({
 	contracts = [],
 	pynths = [],
 	stables = ['USDC', 'DAI'],
+	isPUSDMock = true,
 }) => {
 	const [, owner, , , , validator] = accounts;
 	// Copy mocks into the return object, this allows us to include them in the
@@ -740,8 +751,8 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'Exchanger',
-			source: 'ExchangerWithVirtualPynth',
-			mocks: ['PeriFinance', 'FeePool', 'DelegateApprovals', 'BridgeStatepUSD'],
+			source: 'Exchanger',
+			mocks: ['PeriFinance', 'FeePool', 'DelegateApprovals', 'BridgeState', 'VirtualPynthIssuer'],
 			deps: [
 				'AddressResolver',
 				'TradingRewards',
@@ -894,6 +905,10 @@ const setupAllContracts = async ({
 			contract: 'CrossChainManager',
 			deps: ['AddressResolver', 'CrossChainState', 'Issuer', 'BridgeStatepUSD', 'DebtCache'],
 		},
+		{
+			contract: 'VirtualPynthIssuer',
+			deps: ['AddressResolver'],
+		},
 	];
 
 	// get deduped list of all required base contracts
@@ -990,6 +1005,7 @@ const setupAllContracts = async ({
 			symbol: pynth,
 			resolver: returnObj['AddressResolver'],
 			validator,
+			isPUSDMock,
 		});
 
 		returnObj[`ProxyERC20${pynth}`] = proxy;

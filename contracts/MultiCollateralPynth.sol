@@ -127,7 +127,7 @@ contract MultiCollateralPynth is Pynth {
         require(msg.value >= systemSettings().bridgeClaimGasCost(), "fee is not sufficient");
         bridgeValidator.transfer(msg.value);
 
-        for (uint i = 0; i < applicableIds.length; i++) {
+        for (uint i; i < applicableIds.length; i++) {
             require(_claimBridgedAmount(applicableIds[i]), "Failed to claim");
         }
     }

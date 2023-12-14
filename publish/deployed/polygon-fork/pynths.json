@@ -2,8 +2,7 @@
 	{
 		"name": "pUSD",
 		"asset": "USD",
-		"subclass": "MultiCollateralPynth",
-		"category": "forex"
+		"subclass": "MultiCollateralPynth"
 	},
 	{
 		"name": "pBTC",
