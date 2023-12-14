@@ -493,7 +493,7 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
      *      Instead, you need move to previose network's issued debt to the new contract 
      */
     function setInitialCurrentIssuedDebt(address _prevState) external onlyOwner onlyDuringSetup {
-            state().setInitialCurrentIssuedDebt(ICrossChainState(_prevState).getCurrentNetworkIssuedDebt());
+        state().setInitialCurrentIssuedDebt(ICrossChainState(_prevState).getCurrentNetworkIssuedDebt());
     }
 
     /**

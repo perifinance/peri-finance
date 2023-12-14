@@ -92,7 +92,10 @@ const itCanPerformEscrowMigration = ({ ctx }) => {
 			});
 
 			it('updates user balance', async () => {
-				assert.bnEqual(await PeriFinanceL1.balanceOf(user1L1.address), user1BalanceL1.add(periAmount));
+				assert.bnEqual(
+					await PeriFinanceL1.balanceOf(user1L1.address),
+					user1BalanceL1.add(periAmount)
+				);
 			});
 
 			describe('when the user approves the reward escrow to transfer their PERI', () => {
@@ -210,7 +213,9 @@ const itCanPerformEscrowMigration = ({ ctx }) => {
 								PeriFinanceBridgeToOptimismL1 = PeriFinanceBridgeToOptimismL1.connect(user1L1);
 								// first test migrating a few entries using random extra invalid Ids!
 								const randomEntries = [extraEntries, [0, 100, 3, 2]];
-								let tx = await PeriFinanceBridgeToOptimismL1.initiateEscrowMigration(userEntryBatch);
+								let tx = await PeriFinanceBridgeToOptimismL1.initiateEscrowMigration(
+									userEntryBatch
+								);
 								initiateEscrowMigrationReceipt = await tx.wait();
 								tx = await PeriFinanceBridgeToOptimismL1.initiateEscrowMigration(randomEntries);
 								initiateEscrowMigrationReceiptExtra = await tx.wait();
@@ -324,7 +329,10 @@ const itCanPerformEscrowMigration = ({ ctx }) => {
 										await PeriFinanceL2.balanceOf(RewardEscrowV2L2.address),
 										rewardEscrowBalanceL2.add(totalEscrowed)
 									);
-									assert.bnEqual(await PeriFinanceL2.totalSupply(), totalSupplyL2.add(totalEscrowed));
+									assert.bnEqual(
+										await PeriFinanceL2.totalSupply(),
+										totalSupplyL2.add(totalEscrowed)
+									);
 								});
 							});
 						});

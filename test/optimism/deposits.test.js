@@ -1,5 +1,5 @@
 const ethers = require('ethers');
-const { assert } = require('../contracts/common');
+const { assert, toUnit } = require('../contracts/common');
 const { connectContract } = require('./utils/connectContract');
 const { takeSnapshot, restoreSnapshot } = require('./utils/rpc');
 

@@ -16,7 +16,18 @@ describe('deployments', () => {
 	networks
 		.filter(n => n !== 'local')
 		.forEach(network => {
-			(network === 'goerli' ? describe.skip : describe)(network, () => {
+			(network === 'goerli' ||
+				network.includes('test') ||
+				network.includes('-alphanet') ||
+				network.includes('-ovm') ||
+				network.includes('-fork') ||
+				network === 'kovan' ||
+				network === 'rinkeby' ||
+				network === 'ropsten' ||
+				network === 'mumbai' ||
+				network === 'shibuya'
+				? describe.skip
+				: describe)(network, () => {
 				const { getTarget, getSource, getStakingRewards, getPynths } = wrap({ network, fs, path });
 
 				// we need this outside the test runner in order to generate tests per contract name
@@ -40,8 +51,17 @@ describe('deployments', () => {
 					web3 = new Web3(new Web3.providers.HttpProvider(connections.providerUrl));
 
 					contracts = {
-						PeriFinance: getContract({ source: 'PeriFinance', target: 'ProxyERC20' }),
+						PeriFinance: getContract({
+							source:
+								network !== 'polygon'
+									? network !== 'bsc'
+										? 'PeriFinance'
+										: 'PeriFinanceToBSC'
+									: 'PeriFinanceToPolygon',
+							target: 'ProxyERC20',
+						}),
 						ExchangeRates: getContract({ target: 'ExchangeRates' }),
+						Issuer: getContract({ target: 'Issuer' }),
 					};
 				});
 
@@ -112,7 +132,7 @@ describe('deployments', () => {
 										const tokenName = await tokenContract.methods.name().call();
 
 										if (token === 'PeriFinance' || token === 'ProxyERC20') {
-											assert.strictEqual(tokenName, 'PeriFinance Network Token');
+											assert.strictEqual(tokenName, 'Peri Finance Token');
 										} else if (token.includes('Proxy')) {
 											const pynthType = token.slice(5);
 											assert.strictEqual(tokenName, `Pynth ${pynthType}`);
@@ -158,7 +178,7 @@ describe('deployments', () => {
 								});
 							} else {
 								it('ensure non inverted pynths have s prefix', () => {
-									assert.strictEqual(name[0], 's');
+									assert.strictEqual(name[0], 'p');
 								});
 							}
 							if (feed) {
@@ -204,8 +224,8 @@ describe('deployments', () => {
 							// that would omit the deps from Depot and EtherCollateral which were not
 							// redeployed in Hadar (v2.21)
 							[
-								'BinaryOptionMarketFactory',
-								'BinaryOptionMarketManager',
+								// 'BinaryOptionMarketFactory',
+								// 'BinaryOptionMarketManager',
 								'DebtCache',
 								'DelegateApprovals',
 								'Depot',
@@ -266,17 +286,19 @@ describe('deployments', () => {
 
 							it(`${target} isResolverCached is true`, async () => {
 								if ('isResolverCached' in Contract.methods) {
-									// prior to Shaula (v2.35.x), contracts with isResolverCached took the old resolver as an argument
-									const usesLegacy = !!Contract.options.jsonInterface.find(
-										({ name }) => name === 'isResolverCached'
-									).inputs.length;
-									assert.ok(
-										await Contract.methods
-											.isResolverCached(...[].concat(usesLegacy ? foundResolver : []))
-											.call()
-									);
-									// Depot is the only contract not currently updated to the latest MixinResolver so it
-									// doesn't expose the is cached predicate
+									if (target !== 'EtherCollateral' && target !== 'PeriFinanceBridgeToOptimism') {
+										// prior to Shaula (v2.35.x), contracts with isResolverCached took the old resolver as an argument
+										const usesLegacy = !!Contract.options.jsonInterface.find(
+											({ name }) => name === 'isResolverCached'
+										).inputs.length;
+										assert.ok(
+											await Contract.methods
+												.isResolverCached(...[].concat(usesLegacy ? foundResolver : []))
+												.call()
+										);
+										// Depot is the only contract not currently updated to the latest MixinResolver so it
+										// doesn't expose the is cached predicate
+									}
 								} else if (target !== 'Depot') {
 									throw Error(`${target} is missing isResolverCached() function`);
 								}

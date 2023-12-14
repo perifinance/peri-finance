@@ -66,7 +66,10 @@ const itCanPerformDepositAndEscrowMigration = ({ ctx }) => {
 			});
 
 			it('updates user balance', async () => {
-				assert.bnEqual(await PeriFinanceL1.balanceOf(user1L1.address), user1BalanceL1.add(periAmount));
+				assert.bnEqual(
+					await PeriFinanceL1.balanceOf(user1L1.address),
+					user1BalanceL1.add(periAmount)
+				);
 			});
 
 			describe('when the user approves the reward escrow to transfer their PERI', () => {
@@ -267,7 +270,10 @@ const itCanPerformDepositAndEscrowMigration = ({ ctx }) => {
 												'ImportedVestingEntries',
 												importedVestingEntriesEventListener
 											);
-											PeriFinanceBridgeToBaseL2.off('MintedSecondary', mintedSecondaryEventListener);
+											PeriFinanceBridgeToBaseL2.off(
+												'MintedSecondary',
+												mintedSecondaryEventListener
+											);
 										});
 
 										it('emitted two ImportedVestingEntries events', async () => {

@@ -216,8 +216,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function feeRewardsToBeAllocated() external view returns (uint) {
         // when _everDistributedFeeRewards is true, _feeRewardsToBeAllocated has the right value
         // since _recentFeePeriodsStorage(0).feesToDistribute has the fee for the current network at the moment.
-        return _everDistributedFeeRewards || (_recentFeePeriodsStorage(0).startTime > (now - getFeePeriodDuration())) 
-            ? _feeRewardsToBeAllocated : _recentFeePeriodsStorage(0).feesToDistribute;
+        return
+            _everDistributedFeeRewards || (_recentFeePeriodsStorage(0).startTime > (now - getFeePeriodDuration()))
+                ? _feeRewardsToBeAllocated
+                : _recentFeePeriodsStorage(0).feesToDistribute;
     }
 
     function _recentFeePeriodsStorage(uint index) internal view returns (FeePeriod storage) {
@@ -258,16 +260,23 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         totalFeeRewards = totalFeeRewards.add(_feeRewardsToBeAllocated);
 
         // Set the proportionate rewards for self network
-        _recentFeePeriodsStorage(0).feesToDistribute = totalFeeRewards.decimalToPreciseDecimal()
+        _recentFeePeriodsStorage(0).feesToDistribute = totalFeeRewards
+            .decimalToPreciseDecimal()
             .multiplyDecimalRoundPrecise(crossChainManager().currentNetworkDebtPercentage())
             .preciseDecimalToDecimal();
 
         if (_feeRewardsToBeAllocated > _recentFeePeriodsStorage(0).feesToDistribute) {
             // Burn the distributed rewards to other networks
-            issuer().pynths(pUSD).burn(FEE_ADDRESS, _feeRewardsToBeAllocated.sub(_recentFeePeriodsStorage(0).feesToDistribute));
-        } else if (_feeRewardsToBeAllocated < _recentFeePeriodsStorage(0).feesToDistribute){
+            issuer().pynths(pUSD).burn(
+                FEE_ADDRESS,
+                _feeRewardsToBeAllocated.sub(_recentFeePeriodsStorage(0).feesToDistribute)
+            );
+        } else if (_feeRewardsToBeAllocated < _recentFeePeriodsStorage(0).feesToDistribute) {
             // Mint the extra rewards from other networks
-            issuer().pynths(pUSD).issue(FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute.sub(_feeRewardsToBeAllocated));
+            issuer().pynths(pUSD).issue(
+                FEE_ADDRESS,
+                _recentFeePeriodsStorage(0).feesToDistribute.sub(_feeRewardsToBeAllocated)
+            );
         }
 
         // // If there are fees to be allocated to other networks, we need to burn them and subtract from feesToDistribute
@@ -368,7 +377,9 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     function closeCurrentFeePeriod() external issuanceActive {
         require(getFeePeriodDuration() > 0, "Fee Period Duration not set");
         require(_recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()), "Too early to close fee period");
-        require(_everDistributedFeeRewards || crossChainManager().currentNetworkDebtPercentage() == SafeDecimalMath.preciseUnit(), 
+        require(
+            _everDistributedFeeRewards ||
+                crossChainManager().currentNetworkDebtPercentage() == SafeDecimalMath.preciseUnit(),
             "fee rewards should be distributed before closing period"
         );
 
@@ -390,7 +401,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             .rewardsToDistribute
             .add(periodToRollover.rewardsToDistribute)
             .sub(periodToRollover.rewardsClaimed);
-            
+
         // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
         //     .balanceOf(requireAndGetAddress(CONTRACT_REWARDESCROW_V2))
         //     .sub(rewardEscrowV2().totalEscrowedBalance());
@@ -508,16 +519,23 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         require(prevFeePool != address(0), "Previous FeePool address must be set");
 
         for (uint i; i < FEE_PERIOD_LENGTH; i++) {
-            (uint64 feePeriodId, uint64 startingDebtIndex, uint64 startTime, uint feesToDistribute, 
-                uint feesClaimed, uint rewardsToDistribute, uint rewardsClaimed) = IFeePool(prevFeePool).recentFeePeriods(i);
+            (
+                uint64 feePeriodId,
+                uint64 startingDebtIndex,
+                uint64 startTime,
+                uint feesToDistribute,
+                uint feesClaimed,
+                uint rewardsToDistribute,
+                uint rewardsClaimed
+            ) = IFeePool(prevFeePool).recentFeePeriods(i);
 
-                _recentFeePeriodsStorage(i).feePeriodId = feePeriodId;
-                _recentFeePeriodsStorage(i).startingDebtIndex = startingDebtIndex;
-                _recentFeePeriodsStorage(i).startTime = startTime;
-                _recentFeePeriodsStorage(i).feesToDistribute = feesToDistribute;
-                _recentFeePeriodsStorage(i).feesClaimed = feesClaimed;
-                _recentFeePeriodsStorage(i).rewardsToDistribute = rewardsToDistribute;
-                _recentFeePeriodsStorage(i).rewardsClaimed = rewardsClaimed;
+            _recentFeePeriodsStorage(i).feePeriodId = feePeriodId;
+            _recentFeePeriodsStorage(i).startingDebtIndex = startingDebtIndex;
+            _recentFeePeriodsStorage(i).startTime = startTime;
+            _recentFeePeriodsStorage(i).feesToDistribute = feesToDistribute;
+            _recentFeePeriodsStorage(i).feesClaimed = feesClaimed;
+            _recentFeePeriodsStorage(i).rewardsToDistribute = rewardsToDistribute;
+            _recentFeePeriodsStorage(i).rewardsClaimed = rewardsClaimed;
         }
     }
 
@@ -676,7 +694,11 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // return (totalFees, totalRewards);
     }
 
-    function _isFeesClaimableAndAnyRatesInvalid(address account) internal view returns (bool feesClaimable, bool anyRateIsInvalid) {
+    function _isFeesClaimableAndAnyRatesInvalid(address account)
+        internal
+        view
+        returns (bool feesClaimable, bool anyRateIsInvalid)
+    {
         // External token staked amount should not over the quota limit.
         uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
         if (

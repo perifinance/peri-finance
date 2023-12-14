@@ -128,7 +128,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     function calculateAmountToFixCollateral(uint debtBalance, uint collateral) external view returns (uint) {
         return _calculateAmountToFixCollateral(debtBalance, collateral);
     }
-    
+
     /**
      * r = target issuance ratio
      * D = debt balance
@@ -207,7 +207,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     // Internal function to remove account from liquidations
     // Does not check collateral ratio is fixed
-        function removeAccountInLiquidation(address account) external onlyIssuer {
+    function removeAccountInLiquidation(address account) external onlyIssuer {
         _removeAccountInLiquidation(account);
     }
 
@@ -229,9 +229,11 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         }
     }
 
-    function liquidateAccount(address account, uint pusdAmount, uint debtBalance) 
-    external onlyIssuer
-    returns (uint totalRedeemedinUSD, uint amountToLiquidate)  {
+    function liquidateAccount(
+        address account,
+        uint pusdAmount,
+        uint debtBalance
+    ) external onlyIssuer returns (uint totalRedeemedinUSD, uint amountToLiquidate) {
         require(_isOpenForLiquidation(account), "Account not open for liquidation");
         (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
         require(!periRateInvalid, "PERI rate is invalid");
@@ -250,15 +252,12 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         amountToLiquidate = amountToFixRatioinUSD < pusdAmount ? amountToFixRatioinUSD : pusdAmount;
 
         // Add penalty
-        totalRedeemedinUSD =
-            amountToLiquidate.multiplyDecimal(SafeDecimalMath.unit().add(getLiquidationPenalty()));
+        totalRedeemedinUSD = amountToLiquidate.multiplyDecimal(SafeDecimalMath.unit().add(getLiquidationPenalty()));
 
         if (totalRedeemedinUSD > collateralForAccountinUSD) {
             totalRedeemedinUSD = collateralForAccountinUSD;
 
-            amountToLiquidate = collateralForAccountinUSD.divideDecimal(
-                SafeDecimalMath.unit().add(getLiquidationPenalty())
-            );
+            amountToLiquidate = collateralForAccountinUSD.divideDecimal(SafeDecimalMath.unit().add(getLiquidationPenalty()));
         }
 
         // totalRedeemedinUSD = exTokenStakeManager().redeem(account, totalRedeemedinUSD, liquidator);

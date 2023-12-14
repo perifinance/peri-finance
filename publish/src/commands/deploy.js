@@ -50,7 +50,7 @@ const {
 } = require('../../../.');
 
 const DEFAULTS = {
-	gasPrice: '1',
+	gasPrice: '25',
 	methodCallGasLimit: 250e3, // 250k
 	contractDeploymentGasLimit: 6.9e6, // TODO split out into separate limits for different contracts, Proxys, Pynths, PeriFinance
 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot

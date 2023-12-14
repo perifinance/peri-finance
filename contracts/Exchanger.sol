@@ -70,6 +70,7 @@ interface IExchangerInternalVirtualPynthIssuer {
         bytes32 currencyKey
     ) external returns (IVirtualPynth);
 }
+
 // https://docs.peri.finance/contracts/source/contracts/exchanger
 contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     using SafeMath for uint;
@@ -646,9 +647,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function _createVirtualPynth(
         IERC20 pynth,
-		address recipient,
-		uint amount,
-		bytes32 currencyKey
+        address recipient,
+        uint amount,
+        bytes32 currencyKey
     ) internal returns (IVirtualPynth) {
         virtualPynthIssuer().createVirtualPynth(pynth, recipient, amount, currencyKey);
     }

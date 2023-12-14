@@ -3,12 +3,14 @@
 const path = require('path');
 const { red, gray, yellow } = require('chalk');
 
+// eslint-disable-next-line node/no-extraneous-require
 const { usePlugin, task, internalTask, extendEnvironment } = require('@nomiclabs/buidler/config');
 
+// eslint-disable-next-line node/no-extraneous-require
 const { SOLC_OUTPUT_FILENAME } = require('@nomiclabs/buidler/internal/constants');
 
-require('@eth-optimism/ovm-toolchain/build/src/buidler-plugins/buidler-ovm-compiler'); // enable custom solc compiler
-require('@eth-optimism/ovm-toolchain/build/src/buidler-plugins/buidler-ovm-node'); // add ability to start an OVM node
+// require('@eth-optimism/ovm-toolchain/build/src/buidler-plugins/buidler-ovm-compiler'); // enable custom solc compiler
+// require('@eth-optimism/ovm-toolchain/build/src/buidler-plugins/buidler-ovm-node'); // add ability to start an OVM node
 
 usePlugin('@nomiclabs/buidler-truffle5'); // uses and exposes web3 via buidler-web3 plugin
 usePlugin('solidity-coverage');
