@@ -11,6 +11,8 @@ It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USD
 
 ## Overview
 
+The bug bounty is suspended at the moment. We will notify when it is started again.
+
 This bug bounty document is to verify that PeriFinance hosts a bug bounty on Immunefi at the address [https://immunefi.com/bounty/perifinance/](https://immunefi.com/bounty/perifinance/).
 
 If you have found a vulnerability in our project, it must be submitted through [Immunefi's platform](https://immunefi.com/). Immunefi will handle bug bounty communications.
@@ -36,8 +38,8 @@ You can buy our test tokens from [Uniswap](https://app.uniswap.org/#/swap?use=V2
 
 ### PERI Exchange
 
-Users will be able to converting one Pynth to another without worrying about how deep the liquidity nor slippage. Users will also be able to be benefited by taking short or long positions of Pynths with 20x leverage.  
-Prices will be committed on chain by a trusted oracle. Moving to a decentralised oracle will be phased in with the first phase completed for all forex prices using [Chainlink](https://feeds.chain.link/).
+Users will be able to convert one Pynth to another without worrying about how deep the liquidity or slippage is. Users will also get benefits by taking short or long positions of Pynths with 20x leverage.  
+Prices will be committed on the chain by a trusted oracle. Moving to a decentralized oracle will be phased in with the first phase completed for all forex prices using [Chainlink](https://feeds.chain.link/).
 
 ### PERI DAO
 
@@ -45,11 +47,12 @@ PERI tokens are also used for governance. We have created a PIP (PERI Improvemen
 
 ### Pynths NFTs
 
-Artists and investors are both greatly rewarded and monetized by minting Peri token.
+Artists and investors are both greatly rewarded and monetized by minting Nend tokens and voting power cards. Nend protocol has unique features such as leverage lending that will give huge incentives to investors(lenders). 
+[Nend Protocol](https://nendfi.com).
 
 ---
 
-PERI Finance will be a decentralized cross-chain synthetic issuance and derivative exchange protocol that provides unlimited liquidity on Polkadot network. It gives the opportunity to accessing a wide range of traditional financial and crypto assets in the forms of both leveraged and unleveraged synthetic products without high GAS fee, slow transaction speed and vulnerability to front-running or flash loan.
+PERI Finance will be a decentralized cross-chain synthetic issuance and derivative exchange protocol that provides unlimited liquidity on Polkadot network. It allows access to a wide range of traditional financial and crypto assets in the forms of both leveraged and unleveraged synthetic products without high GAS fees, slow transaction speed, and vulnerability to front-running or flash loans.
 
 For further information see our latest [whitepaper](<http://test.peri.finance/file/Peri%20Whitepaper%20(EN)%20v0.9.pdf>).
 
