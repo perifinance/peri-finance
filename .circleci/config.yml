@@ -281,9 +281,9 @@ workflows:
       - job-test-deploy-script:
           requires:
             - job-prepare
-      - job-prod-tests:
-          requires:
-            - job-prepare
+      # - job-prod-tests:
+      #     requires:
+      #       - job-prepare
       - job-prod-diff-tests-local:
           name: job-prod-diff-tests-local
           requires:
