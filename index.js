@@ -66,6 +66,9 @@ const chainIdMapping = Object.entries({
 		fork: true,
 	},
 
+	1337: {
+		network: 'local',
+	},
 	/* // OVM networks: see https://github.com/ethereum-optimism/regenesis/
 	10: {
 		network: 'mainnet',

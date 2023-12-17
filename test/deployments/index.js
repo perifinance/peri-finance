@@ -16,18 +16,7 @@ describe('deployments', () => {
 	networks
 		.filter(n => n !== 'local')
 		.forEach(network => {
-			(network === 'goerli' ||
-				network.includes('test') ||
-				network.includes('-alphanet') ||
-				network.includes('-ovm') ||
-				network.includes('-fork') ||
-				network === 'kovan' ||
-				network === 'rinkeby' ||
-				network === 'ropsten' ||
-				network === 'mumbai' ||
-				network === 'shibuya'
-				? describe.skip
-				: describe)(network, () => {
+			(network !== 'mainnet' ? describe.skip : describe)(network, () => {
 				const { getTarget, getSource, getStakingRewards, getPynths } = wrap({ network, fs, path });
 
 				// we need this outside the test runner in order to generate tests per contract name

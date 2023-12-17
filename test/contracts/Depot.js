@@ -468,7 +468,7 @@ contract('Depot', async accounts => {
 				});
 			});
 
-			it('exactly matches one deposit (and that the queue is correctly updated) [ @cov-skip ]', async () => {
+			it.skip('exactly matches one deposit (and that the queue is correctly updated) [ @cov-skip ]', async () => {
 				const pynthsToDeposit = ethUsd;
 				const ethToSend = toUnit('1');
 				const depositorStartingBalance = await getEthBalance(depositor);

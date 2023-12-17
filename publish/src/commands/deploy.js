@@ -506,6 +506,7 @@ const deploy = async ({
 			ownerActions,
 			ownerActionsFile,
 			dryRun,
+			noPrompt: yes,
 			nonceManager: manageNonces ? nonceManager : undefined,
 		});
 
@@ -1006,10 +1007,19 @@ const deploy = async ({
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
-		source: useOvm ? 'Exchanger' : 'VirtualPynthIssuer',
+		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualPynth',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
+
+	if (config['Exchanger'].deploy) {
+		await deployer.deployContract({
+			name: 'VirtualPynthIssuer',
+			source: 'VirtualPynthIssuer',
+			deps: ['AddressResolver'],
+			args: [account, addressOf(readProxyForResolver)],
+		});
+	}
 
 	const exchangeState = await deployer.deployContract({
 		name: 'ExchangeState',

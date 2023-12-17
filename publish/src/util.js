@@ -253,6 +253,7 @@ const performTransactionalStep = async ({
 	encodeABI,
 	nonceManager,
 	publiclyCallable,
+	noPrompt = false,
 }) => {
 	const argumentsForWriteFunction = [].concat(writeArg).filter(entry => entry !== undefined); // reduce to array of args
 	const action = `${contract}.${write}(${argumentsForWriteFunction.map(arg =>
@@ -265,7 +266,27 @@ const performTransactionalStep = async ({
 	if (read) {
 		// web3 counts provided arguments - even undefined ones - and they must match the expected args, hence the below
 		const argumentsForReadFunction = [].concat(readArg).filter(entry => entry !== undefined); // reduce to array of args
-		const response = await target.methods[read](...argumentsForReadFunction).call();
+		let response;
+		try {
+			response = await target.methods[read](...argumentsForReadFunction).call();
+		} catch (err) {
+			if (!noPrompt) {
+				try {
+					await confirmAction(
+						yellow(`⚠⚠⚠ WARNING: calling read function(${read}) failed with "${err.message}\n"`) +
+							gray('-'.repeat(50)) +
+							`\nDo you still want to call ${action}? (y/n) `
+					);
+				} catch (err) {
+					console.log(gray(`Calling ${action} cancelled`));
+					return { noop: true };
+				}
+			}
+			console.log(
+				gray(`Even if calling read function(${read}) failed with "${err.message}\n`) +
+					yellow(`Continuing to executing ${action}`)
+			);
+		}
 
 		if (expected(response)) {
 			console.log(gray(`Nothing required for this action.`));
@@ -504,7 +525,7 @@ async function checkGasPrice(network, priority) {
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		gasPrice = await estimatePolygonGasPice(network, priority);
-	} else if (['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby'].includes(network)) {
+	} else if (['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'local'].includes(network)) {
 		gasPrice = await estimateEtherGasPice(priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);

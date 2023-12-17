@@ -408,6 +408,7 @@ class Deployer {
 	getExistingContract({ contract }) {
 		let address;
 		if (this.network === 'local') {
+			if (!this.deployment.targets[contract]) return undefined;
 			address = this.deployment.targets[contract].address;
 		} else {
 			const contractVersion = getVersions({
