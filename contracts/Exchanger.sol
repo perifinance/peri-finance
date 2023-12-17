@@ -19,7 +19,7 @@ import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/ITradingRewards.sol";
 import "./interfaces/IVirtualPynth.sol";
-import "./interfaces/ICrossChainManager.sol";
+// import "./interfaces/ICrossChainManager.sol";
 import "./Proxyable.sol";
 
 // Note: use OZ's IERC20 here as using ours will complain about conflicting names

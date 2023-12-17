@@ -281,11 +281,17 @@ const performTransactionalStep = async ({
 					console.log(gray(`Calling ${action} cancelled`));
 					return { noop: true };
 				}
+
+				console.log(
+					gray(`Even if calling read function(${read}) failed with "${err.message}\n`) +
+						yellow(`Continuing to executing ${action}`)
+				);
+			} else {
+				console.log(
+					gray(`read function(${read}) failed with "${err.message}\nCalling ${action} cancelled`)
+				);
+				return { noop: true };
 			}
-			console.log(
-				gray(`Even if calling read function(${read}) failed with "${err.message}\n`) +
-					yellow(`Continuing to executing ${action}`)
-			);
 		}
 
 		if (expected(response)) {
