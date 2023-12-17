@@ -80,13 +80,13 @@ contract('DebtCache', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'Exchanger', // necessary for burnPynths to check settlement of pUSD
-				// 'DelegateApprovals', // necessary for *OnBehalf functions
+				'DelegateApprovals', // necessary for *OnBehalf functions
 				// 'FlexibleStorage',
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'StakingState',
-				'ExternalTokenStakeManager',
 				'CrossChainManager',
+				'ExternalTokenStakeManager',
 			],
 		}));
 	});

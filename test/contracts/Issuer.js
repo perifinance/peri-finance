@@ -45,7 +45,7 @@ const {
 // const { AssertionError } = require('chai');
 // const { lte } = require('semver');
 
-contract('Issuer (via PeriFinance)', async accounts => {
+contract('Issuer via PeriFinance', async accounts => {
 	const WEEK = 604800;
 
 	const [pUSD, pETH, PERI, USDC, DAI] = ['pUSD', 'pETH', 'PERI', 'USDC', 'DAI'].map(toBytes32);
@@ -169,6 +169,7 @@ contract('Issuer (via PeriFinance)', async accounts => {
 				'CollateralManager',
 				'FeePoolState',
 				'StakingState',
+				'CrossChainManager',
 			],
 			stables,
 		}));
@@ -2109,16 +2110,16 @@ contract('Issuer (via PeriFinance)', async accounts => {
 
 					it('should allow users to burn their debt and adjust the debtBalanceOf correctly for remaining users', async () => {
 						// Give some PERI to account1
-						await periFinance.transfer(account1, toUnit('40000000'), {
+						await periFinance.transfer(account1, toUnit('400000'), {
 							from: owner,
 						});
-						await periFinance.transfer(account2, toUnit('40000000'), {
+						await periFinance.transfer(account2, toUnit('400000'), {
 							from: owner,
 						});
 
 						// Issue
-						const issuedPynths1 = toUnit('150000');
-						const issuedPynths2 = toUnit('50000');
+						const issuedPynths1 = toUnit('15000');
+						const issuedPynths2 = toUnit('5000');
 
 						await periFinance.issuePynths(PERI, issuedPynths1, { from: account1 });
 						await periFinance.issuePynths(PERI, issuedPynths2, { from: account2 });
@@ -2127,17 +2128,17 @@ contract('Issuer (via PeriFinance)', async accounts => {
 						let debtBalance2After = await periFinance.debtBalanceOf(account2, pUSD);
 
 						// debtBalanceOf has rounding error but is within tolerance
-						assert.bnClose(debtBalance1After, toUnit('150000'));
-						assert.bnClose(debtBalance2After, toUnit('50000'));
+						assert.bnClose(debtBalance1After, toUnit('15000'));
+						assert.bnClose(debtBalance2After, toUnit('5000'));
 
 						// Account 1 burns 100,000
-						await periFinance.burnPynths(PERI, toUnit('100000'), { from: account1 });
+						await periFinance.burnPynths(PERI, toUnit('10000'), { from: account1 });
 
 						debtBalance1After = await periFinance.debtBalanceOf(account1, pUSD);
 						debtBalance2After = await periFinance.debtBalanceOf(account2, pUSD);
 
-						assert.bnClose(debtBalance1After, toUnit('50000'));
-						assert.bnClose(debtBalance2After, toUnit('50000'));
+						assert.bnClose(debtBalance1After, toUnit('5000'));
+						assert.bnClose(debtBalance2After, toUnit('5000'));
 					});
 
 					it('should revert if sender tries to issue pynths with 0 amount', async () => {

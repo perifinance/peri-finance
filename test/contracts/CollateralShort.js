@@ -108,7 +108,6 @@ contract('CollateralShort', async accounts => {
 				'Issuer',
 				'DebtCache',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 

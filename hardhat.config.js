@@ -17,7 +17,7 @@ const {
 
 // console.log(inflationStartTimestampInSecs);
 
-const GAS_PRICE = 600e9; // 100 GWEI
+const GAS_PRICE = 900e9; // 100 GWEI
 const CACHE_FOLDER = 'cache';
 
 // task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
@@ -37,15 +37,15 @@ module.exports = {
 		compilers: [
 			{
 				version: '0.4.25',
-				// settings: {
-				// 	optimizer: {
-				// 		runs: 200,
-				// 		enabled: true
-				// 	}
-				// }
 			},
 			{
 				version: '0.5.16',
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 200,
+					},
+				},
 			},
 		],
 	},
@@ -70,9 +70,9 @@ module.exports = {
 			gasPrice: GAS_PRICE,
 			initialDate: new Date().toISOString(), // new Date(inflationStartTimestampInSecs * 1000).toISOString(),
 			// Note: forking settings are injected at runtime by hardhat/tasks/task-node.js
-			forking: {
-				url: 'https://polygon-bor.publicnode.com',
-			},
+			// forking: {
+			// 	url: 'https://polygon-bor.publicnode.com',
+			// },
 		},
 	},
 	gasReporter: {

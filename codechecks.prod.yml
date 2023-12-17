@@ -4,5 +4,5 @@ checks:
       name: prod-test-gas-report
 settings:
   branches:
-    - develop
-    - master
+    - dev
+    - main

@@ -58,7 +58,6 @@ contract('Pynth', async accounts => {
 			ExternalTokenStakeManager: externalTokenStakeManager,
 			// BridgeStatepUSD: bridgeStatepUSD,
 		} = await setupAllContracts({
-			pynths: ['pGBP'],
 			accounts,
 			contracts: [
 				'Pynth',
@@ -77,6 +76,7 @@ contract('Pynth', async accounts => {
 				'RewardEscrowV2', // required for issuer._collateral() to read collateral
 				'ExternalTokenStakeManager',
 				'StakingState',
+				'CrossChainManager',
 			],
 		}));
 
@@ -525,7 +525,7 @@ contract('Pynth', async accounts => {
 						'Cannot transfer during waiting period'
 					);
 				});
-				it('when pEUR is attempted to be transferFrom away by another user, it reverts', async () => {
+				it('when pUSD is attempted to be transferFrom away by another user, it reverts', async () => {
 					await assert.revert(
 						pUSDContract.transferFrom(owner, account2, toUnit('1'), { from: account1 }),
 						'Cannot transfer during waiting period'
@@ -726,8 +726,6 @@ contract('Pynth', async accounts => {
 			let pEURContract;
 
 			beforeEach(async () => {
-				const pEUR = toBytes32('pEUR');
-
 				// create a new pEUR pynth
 				({ Pynth: pEURContract } = await setupAllContracts({
 					accounts,

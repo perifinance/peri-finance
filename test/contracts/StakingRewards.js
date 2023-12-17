@@ -81,7 +81,6 @@ contract('StakingRewards', accounts => {
 				'FeePool',
 				'SystemSettings',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 

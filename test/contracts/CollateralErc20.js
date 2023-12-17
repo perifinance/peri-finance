@@ -64,7 +64,6 @@ contract('CollateralErc20', async accounts => {
 		manager,
 		issuer,
 		debtCache,
-		tokenStatepUSD,
 		FEE_ADDRESS;
 
 	const getid = tx => {
@@ -74,7 +73,7 @@ contract('CollateralErc20', async accounts => {
 
 	const issuepUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of pynths to deposit.
-		await tokenStatepUSD.setBalanceOf(receiver, issueAmount, {
+		await pUSDPynth.issue(receiver, issueAmount, {
 			from: owner,
 		});
 	};
@@ -129,7 +128,6 @@ contract('CollateralErc20', async accounts => {
 		({
 			SystemStatus: systemStatus,
 			ExchangeRates: exchangeRates,
-			TokenStatepUSD: tokenStatepUSD,
 			PynthpUSD: pUSDPynth,
 			PynthpBTC: pBTCPynth,
 			FeePool: feePool,
@@ -149,7 +147,6 @@ contract('CollateralErc20', async accounts => {
 				'DebtCache',
 				'Exchanger',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 
@@ -225,7 +222,6 @@ contract('CollateralErc20', async accounts => {
 		await manager.rebuildCache();
 		await issuer.rebuildCache();
 		await debtCache.rebuildCache();
-		await pUSDPynth.rebuildCache();
 
 		await manager.addCollaterals([cerc20.address], { from: owner });
 

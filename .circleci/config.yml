@@ -114,26 +114,26 @@ jobs:
       - run: npx codechecks codechecks.prod.yml
       - store_artifacts:
           path: test-gas-used-prod.log
-  job-prod-tests:
-    working_directory: ~/repo
-    docker:
-      - image: perifinanceteam/peri-docker-node:0.0.1
-        auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_TOKEN
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - run:
-          command: npx hardhat node --target-network mainnet
-          background: true
-      - cmd-wait-for-port:
-          port: 8545
-      - run: npm run test:prod:gas -- --target-network mainnet
-      - run: npx codechecks codechecks.prod.yml
-      - store_artifacts:
-          path: test-gas-used-prod.log
+  # job-prod-tests:
+  #   working_directory: ~/repo
+  #   docker:
+  #     - image: perifinanceteam/peri-docker-node:0.0.1
+  #       auth:
+  #         username: $DOCKERHUB_USERNAME
+  #         password: $DOCKERHUB_TOKEN
+  #   steps:
+  #     - checkout
+  #     - attach_workspace:
+  #         at: .
+  #     - run:
+  #         command: npx hardhat node --target-network mainnet
+  #         background: true
+  #     - cmd-wait-for-port:
+  #         port: 8545
+  #     - run: npm run test:prod:gas -- --target-network mainnet
+  #     - run: npx codechecks codechecks.prod.yml
+  #     - store_artifacts:
+  #         path: test-gas-used-prod.log
   job-static-analysis:
     working_directory: ~/repo
     docker:

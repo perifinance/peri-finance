@@ -16,13 +16,13 @@ const {
 } = require('../../');
 const BN = require('bn.js');
 
-contract('SystemSettings', async accounts => {
+contract('SystemSettings Only', async accounts => {
 	const [, owner] = accounts;
 	const oneWeek = web3.utils.toBN(7 * 24 * 60 * 60);
 
 	let systemSettings;
 
-	beforeEach(async () => {
+	before(async () => {
 		({ SystemSettings: systemSettings } = await setupAllContracts({
 			accounts,
 			contracts: ['SystemSettings'],
@@ -49,6 +49,7 @@ contract('SystemSettings', async accounts => {
 				'setMinimumStakeTime',
 				'setPriceDeviationThresholdFactor',
 				'setRateStalePeriod',
+				'setSyncStaleThreshold',
 				'setTargetThreshold',
 				'setTradingRewardsEnabled',
 				'setWaitingPeriodSecs',
@@ -388,10 +389,13 @@ contract('SystemSettings', async accounts => {
 	});
 
 	describe('setLiquidationRatio()', () => {
+		beforeEach(async () => {
+			await systemSettings.setIssuanceRatio(toUnit('.25'), { from: owner });
+		});
 		it('can only be invoked by owner', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: systemSettings.setLiquidationRatio,
-				args: [toUnit('.5')],
+				args: [toUnit('.666666666666666666')],
 				address: owner,
 				accounts,
 				reason: 'Only the contract owner may perform this action',

@@ -10,7 +10,7 @@ const { toBytes32 } = require('../..');
 
 let VirtualPynthIssuer;
 
-contract('VirtualPynthIssuer (unit tests)', async accounts => {
+contract('VirtualPynthIssuer unit tests', async accounts => {
 	const [, owner] = accounts;
 
 	before(async () => {

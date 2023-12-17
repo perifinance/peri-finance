@@ -42,7 +42,7 @@ const tokenInfos = {
 
 const keys = ['USDC', 'DAI', 'KRW'];
 
-contract('External token staking integrating test', async accounts => {
+contract('External token staking integration', async accounts => {
 	const [deployerAccount, owner, oracle] = accounts;
 	const users = new Array(7).fill(null).map((_el, idx) => accounts[idx + 3]);
 
@@ -101,17 +101,14 @@ contract('External token staking integrating test', async accounts => {
 				'AddressResolver',
 				'RewardEscrowV2',
 				'PeriFinanceEscrow',
-				'SystemSettings',
 				'Issuer',
+				'Exchanger',
 				'DebtCache',
-				'Exchanger', // necessary for burnPynths to check settlement of pUSD
-				'DelegateApprovals', // necessary for *OnBehalf functions
 				'FlexibleStorage',
-				'CollateralManager',
 				'FeePoolStateUSDC',
 				'StakingState',
 				'ExternalTokenStakeManager',
-				'BlacklistManager',
+				'CrossChainManager',
 			],
 			stables: keys,
 		}));
@@ -1010,13 +1007,13 @@ contract('External token staking integrating test', async accounts => {
 				await periFinance.issuePynths(USDC, toUnit('5'), { from: users[0] });
 				await periFinance.issuePynths(DAI, toUnit('20'), { from: users[0] });
 				await periFinance.issuePynths(KRW, toUnit('25'), { from: users[0] });
+				await fastForward(86401);
+
+				// Set the status to fit to claimable violation set
+				await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
 			});
 
 			it('should exit at no violation status', async () => {
-				await fastForward(86401);
-
-				await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
-
 				await periFinance.exit({ from: users[0] });
 
 				const combinedStakedAmount_0 = await externalTokenStakeManager.combinedStakedAmountOf(
@@ -1051,9 +1048,6 @@ contract('External token staking integrating test', async accounts => {
 			});
 
 			it('should exit at the violation status', async () => {
-				// Set the status to fit to claimable violation set
-				await updateRates([PERI, USDC, DAI, KRW], ['0.01', '2', '2.5', '3000']);
-
 				const targetRatio = await feePool.issuanceRatio();
 				const cRatio_0_before = await periFinance.collateralisationRatio(users[0]);
 

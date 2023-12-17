@@ -40,7 +40,7 @@ contract('CollateralManager', async accounts => {
 		manager,
 		managerState,
 		addressResolver,
-		issuer,
+		// issuer,
 		exchangeRates,
 		feePool,
 		pUSDPynth,
@@ -133,14 +133,14 @@ contract('CollateralManager', async accounts => {
 			PynthpBTC: pBTCPynth,
 			FeePool: feePool,
 			AddressResolver: addressResolver,
-			Issuer: issuer,
+			// Issuer: issuer,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
 			contracts: [
 				'PeriFinance',
-				'FeePool',
+				// 'FeePool',
 				'AddressResolver',
 				'ExchangeRates',
 				'SystemStatus',
@@ -148,9 +148,12 @@ contract('CollateralManager', async accounts => {
 				'DebtCache',
 				'Exchanger',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
+
+		CollateralManager = artifacts.require(`CollateralManager`);
+		CollateralState = artifacts.require(`CollateralState`);
+		CollateralManagerState = artifacts.require('CollateralManagerState');
 
 		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
 
@@ -260,11 +263,11 @@ contract('CollateralManager', async accounts => {
 			}
 		);
 
-		await issuer.rebuildCache();
+		// await issuer.rebuildCache();
 		await ceth.rebuildCache();
 		await cerc20.rebuildCache();
 		await debtCache.rebuildCache();
-		await feePool.rebuildCache();
+		// await feePool.rebuildCache();
 		await manager.rebuildCache();
 		await short.rebuildCache();
 
@@ -318,10 +321,6 @@ contract('CollateralManager', async accounts => {
 	};
 
 	before(async () => {
-		CollateralManager = artifacts.require(`CollateralManager`);
-		CollateralState = artifacts.require(`CollateralState`);
-		CollateralManagerState = artifacts.require('CollateralManagerState');
-
 		await setupManager();
 	});
 

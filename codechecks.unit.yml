@@ -4,5 +4,5 @@ checks:
       name: unit-test-gas-report
 settings:
   branches:
-    - develop
-    - master
+    - dev
+    - main

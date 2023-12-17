@@ -56,12 +56,12 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		});
 	};
 
-	/* const issuepUSDToAccount = async (issueAmount, receiver) => {
+	const issuepUSDToAccount = async (issueAmount, receiver) => {
 		// Set up the depositor with an amount of pynths to deposit.
 		await pUSDPynth.issue(receiver, issueAmount, {
-			from: issuer.address,
+			from: owner,
 		});
-	}; */
+	};
 
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
@@ -109,7 +109,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 				'FeePool',
 				'CollateralManager',
 				'StakingState',
-				'CrossChainManager',
+				// 'CrossChainManager',
 			],
 		}));
 
@@ -154,13 +154,12 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		await manager.rebuildCache();
 		await feePool.rebuildCache();
 		await debtCache.rebuildCache();
-		await pUSDPynth.rebuildCache();
 
 		await manager.addCollaterals([ceth.address, pUSDPynth.address], { from: owner });
 
 		await updateRatesWithDefaults();
 
-		// await issuepUSDToAccount(toUnit(1000), owner);
+		await issuepUSDToAccount(toUnit(1000), owner);
 		await debtCache.takeDebtSnapshot();
 	});
 

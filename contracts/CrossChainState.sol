@@ -105,8 +105,7 @@ contract CrossChainState is Owned, State, ICrossChainState {
         for (uint i; i < _chainIDs.length; ++i) {
             if (_chainIDs[i] == _selfId) {
                 _selfNetworkIssuedDebt = _amounts[i];
-            }
-            else{
+            } else {
                 _crossNetworkIssuedDebt = _crossNetworkIssuedDebt.add(_amounts[i]);
             }
         }

@@ -35,7 +35,8 @@ contract('RealtimeDebtCache', async accounts => {
 		issuer,
 		pynths,
 		addressResolver,
-		exchanger;
+		exchanger,
+		crossChainManager;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
@@ -53,6 +54,7 @@ contract('RealtimeDebtCache', async accounts => {
 			Issuer: issuer,
 			AddressResolver: addressResolver,
 			Exchanger: exchanger,
+			CrossChainManager: crossChainManager,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -167,6 +169,7 @@ contract('RealtimeDebtCache', async accounts => {
 					issuer.rebuildCache(),
 					exchanger.rebuildCache(),
 					realtimeDebtCache.rebuildCache(),
+					crossChainManager.rebuildCache(),
 				]);
 			});
 
@@ -322,7 +325,7 @@ contract('RealtimeDebtCache', async accounts => {
 				});
 
 				it('burning pUSD updates the debt total', async () => {
-					const pynthsToIssue = toUnit('10');
+					const pynthsToIssue = toUnit('20');
 					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 					await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 					const issued = (await realtimeDebtCache.cacheInfo())[0];

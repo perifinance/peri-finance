@@ -47,10 +47,10 @@ contract('Fee Pool', async accounts => {
 		owner,
 		oracle,
 		account1,
-		,
 		debtManager,
 		account2,
 		account3,
+		,
 		,
 		minterRole,
 	] = accounts;
@@ -71,18 +71,18 @@ contract('Fee Pool', async accounts => {
 	};
 
 	const closeFeePeriod = async (inflationMint, account, feeRewards = []) => {
-		const feePeriodDuration = await feePool.feePeriodDuration();
+		const feePeriodDuration = Number(await feePool.feePeriodDuration()) + 60 * 60 * 3;
 		await fastForward(feePeriodDuration);
 
 		let mintAmount;
 		if (inflationMint) {
 			const supplyToMint = await supplySchedule.mintableSupply();
-			// console.log('supplyToMint', supplyToMint.toString());
 			assert.notEqual(
 				supplyToMint,
-				toUnit('0'),
+				'0',
 				'Amount to be minted can only be 0 when the total supply reaches to MAX.'
 			);
+
 			await periFinance.inflationalMint({ from: minterRole });
 			mintAmount = supplyToMint;
 		}
@@ -172,6 +172,7 @@ contract('Fee Pool', async accounts => {
 				'SupplySchedule',
 				'Issuer',
 				'RewardsDistribution',
+				'CrossChainManager',
 			],
 		}));
 
@@ -333,8 +334,8 @@ contract('Fee Pool', async accounts => {
 				await feePool.claimFees({ from: account1 });
 				await feePool.claimFees({ from: account2 });
 
-				const feePeriod = await feePool.recentFeePeriods(1);
-				const unclaimedReward = feePeriod[5].sub(feePeriod[6]);
+				const { rewardsToDistribute, rewardsClaimed } = await feePool.recentFeePeriods(1);
+				const unclaimedReward = rewardsToDistribute.sub(rewardsClaimed);
 				const totalEscrowed1st = await rewardEscrowV2.totalEscrowedBalance();
 
 				// 2nd minting

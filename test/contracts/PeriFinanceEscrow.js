@@ -36,7 +36,7 @@ contract('PeriFinanceEscrow', async accounts => {
 		({ PeriFinanceEscrow: escrow, PeriFinance: periFinance } = await setupAllContracts({
 			pynths,
 			accounts,
-			contracts: ['PeriFinanceEscrow', 'PeriFinance', 'StakingState', 'CrossChainManager'],
+			contracts: ['PeriFinanceEscrow', 'PeriFinance'],
 		}));
 	});
 

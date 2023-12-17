@@ -31,7 +31,7 @@ task('test:prod', 'run production tests against a running fork')
 		taskArguments.maxMemory = true;
 
 		// If running on top of a fork, txs could take a bit longer
-		const timeout = 5 * 60 * 1000; // 5 minutes
+		const timeout = 2 * 60 * 1000; // 2 minutes
 		hre.config.mocha.timeout = timeout;
 		hre.config.networks.localhost.timeout = timeout;
 

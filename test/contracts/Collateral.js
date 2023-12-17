@@ -4,9 +4,13 @@ const { artifacts, contract } = require('hardhat');
 
 const { ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
+const { addSnapshotBeforeRestoreAfterEach } = require('./common');
+
 let Collateral;
 
 contract('Collateral', async accounts => {
+	addSnapshotBeforeRestoreAfterEach();
+
 	before(async () => {
 		Collateral = artifacts.require(`Collateral`);
 	});

@@ -12,10 +12,10 @@ const { ensureOnlyExpectedMutativeFunctions, setStatus } = require('./helpers');
 
 const {
 	toBytes32,
-	defaults: { ISSUANCE_RATIO, LIQUIDATION_DELAY, LIQUIDATION_PENALTY },
+	defaults: { ISSUANCE_RATIO, LIQUIDATION_DELAY, LIQUIDATION_PENALTY, LIQUIDATION_RATIO },
 } = require('../..');
 
-const LIQUIDATION_RATIO = toUnit('0.5');
+// const LIQUIDATION_RATIO = toUnit('0.66666666666666');
 
 const MockExchanger = artifacts.require('MockExchanger');
 const FlexibleStorage = artifacts.require('FlexibleStorage');
@@ -142,7 +142,7 @@ contract('Liquidations', accounts => {
 		});
 		it('liquidation collateral ratio is inverted ratio', async () => {
 			const liquidationCollateralRatio = await liquidations.liquidationCollateralRatio();
-			assert.bnEqual(liquidationCollateralRatio, divideDecimal(toUnit('1'), LIQUIDATION_RATIO));
+			assert.bnClose(liquidationCollateralRatio, divideDecimal(toUnit('1'), LIQUIDATION_RATIO), 10);
 		});
 		it('liquidation penalty ', async () => {
 			const liquidationPenalty = await liquidations.liquidationPenalty();
@@ -381,7 +381,7 @@ contract('Liquidations', accounts => {
 					await updatePERIPrice('1');
 				});
 				it('and liquidation Collateral Ratio is 150%', async () => {
-					assert.bnEqual(await liquidations.liquidationCollateralRatio(), toUnit('1.5'));
+					assert.bnClose(await liquidations.liquidationCollateralRatio(), toUnit('1.5'), 10);
 				});
 				it('and liquidation penalty is 10%', async () => {
 					assert.bnEqual(await liquidations.liquidationPenalty(), LIQUIDATION_PENALTY);

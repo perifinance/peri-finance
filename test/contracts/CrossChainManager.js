@@ -18,13 +18,14 @@ const {
 	currentTime,
 	multiplyDecimal,
 	toUnit,
+	multiplyDecimalRound,
 	multiplyDecimalRoundPrecise,
 	divideDecimalRoundPrecise,
 	fastForward,
 } = require('../utils')();
 
 contract('CrossChainManager', async accounts => {
-	const [, owner, oracle, , , debtManager, account1, account2, account3, minterRole] = accounts;
+	const [, owner, oracle, , debtManager, account1, account2, account3, , minterRole] = accounts;
 
 	const [pUSD, pETH, pBTC, PERI] = ['pUSD', 'pETH', 'pBTC', 'PERI'].map(toBytes32);
 	const pynthKeys = [pUSD, pETH, pBTC];
@@ -508,9 +509,10 @@ contract('CrossChainManager', async accounts => {
 					syncNetworks(true);
 
 					const { debt } = await debtCache.currentDebt();
-					const currentDebt = multiplyDecimal(debt, toUnit('0.051'));
-					// increase self network's issued debt over 1%
-					await periFinance.issuePynths(PERI, currentDebt, {
+					const fivePecent = toUnit((0.05 / 0.95).toString());
+					const fiveAmount = multiplyDecimalRound(debt, fivePecent);
+					// increase self network's issued debt over 5%
+					await periFinance.issuePynths(PERI, fiveAmount, {
 						from: account3,
 					});
 				});

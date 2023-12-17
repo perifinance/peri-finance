@@ -39,14 +39,7 @@ contract('RewardsDistribution', async accounts => {
 		} = await setupAllContracts({
 			pynths,
 			accounts,
-			contracts: [
-				'RewardsDistribution',
-				'PeriFinance',
-				'FeePool',
-				'Issuer',
-				'StakingState',
-				'CrossChainManager',
-			],
+			contracts: ['RewardsDistribution', 'PeriFinance', 'FeePool', 'Issuer', 'StakingState'],
 		}));
 
 		mockRewardsRecipient = await MockRewardsRecipient.new(owner, { from: owner });

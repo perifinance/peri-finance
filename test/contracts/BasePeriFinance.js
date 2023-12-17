@@ -328,7 +328,7 @@ contract('BasePeriFinance', async accounts => {
 	});
 
 	// currently exchange does not support
-	describe.skip('Exchanger calls', () => {
+	describe('Exchanger calls', () => {
 		let smockExchanger;
 		beforeEach(async () => {
 			smockExchanger = await smockit(artifacts.require('Exchanger').abi);
@@ -653,7 +653,7 @@ contract('BasePeriFinance', async accounts => {
 		});
 
 		// currently exchange doesn`t support
-		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
+		describe('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
 				await basePeriFinance.issuePynths(PERI, toUnit('100'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {
@@ -779,8 +779,7 @@ contract('BasePeriFinance', async accounts => {
 					});
 				});
 
-				// ToDo we should not allow the trasfer in this case later
-				it.skip('should not allow transfer if the exchange rate for any pynth is stale', async () => {
+				it('should not allow transfer if the exchange rate for any pynth is stale', async () => {
 					await ensureTransferReverts();
 
 					const timestamp = await currentTime();
@@ -895,7 +894,7 @@ contract('BasePeriFinance', async accounts => {
 		});
 
 		// currently exchange does not support
-		it.skip("should lock newly received periFinance if the user's collaterisation is too high", async () => {
+		it("should lock newly received periFinance if the user's collaterisation is too high", async () => {
 			// Set pEUR for purposes of this test
 			const timestamp1 = await currentTime();
 			await exchangeRates.updateRates([pEUR], [toUnit('0.75')], timestamp1, {
@@ -946,7 +945,7 @@ contract('BasePeriFinance', async accounts => {
 		});
 
 		// currently exchange does not support
-		it.skip('should unlock periFinance when collaterisation ratio changes', async () => {
+		it('should unlock periFinance when collaterisation ratio changes', async () => {
 			// prevent circuit breaker from firing by upping the threshold to factor 5
 			await systemSettings.setPriceDeviationThresholdFactor(toUnit('5'), {
 				from: owner,
@@ -992,7 +991,7 @@ contract('BasePeriFinance', async accounts => {
 		});
 
 		// currently exchange does not support
-		describe.skip('when the user has issued some pUSD and exchanged for other pynths', () => {
+		describe('when the user has issued some pUSD and exchanged for other pynths', () => {
 			beforeEach(async () => {
 				await basePeriFinance.issuePynths(PERI, toUnit('100'), { from: owner });
 				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, {

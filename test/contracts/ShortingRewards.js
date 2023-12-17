@@ -150,7 +150,6 @@ contract('ShortingRewards', accounts => {
 				'SystemSettings',
 				'Exchanger',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 

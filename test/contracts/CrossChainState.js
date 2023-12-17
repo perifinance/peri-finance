@@ -9,9 +9,10 @@ const { setupAllContracts } = require('./setup');
 const { toUnit } = require('../utils')();
 
 const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
+const { toBytes32 } = require('../..');
 
 contract('CrossChainState', async accounts => {
-	const [, , account1] = accounts;
+	// const [, , account1] = accounts;
 
 	let crossChainState /* , crossChainManager, issuer */;
 
@@ -25,23 +26,7 @@ contract('CrossChainState', async accounts => {
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD'],
-			contracts: [
-				'AddressResolver',
-				'CrossChainState',
-				'CrossChainManager',
-				'StakingState',
-				'RewardEscrowV2',
-				'PeriFinanceEscrow',
-				'Liquidations',
-				'DebtCache',
-				'Issuer',
-				'PeriFinance',
-				'PeriFinanceState',
-				'ExchangeRates',
-				'SystemSettings',
-				'CollateralManager',
-				'BridgeStatepUSD',
-			],
+			contracts: ['AddressResolver', 'CrossChainState', 'SystemStatus'],
 		}));
 	});
 
@@ -55,49 +40,61 @@ contract('CrossChainState', async accounts => {
 				// 'addCrosschain',
 				'addIssuedDebt',
 				'subtractIssuedDebt',
-				// 'addNetworkId',
-				// 'setCrossNetworkUserData',
-				// 'addTotalNetworkDebtLedger',
-				// 'appendTotalNetworkDebtLedger',
-				// 'clearCrossNetworkUserData',
-				// 'setCrossNetworkActiveDebt',
 				'setCrossNetworkActiveDebtAll',
 				'setCrossNetworkDebtsAll',
-				// 'setCrossNetworkInbound',
-				// 'setCrossNetworkInboundAll',
-				// 'setCrossNetworkIssuedDebt',
 				'setCrossNetworkIssuedDebtAll',
-				// 'setCrosschain',
 				'setInitialCurrentIssuedDebt',
 				'setOutboundSumToCurrentNetwork',
-				// 'subtractTotalNetworkDebtLedger',
 			],
 		});
 	});
 
 	describe('Should revert as intended', () => {
-		it('setCrossNetworkUserData() cannot be invoked directly by user', () => {
+		it('addIssuedDebt() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: crossChainState.setCrossNetworkUserData,
-				args: [account1, toUnit('1')],
+				fnc: crossChainState.addIssuedDebt,
+				args: [toBytes32('1'), toUnit('1')],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
 		});
 
-		it('clearCrossNetworkUserData() cannot be invoked directly by user', () => {
+		it('subtractIssuedDebt() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: crossChainState.clearCrossNetworkUserData,
-				args: [account1],
+				fnc: crossChainState.subtractIssuedDebt,
+				args: [toBytes32('1'), toUnit('1')],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});
 		});
 
-		it('appendTotalNetworkDebtLedger() cannot be invoked directly by user', () => {
+		it('setCrossNetworkDebtsAll() cannot be invoked directly by user', () => {
 			onlyGivenAddressCanInvoke({
-				fnc: crossChainState.appendTotalNetworkDebtLedger,
-				args: [toUnit('1')],
+				fnc: crossChainState.setCrossNetworkDebtsAll,
+				args: [
+					['5', '80001'].map(toBytes32),
+					['1000', '1000'].map(toUnit),
+					['1000', '1000'].map(toUnit),
+					toUnit('0'),
+				],
+				accounts,
+				reason: 'Only the associated contract can perform this action',
+			});
+		});
+
+		it('setOutboundSumToCurrentNetwork() cannot be invoked directly by user', () => {
+			onlyGivenAddressCanInvoke({
+				fnc: crossChainState.setOutboundSumToCurrentNetwork,
+				args: [toUnit('0')],
+				accounts,
+				reason: 'Only the associated contract can perform this action',
+			});
+		});
+
+		it('setInitialCurrentIssuedDebt() cannot be invoked directly by user', () => {
+			onlyGivenAddressCanInvoke({
+				fnc: crossChainState.setInitialCurrentIssuedDebt,
+				args: [toUnit('0')],
 				accounts,
 				reason: 'Only the associated contract can perform this action',
 			});

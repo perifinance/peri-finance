@@ -49,7 +49,7 @@ contract('Depot', async accounts => {
 	before(async () => {
 		// Mock pUSD as Depot only needs its ERC20 methods (System Pause will not work for suspending pUSD transfers)
 		[{ token: pynth }] = await Promise.all([
-			mockToken({ accounts, pynth: 'pUSD', name: 'Pynthetic USD', symbol: 'pUSD' }),
+			mockToken({ accounts, pynth: 'pUSD', name: 'Pynth USD', symbol: 'pUSD' }),
 		]);
 
 		({
@@ -72,8 +72,6 @@ contract('Depot', async accounts => {
 				'PeriFinance',
 				'Issuer',
 				'StakingState',
-				'CrossChainManager',
-				'ExternalTokenStakeManager',
 			],
 		}));
 	});

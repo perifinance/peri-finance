@@ -17,7 +17,7 @@ const trimUtf8EscapeChars = input => web3.utils.hexToAscii(web3.utils.utf8ToHex(
 
 const VirtualPynth = artifacts.require('VirtualPynth');
 
-contract('VirtualPynth (unit tests)', async accounts => {
+contract('VirtualPynth unit tests', async accounts => {
 	const [, owner, alice] = accounts;
 
 	it('ensure only known functions are mutative', () => {

@@ -30,7 +30,7 @@ contract('EtherCollateralpUSD', async accounts => {
 	const MONTH = 2629743;
 	const YEAR = 31536000;
 
-	const TEST_TIMEOUT = 160e3;
+	const TEST_TIMEOUT = 90e3;
 
 	const [ETH] = ['ETH'].map(toBytes32);
 	const ETH_RATE = 100;
@@ -150,7 +150,6 @@ contract('EtherCollateralpUSD', async accounts => {
 				'CollateralManager',
 				'PeriFinance',
 				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 

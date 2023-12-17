@@ -107,16 +107,14 @@ contract('CollateralEth', async accounts => {
 			accounts,
 			pynths,
 			contracts: [
+				'AddressResolver',
 				'PeriFinance',
 				'FeePool',
-				'AddressResolver',
 				'ExchangeRates',
 				'Exchanger',
 				'SystemStatus',
 				'Issuer',
 				'DebtCache',
-				'StakingState',
-				'CrossChainManager',
 			],
 		}));
 

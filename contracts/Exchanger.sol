@@ -105,7 +105,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
+    // bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
     bytes32 private constant CONTRACT_VIRTUALPYNTHISSUER = "VirtualPynthIssuer";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
@@ -114,7 +114,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](11);
+        bytes32[] memory newAddresses = new bytes32[](10);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -124,8 +124,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
         newAddresses[7] = CONTRACT_ISSUER;
         newAddresses[8] = CONTRACT_DEBTCACHE;
-        newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
-        newAddresses[10] = CONTRACT_VIRTUALPYNTHISSUER;
+        // newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
+        newAddresses[9] = CONTRACT_VIRTUALPYNTHISSUER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -165,9 +165,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return IExchangerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
     }
 
-    function crossChainManager() internal view returns (ICrossChainManager) {
-        return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
-    }
+    // function crossChainManager() internal view returns (ICrossChainManager) {
+    //     return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
+    // }
 
     function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) public view returns (uint) {
         return secsLeftInWaitingPeriodForExchange(exchangeState().getMaxTimestamp(account, currencyKey));
@@ -810,8 +810,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // updating crosschainmanager's debt is not required as it is only used for issued debt.
         // these 2 lines are kept for version compatibility
-        uint reclaimedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
-        crossChainManager().subtractTotalNetworkDebt(reclaimedDebtInpUSD);
+        // uint reclaimedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
+        // crossChainManager().subtractTotalNetworkDebt(reclaimedDebtInpUSD);
     }
 
     function refund(
@@ -825,8 +825,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
         // updating crosschainmanager's debt is not required as it is only used for issued debt.
         // these 2 lines are kept for version compatibility
-        uint refundedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
-        crossChainManager().addTotalNetworkDebt(refundedDebtInpUSD);
+        // uint refundedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
+        // crossChainManager().addTotalNetworkDebt(refundedDebtInpUSD);
     }
 
     function secsLeftInWaitingPeriodForExchange(uint timestamp) internal view returns (uint) {

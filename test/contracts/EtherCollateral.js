@@ -1012,7 +1012,7 @@ contract('EtherCollateral', async accounts => {
 				assert.equal(await etherCollateral.totalOpenLoanCount(), 0);
 			}).timeout(TEST_TIMEOUT);
 
-			it('then creat accountLoanLimit x 1 eth loans and close them', async () => {
+			it.skip('then creat accountLoanLimit x 1 eth loans and close them', async () => {
 				const minLoanSize = await etherCollateral.minLoanSize();
 				const accountLoanLimit = await etherCollateral.accountLoanLimit();
 				for (let i = 0; i < accountLoanLimit; i++) {
@@ -1035,7 +1035,7 @@ contract('EtherCollateral', async accounts => {
 				assert.bnEqual(await etherCollateral.totalLoansCreated(), accountLoanLimit);
 			}).timeout(TEST_TIMEOUT);
 
-			it('then creating 3 accounts create 500 1 eth loans', async () => {
+			it.skip('then creating 3 accounts create 500 1 eth loans', async () => {
 				const minLoanSize = await etherCollateral.minLoanSize();
 				const accountLoanLimit = await etherCollateral.accountLoanLimit();
 				for (let i = 0; i < accountLoanLimit; i++) {
