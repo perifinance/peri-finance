@@ -56,7 +56,7 @@ interface IPeriFinance {
 
     function burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
 
-    function fitToClaimable() external;
+    // function fitToClaimable() external payable;
 
     function exit() external;
 

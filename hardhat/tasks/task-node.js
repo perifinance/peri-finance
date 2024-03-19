@@ -21,6 +21,16 @@ task('node', 'Run a node')
 				process.env.PROVIDER_URL_MAINNET || process.env.PROVIDER_URL.replace('network', 'mainnet');
 
 			console.log(yellow('Forking Mainnet...'));
+		} else if (taskArguments.targetNetwork === 'polygon') {
+			taskArguments.fork =
+				process.env.PROVIDER_URL_POLYGON || process.env.PROVIDER_URL.replace('network', 'polygon');
+
+			console.log(yellow('Forking Polygon...'));
+		} else if (taskArguments.targetNetwork === 'bsc') {
+			taskArguments.fork =
+				process.env.PROVIDER_URL_BSC || process.env.PROVIDER_URL.replace('network', 'bsc');
+
+			console.log(yellow('Forking BSC...'));
 		}
 
 		subtask(TASK_NODE_SERVER_READY).setAction(async ({ provider }, hre, runSuper) => {

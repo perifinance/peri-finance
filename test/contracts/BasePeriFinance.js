@@ -573,15 +573,21 @@ contract('BasePeriFinance', async accounts => {
 		it('should revert when exceeding locked periFinance and calling the ERC20 transfer function', async () => {
 			// Ensure our environment is set up correctly for our assumptions
 			// e.g. owner owns all PERI.
-			assert.bnEqual(await basePeriFinance.totalSupply(), await basePeriFinance.balanceOf(owner));
+			const totalSupply = await basePeriFinance.totalSupply();
+			const balance = await basePeriFinance.balanceOf(owner);
+			assert.bnEqual(totalSupply, balance);
 
 			// Issue max pynths.
 			await basePeriFinance.issueMaxPynths({ from: owner });
 
+			// await basePeriFinance.transfer(account1, '10000', { from: owner });
+
+			// const periCollateral = await basePeriFinance.collateral(owner);
+
 			// Try to transfer 0.000000000000000001 PERI
 			await assert.revert(
 				basePeriFinance.transfer(account1, '1', { from: owner }),
-				'Cannot transfer staked or escrowed PERI'
+				'Check Transferable'
 			);
 		});
 
@@ -648,7 +654,7 @@ contract('BasePeriFinance', async accounts => {
 				basePeriFinance.transferFrom(owner, account2, '1', {
 					from: account1,
 				}),
-				'Cannot transfer staked or escrowed PERI'
+				'Check Transferable'
 			);
 		});
 
@@ -868,7 +874,7 @@ contract('BasePeriFinance', async accounts => {
 							basePeriFinance.transfer(account2, toUnit('990'), {
 								from: account1,
 							}),
-							'Cannot transfer staked or escrowed PERI'
+							'Check Transferable'
 						);
 					});
 				});
@@ -889,7 +895,7 @@ contract('BasePeriFinance', async accounts => {
 				basePeriFinance.transfer(account2, toUnit(issuedPeriFinances), {
 					from: account1,
 				}),
-				'Cannot transfer staked or escrowed PERI'
+				'Check Transferable'
 			);
 		});
 

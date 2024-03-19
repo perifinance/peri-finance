@@ -1,0 +1,10 @@
+{
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0x51597f405303C4377E36123cBc172b13269EA163"
+	},
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA"
+	}
+}

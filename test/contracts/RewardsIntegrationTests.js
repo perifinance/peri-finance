@@ -1098,10 +1098,10 @@ contract('RewardsIntegrationTests', accounts => {
 				from: account1,
 			});
 
-			const alreadyIssued = await issuer.debtBalanceOf(account1, pUSD);
-			const maxIssuablePynthForAccount1 = await issuer.maxIssuablePynths(account1);
+			// const alreadyIssued = await issuer.debtBalanceOf(account1, pUSD);
+			const { maxIssuable, existDebt } = await issuer.maxIssuablePynths(account1);
 
-			await periFinance.issuePynths(PERI, maxIssuablePynthForAccount1.sub(alreadyIssued), {
+			await periFinance.issuePynths(PERI, maxIssuable.sub(existDebt), {
 				from: account1,
 			});
 

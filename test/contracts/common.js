@@ -3,6 +3,7 @@ const { web3 } = require('hardhat');
 const { assert } = require('chai');
 
 const {
+	assertNEventEqual,
 	assertEventEqual,
 	assertEventsEqual,
 	assertBNEqual,
@@ -53,6 +54,7 @@ module.exports = {
 	// we'll just tag them onto the assert object for easy access.
 	assert: Object.assign({}, assert, {
 		eventEqual: assertEventEqual,
+		eventNEqual: assertNEventEqual,
 		eventsEqual: assertEventsEqual,
 		bnEqual: assertBNEqual,
 		bnNotEqual: assertBNNotEqual,

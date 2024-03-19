@@ -1,0 +1,7 @@
+[
+	{
+		"name": "PeriBnbPancakeSwap",
+		"stakingToken": "0xb68ebcec4c7aba66f5b8ed62e8c98b269cf918c8",
+		"rewardsToken": "ProxyERC20"
+	}
+]

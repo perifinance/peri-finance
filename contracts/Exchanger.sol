@@ -616,7 +616,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
                 sourceAmountAfterSettlement,
                 destinationCurrencyKey,
                 amountReceived,
-                exchangeFeeRate
+                exchangeFeeRate,
+                sourceRate,
+                destinationRate
             );
         }
     }
@@ -930,7 +932,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint amount,
         bytes32 dest,
         uint amountReceived,
-        uint exchangeFeeRate
+        uint exchangeFeeRate,
+        uint srcRate,
+        uint destRate
     ) internal {
         IExchangeRates exRates = exchangeRates();
         uint roundIdForSrc = exRates.getCurrentRoundId(src);
@@ -955,7 +959,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             amountReceived,
             exchangeFeeRate,
             roundIdForSrc,
-            roundIdForDest
+            roundIdForDest,
+            srcRate,
+            destRate
         );
     }
 
@@ -1006,7 +1012,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint256 amountReceived,
         uint256 exchangeFeeRate,
         uint256 roundIdForSrc,
-        uint256 roundIdForDest
+        uint256 roundIdForDest,
+        uint256 srcRate,
+        uint256 destRate
     );
 
     event ExchangeEntrySettled(

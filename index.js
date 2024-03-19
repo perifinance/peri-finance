@@ -61,12 +61,12 @@ const chainIdMapping = Object.entries({
 	},
 
 	// Hardhat fork of mainnet: https://hardhat.org/config/#hardhat-network
-	31337: {
-		network: 'mainnet',
+	1337: {
+		network: 'polyton',
 		fork: true,
 	},
 
-	1337: {
+	31337: {
 		network: 'local',
 	},
 	/* // OVM networks: see https://github.com/ethereum-optimism/regenesis/
@@ -185,13 +185,18 @@ const defaults = {
 		.div(w3utils.toBN(4))
 		.toString(), // 1/4 = 0.25
 	MAX_EXTERNAL_TOKEN_QUOTA: w3utils
-		.toBN(2)
+		.toBN(5)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
 	FEE_PERIOD_DURATION: (60 * 60 * (24 * 7 - 3)).toString(), // 1 week - 3 hours
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (60 * 60 * 24 * 1).toString(), // 1 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
+	LIQUIDATION_RATIOS: {
+		P: w3utils.toWei('0.666666666666666666'),
+		C: w3utils.toWei('0.8'),
+		I: w3utils.toWei('0.833333333333333333'),
+	},
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
@@ -433,6 +438,12 @@ const defaults = {
 		MIN_COLLATERAL: w3utils.toWei('1000'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.005'),
 		INTERACTION_DELAY: '3600', // 1 hour in secs
+	},
+	EXTERNAL_TOKEN_ISSUANCE_RATIO: {
+		USDC: w3utils.toWei('1'),
+		DAI: w3utils.toWei('1'),
+		PAXG: w3utils.toWei('0.75'),
+		XAUT: w3utils.toWei('0.75'),
 	},
 };
 
@@ -745,6 +756,10 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		mumbai: Object.assign({}, base),
 		moonriver: Object.assign({}, base),
 		polygon: Object.assign({}, base, {
+			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+		}),
+		bsc: Object.assign({}, base, {
 			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 		}),

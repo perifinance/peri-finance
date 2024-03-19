@@ -26,6 +26,7 @@ contract('StakingState', accounts => {
 	let stakingState, usdc, dai, krw;
 
 	beforeEach(async () => {
+		await StakingState.link(await artifacts.require('SafeDecimalMath').new());
 		stakingState = await StakingState.new(owner, Issuer, { from: deployerAccount });
 
 		[usdc, dai, krw] = await Promise.all([

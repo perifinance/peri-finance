@@ -28,14 +28,33 @@ interface IIssuer {
 
     function lastIssueEvent(address account) external view returns (uint);
 
-    function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);
+    function maxIssuablePynths(address issuer)
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        );
 
-    function externalTokenQuota(
-        address _account,
-        uint _addtionalpUSD,
-        uint _addtionalExToken,
-        bool _isIssue
-    ) external view returns (uint);
+    // function externalTokenQuota(
+    //     address _account,
+    //     uint _addtionalpUSD,
+    //     uint _addtionalExToken,
+    //     bool _isIssue
+    // ) external view returns (uint);
+
+    function getTargetRatio(address account) external view returns (uint);
+
+    function getTRatioCRatio(address _account)
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint,
+            uint
+        );
 
     function remainingIssuablePynths(address issuer)
         external

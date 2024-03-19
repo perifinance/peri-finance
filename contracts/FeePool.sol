@@ -699,13 +699,14 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         view
         returns (bool feesClaimable, bool anyRateIsInvalid)
     {
+        // TODO: Check if this is still needed
         // External token staked amount should not over the quota limit.
-        uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
+        /* uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
         if (
             accountExternalTokenQuota > getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
         ) {
             return (false, false);
-        }
+        } */
 
         uint ratio;
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
