@@ -1211,16 +1211,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     function _issuePynths(
         address from,
         uint amount,
-        /* uint maxIssuable, */
         uint existingDebt,
         uint totalSystemDebt
-    )
-        internal
-        returns (
-            /* bool issueMax */
-            uint afterDebt
-        )
-    {
+    ) internal returns (uint afterDebt) {
         /*  if (!issueMax) {
             require(amount <= maxIssuable, "Amount too large");
         } else {
