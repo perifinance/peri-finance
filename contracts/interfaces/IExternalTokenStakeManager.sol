@@ -2,7 +2,11 @@ pragma solidity 0.5.16;
 
 contract IExternalTokenStakeManager {
     // view
-    function getTargetRatio(address _account, uint _existDebt)
+    function getTargetRatio(
+        address _account,
+        uint _existDebt,
+        uint periCol
+    )
         external
         view
         returns (

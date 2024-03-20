@@ -178,7 +178,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint periCol
         )
     {
-        return _debtsCollateral(_account);
+        return _debtsCollateral(_account, true);
     }
 
     function _availableCurrencyKeysWithOptionalPERI(bool withPERI) internal view returns (bytes32[] memory) {
@@ -195,11 +195,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return currencyKeys;
     }
 
-    function _totalIssuedPynths(bytes32 currencyKey, bool excludeCollateral)
-        internal
-        view
-        returns (uint totalIssued, bool anyRateIsInvalid)
-    {
+    function _totalIssuedPynths(bytes32 currencyKey, bool excludeCollateral) internal view returns (uint totalIssued, bool anyRateIsInvalid) {
         (uint debt, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
         // anyRateIsInvalid = cacheIsInvalid || cacheIsStale;
 
@@ -261,15 +257,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (_debtLedgerLength == 0 || systemDebt == 0) {
             currentDebtOwnership = 0;
         } else {
-            currentDebtOwnership = state
-                .lastDebtLedgerEntry()
-                .divideDecimalRoundPrecise(systemDebt)
-                .multiplyDecimalRoundPrecise(initialDebtOwnership);
+            currentDebtOwnership = state.lastDebtLedgerEntry().divideDecimalRoundPrecise(systemDebt).multiplyDecimalRoundPrecise(initialDebtOwnership);
         }
 
         // Their debt balance is their portion of the total system value.
-        uint highPrecisionBalance =
-            totalSystemValue.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(currentDebtOwnership);
+        uint highPrecisionBalance = totalSystemValue.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(currentDebtOwnership);
 
         // Convert back into 18 decimals (1e18)
         debtBalance = highPrecisionBalance.preciseDecimalToDecimal();
@@ -313,8 +305,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _preciseMulToDecimal(uint x, uint y) internal pure returns (uint) {
-        return
-            x.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(y.decimalToPreciseDecimal()).preciseDecimalToDecimal();
+        return x.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(y.decimalToPreciseDecimal()).preciseDecimalToDecimal();
     }
 
     function _preciseDivToDecimal(uint x, uint y) internal pure returns (uint) {
@@ -531,11 +522,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (, anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(_availableCurrencyKeysWithOptionalPERI(true));
     }
 
-    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral)
-        external
-        view
-        returns (uint totalIssued, bool anyRateIsInvalid)
-    {
+    function totalIssuedPynths(bytes32 currencyKey, bool excludeEtherCollateral) external view returns (uint totalIssued, bool anyRateIsInvalid) {
         (totalIssued, anyRateIsInvalid) = _totalIssuedPynths(currencyKey, excludeEtherCollateral);
     }
 
@@ -547,11 +534,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (cratio, ) = _collateralisationRatio(_issuer);
     }
 
-    function collateralisationRatioAndAnyRatesInvalid(address _issuer)
-        external
-        view
-        returns (uint cratio, bool anyRateIsInvalid)
-    {
+    function collateralisationRatioAndAnyRatesInvalid(address _issuer) external view returns (uint cratio, bool anyRateIsInvalid) {
         // [RC] When DebtCache is staled, the rate should be treated as invalid.
         (, , bool cacheIsInvalid, bool cacheIsStale) = debtCache().cacheInfo();
 
@@ -604,10 +587,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint issuables /* , uint debtBalance */
         )
     {
-        (uint debtBalance, , uint periCol) =
-            _debtsCollateral(
-                _issuer /* , pUSD */
-            );
+        (uint debtBalance, , uint periCol) = _debtsCollateral(_issuer, true);
         (issuables) = exTokenManager().maxStakableAmountOf(_issuer, debtBalance, periCol, _currencyKey);
         issuables = issuables.multiplyDecimal(getExTokenIssuanceRatio(_currencyKey));
     }
@@ -652,24 +632,33 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     } */
 
     function exStakingRatio(address _account) external view returns (uint exSR, uint maxSR) {
-        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+        // (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+        (uint rate, ) = exchangeRates().rateAndInvalid(PERI);
+        uint periCol = _toUSD(_collateral(_account), rate);
 
-        (uint exDebt, uint exEA, uint exTRatio) = exTokenManager().getExEADebt(_account);
+        (
+            ,
+            /* uint exDebt */
+            uint exEA,
+            uint exTRatio
+        ) = exTokenManager().getExEADebt(_account);
 
         if (exEA == 0) return (0, 0);
 
-        maxSR = debtBalance > exDebt ? _preciseMulToDecimal(debtBalance.sub(exDebt), getIssuanceRatio()) : 0;
+        exSR = exEA.divideDecimal(periCol.add(exEA));
 
-        exSR = exEA.divideDecimal(maxSR.add(exEA));
+        // maxSR = debtBalance > exDebt ? _preciseMulToDecimal(debtBalance.sub(exDebt), getIssuanceRatio()) : 0;
+
+        // exSR = exEA.divideDecimal(maxSR.add(exEA));
 
         // Se = (T - Tp) / (Te - Tp)
         maxSR = _preciseDivToDecimal(getExternalTokenQuota().sub(getIssuanceRatio()), exTRatio.sub(getIssuanceRatio()));
     }
 
     function getTargetRatio(address _account) external view returns (uint tRatio) {
-        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+        (uint debtBalance, , uint periCol) = _debtsCollateral(_account, false);
 
-        (tRatio, , ) = exTokenManager().getTargetRatio(_account, debtBalance);
+        (tRatio, , ) = exTokenManager().getTargetRatio(_account, debtBalance, periCol);
     }
 
     function getTRatioCRatio(address _account)
@@ -678,25 +667,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         returns (
             uint tRatio,
             uint cRatio,
-            uint exTSR,
+            uint exTRatio,
             uint exEA
         )
     {
-        (uint rate, ) = exchangeRates().rateAndInvalid(PERI);
-        // isInvalid = anyRateIsInvalid || isInvalid;
-        // _requireRatesNotInvalid(isInvalid);
-        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+        (uint debtBalance, , uint periCol) = _debtsCollateral(_account, false);
 
-        uint periCol = _toUSD(_collateral(_account), rate);
-
-        (tRatio, cRatio, exTSR, exEA) = exTokenManager().getTRatioCRatio(_account, debtBalance, periCol);
+        (tRatio, cRatio, exTRatio, exEA) = exTokenManager().getTRatioCRatio(_account, debtBalance, periCol);
     }
 
-    function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance)
-        external
-        view
-        returns (uint transferable, bool anyRateIsInvalid)
-    {
+    function transferablePeriFinanceAndAnyRateIsInvalid(address account, uint balance) external view returns (uint transferable, bool anyRateIsInvalid) {
         // How many PERI do they have, excluding escrow?
         // Note: We're excluding escrow here because we're interested in their transferable amount
         // and escrowed PERI are not transferable.
@@ -731,10 +711,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exRefundAmt) {
         // get the account's debt balance and peri collateral value
-        (uint debtBalance, , uint periCAinUSD) =
-            _debtsCollateral(
-                _account /* , pUSD */
-            );
+        (uint debtBalance, , uint periCAinUSD) = _debtsCollateral(_account, true);
 
         // get the amount of debt to be burnt and ex-token to be unstaked to satisfy target c-ratio
         (burnAmount, exRefundAmt, ) = exTokenManager().burnAmtToFitTR(_account, debtBalance, periCAinUSD);
@@ -862,9 +839,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         if (_currencyKey != PERI) {
             // get issuer's debt, total system debt
             uint periCol;
-            (existingDebt, totalSystemDebt, periCol) = _debtsCollateral(
-                _issuer /* , pUSD */
-            );
+            (existingDebt, totalSystemDebt, periCol) = _debtsCollateral(_issuer, true);
 
             // Condition of policy, user must have any amount of PERI locked before staking external token.
             _requireExistingDebt(existingDebt);
@@ -977,10 +952,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // _requireRatesNotInvalid(anyRateIsInvalid);
 
         // get issuer's debt, total system debta and peri collateral amount
-        (uint existingDebt, uint totalSystemDebt, uint periColAmt) =
-            _debtsCollateral(
-                _issuer /* , pUSD */
-            );
+        (uint existingDebt, uint totalSystemDebt, uint periColAmt) = _debtsCollateral(_issuer, true);
         // check if existing debt is zero
         _requireExistingDebt(existingDebt);
 
@@ -1033,10 +1005,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // burn pUSD, get the target ratio and check liquidation
         debtBalance = _voluntaryBurnPynths(_from, _burnAmount, debtBalance, systemDebt, false);
         // check if the target ratio is satisfied
-        require(
-            _currencyKey != PERI || debtBalance.roundDownDecimal(uint(12)) <= getExternalTokenQuota(),
-            "Over max external quota"
-        );
+        require(_currencyKey != PERI || debtBalance.roundDownDecimal(uint(12)) <= getExternalTokenQuota(), "Over max external quota");
     }
 
     // function _burnExPynths(address _from, uint _amount) internal {
@@ -1065,10 +1034,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         bool _fitToTRatio
     ) internal {
         // get debt balance and issued debt
-        (uint debtBalance, uint systemDebt, uint periColAmt) =
-            _debtsCollateral(
-                _from /* , pUSD */
-            );
+        (uint debtBalance, uint systemDebt, uint periColAmt) = _debtsCollateral(_from, true);
         require(debtBalance > 0, "No debt to fit");
 
         if (_fitToTRatio) {
@@ -1208,9 +1174,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
      * @return systemDebt current total system debt
      * @return periCol peri's collateral amount in pUSD
      */
-    function _debtsCollateral(
-        address _from /* , bytes32 _unitKey */
-    )
+    function _debtsCollateral(address _from, bool _isRateCheck)
         internal
         view
         returns (
@@ -1221,11 +1185,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     {
         // get debt balance and issued debt
         bool anyRateIsInvalid;
-        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(
-            _from,
-            /* _unitKey */
-            pUSD
-        );
+        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
 
         // // if PERI, there is no need to check the rate validity
         // // since the usage of the debts and collateral is only for c-ratio calculation
@@ -1236,7 +1196,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // get peri rate and check if it's invalid
         (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
-        _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
+        if (_isRateCheck) _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
 
         // get PERI's collateral amount in pUSD
         periCol = _toUSD(_collateral(_from), rate);
@@ -1372,11 +1332,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _setLastIssueEvent(address account) internal {
         // Set the timestamp of the last issuePynths
-        flexibleStorage().setUIntValue(
-            CONTRACT_NAME,
-            keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)),
-            block.timestamp
-        );
+        flexibleStorage().setUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)), block.timestamp);
     }
 
     function _appendAccountIssuanceRecord(address from) internal {
@@ -1449,9 +1405,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         state.setCurrentIssuanceData(from, debtPercentage);
 
-        state.appendDebtLedgerValue(
-            prevLedgerValue.multiplyDecimalRoundPrecise(SafeDecimalMath.preciseUnit().sub(debtPercentage))
-        );
+        state.appendDebtLedgerValue(prevLedgerValue.multiplyDecimalRoundPrecise(SafeDecimalMath.preciseUnit().sub(debtPercentage)));
 
         _appendAccountIssuanceRecord(from);
     }

@@ -233,12 +233,12 @@ contract('CollateralShort', async accounts => {
 	describe('opening shorts', async () => {
 		describe('should open a btc short', async () => {
 			const oneBTC = toUnit(1);
-			const susdCollateral = toUnit(15000);
+			const pusdCollateral = toUnit(15000);
 
 			beforeEach(async () => {
-				await issue(pUSDPynth, susdCollateral, account1);
+				await issue(pUSDPynth, pusdCollateral, account1);
 
-				tx = await short.open(susdCollateral, oneBTC, pBTC, { from: account1 });
+				tx = await short.open(pusdCollateral, oneBTC, pBTC, { from: account1 });
 
 				id = getid(tx);
 
@@ -250,14 +250,14 @@ contract('CollateralShort', async accounts => {
 					account: account1,
 					id: id,
 					amount: oneBTC,
-					collateral: susdCollateral,
+					collateral: pusdCollateral,
 					currency: pBTC,
 				});
 			});
 
 			it('should create the short correctly', async () => {
 				assert.equal(loan.account, account1);
-				assert.equal(loan.collateral, susdCollateral.toString());
+				assert.equal(loan.collateral, pusdCollateral.toString());
 				assert.equal(loan.currency, pBTC);
 				assert.equal(loan.short, true);
 				assert.equal(loan.amount, oneBTC.toString());
@@ -275,18 +275,18 @@ contract('CollateralShort', async accounts => {
 			});
 
 			it('should transfer the pUSD to the contract', async () => {
-				assert.bnEqual(await pUSDPynth.balanceOf(short.address), susdCollateral);
+				assert.bnEqual(await pUSDPynth.balanceOf(short.address), pusdCollateral);
 			});
 		});
 
 		describe('should open an eth short', async () => {
 			const oneETH = toUnit(1);
-			const susdCollateral = toUnit(1000);
+			const pusdCollateral = toUnit(1000);
 
 			beforeEach(async () => {
-				await issue(pUSDPynth, susdCollateral, account1);
+				await issue(pUSDPynth, pusdCollateral, account1);
 
-				tx = await short.open(susdCollateral, oneETH, pETH, { from: account1 });
+				tx = await short.open(pusdCollateral, oneETH, pETH, { from: account1 });
 
 				id = getid(tx);
 
@@ -298,14 +298,14 @@ contract('CollateralShort', async accounts => {
 					account: account1,
 					id: id,
 					amount: oneETH,
-					collateral: susdCollateral,
+					collateral: pusdCollateral,
 					currency: pETH,
 				});
 			});
 
 			it('should create the short correctly', async () => {
 				assert.equal(loan.account, account1);
-				assert.equal(loan.collateral, susdCollateral.toString());
+				assert.equal(loan.collateral, pusdCollateral.toString());
 				assert.equal(loan.currency, pETH);
 				assert.equal(loan.short, true);
 				assert.equal(loan.amount, oneETH.toString());
@@ -326,12 +326,12 @@ contract('CollateralShort', async accounts => {
 
 	describe('Drawing shorts', async () => {
 		const oneETH = toUnit(1);
-		const susdCollateral = toUnit(1000);
+		const pusdCollateral = toUnit(1000);
 
 		beforeEach(async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
-			tx = await short.open(susdCollateral, oneETH, pETH, { from: account1 });
+			tx = await short.open(pusdCollateral, oneETH, pETH, { from: account1 });
 
 			id = getid(tx);
 
@@ -357,10 +357,10 @@ contract('CollateralShort', async accounts => {
 
 	describe('Closing shorts', async () => {
 		const oneETH = toUnit(1);
-		const susdCollateral = toUnit(1000);
+		const pusdCollateral = toUnit(1000);
 
 		it('if the eth price goes down, the shorter makes profit', async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
 			tx = await short.open(toUnit(500), oneETH, pETH, { from: account1 });
 
@@ -385,7 +385,7 @@ contract('CollateralShort', async accounts => {
 		});
 
 		it('if the eth price goes up, the shorter makes a loss', async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
 			tx = await short.open(toUnit(500), oneETH, pETH, { from: account1 });
 
@@ -412,16 +412,16 @@ contract('CollateralShort', async accounts => {
 
 	describe('Liquidating shorts', async () => {
 		const oneETH = toUnit(1);
-		const susdCollateral = toUnit('130');
+		const pusdCollateral = toUnit('130');
 		const expectedCollateralRemaining = toUnit('108.000000000000000143');
 		const expectedCollateralLiquidated = toUnit('21.999999999999999857');
 		const expectedLiquidationAmount = toUnit('0.181818181818181817');
 		const expectedLoanRemaining = toUnit('0.818181818181818183');
 
 		beforeEach(async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
-			tx = await short.open(susdCollateral, oneETH, pETH, { from: account1 });
+			tx = await short.open(pusdCollateral, oneETH, pETH, { from: account1 });
 
 			id = getid(tx);
 			await fastForwardAndUpdateRates(3600);
@@ -463,10 +463,10 @@ contract('CollateralShort', async accounts => {
 	describe('System debt', async () => {
 		const oneETH = toUnit(1);
 		const twoETH = toUnit(2);
-		const susdCollateral = toUnit(1000);
+		const pusdCollateral = toUnit(1000);
 
 		it('If there is 1 ETH and 1 short ETH, then the system debt is constant before and after a price change', async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
 			await debtCache.takeDebtSnapshot();
 			let result = await debtCache.cachedDebt();
@@ -511,7 +511,7 @@ contract('CollateralShort', async accounts => {
 		});
 
 		it('If there is 1 ETH and 2 short ETH, then the system debt decreases if the price goes up', async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
 			await debtCache.takeDebtSnapshot();
 			let result = await debtCache.cachedDebt();
@@ -558,7 +558,7 @@ contract('CollateralShort', async accounts => {
 		});
 
 		it('If there is 1 ETH and 2 short ETH, then the system debt increases if the price goes down', async () => {
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
 			await debtCache.takeDebtSnapshot();
 			let result = await debtCache.cachedDebt();
@@ -608,11 +608,11 @@ contract('CollateralShort', async accounts => {
 	describe('Determining the skew and interest rate', async () => {
 		it('should correctly determine the interest on a short', async () => {
 			const oneBTC = toUnit(1);
-			const susdCollateral = toUnit(15000);
+			const pusdCollateral = toUnit(15000);
 
-			await issue(pUSDPynth, susdCollateral, account1);
+			await issue(pUSDPynth, pusdCollateral, account1);
 
-			tx = await short.open(susdCollateral, oneBTC, pBTC, { from: account1 });
+			tx = await short.open(pusdCollateral, oneBTC, pBTC, { from: account1 });
 			id = getid(tx);
 
 			// after a year we should have accrued 33%.

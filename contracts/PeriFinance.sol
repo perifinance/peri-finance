@@ -116,17 +116,15 @@ contract PeriFinance is BasePeriFinance {
 
         // Set minted PERI balance to RewardEscrow's balance
         // Minus the minterReward and set balance of minter to add reward
+        uint minterReward = supplySchedule().minterReward();
         // uint minterReward = _supplySchedule.minterReward();
-        uint minterReward = crossChainManager().minterReward();
+        // uint minterReward = crossChainManager().minterReward();
 
         // Get the remainder
         uint amountToDistribute = supplyToMint.sub(minterReward);
 
         // Set the token balance to the RewardsDistribution contract
-        tokenState.setBalanceOf(
-            address(_rewardsDistribution),
-            tokenState.balanceOf(address(_rewardsDistribution)).add(amountToDistribute)
-        );
+        tokenState.setBalanceOf(address(_rewardsDistribution), tokenState.balanceOf(address(_rewardsDistribution)).add(amountToDistribute));
         emitTransfer(address(this), address(_rewardsDistribution), amountToDistribute);
 
         // Kick off the distribution of rewards
@@ -153,15 +151,8 @@ contract PeriFinance is BasePeriFinance {
         return true;
     }
 
-    function liquidateDelinquentAccount(address account, uint pusdAmount)
-        external
-        systemActive
-        optionalProxy
-        blacklisted(messageSender)
-        returns (bool)
-    {
-        (uint totalRedeemed, uint amountLiquidated) =
-            issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
+    function liquidateDelinquentAccount(address account, uint pusdAmount) external systemActive optionalProxy blacklisted(messageSender) returns (bool) {
+        (uint totalRedeemed, uint amountLiquidated) = issuer().liquidateDelinquentAccount(account, pusdAmount, messageSender);
 
         emitAccountLiquidated(account, totalRedeemed, amountLiquidated, messageSender);
 
@@ -177,8 +168,7 @@ contract PeriFinance is BasePeriFinance {
         IBridgeState.Signature calldata _sign
     ) external payable optionalProxy blacklisted(messageSender) {
         require(_amount > 0, "0 amount");
-        (uint transferable, ) =
-            issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
+        (uint transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));
         require(transferable >= _amount, "CheckAmount");
 
         require(msg.value >= systemSettings().bridgeTransferGasCost(), "NoFee");
@@ -241,13 +231,6 @@ contract PeriFinance is BasePeriFinance {
         uint256 amountLiquidated,
         address liquidator
     ) internal {
-        proxy._emit(
-            abi.encode(periRedeemed, amountLiquidated, liquidator),
-            2,
-            ACCOUNTLIQUIDATED_SIG,
-            addressToBytes32(account),
-            0,
-            0
-        );
+        proxy._emit(abi.encode(periRedeemed, amountLiquidated, liquidator), 2, ACCOUNTLIQUIDATED_SIG, addressToBytes32(account), 0, 0);
     }
 }

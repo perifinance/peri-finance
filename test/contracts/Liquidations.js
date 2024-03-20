@@ -1284,7 +1284,9 @@ contract('Liquidations', accounts => {
 
 										// loop through until just less than amountToFixRato
 										while (iterations > 0) {
-											const { tRatio, cRatio, exEA } = await issuer.getTRatioCRatio(alice);
+											const { tRatio, cRatio, exTRatio, exEA } = await issuer.getTRatioCRatio(
+												alice
+											);
 											const { debt, periCol } = await issuer.debtsCollateral(alice);
 
 											amountToFixRatio = await liquidations.calcAmtToFixCollateral(
@@ -1296,6 +1298,7 @@ contract('Liquidations', accounts => {
 											console.log(
 												tRatio.toString(),
 												cRatio.toString(),
+												exTRatio.toString(),
 												exEA.toString(),
 												periCol.toString(),
 												debt.toString(),

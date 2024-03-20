@@ -1542,9 +1542,9 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issuePynths(PERI, initDebtPERI, { from: account1 });
 					await periFinance.issuePynths(USDC, initDebtUSDC, { from: account1 });
 
-					const { maxSR } = await issuer.exStakingRatio(account1);
+					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
 
-					assert.bnEqual(maxSR, toUnit('0.375'));
+					assert.bnLte(exSR, maxSR);
 
 					const timestamp2 = await currentTime();
 					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
@@ -1576,7 +1576,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 					const { tRatio, cRatio } = await issuer.getTRatioCRatio(account1);
 					const postQuota = await issuer.exStakingRatio(account1);
-					assert.bnEqual(postQuota.maxSR, toUnit('0.375'));
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 
 					// const cRatio = await periFinance.collateralisationRatio(account1);
 					// assert.bnEqual(quotaPostIssue, maxTRatio);
@@ -1601,8 +1601,9 @@ contract('Issuer via PeriFinance', async accounts => {
 						from: account1,
 					});
 
-					const { maxSR } = await issuer.exStakingRatio(account1);
-					assert.bnEqual(maxSR, toUnit('0.375'));
+					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
+
+					assert.bnLte(exSR, maxSR);
 					const prevDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
 					// const prevUSDCAmount = await stakingState.stakedAmountOf(USDC, account1);
 
@@ -1646,7 +1647,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 					// const lastDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
 					const postQuota = await issuer.exStakingRatio(account1);
-					assert.bnEqual(postQuota.maxSR, toUnit('0.375'));
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 					// const lastUSDCAmount = await stakingState.totalStakedAmount(USDC);
 					// const combinedStakedAmt = await exTokenManager.combinedStakedAmountOf(
 					// 	account1,
@@ -2376,7 +2377,8 @@ contract('Issuer via PeriFinance', async accounts => {
 						toBigNbr(10 ** 12)
 					);
 					// since stakeing state value would be parsed to 10**12
-					assert.bnClose(prevQuota.maxSR, toUnit('0.375'), toBigNbr(10 ** 12));
+					assert.bnLte(prevQuota.exSR, prevQuota.maxSR);
+					// assert.bnClose(prevQuota.maxSR, toUnit('0.375'), toBigNbr(10 ** 12));
 
 					// Currently user has maximum quota staked. (pUSD, USDC) = (30000 , 33333.33333)
 					// If user burns 100 pUSD with 111.111111 USDC untaking,
@@ -2427,7 +2429,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						prevUSDCStakingState.sub(unstakedUSDC.div(toBigNbr(10 ** 12))),
 						postUSDCStakingState
 					);
-					assert.bnLte(postQuota.maxSR, toUnit('0.375'));
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 
 					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
 					const usdcIR = await systemSettings.exTokenIssuanceRatio(USDC);

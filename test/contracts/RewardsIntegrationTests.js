@@ -474,11 +474,12 @@ contract('RewardsIntegrationTests', accounts => {
 
 			// console.log(`rollOverRewards ${rollOverRewards}`);
 
+			// FastForward a bit to be able to mint
+			await fastForwardAndUpdateRates(MINUTE);
+
 			// Get the PERI mintableSupply - the minter reward of 200 PERI
 			const mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_PERI_REWARD);
 
-			// FastForward a bit to be able to mint
-			await fastForwardAndUpdateRates(MINUTE);
 			// Mint the staking rewards
 			await periFinance.inflationalMint({ from: minterRole });
 			// Close the extra week
