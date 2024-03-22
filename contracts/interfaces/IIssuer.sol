@@ -44,17 +44,36 @@ interface IIssuer {
     //     bool _isIssue
     // ) external view returns (uint);
 
-    function getTargetRatio(address account) external view returns (uint);
-
-    function getTRatioCRatio(address _account)
+    // function debtsCollateral(address _account, bool _rateCheck) external
+    //     view
+    //     returns (
+    //         uint,
+    //         uint,
+    //         uint
+    //     );
+    function getRatios(address _account, bool _checkRate)
         external
         view
         returns (
             uint,
             uint,
             uint,
+            uint,
+            uint,
             uint
         );
+
+    function getTargetRatio(address account) external view returns (uint);
+
+    // function getTRatioCRatio(address _account)
+    //     external
+    //     view
+    //     returns (
+    //         uint,
+    //         uint,
+    //         uint,
+    //         uint
+    //     );
 
     function remainingIssuablePynths(address issuer)
         external

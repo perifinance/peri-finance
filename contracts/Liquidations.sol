@@ -126,7 +126,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     function isOpenForLiquidation(address account) external view returns (bool isOpen) {
         // get target ratio and c-ratio
-        (uint tRatio, uint cRatio, , ) = issuer().getTRatioCRatio(account);
+        (uint tRatio, uint cRatio, , , , ) = issuer().getRatios(account, true);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
         isOpen = (tRatio < cRatio && _isOpenForLiquidation(account));
@@ -188,7 +188,10 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         // uint tRatio = issuer().getTargetRatio(account); // getIssuanceRatio();
         uint unit = SafeDecimalMath.unit();
 
-        return (debtBalance.sub(_preciseMulToDecimal(collateral, tRatio))).divideDecimal(unit.sub(_preciseMulToDecimal(unit.add(getLiquidationPenalty()), tRatio)));
+        return
+            (debtBalance.sub(_preciseMulToDecimal(collateral, tRatio))).divideDecimal(
+                unit.sub(_preciseMulToDecimal(unit.add(getLiquidationPenalty()), tRatio))
+            );
 
         // return dividend.divideDecimal(divisor);
     }
@@ -231,7 +234,10 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         uint accountsCollateralisationRatio = issuer().collateralisationRatio(account);
 
         // if accounts issuance ratio is greater than or equal to liquidation ratio set liquidation entry
-        require(accountsCollateralisationRatio >= _liquidationRatio(account), "Account issuance ratio is less than liquidation ratio");
+        require(
+            accountsCollateralisationRatio >= _liquidationRatio(account),
+            "Account issuance ratio is less than liquidation ratio"
+        );
 
         uint deadline = now.add(getLiquidationDelay());
 
@@ -253,7 +259,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         // get target ratio and c-ratio
         uint tRatio;
         uint cRatio;
-        (tRatio, cRatio, , ) = issuer().getTRatioCRatio(account);
+        (tRatio, cRatio, , , , ) = issuer().getRatios(account, true);
 
         // Remove from liquidations if accountsCollateralisationRatio is fixed (less than equal target issuance ratio)
         if (tRatio >= cRatio) {
@@ -295,12 +301,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         colinUSD = colinUSD.add(exEA);
 
         // get needed pUSD amount to fix ratio and save it to exEA
-        exEA = _calcAmtToFixCollateral(
-            /* account, */
-            debtBalance,
-            colinUSD,
-            tRatio
-        );
+        exEA = _calcAmtToFixCollateral(debtBalance, colinUSD, tRatio);
 
         // Cap amount to liquidate to repair collateral ratio based on issuance ratio
         amountToLiquidate = exEA < pusdAmount ? exEA : pusdAmount;
@@ -315,42 +316,67 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
             amountToLiquidate = _preciseDivToDecimal(colinUSD, SafeDecimalMath.unit().add(getLiquidationPenalty()));
         }
 
-        // colinUSD = _preciseMulToDecimal(totalRedeemed, exTSR);
-        exRedeem = periRateInvalid ? totalRedeemed > idealExSA ? idealExSA.add(_preciseMulToDecimal(totalRedeemed.sub(idealExSA), exTSR)) : totalRedeemed : _preciseMulToDecimal(totalRedeemed, exTSR);
+        // if exEA is greater than
+        exRedeem = periRateInvalid
+            ? totalRedeemed > idealExSA
+                ? // ? idealExSA.add(_preciseMulToDecimal(totalRedeemed.sub(idealExSA), exTSR))
+                idealExSA
+                : totalRedeemed
+            : // : totalRedeemed.multiplyDecimal(exTSR);
+            _preciseMulToDecimal(totalRedeemed, exTSR);
 
         // amountToLiquidate = totalRedeemed.sub(idealExSA);
-        idealExSA = exEA;
+        // idealExSA = exEA;
     }
 
     function _idealExAmount(
         address _account,
-        uint existDebt,
-        uint periCol
+        uint _existDebt,
+        uint _periCol
     )
         internal
         view
         returns (
             uint tRatio,
             uint idealExSA,
-            uint exTSR,
+            uint exSR,
             uint exEA
         )
     {
-        (tRatio, idealExSA, exTSR, exEA) = exTokenStakeManager().getTRatioCRatio(_account, existDebt, periCol);
+        uint maxSR;
+        (tRatio, idealExSA, , exEA, exSR, maxSR) = exTokenStakeManager().getRatios(_account, _existDebt, _periCol);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
         require(tRatio < idealExSA && _isOpenForLiquidation(_account), "Account not open for liquidation");
 
-        uint periIR = getIssuanceRatio();
-        // Se-max = (Tmax - Tp) / (Te - Tp)
-        exTSR = _preciseDivToDecimal(getExternalTokenQuota().sub(periIR), exTSR.sub(periIR));
+        // uint periIR = getIssuanceRatio();
+        // // Se-max = (Tmax - Tp) / (Te - Tp)
+        // exTSR = _preciseDivToDecimal(getExternalTokenQuota().sub(periIR), exTSR.sub(periIR));
 
-        uint exSR = exEA.add(periCol);
-        exSR = exEA.divideDecimal(exSR);
-        exTSR = exSR > exTSR ? exTSR : exSR;
+        // derived peri Staked Amount from _existDebt and save it to periSA
+        uint periSA = _existDebt > exEA ? _existDebt.sub(exEA) : 0;
+
+        // calc peri Staked Amount out of peri staked amount and peri issuance ratio
+        periSA = _preciseDivToDecimal(periSA, getIssuanceRatio());
+
+        if (_periCol < periSA) {
+            idealExSA = _periCol.add(exEA);
+            exSR = exEA.divideDecimal(idealExSA);
+            idealExSA = exEA;
+        } else {
+            idealExSA = periSA.add(exEA);
+            exSR = exSR > maxSR ? maxSR : exSR;
+            idealExSA = _preciseMulToDecimal(idealExSA, exSR);
+        }
+
+        // uint exSR = exEA.add(periCol);
+        // exSR = exEA.divideDecimal(idealExSA);
+        // exSR = exSR > maxSR ? maxSR : exSR;
+        // idealExSA = _preciseDivToDecimal(_existDebt, tRatio);
+        // idealExSA = _preciseMulToDecimal(idealExSA, exSR);
 
         // calc EX-token Staking Amount with peri's collateral and exSR
-        idealExSA = periCol.multiplyDecimal(exTSR).divideDecimal(SafeDecimalMath.unit().sub(exTSR));
+        // idealExSA = periCol.multiplyDecimal(exSR).divideDecimal(SafeDecimalMath.unit().sub(exSR));
         // idealExSA = idealExSA.roundDownDecimal(uint(18).sub(minDecimals));
     }
 
@@ -381,12 +407,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         colinUSD = colinUSD.add(exEA);
 
         // get needed pUSD amount to fix ratio and save it to exEA
-        exEA = _calcAmtToFixCollateral(
-            /* account, */
-            debtBalance,
-            colinUSD,
-            tRatio
-        );
+        exEA = _calcAmtToFixCollateral(debtBalance, colinUSD, tRatio);
 
         // Cap amount to liquidate to repair collateral ratio based on issuance ratio
         amountToLiquidate = exEA < pusdAmount ? exEA : pusdAmount;
@@ -402,7 +423,13 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         }
 
         // if exEA is greater than
-        idealExSA = periRateInvalid ? totalRedeemed > idealExSA ? idealExSA.add(_preciseMulToDecimal(totalRedeemed.sub(idealExSA), exTSR)) : totalRedeemed : _preciseMulToDecimal(totalRedeemed, exTSR);
+        idealExSA = periRateInvalid
+            ? totalRedeemed > idealExSA
+                ? // ? idealExSA.add(_preciseMulToDecimal(totalRedeemed.sub(idealExSA), exTSR))
+                idealExSA
+                : totalRedeemed
+            : // : totalRedeemed.multiplyDecimal(exTSR);
+            _preciseMulToDecimal(totalRedeemed, exTSR);
 
         // move exTokens to the liquidator and save the remain amount to tRatio
         tRatio = idealExSA > 0 ? exTokenStakeManager().redeem(account, idealExSA, liquidator) : 0;

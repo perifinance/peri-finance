@@ -333,10 +333,16 @@ contract('RewardsIntegrationTests', accounts => {
 			await periFinance.issuePynths(PERI, toUnit('666'), { from: account1 });
 			await periFinance.issuePynthsToMaxQuota(USDC, { from: account1 });
 
+			// const usdcSA = await externalTokenStakeManager.stakedAmountOf(account1, USDC, pUSD);
+
+			// const exRatios0 = await issuer.getRatios(account1, false);
+
 			// make USDC quota above 20%
 			await exchangeRates.updateRates([USDC], [toUnit('1.2')], await currentTime(), {
 				from: oracle,
 			});
+
+			// const exRatios1 = await issuer.getRatios(account1, false);
 
 			await assert.revert(feePool.claimFees({ from: account1 }), 'C-Ratio below penalty threshold');
 		});

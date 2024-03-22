@@ -321,10 +321,8 @@ contract('External token staking integration', async accounts => {
 				cRatios.forEach((_cRatio, _idx) => assert.bnClose(_cRatio, expectedCRatios[_idx], '10'));
 
 				// No external token quota should exist
-				const quotas = await Promise.all(
-					issuers.map(_issuer => exTokenManager.exStakingRatio(_issuer))
-				);
-				quotas.forEach(_quota => assert.bnEqual(_quota, toBN('0')));
+				const quotas = await Promise.all(issuers.map(_issuer => issuer.exStakingRatio(_issuer)));
+				quotas.forEach(_quota => assert.bnEqual(_quota.exSR, toBN('0')));
 			});
 
 			it('should NOT issue pynths', async () => {
@@ -611,26 +609,30 @@ contract('External token staking integration', async accounts => {
 
 				await periFinance.issuePynths(PAXG, toUnit('900'), { from: users[0] });
 
-				const { debt, periCol } = await issuer.debtsCollateral(users[0]);
+				const { debt, periCol } = await issuer.debtsCollateral(users[0], false);
 
-				const { tRatio, exTRatio, exEA } = await exTokenManager.getTargetRatio(
-					users[0],
-					debt,
-					periCol
-				);
+				const { tRatio, exTRatio, exEA } = await exTokenManager.getTargetRatio(users[0], debt);
 				console.log('debt :', debt.toString());
 				console.log('periCol :', periCol.toString(), 'exEA :', exEA.toString());
 				console.log('exStakingRatio :', divideDecimal(exEA, periCol.add(exEA)).toString());
 
-				const { exSR, maxSR } = await issuer.exStakingRatio(users[0]);
-
-				console.log(exSR.toString(), maxSR.toString());
+				const { exDebt } = await exTokenManager.getExEADebt(users[0]);
 
 				const periIR = await systemSettings.issuanceRatio();
 
-				const targetRatio = periIR.sub(multiplyDecimal(periIR.sub(exTRatio), exSR));
+				const periSA = divideDecimal(debt.sub(exDebt), periIR);
 
-				assert.bnClose(targetRatio, tRatio, 1);
+				const exSRatio = divideDecimal(exEA, periSA.add(exEA));
+
+				const { exSR, maxSR } = await issuer.exStakingRatio(users[0]);
+
+				assert.bnClose(exSRatio, exSR, 10);
+
+				console.log(exSR.toString(), maxSR.toString());
+
+				const targetRatio = periIR.add(multiplyDecimal(exTRatio.sub(periIR), exSR));
+
+				assert.bnClose(targetRatio, tRatio, 10);
 			});
 
 			it('should stake to max quota', async () => {
@@ -736,7 +738,7 @@ contract('External token staking integration', async accounts => {
 				// For convinient calculation
 				await updateRates([DAI], ['1']);
 
-				const { debt, periCol } = await issuer.debtsCollateral(users[0]);
+				const { debt, periCol } = await issuer.debtsCollateral(users[0], false);
 
 				const maxAmount = await exTokenManager.maxStakableAmountOf(users[0], debt, periCol, DAI);
 

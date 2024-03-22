@@ -117,11 +117,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return _calcExDebt(_account);
     }
 
-    function getTargetRatio(
-        address _account,
-        uint _existDebt,
-        uint _periCol
-    )
+    function getTargetRatio(address _account, uint _existDebt)
         external
         view
         returns (
@@ -130,24 +126,32 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             uint exEA
         )
     {
-        (tRatio, exTRatio, exEA) = _getTRatio(_account, _existDebt, _periCol);
+        (tRatio, exTRatio, exEA, , ) = _getTRatio(_account, _existDebt);
     }
 
-    function exStakingRatio(address _account) external view returns (uint) {
-        return _exStakingRatio(_account, _targetRatio(_account));
+    function getRatios(
+        address _account,
+        uint existDebt,
+        uint periCol
+    )
+        external
+        view
+        returns (
+            uint tRatio,
+            uint cRatio,
+            uint exTRatio,
+            uint exEA,
+            uint exSR,
+            uint maxSR
+        )
+    {
+        return _tRatioCRatio(_account, existDebt, periCol);
     }
 
-    /* 
-    function calcUnstakeAmt(address _account, uint _amount, uint _existDebt, uint _periCol, bytes32 _targetKey) 
-        external view returns(uint exRefundAmt) {
-        return _calcUnstakeAmt(_account, _amount, _existDebt, _periCol, _targetKey);
-    } */
-
-    /* function issuableDebtToMaxQ(address _account, uint _existDebt, bytes32 _targetKey, bytes32 _unitKey)
-        external view returns (uint) {
-        (uint issuable,) = _maxStakableAmountOf(_account, _existDebt, _targetKey, _unitKey);
-        return _preciseMulToDecimal(issuable, _targetRatio(_account));
-    }*/
+    function exStakingRatio(address _account, uint _existDebt) external view returns (uint exSR, uint maxSR) {
+        (uint exDebt, uint exEA, uint exTRatio) = _calcExEADebt(_account);
+        return _getExSR(_existDebt, exDebt, exEA, exTRatio);
+    }
 
     function maxStakableAmountOf(
         address _account,
@@ -163,12 +167,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     {
         // return _maxStakableAmountOf(_account, _existDebt, _targetKey, _unitKey);
         // (maxAmount, exTRatio, tRatio) = _maxExStakableAmt(_account, _existDebt, _periCol, _targetKey);
-        (
-            ,
-            ,
-            /* tRatio */
-            maxAmount
-        ) = _getTRAddDebtOrAmt(_account, _existDebt, 0, _periCol, _targetKey);
+        (, , maxAmount) = _getTRAddDebtOrAmt(_account, _existDebt, 0, _periCol, _targetKey);
         // uint stakingAmt = _toCurrency(_unitKey, _targetKey, maxAmount);
 
         // uint targetDecimals = stakingState.tokenDecimals(_targetKey);
@@ -240,31 +239,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      */
     function getTokenPUSDValueOf(address _user, bytes32 _currencyKey) external view returns (uint) {
         return _tokenPUSDValueOf(_user, _currencyKey);
-    }
-
-    function getTRatioCRatio(
-        address _account,
-        uint existDebt,
-        uint periCol
-    )
-        external
-        view
-        returns (
-            uint tRatio,
-            uint cRatio,
-            uint exTRatio,
-            uint exEA /* , uint minDecimals */
-        )
-    {
-        (
-            tRatio,
-            exTRatio,
-            exEA /* , minDecimals */
-        ) = _getTRatio(_account, existDebt, periCol);
-
-        uint totalSA = periCol.add(exEA);
-
-        cRatio = totalSA > 0 ? existDebt.divideDecimal(totalSA) : 0;
     }
 
     /**
@@ -420,62 +394,106 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) external view returns (uint exTargetRatio) {
         // (exTargetRatio, , ) = _expectedTargetRatios(_account, _debtBalance, _addAmt, USDC, _isIssue);
     } */
-    function _getTRatio(
+
+    function _getExSR(
+        uint _existDebt,
+        /* uint _periCol,  */
+        uint _exDebt,
+        uint _exEA,
+        uint _exTRatio
+    ) internal view returns (uint exSR, uint maxSR) {
+        if (_exEA == 0) return (0, 0);
+
+        uint periIR = getIssuanceRatio();
+        uint periSA = _existDebt > _exDebt ? _existDebt.sub(_exDebt) : 0;
+        periSA = _preciseDivToDecimal(periSA, periIR);
+        // totalSA = periSA + _exEA
+        // periSA = periSA > _periCol ? _periCol.add(_exEA) : periSA.add(_exEA);
+        periSA = periSA.add(_exEA);
+        exSR = _exEA.divideDecimal(periSA);
+
+        // Se = (T - Tp) / (Te - Tp)
+        maxSR = _preciseDivToDecimal(getExternalTokenQuota().sub(periIR), _exTRatio.sub(periIR));
+    }
+
+    function _tRatioCRatio(
         address _account,
         uint _existDebt,
-        uint periCol
+        uint _periCol
     )
         internal
         view
         returns (
             uint tRatio,
+            uint cRatio,
             uint exTRatio,
-            uint exEA /* , uint minDecimals */
+            uint exEA,
+            uint exSR,
+            uint maxSR
+        )
+    {
+        (tRatio, exTRatio, exEA, exSR, maxSR) = _getTRatio(_account, _existDebt);
+
+        uint totalSA = _periCol.add(exEA);
+
+        cRatio = totalSA > 0 ? _existDebt.divideDecimal(totalSA) : 0;
+    }
+
+    function _getTRatio(address _account, uint _existDebt)
+        internal
+        view
+        returns (
+            uint tRatio,
+            uint exTRatio,
+            uint exEA,
+            uint exSR,
+            uint maxSR
         )
     {
         if (_existDebt == 0) {
-            return (getIssuanceRatio(), SafeDecimalMath.unit(), 0);
+            return (getIssuanceRatio(), SafeDecimalMath.unit(), 0, 0, 0);
         }
 
         // get tokenEA, otherEA, tokenIR, otherIR
-        uint otherIR;
-        uint otherEA;
-        uint tokenIR;
-        uint tokenEA;
-        uint exDebt;
-        (
-            otherIR,
-            otherEA,
-            tokenIR,
-            tokenEA,
-            exDebt /* , minDecimals */
-        ) = _otherTokenIREA(_account, USDC);
+        // uint tokenIR; uint otherIR;
+        // uint otherEA;
+        // uint tokenEA;
+        // uint exDebt;
+        // (otherIR, otherEA, tokenIR, tokenEA, exDebt) = _otherTokenIREA(_account, USDC);
 
-        // get exEA
-        exEA = tokenEA.add(otherEA);
+        // // get exEA
+        // exEA = tokenEA.add(otherEA);
+        uint exDebt;
+        (exDebt, exEA, exTRatio) = _calcExEADebt(_account);
+
+        uint periIR = getIssuanceRatio();
+        // uint maxTR = getExternalTokenQuota();
 
         if (exEA == 0) {
-            return (getIssuanceRatio(), SafeDecimalMath.unit(), 0);
+            return (periIR, SafeDecimalMath.unit(), 0, 0, 0);
         }
 
-        // get peri SA = periDebt / peri issuance ratio
-        otherEA = _existDebt > exDebt ? _preciseDivToDecimal(_existDebt.sub(exDebt), getIssuanceRatio()) : 0;
+        // // get peri SA = periDebt / peri issuance ratio
+        // otherEA = _existDebt > exDebt ? _preciseDivToDecimal(_existDebt.sub(exDebt), periIR) : 0;
 
-        // get exTRatio (Te = To - (To - Tt) * St)
-        exTRatio = _toTRatio(otherIR, tokenIR, tokenEA.divideDecimal(exEA));
+        // // get exTRatio (Te = To - (To - Tt) * St)
+        // exTRatio = _toTRatio(otherIR, tokenIR, tokenEA.divideDecimal(exEA));
 
         // // Se-max = (Tmax - Tp) / (Te - Tp)
-        // otherIR = _preciseDivToDecimal(getExternalTokenQuota().sub(getIssuanceRatio()), tRatio.sub(getIssuanceRatio()));
-        // exTSR = otherIR < exTSR ? otherIR : exTSR;
+        // otherIR = _preciseDivToDecimal(maxTR.sub(periIR), exTRatio.sub(periIR));
 
-        // get external Target Staking Ratio and save it to otherIR
-        otherIR = exEA.divideDecimal(exEA.add(periCol));
-        // otherIR = _existDebt > 0 ? exEA.divideDecimal(exEA.add(otherEA)) : 0;
+        // // get external Target Staking Ratio and save it to otherIR
+        // uint exSR = exEA.divideDecimal(exEA.add(otherEA));
+        // exSR = exSR > otherIR ? otherIR : exSR;
+
+        (exSR, maxSR) = _getExSR(_existDebt, exDebt, exEA, exTRatio);
+
+        exDebt = exSR > maxSR ? maxSR : exSR;
 
         // get TRatio (Tp + ( Te - Tp) * Se)
-        tRatio = _toTRatio(getIssuanceRatio(), exTRatio, otherIR);
+        tRatio = _toTRatio(periIR, exTRatio, exDebt);
 
-        tRatio = tRatio > getExternalTokenQuota() ? getExternalTokenQuota() : tRatio < getIssuanceRatio() ? getIssuanceRatio() : tRatio;
+        // tRatio = tRatio > maxTR ? maxTR : tRatio < periIR ? periIR : tRatio;
     }
 
     function _targetRatio(address _account) internal view returns (uint tRatio) {
@@ -541,7 +559,11 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _user staker address
      * @param _unitCurrency The currency unit to be applied for estimation [USD]
      */
-    function _compiledStakableAmountOf(address _user, bytes32 _unitCurrency) internal view returns (uint compiledStakableAmount) {
+    function _compiledStakableAmountOf(address _user, bytes32 _unitCurrency)
+        internal
+        view
+        returns (uint compiledStakableAmount)
+    {
         bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();
 
         for (uint i; i < tokenList.length; i++) {
@@ -551,7 +573,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 continue;
             }
 
-            _stakedAmount = tokenInstance(tokenList[i]).balanceOf(_user).mul(10**(18 - (uint)(tokenInstance(tokenList[i]).decimals()))) - _stakedAmount;
+            _stakedAmount =
+                tokenInstance(tokenList[i]).balanceOf(_user).mul(10**(18 - (uint)(tokenInstance(tokenList[i]).decimals()))) -
+                _stakedAmount;
 
             compiledStakableAmount = compiledStakableAmount.add(_toCurrency(tokenList[i], _unitCurrency, _stakedAmount));
         }
@@ -756,7 +780,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             }
         }
 
-        exDebt = _preciseMulToDecimal(tokenEA, tokenIR).roundDownDecimal(uint(18).sub(minDecimals)).add(_preciseMulToDecimal(otherEA, otherIR).roundDownDecimal(uint(18).sub(oMinDecimals)));
+        exDebt = _preciseMulToDecimal(tokenEA, tokenIR).roundDownDecimal(uint(18).sub(minDecimals)).add(
+            _preciseMulToDecimal(otherEA, otherIR).roundDownDecimal(uint(18).sub(oMinDecimals))
+        );
 
         // minDecimals = minDecimals < oMinDecimals ? minDecimals : oMinDecimals;
     }
@@ -808,7 +834,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) internal pure returns (uint tokenSR) {
         // get target token's staking ratio
         // Token Staking Ratio = +/-( Ex-Target Ratio - Token Issuance Ratio ) / +/-( Token Issuance Ratio - Other Issuance Ratio )
-        tokenSR = tokenIR > otherIR ? _preciseDivToDecimal(exTR.sub(otherIR), tokenIR.sub(otherIR)) : _preciseDivToDecimal(otherIR.sub(exTR), otherIR.sub(tokenIR));
+        tokenSR = tokenIR > otherIR
+            ? _preciseDivToDecimal(exTR.sub(otherIR), tokenIR.sub(otherIR))
+            : _preciseDivToDecimal(otherIR.sub(exTR), otherIR.sub(tokenIR));
     }
 
     /**
@@ -1029,7 +1057,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
 
         // calc otherSA(Do) : otherSA = exSA * otherSR
-        otherEA = exSA != 0 ? _preciseMulToDecimal(_tokenSR(stakingState.getExTargetRatio(_account), otherIR, tokenIR), exSA) : 0;
+        otherEA = exSA != 0
+            ? _preciseMulToDecimal(_tokenSR(stakingState.getExTargetRatio(_account), otherIR, tokenIR), exSA)
+            : 0;
 
         // get target token's stakable amount  getExternalTokenQuota() = Tmax
         // X = [ ( Tmax - Tp ) * (D + Vt - Dt) - { ( Tt - Tp ) * Vt + ( To - Tp ) * Do } ] / ( Tt - Tmax )
@@ -1040,7 +1070,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         addableAmt = addableAmt.add(_preciseMulToDecimal(otherIR.sub(getIssuanceRatio()), otherEA));
 
         // calc tokenSA(Dt) : tokenSA = tokenSR * exSA
-        exSA = exSA != 0 ? _preciseMulToDecimal(_tokenSR(stakingState.getExTargetRatio(_account), tokenIR, otherIR), exSA) : 0;
+        exSA = exSA != 0
+            ? _preciseMulToDecimal(_tokenSR(stakingState.getExTargetRatio(_account), tokenIR, otherIR), exSA)
+            : 0;
 
         // debt2ToSA = ( Tmax - Tp ) * (D + Vt - Dt)
         debt2ToSA = _preciseMulToDecimal(getExternalTokenQuota().sub(getIssuanceRatio()), debt2ToSA.add(tokenEA).sub(exSA));
@@ -1198,7 +1230,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         // get SA change in order for debt change in USD
         changedAmt = tokenEA.add(_amount);
-        _amount = _stake ? changedAmt > tokenSA ? changedAmt.sub(tokenSA) : 0 : tokenEA > tokenSA ? _amount > tokenEA.sub(tokenSA) ? _amount.sub(tokenEA.sub(tokenSA)) : _amount : _amount;
+        _amount = _stake ? changedAmt > tokenSA ? changedAmt.sub(tokenSA) : 0 : tokenEA > tokenSA
+            ? _amount > tokenEA.sub(tokenSA) ? _amount.sub(tokenEA.sub(tokenSA)) : _amount
+            : _amount;
 
         // if _amount is 0, return exTRatio, 0
         if (_amount == 0) {
@@ -1206,10 +1240,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
 
         // calc staking/ unstaking amount in USD
-        changedAmt = _stake ? _amount : tokenSA >= tokenEA ? _amount >= tokenSA.sub(tokenEA) ? _amount.sub(tokenSA.sub(tokenEA)) : 0 : _amount.add(tokenEA.sub(tokenSA));
+        changedAmt = _stake ? _amount : tokenSA >= tokenEA
+            ? _amount >= tokenSA.sub(tokenEA) ? _amount.sub(tokenSA.sub(tokenEA)) : 0
+            : _amount.add(tokenEA.sub(tokenSA));
 
         // calc new target token's Staking Ratio
-        tokenSR = _stake ? tokenSA.add(_amount).divideDecimal(_debt2ExSA.add(_amount)) : tokenSA > _amount ? tokenSA.sub(_amount).divideDecimal(_debt2ExSA.sub(_amount)) : 0;
+        tokenSR = _stake ? tokenSA.add(_amount).divideDecimal(_debt2ExSA.add(_amount)) : tokenSA > _amount
+            ? tokenSA.sub(_amount).divideDecimal(_debt2ExSA.sub(_amount))
+            : 0;
 
         // get new ex-target ratio(var: exTRatio) :
         // Ex-Target Ratio = other Issuance Ratio - (other Issuance Ratio - token Issuance Ratio) * token Staking Ratio
@@ -1386,7 +1424,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         totalSA = totalSA.add(addableAmt);
 
         // adjust the changed amount and totalSA if totalSA is over maxSA
-        (addableAmt, totalSA) = totalSA > maxSA ? (addableAmt > totalSA.sub(maxSA) ? addableAmt.sub(totalSA.sub(maxSA)) : 0, maxSA) : (addableAmt, totalSA);
+        (addableAmt, totalSA) = totalSA > maxSA
+            ? (addableAmt > totalSA.sub(maxSA) ? addableAmt.sub(totalSA.sub(maxSA)) : 0, maxSA)
+            : (addableAmt, totalSA);
 
         // get token's staking ratio and save it to exTRatio
         exTRatio = tokenEA.add(addableAmt).divideDecimal(tempAmt);
@@ -1466,7 +1506,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             return (getIssuanceRatio(), 0, 0);
         }
         // get tokenEA, otherEA, tokenIR, otherIR, exDebt
-        (uint otherIR, uint otherEA, uint tokenIR, uint tokenEA, uint exDebt) = _otherTokenIREA(_account, _targetKey == bytes32(0) ? USDC : _targetKey);
+        (uint otherIR, uint otherEA, uint tokenIR, uint tokenEA, uint exDebt) =
+            _otherTokenIREA(_account, _targetKey == bytes32(0) ? USDC : _targetKey);
 
         // get exEA
         uint exEA = tokenEA.add(otherEA);
@@ -1485,7 +1526,11 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             // if max ex-stakable amount call
             if (_addAmt == 0) {
                 // calc total SA = exEA + (periDebt / PERI Issuance Ratio)
-                addDebt = exEA.add(periDebt > _preciseMulToDecimal(_periCol, getIssuanceRatio()) ? _periCol : _preciseDivToDecimal(periDebt, getIssuanceRatio()));
+                addDebt = exEA.add(
+                    periDebt > _preciseMulToDecimal(_periCol, getIssuanceRatio())
+                        ? _periCol
+                        : _preciseDivToDecimal(periDebt, getIssuanceRatio())
+                );
 
                 // get addable amount within max ex-issuance ratio
                 addableAmt = _calcMaxStakableAmt(tokenIR, otherIR, tokenEA, otherEA, addDebt);
@@ -1513,7 +1558,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             // otherwise, adding debt = 0
             // get peri-collateral-converted debt : periCol2Debt = periCol * Tp
             _periCol = _preciseMulToDecimal(_periCol, getIssuanceRatio());
-            addDebt = periDebt > _periCol ? addDebt > periDebt.sub(_periCol) ? addDebt.sub(periDebt.sub(_periCol)) : 0 : addDebt;
+            addDebt = periDebt > _periCol
+                ? addDebt > periDebt.sub(_periCol) ? addDebt.sub(periDebt.sub(_periCol)) : 0
+                : addDebt;
 
             // ** get updated exEA and ex-debt
             // update tokenEA = tokenEA + addableAmt
@@ -1614,7 +1661,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         // (exTRatio, tRatio, exChangeSA) = _calcSAChange(exChangeSA, totalSA, maxSA, tokenEA, exEA, tokenIR, otherIR);
 
-        (exChangeSA, totalSA) = totalSA > maxSA ? (exChangeSA > totalSA.sub(maxSA) ? exChangeSA.sub(totalSA.sub(maxSA)) : 0, maxSA) : (exChangeSA, totalSA);
+        (exChangeSA, totalSA) = totalSA > maxSA
+            ? (exChangeSA > totalSA.sub(maxSA) ? exChangeSA.sub(totalSA.sub(maxSA)) : 0, maxSA)
+            : (exChangeSA, totalSA);
 
         // get token's staking ratio and save it to exTRatio
         exTRatio = tokenEA.divideDecimal(exEA);
@@ -1779,7 +1828,10 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         // uint balance = exToken.balanceOf(_staker).mul(10**(decimals));
 
-        require(exToken.transferFrom(_staker, address(stakingState), stakingAmt.div(10**(decimals))), "Transferring staking token has been failed");
+        require(
+            exToken.transferFrom(_staker, address(stakingState), stakingAmt.div(10**(decimals))),
+            "Transferring staking token has been failed"
+        );
 
         stakingState.stake(_targetKey, _staker, stakingAmt);
     }
@@ -1843,7 +1895,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     function redeem(
         address _account,
         uint _amount,
-        /* uint _existDebt, */
         address _liquidator
     ) external onlyLiquidations returns (uint remainAmt) {
         // get ex-staked amount in unit currency
@@ -1851,7 +1902,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         (_amount, remainAmt) = _amount > exEA ? (exEA, _amount.sub(exEA)) : (_amount, 0);
 
-        remainAmt = remainAmt.add(_proRataUnstake(_account, _liquidator, _amount, exEA, pUSD));
+        exEA = _proRataUnstake(_account, _liquidator, _amount, exEA, pUSD);
+
+        remainAmt = remainAmt.add(exEA);
         // _initTargetRatios(_account, _existDebt.sub(_amount));
         /* remainAmount = amount;
         bytes32[] memory tokenList = stakingState.getTokenCurrencyKeys();

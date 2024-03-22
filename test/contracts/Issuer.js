@@ -1574,7 +1574,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					// stakedUSDCDebt = multiplyDecimal(multiplyDecimal(usdcStakedAmt, usdcPrice), targetRatio);
 					// console.log(`stakedUSDCDebt after: ${stakedUSDCDebt}`);
 
-					const { tRatio, cRatio } = await issuer.getTRatioCRatio(account1);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
 					const postQuota = await issuer.exStakingRatio(account1);
 					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 
@@ -2524,11 +2524,11 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 					await debtCache.takeDebtSnapshot();
 
-					const Ratios = await issuer.getTRatioCRatio(account1);
+					const Ratios = await issuer.getRatios(account1, true);
 					assert.bnLt(Ratios.tRatio, Ratios.cRatio);
 
 					await periFinance.fitToClaimable({ from: account1 });
-					const { tRatio, cRatio } = await issuer.getTRatioCRatio(account1);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
 					assert.bnClose(cRatio, tRatio, 10 ** 12);
 				});
 
@@ -2551,7 +2551,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 					await debtCache.takeDebtSnapshot();
 
-					const { tRatio, cRatio } = await issuer.getTRatioCRatio(account1);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
 					assert.bnGt(tRatio, cRatio);
 					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
 					assert.bnGt(exSR, maxSR);
@@ -2593,7 +2593,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 					await debtCache.takeDebtSnapshot();
 
-					const Ratios = await issuer.getTRatioCRatio(account1);
+					const Ratios = await issuer.getRatios(account1, true);
 					// const prevCRatio = await periFinance.collateralisationRatio(account1);
 					// const preQuota = await issuer.exStakingRatio(account1);
 					assert.bnLt(Ratios.tRatio, Ratios.cRatio);
@@ -2601,7 +2601,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 					await periFinance.fitToClaimable({ from: account1 });
 					// const postCRatio = await periFinance.collateralisationRatio(account1);
-					const { tRatio, cRatio } = await issuer.getTRatioCRatio(account1);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
 					// const postQuota = await issuer.exStakingRatio(account1);
 					// It doesn't fit C-Ratio if it already satisfies target ratio.
 					assert.bnClose(cRatio, tRatio, 10 ** 12);
@@ -2633,7 +2633,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 					await debtCache.takeDebtSnapshot();
 
-					const Ratios = await issuer.getTRatioCRatio(account1);
+					const Ratios = await issuer.getRatios(account1, true);
 					assert.bnGt(Ratios.tRatio, Ratios.cRatio);
 
 					// const { exSR, maxSR } = await issuer.exStakingRatio(account1);
