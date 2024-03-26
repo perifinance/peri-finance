@@ -143,7 +143,8 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+	// inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+	inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
@@ -240,12 +241,12 @@ const defaults = {
 		rinkeby: '0x6bA629E9df8dC7f4039e0FfD1Ff8FF08b609d11C',
 		ropsten: '0x7A7Ed4851B607811C10E51b5538203599437AAD3',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
-		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // 6 decimals
+		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', // 18 decimals
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
-		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
+		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', // 6 decimals
 		// local : '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', <-- fork
 	},
 	DAI_ERC20_ADDRESSES: {
@@ -262,6 +263,51 @@ const defaults = {
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
 		// local : '0x6b175474e89094c44da98b954eedeac495271d0f', <-- fork
+	},
+	USDT_ERC20_ADDRESSES: {
+		mainnet: '0xdac17f958d2ee523a2206206994597c13d831ec7', // 6 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', // 6 decimals
+		bsc: '0x55d398326f99059ff775485246999027b3197955', // 18 decimals
+		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0x321449E0Be9798881e11925666aBaA324162930B', // 6 decimals
+		moonbeam: '0xefaeee334f0fd1712f9a8cc375f427d9cdd40d73', // 6 decimals
+		moonriver: '0xe936caa7f6d9f5c9e907111fcaf7c351c184cda7', // 6 decimals
+	},
+	XAUT_ERC20_ADDRESSES: {
+		mainnet: '0x68749665FF8D2d112Fa859AA293F07A622782F38', // 6 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+		bsc: constants.ZERO_ADDRESS,
+		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0xFA85FfEf4186339892557bb80E4F9C5F3E4df97f', // 6 decimals
+		moonriver: constants.ZERO_ADDRESS,
+		moonbeam: constants.ZERO_ADDRESS,
+	},
+	PAXG_ERC20_ADDRESSES: {
+		mainnet: '0x45804880De22913dAFE09f4980848ECE6EcbAf78', // 18 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: constants.ZERO_ADDRESS,
+		polygon: constants.ZERO_ADDRESS,
+		bsc: '0x7950865a9140cB519342433146Ed5b40c6F210f7', // 18 decimals
+		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0xE00A06E4938c015ba83F3AcB7B3499B36cf58502', // 18 decimals
+		moonriver: constants.ZERO_ADDRESS,
+		moonbeam: constants.ZERO_ADDRESS,
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -406,6 +452,8 @@ const defaults = {
 	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
 	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
 	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${11e6}`),
+	LAST_MINT_EVENT: 1710633600, // Sun Mar 17 2024 00:00:00 GMT+0000
+	INFLATION_WEEK_COUNTER: 140,
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,
@@ -441,6 +489,7 @@ const defaults = {
 	},
 	EXTERNAL_TOKEN_ISSUANCE_RATIO: {
 		USDC: w3utils.toWei('1'),
+		USDT: w3utils.toWei('1'),
 		DAI: w3utils.toWei('1'),
 		PAXG: w3utils.toWei('0.75'),
 		XAUT: w3utils.toWei('0.75'),

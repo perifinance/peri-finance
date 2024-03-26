@@ -217,5 +217,8 @@
 	},
 	"CrossChainState": {
 		"deploy": false
+	},
+	"VirtualPynthIssuer": {
+		"deploy": false
 	}
 }

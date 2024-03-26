@@ -393,13 +393,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // have already claimed from the old period, available in the new period.
         // The subtraction is important so we don't create a ticking time bomb of an ever growing
         // number of fees that can never decrease and will eventually overflow at the end of the fee pool.
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodClosing
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
             .feesToDistribute
-            .add(periodToRollover.feesToDistribute)
+            .add(periodClosing.feesToDistribute)
             .sub(periodToRollover.feesClaimed);
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodClosing
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
             .rewardsToDistribute
-            .add(periodToRollover.rewardsToDistribute)
+            .add(periodClosing.rewardsToDistribute)
             .sub(periodToRollover.rewardsClaimed);
 
         // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance

@@ -39,6 +39,7 @@ contract IExternalTokenStakeManager {
         bytes32 _targetKey
     ) external view returns (uint);
 
+    /* 
     function calcTRatio(
         address _account,
         uint _existDebt,
@@ -58,7 +59,7 @@ contract IExternalTokenStakeManager {
         uint _existDebt,
         bytes32 _unitKey
     ) external view returns (uint, uint);
-
+ */
     function burnAmtToFitTR(
         address _account,
         uint _existDebt,
@@ -91,7 +92,7 @@ contract IExternalTokenStakeManager {
 
     function getTokenActivation(bytes32 _currencyKey) external view returns (bool);
 
-    function getCurrencyKeyOrder() external view returns (bytes32[] memory);
+    // function getCurrencyKeyOrder() external view returns (bytes32[] memory);
 
     function combinedStakedAmountOf(address _user, bytes32 _unitCurrency)
         external
@@ -100,30 +101,32 @@ contract IExternalTokenStakeManager {
             uint /* , uint */
         );
 
+    /* 
     function compiledStakableAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint);
-
+ */
     function getTokenPUSDValueOf(address _user, bytes32 _currencyKey) external view returns (uint);
 
+    /* 
     function maxSAPulsTokensOf(address _user, bytes32 _currencyKey) external view returns (uint);
-
+ */
     function stakedAmountOf(
         address _user,
         bytes32 _currencyKey,
         bytes32 _unitCurrency
     ) external view returns (uint);
 
-    function requireNotExceedsQuotaLimit(
-        address _account,
-        uint _debtBalance,
-        uint _additionalpUSD,
-        uint _additionalExToken,
-        bool _isIssue
-    ) external view;
+    // function requireNotExceedsQuotaLimit(
+    //     address _account,
+    //     uint _debtBalance,
+    //     uint _additionalpUSD,
+    //     uint _additionalExToken,
+    //     bool _isIssue
+    // ) external view;
 
     // function otherTokenIREA(address _account, bytes32 _targetKey) external view returns (uint, uint, uint, uint);
 
     // mutative
-    function setTargetRatios(
+    /* function setTargetRatios(
         address _account,
         uint _tRatio,
         uint _exTRatio
@@ -136,7 +139,7 @@ contract IExternalTokenStakeManager {
             uint,
             uint,
             uint
-        );
+        ); */
 
     function stakeToMaxExQuota(
         address _account,

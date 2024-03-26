@@ -97,10 +97,11 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return _combinedStakedAmountOf(_user, _unitCurrency);
     }
 
+    /* 
     function compiledStakableAmountOf(address _user, bytes32 _unitCurrency) external view returns (uint) {
         return _compiledStakableAmountOf(_user, _unitCurrency);
     }
-
+ */
     function getExEADebt(address _account)
         external
         view
@@ -177,11 +178,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // maxAmount = stakingAmt.div(10**(uint(18).sub(targetDecimals)));
     }
 
-    // function getAddDebtSA(address _account, uint _existDebt, uint _amount, uint _periCol, bytes32 _targetKey)
-    //     external view returns (uint tRatio, uint addDebt, uint addableAmt) {
-    //     return _getTRAddDebtOrAmt(_account, _existDebt, _amount, _periCol, _targetKey);
-    // }
-
+    /* 
     function maxExAmtToTRatio(
         address _account,
         uint _existDebt,
@@ -189,7 +186,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) external view returns (uint) {
         return _maxExAmtToTRatio(_account, _existDebt, _unitKey);
     }
-
+ */
     function burnAmtToFitTR(
         address _account,
         uint _existDebt,
@@ -206,6 +203,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return _burnAmtToFitTR(_account, _existDebt, _periCol);
     }
 
+    /* 
     function calcTRatio(
         address _account,
         uint _existDebt,
@@ -221,8 +219,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         )
     {
         return _calcTRatio(_account, _existDebt, _periCol, _targetKey);
-    }
-
+    } */
+    /* 
     function calcTokenSR(
         uint exTR,
         uint tokenIR,
@@ -230,7 +228,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     ) external pure returns (uint) {
         return _tokenSR(exTR, tokenIR, otherIR);
     }
-
+ */
     /**
      * @notice calculate the pUSD value of the external tokens in user's wallet.
      * @dev external view function
@@ -283,9 +281,10 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _currencyKey target currency key to be calculated
      */
     function _tokenPUSDValueOf(address _user, bytes32 _currencyKey) internal view returns (uint) {
-        (uint tokenRate, bool rateIsInvalid) = exchangeRates().rateAndInvalid(_currencyKey);
+        // (uint tokenRate, bool rateIsInvalid) = exchangeRates().rateAndInvalid(_currencyKey);
 
-        _requireRatesNotInvalid(rateIsInvalid);
+        // _requireRatesNotInvalid(rateIsInvalid);
+        uint tokenRate = _rateCheck(_currencyKey);
 
         IERC20 exToken = tokenInstance(_currencyKey);
 
@@ -294,19 +293,21 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return balance.multiplyDecimal(tokenRate);
     }
 
+    /* 
     /**
      * @notice calculate the max pUSD value of the external tokens in user's wallet.
      *
      * @param _user user's wallet address
      * @param _currencyKey target currency key to be calculated
      */
-    function maxSAPulsTokensOf(address _user, bytes32 _currencyKey) external view returns (uint maxStakableAmt) {
+    /*    function maxSAPulsTokensOf(address _user, bytes32 _currencyKey) external view returns (uint maxStakableAmt) {
         require(_currencyKey != pUSD && _currencyKey != PERI, "PERI and pUSD not allowed");
 
         maxStakableAmt = _combinedStakedAmountOf(_user, pUSD);
         return maxStakableAmt.add(_tokenPUSDValueOf(_user, _currencyKey));
     }
-
+ */
+    /* 
     function expectedTargetRatios(
         address _account,
         uint _existDebt,
@@ -324,7 +325,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     {
         (exTargetRatio, targetRatio, changedAmt) = _expectedTargetRatios(_account, _existDebt, _amount, _targetKey, _stake);
     }
-
+ */
     function stakedAmountOf(
         address _user,
         bytes32 _currencyKey,
@@ -496,10 +497,10 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // tRatio = tRatio > maxTR ? maxTR : tRatio < periIR ? periIR : tRatio;
     }
 
-    function _targetRatio(address _account) internal view returns (uint tRatio) {
-        tRatio = stakingState.getTargetRatio(_account);
-        tRatio = tRatio == 0 ? getIssuanceRatio() : tRatio;
-    }
+    // function _targetRatio(address _account) internal view returns (uint tRatio) {
+    //     tRatio = stakingState.getTargetRatio(_account);
+    //     tRatio = tRatio == 0 ? getIssuanceRatio() : tRatio;
+    // }
 
     function _rateCheck(bytes32 _currencyKey) internal view returns (uint rate) {
         bool isInvalid;
@@ -552,6 +553,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         }
     }
 
+    /* 
     /**
      * @notice calculate stakable amount of the external tokens in the staker's wallet.
      *
@@ -559,7 +561,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _user staker address
      * @param _unitCurrency The currency unit to be applied for estimation [USD]
      */
-    function _compiledStakableAmountOf(address _user, bytes32 _unitCurrency)
+    /*    function _compiledStakableAmountOf(address _user, bytes32 _unitCurrency)
         internal
         view
         returns (uint compiledStakableAmount)
@@ -580,7 +582,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             compiledStakableAmount = compiledStakableAmount.add(_toCurrency(tokenList[i], _unitCurrency, _stakedAmount));
         }
     }
-
+ */
     /**
      * @notice calculate the value in given currency unit.
      *
@@ -601,14 +603,15 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         convAmt = _amount;
         // uint amountToUSD;
         uint rate;
-        bool rateIsInvalid;
+        // bool rateIsInvalid;
         if (_fromKey != pUSD) {
             // if (_fromKey == pUSD) {
             //     amountToUSD = _amount;
             // } else {
-            (rate, rateIsInvalid) = exchangeRates().rateAndInvalid(_fromKey);
+            // (rate, rateIsInvalid) = exchangeRates().rateAndInvalid(_fromKey);
 
-            _requireRatesNotInvalid(rateIsInvalid);
+            // _requireRatesNotInvalid(rateIsInvalid);
+            rate = _rateCheck(_fromKey);
 
             // amountToUSD = _amount.multiplyDecimalRound(rate);
             // convAmt = _amount.multiplyDecimalRound(rate);
@@ -619,9 +622,10 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             // if (_toKey == pUSD) {
             //     return amountToUSD;
             // } else {
-            (rate, rateIsInvalid) = exchangeRates().rateAndInvalid(_toKey);
+            // (rate, rateIsInvalid) = exchangeRates().rateAndInvalid(_toKey);
 
-            _requireRatesNotInvalid(rateIsInvalid);
+            // _requireRatesNotInvalid(rateIsInvalid);
+            rate = _rateCheck(_toKey);
 
             // return convAmt.divideDecimalRound(rate);
             // convAmt = convAmt.divideDecimalRound(rate);
@@ -702,6 +706,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         exTRatio = exEA > 0 ? _toTRatio(otherIR, tokenIR, tokenEA.divideDecimal(exEA)) : SafeDecimalMath.unit();
     }
 
+    /* 
     /**
      * @notice calculate unstake amount of the external tokens with the given amount and debt
      *
@@ -713,7 +718,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      *
      * @return exRefundAmt unstaking ex-token amount in pUSD
      */
-    function _calcUnstakeAmt(
+    /*    function _calcUnstakeAmt(
         address _account,
         uint _amount,
         uint _existDebt,
@@ -737,7 +742,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             ? _amount > exRefundAmt ? _preciseMulToDecimal(_amount.sub(exRefundAmt), getExTokenIssuanceRatio(_targetKey)) : 0
             : _preciseMulToDecimal(_amount, getExTokenIssuanceRatio(_targetKey));
     }
-
+ */
     /**
      * @notice get the other token's Issuance Ratio and Staked Amount
      * (if the target token is stable, this is gold token such as PAXG or vice versa)
@@ -800,13 +805,14 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         (otherIR, otherEA, tokenIR, tokenEA, ) = _otherTokenIREA(_account, _targetKey);
     }
 
+    /* 
     /**
      * @notice get total external tokens' staking ratio
      *
      * @param _account staker address
      * @param targetRatio external tokens' target ratio
      */
-    function _exStakingRatio(address _account, uint targetRatio) internal view returns (uint exSR) {
+    /*    function _exStakingRatio(address _account, uint targetRatio) internal view returns (uint exSR) {
         // if target ratio is 0, return exSR 0
         // if (targetRatio == getIssuanceRatio()) {
         //     return 0;
@@ -819,7 +825,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // Ex-Staking Ratio = (Target Ratio - Peri Issuance Ratio) / (Sum of Ex-Token Target Ratio - Peri Issuance Ratio)
         exSR = _preciseDivToDecimal(targetRatio.sub(getIssuanceRatio()), exSR.sub(getIssuanceRatio()));
     }
-
+ */
+    /* 
     /**
      * @notice get target token's staking ratio
      * @dev St = (To-Te) / (To-Tt)
@@ -827,7 +834,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param tokenIR target token's issuance ratio
      * @param otherIR the other token's issuance ratio
      */
-    function _tokenSR(
+    /*    function _tokenSR(
         uint exTR,
         uint tokenIR,
         uint otherIR
@@ -838,7 +845,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             ? _preciseDivToDecimal(exTR.sub(otherIR), tokenIR.sub(otherIR))
             : _preciseDivToDecimal(otherIR.sub(exTR), otherIR.sub(tokenIR));
     }
-
+ */
+    /* 
     /**
      * @notice get target token's staking ratio and the other token's issuance ratio(if the target token is stable, this is Gold token such as PAXG)
      * @dev only keeps 2 types of external tokens' staking ratio. one is
@@ -850,7 +858,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return otherIR the other token's issuance ratio
      * @return tokenIR target token's issuance ratio
      */
-    function _tokenER(address _account, bytes32 _targetKey)
+    /*    function _tokenER(address _account, bytes32 _targetKey)
         internal
         view
         returns (
@@ -872,7 +880,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // get target token's estimated value ratio tokenER = tokenEA / ( tokenEA + otherEA )
         tokenER = _preciseDivToDecimal(tokenEA, tokenEA.add(tokenER));
     }
-
+ */
+    /*
     /**
      * @notice get max ex-tokens' stakable amount in _unitKey for the current target ratio
      *
@@ -882,7 +891,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      *
      * @return maxAmount max ex-tokens' stakable amount in _unitKey for the current target ratio
      */
-    function _maxExAmtToTRatio(
+    /*    function _maxExAmtToTRatio(
         address _account,
         uint _existDebt,
         bytes32 _unitKey
@@ -897,6 +906,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             maxAmount = _preciseDivToDecimal(maxAmount, _rateCheck(_unitKey));
         }
     }
+*/
 
     /**
      * @notice get burn amount to meet the current target ratio
@@ -1023,6 +1033,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         } */
     }
 
+    /* 
     /**
      * @notice get needed ex-tokens amount in _unitKey to meet max target ratio (ex. 0.5)
      * @dev needed amount(to max target ratio)
@@ -1034,7 +1045,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return exTRatio ex-tokens' staking ratio
      * @return addableAmt needed ex-tokens amount in _unitKey to meet max target ratio (ex. 0.5)
      */
-    function _maxStakableAmountOf(
+    /*    function _maxStakableAmountOf(
         address _account,
         uint _existDebt,
         bytes32 _targetKey,
@@ -1109,7 +1120,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // get exTRatio
         exTRatio = _toTRatio(otherIR, tokenIR, exTRatio);
     }
-
+ */
+    /*
     /**
      * @notice get new target ratio of the staker
      * @dev _debt2TotSA should not be exeeded the staked tokens' total amount in USD, which means _debt2TotSA needs to be caluculated before calling this function.
@@ -1121,7 +1133,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _exTargetRatio external token's target ratio
      * @param _stake if true, it is staking, otherwise unstaking
      */
-    function _calcTargetRatio(
+    /*    function _calcTargetRatio(
         uint _amount,
         uint _debt2TotSA,
         uint _debt2ExSA,
@@ -1146,7 +1158,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // estTargetRatio = targetRatio.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(SafeDecimalMath.unit().sub(estTargetRatio))
         //     .add(exTargetRatio.decimalToPreciseDecimal().multiplyDecimalRoundPrecise(estTargetRatio)).preciseDecimalToDecimal();
     }
-
+*/
+    /*
     /**
      * @notice calculate new target ratios of the staker
      *
@@ -1160,7 +1173,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return targetRatio total external tokens' target ratio
      * @return changedAmt if staking, CHANGED DEBT amount, if not, UNSTAKING amount in USD
      */
-    function _expectedTargetRatios(
+    /*    function _expectedTargetRatios(
         address _account,
         uint _existDebt,
         uint _amount,
@@ -1190,7 +1203,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // get the staker's Target Ratio
         targetRatio = _calcTargetRatio(changedAmt, debt2totSA, debt2ExSA, getIssuanceRatio(), exTargetRatio, _stake);
     }
-
+*/
+    /*
     /**
      * @notice calculate new ex-target ratio of the staker
      *
@@ -1203,7 +1217,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return exTRatio external token's target ratio
      * @return changedAmt if staking, CHANGED DEBT amount, if not, UNSTAKING amount in USD
      */
-    function _expectedExTargetRatio(
+    /*    function _expectedExTargetRatio(
         address _account,
         uint _debt2ExSA,
         uint _amount,
@@ -1253,6 +1267,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // Ex-Target Ratio = other Issuance Ratio - (other Issuance Ratio - token Issuance Ratio) * token Staking Ratio
         exTRatio = _toTRatio(otherIR, tokenIR, tokenSR);
     }
+*/
 
     function _toTRatio(
         uint _Tp,
@@ -1265,9 +1280,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return sub ? _Tp.sub(_preciseMulToDecimal(temp, _Se)) : _Tp.add(_preciseMulToDecimal(temp, _Se));
     }
 
+    /* 
     function calcInitTargetRatios(
         address _account,
-        /* uint _existDebt, */
         uint _periCol
     )
         external
@@ -1282,20 +1297,19 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         return
             _calcInitTargetRatios(
                 _account,
-                /*  _existDebt, */
                 _periCol
             );
     }
-
+*/
+    /*
     /**
      * @notice calulate re-initializable the staker's Target Ratios
      *
      * @param _account staker address
      * @param _periCol Peri Collateral amount
      */
-    function _calcInitTargetRatios(
+    /*    function _calcInitTargetRatios(
         address _account,
-        /* uint _existDebt, */
         uint _periCol
     )
         internal
@@ -1344,7 +1358,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // get max issuable debt : max issuable debt = (max issuable value - staked value) * tRatio
         maxIDebt = _preciseMulToDecimal(tRatio, maxIDebt);
     }
-
+*/
+    /*
     /**
      * @notice get needed ex-tokens amount in _unitKey to meet max target ratio (ex. 0.5)
      * @dev needed amount(to max target ratio)
@@ -1357,7 +1372,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return exTRatio ex-tokens' staking ratio
      * @return addableAmt needed ex-tokens amount in _unitKey to meet max target ratio (ex. 0.5)
      */
-    function _maxExStakableAmt(
+    /*    function _maxExStakableAmt(
         address _account,
         uint _existDebt,
         uint _periCol,
@@ -1440,7 +1455,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // calc new tRatio : tRatio = Tp + ( Te - Tp) * Se
         tRatio = _toTRatio(getIssuanceRatio(), exTRatio, tRatio);
     }
-
+*/
     function _calcMaxStakableAmt(
         uint _tokenIR,
         uint _otherIR,
@@ -1591,6 +1606,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         tRatio = _toTRatio(getIssuanceRatio(), tRatio, exEA.divideDecimal(exEA.add(periDebt)));
     }
 
+    /*
     /**
      * @notice calulate changed external token's staking amount, new target ratios and ex-target ratio
      *
@@ -1603,7 +1619,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @return exTRatio external token's target ratio
      * @return changedAmt External Changed Staked Aamount(exCSA) in USD
      */
-    function _calcTRatio(
+    /*    function _calcTRatio(
         address _account,
         uint _existDebt,
         uint _periCol,
@@ -1645,9 +1661,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint exEA = tokenEA.add(otherEA);
 
         // if there is no newly added debt, return exTRatio
-        if (
-            tokenEA <= tokenSA /* || exEA <= exSA */
-        ) {
+        if (tokenEA <= tokenSA) {
             return (tRatio, exTRatio, 0);
         }
 
@@ -1677,9 +1691,9 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // calc new tRatio : tRatio = Tp + ( Te - Tp) * Se
         tRatio = _toTRatio(getIssuanceRatio(), exTRatio, tRatio);
     }
-
+*/
     /* ========== MUTATIVE FUNCTIONS ========== */
-
+    /* 
     function setTargetRatios(
         address _account,
         uint _tRatio,
@@ -1688,7 +1702,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         stakingState.setExTargetRatio(_account, _exTRatio);
         stakingState.setTargetRatio(_account, _tRatio);
     }
-
+ */
+    /* 
     function _saveTRatios(
         address _account,
         uint _existDebt,
@@ -1709,7 +1724,8 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // set the staker's Target Ratio
         stakingState.setTargetRatio(_account, tRatio);
     }
-
+ */
+    /*
     /**
      * @notice It sets 2 target ratios of the staker.
      *
@@ -1719,7 +1735,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
      * @param _targetKey the external key to be staked
      * @param _stake if true, it is staking, otherwise unstaking
      */
-    function _setTargetRatios(
+    /*    function _setTargetRatios(
         address _account,
         uint _existDebt,
         uint _amount,
@@ -1740,7 +1756,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // set the staker's Target Ratio
         stakingState.setTargetRatio(_account, tRatio);
     }
-
+*/
     function stakeToMaxExQuota(
         address _account,
         uint _existDebt,
@@ -1817,9 +1833,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // get the staking amount in target currency
         uint stakingAmt = _toCurrency(_unitKey, _targetKey, _amount);
 
-        IERC20 exToken = tokenInstance(_targetKey);
-
-        uint decimals = exToken.decimals();
+        uint decimals = stakingState.tokenDecimals(_targetKey);
 
         require(decimals <= 18, "Invalid decimal number");
 
@@ -1829,7 +1843,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         // uint balance = exToken.balanceOf(_staker).mul(10**(decimals));
 
         require(
-            exToken.transferFrom(_staker, address(stakingState), stakingAmt.div(10**(decimals))),
+            tokenInstance(_targetKey).transferFrom(_staker, address(stakingState), stakingAmt.div(10**decimals)),
             "Transferring staking token has been failed"
         );
 
@@ -2204,7 +2218,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     }
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
-        require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
+        require(!anyRateIsInvalid, "A pynth or a external token rate is invalid");
     }
 
     function _onlyIssuer() internal view {

@@ -71,7 +71,7 @@ contract('Fee Pool', async accounts => {
 	};
 
 	const closeFeePeriod = async (inflationMint, account, feeRewards = []) => {
-		const feePeriodDuration = Number(await feePool.feePeriodDuration()) + 60 * 60 * 3;
+		const feePeriodDuration = Number(await feePool.feePeriodDuration()) + 60 * 60 * 27;
 		await fastForward(feePeriodDuration);
 
 		let mintAmount;

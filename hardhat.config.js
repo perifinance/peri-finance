@@ -63,7 +63,7 @@ module.exports = {
 	defaultNetwork: 'hardhat',
 	networks: {
 		hardhat: {
-			chainId: 1337,
+			chainId: 1287,
 			gas: 12e6,
 			blockGasLimit: 12e6,
 			allowUnlimitedContractSize: true,

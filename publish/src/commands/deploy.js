@@ -303,33 +303,38 @@ const deploy = async ({
 	try {
 		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
 		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
+		const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
+		if (oldSupplySchedule) {
+			currentLastMintEvent = await oldSupplySchedule.methods.lastMintEvent().call();
+			currentWeekOfInflation = await oldSupplySchedule.methods.weekCounter().call();
+		} else {
+			// inflationSupplyToDate = total supply - 100m
+			const inflationSupplyToDate = w3utils
+				.toBN(currentPeriFinanceSupply)
+				.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
 
-		// inflationSupplyToDate = total supply - 100m
-		const inflationSupplyToDate = w3utils
-			.toBN(currentPeriFinanceSupply)
-			.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
+			// current weekly inflation 75m / 52
+			const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
+			currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
 
-		// current weekly inflation 75m / 52
-		const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
-		currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
+			// Check result is > 0 else set to 0 for currentWeek
+			currentWeekOfInflation = currentWeekOfInflation.gt(w3utils.toBN('0'))
+				? currentWeekOfInflation.toNumber()
+				: 0;
 
-		// Check result is > 0 else set to 0 for currentWeek
-		currentWeekOfInflation = currentWeekOfInflation.gt(w3utils.toBN('0'))
-			? currentWeekOfInflation.toNumber()
-			: 0;
-
-		// Calculate lastMintEvent as Inflation start date + number of weeks issued * secs in weeks
-		const mintingBuffer = 86400;
-		const secondsInWeek = 604800;
-		const inflationStartDate = inflationStartTimestampInSecs;
-		currentLastMintEvent =
-			inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
+			// Calculate lastMintEvent as Inflation start date + number of weeks issued * secs in weeks
+			const mintingBuffer = 86400;
+			const secondsInWeek = 604800;
+			const inflationStartDate = inflationStartTimestampInSecs;
+			currentLastMintEvent =
+				inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
+		}
 	} catch (err) {
 		console.log(err);
 		if (freshDeploy) {
 			currentPeriFinanceSupply = await getDeployParameter('INITIAL_ISSUANCE');
-			currentWeekOfInflation = 0;
-			currentLastMintEvent = 0;
+			currentWeekOfInflation = await getDeployParameter('INFLATION_WEEK_COUNTER');
+			currentLastMintEvent = await getDeployParameter('LAST_MINT_EVENT');
 		} else {
 			console.error(
 				red(
@@ -1007,7 +1012,7 @@ const deploy = async ({
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
-		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualPynth',
+		source: 'Exchanger',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
@@ -1477,6 +1482,61 @@ const deploy = async ({
 		DAI_ADDRESS = addressOf(DAI);
 	}
 
+	let USDT_ADDRESS = (await getDeployParameter('USDT_ERC20_ADDRESSES'))[network];
+	if (!USDT_ADDRESS || USDT_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			throw new Error('USDT address is not known');
+		}
+
+		const USDT = await deployer.deployContract({
+			name: 'USDT',
+			source: 'MockToken',
+			args: ['Tether USD', 'USDT', 6],
+		});
+
+		USDT_ADDRESS = addressOf(USDT);
+	}
+
+	let XAUT_ADDRESS = (await getDeployParameter('XAUT_ERC20_ADDRESSES'))[network];
+	if (!XAUT_ADDRESS || XAUT_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			console.error(
+				red(
+					'XAUT address is not known. Please provide the address of the XAUT contract on this network.'
+				)
+			);
+			XAUT_ADDRESS = ZERO_ADDRESS;
+		} else {
+			const XAUT = await deployer.deployContract({
+				name: 'XAUT',
+				source: 'MockToken',
+				args: ['Tether Gold', 'XAUT', 6],
+			});
+
+			XAUT_ADDRESS = addressOf(XAUT);
+		}
+	}
+
+	let PAXG_ADDRESS = (await getDeployParameter('PAXG_ERC20_ADDRESSES'))[network];
+	if (!PAXG_ADDRESS || PAXG_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			console.error(
+				red(
+					'PAXG address is not known. Please provide the address of the PAXG contract on this network.'
+				)
+			);
+			PAXG_ADDRESS = ZERO_ADDRESS;
+		} else {
+			const PAXG = await deployer.deployContract({
+				name: 'PAXG',
+				source: 'MockToken',
+				args: ['Paxos Gold', 'PAXG', 18],
+			});
+
+			PAXG_ADDRESS = addressOf(PAXG);
+		}
+	}
+
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
 	const stakingState = await deployer.deployContract({
@@ -1520,6 +1580,17 @@ const deploy = async ({
 					address: USDC_ADDRESS,
 				},
 				{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
+				{
+					currencyKey: toBytes32('USDT'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: USDT_ADDRESS,
+				},
+				{ currencyKey: toBytes32('PAXG'), decimal: '18', address: PAXG_ADDRESS },
+				{
+					currencyKey: toBytes32('XAUT'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: XAUT_ADDRESS,
+				},
 			];
 
 			for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
@@ -2506,13 +2577,29 @@ const deploy = async ({
 			writeArg: await getDeployParameter('ISSUANCE_RATIO'),
 		});
 
+		const exTokenIssuanceRatio = await getDeployParameter('EXTERNAL_TOKEN_ISSUANCE_RATIO');
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'exTokenIssuanceRatio',
+			readArg: [toBytes32('USDC')],
+			expected: input => input !== '0', // only change if zero
+			write: 'setExTokenIssuanceRatio',
+			writeArg: [
+				Object.keys(exTokenIssuanceRatio).map(name => toBytes32(name)),
+				Object.values(exTokenIssuanceRatio).map(ratio => ratio),
+			],
+		});
+
+		const externalTokenQuota = await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA');
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'externalTokenQuota',
-			expected: input => input !== '0', // only change if zero
+			expected: input => input === externalTokenQuota,
 			write: 'setExternalTokenQuota',
-			writeArg: await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA'),
+			writeArg: externalTokenQuota,
 		});
 
 		await runStep({
@@ -2549,6 +2636,21 @@ const deploy = async ({
 			expected: input => input !== '0', // only change if zero
 			write: 'setLiquidationRatio',
 			writeArg: await getDeployParameter('LIQUIDATION_RATIO'),
+		});
+
+		const liquidatioinRatios = await getDeployParameter('LIQUIDATION_RATIOS');
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'liquidationRatios',
+			readArg: [toBytes32('P')],
+			expected: input => input !== '0', // only change if zero
+			write: 'setLiquidationRatios',
+			writeArg: [
+				Object.keys(liquidatioinRatios).map(name => toBytes32(name)),
+				Object.values(liquidatioinRatios).map(ratio => ratio),
+			],
 		});
 
 		await runStep({
