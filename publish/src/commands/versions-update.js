@@ -16,6 +16,8 @@ const versionsUpdate = async ({ versionTag, release, useOvm }) => {
 	// prefix a "v" to the tag
 	versionTag = /^v/.test(versionTag) ? versionTag : 'v' + versionTag;
 
+	const newV = versionTag.split('-')[0];
+
 	for (const network of networks.filter(n => n !== 'local')) {
 		const deploymentPath = getPathToNetwork({ network, path, useOvm });
 		if (!fs.existsSync(deploymentPath)) {
@@ -28,11 +30,12 @@ const versionsUpdate = async ({ versionTag, release, useOvm }) => {
 		});
 
 		for (const tag of Object.keys(versions)) {
+			const oldV = tag.split('-')[0];
 			if (tag === versionTag) {
 				throw Error(`Version: ${versionTag} already used in network: ${network}`);
-			} else if (semver.lt(semver.coerce(versionTag), semver.coerce(tag))) {
+			} else if (semver.lt(semver.coerce(newV), semver.coerce(oldV))) {
 				throw Error(
-					`Version: ${versionTag} is less than existing version ${tag} in network: ${network}`
+					`Version: ${newV} is less than existing version ${oldV} in network: ${network}`
 				);
 			}
 		}
@@ -48,7 +51,7 @@ const versionsUpdate = async ({ versionTag, release, useOvm }) => {
 		const [commit, date] = stdout.replace(/\n|"/g, '').split(/\s/);
 
 		const entry = {
-			tag: versionTag,
+			tag: newV,
 			fulltag: versionTag,
 			release,
 			network,
