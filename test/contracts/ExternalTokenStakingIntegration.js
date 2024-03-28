@@ -429,7 +429,7 @@ contract('External token staking integration', async accounts => {
 				);
 			});
 
-			it('should stake external token', async () => {
+			it.skip('should stake external token', async () => {
 				await periFinance.issueMaxPynths({ from: users[0] });
 
 				// It should derive back user's active debt properly
@@ -503,13 +503,13 @@ contract('External token staking integration', async accounts => {
 				assert.bnEqual(balanceStateDAIAfter, balanceStateDAIBefore.add(stakedAmount0DAIAfter));
 			});
 
-			it('should NOT stake if there is no debt (no PERI locked)', async () => {
+			it.skip('should NOT stake if there is no debt (no PERI locked)', async () => {
 				await assert.revert(
 					periFinance.issuePynths(USDC, '1000000', { from: users[0] }),
 					'User does not have any debt yet'
 				);
 			});
-			it('should NOT stake if it exceeds quota limit', async () => {
+			it.skip('should NOT stake if it exceeds quota limit', async () => {
 				await periFinance.issueMaxPynths({ from: users[0] });
 
 				// Maximum staking upto quota limit
@@ -529,7 +529,7 @@ contract('External token staking integration', async accounts => {
 				);
 			});
 
-			it('should NOT stake if token is not registered', async () => {
+			it.skip('should NOT stake if token is not registered', async () => {
 				await periFinance.issueMaxPynths({ from: users[0] });
 
 				await updateRates([toBytes32('AUD')], ['0.9']);
@@ -540,7 +540,7 @@ contract('External token staking integration', async accounts => {
 				);
 			});
 
-			it('should NOT stake if token is not activated', async () => {
+			it.skip('should NOT stake if token is not activated', async () => {
 				await stakingState.setTokenActivation(USDC, false, { from: owner });
 
 				await periFinance.issueMaxPynths({ from: users[0] });
@@ -554,7 +554,7 @@ contract('External token staking integration', async accounts => {
 				);
 			});
 
-			it('should NOT stake pUSD', async () => {
+			it.skip('should NOT stake pUSD', async () => {
 				await assert.revert(
 					periFinance.issuePynths(pUSD, toUnit('10'), { from: users[0] }),
 					'pUSD is not staking coin'

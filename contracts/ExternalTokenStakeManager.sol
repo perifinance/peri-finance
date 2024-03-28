@@ -805,6 +805,18 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         (otherIR, otherEA, tokenIR, tokenEA, ) = _otherTokenIREA(_account, _targetKey);
     }
 
+    function tokenStakeStatus(address _account)
+        external
+        view
+        returns (bytes32[] memory tokenList, uint[] memory stakedAmts)
+    {
+        tokenList = stakingState.getTokenCurrencyKeys();
+        stakedAmts = new uint[](tokenList.length);
+        for (uint i; i < tokenList.length; i++) {
+            stakedAmts[i] = stakingState.stakedAmountOf(tokenList[i], _account);
+        }
+    }
+
     /* 
     /**
      * @notice get total external tokens' staking ratio
