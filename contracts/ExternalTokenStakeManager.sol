@@ -808,12 +808,17 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     function tokenStakeStatus(address _account)
         external
         view
-        returns (bytes32[] memory tokenList, uint[] memory stakedAmts)
+        returns (
+            bytes32[] memory tokenList,
+            uint[] memory stakedAmts,
+            uint[] memory decimals
+        )
     {
         tokenList = stakingState.getTokenCurrencyKeys();
         stakedAmts = new uint[](tokenList.length);
         for (uint i; i < tokenList.length; i++) {
             stakedAmts[i] = stakingState.stakedAmountOf(tokenList[i], _account);
+            decimals[i] = stakingState.tokenDecimals(tokenList[i]);
         }
     }
 
@@ -1475,27 +1480,33 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint _otherEA,
         uint _totalEA
     ) internal view returns (uint addableAmt) {
+        uint periIR = getIssuanceRatio();
+        uint maxSR = getExternalTokenQuota();
         // get target token's stakable amount  getExternalTokenQuota() = Tmax
         // X = [ ( Tmax - Tp ) * V - { ( Tt - Tp ) * Vt + ( To - Tp ) * Vo } ] / ( Tt - Tmax )
         // addableAmt = ( Tt - Tp ) * Vt : always Tt > Tp
-        addableAmt = _preciseMulToDecimal(_tokenIR.sub(getIssuanceRatio()), _tokenEA);
+        uint temp = _tokenIR.sub(periIR);
+        addableAmt = _preciseMulToDecimal(temp, _tokenEA);
 
         // addableAmt = addableAmt + ( To - Tp ) * Vo : always To > Tp
-        addableAmt = addableAmt.add(_preciseMulToDecimal(_otherIR > 0 ? _otherIR.sub(getIssuanceRatio()) : 0, _otherEA));
+        temp = _preciseMulToDecimal(_otherIR > 0 ? _otherIR.sub(periIR) : 0, _otherEA);
+        addableAmt = addableAmt.add(temp);
 
-        // tempAmt = ( Tmax - Tp ) * V : always Tmax > Tp
-        uint tempAmt = _preciseMulToDecimal(getExternalTokenQuota().sub(getIssuanceRatio()), _totalEA);
+        // temp = ( Tmax - Tp ) * V : always Tmax > Tp
+        temp = maxSR.sub(periIR);
+        temp = _preciseMulToDecimal(temp, _totalEA);
 
         // if target token's EA > target token's SA, return (old exTRatio, 0)
-        if (tempAmt < addableAmt) {
+        if (temp < addableAmt) {
             return 0;
         }
 
         // addableAmt = ( Tmax - Tp ) * V - addableAmt
-        addableAmt = tempAmt.sub(addableAmt);
+        addableAmt = temp.sub(addableAmt);
 
         // addableAmt = addableAmt / ( Tt - Tmax )
-        addableAmt = _preciseDivToDecimal(addableAmt, _tokenIR.sub(getExternalTokenQuota()));
+        temp = _tokenIR.sub(maxSR);
+        addableAmt = _preciseDivToDecimal(addableAmt, temp);
     }
 
     /**
