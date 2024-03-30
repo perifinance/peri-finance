@@ -327,9 +327,19 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         bytes32 _targetCurrency,
         bytes32 _inputCurrency
     ) external onlyIssuer {
-        uint unstakingAmountConverted = _toCurrency(_inputCurrency, _targetCurrency, _amount);
+        _amount = _toCurrency(_inputCurrency, _targetCurrency, _amount);
 
-        _unstakeAndRefund(_unstaker, _unstaker, unstakingAmountConverted, _targetCurrency);
+        uint stakedAmt = stakingState.stakedAmountOf(_targetCurrency, _unstaker);
+
+        uint diff = _amount > stakedAmt ? _amount.sub(stakedAmt) : stakedAmt.sub(_amount);
+
+        uint decimals = stakingState.tokenDecimals(_targetCurrency);
+
+        diff = diff.div(10**(uint(18).sub(decimals)));
+
+        _amount = _amount > stakedAmt && diff < 10 ? stakedAmt : _amount;
+
+        _unstakeAndRefund(_unstaker, _unstaker, _amount, _targetCurrency);
     }
 
     function unstakeAndLiquidate(
