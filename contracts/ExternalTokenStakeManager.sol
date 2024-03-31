@@ -816,6 +816,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     {
         tokenList = stakingState.getTokenCurrencyKeys();
         stakedAmts = new uint[](tokenList.length);
+        decimals = new uint[](tokenList.length);
         for (uint i; i < tokenList.length; i++) {
             stakedAmts[i] = stakingState.stakedAmountOf(tokenList[i], _account);
             decimals[i] = stakingState.tokenDecimals(tokenList[i]);

@@ -609,6 +609,8 @@ contract('External token staking integration', async accounts => {
 
 				await periFinance.issuePynths(PAXG, toUnit('900'), { from: users[0] });
 
+				// const status = await exTokenManager.tokenStakeStatus(users[0]);
+
 				const { debt, periCol } = await issuer.debtsCollateral(users[0], false);
 
 				const { tRatio, exTRatio, exEA } = await exTokenManager.getTargetRatio(users[0], debt);

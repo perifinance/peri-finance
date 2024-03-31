@@ -3056,8 +3056,24 @@
 		"contracts": {
 			"ExternalTokenStakeManager": {
 				"address": "0x9053A6F5E57c3b8cf735687C42C057D59AE30529",
+				"status": "replaced",
+				"keccak256": "0x794e0bebfa4f0103fe85de44c887c0c55e070d445ea86b252864f0b5c231d0e0",
+				"replaced_in": "v0.7.2-moonbase"
+			}
+		}
+	},
+	"v0.7.2-moonbase": {
+		"tag": "v0.7.2",
+		"fulltag": "v0.7.2-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-03-31T10:38:33+09:00",
+		"commit": "6b125dde3d507256a7f573fb24667e7658c2d13d",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0x2977E6FF6601c1837247CDB2508AA2669fCA6fE1",
 				"status": "current",
-				"keccak256": "0x794e0bebfa4f0103fe85de44c887c0c55e070d445ea86b252864f0b5c231d0e0"
+				"keccak256": "0x835476f6fb9a7b0b5e826601640ca0e7e5b4cb91c4f30b5ba204cd7de5b04463"
 			}
 		}
 	}
