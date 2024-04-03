@@ -811,15 +811,18 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         returns (
             bytes32[] memory tokenList,
             uint[] memory stakedAmts,
-            uint[] memory decimals
+            uint[] memory decimals,
+            uint[] memory balances
         )
     {
         tokenList = stakingState.getTokenCurrencyKeys();
         stakedAmts = new uint[](tokenList.length);
         decimals = new uint[](tokenList.length);
+        balances = new uint[](tokenList.length);
         for (uint i; i < tokenList.length; i++) {
             stakedAmts[i] = stakingState.stakedAmountOf(tokenList[i], _account);
             decimals[i] = stakingState.tokenDecimals(tokenList[i]);
+            balances[i] = tokenInstance(tokenList[i]).balanceOf(_account).mul(10**(uint(18).sub(decimals[i])));
         }
     }
 
@@ -1891,7 +1894,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         bytes32 _unitKey
     ) external onlyIssuer {
         // changing _amount from requested issuing debt to requested staking amount
-        // _amount = _preciseDivToDecimal(_amount, getExTokenIssuanceRatio(_targetKey));
+        _amount = _preciseDivToDecimal(_amount, getExTokenIssuanceRatio(_targetKey));
         // _amount = _calcUnstakeAmt(_staker, _amount, _curDebt, _periCol, _targetKey);
 
         // set the staker's External token Target Ratio and Target Ratio
