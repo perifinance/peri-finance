@@ -169,18 +169,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
     }
 
-    function debtsCollateral(address _account, bool _rateCheck)
-        external
-        view
-        returns (
-            uint debt,
-            uint systemDebt,
-            uint periCol
-        )
-    {
-        return _debtsCollateral(_account, _rateCheck);
-    }
-
     function _availableCurrencyKeysWithOptionalPERI(bool withPERI) internal view returns (bytes32[] memory) {
         bytes32[] memory currencyKeys = new bytes32[](availablePynths.length + (withPERI ? 1 : 0));
 
@@ -424,6 +412,52 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return balance;
     }
 
+    /**
+     *
+     * @param _from The address to issue pUSD.
+     *
+     * @return debt current debt balance
+     * @return systemDebt current total system debt
+     * @return periCol peri's collateral amount in pUSD
+     */
+    function _debtsCollateral(address _from, bool _isRateCheck)
+        internal
+        view
+        returns (
+            uint debt,
+            uint systemDebt,
+            uint periCol
+        )
+    {
+        // get debt balance and issued debt
+        bool anyRateIsInvalid;
+        (debt, systemDebt, periCol, anyRateIsInvalid) = _collateralNDebt(_from);
+
+        // get peri rate and check if it's invalid
+        (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
+        if (_isRateCheck) _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
+
+        // get PERI's collateral amount in pUSD
+        periCol = _toUSD(periCol, rate);
+    }
+
+    function _collateralNDebt(address _from)
+        internal
+        view
+        returns (
+            uint debt,
+            uint systemDebt,
+            uint periCol,
+            bool anyRateIsInvalid
+        )
+    {
+        // get debt balance and issued debt
+        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
+
+        // get PERI's collateral amount in pUSD
+        periCol = _collateral(_from);
+    }
+
     // /**
     // * @notice It calculates the debt amount to burn and the ex-token amount to unstake to meet the target c-ratio
     // * @param _account target address
@@ -577,6 +611,34 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debtBalance, , ) = _debtBalanceOfAndTotalDebt(_issuer, currencyKey);
     }
 
+    function debtsCollateral(address _account, bool _checkRate)
+        external
+        view
+        returns (
+            uint debt,
+            uint systemDebt,
+            uint periCol
+        )
+    {
+        return _debtsCollateral(_account, _checkRate);
+    }
+
+    function cRatioNDebtsCollateral(address _account)
+        external
+        view
+        returns (
+            uint cRatio,
+            uint debt,
+            uint exDebt,
+            uint periCol
+        )
+    {
+        (debt, , periCol, ) = _collateralNDebt(_account);
+        uint exEA;
+        (exDebt, exEA, ) = exTokenManager().getExEADebt(_account);
+        cRatio = debt.divideDecimal(periCol.add(exEA));
+    }
+
     function remainingIssuablePynths(
         address _issuer /* , bytes32 _currencyKey */
     )
@@ -622,6 +684,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (maxIssuable, tRatio) = _maxIssuablePynths(_issuer, existDebt);
     }
 
+    /* 
     function debtBalanceOfAndTotalDebt(address _issuer, bytes32 currencyKey)
         external
         view
@@ -632,7 +695,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         )
     {
         (debtBalance, totalSystemValue, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, currencyKey);
-    }
+    } */
 
     /* function externalTokenQuota(
         address _account,
@@ -1157,48 +1220,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function _requireExistingDebt(uint existingDebt) internal pure {
         require(existingDebt > 0, "User has no debt");
-    }
-
-    /**
-     *
-     * @param _from The address to issue pUSD.
-     *
-     * @return debt current debt balance
-     * @return systemDebt current total system debt
-     * @return periCol peri's collateral amount in pUSD
-     */
-    function _debtsCollateral(address _from, bool _isRateCheck)
-        internal
-        view
-        returns (
-            uint debt,
-            uint systemDebt,
-            uint periCol
-        )
-    {
-        // get debt balance and issued debt
-        bool anyRateIsInvalid;
-        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
-
-        // // if PERI, there is no need to check the rate validity
-        // // since the usage of the debts and collateral is only for c-ratio calculation
-        // if (_unitKey == PERI) {
-        //     // get peri's collateral amount in pUSD
-        //     return (debt, systemDebt, _collateral(_from));
-        // }
-
-        // get peri rate and check if it's invalid
-        (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
-        if (_isRateCheck) _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
-
-        // get PERI's collateral amount in pUSD
-        periCol = _toUSD(_collateral(_from), rate);
-
-        // if (_unitKey != pUSD) {
-        //     // get the price of the unit currency
-        //     rate = _rateCheck(_unitKey);
-        //     _fromUSD(periCol, rate);
-        // }
     }
 
     function _issuePynths(

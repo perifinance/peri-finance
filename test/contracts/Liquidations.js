@@ -1088,11 +1088,13 @@ contract('Liquidations', accounts => {
 											const totBalance = periBalance.add(usdcBalance).add(xautSA);
 											assert.bnEqual(totBalance, carolPERIBefore.add(PERI55));
 										});
-										it('then Alice PERI balance is 400', async () => {
+										it('then Alice total balance difference is 55', async () => {
 											const alicePERIAfter = await periFinance.collateral(alice);
 											const aliceSAAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
-											const usdcDiff = aliceSABefore.sub(aliceSAAfter);
-											assert.bnEqual(alicePERIAfter.add(usdcDiff), toUnit('400'));
+											const usdcDiff = alicePERIBefore
+												.add(aliceSABefore)
+												.sub(alicePERIAfter.add(aliceSAAfter));
+											assert.bnEqual(usdcDiff, toUnit('55'));
 										});
 										it('then Alice issuance ratio is updated in feePoolState', async () => {
 											const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
@@ -1142,6 +1144,14 @@ contract('Liquidations', accounts => {
 												alicePERIBefore = aliceBefore.periCol;
 												aliceSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
 												totCollateral = alicePERIBefore.add(aliceSABefore);
+
+												/* const exDebt = await exTokenManager.getExDebt(alice);
+
+												const {
+													totalRedeemed,
+													amountToLiquidate,
+													exRedeem,
+													idealExSA} = await liquidations.maxLiquidateAmt(alice, pUSD5000, aliceDebtBefore); */
 
 												// Bob Liquidates Alice
 												liquidationTransaction = await periFinance.liquidateDelinquentAccount(
@@ -1217,8 +1227,8 @@ contract('Liquidations', accounts => {
 												);
 											});
 											it('then Alice issuanceRatio is now at the target issuanceRatio', async () => {
-												// const { debt, periCol } = await issuer.debtsCollateral(alice);
-												aliceSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+												// const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+												// const aliceSAAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
 												// const totCollateral = periCol.add(aliceSABefore);
 												const { tRatio, cRatio } = await issuer.getRatios(alice, false);
 												// const aliceCRatioAfter = await periFinance.collateralisationRatio(alice);
@@ -1306,6 +1316,13 @@ contract('Liquidations', accounts => {
 												maxSR.toString(),
 												amountToFixRatio.toString()
 											);
+
+											// const {
+											// 	totalRedeemed,
+											// 	amountToLiquidate,
+											// 	exRedeem,
+											// 	idealExSA,
+											// } = await liquidations.maxLiquidateAmt(alice, liquidateAmount, debt);
 
 											await periFinance.liquidateDelinquentAccount(alice, liquidateAmount, {
 												from: bob,
