@@ -431,31 +431,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     {
         // get debt balance and issued debt
         bool anyRateIsInvalid;
-        (debt, systemDebt, periCol, anyRateIsInvalid) = _collateralNDebt(_from);
+        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
 
         // get peri rate and check if it's invalid
         (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
         if (_isRateCheck) _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
 
         // get PERI's collateral amount in pUSD
-        periCol = _toUSD(periCol, rate);
-    }
-
-    function _collateralNDebt(address _from)
-        internal
-        view
-        returns (
-            uint debt,
-            uint systemDebt,
-            uint periCol,
-            bool anyRateIsInvalid
-        )
-    {
-        // get debt balance and issued debt
-        (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
-
-        // get PERI's collateral amount in pUSD
-        periCol = _collateral(_from);
+        periCol = _toUSD(_collateral(_from), rate);
     }
 
     // /**
@@ -627,16 +610,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         external
         view
         returns (
+            uint tRatio,
             uint cRatio,
+            uint exTRatio,
+            uint exEA,
             uint debt,
-            uint exDebt,
             uint periCol
         )
     {
-        (debt, , periCol, ) = _collateralNDebt(_account);
-        uint exEA;
-        (exDebt, exEA, ) = exTokenManager().getExEADebt(_account);
-        cRatio = debt.divideDecimal(periCol.add(exEA));
+        (debt, , periCol) = _debtsCollateral(_account, true);
+        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenManager().getRatios(_account, debt, periCol);
+        (uint rate, ) = exchangeRates().rateAndInvalid(PERI);
+        periCol = _toUSD(periCol, rate);
     }
 
     function remainingIssuablePynths(

@@ -342,9 +342,8 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
             uint exEA
         )
     {
-        uint maxSR;
         uint exTR;
-        (tRatio, idealExSA, exTR, exEA, exSR, maxSR) = exTokenStakeManager().getRatios(_account, _existDebt, _periCol);
+        (tRatio, idealExSA, exTR, exEA, exSR, ) = exTokenStakeManager().getRatios(_account, _existDebt, _periCol);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
         require(tRatio < idealExSA && _isOpenForLiquidation(_account), "Account not open for liquidation");
@@ -418,7 +417,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
             amountToLiquidate = _preciseDivToDecimal(colinUSD, SafeDecimalMath.unit().add(getLiquidationPenalty()));
         }
 
-        // if exEA is greater than
+        // get exToken redeem amount
         idealExSA = _preciseMulToDecimal(totalRedeemed, exTSR);
 
         // move exTokens to the liquidator and save the remain amount to tRatio
