@@ -537,8 +537,8 @@ contract('Issuer via PeriFinance', async accounts => {
 					const peri2usdRate = await exchangeRates.rateForCurrency(PERI);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
-					const issuedPeriFinances = toBigNbr('200012');
-					await periFinance.transfer(account1, toUnit(issuedPeriFinances), {
+					const issuedPeriFinances = toUnit('200012');
+					await periFinance.transfer(account1, issuedPeriFinances, {
 						from: owner,
 					});
 
@@ -547,12 +547,15 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issuePynths(PERI, amountIssued, { from: account1 });
 
 					const expectedIssuablePynths = multiplyDecimal(
-						toUnit(issuedPeriFinances),
+						issuedPeriFinances,
 						multiplyDecimal(peri2usdRate, issuanceRatio)
 					).sub(amountIssued);
 
 					const remainingIssuable = await getRemainingIssuablePynths(account1);
 					assert.bnEqual(remainingIssuable, expectedIssuablePynths);
+
+					const temp = await issuer.cRatioNDebtsCollateral(account1);
+					assert.bnEqual(temp.periCol, issuedPeriFinances);
 				});
 
 				it("should correctly calculate a user's remaining issuable pynths without prior issuance", async () => {

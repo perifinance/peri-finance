@@ -618,10 +618,10 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint periCol
         )
     {
-        (debt, , periCol) = _debtsCollateral(_account, true);
+        (debt, , periCol) = _debtsCollateral(_account, false);
         (tRatio, cRatio, exTRatio, exEA, , ) = exTokenManager().getRatios(_account, debt, periCol);
         (uint rate, ) = exchangeRates().rateAndInvalid(PERI);
-        periCol = _toUSD(periCol, rate);
+        periCol = _fromUSD(periCol, rate);
     }
 
     function remainingIssuablePynths(
