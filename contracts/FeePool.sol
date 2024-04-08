@@ -710,10 +710,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         (uint tRatio, uint ratio, , , uint exSR, uint maxSR) = issuer().getRatios(account, _checkRate);
 
-        if (exSR > maxSR) {
-            return false;
-        }
-
         // uint ratio;
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
         //  0  <  10%:   Claimable
@@ -723,15 +719,16 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         feesClaimable = true;
         // Claimable if collateral ratio below target ratio
-        if (ratio < tRatio) {
+        if (ratio <= tRatio && exSR <= maxSR) {
             return feesClaimable;
         }
 
         // Calculate the threshold for collateral ratio before fees can't be claimed.
         uint ratio_threshold = tRatio.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
+        uint exSR_threshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
 
         // Not claimable if collateral ratio above threshold
-        if (ratio > ratio_threshold) {
+        if (ratio > ratio_threshold && exSR > exSR_threshold) {
             feesClaimable = false;
         }
     }

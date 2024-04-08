@@ -3001,8 +3001,9 @@
 			},
 			"FeePool": {
 				"address": "0x299aaCF33C9cBeFD48C9A47aE2084f7fAD8a48cF",
-				"status": "current",
-				"keccak256": "0xf75c53f506bf8c18ead7c72496e8b5baebe1b5d90d7e9f75cf0f97081112b0d0"
+				"status": "replaced",
+				"keccak256": "0xf75c53f506bf8c18ead7c72496e8b5baebe1b5d90d7e9f75cf0f97081112b0d0",
+				"replaced_in": "v0.7.7-moonbase"
 			},
 			"PeriFinance": {
 				"address": "0x5A2725c696Bede7E177582B414722FAB6D334695",
@@ -3090,8 +3091,9 @@
 		"contracts": {
 			"ExternalTokenStakeManager": {
 				"address": "0xA9BCA54CAa546B2D1Ac3e22c0e2a4db7f9f1C2Bb",
-				"status": "current",
-				"keccak256": "0x5628e1a99b7815f45f1f86d559102c880f0ae4f0f5f5c63121ca23ecbcdb40ce"
+				"status": "replaced",
+				"keccak256": "0x5628e1a99b7815f45f1f86d559102c880f0ae4f0f5f5c63121ca23ecbcdb40ce",
+				"replaced_in": "v0.7.7-moonbase"
 			}
 		}
 	},
@@ -3142,8 +3144,34 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x9f07B4db7837d27477ce0b03Ce2c1Ef39E62f674",
+				"status": "replaced",
+				"keccak256": "0xc895ee8813a77512c140cf3ff52d7f8c57fb10a9692988961e0fa723b3b9f164",
+				"replaced_in": "v0.7.7-moonbase"
+			}
+		}
+	},
+	"v0.7.7-moonbase": {
+		"tag": "v0.7.7",
+		"fulltag": "v0.7.7-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-08T11:58:21+09:00",
+		"commit": "0c923de46190e27835faca08c1488655165f59c3",
+		"contracts": {
+			"FeePool": {
+				"address": "0x391585c5CF224dAd9a4A76ba6e8e7602B0BD8DE7",
 				"status": "current",
-				"keccak256": "0xc895ee8813a77512c140cf3ff52d7f8c57fb10a9692988961e0fa723b3b9f164"
+				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050"
+			},
+			"Issuer": {
+				"address": "0x04F868e1AD568569b8EcbCb144e146Fe81b8eC7a",
+				"status": "current",
+				"keccak256": "0x0891f9c63557821bc03d3b276717fde45265d6e22c66da8e7a2961739a3dc1df"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0xef0489938a5960ceE869F08cfB67C33dff807b3f",
+				"status": "current",
+				"keccak256": "0x78e9655741224d719b2470892fbd5b9083c802f0cf87df68ebfb8da51ba3bbf2"
 			}
 		}
 	}

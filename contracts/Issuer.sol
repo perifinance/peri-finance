@@ -618,10 +618,16 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint periCol
         )
     {
-        (debt, , periCol) = _debtsCollateral(_account, false);
-        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenManager().getRatios(_account, debt, periCol);
+        // get debt
+        (debt, , ) = _debtBalanceOfAndTotalDebt(_account, pUSD);
+
+        // get peri rate and check if it's invalid
         (uint rate, ) = exchangeRates().rateAndInvalid(PERI);
-        periCol = _fromUSD(periCol, rate);
+
+        // get PERI's collateral amount in pUSD
+        periCol = _collateral(_account);
+
+        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenManager().getRatios(_account, debt, _toUSD(periCol, rate));
     }
 
     function remainingIssuablePynths(
@@ -1084,7 +1090,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     ) internal {
         // get debt balance and issued debt
         (uint debtBalance, uint systemDebt, uint periColAmt) = _debtsCollateral(_from, true);
-        require(debtBalance > 0, "No debt to fit");
+        require(debtBalance > 0, "No debt to unstake");
 
         if (_fitToTRatio) {
             // get the amount of debt to be burnt and the amount of ex-token to be unstaked
