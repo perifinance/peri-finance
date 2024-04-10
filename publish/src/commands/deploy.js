@@ -339,7 +339,8 @@ const deploy = async ({
 			console.error(
 				red(
 					'Cannot connect to existing PeriFinance contract. Please double check the deploymentPath is correct for the network allocated'
-				)
+				),
+				err
 			);
 			process.exitCode = 1;
 			return;

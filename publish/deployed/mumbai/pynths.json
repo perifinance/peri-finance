@@ -3,26 +3,5 @@
 		"name": "pUSD",
 		"asset": "USD",
 		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "pBTC",
-		"asset": "BTC",
-		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "pETH",
-		"asset": "ETH"
-	},
-	{
-		"name": "pBNB",
-		"asset": "BNB"
-	},
-	{
-		"name": "pAVAX",
-		"asset": "AVAX"
-	},
-	{
-		"name": "pMATIC",
-		"asset": "MATIC"
 	}
 ]

@@ -270,7 +270,7 @@ const defaults = {
 		goerli: constants.ZERO_ADDRESS,
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
-		mumbai: constants.ZERO_ADDRESS,
+		mumbai: '0xbf56f5af97f6818f451f92ca917d8eeb87bbec7c', // 6 decimals
 		polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', // 6 decimals
 		bsc: '0x55d398326f99059ff775485246999027b3197955', // 18 decimals
 		bsctest: constants.ZERO_ADDRESS,
@@ -285,7 +285,7 @@ const defaults = {
 		goerli: constants.ZERO_ADDRESS,
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
-		mumbai: constants.ZERO_ADDRESS,
+		mumbai: '0xc20c3c3Ff7C418C6372287106b1668ae40c1bC39', // 6 decimals
 		polygon: constants.ZERO_ADDRESS,
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
@@ -300,7 +300,7 @@ const defaults = {
 		goerli: constants.ZERO_ADDRESS,
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
-		mumbai: constants.ZERO_ADDRESS,
+		mumbai: '0x644eAb1a0Ed9E034ad9eDFe75dbE67D614Fb7e7f', // 18 decimals
 		polygon: constants.ZERO_ADDRESS,
 		bsc: '0x7950865a9140cB519342433146Ed5b40c6F210f7', // 18 decimals
 		bsctest: constants.ZERO_ADDRESS,
