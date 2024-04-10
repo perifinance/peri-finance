@@ -1,6 +1,6 @@
 {
 	"name": "@perifinance/peri-finance",
-	"version": "0.7.7-moonbase",
+	"version": "0.7.8-moonbase",
 	"author": "perifinance",
 	"description": "The smart contracts which make up the Peri Finance system. (pynths.com)",
 	"license": "MIT",
