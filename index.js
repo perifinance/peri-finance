@@ -270,7 +270,7 @@ const defaults = {
 		goerli: constants.ZERO_ADDRESS,
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
-		mumbai: '0xbf56f5af97f6818f451f92ca917d8eeb87bbec7c', // 6 decimals
+		mumbai: '0xbf56f5Af97F6818f451F92ca917D8eeb87BbEc7c', // 6 decimals
 		polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', // 6 decimals
 		bsc: '0x55d398326f99059ff775485246999027b3197955', // 18 decimals
 		bsctest: constants.ZERO_ADDRESS,

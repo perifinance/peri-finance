@@ -1587,8 +1587,9 @@
 			},
 			"ExchangeRates": {
 				"address": "0x3b08C19106632dA4Fb21e26646Cb542cF5DF546a",
-				"status": "current",
-				"keccak256": "0x492c833a6ecb6550ce6f29d18038238a0009e7f47f4692e892cea695acc0f954"
+				"status": "replaced",
+				"keccak256": "0x492c833a6ecb6550ce6f29d18038238a0009e7f47f4692e892cea695acc0f954",
+				"replaced_in": "v0.7.9-mumbai"
 			},
 			"RewardEscrow": {
 				"address": "0x4AB0795a7a6B5677bE30278c3579E9Eed2782A15",
@@ -2794,8 +2795,9 @@
 		"contracts": {
 			"CrossChainState": {
 				"address": "0xa92F9E75760dB153E83c1b409cb5Cb7dB727a980",
-				"status": "current",
-				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878"
+				"status": "replaced",
+				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878",
+				"replaced_in": "v0.7.9-mumbai"
 			},
 			"CrossChainManager": {
 				"address": "0x3b674319fd07043E9D0371Fb6c8F2c18ab8822A7",
@@ -3368,8 +3370,9 @@
 			},
 			"Issuer": {
 				"address": "0x0617d4d42a85550b1480Cf19d045481be8760A12",
-				"status": "current",
-				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571"
+				"status": "replaced",
+				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571",
+				"replaced_in": "v0.7.9-mumbai"
 			},
 			"SupplySchedule": {
 				"address": "0xe8F06b716B2236F6640c5318F2C2E02C6c123105",
@@ -3383,8 +3386,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0x1E09B814A72A763aB5cC6c560Bd9e1460a55541e",
-				"status": "current",
-				"keccak256": "0x78e9655741224d719b2470892fbd5b9083c802f0cf87df68ebfb8da51ba3bbf2"
+				"status": "replaced",
+				"keccak256": "0x78e9655741224d719b2470892fbd5b9083c802f0cf87df68ebfb8da51ba3bbf2",
+				"replaced_in": "v0.7.9-mumbai"
 			},
 			"CrossChainManager": {
 				"address": "0xc982928876fFFDbA218D16430873D004277Df24E",
@@ -3395,6 +3399,36 @@
 				"address": "0x4BA1E418c7eE5397F4D279f46AF4CffaB353B16C",
 				"status": "current",
 				"keccak256": "0x7bb575f70d195d9abed55e3022cccedca97cb83cfce223416837ac55ec7151a2"
+			}
+		}
+	},
+	"v0.7.9-mumbai": {
+		"tag": "v0.7.9",
+		"fulltag": "v0.7.9-mumbai",
+		"release": "peri-finance",
+		"network": "mumbai",
+		"date": "2024-04-10T17:42:22+09:00",
+		"commit": "9ca1f61bde63cc976779a39f299a319564615ce5",
+		"contracts": {
+			"ExchangeRates": {
+				"address": "0x6B1a41B47313E7B84c6da3c399A1B7c4f808f289",
+				"status": "current",
+				"keccak256": "0x0e78ee92bfcc11530858621ac5e320fd77fa410354251ae5015379a58098b166"
+			},
+			"Issuer": {
+				"address": "0xC623C793Cd2cc8cDA9EBD57DEd46C8801D1F029a",
+				"status": "current",
+				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0xA51E0b7D3d56c09b1872cD43C9C33090d4473D3b",
+				"status": "current",
+				"keccak256": "0x78e9655741224d719b2470892fbd5b9083c802f0cf87df68ebfb8da51ba3bbf2"
+			},
+			"CrossChainState": {
+				"address": "0xE17486517cF2BE07e00105e70FEA5Eff8d3796C0",
+				"status": "current",
+				"keccak256": "0xd4de0d8894fb38842a778288586b6ce1e62daac432c7e6a8c5d5faf91da3305b"
 			}
 		}
 	}

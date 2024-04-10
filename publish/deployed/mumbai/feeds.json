@@ -4,6 +4,16 @@
 		"feed": "",
 		"standalone": true
 	},
+	"PAXG": {
+		"asset": "PAXG",
+		"feed": "",
+		"standalone": true
+	},
+	"XAUT": {
+		"asset": "XAUT",
+		"feed": "",
+		"standalone": true
+	},
 	"USDC": {
 		"asset": "USDC",
 		"feed": "0x572dDec9087154dC5dfBB1546Bb62713147e0Ab0"
@@ -11,5 +21,9 @@
 	"DAI": {
 		"asset": "DAI",
 		"feed": "0x0FCAa9c899EC5A91eBc3D5Dd869De833b06fB046"
+	},
+	"USDT": {
+		"asset": "USDT",
+		"feed": "0x92C09849638959196E976289418e5973CC96d645"
 	}
 }
