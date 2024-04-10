@@ -139,6 +139,12 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         isPassed = _isOpenForLiquidation(account);
     }
 
+    function getLiquidationInfo(address account) external view returns (uint deadline, bool isOpen) {
+        LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
+        deadline = liquidation.deadline;
+        isOpen = _deadlinePassed(liquidation.deadline);
+    }
+
     function calcAmtToFixCollateral(
         uint debtBalance,
         uint collateral,
