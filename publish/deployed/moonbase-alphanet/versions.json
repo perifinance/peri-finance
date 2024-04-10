@@ -3181,13 +3181,13 @@
 		"fulltag": "v0.7.8-moonbase",
 		"release": "peri-finance",
 		"network": "moonbase-alphanet",
-		"date": "2024-04-09T01:18:49+09:00",
-		"commit": "f00e068384f47835acfa92a2544ae8dbe22d029d",
+		"date": "2024-04-10T12:25:10+09:00",
+		"commit": "c2a2cbae7bf2c3e7bf6b4f5da639384413d87443",
 		"contracts": {
 			"Liquidations": {
-				"address": "0xBBd96236EEE9A98eaD9eE15f9C1c7C9a829EEc2a",
+				"address": "0xb115b80D2e240c516c1EfA177811BaBec2A41F8e",
 				"status": "current",
-				"keccak256": "0xb02781e5325d9117b509651676eae1352b72d482abd8478e0efc3f21d76f480c"
+				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20"
 			}
 		}
 	}
