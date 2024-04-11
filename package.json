@@ -37,7 +37,8 @@
 		"publish/deployed/bsc/*",
 		"publish/deployed/shibuya/*",
 		"publish/deployed/moonbase-alphanet/*",
-		"publish/deployed/moonriver/*"
+		"publish/deployed/moonriver/*",
+		"publish/deployed/base-sepolia/*"
 	],
 	"bin": {
 		"peri": "bin.js"
@@ -138,7 +139,6 @@
 		"@chainlink/contracts-0.0.10": "npm:@chainlink/contracts@0.0.10",
 		"@eth-optimism/contracts": "0.0.2-alpha.7",
 		"@eth-optimism/watcher": "0.0.1-alpha.8",
-		"@perifinance/peri-finance": "^0.5.19",
 		"abi-decoder": "2.3.0",
 		"commander": "5.1.0",
 		"cron-validator": "^1.2.1",

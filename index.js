@@ -20,7 +20,6 @@ const data = {
 	shibuya: require('./publish/deployed/shibuya'),
 	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
 	moonriver: require('./publish/deployed/moonriver'),
-	// eslint-disable-next-line node/no-unpublished-require
 	'base-sepolia': require('./publish/deployed/base-sepolia'),
 	// base: require('./publish/deployed/base'),
 };
