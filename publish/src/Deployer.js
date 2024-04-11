@@ -407,17 +407,22 @@ class Deployer {
 
 	getExistingContract({ contract }) {
 		let address;
-		if (this.network === 'local') {
-			if (!this.deployment.targets[contract]) return undefined;
-			address = this.deployment.targets[contract].address;
-		} else {
-			const contractVersion = getVersions({
-				network: this.network,
-				useOvm: this.useOvm,
-				byContract: true,
-			})[contract];
-			const lastEntry = contractVersion.slice(-1)[0];
-			address = lastEntry.address;
+		try {
+			if (this.network === 'local') {
+				if (!this.deployment.targets[contract]) return undefined;
+				address = this.deployment.targets[contract].address;
+			} else {
+				const contractVersion = getVersions({
+					network: this.network,
+					useOvm: this.useOvm,
+					byContract: true,
+				})[contract];
+				const lastEntry = contractVersion.slice(-1)[0];
+				address = lastEntry.address;
+			}
+		} catch (err) {
+			console.log(gray(`Cannot find existing contract for ${contract}`));
+			return undefined;
 		}
 
 		const { source } = this.deployment.targets[contract];

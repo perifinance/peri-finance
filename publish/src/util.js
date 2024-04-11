@@ -161,12 +161,14 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
 		} else if (network === 'moonriver') {
 			providerUrl = process.env.PROVIDER_URL_MOONRIVER;
+		} else if (network === 'base-sepolia') {
+			providerUrl = process.env.PROVIDER_URL_BASE_SEPOLIA;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)
+	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver', 'base'].includes(network)
 		? process.env.DEPLOY_PRIVATE_KEY
 		: ['shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
@@ -183,6 +185,8 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
 			: ['moonbase-alphanet', 'moonriver'].includes(network)
 			? `https://api-${network === 'moonriver' ? network : 'moonbase'}.moonscan.io/api`
+			: ['base-sepolia', 'base'].includes(network)
+			? `https://api-${network === 'base' ? network : 'sepolia'}.basescan.io/api`
 			: ['shibuya'].includes(network)
 			? `https://${network}.api.subscan.io`
 			: '';
@@ -501,6 +505,44 @@ function estimateBSCGasPice(network, priority) {
 		.catch(e => console.log(e));
 }
 
+function estimateGasPice(network, priority) {
+	const Auth = Buffer.from(
+		process.env.INFURA_API_KEY + ':' + process.env.INFURA_API_KEY_SECRET
+	).toString('base64');
+
+	const gasStationUrl = `https://gas.api.infura.io/networks/${network}/suggestedGasFees`;
+
+	return axios
+		.get(gasStationUrl, {
+			headers: { Authorization: `Basic ${Auth}` },
+		})
+		.then(({ data }) => {
+			console.log('Gas', data);
+			const { low, medium, high } = data.result;
+
+			var gasPrice = 0;
+			switch (priority) {
+				case 'fast':
+					gasPrice =
+						parseInt(high.suggestedMaxFeePerGas) + parseInt(high.suggestedMaxPriorityFeePerGas);
+					break;
+				case 'standard':
+					gasPrice =
+						parseInt(medium.suggestedMaxFeePerGas) + parseInt(medium.suggestedMaxPriorityFeePerGas);
+					break;
+				default:
+					gasPrice =
+						parseInt(low.suggestedMaxFeePerGas) + parseInt(low.suggestedMaxPriorityFeePerGas);
+			}
+			return gasPrice;
+		})
+		.catch(e => {
+			console.log(e);
+			if (network === 84532) return 1;
+			return 0;
+		});
+}
+
 function estimateMoonBeamGasPrice(network, priority) {
 	const gasStationUrl = `https://gmriver.blockscan.com/gasapi.ashx`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
@@ -537,6 +579,8 @@ async function checkGasPrice(network, priority) {
 		gasPrice = await estimateBSCGasPice(network, priority);
 	} else if (['moonbase-alphanet', 'moonriver'].includes(network)) {
 		gasPrice = await estimateMoonBeamGasPrice(network, priority);
+	} else {
+		gasPrice = await estimateGasPice(network, priority);
 	}
 
 	console.log(`using gas price : ${gasPrice}`);
