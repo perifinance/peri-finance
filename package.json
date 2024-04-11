@@ -1,6 +1,6 @@
 {
 	"name": "@perifinance/peri-finance",
-	"version": "0.7.11-base-sepolia",
+	"version": "0.7.12-base-sepolia",
 	"author": "perifinance",
 	"description": "The smart contracts which make up the Peri Finance system. (pynths.com)",
 	"license": "MIT",
