@@ -682,9 +682,10 @@ const deploy = async ({
 		args: [account, ZERO_ADDRESS],
 	});
 
-	const oldFeePool = config[`FeePool`].deploy
-		? await deployer.getExistingContract({ contract: 'FeePool' })
-		: undefined;
+	const oldFeePool =
+		!freshDeploy && config[`FeePool`].deploy
+			? await deployer.getExistingContract({ contract: 'FeePool' })
+			: undefined;
 
 	const feePool = await deployer.deployContract({
 		name: 'FeePool',
@@ -2496,6 +2497,7 @@ const deploy = async ({
 			pSAND: w3utils.toWei('0.003'),
 			pMANA: w3utils.toWei('0.003'),
 			pSOL: w3utils.toWei('0.003'),
+			pMATIC: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths

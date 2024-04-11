@@ -16,7 +16,7 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
-    bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE_OPTIMISM = "PeriFinanceBridgeToOptimism";
+    // bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE_OPTIMISM = "PeriFinanceBridgeToOptimism";
     bytes32 private constant CONTRACT_REWARD_ESCROW = "RewardEscrow";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
 
@@ -28,16 +28,16 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = BaseRewardEscrowV2.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](3);
-        newAddresses[0] = CONTRACT_PERIFINANCE_BRIDGE_OPTIMISM;
-        newAddresses[1] = CONTRACT_REWARD_ESCROW;
-        newAddresses[2] = CONTRACT_SYSTEMSTATUS;
+        bytes32[] memory newAddresses = new bytes32[](2);
+        // newAddresses[0] = CONTRACT_PERIFINANCE_BRIDGE_OPTIMISM;
+        newAddresses[0] = CONTRACT_REWARD_ESCROW;
+        newAddresses[1] = CONTRACT_SYSTEMSTATUS;
         return combineArrays(existingAddresses, newAddresses);
     }
 
-    function periFinanceBridgeToOptimism() internal view returns (address) {
+    /* function periFinanceBridgeToOptimism() internal view returns (address) {
         return requireAndGetAddress(CONTRACT_PERIFINANCE_BRIDGE_OPTIMISM);
-    }
+    } */
 
     function oldRewardEscrow() internal view returns (IRewardEscrow) {
         return IRewardEscrow(requireAndGetAddress(CONTRACT_REWARD_ESCROW));
@@ -187,49 +187,49 @@ contract RewardEscrowV2 is BaseRewardEscrowV2 {
 
     /* ========== L2 MIGRATION ========== */
 
-    function burnForMigration(address account, uint[] calldata entryIDs)
-        external
-        onlyPeriFinanceBridge
-        returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries)
-    {
-        require(entryIDs.length > 0, "Entry IDs required");
+    // function burnForMigration(address account, uint[] calldata entryIDs)
+    //     external
+    //     onlyPeriFinanceBridge
+    //     returns (uint256 escrowedAccountBalance, VestingEntries.VestingEntry[] memory vestingEntries)
+    // {
+    //     require(entryIDs.length > 0, "Entry IDs required");
 
-        vestingEntries = new VestingEntries.VestingEntry[](entryIDs.length);
+    //     vestingEntries = new VestingEntries.VestingEntry[](entryIDs.length);
 
-        for (uint i = 0; i < entryIDs.length; i++) {
-            VestingEntries.VestingEntry storage entry = vestingSchedules[account][entryIDs[i]];
+    //     for (uint i = 0; i < entryIDs.length; i++) {
+    //         VestingEntries.VestingEntry storage entry = vestingSchedules[account][entryIDs[i]];
 
-            if (entry.escrowAmount > 0) {
-                vestingEntries[i] = entry;
+    //         if (entry.escrowAmount > 0) {
+    //             vestingEntries[i] = entry;
 
-                /* add the escrow amount to escrowedAccountBalance */
-                escrowedAccountBalance = escrowedAccountBalance.add(entry.escrowAmount);
+    //             /* add the escrow amount to escrowedAccountBalance */
+    //             escrowedAccountBalance = escrowedAccountBalance.add(entry.escrowAmount);
 
-                /* Delete the vesting entry being migrated */
-                delete vestingSchedules[account][entryIDs[i]];
-            }
-        }
+    //             /* Delete the vesting entry being migrated */
+    //             delete vestingSchedules[account][entryIDs[i]];
+    //         }
+    //     }
 
-        /**
-         *  update account total escrow balances for migration
-         *  transfer the escrowed PERI being migrated to the L2 deposit contract
-         */
-        if (escrowedAccountBalance > 0) {
-            _reduceAccountEscrowBalances(account, escrowedAccountBalance);
-            IERC20(address(periFinance())).transfer(periFinanceBridgeToOptimism(), escrowedAccountBalance);
-        }
+    //     /**
+    //      *  update account total escrow balances for migration
+    //      *  transfer the escrowed PERI being migrated to the L2 deposit contract
+    //      */
+    //     if (escrowedAccountBalance > 0) {
+    //         _reduceAccountEscrowBalances(account, escrowedAccountBalance);
+    //         IERC20(address(periFinance())).transfer(periFinanceBridgeToOptimism(), escrowedAccountBalance);
+    //     }
 
-        emit BurnedForMigrationToL2(account, entryIDs, escrowedAccountBalance, block.timestamp);
+    //     emit BurnedForMigrationToL2(account, entryIDs, escrowedAccountBalance, block.timestamp);
 
-        return (escrowedAccountBalance, vestingEntries);
-    }
+    //     return (escrowedAccountBalance, vestingEntries);
+    // }
 
     /* ========== MODIFIERS ========== */
 
-    modifier onlyPeriFinanceBridge() {
+    /*     modifier onlyPeriFinanceBridge() {
         require(msg.sender == periFinanceBridgeToOptimism(), "Can only be invoked by PeriFinanceBridgeToOptimism contract");
         _;
-    }
+    } */
 
     modifier systemActive() {
         systemStatus().requireSystemActive();

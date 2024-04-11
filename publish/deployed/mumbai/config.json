@@ -163,5 +163,68 @@
 	},
 	"VirtualPynthIssuer": {
 		"deploy": false
+	},
+	"TokenStatepBTC": {
+		"deploy": false
+	},
+	"ProxyERC20pBTC": {
+		"deploy": false
+	},
+	"PynthpBTC": {
+		"deploy": false
+	},
+	"TokenStatepETH": {
+		"deploy": false
+	},
+	"ProxyERC20pETH": {
+		"deploy": false
+	},
+	"PynthpETH": {
+		"deploy": false
+	},
+	"TokenStatepSAND": {
+		"deploy": false
+	},
+	"ProxyERC20pSAND": {
+		"deploy": false
+	},
+	"PynthpSAND": {
+		"deploy": false
+	},
+	"TokenStatepMATIC": {
+		"deploy": false
+	},
+	"ProxyERC20pMATIC": {
+		"deploy": false
+	},
+	"PynthpMATIC": {
+		"deploy": false
+	},
+	"TokenStatepLINK": {
+		"deploy": false
+	},
+	"ProxyERC20pLINK": {
+		"deploy": false
+	},
+	"PynthpLINK": {
+		"deploy": false
+	},
+	"TokenStatepSOL": {
+		"deploy": false
+	},
+	"ProxyERC20pSOL": {
+		"deploy": false
+	},
+	"PynthpSOL": {
+		"deploy": false
+	},
+	"TokenStatepEUR": {
+		"deploy": false
+	},
+	"ProxyERC20pEUR": {
+		"deploy": false
+	},
+	"PynthpEUR": {
+		"deploy": false
 	}
 }
