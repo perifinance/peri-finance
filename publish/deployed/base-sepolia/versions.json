@@ -159,8 +159,9 @@
 			},
 			"Issuer": {
 				"address": "0x0ec3A103F92BeE5Fa35de95366074303C52Ad2fC",
-				"status": "current",
-				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571"
+				"status": "replaced",
+				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571",
+				"replaced_in": "v0.7.14-base-sepolia"
 			},
 			"TradingRewards": {
 				"address": "0xB2FAfD6E079C3Cd2293e777a1834bc59E4E99dAD",
@@ -331,8 +332,9 @@
 			},
 			"StakingState": {
 				"address": "0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
-				"status": "current",
-				"keccak256": "0x2146054d3ece3f094cde0bb763cc2ee1537eefe018601ed337229984160829d8"
+				"status": "replaced",
+				"keccak256": "0x2146054d3ece3f094cde0bb763cc2ee1537eefe018601ed337229984160829d8",
+				"replaced_in": "v0.7.14-base-sepolia"
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0xC967CdCE9892bB55743B78329191eB4D6e384e1E",
@@ -353,6 +355,26 @@
 				"address": "0x13De028C4CE5A3F83de7310fD373fADd7F174602",
 				"status": "current",
 				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
+			}
+		}
+	},
+	"v0.7.14-base-sepolia": {
+		"tag": "v0.7.14",
+		"fulltag": "v0.7.14-base-sepolia",
+		"release": "peri-finance",
+		"network": "base-sepolia",
+		"date": "2024-04-12T10:44:23+09:00",
+		"commit": "e0427d99003fa86d2bc3e9a570253b0027f91ec3",
+		"contracts": {
+			"Issuer": {
+				"address": "0x24E910eE07b3504bC14420E7C08383E787954903",
+				"status": "current",
+				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571"
+			},
+			"StakingState": {
+				"address": "0x055Da09418e173878fb572465AE7F9bd393b5aDE",
+				"status": "current",
+				"keccak256": "0x2146054d3ece3f094cde0bb763cc2ee1537eefe018601ed337229984160829d8"
 			}
 		}
 	}

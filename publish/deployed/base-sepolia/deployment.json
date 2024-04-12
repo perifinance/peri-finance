@@ -272,10 +272,10 @@
 		},
 		"Issuer": {
 			"name": "Issuer",
-			"address": "0x0ec3A103F92BeE5Fa35de95366074303C52Ad2fC",
+			"address": "0x24E910eE07b3504bC14420E7C08383E787954903",
 			"source": "Issuer",
-			"link": "https://base-sepolia.etherscan.io/address/0x0ec3A103F92BeE5Fa35de95366074303C52Ad2fC",
-			"timestamp": "2024-04-11T09:47:23.483Z",
+			"link": "https://base-sepolia.etherscan.io/address/0x24E910eE07b3504bC14420E7C08383E787954903",
+			"timestamp": "2024-04-12T02:35:55.708Z",
 			"txn": "",
 			"network": "base-sepolia"
 		},
@@ -398,10 +398,10 @@
 		},
 		"StakingState": {
 			"name": "StakingState",
-			"address": "0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
+			"address": "0x055Da09418e173878fb572465AE7F9bd393b5aDE",
 			"source": "StakingState",
-			"link": "https://base-sepolia.etherscan.io/address/0xC4ea2c03dDfECAEF96a19Af751Bef71A3Bd0317d",
-			"timestamp": "2024-04-12T01:36:23.809Z",
+			"link": "https://base-sepolia.etherscan.io/address/0x055Da09418e173878fb572465AE7F9bd393b5aDE",
+			"timestamp": "2024-04-12T02:42:15.778Z",
 			"txn": "",
 			"network": "base-sepolia"
 		},

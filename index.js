@@ -259,7 +259,7 @@ const defaults = {
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', // 6 decimals
-		'base-sepolia': '0x3AA7AB772b2Ff1bFD625059b6498bFF8976950e7',
+		'base-sepolia': '0xfec043ba43c733069cbc2243b36bc4fa33afcc28',
 		base: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // 6 decimals
 		// local : '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', <-- fork
 	},
