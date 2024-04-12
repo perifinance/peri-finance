@@ -1065,14 +1065,14 @@ const deploy = async ({
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
-	if (config['Exchanger'].deploy) {
-		await deployer.deployContract({
-			name: 'VirtualPynthIssuer',
-			source: 'VirtualPynthIssuer',
-			deps: ['AddressResolver'],
-			args: [account, addressOf(readProxyForResolver)],
-		});
-	}
+	// if (freshDeploy || config['Exchanger'].deploy) {
+	await deployer.deployContract({
+		name: 'VirtualPynthIssuer',
+		source: 'VirtualPynthIssuer',
+		deps: ['AddressResolver'],
+		args: [account, addressOf(readProxyForResolver)],
+	});
+	// }
 
 	const exchangeState = await deployer.deployContract({
 		name: 'ExchangeState',

@@ -186,7 +186,7 @@ const loadConnections = ({ network, useFork }) => {
 			: ['moonbase-alphanet', 'moonriver'].includes(network)
 			? `https://api-${network === 'moonriver' ? network : 'moonbase'}.moonscan.io/api`
 			: ['base-sepolia', 'base'].includes(network)
-			? `https://api-${network === 'base' ? network : 'sepolia'}.basescan.io/api`
+			? `https://api-${network === 'base' ? network : 'sepolia'}.basescan.org/api`
 			: ['shibuya'].includes(network)
 			? `https://${network}.api.subscan.io`
 			: '';
@@ -577,7 +577,7 @@ async function checkGasPrice(network, priority) {
 		gasPrice = await estimateEtherGasPice(priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);
-	} else if (['moonbase-alphanet', 'moonriver'].includes(network)) {
+	} else if (['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)) {
 		gasPrice = await estimateMoonBeamGasPrice(network, priority);
 	} else {
 		gasPrice = await estimateGasPice(network, priority);

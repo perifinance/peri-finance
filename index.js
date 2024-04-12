@@ -276,7 +276,7 @@ const defaults = {
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
-		'base-sepolia': '0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3',
+		'base-sepolia': '0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb',
 		base: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb',
 		// local : '0x6b175474e89094c44da98b954eedeac495271d0f', <-- fork
 	},

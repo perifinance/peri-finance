@@ -13,5 +13,9 @@
 		"name": "pETH",
 		"asset": "ETH",
 		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
 	}
 ]

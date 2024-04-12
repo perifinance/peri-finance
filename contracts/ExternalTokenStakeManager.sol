@@ -812,20 +812,17 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
             bytes32[] memory tokenList,
             uint[] memory stakedAmts,
             uint[] memory decimals,
-            uint[] memory balances /* ,
-            uint[] memory tokenIRs */
+            uint[] memory balances
         )
     {
         tokenList = stakingState.getTokenCurrencyKeys();
         stakedAmts = new uint[](tokenList.length);
         decimals = new uint[](tokenList.length);
         balances = new uint[](tokenList.length);
-        /* tokenIRs = new uint[](tokenList.length); */
         for (uint i; i < tokenList.length; i++) {
             stakedAmts[i] = stakingState.stakedAmountOf(tokenList[i], _account);
             decimals[i] = stakingState.tokenDecimals(tokenList[i]);
             balances[i] = tokenInstance(tokenList[i]).balanceOf(_account).mul(10**(uint(18).sub(decimals[i])));
-            /* tokenIRs[i] = getExTokenIssuanceRatio(tokenList[i]); */
         }
     }
 

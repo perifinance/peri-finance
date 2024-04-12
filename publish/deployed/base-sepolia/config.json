@@ -181,5 +181,14 @@
 	},
 	"PynthpETH": {
 		"deploy": false
+	},
+	"TokenStatepLINK": {
+		"deploy": false
+	},
+	"ProxyERC20pLINK": {
+		"deploy": false
+	},
+	"PynthpLINK": {
+		"deploy": false
 	}
 }
