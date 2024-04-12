@@ -30,5 +30,8 @@
 		"name": "pSOL",
 		"asset": "SOL"
 	},
-	{ "name": "pEUR", "asset": "EUR" }
+	{
+		"name": "pEUR",
+		"asset": "EUR"
+	}
 ]

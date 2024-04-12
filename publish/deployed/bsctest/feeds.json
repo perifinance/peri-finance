@@ -11,5 +11,37 @@
 	"DAI": {
 		"asset": "DAI",
 		"feed": "0xE4eE17114774713d2De0eC0f035d4F7665fc025D"
+	},
+	"USDT": {
+		"asset": "USDT",
+		"feed": "0xEca2605f0BCF2BA5966372C99837b1F182d3D620"
+	},
+	"XAUT": {
+		"asset": "XAUT",
+		"feed": "0x4E08A779a85d28Cc96515379903A6029487CEbA0"
+	},
+	"PAXG": {
+		"asset": "PAXG",
+		"feed": "0x4E08A779a85d28Cc96515379903A6029487CEbA0"
+	},
+	"BTC": {
+		"asset": "BTC",
+		"feed": "0x5741306c21795FdCBb9b265Ea0255F499DFe515C"
+	},
+	"ETH": {
+		"asset": "ETH",
+		"feed": "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7"
+	},
+	"MATIC": {
+		"asset": "MATIC",
+		"feed": "0x957Eb0316f02ba4a9De3D308742eefd44a3c1719"
+	},
+	"LINK": {
+		"asset": "LINK",
+		"feed": "0x1B329402Cb1825C6F30A0d92aB9E2862BE47333f"
+	},
+	"CAKE": {
+		"asset": "CAKE",
+		"feed": "0x81faeDDfeBc2F8Ac524327d70Cf913001732224C"
 	}
 }

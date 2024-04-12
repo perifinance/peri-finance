@@ -3,5 +3,31 @@
 		"name": "pUSD",
 		"asset": "USD",
 		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pSAND",
+		"asset": "SAND"
+	},
+	{
+		"name": "pMATIC",
+		"asset": "MATIC"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
+	},
+	{
+		"name": "pCAKE",
+		"asset": "CAKE"
 	}
 ]

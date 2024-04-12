@@ -319,7 +319,7 @@ const defaults = {
 		mumbai: '0x644eAb1a0Ed9E034ad9eDFe75dbE67D614Fb7e7f', // 18 decimals
 		polygon: constants.ZERO_ADDRESS,
 		bsc: '0x7950865a9140cB519342433146Ed5b40c6F210f7', // 18 decimals
-		bsctest: constants.ZERO_ADDRESS,
+		bsctest: '0xd3145aB4D7271740C1d4BdB0deD5CDEE0d08ee10', // 18 decimals
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': '0xE00A06E4938c015ba83F3AcB7B3499B36cf58502', // 18 decimals
 		moonriver: constants.ZERO_ADDRESS,

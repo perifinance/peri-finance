@@ -82,7 +82,7 @@ contract StakingState is Owned, State {
         uint8 _decimals
     ) external onlyOwner {
         require(_tokenAddress != address(0), "Address cannot be empty");
-        require(targetTokens[_currencyKey].tokenAddress == address(0), "Token is already registered");
+        // require(targetTokens[_currencyKey].tokenAddress == address(0), "Token is already registered");
 
         if (targetTokens[_currencyKey].tokenAddress == address(0)) {
             tokenList.push(_currencyKey);
