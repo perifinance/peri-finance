@@ -191,19 +191,19 @@
 		},
 		"ProxyERC20": {
 			"name": "ProxyERC20",
-			"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
+			"address": "0xA9cb3Ca6A5D4e8AE2f78bD67D4Eb752Edb467CF3",
 			"source": "ProxyERC20",
-			"link": "https://base-sepolia.etherscan.io/address/0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-			"timestamp": "2024-04-11T08:22:39.442Z",
+			"link": "https://base-sepolia.etherscan.io/address/0xA9cb3Ca6A5D4e8AE2f78bD67D4Eb752Edb467CF3",
+			"timestamp": "2024-04-12T03:34:17.927Z",
 			"txn": "",
 			"network": "base-sepolia"
 		},
 		"TokenStatePeriFinance": {
 			"name": "TokenStatePeriFinance",
-			"address": "0xdb7112b62daaDbe1DC87fa9E49CfE9B7f331568A",
+			"address": "0x53a1140dB0845B4618a7637D8f65CD2d1918957F",
 			"source": "TokenState",
-			"link": "https://base-sepolia.etherscan.io/address/0xdb7112b62daaDbe1DC87fa9E49CfE9B7f331568A",
-			"timestamp": "2024-04-11T08:22:43.733Z",
+			"link": "https://base-sepolia.etherscan.io/address/0x53a1140dB0845B4618a7637D8f65CD2d1918957F",
+			"timestamp": "2024-04-12T03:34:22.572Z",
 			"txn": "",
 			"network": "base-sepolia"
 		},
@@ -218,10 +218,10 @@
 		},
 		"PeriFinance": {
 			"name": "PeriFinance",
-			"address": "0x8EDc640693b518c8d531A8516A5C0Ae98b641a03",
+			"address": "0xE54d2B348c50fC7Dc6c4b35f432739AfD2716ecc",
 			"source": "PeriFinance",
-			"link": "https://base-sepolia.etherscan.io/address/0x8EDc640693b518c8d531A8516A5C0Ae98b641a03",
-			"timestamp": "2024-04-11T09:46:28.045Z",
+			"link": "https://base-sepolia.etherscan.io/address/0xE54d2B348c50fC7Dc6c4b35f432739AfD2716ecc",
+			"timestamp": "2024-04-12T03:34:27.261Z",
 			"txn": "",
 			"network": "base-sepolia"
 		},

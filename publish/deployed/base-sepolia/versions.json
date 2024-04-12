@@ -113,13 +113,15 @@
 			},
 			"ProxyERC20": {
 				"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-				"status": "current",
-				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
+				"status": "replaced",
+				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29",
+				"replaced_in": "v0.7.15-base-sepolia"
 			},
 			"TokenStatePeriFinance": {
 				"address": "0xdb7112b62daaDbe1DC87fa9E49CfE9B7f331568A",
-				"status": "current",
-				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+				"status": "replaced",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955",
+				"replaced_in": "v0.7.15-base-sepolia"
 			},
 			"BlacklistManager": {
 				"address": "0xA4CD91Ba8eBfEE60F5F1580a925DBBF51ba38442",
@@ -128,8 +130,9 @@
 			},
 			"PeriFinance": {
 				"address": "0x8EDc640693b518c8d531A8516A5C0Ae98b641a03",
-				"status": "current",
-				"keccak256": "0x45294d72771e4ee5c1a705f150c833f4a585c41b8a0e3e4ad88587901cb32906"
+				"status": "replaced",
+				"keccak256": "0x45294d72771e4ee5c1a705f150c833f4a585c41b8a0e3e4ad88587901cb32906",
+				"replaced_in": "v0.7.15-base-sepolia"
 			},
 			"BridgeState": {
 				"address": "0x15040a4bDE0731664373Fb46Ce233262A644DFcd",
@@ -375,6 +378,31 @@
 				"address": "0x055Da09418e173878fb572465AE7F9bd393b5aDE",
 				"status": "current",
 				"keccak256": "0x2146054d3ece3f094cde0bb763cc2ee1537eefe018601ed337229984160829d8"
+			}
+		}
+	},
+	"v0.7.15-base-sepolia": {
+		"tag": "v0.7.15",
+		"fulltag": "v0.7.15-base-sepolia",
+		"release": "peri-finance",
+		"network": "base-sepolia",
+		"date": "2024-04-12T11:44:07+09:00",
+		"commit": "bc71a66cf3d0fec1be419d4f3567a9cf0283ec53",
+		"contracts": {
+			"ProxyERC20": {
+				"address": "0xA9cb3Ca6A5D4e8AE2f78bD67D4Eb752Edb467CF3",
+				"status": "current",
+				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
+			},
+			"TokenStatePeriFinance": {
+				"address": "0x53a1140dB0845B4618a7637D8f65CD2d1918957F",
+				"status": "current",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+			},
+			"PeriFinance": {
+				"address": "0xE54d2B348c50fC7Dc6c4b35f432739AfD2716ecc",
+				"status": "current",
+				"keccak256": "0x45294d72771e4ee5c1a705f150c833f4a585c41b8a0e3e4ad88587901cb32906"
 			}
 		}
 	}

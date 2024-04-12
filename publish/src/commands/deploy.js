@@ -1106,7 +1106,7 @@ const deploy = async ({
 	}
 
 	// only reset token state if redeploying
-	if (tokenStatePeriFinance && config['TokenStatePeriFinance'].deploy) {
+	if (tokenStatePeriFinance && (freshDeploy || config['TokenStatePeriFinance'].deploy)) {
 		const initialIssuance = await getDeployParameter('INITIAL_ISSUANCE');
 		await runStep({
 			contract: 'TokenStatePeriFinance',
