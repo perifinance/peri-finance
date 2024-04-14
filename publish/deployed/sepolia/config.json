@@ -2,13 +2,13 @@
 	"AddressResolver": {
 		"deploy": false
 	},
+	"BinaryOptionMarketData": {
+		"deploy": true
+	},
 	"CollateralManager": {
 		"deploy": false
 	},
 	"CollateralManagerState": {
-		"deploy": false
-	},
-	"CollateralEth": {
 		"deploy": false
 	},
 	"CollateralErc20": {
@@ -18,9 +18,6 @@
 		"deploy": false
 	},
 	"CollateralStateErc20": {
-		"deploy": false
-	},
-	"CollateralStateEth": {
 		"deploy": false
 	},
 	"CollateralStateShort": {
@@ -71,16 +68,28 @@
 	"FlexibleStorage": {
 		"deploy": false
 	},
+	"Issuer": {
+		"deploy": false
+	},
 	"EternalStorageLiquidations": {
 		"deploy": false
 	},
 	"Liquidations": {
 		"deploy": false
 	},
+	"RewardEscrow": {
+		"deploy": false
+	},
+	"RewardEscrowV2": {
+		"deploy": false
+	},
 	"RewardsDistribution": {
 		"deploy": false
 	},
 	"SupplySchedule": {
+		"deploy": false
+	},
+	"PeriFinance": {
 		"deploy": false
 	},
 	"PeriFinanceEscrow": {
@@ -104,6 +113,9 @@
 	"PynthpUSD": {
 		"deploy": false
 	},
+	"ProxyERC20pUSD": {
+		"deploy": false
+	},
 	"ProxyERC20": {
 		"deploy": false
 	},
@@ -125,28 +137,10 @@
 	"TradingRewards": {
 		"deploy": false
 	},
-	"RewardEscrow": {
-		"deploy": false
-	},
-	"RewardEscrowV2": {
-		"deploy": false
-	},
-	"ProxyERC20pUSD": {
-		"deploy": false
-	},
-	"BlacklistManager": {
-		"deploy": false
-	},
-	"ExternalTokenStakeManager": {
-		"deploy": false
-	},
 	"StakingState": {
 		"deploy": false
 	},
-	"Issuer": {
-		"deploy": false
-	},
-	"PeriFinance": {
+	"ExternalTokenStakeManager": {
 		"deploy": false
 	},
 	"BridgeState": {
@@ -155,58 +149,16 @@
 	"BridgeStatepUSD": {
 		"deploy": false
 	},
-	"CrossChainManager": {
+	"BlacklistManager": {
 		"deploy": false
 	},
 	"CrossChainState": {
 		"deploy": false
 	},
+	"CrossChainManager": {
+		"deploy": false
+	},
 	"VirtualPynthIssuer": {
-		"deploy": false
-	},
-	"TokenStatepBTC": {
-		"deploy": false
-	},
-	"ProxyERC20pBTC": {
-		"deploy": false
-	},
-	"PynthpBTC": {
-		"deploy": false
-	},
-	"TokenStatepETH": {
-		"deploy": false
-	},
-	"ProxyERC20pETH": {
-		"deploy": false
-	},
-	"PynthpETH": {
-		"deploy": false
-	},
-	"TokenStatepMATIC": {
-		"deploy": false
-	},
-	"ProxyERC20pMATIC": {
-		"deploy": false
-	},
-	"PynthpMATIC": {
-		"deploy": false
-	},
-	"TokenStatepLINK": {
-		"deploy": false
-	},
-	"ProxyERC20pLINK": {
-		"deploy": false
-	},
-	"PynthpLINK": {
-		"deploy": false
-	},
-	"TokenStatepCAKE": {
-		"deploy": false
-	},
-	"ProxyERC20pCAKE": {
-		"deploy": false
-	},
-	"PynthpCAKE": {
 		"deploy": false
 	}
 }

@@ -115,10 +115,10 @@ const removePynths = async ({
 
 	console.log(gray(`Removing pynths from PeriFinance contract, ${ProxyERC20[network]}...`));
 
-	const PeriFinance = new web3.eth.Contract(
-		deployment.sources[ProxyERC20[network]].abi,
-		deployment.targets['PeriFinance'].address
-	);
+	// const PeriFinance = new web3.eth.Contract(
+	// 	deployment.sources[ProxyERC20[network]].abi,
+	// 	deployment.targets['PeriFinance'].address
+	// );
 
 	const Issuer = new web3.eth.Contract(
 		deployment.sources['Issuer'].abi,
@@ -137,7 +137,7 @@ const removePynths = async ({
 		const { abi: pynthABI } = deployment.sources[pynthSource];
 		const Pynth = new web3.eth.Contract(pynthABI, pynthAddress);
 
-		const currentPynthInPERI = await PeriFinance.methods.pynths(toBytes32(currencyKey)).call();
+		const currentPynthInPERI = await Issuer.methods.pynths(toBytes32(currencyKey)).call();
 
 		if (pynthAddress !== currentPynthInPERI) {
 			try {

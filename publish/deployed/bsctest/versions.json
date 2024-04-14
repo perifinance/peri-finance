@@ -2659,17 +2659,17 @@
 			},
 			"TokenStatepSAND": {
 				"address": "0xDB353F92c9e9173A50f889650f0C85bbcc403C89",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
 			},
 			"ProxyERC20pSAND": {
 				"address": "0x581c9db735fD0Ec1Cd7CAC524f4fD62f1636Af10",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
 			},
 			"PynthpSAND": {
 				"address": "0x96C9A2f0F7cef0D7a9fd92eE51d74a03f6875fab",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
 			},
 			"TokenStatepMATIC": {

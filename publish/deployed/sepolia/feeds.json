@@ -1,0 +1,27 @@
+{
+	"PERI": {
+		"asset": "PERI",
+		"feed": "",
+		"standalone": true
+	},
+	"PAXG": {
+		"asset": "PAXG",
+		"feed": "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea"
+	},
+	"XAUT": {
+		"asset": "XAUT",
+		"feed": "0xC5981F461d74c46eB4b0CF3f4Ec79f025573B0Ea"
+	},
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x14866185B1962B63C3Ea9E03Bc1da838bab34C19"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E"
+	},
+	"USDT": {
+		"asset": "USDT",
+		"feed": "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E"
+	}
+}

@@ -9,12 +9,12 @@ const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
-const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
+const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver', 'moonbeam', 'base'];
 // const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 
-const polygon = ['polygon', 'mumbai'];
+const polygon = ['polygon', 'mumbai', 'amoy'];
 const bsc = ['bsc', 'bsctest'];
-const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'];
+const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local', 'sepolia'];
 /* const moonriver = ['moonriver', 'moonbase-alphanet', 'shibuya'];
 const base = ['base', 'base-sepolia']; */
 
@@ -331,29 +331,30 @@ const deploy = async ({
 				inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
 		}
 	} catch (err) {
-		console.log(err);
 		currentPeriFinanceSupply = await getDeployParameter('INITIAL_ISSUANCE');
 		currentWeekOfInflation = await getDeployParameter('INFLATION_WEEK_COUNTER');
 		currentLastMintEvent = await getDeployParameter('LAST_MINT_EVENT');
 
-		if (!yes) {
-			try {
-				await confirmAction(
-					yellow(
-						`⚠⚠⚠ WARNING: Cannot connect to existing PeriFinance contract. 
-							\n Please double check the deploymentPath is correct for the network allocated.
-							\n Using default values for current PeriFinance supply: ${currentPeriFinanceSupply}
-							\n Inflation week counter: ${currentWeekOfInflation}
-							\n Last Mint Event: ${currentLastMintEvent}
-							\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
-					) +
-						gray('-'.repeat(50)) +
-						'\nDo you want to continue? (y/n) '
-				);
-			} catch (err) {
-				console.log(gray('Operation cancelled'));
-				process.exitCode = 1;
-				return;
+		if (!freshDeploy) {
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing PeriFinance contract. 
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Using default values for current PeriFinance supply: ${currentPeriFinanceSupply}
+								\n Inflation week counter: ${currentWeekOfInflation}
+								\n Last Mint Event: ${currentLastMintEvent}
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
 			}
 		}
 	}
@@ -364,36 +365,29 @@ const deploy = async ({
 			oracleExrates = await oldExrates.methods.oracle().call();
 		}
 	} catch (err) {
-		/* if (freshDeploy) { */
 		oracleExrates = oracleExrates || account;
 		oldExrates = undefined; // unset to signify that a fresh one will be deployed
-		/* } else {
-			console.error(
-				red(
-					'Cannot connect to existing ExchangeRates contract. Please double check the deploymentPath is correct for the network allocated'
-				)
-			);
- */
-		if (!yes) {
-			try {
-				await confirmAction(
-					yellow(
-						`⚠⚠⚠ WARNING: Cannot connect to existing ExchangeRates contract.
-							\n Please double check the deploymentPath is correct for the network allocated.
-							\n Using default values for oldExrates: ${undefined}
-							\n oracleExrates: ${oracleExrates}
-							\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
-					) +
-						gray('-'.repeat(50)) +
-						'\nDo you want to continue? (y/n) '
-				);
-			} catch (err) {
-				console.log(gray('Operation cancelled'));
-				process.exitCode = 1;
-				return;
+		if (!freshDeploy) {
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing ExchangeRates contract.
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Using default values for oldExrates: ${undefined}
+								\n oracleExrates: ${oracleExrates}
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
 			}
 		}
-		/* } */
 	}
 
 	try {
@@ -404,30 +398,23 @@ const deploy = async ({
 		systemSuspended = systemSuspensionStatus.suspended;
 		systemSuspendedReason = systemSuspensionStatus.reason;
 	} catch (err) {
-		/* if (!freshDeploy) {
-			console.error(
-				red(
-					'Cannot connect to existing SystemStatus contract. Please double check the deploymentPath is correct for the network allocated'
-				)
-			);
-			process.exitCode = 1;
-			return;
-		} */
-		if (!yes) {
-			try {
-				await confirmAction(
-					yellow(
-						`⚠⚠⚠ WARNING: Cannot connect to existing SystemStatus contract.
-							\n Please double check the deploymentPath is correct for the network allocated.
-							\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
-					) +
-						gray('-'.repeat(50)) +
-						'\nDo you want to continue? (y/n) '
-				);
-			} catch (err) {
-				console.log(gray('Operation cancelled'));
-				process.exitCode = 1;
-				return;
+		if (!freshDeploy) {
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing SystemStatus contract.
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
 			}
 		}
 	}

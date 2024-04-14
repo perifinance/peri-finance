@@ -549,33 +549,6 @@
 			"txn": "",
 			"network": "bsctest"
 		},
-		"TokenStatepSAND": {
-			"name": "TokenStatepSAND",
-			"address": "0xDB353F92c9e9173A50f889650f0C85bbcc403C89",
-			"source": "TokenState",
-			"link": "https://testnet.bscscan.com/address/0xDB353F92c9e9173A50f889650f0C85bbcc403C89",
-			"timestamp": "2024-04-12T08:45:56.325Z",
-			"txn": "",
-			"network": "bsctest"
-		},
-		"ProxyERC20pSAND": {
-			"name": "ProxyERC20pSAND",
-			"address": "0x581c9db735fD0Ec1Cd7CAC524f4fD62f1636Af10",
-			"source": "ProxyERC20",
-			"link": "https://testnet.bscscan.com/address/0x581c9db735fD0Ec1Cd7CAC524f4fD62f1636Af10",
-			"timestamp": "2024-04-12T08:45:58.720Z",
-			"txn": "",
-			"network": "bsctest"
-		},
-		"PynthpSAND": {
-			"name": "PynthpSAND",
-			"address": "0x96C9A2f0F7cef0D7a9fd92eE51d74a03f6875fab",
-			"source": "Pynth",
-			"link": "https://testnet.bscscan.com/address/0x96C9A2f0F7cef0D7a9fd92eE51d74a03f6875fab",
-			"timestamp": "2024-04-12T08:46:02.085Z",
-			"txn": "",
-			"network": "bsctest"
-		},
 		"TokenStatepMATIC": {
 			"name": "TokenStatepMATIC",
 			"address": "0xaE3b243D5Bf7FEf378dEB424Ff8AefAC16703035",

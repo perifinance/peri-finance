@@ -38,7 +38,8 @@
 		"publish/deployed/shibuya/*",
 		"publish/deployed/moonbase-alphanet/*",
 		"publish/deployed/moonriver/*",
-		"publish/deployed/base-sepolia/*"
+		"publish/deployed/base-sepolia/*",
+		"publish/deployed/sepolia/*"
 	],
 	"bin": {
 		"peri": "bin.js"

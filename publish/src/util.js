@@ -132,8 +132,11 @@ const getEtherscanLinkPrefix = network => {
 	if (['bsc', 'bsctest'].includes(network)) {
 		return `https://${network !== 'bsc' ? 'testnet.' : ''}bscscan.com`;
 	}
-	if (['moonbase-alphanet', 'moonriver'].includes(network)) {
-		return `https://${network === 'moonriver' ? network : 'moonbase'}.moonscan.io`;
+	if (['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)) {
+		return `https://${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io`;
+	}
+	if (['base-sepolia', 'base'].includes(network)) {
+		return `https://${network === 'base' ? network : 'sepolia'}.basescan.org`;
 	}
 	return `https://${network !== 'mainnet' ? network + '.' : ''}etherscan.io`;
 };
@@ -161,14 +164,22 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
 		} else if (network === 'moonriver') {
 			providerUrl = process.env.PROVIDER_URL_MOONRIVER;
+		} else if (network === 'moonbeam') {
+			providerUrl = process.env.PROVIDER_URL_MOONBEAM;
 		} else if (network === 'base-sepolia') {
 			providerUrl = process.env.PROVIDER_URL_BASE_SEPOLIA;
+		} else if (network === 'base') {
+			providerUrl = process.env.PROVIDER_URL_BASE;
+		} else if (network === 'sepolia') {
+			providerUrl = process.env.PROVIDER_URL_SEPOLIA;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver', 'base'].includes(network)
+	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver', 'base', 'moonbeam'].includes(
+		network
+	)
 		? process.env.DEPLOY_PRIVATE_KEY
 		: ['shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
@@ -177,14 +188,14 @@ const loadConnections = ({ network, useFork }) => {
 	const etherscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
-			: ['kovan', 'goerli', 'ropsten', 'rinkeby'].includes(network)
+			: ['kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia'].includes(network)
 			? `https://api-${network}.etherscan.io/api`
 			: ['bsc', 'bsctest'].includes(network)
 			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
 			: ['polygon', 'mumbai'].includes(network)
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
-			: ['moonbase-alphanet', 'moonriver'].includes(network)
-			? `https://api-${network === 'moonriver' ? network : 'moonbase'}.moonscan.io/api`
+			: ['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)
+			? `https://api-${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io/api`
 			: ['base-sepolia', 'base'].includes(network)
 			? `https://api-${network === 'base' ? network : 'sepolia'}.basescan.org/api`
 			: ['shibuya'].includes(network)
@@ -573,7 +584,9 @@ async function checkGasPrice(network, priority) {
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		gasPrice = await estimatePolygonGasPice(network, priority);
-	} else if (['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'local'].includes(network)) {
+	} else if (
+		['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia', 'local'].includes(network)
+	) {
 		gasPrice = await estimateEtherGasPice(priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);

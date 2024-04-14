@@ -15,10 +15,6 @@
 		"subclass": "MultiCollateralPynth"
 	},
 	{
-		"name": "pSAND",
-		"asset": "SAND"
-	},
-	{
 		"name": "pMATIC",
 		"asset": "MATIC"
 	},
