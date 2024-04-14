@@ -300,8 +300,24 @@
 		"contracts": {
 			"ExternalTokenStakeManager": {
 				"address": "0x98DBD774F7898b5e225F0Db4be5B75aa1582d1b1",
+				"status": "replaced",
+				"keccak256": "0x4aa2cbf28057506197410c455d4df6d4661c5a0d0d399def7c9820b09664fc2b",
+				"replaced_in": "v0.7.18-sepolia"
+			}
+		}
+	},
+	"v0.7.18-sepolia": {
+		"tag": "v0.7.18",
+		"fulltag": "v0.7.18-sepolia",
+		"release": "peri-finance",
+		"network": "sepolia",
+		"date": "2024-04-14T15:31:50+09:00",
+		"commit": "c3e17c1e23ad303e33d811fe77716a4994418d32",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0xA2F116C4C221A3D9b7e389056543c836c3fD0493",
 				"status": "current",
-				"keccak256": "0x4aa2cbf28057506197410c455d4df6d4661c5a0d0d399def7c9820b09664fc2b"
+				"keccak256": "0x147c1b20ea2301697344330f89cbbb38002733abe5cd0883f52c816b12263615"
 			}
 		}
 	}
