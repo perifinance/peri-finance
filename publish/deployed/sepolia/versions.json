@@ -118,8 +118,9 @@
 			},
 			"TokenStatePeriFinance": {
 				"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-				"status": "current",
-				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+				"status": "replaced",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955",
+				"replaced_in": "v0.7.16-sepolia"
 			},
 			"BlacklistManager": {
 				"address": "0xdb7112b62daaDbe1DC87fa9E49CfE9B7f331568A",
@@ -270,6 +271,21 @@
 				"address": "0x3dCaDCCFd4eD61F84cB08F76Eb00224fBe365E4B",
 				"status": "current",
 				"keccak256": "0x2df1c60266d3aa7f49f8b0e7fcd08a202e7f351a1b6057926a0a2f6eefd6ab03"
+			}
+		}
+	},
+	"v0.7.16-sepolia": {
+		"tag": "v0.7.16",
+		"fulltag": "v0.7.16-sepolia",
+		"release": "peri-finance",
+		"network": "sepolia",
+		"date": "2024-04-14T13:10:42+09:00",
+		"commit": "c1594eb24e44aefb167aae3730384dbd4b21f2b1",
+		"contracts": {
+			"TokenStatePeriFinance": {
+				"address": "0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
+				"status": "current",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
 			}
 		}
 	}

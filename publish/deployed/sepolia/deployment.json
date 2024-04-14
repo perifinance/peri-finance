@@ -200,10 +200,10 @@
 		},
 		"TokenStatePeriFinance": {
 			"name": "TokenStatePeriFinance",
-			"address": "0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
+			"address": "0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
 			"source": "TokenState",
-			"link": "https://sepolia.etherscan.io/address/0x8Fc89b37B3075dd0f63200D30Fa59C53F1AE819E",
-			"timestamp": "2024-04-14T03:07:49.940Z",
+			"link": "https://sepolia.etherscan.io/address/0xaBA0ACBFa39f487e414519C9e56B97C748CB885e",
+			"timestamp": "2024-04-14T05:41:00.849Z",
 			"txn": "",
 			"network": "sepolia"
 		},
