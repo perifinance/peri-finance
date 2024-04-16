@@ -276,7 +276,7 @@ const owner = async ({
 					const tx = await web3.eth.sendTransaction({
 						from: account,
 						to: deployedContract.options.address,
-						gasPrice,
+						gasPrice: w3utils.toWei(gasPrice, 'gwei'),
 						gas: gasLimit,
 						data: encodedData,
 					});
@@ -314,8 +314,8 @@ module.exports = {
 				'The address of protocolDAO proxy contract as owner (please include the 0x prefix)'
 			)
 			.option('-v, --private-key [value]', 'The private key of wallet to stage with.')
-			.option('-g, --gas-price <value>', 'Gas price in GWEI', DEFAULTS.gasPrice)
-			.option('-l, --gas-limit <value>', 'Gas limit', Number, 15e4)
+			.option('-g, --gas-price <value>', 'Gas price in GWEI', x => x, DEFAULTS.gasPrice)
+			.option('-l, --gas-limit <value>', 'Gas limit', x => parseInt(x), 15e4)
 			.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'kovan')
 			.option('-y, --yes', 'Dont prompt, just reply yes.')
 			.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')

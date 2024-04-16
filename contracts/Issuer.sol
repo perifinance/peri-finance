@@ -264,7 +264,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     }
 
     function _canBurnPynths(address account) internal view returns (bool) {
-        return now >= _lastIssueEvent(account).add(getMinimumStakeTime()) && !crossChainManager().syncStale();
+        return now >= _lastIssueEvent(account).add(getMinimumStakeTime()); /*  && !crossChainManager().syncStale() */
     }
 
     function _lastIssueEvent(address account) internal view returns (uint) {

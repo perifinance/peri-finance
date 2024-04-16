@@ -56,6 +56,8 @@ node publish deploy # "--help" for options
 
 5. make sure network name is list in deploy.js
 6. make sure crosschains BRIDGE_NETWORK_STATUS in
+7. make sure VirtualPynthIssuer to be in config.json
+8. check pynthExchangeRateOverride for ExchangeFeeRate.
 
 ### CLI Options
 

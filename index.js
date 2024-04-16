@@ -21,8 +21,8 @@ const data = {
 	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
 	moonriver: require('./publish/deployed/moonriver'),
 	'base-sepolia': require('./publish/deployed/base-sepolia'),
-	// base: require('./publish/deployed/base'),
-	// moonbeam: require('./publish/deployed/moonbeam'),
+	base: require('./publish/deployed/base'),
+	moonbeam: require('./publish/deployed/moonbeam'),
 	sepolia: require('./publish/deployed/sepolia'),
 };
 
@@ -45,6 +45,7 @@ const networks = [
 	'shibuya',
 	'moonbase-alphanet',
 	'moonriver',
+	'moonbeam',
 	'base-sepolia',
 	'base',
 	'sepolia',
@@ -111,6 +112,9 @@ const chainIdMapping = Object.entries({
 	},
 	1287: {
 		network: 'moonbase-alphanet',
+	},
+	1284: {
+		network: 'moonbeam',
 	},
 	1285: {
 		network: 'moonriver',
@@ -188,6 +192,7 @@ const knownAccounts = {
 	bsc: [],
 	'moonbase-alphanet': [],
 	moonriver: [],
+	moonbeam: [],
 	'base-sepolia': [],
 	base: [],
 	sepolia: [],
@@ -270,6 +275,7 @@ const defaults = {
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
 		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', // 6 decimals
+		moonbeam: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b', // 6 decimals
 		'base-sepolia': '0xfec043ba43c733069cbc2243b36bc4fa33afcc28',
 		base: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // 6 decimals
 		sepolia: '0x38d4e2EefDD05970f7d198F74E25D94e70D049D5', // 6 decimals
@@ -288,7 +294,7 @@ const defaults = {
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
-		moonbeam: '0x765277eebeca2e31912c9946eae1021199b39c61',
+		moonbeam: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
 		'base-sepolia': '0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb',
 		base: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb',
 		sepolia: '0x4ABf615437fb7eCE1b6702E57B23a7547F945545',
@@ -306,8 +312,8 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': '0x321449E0Be9798881e11925666aBaA324162930B', // 6 decimals
-		moonbeam: '0xefaeee334f0fd1712f9a8cc375f427d9cdd40d73', // 6 decimals
-		moonriver: '0xe936caa7f6d9f5c9e907111fcaf7c351c184cda7', // 6 decimals
+		moonbeam: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73', // 6 decimals
+		moonriver: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C', // 6 decimals
 		sepolia: '0x2436953d15Ae8b9119c787e1d50e393aFEe3426A', // 6 decimals
 	},
 	XAUT_ERC20_ADDRESSES: {
@@ -322,9 +328,12 @@ const defaults = {
 		bsctest: constants.ZERO_ADDRESS,
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': '0xFA85FfEf4186339892557bb80E4F9C5F3E4df97f', // 6 decimals
-		moonriver: constants.ZERO_ADDRESS,
 		sepolia: '0x16B7Cf4F16608D76aEAD2b7b10f85090EfC7B746',
 	},
+	// USDbC_ERC20_ADDRESSES: {
+	// 	base: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+	// 	'base-sepolia': '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+	// },
 	PAXG_ERC20_ADDRESSES: {
 		mainnet: '0x45804880De22913dAFE09f4980848ECE6EcbAf78', // 18 decimals
 		kovan: constants.ZERO_ADDRESS,
@@ -332,12 +341,11 @@ const defaults = {
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
 		mumbai: '0x644eAb1a0Ed9E034ad9eDFe75dbE67D614Fb7e7f', // 18 decimals
-		polygon: constants.ZERO_ADDRESS,
+		polygon: '0x553d3D295e0f695B9228246232eDF400ed3560B5',
 		bsc: '0x7950865a9140cB519342433146Ed5b40c6F210f7', // 18 decimals
 		bsctest: '0xd3145aB4D7271740C1d4BdB0deD5CDEE0d08ee10', // 18 decimals
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': '0xE00A06E4938c015ba83F3AcB7B3499B36cf58502', // 18 decimals
-		moonriver: constants.ZERO_ADDRESS,
 		sepolia: '0x0567327A31A812344B71e6f95a64626EB72c1B22',
 	},
 	MINTER_ROLE_ADDRESS: {
@@ -448,6 +456,7 @@ const defaults = {
 			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 		],
 		moonriver: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		moonbeam: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 		'base-sepolia': [
 			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 		],
@@ -459,27 +468,43 @@ const defaults = {
 			{ network: 'bsc', isOpened: true },
 			{ network: 'polygon', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		bsc: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'polygon', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		polygon: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'bsc', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		moonriver: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'bsc', isOpened: true },
 			{ network: 'polygon', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
+		],
+		moonbeam: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'bsc', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		base: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'bsc', isOpened: true },
 			{ network: 'polygon', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
 		],
 		sepolia: [
 			{ network: 'base-sepolia', isOpened: true },
@@ -523,14 +548,14 @@ const defaults = {
 			{ network: 'mumbai', isOpened: true },
 			{ network: 'bsctest', isOpened: true },
 			{ network: 'sepolia', isOpened: true },
-			{ network: 'goerli', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
 		],
 	},
 	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
 	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
-	INITIAL_ISSUANCE: w3utils.toWei(`${2e6}`),
-	LAST_MINT_EVENT: 1712793600, // Thu Apr 11 2024 00:00:00 GMT
-	INFLATION_WEEK_COUNTER: 140,
+	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${2e6}`),
+	LAST_MINT_EVENT: 1713571500, // Sat Apr 20 2024 00:05:00 GMT+0000
+	INFLATION_WEEK_COUNTER: 144, // 140,
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,

@@ -371,8 +371,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x24E910eE07b3504bC14420E7C08383E787954903",
-				"status": "current",
-				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571"
+				"status": "replaced",
+				"keccak256": "0x054a5ca7698b50684efd353a1c69d8231cfeb71882a6d1cebfbd4895395c0571",
+				"replaced_in": "v0.7.19-rc"
 			},
 			"StakingState": {
 				"address": "0x055Da09418e173878fb572465AE7F9bd393b5aDE",
@@ -403,6 +404,21 @@
 				"address": "0xE54d2B348c50fC7Dc6c4b35f432739AfD2716ecc",
 				"status": "current",
 				"keccak256": "0x45294d72771e4ee5c1a705f150c833f4a585c41b8a0e3e4ad88587901cb32906"
+			}
+		}
+	},
+	"v0.7.19-rc": {
+		"tag": "v0.7.19",
+		"fulltag": "v0.7.19-rc",
+		"release": "peri-finance",
+		"network": "base-sepolia",
+		"date": "2024-04-14T13:10:42+09:00",
+		"commit": "c1594eb24e44aefb167aae3730384dbd4b21f2b1",
+		"contracts": {
+			"Issuer": {
+				"address": "0x74b9F1C61a7996949cD1De27C03c7eDD978d6366",
+				"status": "current",
+				"keccak256": "0x46847b21e4d98b50d598a0ea8cfbefddc4bdb8b5920b7bb2fac6f47c375a1c2f"
 			}
 		}
 	}

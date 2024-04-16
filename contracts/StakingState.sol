@@ -19,10 +19,6 @@ contract StakingState is Owned, State {
 
     mapping(bytes32 => mapping(address => uint)) public stakedAmountOf;
 
-    // mapping(address => uint) public targetRatio;
-
-    // mapping(address => uint) public exTargetRatio;
-
     mapping(bytes32 => uint) public totalStakedAmount;
 
     mapping(bytes32 => uint) public totalStakerCount;
@@ -55,26 +51,7 @@ contract StakingState is Owned, State {
         return tokenList;
     }
 
-    // function getExTargetRatio(address _account) external view returns (uint exRatio) {
-    //     exRatio = exTargetRatio[_account];
-    //     return exRatio == 0 ? SafeDecimalMath.unit() : exRatio;
-    // }
-
-    // function getTargetRatio(address _account) external view returns (uint) {
-    //     return targetRatio[_account];
-    // }
-
     /* ========== MUTATIVE FUNCTIONS ========== */
-
-    // function setTargetRatio(address _account, uint _taretRatio) external onlyAssociatedContract {
-    //     require(_account != address(0), "Address cannot be empty");
-    //     targetRatio[_account] = _taretRatio;
-    // }
-
-    // function setExTargetRatio(address _account, uint _exTRatio) external onlyAssociatedContract {
-    //     require(_account != address(0), "Address cannot be empty");
-    //     exTargetRatio[_account] = _exTRatio;
-    // }
 
     function setTargetToken(
         bytes32 _currencyKey,

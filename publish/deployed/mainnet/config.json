@@ -54,13 +54,13 @@
 		"deploy": false
 	},
 	"Exchanger": {
-		"deploy": false
+		"deploy": true
 	},
 	"ExchangeState": {
 		"deploy": false
 	},
 	"FeePool": {
-		"deploy": false
+		"deploy": true
 	},
 	"FeePoolState": {
 		"deploy": false
@@ -72,13 +72,13 @@
 		"deploy": false
 	},
 	"Issuer": {
-		"deploy": false
+		"deploy": true
 	},
 	"EternalStorageLiquidations": {
 		"deploy": false
 	},
 	"Liquidations": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardEscrow": {
 		"deploy": false
@@ -93,7 +93,7 @@
 		"deploy": false
 	},
 	"PeriFinance": {
-		"deploy": false
+		"deploy": true
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
@@ -102,7 +102,7 @@
 		"deploy": false
 	},
 	"SystemSettings": {
-		"deploy": false
+		"deploy": true
 	},
 	"SystemStatus": {
 		"deploy": false
@@ -144,7 +144,7 @@
 		"deploy": false
 	},
 	"ExternalTokenStakeManager": {
-		"deploy": false
+		"deploy": true
 	},
 	"BridgeState": {
 		"deploy": false
@@ -159,9 +159,9 @@
 		"deploy": false
 	},
 	"CrossChainState": {
-		"deploy": false
+		"deploy": true
 	},
 	"CrossChainManager": {
-		"deploy": false
+		"deploy": true
 	}
 }

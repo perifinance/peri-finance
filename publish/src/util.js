@@ -21,6 +21,7 @@ const {
 		FEEDS_FILENAME,
 	},
 	wrap,
+	networkToChainId,
 } = require('../..');
 
 const {
@@ -126,7 +127,7 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 };
 
 const getEtherscanLinkPrefix = network => {
-	if (['polygon', 'mumbai'].includes(network)) {
+	if (['polygon', 'mumbai', 'amoy'].includes(network)) {
 		return `https://${network !== 'polygon' ? network + '.' : ''}polygonscan.com`;
 	}
 	if (['bsc', 'bsctest'].includes(network)) {
@@ -192,7 +193,7 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://api-${network}.etherscan.io/api`
 			: ['bsc', 'bsctest'].includes(network)
 			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
-			: ['polygon', 'mumbai'].includes(network)
+			: ['polygon', 'mumbai', 'amoy'].includes(network)
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
 			: ['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)
 			? `https://api-${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io/api`
@@ -521,7 +522,7 @@ function estimateGasPice(network, priority) {
 		process.env.INFURA_API_KEY + ':' + process.env.INFURA_API_KEY_SECRET
 	).toString('base64');
 
-	const gasStationUrl = `https://gas.api.infura.io/networks/${network}/suggestedGasFees`;
+	const gasStationUrl = `https://gas.api.infura.io/networks/${networkToChainId[network]}/suggestedGasFees`;
 
 	return axios
 		.get(gasStationUrl, {
@@ -529,33 +530,36 @@ function estimateGasPice(network, priority) {
 		})
 		.then(({ data }) => {
 			console.log('Gas', data);
-			const { low, medium, high } = data.result;
+			const { low, medium, high } = data;
 
 			var gasPrice = 0;
 			switch (priority) {
 				case 'fast':
 					gasPrice =
-						parseInt(high.suggestedMaxFeePerGas) + parseInt(high.suggestedMaxPriorityFeePerGas);
+						Number(high.suggestedMaxFeePerGas) + Number(high.suggestedMaxPriorityFeePerGas);
 					break;
 				case 'standard':
 					gasPrice =
-						parseInt(medium.suggestedMaxFeePerGas) + parseInt(medium.suggestedMaxPriorityFeePerGas);
+						Number(medium.suggestedMaxFeePerGas) + Number(medium.suggestedMaxPriorityFeePerGas);
 					break;
 				default:
-					gasPrice =
-						parseInt(low.suggestedMaxFeePerGas) + parseInt(low.suggestedMaxPriorityFeePerGas);
+					gasPrice = Number(low.suggestedMaxFeePerGas) + Number(low.suggestedMaxPriorityFeePerGas);
 			}
-			return gasPrice;
+			return gasPrice.toString();
 		})
 		.catch(e => {
 			console.log(e);
-			if (network === 84532) return 1;
-			return 0;
+			if (network === 84532) return '0.002';
+			return '1';
 		});
 }
 
 function estimateMoonBeamGasPrice(network, priority) {
-	const gasStationUrl = `https://gmriver.blockscan.com/gasapi.ashx`;
+	if (network === 'moonbase-alphanet') return '1';
+
+	const gasStationUrl = `https://${
+		network === 'moonriver' ? 'gmriver' : 'gmbeam'
+	}.blockscan.com/gasapi.ashx`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
@@ -580,7 +584,7 @@ function estimateMoonBeamGasPrice(network, priority) {
 }
 
 async function checkGasPrice(network, priority) {
-	let gasPrice;
+	let gasPrice = '1';
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		gasPrice = await estimatePolygonGasPice(network, priority);
@@ -608,6 +612,15 @@ function sleep(ms) {
 	});
 }
 
+// Fixed point multiplication utilities
+function multiplyDecimal(x, y) {
+	const xBN = w3utils.BN.isBN(x) ? x : w3utils.toBN(x);
+	const yBN = w3utils.BN.isBN(y) ? y : w3utils.toBN(y);
+
+	const unit = w3utils.toBN(w3utils.toWei('1'));
+	return xBN.mul(yBN).div(unit);
+}
+
 module.exports = {
 	ensureNetwork,
 	ensureDeploymentPath,
@@ -623,4 +636,5 @@ module.exports = {
 	reportDeployedContracts,
 	checkGasPrice,
 	sleep,
+	multiplyDecimal,
 };

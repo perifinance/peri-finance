@@ -1,0 +1,46 @@
+{
+	"DAI": {
+		"asset": "DAI",
+		"feed": "0x6063e1037B1afDA2bE5A3340757261E4d6a402ac"
+	},
+	"USDC": {
+		"asset": "USDC",
+		"feed": "0xA122591F60115D63421f66F752EF9f6e0bc73abC"
+	},
+	"USDT": {
+		"asset": "USDT",
+		"feed": "0xD925C5BF88Bd0ca09312625d429240F811b437c6"
+	},
+	"BTC": {
+		"asset": "BTC",
+		"feed": "0x8c4425e141979c66423A83bE2ee59135864487Eb"
+	},
+	"ETH": {
+		"asset": "ETH",
+		"feed": "0x9ce2388a1696e22F870341C3FC1E89710C7569B5"
+	},
+	"BNB": {
+		"asset": "BNB",
+		"feed": "0x0147f2Ad7F1e2Bc51F998CC128a8355d5AE8C32D"
+	},
+	"ATOM": {
+		"asset": "ATOM",
+		"feed": "0x4F152D143c97B5e8d2293bc5B2380600f274a5dd"
+	},
+	"LINK": {
+		"asset": "LINK",
+		"feed": "0xd61D7398B7734aBe7C4B143fE57dC666D2fe83aD"
+	},
+	"DOT": {
+		"asset": "DOT",
+		"feed": "0x1466b4bD0C4B6B8e1164991909961e0EE6a66d8c"
+	},
+	"GLMR": {
+		"asset": "GLMR",
+		"feed": "0x4497B606be93e773bbA5eaCFCb2ac5E2214220Eb"
+	},
+	"CAKE": {
+		"asset": "CAKE",
+		"feed": "0x6dD5ccbDBbb77a4827209104615db2333304F008"
+	}
+}

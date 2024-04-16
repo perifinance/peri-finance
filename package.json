@@ -39,7 +39,9 @@
 		"publish/deployed/moonbase-alphanet/*",
 		"publish/deployed/moonriver/*",
 		"publish/deployed/base-sepolia/*",
-		"publish/deployed/sepolia/*"
+		"publish/deployed/sepolia/*",
+		"publish/deployed/moonbeam/*",
+		"publish/deployed/base/*"
 	],
 	"bin": {
 		"peri": "bin.js"

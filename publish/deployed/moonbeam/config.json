@@ -143,6 +143,27 @@
 	"StakingState": {
 		"deploy": false
 	},
+	"Issuer": {
+		"deploy": false
+	},
+	"PeriFinance": {
+		"deploy": false
+	},
+	"BridgeState": {
+		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
+	},
+	"VirtualPynthIssuer": {
+		"deploy": false
+	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -188,34 +209,31 @@
 	"PynthpLINK": {
 		"deploy": false
 	},
-	"TokenStatepLUNA": {
+	"TokenStatepATOM": {
 		"deploy": false
 	},
-	"ProxyERC20pLUNA": {
+	"ProxyERC20pATOM": {
 		"deploy": false
 	},
-	"PynthpLUNA": {
+	"PynthpATOM": {
 		"deploy": false
 	},
-	"Issuer": {
+	"TokenStatepCAKE": {
 		"deploy": false
 	},
-	"PeriFinance": {
+	"ProxyERC20pCAKE": {
 		"deploy": false
 	},
-	"BridgeState": {
+	"PynthpCAKE": {
 		"deploy": false
 	},
-	"BridgeStatepUSD": {
+	"TokenStatepGLMR": {
 		"deploy": false
 	},
-	"CrossChainManager": {
+	"ProxyERC20pGLMR": {
 		"deploy": false
 	},
-	"CrossChainState": {
-		"deploy": false
-	},
-	"VirtualPynthIssuer": {
+	"PynthpGLMR": {
 		"deploy": false
 	}
 }

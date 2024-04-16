@@ -5,6 +5,7 @@ const { gray, green, yellow, redBright, red } = require('chalk');
 const w3utils = require('web3-utils');
 const Deployer = require('../Deployer');
 const NonceManager = require('../NonceManager');
+const { multiplyDecimal } = require('../util');
 const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
@@ -94,7 +95,7 @@ const deploy = async ({
 	}
 
 	if (priority) {
-		gasPrice = w3utils.toBN(await checkGasPrice(network, priority));
+		gasPrice = await checkGasPrice(network, priority);
 	}
 
 	const limitPromise = pLimit(concurrency);
@@ -223,6 +224,15 @@ const deploy = async ({
 
 		return effectiveValue;
 	};
+
+	// const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+	// testCost && console.log(`testCost: ${testCost}`);
+	// const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
+	// console.log(`bClaimGasCos: ${bClaimGasCos}`);
+
+	// gasPrice = w3utils.toWei(await checkGasPrice(network, priority));
+	// const test = w3utils.toWei(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+	// const gasTemp = multiplyDecimal(gasPrice, test);
 
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
@@ -433,17 +443,21 @@ const deploy = async ({
 
 	let aggregatedPriceResults = 'N/A';
 
-	if (oldExrates && network !== 'local') {
-		const padding = '\n\t\t\t\t';
-		const aggResults = await checkAggregatorPrices({
-			network,
-			useOvm,
-			providerUrl,
-			pynths,
-			oldExrates,
-			standaloneFeeds,
-		});
-		aggregatedPriceResults = padding + aggResults.join(padding);
+	try {
+		if (oldExrates && network !== 'local') {
+			const padding = '\n\t\t\t\t';
+			const aggResults = await checkAggregatorPrices({
+				network,
+				useOvm,
+				providerUrl,
+				pynths,
+				oldExrates,
+				standaloneFeeds,
+			});
+			aggregatedPriceResults = padding + aggResults.join(padding);
+		}
+	} catch (err) {
+		console.error(red('Error checking aggregator prices: ', err));
 	}
 
 	const deployerBalance = parseInt(
@@ -1533,6 +1547,7 @@ const deploy = async ({
 	} */
 
 	const XAUT_ADDRESS = (await getDeployParameter('XAUT_ERC20_ADDRESSES'))[network];
+	// const USDBC_ADDRESS = (await getDeployParameter('USDbC_ERC20_ADDRESSES'))[network];
 	/* if (!XAUT_ADDRESS || XAUT_ADDRESS === ZERO_ADDRESS) {
 		if (mainnet.includes(network)) {
 			console.error(
@@ -1571,6 +1586,7 @@ const deploy = async ({
 			PAXG_ADDRESS = addressOf(PAXG);
 		}
 	} */
+	// const WBTC_ADDRESS = (await getDeployParameter('WBTC_ERC20_ADDRESSES'))[network];
 
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
@@ -1617,23 +1633,39 @@ const deploy = async ({
 				{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
 			];
 			USDT_ADDRESS &&
+				USDT_ADDRESS !== ZERO_ADDRESS &&
 				stakingStateCurrencies.push({
 					currencyKey: toBytes32('USDT'),
 					decimal: ['bsc'].includes(network) ? '18' : '6',
 					address: USDT_ADDRESS,
 				});
 			PAXG_ADDRESS &&
+				PAXG_ADDRESS !== ZERO_ADDRESS &&
 				stakingStateCurrencies.push({
 					currencyKey: toBytes32('PAXG'),
 					decimal: '18',
 					address: PAXG_ADDRESS,
 				});
 			XAUT_ADDRESS &&
+				XAUT_ADDRESS !== ZERO_ADDRESS &&
 				stakingStateCurrencies.push({
 					currencyKey: toBytes32('XAUT'),
 					decimal: ['bsc'].includes(network) ? '18' : '6',
 					address: XAUT_ADDRESS,
 				});
+			/* WBTC_ADDRESS &&
+				WBTC_ADDRESS !== ZERO_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('WBTC'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: WBTC_ADDRESS,
+				}); */
+			/* USDBC_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('USDbC'),
+					decimal: '6',
+					addres: USDBC_ADDRESS,
+				}); */
 
 			for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
 				await runStep({
@@ -2538,6 +2570,9 @@ const deploy = async ({
 			pMANA: w3utils.toWei('0.003'),
 			pSOL: w3utils.toWei('0.003'),
 			pMATIC: w3utils.toWei('0.003'),
+			pATOM: w3utils.toWei('0.003'),
+			pGLMR: w3utils.toWei('0.003'),
+			pOP: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2734,29 +2769,31 @@ const deploy = async ({
 
 		let gPrice = gasPrice;
 		try {
-			gPrice = await checkGasPrice(network, 'standard');
+			gPrice = w3utils.toBN(await checkGasPrice(network, 'standard'));
 		} catch (e) {
-			console.log(e);
+			// console.log(e);
 		}
-		await runStep({
-			contract: 'SystemSettings',
-			target: systemSettings,
-			read: 'bridgeClaimGasCost',
-			expected: input => input !== '0', // only change if zero
-			write: 'setBridgeClaimGasCost',
-			writeArg: ((await getDeployParameter('BRIDGE_CLAIM_GAS_COST')) * parseInt(gPrice)).toString(), // multiply by gasPrice
-		});
+		const bridgeClaimGasCost = await getDeployParameter('BRIDGE_CLAIM_GAS_COST');
+		bridgeClaimGasCost &&
+			(await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'bridgeClaimGasCost',
+				expected: input => input !== '0', // only change if zero
+				write: 'setBridgeClaimGasCost',
+				writeArg: multiplyDecimal(bridgeClaimGasCost, w3utils.toWei(gPrice)).toString(), // multiply by gasPrice
+			}));
 
-		await runStep({
-			contract: 'SystemSettings',
-			target: systemSettings,
-			read: 'bridgeTransferGasCost',
-			expected: input => input !== '0', // only change if zero
-			write: 'setBridgeTransferGasCost',
-			writeArg: (
-				(await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')) * parseInt(gPrice)
-			).toString(), // multiply by gasPrice
-		});
+		const bridgeTransferGasCost = await getDeployParameter('BRIDGE_TRANSFER_GAS_COST');
+		bridgeTransferGasCost &&
+			(await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'bridgeTransferGasCost',
+				expected: input => input !== '0', // only change if zero
+				write: 'setBridgeTransferGasCost',
+				writeArg: multiplyDecimal(bridgeTransferGasCost, w3utils.toWei(gPrice)).toString(), // multiply by gasPrice
+			}));
 
 		await runStep({
 			contract: 'SystemSettings',

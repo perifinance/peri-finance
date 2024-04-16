@@ -143,6 +143,27 @@
 	"StakingState": {
 		"deploy": false
 	},
+	"PeriFinance": {
+		"deploy": false
+	},
+	"Issuer": {
+		"deploy": false
+	},
+	"BridgeState": {
+		"deploy": false
+	},
+	"BridgeStatepUSD": {
+		"deploy": false
+	},
+	"CrossChainManager": {
+		"deploy": false
+	},
+	"CrossChainState": {
+		"deploy": false
+	},
+	"VirtualPynthIssuer": {
+		"deploy": false
+	},
 	"TokenStatepBTC": {
 		"deploy": false
 	},
@@ -161,24 +182,6 @@
 	"PynthpETH": {
 		"deploy": false
 	},
-	"TokenStatepBNB": {
-		"deploy": false
-	},
-	"ProxyERC20pBNB": {
-		"deploy": false
-	},
-	"PynthpBNB": {
-		"deploy": false
-	},
-	"TokenStatepDOT": {
-		"deploy": false
-	},
-	"ProxyERC20pDOT": {
-		"deploy": false
-	},
-	"PynthpDOT": {
-		"deploy": false
-	},
 	"TokenStatepLINK": {
 		"deploy": false
 	},
@@ -188,34 +191,49 @@
 	"PynthpLINK": {
 		"deploy": false
 	},
-	"TokenStatepLUNA": {
+	"TokenStatepOP": {
 		"deploy": false
 	},
-	"ProxyERC20pLUNA": {
+	"ProxyERC20pOP": {
 		"deploy": false
 	},
-	"PynthpLUNA": {
+	"PynthpOP": {
 		"deploy": false
 	},
-	"Issuer": {
+	"TokenStatepCOMP": {
 		"deploy": false
 	},
-	"PeriFinance": {
+	"ProxyERC20pCOMP": {
 		"deploy": false
 	},
-	"BridgeState": {
+	"PynthpCOMP": {
 		"deploy": false
 	},
-	"BridgeStatepUSD": {
+	"TokenStatepSNX": {
 		"deploy": false
 	},
-	"CrossChainManager": {
+	"ProxyERC20pSNX": {
 		"deploy": false
 	},
-	"CrossChainState": {
+	"PynthpSNX": {
 		"deploy": false
 	},
-	"VirtualPynthIssuer": {
+	"TokenStatepSOL": {
+		"deploy": false
+	},
+	"ProxyERC20pSOL": {
+		"deploy": false
+	},
+	"PynthpSOL": {
+		"deploy": false
+	},
+	"TokenStatepYFI": {
+		"deploy": false
+	},
+	"ProxyERC20pYFI": {
+		"deploy": false
+	},
+	"PynthpYFI": {
 		"deploy": false
 	}
 }
