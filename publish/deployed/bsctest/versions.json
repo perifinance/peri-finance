@@ -2589,8 +2589,9 @@
 			},
 			"FeePool": {
 				"address": "0xF0787Aa274f618f340f8fD3575F26d7cfd5070E0",
-				"status": "current",
-				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050"
+				"status": "replaced",
+				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050",
+				"replaced_in": "v0.7.20-rc"
 			},
 			"PeriFinance": {
 				"address": "0x9AeDc20dA98f348afb85E02Ce09E64AF82dEEe68",
@@ -2737,6 +2738,21 @@
 				"address": "0x62db0e20064E690EE39061A3595F250a7663c85f",
 				"status": "current",
 				"keccak256": "0x46847b21e4d98b50d598a0ea8cfbefddc4bdb8b5920b7bb2fac6f47c375a1c2f"
+			}
+		}
+	},
+	"v0.7.20-rc": {
+		"tag": "v0.7.20",
+		"fulltag": "v0.7.20-rc",
+		"release": "peri-finance",
+		"network": "bsctest",
+		"date": "2024-04-17T00:38:44+09:00",
+		"commit": "fef73787ee9a420f8eed340f229dd562f51f9ec1",
+		"contracts": {
+			"FeePool": {
+				"address": "0xe582b3Fc5db4e34B2CE4feDB786D74032CB26bd9",
+				"status": "current",
+				"keccak256": "0xd7adc4c4ed666d5f1a8a5582f3301b8bd9374d86f4912ffd93439597efaac340"
 			}
 		}
 	}

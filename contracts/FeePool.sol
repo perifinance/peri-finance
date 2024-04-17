@@ -728,7 +728,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint exSR_threshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
 
         // Not claimable if collateral ratio above threshold
-        if (ratio > ratio_threshold && exSR > exSR_threshold) {
+        if (ratio > ratio_threshold || exSR > exSR_threshold) {
             feesClaimable = false;
         }
     }

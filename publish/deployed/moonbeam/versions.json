@@ -98,8 +98,9 @@
 			},
 			"FeePool": {
 				"address": "0x56155855c3414E4378fD2932e280348018C11a77",
-				"status": "current",
-				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050"
+				"status": "replaced",
+				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050",
+				"replaced_in": "v0.7.20-rc"
 			},
 			"FeePoolState": {
 				"address": "0x1b4dCf2c2a7A27EC9366c75dB27866a5C8799A82",
@@ -405,6 +406,21 @@
 				"address": "0x120Fd6abFa4821EACe5EBb5ce7558e1563347E47",
 				"status": "current",
 				"keccak256": "0x7bb575f70d195d9abed55e3022cccedca97cb83cfce223416837ac55ec7151a2"
+			}
+		}
+	},
+	"v0.7.20-rc": {
+		"tag": "v0.7.20",
+		"fulltag": "v0.7.20-rc",
+		"release": "peri-finance",
+		"network": "moonbeam",
+		"date": "2024-04-17T00:38:44+09:00",
+		"commit": "fef73787ee9a420f8eed340f229dd562f51f9ec1",
+		"contracts": {
+			"FeePool": {
+				"address": "0x4232B073A48E7717885BC90Df0818B017194Efbf",
+				"status": "current",
+				"keccak256": "0xd7adc4c4ed666d5f1a8a5582f3301b8bd9374d86f4912ffd93439597efaac340"
 			}
 		}
 	}

@@ -2,9 +2,6 @@
 	"AddressResolver": {
 		"deploy": false
 	},
-	"BinaryOptionMarketData": {
-		"deploy": true
-	},
 	"CollateralManager": {
 		"deploy": false
 	},

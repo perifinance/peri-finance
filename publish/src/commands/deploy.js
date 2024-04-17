@@ -225,10 +225,14 @@ const deploy = async ({
 		return effectiveValue;
 	};
 
-	// const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
-	// testCost && console.log(`testCost: ${testCost}`);
-	// const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
-	// console.log(`bClaimGasCos: ${bClaimGasCos}`);
+	/* const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+	testCost && console.log(`testCost: ${testCost}`);
+	const gwGasPrice = (parseInt(gasPrice) > 1
+		? Math.round(Number(gasPrice))
+		: Math.round(Number(gasPrice) * 1e9) / 1e9
+	).toString();
+	const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
+	console.log(`bClaimGasCos: ${bClaimGasCos}`, `test: ${test}`); */
 
 	// gasPrice = w3utils.toWei(await checkGasPrice(network, priority));
 	// const test = w3utils.toWei(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
@@ -2769,10 +2773,10 @@ const deploy = async ({
 
 		let gPrice = gasPrice;
 		try {
-			gPrice = w3utils.toBN(await checkGasPrice(network, 'standard'));
-		} catch (e) {
-			// console.log(e);
-		}
+			gPrice = await checkGasPrice(network, 'standard');
+		} catch (e) {}
+		gPrice = w3utils.toWei(gPrice, 'gwei');
+
 		const bridgeClaimGasCost = await getDeployParameter('BRIDGE_CLAIM_GAS_COST');
 		bridgeClaimGasCost &&
 			(await runStep({
@@ -2781,7 +2785,7 @@ const deploy = async ({
 				read: 'bridgeClaimGasCost',
 				expected: input => input !== '0', // only change if zero
 				write: 'setBridgeClaimGasCost',
-				writeArg: multiplyDecimal(bridgeClaimGasCost, w3utils.toWei(gPrice)).toString(), // multiply by gasPrice
+				writeArg: multiplyDecimal(bridgeClaimGasCost, gPrice).toString(), // multiply by gasPrice
 			}));
 
 		const bridgeTransferGasCost = await getDeployParameter('BRIDGE_TRANSFER_GAS_COST');
@@ -2792,7 +2796,7 @@ const deploy = async ({
 				read: 'bridgeTransferGasCost',
 				expected: input => input !== '0', // only change if zero
 				write: 'setBridgeTransferGasCost',
-				writeArg: multiplyDecimal(bridgeTransferGasCost, w3utils.toWei(gPrice)).toString(), // multiply by gasPrice
+				writeArg: multiplyDecimal(bridgeTransferGasCost, w3utils.toWei(gPrice, 'gwei')).toString(), // multiply by gasPrice
 			}));
 
 		await runStep({

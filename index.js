@@ -239,6 +239,18 @@ const defaults = {
 		.mul(w3utils.toBN(1e18))
 		.div(w3utils.toBN(20))
 		.toString(), // 1/20 5%
+	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
+	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
+	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${2e6}`),
+	LAST_MINT_EVENT: 1713571500, // Sat Apr 20 2024 00:05:00 GMT+0000
+	INFLATION_WEEK_COUNTER: 144, // 140,
+	EXTERNAL_TOKEN_ISSUANCE_RATIO: {
+		USDC: w3utils.toWei('1'),
+		USDT: w3utils.toWei('1'),
+		DAI: w3utils.toWei('1'),
+		PAXG: w3utils.toWei('0.75'),
+		XAUT: w3utils.toWei('0.75'),
+	},
 	AGGREGATOR_WARNING_FLAGS: {
 		mainnet: '0x4A5b9B4aD08616D11F3A402FF7cBEAcB732a76C6',
 		kovan: '0x6292aa9a6650ae14fbf974e5029f36f95a1848fd',
@@ -551,11 +563,6 @@ const defaults = {
 			{ network: 'moonbase-alphanet', isOpened: true },
 		],
 	},
-	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
-	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
-	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${2e6}`),
-	LAST_MINT_EVENT: 1713571500, // Sat Apr 20 2024 00:05:00 GMT+0000
-	INFLATION_WEEK_COUNTER: 144, // 140,
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,
@@ -588,13 +595,6 @@ const defaults = {
 		MIN_COLLATERAL: w3utils.toWei('1000'),
 		ISSUE_FEE_RATE: w3utils.toWei('0.005'),
 		INTERACTION_DELAY: '3600', // 1 hour in secs
-	},
-	EXTERNAL_TOKEN_ISSUANCE_RATIO: {
-		USDC: w3utils.toWei('1'),
-		USDT: w3utils.toWei('1'),
-		DAI: w3utils.toWei('1'),
-		PAXG: w3utils.toWei('0.75'),
-		XAUT: w3utils.toWei('0.75'),
 	},
 };
 
