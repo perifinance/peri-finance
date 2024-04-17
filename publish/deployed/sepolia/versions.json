@@ -348,8 +348,24 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0x7e15abc1a8918b7CAb323eC93E7C9A23d010722b",
+				"status": "replaced",
+				"keccak256": "0xd7adc4c4ed666d5f1a8a5582f3301b8bd9374d86f4912ffd93439597efaac340",
+				"replaced_in": "v0.7.21-sepolia"
+			}
+		}
+	},
+	"v0.7.21-sepolia": {
+		"tag": "v0.7.21",
+		"fulltag": "v0.7.21-sepolia",
+		"release": "peri-finance",
+		"network": "sepolia",
+		"date": "2024-04-17T13:33:52+09:00",
+		"commit": "8a8226e082c4d2badb19d111654da8cb0dd13daa",
+		"contracts": {
+			"FeePool": {
+				"address": "0x160452Bee9DA103157EA1E512299728c46995157",
 				"status": "current",
-				"keccak256": "0xd7adc4c4ed666d5f1a8a5582f3301b8bd9374d86f4912ffd93439597efaac340"
+				"keccak256": "0x77bb52cfac7fc91a2a061a568a3b3e316e84836b9a57f195ea23fba792a94167"
 			}
 		}
 	}
