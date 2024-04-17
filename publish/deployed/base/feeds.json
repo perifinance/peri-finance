@@ -47,5 +47,9 @@
 	"YFI": {
 		"asset": "YFI",
 		"feed": "0xD40e758b5eC80820B68DFC302fc5Ce1239083548"
+	},
+	"APT": {
+		"asset": "APT",
+		"feed": "0x88a98431C25329AA422B21D147c1518b34dD36F4"
 	}
 }

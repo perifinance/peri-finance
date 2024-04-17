@@ -529,7 +529,7 @@ function estimateGasPice(network, priority) {
 			headers: { Authorization: `Basic ${Auth}` },
 		})
 		.then(({ data }) => {
-			console.log('Gas', data);
+			// console.log('Gas', data);
 			const { low, medium, high } = data;
 
 			var gasPrice = 0;
@@ -600,12 +600,13 @@ async function checkGasPrice(network, priority) {
 		gasPrice = await estimateGasPice(network, priority);
 	}
 
-	console.log(`using gas price : ${gasPrice}`);
 	if (!gasPrice) throw new Error('gas price is undefined');
 	gasPrice = (parseInt(gasPrice) > 1
 		? Math.round(Number(gasPrice))
 		: Math.round(Number(gasPrice) * 1e9) / 1e9
 	).toString();
+
+	console.log(`using gas price : ${gasPrice}`);
 
 	return gasPrice;
 }

@@ -235,5 +235,14 @@
 	},
 	"PynthpYFI": {
 		"deploy": false
+	},
+	"TokenStatepAPT": {
+		"deploy": false
+	},
+	"ProxyERC20pAPT": {
+		"deploy": false
+	},
+	"PynthpAPT": {
+		"deploy": false
 	}
 }

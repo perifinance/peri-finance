@@ -225,18 +225,9 @@ const deploy = async ({
 		return effectiveValue;
 	};
 
-	/* const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
-	testCost && console.log(`testCost: ${testCost}`);
-	const gwGasPrice = (parseInt(gasPrice) > 1
-		? Math.round(Number(gasPrice))
-		: Math.round(Number(gasPrice) * 1e9) / 1e9
-	).toString();
-	const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
-	console.log(`bClaimGasCos: ${bClaimGasCos}`, `test: ${test}`); */
-
-	// gasPrice = w3utils.toWei(await checkGasPrice(network, priority));
-	// const test = w3utils.toWei(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
-	// const gasTemp = multiplyDecimal(gasPrice, test);
+	// const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+	// const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
+	// console.log(`bClaimGasCos: ${bClaimGasCos}`, `gasPrice: ${gasPrice}`);
 
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
@@ -2577,6 +2568,7 @@ const deploy = async ({
 			pATOM: w3utils.toWei('0.003'),
 			pGLMR: w3utils.toWei('0.003'),
 			pOP: w3utils.toWei('0.003'),
+			pAPT: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2775,7 +2767,7 @@ const deploy = async ({
 		try {
 			gPrice = await checkGasPrice(network, 'standard');
 		} catch (e) {}
-		gPrice = w3utils.toWei(gPrice, 'gwei');
+		gPrice = w3utils.toWei(gPrice);
 
 		const bridgeClaimGasCost = await getDeployParameter('BRIDGE_CLAIM_GAS_COST');
 		bridgeClaimGasCost &&
@@ -2789,14 +2781,16 @@ const deploy = async ({
 			}));
 
 		const bridgeTransferGasCost = await getDeployParameter('BRIDGE_TRANSFER_GAS_COST');
+		const bridgeTCost = multiplyDecimal(bridgeTransferGasCost, gPrice).toString();
 		bridgeTransferGasCost &&
 			(await runStep({
 				contract: 'SystemSettings',
 				target: systemSettings,
 				read: 'bridgeTransferGasCost',
 				expected: input => input !== '0', // only change if zero
+				// expected: input => input === bridgeTCost,
 				write: 'setBridgeTransferGasCost',
-				writeArg: multiplyDecimal(bridgeTransferGasCost, w3utils.toWei(gPrice, 'gwei')).toString(), // multiply by gasPrice
+				writeArg: bridgeTCost, // multiply by gasPrice
 			}));
 
 		await runStep({
