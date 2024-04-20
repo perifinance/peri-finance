@@ -30,5 +30,9 @@
 	"DOT": {
 		"asset": "DOT",
 		"feed": "0x54B584eb643375C41c55ddD8Da4b90124b18d05c"
+	},
+	"FTM": {
+		"asset": "FTM",
+		"feed": "0x5e70fC5f38cB930F9BE8BEAEaF80CF927Af3B17E"
 	}
 }

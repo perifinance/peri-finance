@@ -3,5 +3,185 @@
 		"name": "pUSD",
 		"asset": "USD",
 		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pBTC",
+		"asset": "BTC",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pETH",
+		"asset": "ETH",
+		"subclass": "MultiCollateralPynth"
+	},
+	{
+		"name": "pAAVE",
+		"asset": "AAVE",
+		"category": "crypto"
+	},
+	{
+		"name": "pADA",
+		"asset": "ADA",
+		"category": "crypto"
+	},
+	{
+		"name": "pATOM",
+		"asset": "ATOM",
+		"category": "crypto"
+	},
+	{
+		"name": "pAVAX",
+		"asset": "AVAX",
+		"category": "crypto"
+	},
+	{
+		"name": "pAXS",
+		"asset": "AXS",
+		"category": "crypto"
+	},
+	{
+		"name": "pBCH",
+		"asset": "BCH",
+		"category": "crypto"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB",
+		"category": "crypto"
+	},
+	{
+		"name": "pCAKE",
+		"asset": "CAKE",
+		"category": "crypto"
+	},
+	{
+		"name": "pCOMP",
+		"asset": "COMP",
+		"category": "crypto"
+	},
+	{
+		"name": "pDOT",
+		"asset": "DOT",
+		"category": "crypto"
+	},
+	{
+		"name": "pDOGE",
+		"asset": "DOGE",
+		"category": "crypto"
+	},
+	{
+		"name": "pEOS",
+		"asset": "EOS",
+		"category": "crypto"
+	},
+	{
+		"name": "pFET",
+		"asset": "FET",
+		"category": "crypto"
+	},
+	{
+		"name": "pFTM",
+		"asset": "FTM",
+		"category": "crypto"
+	},
+	{
+		"name": "pICP",
+		"asset": "ICP",
+		"category": "crypto"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK",
+		"category": "crypto"
+	},
+	{
+		"name": "pLTC",
+		"asset": "LTC",
+		"category": "crypto"
+	},
+	{
+		"name": "pMATIC",
+		"asset": "MATIC",
+		"category": "crypto"
+	},
+	{
+		"name": "pNEAR",
+		"asset": "NEAR",
+		"category": "crypto"
+	},
+	{
+		"name": "pPAXG",
+		"asset": "PAXG",
+		"category": "crypto"
+	},
+	{
+		"name": "pSHIB",
+		"asset": "SHIB",
+		"category": "crypto"
+	},
+	{
+		"name": "pSOL",
+		"asset": "SOL",
+		"category": "crypto"
+	},
+	{
+		"name": "pSUSHI",
+		"asset": "SUSHI",
+		"category": "crypto"
+	},
+	{
+		"name": "pUNI",
+		"asset": "UNI",
+		"category": "crypto"
+	},
+	{
+		"name": "pXRP",
+		"asset": "XRP",
+		"category": "crypto"
+	},
+	{
+		"name": "pYFI",
+		"asset": "YFI",
+		"category": "crypto"
+	},
+	{
+		"name": "p1INCH",
+		"asset": "1INCH",
+		"category": "crypto"
+	},
+	{
+		"name": "pXAU",
+		"asset": "XAU",
+		"category": "commodity"
+	},
+	{
+		"name": "pXAG",
+		"asset": "XAG",
+		"category": "commodity"
+	},
+	{
+		"name": "pEUR",
+		"asset": "EUR",
+		"category": "forex"
+	},
+	{
+		"name": "pGBP",
+		"asset": "GBP",
+		"category": "forex"
+	},
+	{
+		"name": "pJPY",
+		"asset": "JPY",
+		"category": "forex"
+	},
+	{
+		"name": "pAUD",
+		"asset": "AUD",
+		"category": "forex"
+	},
+	{
+		"name": "pCHF",
+		"asset": "CHF",
+		"category": "forex"
 	}
 ]

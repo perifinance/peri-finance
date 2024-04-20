@@ -51,3 +51,7 @@ cache
 artifacts
 
 memo.txt
+
+
+# remix save files
+.deploys

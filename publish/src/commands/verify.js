@@ -27,12 +27,14 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	// Note: require this here as silent error is detected on require that impacts pretty-error
 	const solc = require('solc');
 
-	const networkScanKey = ['mumbai', 'polygon'].includes(network)
+	const networkScanKey = ['mumbai', 'polygon', 'amoy'].includes(network)
 		? process.env.POLYGONSCAN_KEY
 		: ['bsc', 'bsctest'].includes(network)
 		? process.env.BSCSCAN_KEY
-		: ['moonriver', 'moonbase-alphanet'].includes(network)
+		: ['moonriver', 'moonbase-alphanet', 'moonbeam'].includes(network)
 		? process.env.MOONBEAMSCAN_KEY
+		: ['base', 'base-sepolia'].includes(network)
+		? process.env.BASESCAN_KEY
 		: process.env.ETHERSCAN_KEY;
 
 	ensureNetwork(network);
@@ -238,7 +240,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 
 				if (status !== 'Pass - Verified') {
 					console.log(gray(' - Sleeping for 5 seconds and re-checking.'));
-					await new Promise(resolve => setTimeout(resolve, 5000));
+					await new Promise(resolve => setTimeout(resolve, 6000));
 				} else {
 					console.log(green(` - Verified ${name}`));
 					tableData.push([name, address, 'Successfully verified']);

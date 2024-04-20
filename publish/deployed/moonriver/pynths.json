@@ -11,22 +11,32 @@
 	},
 	{
 		"name": "pETH",
-		"asset": "ETH"
+		"asset": "ETH",
+		"category": "crypto"
 	},
 	{
 		"name": "pBNB",
-		"asset": "BNB"
+		"asset": "BNB",
+		"category": "crypto"
 	},
 	{
 		"name": "pAAVE",
-		"asset": "AAVE"
+		"asset": "AAVE",
+		"category": "crypto"
 	},
 	{
 		"name": "pLINK",
-		"asset": "LINK"
+		"asset": "LINK",
+		"category": "crypto"
 	},
 	{
 		"name": "pDOT",
-		"asset": "DOT"
+		"asset": "DOT",
+		"category": "crypto"
+	},
+	{
+		"name": "pFTM",
+		"asset": "FTM",
+		"category": "crypto"
 	}
 ]

@@ -198,7 +198,7 @@ const loadConnections = ({ network, useFork }) => {
 			: ['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)
 			? `https://api-${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io/api`
 			: ['base-sepolia', 'base'].includes(network)
-			? `https://api-${network === 'base' ? network : 'sepolia'}.basescan.org/api`
+			? `https://api${network === 'base' ? '' : '-sepolia'}.basescan.org/api`
 			: ['shibuya'].includes(network)
 			? `https://${network}.api.subscan.io`
 			: '';

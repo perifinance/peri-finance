@@ -23,8 +23,8 @@
 			"address": "0x737d328a16FB9e3cb196ECAa0e4f7847058BD2E1",
 			"source": "AddressResolver",
 			"link": "https://moonbeam.moonscan.io/address/0x737d328a16FB9e3cb196ECAa0e4f7847058BD2E1",
-			"timestamp": "2024-04-15T13:16:42.773Z",
-			"txn": "",
+			"timestamp": "2024-04-15T13:16:30.000Z",
+			"txn": "https://moonbeam.moonscan.io/tx/0x767b0f1f3c8bc56c138936010ece2955e8c6666d5628416beb728bdff2edd3f8",
 			"network": "moonbeam"
 		},
 		"ReadProxyAddressResolver": {
@@ -653,8 +653,8 @@
 			"address": "0x4C1674D352A4C04B4e571249602e65d0a0EB5a8E",
 			"source": "CollateralManager",
 			"link": "https://moonbeam.moonscan.io/address/0x4C1674D352A4C04B4e571249602e65d0a0EB5a8E",
-			"timestamp": "2024-04-15T14:19:32.185Z",
-			"txn": "",
+			"timestamp": "2024-04-15T14:19:18.000Z",
+			"txn": "https://moonbeam.moonscan.io/tx/0xd6a54abc580dd0ae3c3868648f2aa4f8f73501ffefe7386438c4b8d272e24740",
 			"network": "moonbeam"
 		},
 		"CollateralStateEth": {

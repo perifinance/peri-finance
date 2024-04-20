@@ -5,8 +5,8 @@
 			"address": "0x4b9CA958bECaA7EEa3A2801A4f8d5E3FbA500255",
 			"source": "SafeDecimalMath",
 			"link": "https://base.basescan.org/address/0x4b9CA958bECaA7EEa3A2801A4f8d5E3FbA500255",
-			"timestamp": "2024-04-17T17:06:54.892Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:06:53.000Z",
+			"txn": "https://base.basescan.org/tx/0xb3b52bc13217f7653e371271690c7d4b836a651a4271ed284be0dfccb08745b4",
 			"network": "base"
 		},
 		"Math": {
@@ -14,8 +14,8 @@
 			"address": "0x6bF7fDB0925A89572b3e546085AacAD10DA2e40b",
 			"source": "Math",
 			"link": "https://base.basescan.org/address/0x6bF7fDB0925A89572b3e546085AacAD10DA2e40b",
-			"timestamp": "2024-04-17T17:06:58.893Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:06:57.000Z",
+			"txn": "https://base.basescan.org/tx/0x6f9deaf42233ef2ff40ebc9ebd2358a252beedddee21e9e2784e4de6587c7521",
 			"network": "base"
 		},
 		"AddressResolver": {
@@ -23,8 +23,8 @@
 			"address": "0x737d328a16FB9e3cb196ECAa0e4f7847058BD2E1",
 			"source": "AddressResolver",
 			"link": "https://base.basescan.org/address/0x737d328a16FB9e3cb196ECAa0e4f7847058BD2E1",
-			"timestamp": "2024-04-17T17:07:02.865Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:01.000Z",
+			"txn": "https://base.basescan.org/tx/0xe2221acf7569f50c54163368b65abdeee51b31c2b134c860450f7b884d0d0437",
 			"network": "base"
 		},
 		"ReadProxyAddressResolver": {
@@ -32,8 +32,8 @@
 			"address": "0x0DD3CD7FAEA2a0F4C42Ef1647C315634F48dB90b",
 			"source": "ReadProxy",
 			"link": "https://base.basescan.org/address/0x0DD3CD7FAEA2a0F4C42Ef1647C315634F48dB90b",
-			"timestamp": "2024-04-17T17:07:06.518Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:05.000Z",
+			"txn": "https://base.basescan.org/tx/0xf2b0607ee3de59c8399f9e2fbb4d48933125be059fc696c69c29a93702918c24",
 			"network": "base"
 		},
 		"FlexibleStorage": {
@@ -41,8 +41,8 @@
 			"address": "0xA11b3A0411041DA84aC84858945426B2f0Ee0149",
 			"source": "FlexibleStorage",
 			"link": "https://base.basescan.org/address/0xA11b3A0411041DA84aC84858945426B2f0Ee0149",
-			"timestamp": "2024-04-17T17:07:15.083Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:13.000Z",
+			"txn": "https://base.basescan.org/tx/0x2e546c7d9db4635b423f6802fb4202e8df1d628e27ef6c5f7f8dc495e38a7caf",
 			"network": "base"
 		},
 		"SystemSettings": {
@@ -50,8 +50,8 @@
 			"address": "0xB65906910A181e0e166b7f9653a1C5CCF1Ef0Ba6",
 			"source": "SystemSettings",
 			"link": "https://base.basescan.org/address/0xB65906910A181e0e166b7f9653a1C5CCF1Ef0Ba6",
-			"timestamp": "2024-04-17T17:07:20.784Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:19.000Z",
+			"txn": "https://base.basescan.org/tx/0xc53c69c1284fa153adac8110383a58fca25fc75ecac1c78da8e6356307745651",
 			"network": "base"
 		},
 		"SystemStatus": {
@@ -59,8 +59,8 @@
 			"address": "0x5192bb3cF35ba5d923d98062d57c0f80C0d2AEAF",
 			"source": "SystemStatus",
 			"link": "https://base.basescan.org/address/0x5192bb3cF35ba5d923d98062d57c0f80C0d2AEAF",
-			"timestamp": "2024-04-17T17:07:25.907Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:23.000Z",
+			"txn": "https://base.basescan.org/tx/0xa4e72c6991d74b0e1d77665d230c64d6413da10655e2b62dba9bb5ade9a70c5e",
 			"network": "base"
 		},
 		"ExchangeRates": {
@@ -68,8 +68,8 @@
 			"address": "0x63FdAAf4424DB3FC4A46DF0A3B985849ef1dF938",
 			"source": "ExchangeRates",
 			"link": "https://base.basescan.org/address/0x63FdAAf4424DB3FC4A46DF0A3B985849ef1dF938",
-			"timestamp": "2024-04-17T17:07:31.186Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:07:29.000Z",
+			"txn": "https://base.basescan.org/tx/0xf75b6600ea3d2e55f0a824859b86ddc9029d818e625410e4e4ac97ff304363c6",
 			"network": "base"
 		},
 		"RewardEscrow": {
@@ -77,8 +77,8 @@
 			"address": "0xcC0165b5F2d11A26A0A9c2A1d8BA4aCcCfBA1b68",
 			"source": "RewardEscrow",
 			"link": "https://base.basescan.org/address/0xcC0165b5F2d11A26A0A9c2A1d8BA4aCcCfBA1b68",
-			"timestamp": "2024-04-17T17:09:05.278Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:03.000Z",
+			"txn": "https://base.basescan.org/tx/0xa57c1edb1eebf62aea4639f4a8e74ec0c539ba2e0bf660be2e1450526383c64e",
 			"network": "base"
 		},
 		"RewardEscrowV2": {
@@ -86,8 +86,8 @@
 			"address": "0x2C9D6F0AF5a7C41c18982ED657e3D9faAcE8a125",
 			"source": "RewardEscrowV2",
 			"link": "https://base.basescan.org/address/0x2C9D6F0AF5a7C41c18982ED657e3D9faAcE8a125",
-			"timestamp": "2024-04-17T17:09:11.378Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:09.000Z",
+			"txn": "https://base.basescan.org/tx/0xf7e2242dd9938c071fc41dcf2b4ed8127d68703cfce9951ceef1ebfc527d71ae",
 			"network": "base"
 		},
 		"PeriFinanceEscrow": {
@@ -95,8 +95,8 @@
 			"address": "0x17805756a94932a4B5d4eF9986fccc18080E6462",
 			"source": "PeriFinanceEscrow",
 			"link": "https://base.basescan.org/address/0x17805756a94932a4B5d4eF9986fccc18080E6462",
-			"timestamp": "2024-04-17T17:09:17.357Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:15.000Z",
+			"txn": "https://base.basescan.org/tx/0x74ea4061a33d9902697dda8e2d8dfbf1de76a7f8ec85f9db9d5e91cd9a150589",
 			"network": "base"
 		},
 		"PeriFinanceState": {
@@ -104,8 +104,8 @@
 			"address": "0x9f00620B2d4100045584C0F504eBF6CABd966CbD",
 			"source": "PeriFinanceState",
 			"link": "https://base.basescan.org/address/0x9f00620B2d4100045584C0F504eBF6CABd966CbD",
-			"timestamp": "2024-04-17T17:09:21.207Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:19.000Z",
+			"txn": "https://base.basescan.org/tx/0x86732b1f1845776edf5bf8a2843affc28b8ae986ea89d325f26a7c29eaa0871b",
 			"network": "base"
 		},
 		"ProxyFeePool": {
@@ -113,8 +113,8 @@
 			"address": "0xc39F74Fca8A4191bA9801360a9e2eAdB0BD6325F",
 			"source": "Proxy",
 			"link": "https://base.basescan.org/address/0xc39F74Fca8A4191bA9801360a9e2eAdB0BD6325F",
-			"timestamp": "2024-04-17T17:09:25.204Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:23.000Z",
+			"txn": "https://base.basescan.org/tx/0x3cc1c35a18db79b075996b5889bed9b41652eceaefa93cd1511e9d8696dcdc3f",
 			"network": "base"
 		},
 		"DelegateApprovalsEternalStorage": {
@@ -122,8 +122,8 @@
 			"address": "0xda8c9EA4b57752520a297B2A1986F0a231eED28f",
 			"source": "EternalStorage",
 			"link": "https://base.basescan.org/address/0xda8c9EA4b57752520a297B2A1986F0a231eED28f",
-			"timestamp": "2024-04-17T17:09:28.786Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:27.000Z",
+			"txn": "https://base.basescan.org/tx/0x97f0aa46990b925fdf17a32b8e75541789adb4c04f6d0a995d93280036aecb16",
 			"network": "base"
 		},
 		"DelegateApprovals": {
@@ -131,8 +131,8 @@
 			"address": "0x28b9aF62cAd148bedF9f11d2291C0B099642943e",
 			"source": "DelegateApprovals",
 			"link": "https://base.basescan.org/address/0x28b9aF62cAd148bedF9f11d2291C0B099642943e",
-			"timestamp": "2024-04-17T17:09:32.540Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:31.000Z",
+			"txn": "https://base.basescan.org/tx/0x381cd3372b1da4c083b4b179271b1f7ec88141f69db5d419f3109de39b5fa34b",
 			"network": "base"
 		},
 		"Liquidations": {
@@ -140,8 +140,8 @@
 			"address": "0x4269106Bf911bDF2eeAbcE621917c0590Cb4Bf6C",
 			"source": "Liquidations",
 			"link": "https://base.basescan.org/address/0x4269106Bf911bDF2eeAbcE621917c0590Cb4Bf6C",
-			"timestamp": "2024-04-17T17:09:41.689Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:39.000Z",
+			"txn": "https://base.basescan.org/tx/0x32aad73d045d31a8ddf698c7b0c033e2ef3ecd3af982bb7421e3c762643e5bd9",
 			"network": "base"
 		},
 		"EternalStorageLiquidations": {
@@ -149,8 +149,8 @@
 			"address": "0x74750732E3450C4FB9a3eD2F485372A2143271E3",
 			"source": "EternalStorage",
 			"link": "https://base.basescan.org/address/0x74750732E3450C4FB9a3eD2F485372A2143271E3",
-			"timestamp": "2024-04-17T17:09:47.232Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:45.000Z",
+			"txn": "https://base.basescan.org/tx/0x102466e8cf7014db13c84a65f8bc613ff8e2b33d1d47b5cf4a2c5dec25072247",
 			"network": "base"
 		},
 		"FeePoolEternalStorage": {
@@ -158,8 +158,8 @@
 			"address": "0xeFC338C8fAB66BFcE3D4d009516B16F2DF880D4A",
 			"source": "FeePoolEternalStorage",
 			"link": "https://base.basescan.org/address/0xeFC338C8fAB66BFcE3D4d009516B16F2DF880D4A",
-			"timestamp": "2024-04-17T17:09:50.409Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:49.000Z",
+			"txn": "https://base.basescan.org/tx/0xd2ce3066fee727ee44d2f247b4f1a40838680f2ceae8d89db3de9f3a5cb6350a",
 			"network": "base"
 		},
 		"FeePool": {
@@ -167,8 +167,8 @@
 			"address": "0x56155855c3414E4378fD2932e280348018C11a77",
 			"source": "FeePool",
 			"link": "https://base.basescan.org/address/0x56155855c3414E4378fD2932e280348018C11a77",
-			"timestamp": "2024-04-17T17:09:54.228Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:09:53.000Z",
+			"txn": "https://base.basescan.org/tx/0x971edc1c4e9a9583383d9588fbdf517164bab7c971311d9829424d69632ac30d",
 			"network": "base"
 		},
 		"FeePoolState": {
@@ -176,8 +176,8 @@
 			"address": "0x1b4dCf2c2a7A27EC9366c75dB27866a5C8799A82",
 			"source": "FeePoolState",
 			"link": "https://base.basescan.org/address/0x1b4dCf2c2a7A27EC9366c75dB27866a5C8799A82",
-			"timestamp": "2024-04-17T17:10:08.383Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:07.000Z",
+			"txn": "https://base.basescan.org/tx/0x9921453233fa2d3dbf2b8db98a0bb825f787e8f935900bf46db6beb1f894590f",
 			"network": "base"
 		},
 		"RewardsDistribution": {
@@ -185,8 +185,8 @@
 			"address": "0xF5986aCF09cd2F2A47add4E8D15441559E7974Ea",
 			"source": "RewardsDistribution",
 			"link": "https://base.basescan.org/address/0xF5986aCF09cd2F2A47add4E8D15441559E7974Ea",
-			"timestamp": "2024-04-17T17:10:12.172Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:11.000Z",
+			"txn": "https://base.basescan.org/tx/0x379e25b975d4809c96d7576b8b4a4e7b8497f51192f6d0d84e28ab2629b98e15",
 			"network": "base"
 		},
 		"ProxyERC20": {
@@ -194,8 +194,8 @@
 			"address": "0xa8dA6145919B7F710cb18dE3f5093860ED960c1b",
 			"source": "ProxyERC20",
 			"link": "https://base.basescan.org/address/0xa8dA6145919B7F710cb18dE3f5093860ED960c1b",
-			"timestamp": "2024-04-17T17:10:16.980Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:15.000Z",
+			"txn": "https://base.basescan.org/tx/0xba939815642a7236bed988422265b9a107de64bb6476df0e107c54cfbc1bc017",
 			"network": "base"
 		},
 		"TokenStatePeriFinance": {
@@ -203,8 +203,8 @@
 			"address": "0x77c13aC4EB207d2568188474a66cFe28287bdE02",
 			"source": "TokenState",
 			"link": "https://base.basescan.org/address/0x77c13aC4EB207d2568188474a66cFe28287bdE02",
-			"timestamp": "2024-04-17T17:10:20.936Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:19.000Z",
+			"txn": "https://base.basescan.org/tx/0x2e814a8fb55ede542c3b5c32373d5896e03699d14b02b810d44b0bcf9e0f99ce",
 			"network": "base"
 		},
 		"BlacklistManager": {
@@ -212,8 +212,8 @@
 			"address": "0x040aC44A4dCc8e1a66ddAA8B29746AcA8AEb9C02",
 			"source": "BlacklistManager",
 			"link": "https://base.basescan.org/address/0x040aC44A4dCc8e1a66ddAA8B29746AcA8AEb9C02",
-			"timestamp": "2024-04-17T17:10:24.902Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:23.000Z",
+			"txn": "https://base.basescan.org/tx/0xba54d47d85435f3c968ed984f09f82b281949ccd77449d1cebe1f914f4346f70",
 			"network": "base"
 		},
 		"PeriFinance": {
@@ -239,8 +239,8 @@
 			"address": "0xdE37084ee92F573081FFc25c4120f17E9818173c",
 			"source": "DebtCache",
 			"link": "https://base.basescan.org/address/0xdE37084ee92F573081FFc25c4120f17E9818173c",
-			"timestamp": "2024-04-17T17:11:18.049Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:15.000Z",
+			"txn": "https://base.basescan.org/tx/0x90e4e22117f81806b604859ca832273373d305ccf15e1bf51c29a81cf9f058c6",
 			"network": "base"
 		},
 		"Exchanger": {
@@ -248,8 +248,8 @@
 			"address": "0xf566040B93d6fDB2728F8D4660220D6b43A0aC5A",
 			"source": "Exchanger",
 			"link": "https://base.basescan.org/address/0xf566040B93d6fDB2728F8D4660220D6b43A0aC5A",
-			"timestamp": "2024-04-17T17:11:22.766Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:21.000Z",
+			"txn": "https://base.basescan.org/tx/0xd81eb8046249f8d8ce4a6c4450b373cee865d5d3d3e2a2f6a316664680b50876",
 			"network": "base"
 		},
 		"VirtualPynthIssuer": {
@@ -266,8 +266,8 @@
 			"address": "0xA868fa6218bfdEcDb6f0e503673AF9aCc67F4A7B",
 			"source": "ExchangeState",
 			"link": "https://base.basescan.org/address/0xA868fa6218bfdEcDb6f0e503673AF9aCc67F4A7B",
-			"timestamp": "2024-04-17T17:11:31.625Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:29.000Z",
+			"txn": "https://base.basescan.org/tx/0x74faafed41c7c67a8e61ad9c93224d863ed4f196838321263313ca6e65d65eb8",
 			"network": "base"
 		},
 		"Issuer": {
@@ -284,8 +284,8 @@
 			"address": "0xfEd2e47E09cC1e225E5C7C02660b611547c33eA3",
 			"source": "TradingRewards",
 			"link": "https://base.basescan.org/address/0xfEd2e47E09cC1e225E5C7C02660b611547c33eA3",
-			"timestamp": "2024-04-17T17:11:52.464Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:51.000Z",
+			"txn": "https://base.basescan.org/tx/0xdfdce97a65d747b93406ed8de835243ed149967f9d417e13ac9203354fbf8752",
 			"network": "base"
 		},
 		"EscrowChecker": {
@@ -293,8 +293,8 @@
 			"address": "0xd64Fcbd455C7D64F4e8c221Ad7f7359852AEa66d",
 			"source": "EscrowChecker",
 			"link": "https://base.basescan.org/address/0xd64Fcbd455C7D64F4e8c221Ad7f7359852AEa66d",
-			"timestamp": "2024-04-17T17:12:00.867Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:59.000Z",
+			"txn": "https://base.basescan.org/tx/0xe5427e0f6c536844e4e852230f430860c3436abe5c5f1265c22e7b9c98b6c2f3",
 			"network": "base"
 		},
 		"SupplySchedule": {
@@ -302,8 +302,8 @@
 			"address": "0x0B793C281A3a51E7c4f5E6bfe60457796EdE6a21",
 			"source": "SupplySchedule",
 			"link": "https://base.basescan.org/address/0x0B793C281A3a51E7c4f5E6bfe60457796EdE6a21",
-			"timestamp": "2024-04-17T17:12:13.138Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:12:11.000Z",
+			"txn": "https://base.basescan.org/tx/0x5b27108b370e1fbe56ede2f3e47b395406268ea20d942d48a0e8a76a4ab2983d",
 			"network": "base"
 		},
 		"TokenStatepUSD": {
@@ -311,8 +311,8 @@
 			"address": "0xF668242f68C818e91433b22D715ede4fe7090579",
 			"source": "TokenState",
 			"link": "https://base.basescan.org/address/0xF668242f68C818e91433b22D715ede4fe7090579",
-			"timestamp": "2024-04-17T17:12:34.827Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:12:33.000Z",
+			"txn": "https://base.basescan.org/tx/0xfd16c7fc8e5420bf66c6cd63e780f106f9fc92507eb807e7e42537bd9b4c9e58",
 			"network": "base"
 		},
 		"ProxyERC20pUSD": {
@@ -320,8 +320,8 @@
 			"address": "0xA7e9e51eB96D41eEE7676cE09A20D4137132FACa",
 			"source": "ProxyERC20",
 			"link": "https://base.basescan.org/address/0xA7e9e51eB96D41eEE7676cE09A20D4137132FACa",
-			"timestamp": "2024-04-17T17:12:39.254Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:12:37.000Z",
+			"txn": "https://base.basescan.org/tx/0xf796165db1b94798970fdd6c56559d4446baf65841301b6a4aaa9a0f59f63c68",
 			"network": "base"
 		},
 		"PynthpUSD": {
@@ -329,8 +329,8 @@
 			"address": "0x9019eb72BB577678cB2B39EA2150bCf61f9468dD",
 			"source": "MultiCollateralPynth",
 			"link": "https://base.basescan.org/address/0x9019eb72BB577678cB2B39EA2150bCf61f9468dD",
-			"timestamp": "2024-04-17T17:12:44.919Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:12:43.000Z",
+			"txn": "https://base.basescan.org/tx/0x46af52d709ebc738b35d9530f650a378fc58894b7d7746885eb9cf7a2bb8b69f",
 			"network": "base"
 		},
 		"BridgeStatepUSD": {
@@ -626,8 +626,8 @@
 			"address": "0xc54b0CAB3603A5A4d621C8cE4eE33a5F39B6a6d9",
 			"source": "Depot",
 			"link": "https://base.basescan.org/address/0xc54b0CAB3603A5A4d621C8cE4eE33a5F39B6a6d9",
-			"timestamp": "2024-04-17T17:17:51.102Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:17:49.000Z",
+			"txn": "https://base.basescan.org/tx/0xc7c583be6c28bc119073db04d972bca62314f95968bec537800d62dcac024704",
 			"network": "base"
 		},
 		"EtherCollateral": {
@@ -635,8 +635,8 @@
 			"address": "0x46a39DEee1F3c154aF6538Fc8B307d1C684EA052",
 			"source": "EtherCollateral",
 			"link": "https://base.basescan.org/address/0x46a39DEee1F3c154aF6538Fc8B307d1C684EA052",
-			"timestamp": "2024-04-17T17:17:57.032Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:17:55.000Z",
+			"txn": "https://base.basescan.org/tx/0x73519f6121903f9f01a816a87ae7695e69483db9dbc26c2c92f763b5f5b97d54",
 			"network": "base"
 		},
 		"EtherCollateralpUSD": {
@@ -644,8 +644,8 @@
 			"address": "0x3a402866d17a89a8Ea56607478C8Bc4Ef128B37d",
 			"source": "EtherCollateralpUSD",
 			"link": "https://base.basescan.org/address/0x3a402866d17a89a8Ea56607478C8Bc4Ef128B37d",
-			"timestamp": "2024-04-17T17:18:02.399Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:01.000Z",
+			"txn": "https://base.basescan.org/tx/0x92f9714fbaee5d1fcfd0ccd6b9717463d80724dbd50c2234bc410305268a382b",
 			"network": "base"
 		},
 		"PynthUtil": {
@@ -653,8 +653,8 @@
 			"address": "0x12C8b7D71Ca448cA0D1af021ed691315C94953c0",
 			"source": "PynthUtil",
 			"link": "https://base.basescan.org/address/0x12C8b7D71Ca448cA0D1af021ed691315C94953c0",
-			"timestamp": "2024-04-17T17:18:07.300Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:05.000Z",
+			"txn": "https://base.basescan.org/tx/0x0f7f9a22ffb7db2a623efd54b460d67db81869d26966e36157a526ba1d0c3d12",
 			"network": "base"
 		},
 		"DappMaintenance": {
@@ -662,8 +662,8 @@
 			"address": "0xD43A56F2342f39a41d4e81EA4405fDc65CFfabb5",
 			"source": "DappMaintenance",
 			"link": "https://base.basescan.org/address/0xD43A56F2342f39a41d4e81EA4405fDc65CFfabb5",
-			"timestamp": "2024-04-17T17:18:10.635Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:09.000Z",
+			"txn": "https://base.basescan.org/tx/0x68e22261ef3451fac4a8764139eeba727866db53c786764ab05baf535d39fe31",
 			"network": "base"
 		},
 		"CollateralManagerState": {
@@ -671,8 +671,8 @@
 			"address": "0x785191893E7022bc507D1cEAE52a29c43e65e5E6",
 			"source": "CollateralManagerState",
 			"link": "https://base.basescan.org/address/0x785191893E7022bc507D1cEAE52a29c43e65e5E6",
-			"timestamp": "2024-04-17T17:18:34.693Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:33.000Z",
+			"txn": "https://base.basescan.org/tx/0x91b9065d15ec94210b4c9733226c1ed7fc882c3942e1456dbec6b9d7751d9910",
 			"network": "base"
 		},
 		"CollateralManager": {
@@ -680,8 +680,8 @@
 			"address": "0xdD01256ef1eD46eB5b966494E45923ab6B073954",
 			"source": "CollateralManager",
 			"link": "https://base.basescan.org/address/0xdD01256ef1eD46eB5b966494E45923ab6B073954",
-			"timestamp": "2024-04-17T17:18:39.164Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:37.000Z",
+			"txn": "https://base.basescan.org/tx/0xbe670d98543df95d93a48da019c36ee343e4f1290629eae1de49895c83fd81e8",
 			"network": "base"
 		},
 		"CollateralStateEth": {
@@ -689,8 +689,8 @@
 			"address": "0x1B4f8A9065c4b83369eAef99B4473e9d7307158C",
 			"source": "CollateralState",
 			"link": "https://base.basescan.org/address/0x1B4f8A9065c4b83369eAef99B4473e9d7307158C",
-			"timestamp": "2024-04-17T17:18:48.596Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:47.000Z",
+			"txn": "https://base.basescan.org/tx/0xc6f24b9a2063cc105bf9f7f623a7988be918ddf4eba1f67987b5b04e48ac6044",
 			"network": "base"
 		},
 		"CollateralEth": {
@@ -698,8 +698,8 @@
 			"address": "0x2F47Ac75e0922f994759569cF020a001e5178Bc6",
 			"source": "CollateralEth",
 			"link": "https://base.basescan.org/address/0x2F47Ac75e0922f994759569cF020a001e5178Bc6",
-			"timestamp": "2024-04-17T17:18:52.715Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:51.000Z",
+			"txn": "https://base.basescan.org/tx/0xbfc05802c8a74a4824c9252ad087482f607d367d0f79d46c5cfa7b2d75a2b09b",
 			"network": "base"
 		},
 		"CollateralStateErc20": {
@@ -707,8 +707,8 @@
 			"address": "0xC30e228dcC425160A64089544535e94eb895d7fe",
 			"source": "CollateralState",
 			"link": "https://base.basescan.org/address/0xC30e228dcC425160A64089544535e94eb895d7fe",
-			"timestamp": "2024-04-17T17:19:01.279Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:18:59.000Z",
+			"txn": "https://base.basescan.org/tx/0x89e46eb08dc384db6cd2e2a89ba12033ea61a34f36e48fe94d161a76776aaa5c",
 			"network": "base"
 		},
 		"CollateralErc20": {
@@ -716,8 +716,8 @@
 			"address": "0x75C4C3ee1d06F46B8698493f4D56D93f2f3f186D",
 			"source": "CollateralErc20",
 			"link": "https://base.basescan.org/address/0x75C4C3ee1d06F46B8698493f4D56D93f2f3f186D",
-			"timestamp": "2024-04-17T17:19:05.116Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:19:03.000Z",
+			"txn": "https://base.basescan.org/tx/0xcf2b1777c678b0092870dc769acd7ed98214b46d8b84b77f5abf2eb5049b4a4a",
 			"network": "base"
 		},
 		"CollateralStateShort": {
@@ -725,8 +725,8 @@
 			"address": "0xCC59595a3FCeF9A1A84732319f72a72Bd9868C4C",
 			"source": "CollateralState",
 			"link": "https://base.basescan.org/address/0xCC59595a3FCeF9A1A84732319f72a72Bd9868C4C",
-			"timestamp": "2024-04-17T17:19:12.937Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:19:11.000Z",
+			"txn": "https://base.basescan.org/tx/0xb1c6a59365e9dadf39c77d484eccf837d28d0fbd7a4ef81226334176dae824a3",
 			"network": "base"
 		},
 		"CollateralShort": {
@@ -734,8 +734,8 @@
 			"address": "0x120Fd6abFa4821EACe5EBb5ce7558e1563347E47",
 			"source": "CollateralShort",
 			"link": "https://base.basescan.org/address/0x120Fd6abFa4821EACe5EBb5ce7558e1563347E47",
-			"timestamp": "2024-04-17T17:19:17.130Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:19:15.000Z",
+			"txn": "https://base.basescan.org/tx/0x52c3a8f8216fec26ad0a08a66d80f208fde312420554dcb6331ef853aed340dc",
 			"network": "base"
 		}
 	},

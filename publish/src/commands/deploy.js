@@ -1679,7 +1679,10 @@ const deploy = async ({
 	console.log(gray(`\n------ Deploy multi chain debt share related contracts ------\n`));
 
 	const crossStateConfig = config[`CrossChainState`] || {};
+
+	// // ToDo: This is one time test only, remove it after test
 	let oldCrossChainState;
+	// let oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
 	if (crossStateConfig.deploy) {
 		try {
 			oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
@@ -2940,7 +2943,7 @@ const deploy = async ({
 		// 	writeArg: [networkIds],
 		// });
 
-		// ----------------
+		// // ToDo: This one time setup should be uncommented when we are ready!
 		if (crossStateConfig.deploy && oldCrossChainState) {
 			await runStep({
 				contract: 'CrossChainManager',

@@ -131,9 +131,6 @@
 	"RewardEscrowV2": {
 		"deploy": false
 	},
-	"PeriFinanceBridgeToOptimism": {
-		"deploy": false
-	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
@@ -209,6 +206,9 @@
 	"CrossChainState": {
 		"deploy": false
 	},
+	"VirtualPynthIssuer": {
+		"deploy": false
+	},
 	"TokenStatepAAVE": {
 		"deploy": false
 	},
@@ -216,6 +216,15 @@
 		"deploy": false
 	},
 	"PynthpAAVE": {
+		"deploy": false
+	},
+	"TokenStatepFTM": {
+		"deploy": false
+	},
+	"ProxyERC20pFTM": {
+		"deploy": false
+	},
+	"PynthpFTM": {
 		"deploy": false
 	}
 }
