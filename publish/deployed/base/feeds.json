@@ -16,39 +16,39 @@
 		"asset": "USDT",
 		"feed": "0xf19d560eB8d2ADf07BD6D13ed03e1D11215721F9"
 	},
-	"BTC": {
+	"pBTC": {
 		"asset": "BTC",
 		"feed": "0xCCADC697c55bbB68dc5bCdf8d3CBe83CdD4E071E"
 	},
-	"ETH": {
+	"pETH": {
 		"asset": "ETH",
 		"feed": "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70"
 	},
-	"OP": {
+	"pOP": {
 		"asset": "OP",
 		"feed": "0x3E3A6bD129A63564FE7abde85FA67c3950569060"
 	},
-	"COMP": {
+	"pCOMP": {
 		"asset": "COMP",
 		"feed": "0x9DDa783DE64A9d1A60c49ca761EbE528C35BA428"
 	},
-	"LINK": {
+	"pLINK": {
 		"asset": "LINK",
 		"feed": "0x17CAb8FE31E32f08326e5E27412894e49B0f9D65"
 	},
-	"SNX": {
+	"pSNX": {
 		"asset": "SNX",
 		"feed": "0xe3971Ed6F1A5903321479Ef3148B5950c0612075"
 	},
-	"SOL": {
+	"pSOL": {
 		"asset": "SOL",
 		"feed": "0x975043adBb80fc32276CbF9Bbcfd4A601a12462D"
 	},
-	"YFI": {
+	"pYFI": {
 		"asset": "YFI",
 		"feed": "0xD40e758b5eC80820B68DFC302fc5Ce1239083548"
 	},
-	"APT": {
+	"pAPT": {
 		"asset": "APT",
 		"feed": "0x88a98431C25329AA422B21D147c1518b34dD36F4"
 	}

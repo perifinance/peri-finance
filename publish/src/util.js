@@ -442,7 +442,7 @@ function reportDeployedContracts({ deployer }) {
 	}
 }
 
-function estimateEtherGasPice(network, priority) {
+const estimateEtherGasPice = async (network, priority) => {
 	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
@@ -461,7 +461,7 @@ function estimateEtherGasPice(network, priority) {
 			}
 		})
 		.catch(e => console.log(e));
-}
+};
 
 function estimatePolygonGasPice(network, priority) {
 	const gasStationUrl = `https://${
@@ -591,7 +591,7 @@ async function checkGasPrice(network, priority) {
 	} else if (
 		['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia', 'local'].includes(network)
 	) {
-		gasPrice = await estimateEtherGasPice(priority);
+		gasPrice = await estimateEtherGasPice(network, priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);
 	} else if (['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)) {

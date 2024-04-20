@@ -5,7 +5,6 @@ const { gray, green, yellow, redBright, red } = require('chalk');
 const w3utils = require('web3-utils');
 const Deployer = require('../Deployer');
 const NonceManager = require('../NonceManager');
-const { multiplyDecimal } = require('../util');
 const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
@@ -226,8 +225,15 @@ const deploy = async ({
 	};
 
 	// const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
-	// const bClaimGasCos = multiplyDecimal(testCost, w3utils.toWei(gasPrice)).toString();
-	// console.log(`bClaimGasCos: ${bClaimGasCos}`, `gasPrice: ${gasPrice}`);
+	// const bClaimGasCost = (
+	// 	testCost.mul(w3utils.toBN(w3utils.toWei(gasPrice, 'gwei'))) / w3utils.toBN(10e9)
+	// ).toString();
+
+	// const testTCost = w3utils.toBN(await getDeployParameter('BRIDGE_TRANSFER_GAS_COST'));
+	// const bTGasCost = (
+	// 	testTCost.mul(w3utils.toBN(w3utils.toWei(gasPrice, 'gwei'))) / w3utils.toBN(10e9)
+	// ).toString();
+	// console.log(`bClaimGasCos: ${bClaimGasCost}`, `bTGasCost: ${bTGasCost}`, `gasPrice: ${gasPrice}`);
 
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
@@ -2770,30 +2776,32 @@ const deploy = async ({
 		try {
 			gPrice = await checkGasPrice(network, 'standard');
 		} catch (e) {}
-		gPrice = w3utils.toWei(gPrice);
+		gPrice = w3utils.toBN(w3utils.toWei(gPrice, 'gwei'));
 
-		const bridgeClaimGasCost = await getDeployParameter('BRIDGE_CLAIM_GAS_COST');
+		const bridgeClaimGasCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+		const bridgeCCost = bridgeClaimGasCost.mul(gPrice) / w3utils.toBN(10e9);
 		bridgeClaimGasCost &&
 			(await runStep({
 				contract: 'SystemSettings',
 				target: systemSettings,
 				read: 'bridgeClaimGasCost',
 				expected: input => input !== '0', // only change if zero
+				// expected: input => input === bridgeCCost.toString(),
 				write: 'setBridgeClaimGasCost',
-				writeArg: multiplyDecimal(bridgeClaimGasCost, gPrice).toString(), // multiply by gasPrice
+				writeArg: bridgeCCost.toString(), // multiply by gasPrice
 			}));
 
 		const bridgeTransferGasCost = await getDeployParameter('BRIDGE_TRANSFER_GAS_COST');
-		const bridgeTCost = multiplyDecimal(bridgeTransferGasCost, gPrice).toString();
+		const bridgeTCost = bridgeTransferGasCost.mul(gPrice) / w3utils.toBN(10e9);
 		bridgeTransferGasCost &&
 			(await runStep({
 				contract: 'SystemSettings',
 				target: systemSettings,
 				read: 'bridgeTransferGasCost',
 				expected: input => input !== '0', // only change if zero
-				// expected: input => input === bridgeTCost,
+				// expected: input => input === bridgeTCost.toString(),
 				write: 'setBridgeTransferGasCost',
-				writeArg: bridgeTCost, // multiply by gasPrice
+				writeArg: bridgeTCost.toString(), // multiply by gasPrice
 			}));
 
 		await runStep({

@@ -31,7 +31,9 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 		? process.env.POLYGONSCAN_KEY
 		: ['bsc', 'bsctest'].includes(network)
 		? process.env.BSCSCAN_KEY
-		: ['moonriver', 'moonbase-alphanet', 'moonbeam'].includes(network)
+		: ['moonriver', 'moonbase-alphanet'].includes(network)
+		? process.env.MOONRIVERSCAN_KEY
+		: ['moonbeam'].includes(network)
 		? process.env.MOONBEAMSCAN_KEY
 		: ['base', 'base-sepolia'].includes(network)
 		? process.env.BASESCAN_KEY
