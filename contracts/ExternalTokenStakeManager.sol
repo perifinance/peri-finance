@@ -961,7 +961,13 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint exTRatio;
         (exDebt, exEA, exTRatio) = _calcExEADebt(_account);
 
-        require(exEA > 0, "No external token staked");
+        // require(exEA > 0, "No external token staked");
+
+        if (exEA == 0) {
+            exDebt = _preciseMulToDecimal(_periCol, getIssuanceRatio());
+            burnAmount = _existDebt > exDebt ? _existDebt.sub(exDebt) : 0;
+            return (burnAmount, 0, 0);
+        }
 
         /* // get total SA(D) 
         uint tmpEA = _existDebt > exDebt

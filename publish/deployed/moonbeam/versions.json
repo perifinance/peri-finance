@@ -319,8 +319,9 @@
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0xdeeEef4729337bA53b28E60d176334F21769fc5f",
-				"status": "current",
-				"keccak256": "0x147c1b20ea2301697344330f89cbbb38002733abe5cd0883f52c816b12263615"
+				"status": "replaced",
+				"keccak256": "0x147c1b20ea2301697344330f89cbbb38002733abe5cd0883f52c816b12263615",
+				"replaced_in": "v0.7.25"
 			},
 			"CrossChainState": {
 				"address": "0x8f151e700772d6e8Dc7dA8B260c9e0C3eCbF4174",
@@ -437,6 +438,21 @@
 				"address": "0x93484588cf2345E4b2D788a80CCE0b1646971F30",
 				"status": "current",
 				"keccak256": "0x77bb52cfac7fc91a2a061a568a3b3e316e84836b9a57f195ea23fba792a94167"
+			}
+		}
+	},
+	"v0.7.25": {
+		"tag": "v0.7.25",
+		"fulltag": "v0.7.25",
+		"release": "peri-finance",
+		"network": "moonbeam",
+		"date": "2024-04-20T15:54:15+09:00",
+		"commit": "3be0ee1f459776ed9d3612612d1a5def8a0a2228",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0x187cE6E180fc6F2677237c541E94Dbb37A9ea987",
+				"status": "current",
+				"keccak256": "0xec03ade0a395d2faa2f10058338dc07955e432bc5c9d8ebc2f28e54bc25d590b"
 			}
 		}
 	}

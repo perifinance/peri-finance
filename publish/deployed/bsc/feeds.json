@@ -15,123 +15,119 @@
 		"asset": "USDT",
 		"feed": "0xD5c40f5144848Bd4EF08a9605d860e727b991513"
 	},
-	"pBTC": {
+	"BTC": {
 		"asset": "BTC",
 		"feed": "0x116EeB23384451C78ed366D4f67D5AD44eE771A0"
 	},
-	"pETH": {
+	"ETH": {
 		"asset": "ETH",
 		"feed": "0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726"
 	},
-	"pAAVE": {
+	"AAVE": {
 		"asset": "AAVE",
 		"feed": "0xA8357BF572460fC40f4B0aCacbB2a6A61c89f475"
 	},
-	"pADA": {
+	"ADA": {
 		"asset": "ADA",
 		"feed": "0x2d5Fc41d1365fFe13d03d91E82e04Ca878D69f4B"
 	},
-	"pATOM": {
+	"ATOM": {
 		"asset": "ATOM",
 		"feed": "0xb056B7C804297279A9a673289264c17E6Dc6055d"
 	},
-	"pAVAX": {
+	"AVAX": {
 		"asset": "AVAX",
 		"feed": "0x5974855ce31EE8E1fff2e76591CbF83D7110F151"
 	},
-	"pAXS": {
+	"AXS": {
 		"asset": "AXS",
 		"feed": "0x7B49524ee5740c99435f52d731dFC94082fE61Ab"
 	},
-	"pBCH": {
+	"BCH": {
 		"asset": "BCH",
 		"feed": "0x2a548935a323Bb7329a5E3F1667B979f16Bc890b"
 	},
-	"pBNB": {
+	"BNB": {
 		"asset": "BNB",
 		"feed": "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE"
 	},
-	"pCAKE": {
+	"CAKE": {
 		"asset": "CAKE",
 		"feed": "0xcB23da9EA243f53194CBc2380A6d4d9bC046161f"
 	},
-	"pCOMP": {
+	"COMP": {
 		"asset": "COMP",
 		"feed": "0x0Db8945f9aEf5651fa5bd52314C5aAe78DfDe540"
 	},
-	"pDOT": {
+	"DOT": {
 		"asset": "DOT",
 		"feed": "0xBA8683E9c3B1455bE6e18E7768e8cAD95Eb5eD49"
 	},
-	"pDOGE": {
+	"DOGE": {
 		"asset": "DOGE",
 		"feed": "0x3AB0A0d137D4F946fBB19eecc6e92E64660231C8"
 	},
-	"pEOS": {
+	"EOS": {
 		"asset": "EOS",
 		"feed": "0xed93F3764334788f2f6628b30e505fe1fc5d1D7b"
 	},
-	"pFET": {
+	"FET": {
 		"asset": "FET",
 		"feed": "0x657e700c66C48c135c4A29c4292908DbdA7aa280"
 	},
-	"pFTM": {
+	"FTM": {
 		"asset": "FTM",
 		"feed": "0xe2A47e87C0f4134c8D06A41975F6860468b2F925"
 	},
-	"pICP": {
+	"ICP": {
 		"asset": "ICP",
 		"feed": "0x84210d9013A30C6ab169e28840A6CC54B60fa042"
 	},
-	"pLINK": {
+	"LINK": {
 		"asset": "LINK",
 		"feed": "0xB38722F6A608646a538E882Ee9972D15c86Fc597"
 	},
-	"pLTC": {
+	"LTC": {
 		"asset": "LTC",
 		"feed": "0x4e5a43A79f53c0a8e83489648Ea7e429278f8b2D"
 	},
-	"pMATIC": {
+	"MATIC": {
 		"asset": "MATIC",
 		"feed": "0x7CA57b0cA6367191c94C8914d7Df09A57655905f"
 	},
-	"pNEAR": {
+	"NEAR": {
 		"asset": "NEAR",
 		"feed": "0x0Fe4D87883005fCAFaF56B81d09473D9A29dCDC3"
 	},
-	"pPAXG": {
-		"asset": "PAXG",
-		"feed": "0x7F8caD4690A38aC28BDA3D132eF83DB1C17557Df"
-	},
-	"pSHIB": {
+	"SHIB": {
 		"asset": "SHIB",
 		"feed": "0xA615Be6cb0f3F36A641858dB6F30B9242d0ABeD8"
 	},
-	"pSOL": {
+	"SOL": {
 		"asset": "SOL",
 		"feed": "0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323"
 	},
-	"pSUSHI": {
+	"SUSHI": {
 		"asset": "SUSHI",
 		"feed": "0xa679C72a97B654CFfF58aB704de3BA15Cde89B07"
 	},
-	"pUNI": {
+	"UNI": {
 		"asset": "UNI",
 		"feed": "0x25298F020c3CA1392da76Eb7Ac844813b218ccf7"
 	},
-	"pXRP": {
+	"XRP": {
 		"asset": "XRP",
 		"feed": "0x798A65D349B2B5E6645695912880b54dfFd79074"
 	},
-	"pYFI": {
+	"YFI": {
 		"asset": "YFI",
 		"feed": "0xF841761481DF19831cCC851A54D8350aE6022583"
 	},
-	"p1INCH": {
+	"1INCH": {
 		"asset": "1INCH",
 		"feed": "0x9a177Bb9f5b6083E962f9e62bD21d4b5660Aeb03"
 	},
-	"pXAU": {
+	"XAU": {
 		"asset": "XAU",
 		"feed": "0x86896fEB19D8A607c3b11f2aF50A0f239Bd71CD0"
 	},
@@ -139,23 +135,23 @@
 		"asset": "XAG",
 		"feed": "0x817326922c909b16944817c207562B25C4dF16aD"
 	},
-	"pEUR": {
+	"EUR": {
 		"asset": "EUR",
 		"feed": "0x0bf79F617988C472DcA68ff41eFe1338955b9A80"
 	},
-	"pGBP": {
+	"GBP": {
 		"asset": "GBP",
 		"feed": "0x8FAf16F710003E538189334541F5D4a391Da46a0"
 	},
-	"pJPY": {
+	"JPY": {
 		"asset": "JPY",
 		"feed": "0x22Db8397a6E77E41471dE256a7803829fDC8bC57"
 	},
-	"pAUD": {
+	"AUD": {
 		"asset": "AUD",
 		"feed": "0x498F912B09B5dF618c77fcC9E8DA503304Df92bF"
 	},
-	"pCHF": {
+	"CHF": {
 		"asset": "CHF",
 		"feed": "0x964261740356cB4aaD0C3D2003Ce808A4176a46d"
 	}

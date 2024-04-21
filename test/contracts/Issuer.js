@@ -1187,6 +1187,45 @@ contract('Issuer via PeriFinance', async accounts => {
 						assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('40000'));
 					});
 				});
+				describe('fitToClaimable with only PERI staked', () => {
+					it('should allow fitToClaimable when c-ratio is below 400%', async () => {
+						// Give some PERI to account1
+						await periFinance.transfer(account1, toUnit('10000'), {
+							from: owner,
+						});
+
+						await dai.transfer(account1, toUnit('1'), { from: owner });
+						await dai.approve(exTokenManager.address, toUnit('10000'), {
+							from: account1,
+						});
+
+						// They should now be able to issue pUSD
+						// Determine maximum amount that can be issued.
+						const { maxIssuable } = await issuer.maxIssuablePynths(account1);
+						// Issue
+						await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
+
+						await periFinance.issuePynths(DAI, toUnit('0.0000000001'), { from: account1 });
+
+						await fastForward(86400 + 1);
+
+						const timestamp = await currentTime();
+						await exchangeRates.updateRates(
+							[PERI, USDC, DAI, PAXG],
+							['8', '0.9', '1', '2000'].map(toUnit),
+							timestamp,
+							{ from: oracle }
+						);
+						await debtCache.takeDebtSnapshot();
+
+						const ratios0 = await issuer.getRatios(account1, false);
+						assert.bnGt(ratios0.cRatio, ratios0.tRatio);
+
+						await periFinance.fitToClaimable({ from: account1 });
+						const ratios1 = await issuer.getRatios(account1, false);
+						assert.bnClose(ratios1.cRatio, ratios1.tRatio, '0'.repeat(10));
+					});
+				});
 
 				beforeEach(async () => {
 					// Setting USD/PERI exchange rate to 10

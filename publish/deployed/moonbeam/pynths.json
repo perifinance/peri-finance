@@ -2,39 +2,48 @@
 	{
 		"name": "pUSD",
 		"asset": "USD",
-		"subclass": "MultiCollateralPynth"
+		"subclass": "MultiCollateralPynth",
+		"category": "crypto"
 	},
 	{
 		"name": "pBTC",
 		"asset": "BTC",
-		"subclass": "MultiCollateralPynth"
+		"subclass": "MultiCollateralPynth",
+		"category": "crypto"
 	},
 	{
 		"name": "pETH",
-		"asset": "ETH"
+		"asset": "ETH",
+		"category": "crypto"
 	},
 	{
 		"name": "pBNB",
-		"asset": "BNB"
+		"asset": "BNB",
+		"category": "crypto"
 	},
 	{
 		"name": "pATOM",
-		"asset": "ATOM"
+		"asset": "ATOM",
+		"category": "crypto"
 	},
 	{
 		"name": "pLINK",
-		"asset": "LINK"
+		"asset": "LINK",
+		"category": "crypto"
 	},
 	{
 		"name": "pDOT",
-		"asset": "DOT"
+		"asset": "DOT",
+		"category": "crypto"
 	},
 	{
 		"name": "pGLMR",
-		"asset": "GLMR"
+		"asset": "GLMR",
+		"category": "crypto"
 	},
 	{
 		"name": "pCAKE",
-		"asset": "CAKE"
+		"asset": "CAKE",
+		"category": "crypto"
 	}
 ]
