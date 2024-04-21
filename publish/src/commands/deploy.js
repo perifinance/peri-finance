@@ -1067,14 +1067,14 @@ const deploy = async ({
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
-	// if (freshDeploy || config['Exchanger'].deploy) {
-	await deployer.deployContract({
-		name: 'VirtualPynthIssuer',
-		source: 'VirtualPynthIssuer',
-		deps: ['AddressResolver'],
-		args: [account, addressOf(readProxyForResolver)],
-	});
-	// }
+	if (freshDeploy || config['Exchanger'].deploy) {
+		await deployer.deployContract({
+			name: 'VirtualPynthIssuer',
+			source: 'VirtualPynthIssuer',
+			deps: ['AddressResolver'],
+			args: [account, addressOf(readProxyForResolver)],
+		});
+	}
 
 	const exchangeState = await deployer.deployContract({
 		name: 'ExchangeState',
@@ -1686,10 +1686,8 @@ const deploy = async ({
 
 	const crossStateConfig = config[`CrossChainState`] || {};
 
-	// // ToDo: This is one time test only, remove it after test
 	let oldCrossChainState;
-	// let oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
-	if (crossStateConfig.deploy) {
+	if (crossStateConfig.deploy || crossStateConfig.migrate) {
 		try {
 			oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
 		} catch (err) {
@@ -2791,7 +2789,9 @@ const deploy = async ({
 				writeArg: bridgeCCost.toString(), // multiply by gasPrice
 			}));
 
-		const bridgeTransferGasCost = await getDeployParameter('BRIDGE_TRANSFER_GAS_COST');
+		const bridgeTransferGasCost = w3utils.toBN(
+			await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')
+		);
 		const bridgeTCost = bridgeTransferGasCost.mul(gPrice) / w3utils.toBN(10e9);
 		bridgeTransferGasCost &&
 			(await runStep({
@@ -2951,14 +2951,14 @@ const deploy = async ({
 		// 	writeArg: [networkIds],
 		// });
 
-		// // ToDo: This one time setup should be uncommented when we are ready!
-		if (crossStateConfig.deploy && oldCrossChainState) {
+		if (crossStateConfig.migrate && oldCrossChainState) {
 			await runStep({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
 				write: 'setInitialCurrentIssuedDebt',
 				writeArg: addressOf(oldCrossChainState),
 			});
+			deployer.updateMigrateDone({ name: 'CrossChainState' });
 		}
 	}
 
