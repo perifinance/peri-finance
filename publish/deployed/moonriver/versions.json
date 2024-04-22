@@ -3590,8 +3590,9 @@
 			},
 			"Liquidations": {
 				"address": "0x8F9fb90fdc5257D804662583C50De2F6Df2fA4bc",
-				"status": "current",
-				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20"
+				"status": "replaced",
+				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20",
+				"replaced_in": "v0.7.26"
 			},
 			"FeePool": {
 				"address": "0xF02058C9c2bB3b18E6f63D414392818e757674c8",
@@ -3663,6 +3664,21 @@
 				"address": "0x9ec6613eaafc049AC8B7d87Abeade6da7C4bD50f",
 				"status": "current",
 				"keccak256": "0xec03ade0a395d2faa2f10058338dc07955e432bc5c9d8ebc2f28e54bc25d590b"
+			}
+		}
+	},
+	"v0.7.26": {
+		"tag": "v0.7.26",
+		"fulltag": "v0.7.26",
+		"release": "peri-finance",
+		"network": "moonriver",
+		"date": "2024-04-22T03:05:55+09:00",
+		"commit": "37fe7f4c911cb0fb6255c72c0c92461bcd0c01fc",
+		"contracts": {
+			"Liquidations": {
+				"address": "0x46879973EB529F64e7fC5ae90709Ae95DcCA7f19",
+				"status": "current",
+				"keccak256": "0x87bea792cdd112378a0ce6c4d0760be3a4c2c6b2169a0f7dc76bab801e63fbe4"
 			}
 		}
 	}

@@ -126,11 +126,12 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     function isOpenForLiquidation(address account) external view returns (bool isOpen) {
         // get target ratio and c-ratio
-        (uint tRatio, uint cRatio, , , , ) = issuer().getRatios(account, true);
+        // (uint tRatio, uint cRatio, , , , ) = issuer().getRatios(account, true);
+        uint cRatio = issuer().collateralisationRatio(account);
         // uint lRatio = _liquidationRatio(account);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        isOpen = (tRatio < cRatio && _isOpenForLiquidation(account));
+        isOpen = (_liquidationRatio(account) > cRatio && _isOpenForLiquidation(account));
     }
 
     function isLiquidationDeadlinePassed(address account) external view returns (bool isPassed) {
@@ -274,6 +275,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         }
     }
 
+    /* 
     function maxLiquidateAmt(
         address account,
         uint pusdAmount,
@@ -332,6 +334,38 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
         // amountToLiquidate = totalRedeemed.sub(idealExSA);
         // idealExSA = exEA;
+    } */
+
+    function cRatioNDebtsCollateral(address _account)
+        external
+        view
+        returns (
+            uint tRatio,
+            uint cRatio,
+            uint exTRatio,
+            uint exEA,
+            uint debt,
+            uint periCol,
+            bool isLiquidateOpen
+        )
+    {
+        // get debt
+        debt = issuer().debtBalanceOf(_account, pUSD);
+
+        // get peri rate and check if it's invalid
+        uint rate;
+        (rate, ) = exchangeRates().rateAndInvalid(PERI);
+
+        // get PERI's collateral amount in pUSD
+        periCol = issuer().collateral(_account);
+
+        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenStakeManager().getRatios(
+            _account,
+            debt,
+            _preciseMulToDecimal(periCol, rate)
+        );
+
+        isLiquidateOpen = _liquidationRatio(_account) > cRatio && _isOpenForLiquidation(_account);
     }
 
     function _idealExAmount(
@@ -352,7 +386,10 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         (tRatio, idealExSA, exTR, exEA, exSR, ) = exTokenStakeManager().getRatios(_account, _existDebt, _periCol);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        require(tRatio < idealExSA && _isOpenForLiquidation(_account), "Account not open for liquidation");
+        require(
+            _liquidationRatio(_account) > idealExSA && _isOpenForLiquidation(_account),
+            "Account not open for liquidation"
+        );
 
         // uint periIR = getIssuanceRatio();
         // // Se-max = (Tmax - Tp) / (Te - Tp)
@@ -392,7 +429,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         require(!periRateInvalid, "PERI rate is invalid");
 
         // get PERI collateral
-        uint colinUSD = _preciseMulToDecimal(IERC20(address(periFinance())).balanceOf(account), periRate);
+        uint colinUSD = _preciseMulToDecimal(issuer().collateral(account), periRate);
 
         // get target ratio and c-ratio
         uint tRatio;

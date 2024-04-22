@@ -646,8 +646,9 @@
 			},
 			"Liquidations": {
 				"address": "0xa9a4CB6458b964d62DDF65964D233cfa7E89C7f9",
-				"status": "current",
-				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20"
+				"status": "replaced",
+				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20",
+				"replaced_in": "v0.7.26"
 			},
 			"SystemSettings": {
 				"address": "0x8342f5a2c849d7737776E1c41Eafa9ED146B1D94",
@@ -689,6 +690,21 @@
 				"address": "0x468BC1804aFa6cE807F75819f73B1349fe74f0De",
 				"status": "current",
 				"keccak256": "0xec03ade0a395d2faa2f10058338dc07955e432bc5c9d8ebc2f28e54bc25d590b"
+			}
+		}
+	},
+	"v0.7.26": {
+		"tag": "v0.7.26",
+		"fulltag": "v0.7.26",
+		"release": "peri-finance",
+		"network": "mainnet",
+		"date": "2024-04-22T03:05:55+09:00",
+		"commit": "37fe7f4c911cb0fb6255c72c0c92461bcd0c01fc",
+		"contracts": {
+			"Liquidations": {
+				"address": "0xd64Fcbd455C7D64F4e8c221Ad7f7359852AEa66d",
+				"status": "current",
+				"keccak256": "0x87bea792cdd112378a0ce6c4d0760be3a4c2c6b2169a0f7dc76bab801e63fbe4"
 			}
 		}
 	}
