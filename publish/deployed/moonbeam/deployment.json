@@ -137,10 +137,10 @@
 		},
 		"Liquidations": {
 			"name": "Liquidations",
-			"address": "0x54050E98665ae9097D359C82D6feFeFf3FDb8254",
+			"address": "0xea9351303b99ca478FB4048b070f6a5286631517",
 			"source": "Liquidations",
-			"link": "https://moonbeam.moonscan.io/address/0x54050E98665ae9097D359C82D6feFeFf3FDb8254",
-			"timestamp": "2024-04-22T14:26:18.924Z",
+			"link": "https://moonbeam.moonscan.io/address/0xea9351303b99ca478FB4048b070f6a5286631517",
+			"timestamp": "2024-04-22T15:42:02.470Z",
 			"txn": "",
 			"network": "moonbeam"
 		},

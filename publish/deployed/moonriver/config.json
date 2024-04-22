@@ -75,7 +75,7 @@
 		"deploy": false
 	},
 	"Liquidations": {
-		"deploy": false
+		"deploy": true
 	},
 	"RewardsDistribution": {
 		"deploy": false

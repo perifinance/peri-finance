@@ -173,10 +173,10 @@
 		},
 		"Liquidations": {
 			"name": "Liquidations",
-			"address": "0x741aAb879CBeA6beA8F167Db59317b6A9Da38940",
+			"address": "0x49AE921484C8D95C1f534f0179E815AB064086c8",
 			"source": "Liquidations",
-			"link": "https://bscscan.com/address/0x741aAb879CBeA6beA8F167Db59317b6A9Da38940",
-			"timestamp": "2024-04-22T14:05:41.930Z",
+			"link": "https://bscscan.com/address/0x49AE921484C8D95C1f534f0179E815AB064086c8",
+			"timestamp": "2024-04-22T15:40:11.038Z",
 			"txn": "",
 			"network": "bsc"
 		},

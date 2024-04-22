@@ -137,10 +137,10 @@
 		},
 		"Liquidations": {
 			"name": "Liquidations",
-			"address": "0x1BFC0F1Db566DaAF4138981a7fe489133C0a142C",
+			"address": "0x31936CEDDe51b2e5a647A7A26763a108E2b107F4",
 			"source": "Liquidations",
-			"link": "https://base.basescan.org/address/0x1BFC0F1Db566DaAF4138981a7fe489133C0a142C",
-			"timestamp": "2024-04-22T14:19:43.174Z",
+			"link": "https://base.basescan.org/address/0x31936CEDDe51b2e5a647A7A26763a108E2b107F4",
+			"timestamp": "2024-04-22T15:45:25.402Z",
 			"txn": "",
 			"network": "base"
 		},

@@ -467,6 +467,22 @@
 		"contracts": {
 			"Liquidations": {
 				"address": "0x54050E98665ae9097D359C82D6feFeFf3FDb8254",
+				"status": "replaced",
+				"keccak256": "0x87bea792cdd112378a0ce6c4d0760be3a4c2c6b2169a0f7dc76bab801e63fbe4",
+				"replaced_in": "v0.7.27-rc"
+			}
+		}
+	},
+	"v0.7.27-rc": {
+		"tag": "v0.7.27",
+		"fulltag": "v0.7.27-rc",
+		"release": "peri-finance",
+		"network": "moonbeam",
+		"date": "2024-04-22T23:35:15+09:00",
+		"commit": "0b4fe5b5ac4c7aa09e93718f16471e50ac7e97c9",
+		"contracts": {
+			"Liquidations": {
+				"address": "0xea9351303b99ca478FB4048b070f6a5286631517",
 				"status": "current",
 				"keccak256": "0x87bea792cdd112378a0ce6c4d0760be3a4c2c6b2169a0f7dc76bab801e63fbe4"
 			}

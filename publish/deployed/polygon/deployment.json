@@ -137,10 +137,10 @@
 		},
 		"Liquidations": {
 			"name": "Liquidations",
-			"address": "0xA883836cB03144fC1Ba8205E7C278ad822bb0952",
+			"address": "0xfF3B7722C5177aAB8AfC55aC8d05A1904aba19C3",
 			"source": "Liquidations",
-			"link": "https://polygonscan.com/address/0xA883836cB03144fC1Ba8205E7C278ad822bb0952",
-			"timestamp": "2024-04-22T13:50:50.381Z",
+			"link": "https://polygonscan.com/address/0xfF3B7722C5177aAB8AfC55aC8d05A1904aba19C3",
+			"timestamp": "2024-04-22T15:34:31.521Z",
 			"txn": "",
 			"network": "polygon"
 		},

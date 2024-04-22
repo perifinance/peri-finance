@@ -131,7 +131,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         // uint lRatio = _liquidationRatio(account);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        isOpen = (_liquidationRatio(account) > cRatio && _isOpenForLiquidation(account));
+        isOpen = (_liquidationRatio(account) < cRatio && _isOpenForLiquidation(account));
     }
 
     function isLiquidationDeadlinePassed(address account) external view returns (bool isPassed) {
@@ -365,7 +365,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
             _preciseMulToDecimal(periCol, rate)
         );
 
-        isLiquidateOpen = _liquidationRatio(_account) > cRatio && _isOpenForLiquidation(_account);
+        isLiquidateOpen = _liquidationRatio(_account) < cRatio && _isOpenForLiquidation(_account);
     }
 
     function _idealExAmount(
@@ -387,7 +387,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
         require(
-            _liquidationRatio(_account) > idealExSA && _isOpenForLiquidation(_account),
+            _liquidationRatio(_account) < idealExSA && _isOpenForLiquidation(_account),
             "Account not open for liquidation"
         );
 
