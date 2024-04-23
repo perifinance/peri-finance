@@ -372,7 +372,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         (tRatio, cRatio, exTRatio, exEA, , ) = exTokenStakeManager().getRatios(_account, debt, periCol);
 
         // only the amount of peri in wallet is available for liquidation
-        periCol = _preciseMulToDecimal(IERC20(address(periFinance())).balanceOf(_account), rate);
+        periCol = IERC20(address(periFinance())).balanceOf(_account);
 
         isLiquidateOpen = getLiquidationRatios(_liquidationType(tRatio)) < cRatio && _isOpenForLiquidation(_account);
     }

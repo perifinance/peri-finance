@@ -1288,8 +1288,24 @@
 		"contracts": {
 			"Liquidations": {
 				"address": "0x943A44c3354aa70a596A89eE702051ca4aaf8d64",
+				"status": "replaced",
+				"keccak256": "0x6f4259a60320483a689d46a188433ac9b867651784f2eec346c107dbeb49bfd2",
+				"replaced_in": "v0.7.30"
+			}
+		}
+	},
+	"v0.7.30": {
+		"tag": "v0.7.30",
+		"fulltag": "v0.7.30",
+		"release": "peri-finance",
+		"network": "bsc",
+		"date": "2024-04-23T01:36:26+09:00",
+		"commit": "146b51ff7cc23178f3efcbbfd3d4b8a729611e4d",
+		"contracts": {
+			"Liquidations": {
+				"address": "0x864aF672614D0c221e91CACbe7DF2EeB0BD3bbdd",
 				"status": "current",
-				"keccak256": "0x6f4259a60320483a689d46a188433ac9b867651784f2eec346c107dbeb49bfd2"
+				"keccak256": "0x50abe6bdeda177e0921004e180e628a891be16967f733eb372c11f603030c0a3"
 			}
 		}
 	}
