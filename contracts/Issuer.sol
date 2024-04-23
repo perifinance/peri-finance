@@ -606,7 +606,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return _debtsCollateral(_account, _checkRate);
     }
 
-    function cRatioNDebtsCollateral(address _account)
+    /* function cRatioNDebtsCollateral(address _account)
         external
         view
         returns (
@@ -628,7 +628,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         periCol = _collateral(_account);
 
         (tRatio, cRatio, exTRatio, exEA, , ) = exTokenManager().getRatios(_account, debt, _toUSD(periCol, rate));
-    }
+    } */
 
     function remainingIssuablePynths(
         address _issuer /* , bytes32 _currencyKey */
@@ -1146,7 +1146,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // What is their debt in pUSD?
         (uint debtBalance, uint totalDebtIssued, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, pUSD);
-        _requireRatesNotInvalid(anyRateIsInvalid); //--> moved to liquidations().liquidateAccount()
+        (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
+        _requireRatesNotInvalid(anyRateIsInvalid || periRateInvalid);
 
         /*uint collateralForAccountinUSD = _toUSD(IERC20(address(periFinance())).balanceOf(account), periRate);
 
@@ -1185,7 +1186,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             // Remove liquidation
             liquidations().removeAccountInLiquidation(account);
         } */
-        (totalRedeemed, amountToLiquidate) = liquidations().liquidateAccount(account, liquidator, pusdAmount, debtBalance);
+        periRate = _toUSD(_collateral(account), periRate);
+        (totalRedeemed, amountToLiquidate) = liquidations().liquidateAccount(
+            account,
+            liquidator,
+            pusdAmount,
+            debtBalance,
+            periRate
+        );
 
         // burn pUSD from messageSender (liquidator) and reduce account's debt
         _burnPynths(account, liquidator, amountToLiquidate, debtBalance, totalDebtIssued);

@@ -1042,8 +1042,9 @@
 			},
 			"Issuer": {
 				"address": "0xD43A56F2342f39a41d4e81EA4405fDc65CFfabb5",
-				"status": "current",
-				"keccak256": "0xb36b13933c3b7b2cd57596d0015235a3d5f5da91d91fdf303f9430cd0794c348"
+				"status": "replaced",
+				"keccak256": "0xb36b13933c3b7b2cd57596d0015235a3d5f5da91d91fdf303f9430cd0794c348",
+				"replaced_in": "v0.7.29-rc"
 			},
 			"ExternalTokenStakeManager": {
 				"address": "0xfeE19d9c4f0E853213aEaA440C414D1D03EE5582",
@@ -1410,8 +1411,29 @@
 		"contracts": {
 			"Liquidations": {
 				"address": "0x3202bDD6544Df2452Ce1853d342083D5bc674ab4",
+				"status": "replaced",
+				"keccak256": "0x6f4259a60320483a689d46a188433ac9b867651784f2eec346c107dbeb49bfd2",
+				"replaced_in": "v0.7.29-rc"
+			}
+		}
+	},
+	"v0.7.29-rc": {
+		"tag": "v0.7.29",
+		"fulltag": "v0.7.29-rc",
+		"release": "peri-finance",
+		"network": "polygon",
+		"date": "2024-04-23T01:36:26+09:00",
+		"commit": "146b51ff7cc23178f3efcbbfd3d4b8a729611e4d",
+		"contracts": {
+			"Liquidations": {
+				"address": "0x3205407a117717fF29FaF466BBDAD007040Ad3c0",
 				"status": "current",
-				"keccak256": "0x6f4259a60320483a689d46a188433ac9b867651784f2eec346c107dbeb49bfd2"
+				"keccak256": "0x19d3ea941901947c8c843b7cc4af9e3d3a2e26052173d3b5c50d18923a92dcc9"
+			},
+			"Issuer": {
+				"address": "0xaA6588872270168866B8c2b74838C7ECc9cADe78",
+				"status": "current",
+				"keccak256": "0xdb7e68380f1933efdf352fcc9b3a25021e9f7c415560e0cfddc38af106f80827"
 			}
 		}
 	}

@@ -101,14 +101,15 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
     function _liquidationRatio(address account) internal view returns (uint ratio) {
         ratio = issuer().getTargetRatio(account);
 
-        bytes32 userType =
-            ratio <= MAX_CP_ISSUANCE_RATIO
-                ? ratio == getIssuanceRatio()
-                    ? PERI_ONLY // 25e16           // 150% collateral ratio
-                    : COMPOUND // 8e17            // 125% collateral ratio
-                : INSTITUTION; // 8.333333e17            // 125% collateral ratio
+        ratio = getLiquidationRatios(_liquidationType(ratio));
+    }
 
-        ratio = getLiquidationRatios(userType);
+    function _liquidationType(uint tRatio) internal view returns (bytes32 userType) {
+        userType = tRatio <= MAX_CP_ISSUANCE_RATIO
+            ? tRatio == getIssuanceRatio()
+                ? PERI_ONLY // 25e16           // 150% collateral ratio
+                : COMPOUND // 8e17            // 125% collateral ratio
+            : INSTITUTION; // 8.333333e17            // 125% collateral ratio
     }
 
     function liquidationPenalty() external view returns (uint) {
@@ -126,13 +127,22 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
 
     function isOpenForLiquidation(address account) external view returns (bool isOpen) {
         // get target ratio and c-ratio
-        // (uint tRatio, uint cRatio, , , , ) = issuer().getRatios(account, true);
-        uint cRatio = issuer().collateralisationRatio(account);
-        // uint lRatio = _liquidationRatio(account);
+        (uint tRatio, uint cRatio, , , , ) = issuer().getRatios(account, true);
+
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        isOpen = (_liquidationRatio(account) < cRatio && _isOpenForLiquidation(account));
+        isOpen = (tRatio < cRatio && _isOpenForLiquidation(account));
     }
+
+    /*     function isOpenAndBelowRatio(address account) external view returns (bool isOpen) {
+        // get target ratio and c-ratio
+        (uint ratio, uint cRatio, , , , ) = issuer().getRatios(account, true);
+        ratio = getLiquidationRatios(_liquidationType(ratio));
+
+        // Liquidation closed if collateral ratio less than or equal target issuance Ratio
+        // Account with no peri collateral will also not be open for liquidation (ratio is 0)
+        isOpen = (ratio < cRatio && _isOpenForLiquidation(account));
+    } */
 
     function isLiquidationDeadlinePassed(address account) external view returns (bool isPassed) {
         // LiquidationEntry memory liquidation = _getLiquidationEntryForAccount(account);
@@ -365,7 +375,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
             _preciseMulToDecimal(periCol, rate)
         );
 
-        isLiquidateOpen = _liquidationRatio(_account) < cRatio && _isOpenForLiquidation(_account);
+        isLiquidateOpen = getLiquidationRatios(_liquidationType(tRatio)) < cRatio && _isOpenForLiquidation(_account);
     }
 
     function _idealExAmount(
@@ -386,10 +396,7 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         (tRatio, idealExSA, exTR, exEA, exSR, ) = exTokenStakeManager().getRatios(_account, _existDebt, _periCol);
         // Liquidation closed if collateral ratio less than or equal target issuance Ratio
         // Account with no peri collateral will also not be open for liquidation (ratio is 0)
-        require(
-            _liquidationRatio(_account) < idealExSA && _isOpenForLiquidation(_account),
-            "Account not open for liquidation"
-        );
+        require(tRatio < idealExSA && _isOpenForLiquidation(_account), "Account not open for liquidation");
 
         // uint periIR = getIssuanceRatio();
         // // Se-max = (Tmax - Tp) / (Te - Tp)
@@ -421,15 +428,16 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         address account,
         address liquidator,
         uint pusdAmount,
-        uint debtBalance
+        uint debtBalance,
+        uint colinUSD
     ) external onlyIssuer returns (uint totalRedeemed, uint amountToLiquidate) {
         systemStatus().requireSystemActive();
         require(pusdAmount > 0, "Liquidation amount can not be 0");
-        (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
-        require(!periRateInvalid, "PERI rate is invalid");
+        (uint periRate, ) = exchangeRates().rateAndInvalid(PERI);
+        // require(!periRateInvalid, "PERI rate is invalid");
 
         // get PERI collateral
-        uint colinUSD = _preciseMulToDecimal(issuer().collateral(account), periRate);
+        // uint colinUSD = _preciseMulToDecimal(issuer().collateral(account), periRate);
 
         // get target ratio and c-ratio
         uint tRatio;
