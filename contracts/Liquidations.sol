@@ -367,13 +367,12 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         (rate, ) = exchangeRates().rateAndInvalid(PERI);
 
         // get PERI's collateral amount in pUSD
-        periCol = issuer().collateral(_account);
+        periCol = _preciseMulToDecimal(issuer().collateral(_account), rate);
 
-        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenStakeManager().getRatios(
-            _account,
-            debt,
-            _preciseMulToDecimal(periCol, rate)
-        );
+        (tRatio, cRatio, exTRatio, exEA, , ) = exTokenStakeManager().getRatios(_account, debt, periCol);
+
+        // only the amount of peri in wallet is available for liquidation
+        periCol = _preciseMulToDecimal(IERC20(address(periFinance())).balanceOf(_account), rate);
 
         isLiquidateOpen = getLiquidationRatios(_liquidationType(tRatio)) < cRatio && _isOpenForLiquidation(_account);
     }
@@ -428,16 +427,15 @@ contract Liquidations is Owned, MixinSystemSettings, ILiquidations {
         address account,
         address liquidator,
         uint pusdAmount,
-        uint debtBalance,
-        uint colinUSD
+        uint debtBalance
     ) external onlyIssuer returns (uint totalRedeemed, uint amountToLiquidate) {
         systemStatus().requireSystemActive();
         require(pusdAmount > 0, "Liquidation amount can not be 0");
-        (uint periRate, ) = exchangeRates().rateAndInvalid(PERI);
-        // require(!periRateInvalid, "PERI rate is invalid");
+        (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
+        require(!periRateInvalid, "PERI rate is invalid");
 
         // get PERI collateral
-        // uint colinUSD = _preciseMulToDecimal(issuer().collateral(account), periRate);
+        uint colinUSD = _preciseMulToDecimal(IERC20(address(periFinance())).balanceOf(account), periRate);
 
         // get target ratio and c-ratio
         uint tRatio;

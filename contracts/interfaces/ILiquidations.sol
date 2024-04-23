@@ -27,8 +27,7 @@ interface ILiquidations {
         address account,
         address liquidator,
         uint pusdAmount,
-        uint debtBalance,
-        uint colinUSD
+        uint debtBalance
     ) external returns (uint totalRedeemed, uint amountToLiquidate);
 
     function checkAndRemoveAccountInLiquidation(address account) external;
