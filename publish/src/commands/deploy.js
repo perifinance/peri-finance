@@ -316,7 +316,7 @@ const deploy = async ({
 		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
 		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
 		const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
-		if (oldSupplySchedule) {
+		if (!config['SypplySchedule'].deploy && oldSupplySchedule) {
 			currentLastMintEvent = await oldSupplySchedule.methods.lastMintEvent().call();
 			currentWeekOfInflation = await oldSupplySchedule.methods.weekCounter().call();
 		} else {

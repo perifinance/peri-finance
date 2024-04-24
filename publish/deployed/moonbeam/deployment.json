@@ -290,10 +290,10 @@
 		},
 		"SupplySchedule": {
 			"name": "SupplySchedule",
-			"address": "0x6cB6dc41d3b79b21Ddd57FeE0f845d276449a9D3",
+			"address": "0x10f20453aA46C806211064EE81776d4554946c65",
 			"source": "SupplySchedule",
-			"link": "https://moonbeam.moonscan.io/address/0x6cB6dc41d3b79b21Ddd57FeE0f845d276449a9D3",
-			"timestamp": "2024-04-15T13:37:31.834Z",
+			"link": "https://moonbeam.moonscan.io/address/0x10f20453aA46C806211064EE81776d4554946c65",
+			"timestamp": "2024-04-24T14:37:06.959Z",
 			"txn": "",
 			"network": "moonbeam"
 		},
