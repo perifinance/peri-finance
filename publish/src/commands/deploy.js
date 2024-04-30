@@ -316,7 +316,7 @@ const deploy = async ({
 		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
 		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
 		const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
-		if (!config['SypplySchedule'].deploy && oldSupplySchedule) {
+		if (!config['SupplySchedule'].deploy && oldSupplySchedule) {
 			currentLastMintEvent = await oldSupplySchedule.methods.lastMintEvent().call();
 			currentWeekOfInflation = await oldSupplySchedule.methods.weekCounter().call();
 		} else {
@@ -2777,7 +2777,7 @@ const deploy = async ({
 		gPrice = w3utils.toBN(w3utils.toWei(gPrice, 'gwei'));
 
 		const bridgeClaimGasCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
-		const bridgeCCost = bridgeClaimGasCost.mul(gPrice) / w3utils.toBN(10e9);
+		const bridgeCCost = bridgeClaimGasCost.mul(gPrice).div(w3utils.toBN(10e9));
 		bridgeClaimGasCost &&
 			(await runStep({
 				contract: 'SystemSettings',
@@ -2792,7 +2792,7 @@ const deploy = async ({
 		const bridgeTransferGasCost = w3utils.toBN(
 			await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')
 		);
-		const bridgeTCost = bridgeTransferGasCost.mul(gPrice) / w3utils.toBN(10e9);
+		const bridgeTCost = bridgeTransferGasCost.mul(gPrice).div(w3utils.toBN(10e9));
 		bridgeTransferGasCost &&
 			(await runStep({
 				contract: 'SystemSettings',

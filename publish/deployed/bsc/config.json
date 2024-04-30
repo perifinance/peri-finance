@@ -293,15 +293,6 @@
 	"PynthpEOS": {
 		"deploy": false
 	},
-	"TokenStatepFET": {
-		"deploy": false
-	},
-	"ProxyERC20pFET": {
-		"deploy": false
-	},
-	"PynthpFET": {
-		"deploy": false
-	},
 	"TokenStatepFTM": {
 		"deploy": false
 	},

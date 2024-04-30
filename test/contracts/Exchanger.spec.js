@@ -1791,6 +1791,10 @@ contract('Exchanger (spec tests)', async accounts => {
 						const pAUDBalance = await pAUDContract.balanceOf(account1);
 						assert.bnEqual(amountReceived, pAUDBalance);
 
+						/* 						await exchanger.fixIssuedAmt(account1, pAUD, amountReceived, { from: owner });
+
+						const pAUDBal2 = await pAUDContract.balanceOf(account1);
+ */
 						// Assert we have the exchange fee to distribute
 						const feePeriodZero = await feePool.recentFeePeriods(0);
 						const usdFeeAmount = await exchangeRates.effectiveValue(pAUD, fee, pUSD);

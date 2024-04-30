@@ -5,23 +5,23 @@
 	},
 	"USDC": {
 		"asset": "USDC",
-		"feed": "0x45f86CA2A8BC9EBD757225B19a1A0D7051bE46Db"
+		"feed": "0x51597f405303C4377E36123cBc172b13269EA163"
 	},
 	"DAI": {
 		"asset": "DAI",
-		"feed": "0x8EC213E7191488C7873cEC6daC8e97cdbAdb7B35"
+		"feed": "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA"
 	},
 	"USDT": {
 		"asset": "USDT",
-		"feed": "0xD5c40f5144848Bd4EF08a9605d860e727b991513"
+		"feed": "0xB97Ad0E74fa7d920791E90258A6E2085088b4320"
 	},
 	"BTC": {
 		"asset": "BTC",
-		"feed": "0x116EeB23384451C78ed366D4f67D5AD44eE771A0"
+		"feed": "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf"
 	},
 	"ETH": {
 		"asset": "ETH",
-		"feed": "0x63D407F32Aa72E63C7209ce1c2F5dA40b3AaE726"
+		"feed": "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e"
 	},
 	"AAVE": {
 		"asset": "AAVE",
@@ -29,7 +29,7 @@
 	},
 	"ADA": {
 		"asset": "ADA",
-		"feed": "0x2d5Fc41d1365fFe13d03d91E82e04Ca878D69f4B"
+		"feed": "0xa767f745331D267c7751297D982b050c93985627"
 	},
 	"ATOM": {
 		"asset": "ATOM",
@@ -45,7 +45,7 @@
 	},
 	"BCH": {
 		"asset": "BCH",
-		"feed": "0x2a548935a323Bb7329a5E3F1667B979f16Bc890b"
+		"feed": "0x43d80f616DAf0b0B42a928EeD32147dC59027D41"
 	},
 	"BNB": {
 		"asset": "BNB",
@@ -53,7 +53,7 @@
 	},
 	"CAKE": {
 		"asset": "CAKE",
-		"feed": "0xcB23da9EA243f53194CBc2380A6d4d9bC046161f"
+		"feed": "0xB6064eD41d4f67e353768aA239cA86f4F73665a1"
 	},
 	"COMP": {
 		"asset": "COMP",
@@ -61,7 +61,7 @@
 	},
 	"DOT": {
 		"asset": "DOT",
-		"feed": "0xBA8683E9c3B1455bE6e18E7768e8cAD95Eb5eD49"
+		"feed": "0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592"
 	},
 	"DOGE": {
 		"asset": "DOGE",
@@ -69,11 +69,7 @@
 	},
 	"EOS": {
 		"asset": "EOS",
-		"feed": "0xed93F3764334788f2f6628b30e505fe1fc5d1D7b"
-	},
-	"FET": {
-		"asset": "FET",
-		"feed": "0x657e700c66C48c135c4A29c4292908DbdA7aa280"
+		"feed": "0xd5508c8Ffdb8F15cE336e629fD4ca9AdB48f50F0"
 	},
 	"FTM": {
 		"asset": "FTM",
@@ -85,11 +81,11 @@
 	},
 	"LINK": {
 		"asset": "LINK",
-		"feed": "0xB38722F6A608646a538E882Ee9972D15c86Fc597"
+		"feed": "0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8"
 	},
 	"LTC": {
 		"asset": "LTC",
-		"feed": "0x4e5a43A79f53c0a8e83489648Ea7e429278f8b2D"
+		"feed": "0x74E72F37A8c415c8f1a98Ed42E78Ff997435791D"
 	},
 	"MATIC": {
 		"asset": "MATIC",
@@ -113,15 +109,15 @@
 	},
 	"UNI": {
 		"asset": "UNI",
-		"feed": "0x25298F020c3CA1392da76Eb7Ac844813b218ccf7"
+		"feed": "0xb57f259E7C24e56a1dA00F66b55A5640d9f9E7e4"
 	},
 	"XRP": {
 		"asset": "XRP",
-		"feed": "0x798A65D349B2B5E6645695912880b54dfFd79074"
+		"feed": "0x93A67D414896A280bF8FFB3b389fE3686E014fda"
 	},
 	"YFI": {
 		"asset": "YFI",
-		"feed": "0xF841761481DF19831cCC851A54D8350aE6022583"
+		"feed": "0xD7eAa5Bf3013A96e3d515c055Dbd98DbdC8c620D"
 	},
 	"1INCH": {
 		"asset": "1INCH",

@@ -74,11 +74,6 @@
 		"category": "crypto"
 	},
 	{
-		"name": "pFET",
-		"asset": "FET",
-		"category": "crypto"
-	},
-	{
 		"name": "pFTM",
 		"asset": "FTM",
 		"category": "crypto"
