@@ -660,8 +660,9 @@
 			},
 			"Exchanger": {
 				"address": "0xF2464521b4F1Bca3913fbc34Ad88B7fB73799360",
-				"status": "current",
-				"keccak256": "0xd92a1bc336c63374de3fff06819426ce04575b2dffa763092a25f935837ba2ba"
+				"status": "replaced",
+				"keccak256": "0xd92a1bc336c63374de3fff06819426ce04575b2dffa763092a25f935837ba2ba",
+				"replaced_in": "v0.7.30-bsc"
 			},
 			"Issuer": {
 				"address": "0x993308a2AD954b94d3Ee3AD04CCc29824b2120B2",
@@ -896,17 +897,17 @@
 			},
 			"TokenStatepFET": {
 				"address": "0x1Fde7043f6ABD5828Af794Fa15B39A0197e19445",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
 			},
 			"ProxyERC20pFET": {
 				"address": "0xCC59595a3FCeF9A1A84732319f72a72Bd9868C4C",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
 			},
 			"PynthpFET": {
 				"address": "0x120Fd6abFa4821EACe5EBb5ce7558e1563347E47",
-				"status": "current",
+				"status": "deleted",
 				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
 			},
 			"TokenStatepFTM": {
@@ -1306,6 +1307,21 @@
 				"address": "0x864aF672614D0c221e91CACbe7DF2EeB0BD3bbdd",
 				"status": "current",
 				"keccak256": "0x50abe6bdeda177e0921004e180e628a891be16967f733eb372c11f603030c0a3"
+			}
+		}
+	},
+	"v0.7.30-bsc": {
+		"tag": "v0.7.30",
+		"fulltag": "v0.7.30-bsc",
+		"release": "peri-finance",
+		"network": "bsc",
+		"date": "2024-04-30T17:05:42+09:00",
+		"commit": "6dddb0dbb674aa8bebfae550f72b83d3337a05bf",
+		"contracts": {
+			"Exchanger": {
+				"address": "0x3aaB829c2035A60Bb60b9730b0B25bDf0d55ca47",
+				"status": "current",
+				"keccak256": "0xec64c667ccbaa5b3230b9dda10ba93cbd4fbdec7caf39ed9bcdda528fd487e9d"
 			}
 		}
 	}
