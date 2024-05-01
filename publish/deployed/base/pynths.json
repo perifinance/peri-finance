@@ -41,5 +41,17 @@
 	{
 		"name": "pAPT",
 		"asset": "APT"
+	},
+	{
+		"name": "pAVAX",
+		"asset": "AVAX"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB"
+	},
+	{
+		"name": "pMATIC",
+		"asset": "MATIC"
 	}
 ]

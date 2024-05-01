@@ -18,7 +18,7 @@
 	},
 	"BTC": {
 		"asset": "BTC",
-		"feed": "0xCCADC697c55bbB68dc5bCdf8d3CBe83CdD4E071E"
+		"feed": "0x64c911996D3c6aC71f9b455B1E8E7266BcbD848F"
 	},
 	"ETH": {
 		"asset": "ETH",
@@ -51,5 +51,17 @@
 	"APT": {
 		"asset": "APT",
 		"feed": "0x88a98431C25329AA422B21D147c1518b34dD36F4"
+	},
+	"AVAX": {
+		"asset": "AVAX",
+		"feed": "0xE70f2D34Fd04046aaEC26a198A35dD8F2dF5cd92"
+	},
+	"BNB": {
+		"asset": "BNB",
+		"feed": "0x4b7836916781CAAfbb7Bd1E5FDd20ED544B453b1"
+	},
+	"MATIC": {
+		"asset": "MATIC",
+		"feed": "0x12129aAC52D6B0f0125677D4E1435633E61fD25f"
 	}
 }

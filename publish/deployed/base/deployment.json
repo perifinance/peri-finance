@@ -737,6 +737,87 @@
 			"timestamp": "2024-04-17T17:19:15.000Z",
 			"txn": "https://base.basescan.org/tx/0x52c3a8f8216fec26ad0a08a66d80f208fde312420554dcb6331ef853aed340dc",
 			"network": "base"
+		},
+		"TokenStatepAVAX": {
+			"name": "TokenStatepAVAX",
+			"address": "0x52805D7FE3a5032260DAAA7e405059CfF9940f0F",
+			"source": "TokenState",
+			"link": "https://base.basescan.org/address/0x52805D7FE3a5032260DAAA7e405059CfF9940f0F",
+			"timestamp": "2024-05-01T09:09:26.572Z",
+			"txn": "",
+			"network": "base"
+		},
+		"ProxyERC20pAVAX": {
+			"name": "ProxyERC20pAVAX",
+			"address": "0xa9B47197D8e68710F2dA6fB42bFaF7Ce0b150d30",
+			"source": "ProxyERC20",
+			"link": "https://base.basescan.org/address/0xa9B47197D8e68710F2dA6fB42bFaF7Ce0b150d30",
+			"timestamp": "2024-05-01T09:09:30.524Z",
+			"txn": "",
+			"network": "base"
+		},
+		"PynthpAVAX": {
+			"name": "PynthpAVAX",
+			"address": "0x19fE395F8034a645AE3f318168C72551900E4984",
+			"source": "Pynth",
+			"link": "https://base.basescan.org/address/0x19fE395F8034a645AE3f318168C72551900E4984",
+			"timestamp": "2024-05-01T09:09:34.471Z",
+			"txn": "",
+			"network": "base"
+		},
+		"TokenStatepBNB": {
+			"name": "TokenStatepBNB",
+			"address": "0xb9c5F6760e9FA2f1B32dd02e557ED77e2AeCdCE3",
+			"source": "TokenState",
+			"link": "https://base.basescan.org/address/0xb9c5F6760e9FA2f1B32dd02e557ED77e2AeCdCE3",
+			"timestamp": "2024-05-01T09:09:50.240Z",
+			"txn": "",
+			"network": "base"
+		},
+		"ProxyERC20pBNB": {
+			"name": "ProxyERC20pBNB",
+			"address": "0xA767085ef8d6731B39c9731b53969B7bA62F8678",
+			"source": "ProxyERC20",
+			"link": "https://base.basescan.org/address/0xA767085ef8d6731B39c9731b53969B7bA62F8678",
+			"timestamp": "2024-05-01T09:09:54.663Z",
+			"txn": "",
+			"network": "base"
+		},
+		"PynthpBNB": {
+			"name": "PynthpBNB",
+			"address": "0x10f20453aA46C806211064EE81776d4554946c65",
+			"source": "Pynth",
+			"link": "https://base.basescan.org/address/0x10f20453aA46C806211064EE81776d4554946c65",
+			"timestamp": "2024-05-01T09:09:58.684Z",
+			"txn": "",
+			"network": "base"
+		},
+		"TokenStatepMATIC": {
+			"name": "TokenStatepMATIC",
+			"address": "0xfeE19d9c4f0E853213aEaA440C414D1D03EE5582",
+			"source": "TokenState",
+			"link": "https://base.basescan.org/address/0xfeE19d9c4f0E853213aEaA440C414D1D03EE5582",
+			"timestamp": "2024-05-01T09:10:15.056Z",
+			"txn": "",
+			"network": "base"
+		},
+		"ProxyERC20pMATIC": {
+			"name": "ProxyERC20pMATIC",
+			"address": "0x10A1B364068ef7fD10544d46d8eF76d35E717403",
+			"source": "ProxyERC20",
+			"link": "https://base.basescan.org/address/0x10A1B364068ef7fD10544d46d8eF76d35E717403",
+			"timestamp": "2024-05-01T09:10:18.888Z",
+			"txn": "",
+			"network": "base"
+		},
+		"PynthpMATIC": {
+			"name": "PynthpMATIC",
+			"address": "0x232a0621dF8b997c0d4EEea9aeac0DFDeCA441e1",
+			"source": "Pynth",
+			"link": "https://base.basescan.org/address/0x232a0621dF8b997c0d4EEea9aeac0DFDeCA441e1",
+			"timestamp": "2024-05-01T09:10:22.959Z",
+			"txn": "",
+			"network": "base"
 		}
 	},
 	"sources": {

@@ -244,5 +244,32 @@
 	},
 	"PynthpAPT": {
 		"deploy": false
+	},
+	"TokenStatepAVAX": {
+		"deploy": false
+	},
+	"ProxyERC20pAVAX": {
+		"deploy": false
+	},
+	"PynthpAVAX": {
+		"deploy": false
+	},
+	"TokenStatepBNB": {
+		"deploy": false
+	},
+	"ProxyERC20pBNB": {
+		"deploy": false
+	},
+	"PynthpBNB": {
+		"deploy": false
+	},
+	"TokenStatepMATIC": {
+		"deploy": false
+	},
+	"ProxyERC20pMATIC": {
+		"deploy": false
+	},
+	"PynthpMATIC": {
+		"deploy": false
 	}
 }

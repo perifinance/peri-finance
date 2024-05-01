@@ -498,5 +498,60 @@
 				"keccak256": "0x50abe6bdeda177e0921004e180e628a891be16967f733eb372c11f603030c0a3"
 			}
 		}
+	},
+	"v0.7.32": {
+		"tag": "v0.7.32",
+		"fulltag": "v0.7.32",
+		"release": "peri-finance",
+		"network": "base",
+		"date": "2024-04-23T14:40:10+09:00",
+		"commit": "e2a4976bca46ac50b52d9235c5483696d6103bb8",
+		"contracts": {
+			"TokenStatepAVAX": {
+				"address": "0x52805D7FE3a5032260DAAA7e405059CfF9940f0F",
+				"status": "current",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+			},
+			"ProxyERC20pAVAX": {
+				"address": "0xa9B47197D8e68710F2dA6fB42bFaF7Ce0b150d30",
+				"status": "current",
+				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
+			},
+			"PynthpAVAX": {
+				"address": "0x19fE395F8034a645AE3f318168C72551900E4984",
+				"status": "current",
+				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
+			},
+			"TokenStatepBNB": {
+				"address": "0xb9c5F6760e9FA2f1B32dd02e557ED77e2AeCdCE3",
+				"status": "current",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+			},
+			"ProxyERC20pBNB": {
+				"address": "0xA767085ef8d6731B39c9731b53969B7bA62F8678",
+				"status": "current",
+				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
+			},
+			"PynthpBNB": {
+				"address": "0x10f20453aA46C806211064EE81776d4554946c65",
+				"status": "current",
+				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
+			},
+			"TokenStatepMATIC": {
+				"address": "0xfeE19d9c4f0E853213aEaA440C414D1D03EE5582",
+				"status": "current",
+				"keccak256": "0x3f14e6166fe51fd37f1007318b3bc58541fe01e78aecc945bad7dd32aba8f955"
+			},
+			"ProxyERC20pMATIC": {
+				"address": "0x10A1B364068ef7fD10544d46d8eF76d35E717403",
+				"status": "current",
+				"keccak256": "0xc7f4e6f1557878a0b3d3b6f6f771dd269a57e29ae448b4a9d0fee9eafa692a29"
+			},
+			"PynthpMATIC": {
+				"address": "0x232a0621dF8b997c0d4EEea9aeac0DFDeCA441e1",
+				"status": "current",
+				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
+			}
+		}
 	}
 }
