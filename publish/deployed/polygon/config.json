@@ -137,9 +137,6 @@
 	"RewardEscrowV2": {
 		"deploy": false
 	},
-	"PeriFinanceBridgeToOptimism": {
-		"deploy": false
-	},
 	"ProxyERC20pUSD": {
 		"deploy": false
 	},
@@ -159,6 +156,9 @@
 		"deploy": false
 	},
 	"CrossChainManager": {
+		"deploy": false
+	},
+	"VirtualPynthIssuer": {
 		"deploy": false
 	},
 	"BridgeState": {
@@ -354,6 +354,177 @@
 		"deploy": false
 	},
 	"PynthpSOL": {
+		"deploy": false
+	},
+	"TokenStatepADA": {
+		"deploy": false
+	},
+	"ProxyERC20pADA": {
+		"deploy": false
+	},
+	"PynthpADA": {
+		"deploy": false
+	},
+	"TokenStatepBCH": {
+		"deploy": false
+	},
+	"ProxyERC20pBCH": {
+		"deploy": false
+	},
+	"PynthpBCH": {
+		"deploy": false
+	},
+	"TokenStatepDOGE": {
+		"deploy": false
+	},
+	"ProxyERC20pDOGE": {
+		"deploy": false
+	},
+	"PynthpDOGE": {
+		"deploy": false
+	},
+	"TokenStatepEOS": {
+		"deploy": false
+	},
+	"ProxyERC20pEOS": {
+		"deploy": false
+	},
+	"PynthpEOS": {
+		"deploy": false
+	},
+	"TokenStatepFTM": {
+		"deploy": false
+	},
+	"ProxyERC20pFTM": {
+		"deploy": false
+	},
+	"PynthpFTM": {
+		"deploy": false
+	},
+	"TokenStatepGRT": {
+		"deploy": false
+	},
+	"ProxyERC20pGRT": {
+		"deploy": false
+	},
+	"PynthpGRT": {
+		"deploy": false
+	},
+	"TokenStatepICP": {
+		"deploy": false
+	},
+	"ProxyERC20pICP": {
+		"deploy": false
+	},
+	"PynthpICP": {
+		"deploy": false
+	},
+	"TokenStatepLTC": {
+		"deploy": false
+	},
+	"ProxyERC20pLTC": {
+		"deploy": false
+	},
+	"PynthpLTC": {
+		"deploy": false
+	},
+	"TokenStatepMATIC": {
+		"deploy": false
+	},
+	"ProxyERC20pMATIC": {
+		"deploy": false
+	},
+	"PynthpMATIC": {
+		"deploy": false
+	},
+	"TokenStatepPAXG": {
+		"deploy": false
+	},
+	"ProxyERC20pPAXG": {
+		"deploy": false
+	},
+	"PynthpPAXG": {
+		"deploy": false
+	},
+	"TokenStatepXAU": {
+		"deploy": false
+	},
+	"ProxyERC20pXAU": {
+		"deploy": false
+	},
+	"PynthpXAU": {
+		"deploy": false
+	},
+	"TokenStatepXAG": {
+		"deploy": false
+	},
+	"ProxyERC20pXAG": {
+		"deploy": false
+	},
+	"PynthpXAG": {
+		"deploy": false
+	},
+	"TokenStatepGBP": {
+		"deploy": false
+	},
+	"ProxyERC20pGBP": {
+		"deploy": false
+	},
+	"PynthpGBP": {
+		"deploy": false
+	},
+	"TokenStatepJPY": {
+		"deploy": false
+	},
+	"ProxyERC20pJPY": {
+		"deploy": false
+	},
+	"PynthpJPY": {
+		"deploy": false
+	},
+	"TokenStatepCHF": {
+		"deploy": false
+	},
+	"ProxyERC20pCHF": {
+		"deploy": false
+	},
+	"PynthpCHF": {
+		"deploy": false
+	},
+	"TokenStatepAUD": {
+		"deploy": false
+	},
+	"ProxyERC20pAUD": {
+		"deploy": false
+	},
+	"PynthpAUD": {
+		"deploy": false
+	},
+	"TokenStatepNZD": {
+		"deploy": false
+	},
+	"ProxyERC20pNZD": {
+		"deploy": false
+	},
+	"PynthpNZD": {
+		"deploy": false
+	},
+	"TokenStatepCAD": {
+		"deploy": false
+	},
+	"ProxyERC20pCAD": {
+		"deploy": false
+	},
+	"PynthpCAD": {
+		"deploy": false
+	},
+	"TokenStatepDPI": {
+		"deploy": false
+	},
+	"ProxyERC20pDPI": {
+		"deploy": false
+	},
+	"PynthpDPI": {
 		"deploy": false
 	}
 }

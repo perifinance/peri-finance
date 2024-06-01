@@ -139,9 +139,7 @@ describe('deployments', () => {
 					const pynths = getPynths();
 
 					it(`The number of available pynths in PeriFinance matches the number of pynths in the JSON file: ${pynths.length}`, async () => {
-						const availablePynths = await contracts.PeriFinance.methods
-							.availableCurrencyKeys()
-							.call();
+						const availablePynths = await contracts.Issuer.methods.availableCurrencyKeys().call();
 						assert.strictEqual(availablePynths.length, pynths.length);
 					});
 					pynths.forEach(({ name, inverted, feed, index }) => {

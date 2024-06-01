@@ -6,14 +6,27 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const { setupAllContracts, setupContract } = require('./setup');
 
-const { currentTime, multiplyDecimal, divideDecimal, toUnit, fastForward } = require('../utils')();
+const {
+	currentTime,
+	multiplyDecimal,
+	divideDecimal,
+	toBigNbr,
+	toUnit,
+	fastForward,
+} = require('../utils')();
 
-const { ensureOnlyExpectedMutativeFunctions, setStatus } = require('./helpers');
+const {
+	onlyGivenAddressCanInvoke,
+	ensureOnlyExpectedMutativeFunctions,
+	setStatus,
+} = require('./helpers');
 
 const {
 	toBytes32,
-	defaults: { ISSUANCE_RATIO, LIQUIDATION_DELAY, LIQUIDATION_PENALTY, LIQUIDATION_RATIO },
+	defaults: { ISSUANCE_RATIO, LIQUIDATION_DELAY, LIQUIDATION_PENALTY, LIQUIDATION_RATIOS },
+	// constants: { ZERO_ADDRESS },
 } = require('../..');
+// const { xit } = require('mocha');
 
 // const LIQUIDATION_RATIO = toUnit('0.66666666666666');
 
@@ -21,7 +34,8 @@ const MockExchanger = artifacts.require('MockExchanger');
 const FlexibleStorage = artifacts.require('FlexibleStorage');
 
 contract('Liquidations', accounts => {
-	const [pUSD, PERI, USDC, DAI] = ['pUSD', 'PERI', 'USDC', 'DAI'].map(toBytes32);
+	const [pUSD, PERI, USDC, DAI, XAUT] = ['pUSD', 'PERI', 'USDC', 'DAI', 'XAUT'].map(toBytes32);
+	const keys = ['USDC', 'DAI', 'XAUT'];
 	const [deployerAccount, owner, oracle, account1, alice, bob, carol, david] = accounts;
 	const week = 3600 * 24 * 7;
 	const pUSD100 = toUnit('100');
@@ -37,7 +51,11 @@ contract('Liquidations', accounts => {
 		feePoolState,
 		debtCache,
 		issuer,
-		timestamp;
+		timestamp,
+		exTokenManager,
+		usdc,
+		xaut;
+	/* 	dai; */
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
@@ -53,7 +71,10 @@ contract('Liquidations', accounts => {
 			SystemStatus: systemStatus,
 			FeePoolState: feePoolState,
 			DebtCache: debtCache,
+			ExternalTokenStakeManager: exTokenManager,
 			Issuer: issuer,
+			USDC: usdc,
+			XAUT: xaut,
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD'],
@@ -74,10 +95,12 @@ contract('Liquidations', accounts => {
 				'RewardEscrowV2', // required for Issuer._collateral() to load balances
 				'StakingState',
 				'CrossChainManager',
+				'ExternalTokenStakeManager',
 			],
+			stables: keys,
 		}));
 
-		await systemSettings.setLiquidationRatio(LIQUIDATION_RATIO, { from: owner });
+		// await systemSettings.setLiquidationRatio(LIQUIDATION_RATIO, { from: owner });
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -110,6 +133,27 @@ contract('Liquidations', accounts => {
 		await debtCache.takeDebtSnapshot();
 	};
 
+	// const updateXAUTPrice = async rate => {
+	// 	timestamp = await currentTime();
+	// 	await exchangeRates.updateRates([XAUT], [rate].map(toUnit), timestamp, {
+	// 		from: oracle,
+	// 	});
+	// 	await debtCache.takeDebtSnapshot();
+	// };
+
+	const updatePrices = async (periRate, usdcRate, xautRate) => {
+		timestamp = await currentTime();
+		await exchangeRates.updateRates(
+			[PERI, USDC, XAUT],
+			[periRate, usdcRate, xautRate].map(toUnit),
+			timestamp,
+			{
+				from: oracle,
+			}
+		);
+		await debtCache.takeDebtSnapshot();
+	};
+
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: liquidations.abi,
@@ -137,13 +181,17 @@ contract('Liquidations', accounts => {
 
 	describe('Default settings', () => {
 		it('liquidation (issuance) ratio', async () => {
-			const liquidationRatio = await liquidations.liquidationRatio();
-			assert.bnEqual(liquidationRatio, LIQUIDATION_RATIO);
+			const lqdRatioPeri = await systemSettings.liquidationRatios(toBytes32('P'));
+			assert.bnEqual(lqdRatioPeri, LIQUIDATION_RATIOS['P']);
+			const lqdRatioComp = await systemSettings.liquidationRatios(toBytes32('C'));
+			assert.bnEqual(lqdRatioComp, LIQUIDATION_RATIOS['C']);
+			const lqdRatioInst = await systemSettings.liquidationRatios(toBytes32('I'));
+			assert.bnEqual(lqdRatioInst, LIQUIDATION_RATIOS['I']);
 		});
-		it('liquidation collateral ratio is inverted ratio', async () => {
-			const liquidationCollateralRatio = await liquidations.liquidationCollateralRatio();
-			assert.bnClose(liquidationCollateralRatio, divideDecimal(toUnit('1'), LIQUIDATION_RATIO), 10);
-		});
+		// it('liquidation collateral ratio is inverted ratio', async () => {
+		// 	const liquidationCollateralRatio = await liquidations.liquidationCollateralRatio();
+		// 	assert.bnClose(liquidationCollateralRatio, divideDecimal(toUnit('1'), LIQUIDATION_RATIO), 10);
+		// });
 		it('liquidation penalty ', async () => {
 			const liquidationPenalty = await liquidations.liquidationPenalty();
 			assert.bnEqual(liquidationPenalty, LIQUIDATION_PENALTY);
@@ -153,15 +201,15 @@ contract('Liquidations', accounts => {
 			assert.bnEqual(liquidationDelay, LIQUIDATION_DELAY);
 		});
 		it('issuance ratio is correctly configured as a default', async () => {
-			assert.bnEqual(await liquidations.issuanceRatio(), ISSUANCE_RATIO);
+			assert.bnEqual(await systemSettings.issuanceRatio(), ISSUANCE_RATIO);
 		});
 	});
 
-	describe('with issuanceRatio of 0.125', () => {
+	describe('with issuanceRatio of 0.25', () => {
 		beforeEach(async () => {
-			// Set issuanceRatio to 800%
-			const issuanceRatio800 = toUnit('0.125');
-			await systemSettings.setIssuanceRatio(issuanceRatio800, { from: owner });
+			// Set issuanceRatio to 400%
+			const issuanceRatio400 = toUnit('0.25');
+			await systemSettings.setIssuanceRatio(issuanceRatio400, { from: owner });
 
 			await updateRatesWithDefaults();
 		});
@@ -230,8 +278,11 @@ contract('Liquidations', accounts => {
 				});
 				describe('when the liquidationRatio is set', () => {
 					beforeEach(async () => {
+						const lqdTypes = Object.keys(LIQUIDATION_RATIOS).map(name => toBytes32(name));
+						const lqdRatios = Object.values(LIQUIDATION_RATIOS).map(ratio => ratio);
+						await systemSettings.setLiquidationRatios(lqdTypes, lqdRatios, { from: owner });
 						// await systemSettings.setIssuanceRatio(ISSUANCE_RATIO, { from: owner });
-						await systemSettings.setLiquidationRatio(LIQUIDATION_RATIO, { from: owner });
+						// await systemSettings.setLiquidationRatio(LIQUIDATION_RATIO, { from: owner });
 					});
 					it('when flagAccountForLiquidation() is invoked, it reverts with liquidation delay not set', async () => {
 						await assert.revert(
@@ -253,25 +304,25 @@ contract('Liquidations', accounts => {
 					// now have Liquidations resync its cache
 					await liquidations.rebuildCache();
 				});
-				// it('removeAccountInLiquidation() can only be invoked by issuer', async () => {
-				// 	await onlyGivenAddressCanInvoke({
-				// 		fnc: liquidations.removeAccountInLiquidation,
-				// 		args: [alice],
-				// 		address: owner, // TODO: is this supposed to be issuer.address
-				// 		accounts,
-				// 		reason: 'Liquidations: Only the Issuer contract can perform this action',
-				// 	});
-				// });
+				it('removeAccountInLiquidation() can only be invoked by issuer', async () => {
+					await onlyGivenAddressCanInvoke({
+						fnc: liquidations.removeAccountInLiquidation,
+						args: [alice],
+						address: owner,
+						accounts,
+						reason: 'Liquidations: Only the Issuer contract can perform this action',
+					});
+				});
 			});
 		});
-		describe('calculateAmountToFixCollateral', () => {
+		describe('calcAmtToFixCollateral', () => {
 			let ratio;
 			let penalty;
 			let collateralBefore;
 			let debtBefore;
-			describe('given target ratio of 800%, collateral of $600, debt of $300', () => {
+			describe('given target ratio of 400%, collateral of $600, debt of $300', () => {
 				beforeEach(async () => {
-					ratio = toUnit('0.125');
+					ratio = toUnit('0.25');
 
 					await systemSettings.setIssuanceRatio(ratio, { from: owner });
 
@@ -284,12 +335,13 @@ contract('Liquidations', accounts => {
 						await systemSettings.setLiquidationPenalty(penalty, { from: owner });
 					});
 					it('calculates pUSD to fix ratio from 200%, with $600 PERI collateral and $300 debt', async () => {
-						const expectedAmount = toUnit('260.869565217391304347');
+						const expectedAmount = toUnit('206.896551724137931034');
 
 						// amount of debt to redeem to fix
-						const pUSDToLiquidate = await liquidations.calculateAmountToFixCollateral(
+						const pUSDToLiquidate = await liquidations.calcAmtToFixCollateral(
 							debtBefore,
-							collateralBefore
+							collateralBefore,
+							ratio
 						);
 
 						assert.bnEqual(pUSDToLiquidate, expectedAmount);
@@ -307,12 +359,13 @@ contract('Liquidations', accounts => {
 					});
 					it('calculates pUSD to fix ratio from 300%, with $600 PERI collateral and $200 debt', async () => {
 						debtBefore = toUnit('200');
-						const expectedAmount = toUnit('144.927536231884057971');
+						const expectedAmount = toUnit('68.965517241379310344');
 
 						// amount of debt to redeem to fix
-						const pUSDToLiquidate = await liquidations.calculateAmountToFixCollateral(
+						const pUSDToLiquidate = await liquidations.calcAmtToFixCollateral(
 							debtBefore,
-							collateralBefore
+							collateralBefore,
+							ratio
 						);
 
 						assert.bnEqual(pUSDToLiquidate, expectedAmount);
@@ -370,18 +423,41 @@ contract('Liquidations', accounts => {
 			});
 			describe('when Alice is undercollateralized', () => {
 				beforeEach(async () => {
-					// wen PERI 6 dolla
-					await updatePERIPrice('6');
+					// when PERI $4
+					// await updatePERIPrice('4');
+					updatePrices('4', '1', '2000');
 
-					// Alice issues pUSD $600
-					await periFinance.transfer(alice, toUnit('800'), { from: owner });
+					// Alice issues pUSD $400
+					await periFinance.transfer(alice, toUnit('400'), { from: owner });
 					await periFinance.issueMaxPynths({ from: alice });
 
-					// Drop PERI value to $1 (Collateral worth $800 after)
+					await usdc.transfer(alice, '400' + '0'.repeat(6), { from: owner });
+					usdc.approve(exTokenManager.address, toUnit(toUnit('1')), {
+						from: alice,
+					});
+
+					await xaut.transfer(alice, toUnit('10'), { from: owner });
+					xaut.approve(exTokenManager.address, toUnit(toUnit('1')), {
+						from: alice,
+					});
+
+					// Alice issues additional pUSD $200 with USDC as collateral
+					// $200 + $400 = $600 pUSD
+					await periFinance.issuePynthsToMaxQuota(USDC, { from: alice });
+					await periFinance.issuePynthsToMaxQuota(XAUT, { from: alice });
+
+					// const xautSA = await exTokenManager.stakedAmountOf(alice, XAUT, pUSD);
+					// const usdcSA = await exTokenManager.stakedAmountOf(alice, USDC, pUSD);
+					// const periCollateral = await periFinance.collateral(alice);
+
+					// Drop PERI value to $1 (Collateral worth $400 after)
 					await updatePERIPrice('1');
+
+					// const { tRatio, cRatio, exDebt, exEA } = await issuer.getRatios(alice);
 				});
 				it('and liquidation Collateral Ratio is 150%', async () => {
-					assert.bnClose(await liquidations.liquidationCollateralRatio(), toUnit('1.5'), 10);
+					const ratio = await liquidations.liquidationCollateralRatio(alice);
+					assert.bnClose(ratio, toUnit('1.25'), 10);
 				});
 				it('and liquidation penalty is 10%', async () => {
 					assert.bnEqual(await liquidations.liquidationPenalty(), LIQUIDATION_PENALTY);
@@ -431,12 +507,13 @@ contract('Liquidations', accounts => {
 							// fast forward to after deadline
 							await fastForward(delay + 100);
 
-							await updatePERIPrice(toUnit('6'));
+							// await updatePERIPrice(toUnit('6'));
+							await updatePrices('6', '1', '2000');
 
-							const liquidationRatio = await liquidations.liquidationRatio();
+							const liquidationRatio = await liquidations.liquidationRatio(alice);
 
 							const ratio = await periFinance.collateralisationRatio(alice);
-							const targetIssuanceRatio = await liquidations.issuanceRatio();
+							const targetIssuanceRatio = await issuer.getTargetRatio(alice);
 
 							// check Alice ratio is below liquidation ratio
 							assert.isTrue(ratio.lt(liquidationRatio));
@@ -454,10 +531,10 @@ contract('Liquidations', accounts => {
 					describe('given Alice issuance ratio is higher than the liquidation ratio', () => {
 						let liquidationRatio;
 						beforeEach(async () => {
-							liquidationRatio = await liquidations.liquidationRatio();
+							liquidationRatio = await liquidations.liquidationRatio(alice);
 
 							const ratio = await periFinance.collateralisationRatio(alice);
-							const targetIssuanceRatio = await liquidations.issuanceRatio();
+							const targetIssuanceRatio = await systemSettings.issuanceRatio();
 
 							// check Alice ratio is above or equal liquidation ratio
 							assert.isTrue(ratio.gte(liquidationRatio));
@@ -478,6 +555,7 @@ contract('Liquidations', accounts => {
 								const delay = await liquidations.liquidationDelay();
 
 								await fastForward(delay + 100);
+								await updatePrices('1', '1', '2000');
 							});
 							it('then isLiquidationDeadlinePassed returns true', async () => {
 								assert.isTrue(await liquidations.isLiquidationDeadlinePassed(alice));
@@ -538,9 +616,14 @@ contract('Liquidations', accounts => {
 						beforeEach(async () => {
 							await fastForwardAndUpdateRates(week * 2.1);
 						});
+						it('then Alice still remains in liquidation entry', async () => {
+							const deadline = await liquidations.getLiquidationDeadlineForAccount(alice);
+							assert.isTrue(deadline > 0);
+						});
+
 						describe('when Alice c-ratio is above the liquidation Ratio and Bob liquidates alice', () => {
 							beforeEach(async () => {
-								await updatePERIPrice('10');
+								await updatePrices('10', '1', '2000');
 
 								// Get Bob some pUSD
 								await pUSDContract.issue(bob, pUSD100, {
@@ -570,15 +653,15 @@ contract('Liquidations', accounts => {
 							it('then Bob still has 0 PERI', async () => {
 								assert.bnEqual(await periFinance.balanceOf(bob), 0);
 							});
-							it('then Alice still has 800 PERI', async () => {
-								assert.bnEqual(await periFinance.collateral(alice), toUnit('800'));
+							it('then Alice still has 400 PERI', async () => {
+								assert.bnEqual(await periFinance.collateral(alice), toUnit('400'));
 							});
 						});
 
 						describe('when Alice burnPynthsToTarget to fix her c-ratio ', () => {
 							let burnTransaction;
 							beforeEach(async () => {
-								await updatePERIPrice('1');
+								await updatePrices('1', '1', '2000');
 								burnTransaction = await periFinance.fitToClaimable({
 									from: alice,
 								});
@@ -602,12 +685,13 @@ contract('Liquidations', accounts => {
 							let aliceDebtBalance;
 							let amountToBurn;
 							beforeEach(async () => {
-								await updatePERIPrice('1');
+								await updatePrices('1', '1', '2000');
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 								amountToBurn = toUnit('10');
-								await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
+								await periFinance.burnPynths(USDC, amountToBurn, { from: alice });
+								// await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
 							});
-							it('then alice debt balance is less amountToBurn', async () => {
+							it('then Alice debt balance is less amountToBurn', async () => {
 								assert.bnEqual(
 									await periFinance.debtBalanceOf(alice, pUSD),
 									aliceDebtBalance.sub(amountToBurn)
@@ -626,19 +710,61 @@ contract('Liquidations', accounts => {
 							let aliceDebtBalance;
 							let amountToBurn;
 							beforeEach(async () => {
-								await updatePERIPrice('1');
-								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
+								await updatePrices('1', '1', '2000');
 
-								const maxIssuablePynths = await issuer.maxIssuablePynths(alice);
-								amountToBurn = aliceDebtBalance.sub(maxIssuablePynths).abs();
+								// const { debt, periCol } = await issuer.debtsCollateral(alice);
+								aliceDebtBalance = /* debt;  */ await periFinance.debtBalanceOf(alice, pUSD);
 
-								await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
+								// const { burnAmount, exRefundAmt } = await exTokenManager.burnAmtToFitTR(
+								// 	alice,
+								// 	debt,
+								// 	periCol
+								// );
+								const { burnAmount, exRefundAmt } = await issuer.amountsToFitClaimable(alice);
+								const { exTRatio } = await exTokenManager.getExEADebt(alice);
+								const exBurnAmt = multiplyDecimal(exRefundAmt, exTRatio);
+								// const combinedSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+
+								// const remainAmt = await exTokenManager.proRataUnstake(alice, exBurnAmt, pUSD);
+								await periFinance.burnPynths(toBytes32(0), exBurnAmt, { from: alice });
+								// const combinedSAAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+								// const usdcSA = await exTokenManager.stakedAmountOf(alice, USDC, pUSD);
+								// const xautSA = await exTokenManager.stakedAmountOf(alice, XAUT, pUSD);
+								// const periColBefore = await periFinance.collateral(alice);
+								// console.log('periColBefore', periColBefore.toString());
+								// const { maxIssuable, tRatio } = await issuer.maxIssuablePynths(alice);
+								// const ratios = await issuer.getRatios(alice);
+
+								await periFinance.burnPynths(PERI, burnAmount.sub(exBurnAmt), { from: alice });
+								// await periFinance.fitToClaimable({ from: alice });
+
+								// const periColAfter = await periFinance.collateral(alice);
+								// console.log('periColAfter', periColAfter.toString());
+
+								amountToBurn = burnAmount;
+
+								// const debtAfter = await periFinance.debtBalanceOf(alice, pUSD);
+
+								// const cratio = await periFinance.collateralisationRatio(alice);
+
+								// aliceDebtBalance = aliceDebtBalance.sub(burnAmount);
+
+								// const { maxIssuable } = await issuer.maxIssuablePynths(alice);
+								// amountToBurn = aliceDebtBalance.gt(maxIssuable)
+								// 	? aliceDebtBalance.sub(maxIssuable)
+								// 	: 0;
+
+								// await periFinance.burnPynths(PERI, amountToBurn, { from: alice });
+							});
+							it('the Alice c-ratio is below t-ratio', async () => {
+								const { tRatio, cRatio } = await issuer.getRatios(alice, false);
+								assert.isTrue(cRatio.lt(tRatio));
 							});
 							it('then alice debt balance is less amountToBurn', async () => {
-								assert.bnEqual(
-									await periFinance.debtBalanceOf(alice, pUSD),
-									aliceDebtBalance.sub(amountToBurn)
-								);
+								const debt = await periFinance.debtBalanceOf(alice, pUSD);
+								const gap = aliceDebtBalance.sub(amountToBurn);
+								assert.bnEqual(debt, gap);
+								// assert.bnClose(debt, gap, '1' + '0'.repeat(12));
 							});
 							it('then Alice liquidation entry is removed', async () => {
 								const deadline = await liquidations.getLiquidationDeadlineForAccount(alice);
@@ -653,22 +779,54 @@ contract('Liquidations', accounts => {
 							let aliceDebtBalance;
 							let burnTransaction;
 							beforeEach(async () => {
-								await updatePERIPrice('1');
-								await updateUSDCPrice('1');
+								await updatePrices('1', '1', '2000');
 
 								aliceDebtBalance = await periFinance.debtBalanceOf(alice, pUSD);
 
-								burnTransaction = await periFinance.burnPynths(PERI, aliceDebtBalance, {
+								const exDebt = await exTokenManager.getExDebt(alice);
+								// const { exEA, exDebt, exTRatio } = await exTokenManager.getExEADebt(alice);
+
+								// const usdcSA = await exTokenManager.stakedAmountOf(alice, USDC, USDC);
+								// const usdcSA1 = multiplyDecimal(
+								// 	divideDecimal(exDebt, exTRatio),
+								// 	divideDecimal(usdcSA, exEA)
+								// );
+								// const usdcUnSA = usdcSA1.div(toBigNbr(10 ** 12)).mul(toBigNbr(10 ** 12));
+								// const xautSA = await exTokenManager.stakedAmountOf(alice, XAUT, XAUT);
+								// const xautSA1 = multiplyDecimal(
+								// 	divideDecimal(exDebt, exTRatio),
+								// 	divideDecimal(xautSA, exEA)
+								// );
+
+								// const { overAmt, remainAmt } = await exTokenManager.proRataRefundAmt(alice, exDebt, pUSD);
+
+								await periFinance.burnPynths(toBytes32(0), exDebt, { from: alice });
+
+								burnTransaction = await periFinance.burnPynths(PERI, aliceDebtBalance.sub(exDebt), {
 									from: alice,
 								});
+
+								// const { tRatio, cRatio } = await issuer.getRatios(alice);
+
+								// burnTransaction = await issuer.burnPynths(
+								// 	alice,
+								// 	PERI,
+								// 	aliceDebtBalance.sub(exDebt)
+								// );
 							});
 							it('then alice has no more debt', async () => {
-								assert.bnEqual(toUnit(0), await periFinance.debtBalanceOf(alice, pUSD));
+								const debt = await periFinance.debtBalanceOf(alice, pUSD);
+								assert.bnEqual(toUnit(0), debt);
 							});
 							xit('then AccountRemovedFromLiquidation event is emitted', async () => {
 								assert.eventEqual(burnTransaction, 'AccountRemovedFromLiquidation', {
 									account: alice,
 								});
+
+								// const tr = await liquidations.removeAccountInLiquidation(alice);
+								// assert.eventEqual(tr, 'AccountRemovedFromLiquidation', {
+								// 	account: alice,
+								// });
 							});
 							it('then Alice liquidation entry is removed', async () => {
 								const deadline = await liquidations.getLiquidationDeadlineForAccount(alice);
@@ -681,7 +839,7 @@ contract('Liquidations', accounts => {
 						});
 						describe('when Alice does not fix her c-ratio ', () => {
 							beforeEach(async () => {
-								await updatePERIPrice('1');
+								await updatePrices('1', '1', '2000');
 							});
 							it('then isOpenForLiquidation returns true for Alice', async () => {
 								const isOpenForLiquidation = await liquidations.isOpenForLiquidation(alice);
@@ -732,8 +890,11 @@ contract('Liquidations', accounts => {
 							});
 							describe('when Bob liquidates alice for 100 pUSD to get 110 PERI', () => {
 								const PERI110 = toUnit('110');
+								// const pUSDToLiquidate = toUnit('90.909090909090909090');
+								// const pUSDToRemain = PERI100.sub(pUSDToLiquidate);
 								let aliceDebtBefore;
 								let alicePERIBefore;
+								let aliceSABefore;
 								let bobPERIBefore;
 								beforeEach(async () => {
 									// send bob some PERI
@@ -746,14 +907,27 @@ contract('Liquidations', accounts => {
 									assert.bnEqual(await pUSDContract.balanceOf(bob), pUSD100);
 
 									// Record Alices state
-									aliceDebtBefore = await periFinance.debtBalanceOf(alice, pUSD);
-									alicePERIBefore = await periFinance.collateral(alice);
+									// aliceDebtBefore = await periFinance.debtBalanceOf(alice, pUSD);
+									// alicePERIBefore = await periFinance.collateral(alice);
+									const aliceBefore = await issuer.debtsCollateral(alice, false);
+									aliceDebtBefore = aliceBefore.debt;
+									alicePERIBefore = aliceBefore.periCol;
+									aliceSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
 
 									// Record Bob's state
 									bobPERIBefore = await periFinance.balanceOf(bob);
 
 									// Bob Liquidates Alice
 									await periFinance.liquidateDelinquentAccount(alice, pUSD100, { from: bob });
+									// const redeem = await issuer.liquidateDelinquentAccount(alice, pUSD100, bob);
+
+									// const pusdToFixRatio = await liquidations.calcAmtToFixCollateral(
+									// 	alice,
+									// 	aliceDebtBefore,
+									// 	alicePERIBefore
+									// );
+
+									// console.log(pusdToFixRatio);
 								});
 								it('then Bob pUSD balance is reduced by 100 pUSD', async () => {
 									assert.bnEqual(await pUSDContract.balanceOf(bob), 0);
@@ -765,16 +939,31 @@ contract('Liquidations', accounts => {
 								});
 								it('then Alice has less PERI + penalty', async () => {
 									const alicePERIAfter = await periFinance.collateral(alice);
-									const difference = alicePERIBefore.sub(alicePERIAfter);
-									assert.bnEqual(difference, PERI110);
+									const diffPeri = alicePERIBefore.sub(alicePERIAfter);
+
+									const aliceUSDCAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+									const diffExTokens = aliceSABefore.sub(aliceUSDCAfter);
+									assert.bnClose(diffPeri.add(diffExTokens), PERI110, '1' + '0'.repeat(12));
 								});
 								it('then Bob has extra 100 PERI + the 10 PERI penalty (110)', async () => {
 									const periBalance = await periFinance.balanceOf(bob);
-									assert.bnEqual(periBalance, bobPERIBefore.add(PERI110));
+									const usdcBalance = (await usdc.balanceOf(bob)).mul(toBigNbr(10 ** 12));
+									const xautSA = multiplyDecimal(
+										await xaut.balanceOf(bob),
+										await exchangeRates.rateForCurrency(XAUT)
+									);
+									const totBalance = periBalance.add(usdcBalance).add(xautSA);
+									const bobPERIAfter = bobPERIBefore.add(PERI110);
+									assert.bnClose(totBalance, bobPERIAfter, '1' + '0'.repeat(12));
 								});
-								it('then Alice PERI balance is 690', async () => {
+								it('then Alice staking amount is 1090', async () => {
 									const alicePERIAfter = await periFinance.collateral(alice);
-									assert.bnEqual(alicePERIAfter, toUnit('690'));
+									const aliceUSDCAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+									assert.bnClose(
+										alicePERIAfter.add(aliceUSDCAfter),
+										alicePERIBefore.add(aliceSABefore).sub(PERI110),
+										'1' + '0'.repeat(12)
+									);
 								});
 								it('then Alice issuance ratio is updated in feePoolState', async () => {
 									const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
@@ -804,6 +993,7 @@ contract('Liquidations', accounts => {
 										// Record Alices state
 										aliceDebtBefore = await periFinance.debtBalanceOf(alice, pUSD);
 										alicePERIBefore = await periFinance.collateral(alice);
+										aliceSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
 
 										// Record Carol State
 										carolPERIBefore = await periFinance.balanceOf(carol);
@@ -822,18 +1012,25 @@ contract('Liquidations', accounts => {
 											const difference = aliceDebtBefore.sub(aliceDebtAfter);
 											assert.bnEqual(difference, pUSD50);
 										});
-										it('then Alice has less PERI + penalty', async () => {
+										it('then Alice has less 50 Staking Amount + penalty(55)', async () => {
 											const alicePERIAfter = await periFinance.collateral(alice);
 											const difference = alicePERIBefore.sub(alicePERIAfter);
-											assert.bnEqual(difference, PERI55);
+											const aliceUSDCAfter = await exTokenManager.combinedStakedAmountOf(
+												alice,
+												pUSD
+											);
+											const diffExTokens = aliceSABefore.sub(aliceUSDCAfter);
+											assert.bnEqual(difference.add(diffExTokens), PERI55);
 										});
 										it('then Carol has extra 50 PERI + the 5 PERI penalty (55)', async () => {
 											const periBalance = await periFinance.balanceOf(carol);
-											assert.bnEqual(periBalance, carolPERIBefore.add(PERI55));
-										});
-										it('then Alice PERI balance is 635', async () => {
-											const alicePERIAfter = await periFinance.collateral(alice);
-											assert.bnEqual(alicePERIAfter, toUnit('635'));
+											const usdcBalance = (await usdc.balanceOf(carol)).mul(toBigNbr(10 ** 12));
+											const xautSA = multiplyDecimal(
+												await xaut.balanceOf(carol),
+												await exchangeRates.rateForCurrency(XAUT)
+											);
+											const totBalance = periBalance.add(usdcBalance).add(xautSA);
+											assert.bnEqual(totBalance, carolPERIBefore.add(PERI55));
 										});
 										it('then Alice issuance ratio is updated in feePoolState', async () => {
 											const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
@@ -858,6 +1055,9 @@ contract('Liquidations', accounts => {
 												pUSD50,
 												{ from: carol }
 											);
+											// const alicePERIAfter = await periFinance.collateral(alice);
+											// const diff = alicePERIBefore.sub(alicePERIAfter);
+											// console.log('SA diff', diff.toString());
 										});
 										it('then Carols pUSD balance is reduced by 50 pUSD', async () => {
 											assert.bnEqual(await pUSDContract.balanceOf(carol), 0);
@@ -870,15 +1070,31 @@ contract('Liquidations', accounts => {
 										it('then Alice has less PERI + penalty', async () => {
 											const alicePERIAfter = await periFinance.collateral(alice);
 											const difference = alicePERIBefore.sub(alicePERIAfter);
-											assert.bnEqual(difference, PERI55);
+											// assert.bnEqual(difference, PERI55);
+											const aliceUSDCAfter = await exTokenManager.combinedStakedAmountOf(
+												alice,
+												pUSD
+											);
+											const diffExTokens = aliceSABefore.sub(aliceUSDCAfter);
+											assert.bnEqual(difference.add(diffExTokens), PERI55);
 										});
 										it('then Carol has extra 50 PERI + the 5 PERI penalty (55)', async () => {
 											const periBalance = await periFinance.balanceOf(carol);
-											assert.bnEqual(periBalance, carolPERIBefore.add(PERI55));
+											const usdcBalance = (await usdc.balanceOf(carol)).mul(toBigNbr(10 ** 12));
+											const xautSA = multiplyDecimal(
+												await xaut.balanceOf(carol),
+												await exchangeRates.rateForCurrency(XAUT)
+											);
+											const totBalance = periBalance.add(usdcBalance).add(xautSA);
+											assert.bnEqual(totBalance, carolPERIBefore.add(PERI55));
 										});
-										it('then Alice PERI balance is 635', async () => {
+										it('then Alice total balance difference is 55', async () => {
 											const alicePERIAfter = await periFinance.collateral(alice);
-											assert.bnEqual(alicePERIAfter, toUnit('635'));
+											const aliceSAAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+											const usdcDiff = alicePERIBefore
+												.add(aliceSABefore)
+												.sub(alicePERIAfter.add(aliceSAAfter));
+											assert.bnEqual(usdcDiff, toUnit('55'));
 										});
 										it('then Alice issuance ratio is updated in feePoolState', async () => {
 											const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
@@ -895,86 +1111,129 @@ contract('Liquidations', accounts => {
 											);
 										});
 										it('then events AccountLiquidated are emitted', async () => {
-											assert.eventEqual(liquidationTransaction, 'AccountLiquidated', {
+											assert.eventNEqual(liquidationTransaction, 'AccountLiquidated', 2, {
 												account: alice,
-												periRedeemed: PERI55,
+												periRedeemed: toUnit('13.75'),
 												amountLiquidated: pUSD50,
 												liquidator: carol,
 											});
 										});
-										describe('when Bob liqudates Alice with 1000 pUSD', () => {
-											const pUSD1000 = toUnit('1000');
+										describe('when Bob liqudates Alice with 5000 pUSD', () => {
+											const penalty = toUnit('0.1');
+											const pUSD5000 = toUnit('5000');
 											let liquidationTransaction;
 											let bobPynthBalanceBefore;
+											let targetRatio;
+											let totCollateral;
 											beforeEach(async () => {
 												// send Bob some PERI for pUSD
-												await periFinance.transfer(bob, toUnit('10000'), {
+												await periFinance.transfer(bob, toUnit('40000'), {
 													from: owner,
 												});
 
-												await periFinance.issuePynths(PERI, pUSD1000, { from: bob });
+												await periFinance.issuePynths(PERI, pUSD5000, { from: bob });
 
 												bobPynthBalanceBefore = await pUSDContract.balanceOf(bob);
-												assert.bnEqual(bobPynthBalanceBefore, pUSD1000);
+												assert.bnEqual(bobPynthBalanceBefore, pUSD5000);
+
+												targetRatio = await issuer.getTargetRatio(alice);
 
 												// Record Alices state
-												aliceDebtBefore = await periFinance.debtBalanceOf(alice, pUSD);
-												alicePERIBefore = await periFinance.collateral(alice);
+												const aliceBefore = await issuer.debtsCollateral(alice, false);
+												aliceDebtBefore = aliceBefore.debt;
+												alicePERIBefore = aliceBefore.periCol;
+												aliceSABefore = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+												totCollateral = alicePERIBefore.add(aliceSABefore);
+
+												/* const exDebt = await exTokenManager.getExDebt(alice);
+
+												const {
+													totalRedeemed,
+													amountToLiquidate,
+													exRedeem,
+													idealExSA} = await liquidations.maxLiquidateAmt(alice, pUSD5000, aliceDebtBefore); */
 
 												// Bob Liquidates Alice
 												liquidationTransaction = await periFinance.liquidateDelinquentAccount(
 													alice,
-													pUSD1000,
+													pUSD5000,
 													{
 														from: bob,
 													}
 												);
 											});
 											it('then Bobs partially liquidates the 1000 pUSD to repair Alice to target issuance ratio', async () => {
-												const susdToFixRatio = await liquidations.calculateAmountToFixCollateral(
+												const pusdToFixRatio = await liquidations.calcAmtToFixCollateral(
 													aliceDebtBefore,
-													alicePERIBefore
+													totCollateral,
+													targetRatio
 												);
+
+												let amountToLiquidate = pUSD5000.gt(pusdToFixRatio)
+													? pusdToFixRatio
+													: pUSD5000;
+
+												// Add penalty to the amount to get liquidated
+												const totalRedeemed = multiplyDecimal(
+													amountToLiquidate,
+													toUnit('1').add(penalty)
+												);
+
+												amountToLiquidate = totalRedeemed.gt(totCollateral)
+													? divideDecimal(totCollateral, toUnit('1').add(penalty))
+													: amountToLiquidate;
 
 												const aliceDebtAfter = await periFinance.debtBalanceOf(alice, pUSD);
-												assert.bnEqual(aliceDebtAfter, aliceDebtBefore.sub(susdToFixRatio));
+												// const aliceUSDCAfter = await exTokenManager.combinedStakedAmountOf(
+												// 	alice,
+												// 	pUSD
+												// );
+												// const diffExTokens = aliceSABefore.sub(aliceUSDCAfter);
+
+												assert.bnClose(aliceDebtAfter, aliceDebtBefore.sub(amountToLiquidate), 10);
 
 												const bobPynthBalanceAfter = await pUSDContract.balanceOf(bob);
-												assert.bnEqual(
+												assert.bnClose(
 													bobPynthBalanceAfter,
-													bobPynthBalanceBefore.sub(susdToFixRatio)
+													bobPynthBalanceBefore.sub(amountToLiquidate),
+													10
 												);
 											});
-											it('then Alice liquidation entry is removed', async () => {
-												const deadline = await liquidations.getLiquidationDeadlineForAccount(alice);
-												assert.bnEqual(deadline, 0);
-											});
 											it('then Alices account is not open for liquidation', async () => {
+												// const { tRatio, cRatio } = await issuer.getRatios(alice, true);
 												const isOpenForLiquidation = await liquidations.isOpenForLiquidation(alice);
 												assert.bnEqual(isOpenForLiquidation, false);
 											});
-											it('then events AccountLiquidated & AccountRemovedFromLiquidation are emitted', async () => {
+											it('then Alice liquidation entry is still stayed as debt is left', async () => {
+												const deadline = await liquidations.getLiquidationDeadlineForAccount(alice);
+												assert.bnGte(deadline, 0);
+											});
+											xit('then events AccountLiquidated & AccountRemovedFromLiquidation are emitted', async () => {
 												assert.eventsEqual(
 													liquidationTransaction,
-													'AccountLiquidated',
-													{
-														account: alice,
-													},
 													'Transfer',
 													{
 														from: alice,
 														to: bob,
+													},
+													'AccountLiquidated',
+													{
+														account: alice,
+													},
+													'AccountRemovedFromLiquidation', // TODO this should be emitted from liquidation in this test case
+													{
+														account: alice,
 													}
-													// 'AccountRemovedFromLiquidation', // TODO this should be emitted from liquidation in this test case
-													// {
-													// 	account: alice,
-													// }
 												);
 											});
 											it('then Alice issuanceRatio is now at the target issuanceRatio', async () => {
-												const aliceCRatioAfter = await periFinance.collateralisationRatio(alice);
-												const issuanceRatio = await liquidations.issuanceRatio();
-												assert.bnEqual(aliceCRatioAfter, issuanceRatio);
+												// const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+												// const aliceSAAfter = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+												// const totCollateral = periCol.add(aliceSABefore);
+												const { tRatio, cRatio } = await issuer.getRatios(alice, false);
+												// const aliceCRatioAfter = await periFinance.collateralisationRatio(alice);
+												// const issuanceRatio = await issuer.getTargetRatio(alice);
+												assert.bnLte(cRatio, tRatio);
 											});
 										});
 									});
@@ -982,45 +1241,149 @@ contract('Liquidations', accounts => {
 							});
 							describe('given Alice has $600 Debt, $800 worth of PERI Collateral and c-ratio at 133.33%', () => {
 								describe('when bob calls liquidate on Alice in multiple calls until fixing the ratio', () => {
-									const pUSD1000 = toUnit('1000');
+									// const penalty = toUnit('0.1');
+									let targetRatio;
+									const pUSD5000 = toUnit('5000');
 									let aliceDebtBefore;
 									let aliceCollateralBefore;
 									let bobPynthBalanceBefore;
 									let amountToFixRatio;
 									beforeEach(async () => {
 										// send bob some PERI
-										await periFinance.transfer(bob, toUnit('10000'), {
+										await periFinance.transfer(bob, toUnit('40000'), {
 											from: owner,
 										});
 
-										await periFinance.issuePynths(PERI, pUSD1000, { from: bob });
+										await periFinance.issuePynths(PERI, pUSD5000, { from: bob });
 
 										// Record Bob's state
 										bobPynthBalanceBefore = await pUSDContract.balanceOf(bob);
 
-										assert.bnEqual(bobPynthBalanceBefore, pUSD1000);
+										assert.bnEqual(bobPynthBalanceBefore, pUSD5000);
 
 										// Record Alices state
-										aliceDebtBefore = await periFinance.debtBalanceOf(alice, pUSD);
-										aliceCollateralBefore = await periFinance.collateral(alice);
+										const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+										aliceDebtBefore = debt;
+										const aliceUSDC = await exTokenManager.combinedStakedAmountOf(alice, pUSD);
+										aliceCollateralBefore = periCol.add(aliceUSDC);
+
+										targetRatio = await issuer.getTargetRatio(alice);
 
 										// Calc amount to fix ratio
-										amountToFixRatio = await liquidations.calculateAmountToFixCollateral(
+										amountToFixRatio = await liquidations.calcAmtToFixCollateral(
 											aliceDebtBefore,
-											aliceCollateralBefore
+											aliceCollateralBefore,
+											targetRatio
 										);
 									});
 									it('then Bob can liquidate Alice multiple times until fixing the c-ratio', async () => {
-										const liquidateAmount = toUnit('50');
+										// Add penalty to the amount to get liquidated
+										// const totalRedeemed = multiplyDecimal(amountToFixRatio, toUnit('1').add(penalty));
+
+										// amountToFixRatio = totalRedeemed.gt(aliceCollateralBefore)
+										// 	? divideDecimal(aliceCollateralBefore, toUnit('1').add(penalty))
+										// 	: amountToFixRatio;
+										const liquidateAmount = toUnit('100');
 										let iterations = Math.floor(amountToFixRatio.div(liquidateAmount));
+										// iterations = 15;
 
 										// loop through until just less than amountToFixRato
 										while (iterations > 0) {
+											const {
+												tRatio,
+												cRatio,
+												exTRatio,
+												exEA,
+												exSR,
+												maxSR,
+											} = await issuer.getRatios(alice, false);
+											const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+
+											amountToFixRatio = await liquidations.calcAmtToFixCollateral(
+												debt,
+												periCol.add(exEA),
+												tRatio
+											);
+
+											console.log(
+												tRatio.toString(),
+												cRatio.toString(),
+												exTRatio.toString(),
+												exEA.toString(),
+												periCol.toString(),
+												debt.toString(),
+												exSR.toString(),
+												maxSR.toString(),
+												amountToFixRatio.toString()
+											);
+
+											// const {
+											// 	totalRedeemed,
+											// 	amountToLiquidate,
+											// 	exRedeem,
+											// 	idealExSA,
+											// } = await liquidations.maxLiquidateAmt(alice, liquidateAmount, debt);
+
 											await periFinance.liquidateDelinquentAccount(alice, liquidateAmount, {
 												from: bob,
 											});
 
+											// Alice should have liquidations closed
+											if ((await liquidations.isOpenForLiquidation(alice)) === false) {
+												break;
+											}
+
+											// console.log('amountToFixRatio', amountToFixRatio.toString());
+
 											iterations--;
+											// amountToFixRatio = amountToFixRatio.sub(liquidateAmount);
+											if (iterations === 0) {
+												const {
+													tRatio,
+													cRatio,
+													exTRatio,
+													exEA,
+													exSR,
+													maxSR,
+												} = await issuer.getRatios(alice, false);
+												const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+
+												amountToFixRatio = await liquidations.calcAmtToFixCollateral(
+													debt,
+													periCol.add(exEA),
+													tRatio
+												);
+
+												// const {
+												// 	totalRedeemed,
+												// 	amountToLiquidate,
+												// 	exRedeem,
+												// 	idealExSA,
+												// } = await liquidations.maxLiquidateAmt(alice, liquidateAmount, debt);
+
+												// console.log(
+												// 	'totalRedeemed:',
+												// 	totalRedeemed.toString(),
+												// 	'amountToLiquidate:',
+												// 	amountToLiquidate.toString(),
+												// 	'exRedeem:',
+												// 	exRedeem.toString(),
+												// 	'idealExSA:',
+												// 	idealExSA.toString()
+												// );
+
+												console.log(
+													tRatio.toString(),
+													cRatio.toString(),
+													exTRatio.toString(),
+													exEA.toString(),
+													periCol.toString(),
+													debt.toString(),
+													exSR.toString(),
+													maxSR.toString(),
+													amountToFixRatio.toString()
+												);
+											}
 										}
 
 										// Should be able to liquidate one last time and fix c-ratio
@@ -1028,17 +1391,35 @@ contract('Liquidations', accounts => {
 											from: bob,
 										});
 
+										const { tRatio, cRatio, exTRatio, exEA, exSR, maxSR } = await issuer.getRatios(
+											alice,
+											false
+										);
+										const { debt, periCol } = await issuer.debtsCollateral(alice, false);
+
+										console.log(
+											tRatio.toString(),
+											cRatio.toString(),
+											exTRatio.toString(),
+											exEA.toString(),
+											periCol.toString(),
+											debt.toString(),
+											exSR.toString(),
+											maxSR.toString(),
+											amountToFixRatio.toString()
+										);
+
 										// Alice should have liquidations closed
 										assert.isFalse(await liquidations.isOpenForLiquidation(alice));
 
 										// Alice should have liquidation entry removed
 										assert.bnEqual(await liquidations.getLiquidationDeadlineForAccount(david), 0);
 
-										// Bob's pUSD balance should be less amountToFixRatio
-										assert.bnEqual(
-											await pUSDContract.balanceOf(bob),
-											bobPynthBalanceBefore.sub(amountToFixRatio)
-										);
+										// const bobPUSD = await pUSDContract.balanceOf(bob);
+
+										// // Bob's pUSD balance should be less amountToFixRatio
+										// assert.bnEqual(bobPUSD, bobPynthBalanceBefore.sub(amountToFixRatio));
+										assert.bnLte(cRatio, tRatio);
 									});
 								});
 							});

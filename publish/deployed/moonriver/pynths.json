@@ -11,86 +11,32 @@
 	},
 	{
 		"name": "pETH",
-		"asset": "ETH"
+		"asset": "ETH",
+		"category": "crypto"
 	},
 	{
 		"name": "pBNB",
-		"asset": "BNB"
-	},
-	{
-		"name": "pAVAX",
-		"asset": "AVAX"
-	},
-	{
-		"name": "pUNI",
-		"asset": "UNI"
-	},
-	{
-		"name": "pMKR",
-		"asset": "MKR"
-	},
-	{
-		"name": "pCAKE",
-		"asset": "CAKE"
+		"asset": "BNB",
+		"category": "crypto"
 	},
 	{
 		"name": "pAAVE",
-		"asset": "AAVE"
-	},
-	{
-		"name": "pCOMP",
-		"asset": "COMP"
-	},
-	{
-		"name": "pSUSHI",
-		"asset": "SUSHI"
-	},
-	{
-		"name": "pSNX",
-		"asset": "SNX"
-	},
-	{
-		"name": "pCRV",
-		"asset": "CRV"
-	},
-	{
-		"name": "pYFI",
-		"asset": "YFI"
-	},
-	{
-		"name": "p1INCH",
-		"asset": "1INCH"
-	},
-	{
-		"name": "pANKR",
-		"asset": "ANKR"
+		"asset": "AAVE",
+		"category": "crypto"
 	},
 	{
 		"name": "pLINK",
-		"asset": "LINK"
+		"asset": "LINK",
+		"category": "crypto"
 	},
 	{
 		"name": "pDOT",
-		"asset": "DOT"
+		"asset": "DOT",
+		"category": "crypto"
 	},
 	{
-		"name": "pXRP",
-		"asset": "XRP"
-	},
-	{
-		"name": "pAXS",
-		"asset": "AXS"
-	},
-	{
-		"name": "pEUR",
-		"asset": "EUR"
-	},
-	{
-		"name": "pSAND",
-		"asset": "SAND"
-	},
-	{
-		"name": "pMANA",
-		"asset": "MANA"
+		"name": "pFTM",
+		"asset": "FTM",
+		"category": "crypto"
 	}
 ]

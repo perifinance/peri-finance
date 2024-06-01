@@ -1256,8 +1256,9 @@
 			},
 			"Liquidations": {
 				"address": "0x8b539268247522a5f38157e5fAD3A7eEc27Fbe66",
-				"status": "current",
-				"keccak256": "0x73675b4c33702e257a3f147b570cf03b819b47eb73d80d6db45cf7da8894dca8"
+				"status": "replaced",
+				"keccak256": "0x73675b4c33702e257a3f147b570cf03b819b47eb73d80d6db45cf7da8894dca8",
+				"replaced_in": "v0.7.0-moonbase"
 			},
 			"EternalStorageLiquidations": {
 				"address": "0xC5D4Df1cF149C64505C419c621842B069355f605",
@@ -1713,8 +1714,9 @@
 			},
 			"StakingState": {
 				"address": "0x3a96F21324745A2196536DE1Be97D2660E591504",
-				"status": "current",
-				"keccak256": "0xcd748d3aab9d0f442ebd9c4923586f486de1a5fc5e01a99ef4eb94609b9f7a59"
+				"status": "replaced",
+				"keccak256": "0xcd748d3aab9d0f442ebd9c4923586f486de1a5fc5e01a99ef4eb94609b9f7a59",
+				"replaced_in": "v0.7.0-moonbase"
 			},
 			"CrossChainState": {
 				"address": "0xdE3Fa88b5098c8D676B36fd439217732653aB64c",
@@ -1848,8 +1850,9 @@
 		"contracts": {
 			"Exchanger": {
 				"address": "0x083e9ccC52d148E63737005181308386408F2779",
-				"status": "current",
-				"keccak256": "0xdbfc941420a6f10002966750dccec7fd5ca17456756349a56068224356f4d86e"
+				"status": "replaced",
+				"keccak256": "0xdbfc941420a6f10002966750dccec7fd5ca17456756349a56068224356f4d86e",
+				"replaced_in": "v0.7.0-moonbase"
 			}
 		}
 	},
@@ -2744,13 +2747,15 @@
 			},
 			"CrossChainState": {
 				"address": "0x87B95c111cd1825f1FC0BB187A8298425335c282",
-				"status": "current",
-				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878"
+				"status": "replaced",
+				"keccak256": "0x5b7f978dd52fbd421bf565f7730a1aadbc7d411bf1e6a4c183e0ae55632db878",
+				"replaced_in": "v0.7.0-moonbase"
 			},
 			"CrossChainManager": {
 				"address": "0x55426caAcfe267c11F8650e63a5bBcEbA4Ca2965",
-				"status": "current",
-				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b"
+				"status": "replaced",
+				"keccak256": "0xb727564727648389e3b33e04c703d23901ac380919d94ca9114fa1320511de6b",
+				"replaced_in": "v0.7.0-moonbase"
 			}
 		}
 	},
@@ -2843,8 +2848,9 @@
 		"contracts": {
 			"ExternalTokenStakeManager": {
 				"address": "0xbBc59cb49E6090b86554F2788d5C97cb5EF9328c",
-				"status": "current",
-				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0"
+				"status": "replaced",
+				"keccak256": "0x9fec5f28f08eb45117967d622193892ce968bcd03980659e21a111244fced3a0",
+				"replaced_in": "v0.7.0-moonbase"
 			}
 		}
 	},
@@ -2902,8 +2908,9 @@
 		"contracts": {
 			"PeriFinance": {
 				"address": "0x25E322a86FB964195393A32C3d3D8B769E389C2E",
-				"status": "current",
-				"keccak256": "0xf098fb8598bd826aeafc4155bac140b7508b1862459eabf760bbe349a07fd857"
+				"status": "replaced",
+				"keccak256": "0xf098fb8598bd826aeafc4155bac140b7508b1862459eabf760bbe349a07fd857",
+				"replaced_in": "v0.7.0-moonbase"
 			},
 			"Issuer": {
 				"address": "0x3F725311B3aDF7809e18c35f6e43e3140e580Bd3",
@@ -2937,8 +2944,9 @@
 		"contracts": {
 			"Issuer": {
 				"address": "0x09cEb533619a97519dA83434A095D96FC6ff1f00",
-				"status": "current",
-				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee"
+				"status": "replaced",
+				"keccak256": "0xd4080dc71446a83a6d3af981a541ee3d181722554c22ef4a8b31bb9c8c30d0ee",
+				"replaced_in": "v0.7.0-moonbase"
 			}
 		}
 	},
@@ -2951,8 +2959,9 @@
 		"contracts": {
 			"SystemSettings": {
 				"address": "0xD41D351A75d3b4217d1fD72f5bf1cE04cae235b1",
-				"status": "current",
-				"keccak256": "0x1750b2af99da984502a7749ab51015a983cd7ae3acbd0edbe2987588aad308cd"
+				"status": "replaced",
+				"keccak256": "0x1750b2af99da984502a7749ab51015a983cd7ae3acbd0edbe2987588aad308cd",
+				"replaced_in": "v0.7.0-moonbase"
 			}
 		}
 	},
@@ -2965,8 +2974,268 @@
 		"contracts": {
 			"FeePool": {
 				"address": "0xCAE902825a1337f032fb07b65333c3ae7b79eCD0",
+				"status": "replaced",
+				"keccak256": "0xa768b5eb14646c543dc4c15f5099151208d634be6f7426c229e968ef897449ec",
+				"replaced_in": "v0.7.0-moonbase"
+			}
+		}
+	},
+	"v0.7.0-moonbase": {
+		"tag": "v0.7.0",
+		"fulltag": "v0.7.0-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-03-26T21:59:15+09:00",
+		"commit": "0ef140d139565a0390edb5bd376596f1456c47e2",
+		"contracts": {
+			"SystemSettings": {
+				"address": "0xc896419c6990A7afCe012F5F15389430Fa9691E7",
 				"status": "current",
-				"keccak256": "0xa768b5eb14646c543dc4c15f5099151208d634be6f7426c229e968ef897449ec"
+				"keccak256": "0xf6234c570e3f445f48640eabec5df34df19760135deed1115d8b534b7ae1290d"
+			},
+			"Liquidations": {
+				"address": "0x22DE87555fFCf4D531129A08cBC6bCC3Fd2481e9",
+				"status": "replaced",
+				"keccak256": "0x7a05b4a5161132df55c66035575afb166827c5e53d09af81be4e02e6d830d117",
+				"replaced_in": "v0.7.4-moonbase"
+			},
+			"FeePool": {
+				"address": "0x299aaCF33C9cBeFD48C9A47aE2084f7fAD8a48cF",
+				"status": "replaced",
+				"keccak256": "0xf75c53f506bf8c18ead7c72496e8b5baebe1b5d90d7e9f75cf0f97081112b0d0",
+				"replaced_in": "v0.7.7-moonbase"
+			},
+			"PeriFinance": {
+				"address": "0x5A2725c696Bede7E177582B414722FAB6D334695",
+				"status": "current",
+				"keccak256": "0xc38f1567a34d03c42501cd50fca051b3c4345a13720d12ced32166fe445a32b9"
+			},
+			"Exchanger": {
+				"address": "0xA8FfE42B46118B20b957E0eE1773a3C1B27408dA",
+				"status": "current",
+				"keccak256": "0xd92a1bc336c63374de3fff06819426ce04575b2dffa763092a25f935837ba2ba"
+			},
+			"Issuer": {
+				"address": "0x729087797ee09B5568242Dd63c0eFa03dcDa75df",
+				"status": "replaced",
+				"keccak256": "0x778c1569e9d92b5c1fd5da75d40d3cabfc1be0e11ff61ae252fb8f80ef0a07b2",
+				"replaced_in": "v0.7.4-moonbase"
+			},
+			"StakingState": {
+				"address": "0xF0cAe4201a1901910E229A6288B6b73c4B09C91f",
+				"status": "current",
+				"keccak256": "0x2146054d3ece3f094cde0bb763cc2ee1537eefe018601ed337229984160829d8"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0x2296c026e9C56196493Da81972C8680898dF5827",
+				"status": "replaced",
+				"keccak256": "0x698adf22941a8f0cf699ff01f9eefa43f3335a587a6294d2932a0dec7a1eddfb",
+				"replaced_in": "v0.7.1-moonbase"
+			},
+			"CrossChainState": {
+				"address": "0x01d0C66fc0ca2A8f968D158eF7B2580A25452354",
+				"status": "current",
+				"keccak256": "0xd4de0d8894fb38842a778288586b6ce1e62daac432c7e6a8c5d5faf91da3305b"
+			},
+			"CrossChainManager": {
+				"address": "0xBAb26e7eEfF00d9a268A720317CE6abe7F469877",
+				"status": "current",
+				"keccak256": "0xe0ae68d5b6e76605f10070c669274e85ce0058e31cbccfc9c1dab0d05b47c8a6"
+			},
+			"VirtualPynthIssuer": {
+				"address": "0x4bCD7273Ea83973943150BE1363134234C174846",
+				"status": "current",
+				"keccak256": "0x7bb575f70d195d9abed55e3022cccedca97cb83cfce223416837ac55ec7151a2"
+			}
+		}
+	},
+	"v0.7.1-moonbase": {
+		"tag": "v0.7.1",
+		"fulltag": "v0.7.1-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-03-26T21:59:15+09:00",
+		"commit": "0ef140d139565a0390edb5bd376596f1456c47e2",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0x9053A6F5E57c3b8cf735687C42C057D59AE30529",
+				"status": "replaced",
+				"keccak256": "0x794e0bebfa4f0103fe85de44c887c0c55e070d445ea86b252864f0b5c231d0e0",
+				"replaced_in": "v0.7.2-moonbase"
+			}
+		}
+	},
+	"v0.7.2-moonbase": {
+		"tag": "v0.7.2",
+		"fulltag": "v0.7.2-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-03-31T10:38:33+09:00",
+		"commit": "6b125dde3d507256a7f573fb24667e7658c2d13d",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0x2977E6FF6601c1837247CDB2508AA2669fCA6fE1",
+				"status": "replaced",
+				"keccak256": "0x835476f6fb9a7b0b5e826601640ca0e7e5b4cb91c4f30b5ba204cd7de5b04463",
+				"replaced_in": "v0.7.3-moonbase"
+			}
+		}
+	},
+	"v0.7.3-moonbase": {
+		"tag": "v0.7.3",
+		"fulltag": "v0.7.3-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-03-31T11:01:11+09:00",
+		"commit": "cfcd39a9e15dd28debb593a40e15f21155137602",
+		"contracts": {
+			"ExternalTokenStakeManager": {
+				"address": "0xA9BCA54CAa546B2D1Ac3e22c0e2a4db7f9f1C2Bb",
+				"status": "replaced",
+				"keccak256": "0x5628e1a99b7815f45f1f86d559102c880f0ae4f0f5f5c63121ca23ecbcdb40ce",
+				"replaced_in": "v0.7.7-moonbase"
+			}
+		}
+	},
+	"v0.7.4-moonbase": {
+		"tag": "v0.7.4",
+		"fulltag": "v0.7.4-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-07T21:23:48+09:00",
+		"commit": "dab4f57acdbcbd542f92c841000be580fba4c905",
+		"contracts": {
+			"Liquidations": {
+				"address": "0xa6Da786ba14FD8CeA3b07C57508E56d71146Ec42",
+				"status": "replaced",
+				"keccak256": "0xe407f7a1beccc83b3195f0b52da42f9d44ac58682050acbe1611b35e5ca00910",
+				"replaced_in": "v0.7.8-moonbase"
+			},
+			"Issuer": {
+				"address": "0xAb8227bA1b714B9d8092D02Df44D4eD7287cB543",
+				"status": "replaced",
+				"keccak256": "0x55902d7d213457ee80a475df4fa16c9ef0ed4a5de9cc04380f7850f9702d392b",
+				"replaced_in": "v0.7.5-moonbase"
+			}
+		}
+	},
+	"v0.7.5-moonbase": {
+		"tag": "v0.7.5",
+		"fulltag": "v0.7.5-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-07T21:23:48+09:00",
+		"commit": "dab4f57acdbcbd542f92c841000be580fba4c905",
+		"contracts": {
+			"Issuer": {
+				"address": "0x148D6A0239ea31BF286df686548E708836315E5B",
+				"status": "replaced",
+				"keccak256": "0xc895ee8813a77512c140cf3ff52d7f8c57fb10a9692988961e0fa723b3b9f164",
+				"replaced_in": "v0.7.6-moonbase"
+			}
+		}
+	},
+	"v0.7.6-moonbase": {
+		"tag": "v0.7.6",
+		"fulltag": "v0.7.6-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-08T00:34:05+09:00",
+		"commit": "5442fc2d38a789321f3edd39eb0edeee68e9e29a",
+		"contracts": {
+			"Issuer": {
+				"address": "0x9f07B4db7837d27477ce0b03Ce2c1Ef39E62f674",
+				"status": "replaced",
+				"keccak256": "0xc895ee8813a77512c140cf3ff52d7f8c57fb10a9692988961e0fa723b3b9f164",
+				"replaced_in": "v0.7.7-moonbase"
+			}
+		}
+	},
+	"v0.7.7-moonbase": {
+		"tag": "v0.7.7",
+		"fulltag": "v0.7.7-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-08T11:58:21+09:00",
+		"commit": "0c923de46190e27835faca08c1488655165f59c3",
+		"contracts": {
+			"FeePool": {
+				"address": "0x391585c5CF224dAd9a4A76ba6e8e7602B0BD8DE7",
+				"status": "replaced",
+				"keccak256": "0x96b23f4d06adcb334baef4e8e1eeaf1ef438ce9b92b43df6a2a55d566a159050",
+				"replaced_in": "v0.7.20-rc"
+			},
+			"Issuer": {
+				"address": "0x04F868e1AD568569b8EcbCb144e146Fe81b8eC7a",
+				"status": "replaced",
+				"keccak256": "0x0891f9c63557821bc03d3b276717fde45265d6e22c66da8e7a2961739a3dc1df",
+				"replaced_in": "v0.7.19-rc"
+			},
+			"ExternalTokenStakeManager": {
+				"address": "0xef0489938a5960ceE869F08cfB67C33dff807b3f",
+				"status": "current",
+				"keccak256": "0x78e9655741224d719b2470892fbd5b9083c802f0cf87df68ebfb8da51ba3bbf2"
+			}
+		}
+	},
+	"v0.7.8-moonbase": {
+		"tag": "v0.7.8",
+		"fulltag": "v0.7.8-moonbase",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-10T12:25:10+09:00",
+		"commit": "c2a2cbae7bf2c3e7bf6b4f5da639384413d87443",
+		"contracts": {
+			"Liquidations": {
+				"address": "0xb115b80D2e240c516c1EfA177811BaBec2A41F8e",
+				"status": "current",
+				"keccak256": "0xd45d1bacf3309a00ba9149edbe209b4d00e2d4e75cfe98215b9f1042a470be20"
+			}
+		}
+	},
+	"v0.7.19-rc": {
+		"tag": "v0.7.19",
+		"fulltag": "v0.7.19-rc",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-10T12:31:14+09:00",
+		"commit": "a6ce2720666117b7dae7e792260263c7d40645a2",
+		"contracts": {
+			"Issuer": {
+				"address": "0xCA2727a762880edF98c7E918e76B425AFC5c3022",
+				"status": "current",
+				"keccak256": "0x46847b21e4d98b50d598a0ea8cfbefddc4bdb8b5920b7bb2fac6f47c375a1c2f"
+			}
+		}
+	},
+	"v0.7.20-rc": {
+		"tag": "v0.7.20",
+		"fulltag": "v0.7.20-rc",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-17T00:38:44+09:00",
+		"commit": "fef73787ee9a420f8eed340f229dd562f51f9ec1",
+		"contracts": {
+			"FeePool": {
+				"address": "0xa1B9685eA28cc8F827Fd39d68F3D1ec19BFC170F",
+				"status": "replaced",
+				"keccak256": "0xd7adc4c4ed666d5f1a8a5582f3301b8bd9374d86f4912ffd93439597efaac340",
+				"replaced_in": "v0.7.21-rc"
+			}
+		}
+	},
+	"v0.7.21-rc": {
+		"tag": "v0.7.21",
+		"fulltag": "v0.7.21-rc",
+		"release": "peri-finance",
+		"network": "moonbase-alphanet",
+		"date": "2024-04-17T13:33:52+09:00",
+		"commit": "8a8226e082c4d2badb19d111654da8cb0dd13daa",
+		"contracts": {
+			"FeePool": {
+				"address": "0x0A7797F6B45E1009Beee524A0Cb15B53665a771c",
+				"status": "current",
+				"keccak256": "0x77bb52cfac7fc91a2a061a568a3b3e316e84836b9a57f195ea23fba792a94167"
 			}
 		}
 	}

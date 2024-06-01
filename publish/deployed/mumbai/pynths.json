@@ -11,18 +11,27 @@
 	},
 	{
 		"name": "pETH",
-		"asset": "ETH"
+		"asset": "ETH",
+		"subclass": "MultiCollateralPynth"
 	},
 	{
-		"name": "pBNB",
-		"asset": "BNB"
-	},
-	{
-		"name": "pAVAX",
-		"asset": "AVAX"
+		"name": "pSAND",
+		"asset": "SAND"
 	},
 	{
 		"name": "pMATIC",
 		"asset": "MATIC"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK"
+	},
+	{
+		"name": "pSOL",
+		"asset": "SOL"
+	},
+	{
+		"name": "pEUR",
+		"asset": "EUR"
 	}
 ]

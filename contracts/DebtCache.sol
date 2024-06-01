@@ -84,7 +84,7 @@ contract DebtCache is BaseDebtCache {
     /**
      * @notice invalidate the cached debt if needed
      */
-    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchanger {
+    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchangerOrPynthpUSD {
         _updateDebtCacheValidity(currentlyInvalid);
     }
 

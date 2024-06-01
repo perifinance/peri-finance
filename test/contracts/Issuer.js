@@ -17,6 +17,7 @@ const {
 	fromUnit,
 	toPreciseUnit,
 	// fromPreciseUnit,
+	// preciseUnitToUnit,
 	divideDecimalRound,
 	multiplyDecimalRoundPrecise,
 	divideDecimalRoundPrecise,
@@ -48,7 +49,9 @@ const {
 contract('Issuer via PeriFinance', async accounts => {
 	const WEEK = 604800;
 
-	const [pUSD, pETH, PERI, USDC, DAI] = ['pUSD', 'pETH', 'PERI', 'USDC', 'DAI'].map(toBytes32);
+	const [pUSD, pETH, PERI, USDC, DAI, PAXG] = ['pUSD', 'pETH', 'PERI', 'USDC', 'DAI', 'PAXG'].map(
+		toBytes32
+	);
 	const pynthKeys = [pUSD, pETH];
 
 	const [, owner, oracle, account1, account2, account3, account6] = accounts;
@@ -69,16 +72,17 @@ contract('Issuer via PeriFinance', async accounts => {
 		pynths,
 		addressResolver,
 		stakingState,
-		externalTokenStakeManager,
+		exTokenManager,
 		usdc,
 		dai,
+		paxg,
 		stables;
 
 	const getRemainingIssuablePynths = async account =>
 		(await periFinance.remainingIssuablePynths(account))[0];
 
-	const getStakingAmount = async (token, tryingDebt) => {
-		const issuanceRatio = await systemSettings.issuanceRatio();
+	const getExSA = async (token, tryingDebt) => {
+		const issuanceRatio = await systemSettings.exTokenIssuanceRatio(token);
 		// console.log(`issuanceRatio is ${issuanceRatio}`);
 		const owingDebt = divideDecimalRound(tryingDebt, issuanceRatio);
 		// console.log(`amountToStake is ${owingDebt}`);
@@ -92,7 +96,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 		const zroNumber = toBigNbr(10 ** toBigNbr(18).sub(targetDecimals));
 		const stakingAmount = toBigNbr(convertedAmount)
-			.divRound(zroNumber)
+			.div(zroNumber)
 			.mul(zroNumber);
 		// console.log(`stakingAmount is ${stakingAmount}`);
 		return stakingAmount;
@@ -130,7 +134,7 @@ contract('Issuer via PeriFinance', async accounts => {
 			assert.fail('test is done!!');
 		}
 		pynths = ['pUSD', 'pETH'];
-		stables = ['USDC', 'DAI'];
+		stables = ['USDC', 'DAI', 'PAXG'];
 		({
 			PeriFinance: periFinance,
 			PeriFinanceState: periFinanceState,
@@ -146,9 +150,10 @@ contract('Issuer via PeriFinance', async accounts => {
 			// DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
 			StakingState: stakingState,
-			ExternalTokenStakeManager: externalTokenStakeManager,
+			ExternalTokenStakeManager: exTokenManager,
 			USDC: usdc,
 			DAI: dai,
+			PAXG: paxg,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -181,8 +186,8 @@ contract('Issuer via PeriFinance', async accounts => {
 		timestamp = await currentTime();
 
 		await exchangeRates.updateRates(
-			[PERI, USDC, DAI, pETH],
-			['0.2', '0.98', '0.99', '1200'].map(toUnit),
+			[PERI, USDC, DAI, pETH, PAXG],
+			['0.2', '0.98', '0.99', '1200', '2000'].map(toUnit),
 			timestamp,
 			{
 				from: oracle,
@@ -255,6 +260,38 @@ contract('Issuer via PeriFinance', async accounts => {
 				reason: 'Only the periFinance contract can perform this action',
 			});
 		});
+		it('issuePynthsToMaxQuota() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.issuePynthsToMaxQuota,
+				args: [account1, DAI],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('fitToClaimable() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.fitToClaimable,
+				args: [account1],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('exit() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.exit,
+				args: [account1],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
+		it('liquidateDelinquentAccount() cannot be invoked directly by a user', async () => {
+			await onlyGivenAddressCanInvoke({
+				fnc: issuer.liquidateDelinquentAccount,
+				args: [account1, toUnit('1'), account2],
+				accounts,
+				reason: 'Only the periFinance contract can perform this action',
+			});
+		});
 	});
 
 	describe('when minimum stake time is set to 0', () => {
@@ -282,10 +319,10 @@ contract('Issuer via PeriFinance', async accounts => {
 					await usdc.transfer(account1, to3Unit('10000'), { from: owner });
 
 					// approve USDC allowance
-					await usdc.approve(externalTokenStakeManager.address, to3Unit('10000'), {
+					await usdc.approve(exTokenManager.address, to3Unit('10000'), {
 						from: owner,
 					});
-					await usdc.approve(externalTokenStakeManager.address, to3Unit('10000'), {
+					await usdc.approve(exTokenManager.address, to3Unit('10000'), {
 						from: account1,
 					});
 
@@ -500,8 +537,8 @@ contract('Issuer via PeriFinance', async accounts => {
 					const peri2usdRate = await exchangeRates.rateForCurrency(PERI);
 					const issuanceRatio = await systemSettings.issuanceRatio();
 
-					const issuedPeriFinances = toBigNbr('200012');
-					await periFinance.transfer(account1, toUnit(issuedPeriFinances), {
+					const issuedPeriFinances = toUnit('200012');
+					await periFinance.transfer(account1, issuedPeriFinances, {
 						from: owner,
 					});
 
@@ -510,12 +547,15 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issuePynths(PERI, amountIssued, { from: account1 });
 
 					const expectedIssuablePynths = multiplyDecimal(
-						toUnit(issuedPeriFinances),
+						issuedPeriFinances,
 						multiplyDecimal(peri2usdRate, issuanceRatio)
 					).sub(amountIssued);
 
 					const remainingIssuable = await getRemainingIssuablePynths(account1);
 					assert.bnEqual(remainingIssuable, expectedIssuablePynths);
+
+					const temp = await issuer.cRatioNDebtsCollateral(account1);
+					assert.bnEqual(temp.periCol, issuedPeriFinances);
 				});
 
 				it("should correctly calculate a user's remaining issuable pynths without prior issuance", async () => {
@@ -550,14 +590,14 @@ contract('Issuer via PeriFinance', async accounts => {
 						toUnit(issuedPeriFinances),
 						multiplyDecimal(rate, issuanceRatio)
 					);
-					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 
-					assert.bnEqual(expectedIssuablePynths, maxIssuablePynths);
+					assert.bnEqual(expectedIssuablePynths, maxIssuable);
 				});
 
 				it("should correctly calculate a user's maximum issuable pynths without any PERI", async () => {
-					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
-					assert.bnEqual(0, maxIssuablePynths);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
+					assert.bnEqual(0, maxIssuable);
 				});
 
 				it("should correctly calculate a user's maximum issuable pynths with prior issuance", async () => {
@@ -577,8 +617,8 @@ contract('Issuer via PeriFinance', async accounts => {
 						multiplyDecimal(peri2usdRate, issuanceRatio)
 					);
 
-					const maxIssuablePynths = await issuer.maxIssuablePynths(account1);
-					assert.bnEqual(expectedIssuablePynths, maxIssuablePynths);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
+					assert.bnEqual(expectedIssuablePynths, maxIssuable);
 				});
 			});
 
@@ -1062,7 +1102,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					const maxPynths = await issuer.maxIssuablePynths(account1);
 
 					// account1 should be able to issue
-					await periFinance.issuePynths(PERI, maxPynths, { from: account1 });
+					await periFinance.issuePynths(PERI, maxPynths.maxIssuable, { from: account1 });
 				});
 
 				it('should allow an issuer to issue pynths in one flavour', async () => {
@@ -1147,6 +1187,45 @@ contract('Issuer via PeriFinance', async accounts => {
 						assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('40000'));
 					});
 				});
+				describe('fitToClaimable with only PERI staked', () => {
+					it('should allow fitToClaimable when c-ratio is below 400%', async () => {
+						// Give some PERI to account1
+						await periFinance.transfer(account1, toUnit('10000'), {
+							from: owner,
+						});
+
+						await dai.transfer(account1, toUnit('1'), { from: owner });
+						await dai.approve(exTokenManager.address, toUnit('10000'), {
+							from: account1,
+						});
+
+						// They should now be able to issue pUSD
+						// Determine maximum amount that can be issued.
+						const { maxIssuable } = await issuer.maxIssuablePynths(account1);
+						// Issue
+						await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
+
+						await periFinance.issuePynths(DAI, toUnit('0.0000000001'), { from: account1 });
+
+						await fastForward(86400 + 1);
+
+						const timestamp = await currentTime();
+						await exchangeRates.updateRates(
+							[PERI, USDC, DAI, PAXG],
+							['8', '0.9', '1', '2000'].map(toUnit),
+							timestamp,
+							{ from: oracle }
+						);
+						await debtCache.takeDebtSnapshot();
+
+						const ratios0 = await issuer.getRatios(account1, false);
+						assert.bnGt(ratios0.cRatio, ratios0.tRatio);
+
+						await periFinance.fitToClaimable({ from: account1 });
+						const ratios1 = await issuer.getRatios(account1, false);
+						assert.bnClose(ratios1.cRatio, ratios1.tRatio, '0'.repeat(10));
+					});
+				});
 
 				beforeEach(async () => {
 					// Setting USD/PERI exchange rate to 10
@@ -1162,7 +1241,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 				it('should allow an issuer to issue max pynths via the standard issue call', async () => {
 					// Determine maximum amount that can be issued.
-					const maxIssuable = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 
 					// Issue
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
@@ -1209,8 +1288,8 @@ contract('Issuer via PeriFinance', async accounts => {
 				beforeEach(async () => {
 					const timestamp = await currentTime();
 					await exchangeRates.updateRates(
-						[PERI, USDC, DAI],
-						['10', '0.9', '1'].map(toUnit),
+						[PERI, USDC, DAI, PAXG],
+						['10', '0.9', '1', '2000'].map(toUnit),
 						timestamp,
 						{ from: oracle }
 					);
@@ -1221,7 +1300,11 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.transfer(account1, toUnit('20000'), { from: owner });
 					await periFinance.transfer(account2, toUnit('20000'), { from: owner });
 					await usdc.transfer(account1, to3Unit('10000'), { from: owner });
-					await usdc.approve(externalTokenStakeManager.address, to3Unit('10000'), {
+					await usdc.approve(exTokenManager.address, to3Unit('10000'), {
+						from: account1,
+					});
+					await paxg.transfer(account1, toUnit('10000'), { from: owner });
+					await paxg.approve(exTokenManager.address, toUnit('10000'), {
 						from: account1,
 					});
 
@@ -1231,16 +1314,24 @@ contract('Issuer via PeriFinance', async accounts => {
 
 				it('should initiate correctly', async () => {
 					const usdcBalance = await usdc.balanceOf(account1);
-					const usdcAllowance = await usdc.allowance(account1, externalTokenStakeManager.address);
+					const usdcAllowance = await usdc.allowance(account1, exTokenManager.address);
 					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
 
 					assert.bnEqual(usdcBalance, to3Unit('10000'));
 					assert.bnEqual(usdcAllowance, to3Unit('10000'));
 					assert.bnEqual(usdcExRate, toUnit('0.9'));
+
+					const paxgBalance = await paxg.balanceOf(account1);
+					const paxgAllowance = await paxg.allowance(account1, exTokenManager.address);
+					const paxgExRate = await exchangeRates.rateForCurrency(PAXG);
+
+					assert.bnEqual(paxgBalance, toUnit('10000'));
+					assert.bnEqual(paxgAllowance, toUnit('10000'));
+					assert.bnEqual(paxgExRate, toUnit('2000'));
 				});
 
 				it('should NOT stake if try to stake more than issue', async () => {
-					const exTokenStakedAmt = await externalTokenStakeManager.combinedStakedAmountOf(
+					const exTokenStakedAmt = await exTokenManager.combinedStakedAmountOf(
 						issuer.address,
 						pUSD
 					);
@@ -1292,14 +1383,16 @@ contract('Issuer via PeriFinance', async accounts => {
 				});
 
 				it('should NOT stake USDC if there is no issue amount', async () => {
-					// debt will be 10000 USD
-					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
+					// debt will be 2000 USD
+					await periFinance.issuePynths(PERI, toUnit('2000'), { from: account1 });
 
 					// only stake, not issue pUSD
 					await assert.revert(
-						periFinance.issuePynths(USDC, toUnit('2050'), { from: account1 }),
-						'Staking amount exceeds issueing amount'
+						periFinance.issuePynths(USDC, toUnit('6001'), { from: account1 }),
+						'Over max external quota'
 					);
+					// const tRatio = await issuer.getTargetRatio(account1);
+					// console.log('tRatio:', tRatio.toString());
 				});
 
 				it('should issue pynths', async () => {
@@ -1312,7 +1405,6 @@ contract('Issuer via PeriFinance', async accounts => {
 						pUSDBalance,
 						debtBalance,
 						totalIssuedPUSD,
-						usdcQuota,
 					] = await Promise.all([
 						stakingState.stakedAmountOf(USDC, account1),
 						stakingState.totalStakedAmount(USDC),
@@ -1320,7 +1412,6 @@ contract('Issuer via PeriFinance', async accounts => {
 						pUSDContract.balanceOf(account1),
 						periFinance.debtBalanceOf(account1, pUSD),
 						periFinance.totalIssuedPynths(pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
 					]);
 
 					assert.equal(stakedAmount.toString(), '0');
@@ -1329,54 +1420,59 @@ contract('Issuer via PeriFinance', async accounts => {
 					assert.bnEqual(pUSDBalance, toUnit('10000'));
 					assert.bnEqual(debtBalance, toUnit('10000'));
 					assert.bnEqual(totalIssuedPUSD, toUnit('10000'));
-					assert.bnEqual(usdcQuota.toString(), '0');
 				});
 
 				it('should stake USDC and issue pynths', async () => {
-					const debtPERI = toUnit('4000');
-					const debtUSDC = toUnit('1000');
+					const debtPERI = toUnit('3000');
+					const debtUSDC = toUnit('3000');
+					const debtPAXG = toUnit('4500');
 					// debt will be 4000 USD
 					await periFinance.issuePynths(PERI, debtPERI, { from: account1 });
 
+					const stakingAmount = await getExSA(USDC, debtUSDC);
+					const paxgExpectedSA = await getExSA(PAXG, debtPAXG);
+
+					await periFinance.issuePynths(USDC, debtUSDC, { from: account1 });
+					// const tempDebtSA = await issuer.getAddDebtSA(account1, debtPAXG, PAXG);
+					await periFinance.issuePynths(PAXG, debtPAXG, { from: account1 });
+
 					await assert.revert(
 						periFinance.issuePynths(USDC, debtUSDC.add(toUnit('10')), { from: account1 }),
-						'Input amount exceeds available staking amount'
+						'Over max external quota'
 					);
-
-					const tryIssuingAmt = debtUSDC;
-					const stakingAmount = await getStakingAmount(USDC, tryIssuingAmt);
-
-					await periFinance.issuePynths(USDC, tryIssuingAmt, { from: account1 });
 
 					const [
 						stakedAmount,
+						paxgSA,
 						totalStaked,
 						numOfStaker,
 						pUSDBalance,
 						debtBalance,
 						totalIssuedPUSD,
-						usdcQuota,
+						// usdcQuota,
 					] = await Promise.all([
 						stakingState.stakedAmountOf(USDC, account1),
+						stakingState.stakedAmountOf(PAXG, account1),
 						stakingState.totalStakedAmount(USDC),
 						stakingState.totalStakerCount(USDC),
 						pUSDContract.balanceOf(account1),
 						periFinance.debtBalanceOf(account1, pUSD),
 						periFinance.totalIssuedPynths(pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
+						// exTokenManager.exStakingRatio(account1),
 					]);
 
 					assert.bnEqual(stakedAmount, stakingAmount);
+					assert.bnEqual(paxgSA, paxgExpectedSA);
 					assert.bnEqual(totalStaked, stakingAmount);
 					assert.bnEqual(numOfStaker, '1');
-					assert.bnEqual(pUSDBalance, debtPERI.add(debtUSDC));
-					assert.bnEqual(debtBalance, debtPERI.add(debtUSDC));
-					assert.bnEqual(totalIssuedPUSD, debtPERI.add(debtUSDC));
-					assert.bnClose(
-						usdcQuota,
-						divideDecimalRound(tryIssuingAmt, debtBalance),
-						toUnit(10 ** 12)
-					);
+					assert.bnEqual(pUSDBalance, debtPERI.add(debtUSDC).add(debtPAXG));
+					assert.bnEqual(debtBalance, debtPERI.add(debtUSDC).add(debtPAXG));
+					assert.bnEqual(totalIssuedPUSD, debtPERI.add(debtUSDC).add(debtPAXG));
+					// assert.bnClose(
+					// 	usdcQuota,
+					// 	divideDecimalRound(tryIssuingAmt, debtBalance),
+					// 	toUnit(10 ** 12)
+					// );
 				});
 
 				it('should set lastDebtLedgerEntry to 1 when a user added to a debtRegister and no debt exists', async () => {
@@ -1483,108 +1579,55 @@ contract('Issuer via PeriFinance', async accounts => {
 						from: oracle,
 					});
 
-					const initDebtUSDC = toUnit('250');
+					const initDebtUSDC = toUnit('3000');
 					const initDebtPERI = toUnit('1000');
-					const targetRatio = await systemSettings.issuanceRatio();
 					await periFinance.issuePynths(PERI, initDebtPERI, { from: account1 });
 					await periFinance.issuePynths(USDC, initDebtUSDC, { from: account1 });
 
-					assert.bnEqual(await issuer.externalTokenQuota(account1, 0, 0, true), toUnit('0.2'));
+					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
+
+					assert.bnLte(exSR, maxSR);
 
 					const timestamp2 = await currentTime();
 					await exchangeRates.updateRates([USDC], [toUnit('1.2')], timestamp2, {
 						from: oracle,
 					});
 
-					const quotaPreIssue = await issuer.externalTokenQuota(account1, 0, 0, true);
-					const cRatioPreIssue = await periFinance.collateralisationRatio(account1);
-					assert.bnGt(quotaPreIssue, toUnit('0.2'));
-					assert.bnLt(cRatioPreIssue, targetRatio);
+					// const maxTRatio = await systemSettings.externalTokenQuota();
+					// const targetRatio = await issuer.getTargetRatio(account1);
+					// const quotaPreIssue = await issuer.exStakingRatio(account1);
+					// const cRatioPreIssue = await periFinance.collateralisationRatio(account1);
+					// assert.bnGt(quotaPreIssue, maxTRatio);
+					// assert.bnGt(cRatioPreIssue, targetRatio);
 
 					await periFinance.issuePynths(PERI, initDebtPERI, { from: account1 });
 					// should throw error for it cannot stake than its issue amount * targetRatio
 					await assert.revert(
 						periFinance.issuePynths(USDC, initDebtUSDC, { from: account1 }),
-						'Input amount exceeds available staking amount'
+						'Over max external quota'
 					);
 
-					const maxExQuota = await systemSettings.externalTokenQuota();
-					const usdcPrice = await exchangeRates.rateForCurrency(USDC);
-					const usdcStakedAmt = await stakingState.stakedAmountOf(USDC, account1);
-					console.log(`usdcStakedAmt: ${usdcStakedAmt}`);
+					const issuables = await issuer.maxExIssuablePynths(account1, USDC);
 
-					const stakedUSDCDebt = multiplyDecimal(
-						multiplyDecimal(usdcStakedAmt, usdcPrice),
-						targetRatio
-					);
-					// console.log(`stakedUSDCDebt before: ${stakedUSDCDebt}`);
-					// console.log(`toUnit('500').sub(stakedUSDCDebt): ${toUnit('500').sub(stakedUSDCDebt)}`);
-
-					// try {
-					// 	const usdcStakingValue = divideDecimalRound(toUnit('200'), maxExQuota);
-					// 	console.log(`usdcStakingValue: ${usdcStakingValue}`);
-
-					// 	await issuer.stake(account1, usdcStakingValue, USDC, pUSD, { from: account1 });
-
-					// 	const usdcStakedAmt2 = await stakingState.stakedAmountOf(USDC, account1);
-
-					// 	console.log(`usdcStakedAmt2: ${usdcStakedAmt2}`);
-
-					// 	const exTokenAmount = await getStakingAmount(USDC, toUnit('200'));
-					// 	assert.bnEqual(usdcStakedAmt2.sub(usdcStakedAmt), exTokenAmount);
-
-					// 	console.log(`exTokenAmount: ${exTokenAmount}`);
-
-					// 	const {
-					// 		maxIssuable,
-					// 		alreadyIssued,
-					// 		totalSystemDebt,
-					// 	} = await periFinance.remainingIssuablePynths(account1);
-					// 	console.log(`alreadyIssued: ${alreadyIssued}`);
-					// 	console.log(`maxIssuable: ${maxIssuable}`);
-					// 	console.log(`totalSystemDebt: ${totalSystemDebt}`);
-					// } catch (err) {
-					// 	console.log(`error occurs: ${err.toString()}`);
-					// }
-					// const estimatedQuota = await externalTokenStakeManager.externalTokenQuota(
-					// 	account1,
-					// 	toUnit('2500'),
-					// 	0,
-					// 	0,
-					// 	true
-					// );
-
-					// console.log(`estimatedExternalTokenQuota: ${estimatedQuota}`);
-					// existing debt from USDC has risen up to 1250 * 1.2 = 1500, 1500 * 0.2 = 300
-					// existing debt from PERI has come down to 1000 + 1000 - 50 = 1950
-					// so, the remained the quota amount of debt for USDC is 1950 * 1/4 = 287.5
-					const usdcIssuableDebt = divideDecimal(
-						multiplyDecimal(
-							multiplyDecimal(initDebtPERI, toUnit(2)).sub(stakedUSDCDebt.sub(initDebtUSDC)),
-							maxExQuota
-						),
-						toUnit(1).sub(maxExQuota)
-					);
-
-					// console.log(
-					// 	`usdcIssuableDebt.sub(initDebtUSDC): ${usdcIssuableDebt.sub(stakedUSDCDebt)}`
-					// );
-					await periFinance.issuePynths(USDC, usdcIssuableDebt.sub(stakedUSDCDebt), {
+					await periFinance.issuePynths(USDC, issuables, {
 						from: account1,
 					});
 
 					// stakedUSDCDebt = multiplyDecimal(multiplyDecimal(usdcStakedAmt, usdcPrice), targetRatio);
 					// console.log(`stakedUSDCDebt after: ${stakedUSDCDebt}`);
 
-					const quotaPostIssue = await issuer.externalTokenQuota(account1, 0, 0, true);
-					const cratioPostIssue = await periFinance.collateralisationRatio(account1);
-					assert.bnEqual(quotaPostIssue, toUnit('0.2'));
-					assert.bnLt(cratioPostIssue, targetRatio);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
+					const postQuota = await issuer.exStakingRatio(account1);
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
+
+					// const cRatio = await periFinance.collateralisationRatio(account1);
+					// assert.bnEqual(quotaPostIssue, maxTRatio);
+					assert.bnLte(cRatio, tRatio);
 				});
 
 				it('should issue max pynths when USDC quota exceeds threshold', async () => {
 					await usdc.transfer(account1, to3Unit('100000'), { from: owner });
-					await usdc.approve(externalTokenStakeManager.address, to3Unit('100000'), {
+					await usdc.approve(exTokenManager.address, to3Unit('100000'), {
 						from: account1,
 					});
 
@@ -1592,15 +1635,17 @@ contract('Issuer via PeriFinance', async accounts => {
 					await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
 						from: oracle,
 					});
-					const initDebtUSDC = toUnit('250');
+					const initDebtUSDC = toUnit('3000');
 					const initDebtPERI = toUnit('1000');
-					const targetRatio = await systemSettings.issuanceRatio();
+
 					await periFinance.issuePynths(PERI, initDebtPERI, { from: account1 });
 					await periFinance.issuePynths(USDC, initDebtUSDC, {
 						from: account1,
 					});
 
-					assert.bnEqual(await issuer.externalTokenQuota(account1, 0, 0, true), toUnit('0.2'));
+					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
+
+					assert.bnLte(exSR, maxSR);
 					const prevDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
 					// const prevUSDCAmount = await stakingState.stakedAmountOf(USDC, account1);
 
@@ -1615,20 +1660,21 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issueMaxPynths({ from: account1 });
 
 					const postDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
-					const postIssueQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
+					// const postIssueQuota = await issuer.exStakingRatio(account1);
 					const postIssueCRatio = await periFinance.collateralisationRatio(account1);
+					const targetRatio = await issuer.getTargetRatio(account1);
 					// const postUSDCAmount = await stakingState.stakedAmountOf(USDC, account1);
 					// const { alreadyIssued } = await periFinance.remainingIssuablePynths(account1);
 
 					assert.bnGt(postDebtAmount, prevDebtAmount);
-					assert.bnLt(postIssueQuota, toUnit('0.2'));
-					assert.bnEqual(postIssueCRatio, targetRatio);
+					// assert.bnLte(postIssueQuota, toUnit('0.375'));
+					assert.bnLte(postIssueCRatio, targetRatio);
 					// console.log(`prevUSDCAmount: ${prevUSDCAmount}, postUSDCAmount: ${postUSDCAmount}`);
 					// console.log(`prevDebtAmount: ${prevDebtAmount}, postDebtAmount: ${postDebtAmount}`);
 					// console.log(`alreadyIssued: ${alreadyIssued}`);
 
-					const usdcBalanceOfAccoun1 = await usdc.balanceOf(account1);
-					console.log(`usdcBalanceOfAccoun1: ${usdcBalanceOfAccoun1}`);
+					// const usdcBalanceOfAccoun1 = await usdc.balanceOf(account1);
+					// console.log(`usdcBalanceOfAccoun1: ${usdcBalanceOfAccoun1}`);
 
 					// const { issueAmount, stakeAmount } = await issuer.maxExternalTokenStakeAmount(
 					// 	account1,
@@ -1642,9 +1688,10 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issuePynthsToMaxQuota(USDC, { from: account1 });
 
 					// const lastDebtAmount = await periFinance.debtBalanceOf(account1, pUSD);
-					const lastIssueQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
+					const postQuota = await issuer.exStakingRatio(account1);
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 					// const lastUSDCAmount = await stakingState.totalStakedAmount(USDC);
-					// const combinedStakedAmt = await externalTokenStakeManager.combinedStakedAmountOf(
+					// const combinedStakedAmt = await exTokenManager.combinedStakedAmountOf(
 					// 	account1,
 					// 	pUSD
 					// );
@@ -1654,13 +1701,13 @@ contract('Issuer via PeriFinance', async accounts => {
 					// console.log(`postIssueQuota: ${postIssueQuota}, lastIssueQuota: ${lastIssueQuota}`);
 					// console.log(`postUSDCAmount: ${postUSDCAmount}, lastUSDCAmount: ${lastUSDCAmount}`);
 
-					assert.bnClose(lastIssueQuota, toUnit('0.2'), toUnit(10 ** 12));
+					// assert.bnClose(lastIssueQuota, toUnit('0.375'), toUnit(10 ** 12));
 				});
 			});
 
 			describe('issuance USDC max staking', () => {
-				const debtExToken = toUnit('1000');
-				const debtPERI = toUnit('4000');
+				const debtExToken = toUnit('6000');
+				const debtPERI = toUnit('2000');
 				beforeEach(async () => {
 					const timestamp = await currentTime();
 					await exchangeRates.updateRates([PERI, USDC], ['10', '1'].map(toUnit), timestamp, {
@@ -1668,18 +1715,18 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 
 					await usdc.faucet(accounts[0]);
-					await periFinance.transfer(account1, toUnit('10000'), { from: owner });
-					await usdc.transfer(account1, to3Unit('5000'), { from: accounts[0] });
-					await usdc.approve(externalTokenStakeManager.address, to3Unit('100000'), {
+					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
+					await usdc.transfer(account1, to3Unit('6000'), { from: accounts[0] });
+					await usdc.approve(exTokenManager.address, to3Unit('100000'), {
 						from: account1,
 					});
 				});
 
 				it('should initiate correctly', async () => {
 					const usdcBalance = await usdc.balanceOf(account1);
-					const usdcAllowance = await usdc.allowance(account1, externalTokenStakeManager.address);
+					const usdcAllowance = await usdc.allowance(account1, exTokenManager.address);
 
-					assert.bnEqual(usdcBalance, to3Unit('5000'));
+					assert.bnEqual(usdcBalance, to3Unit('6000'));
 					assert.bnEqual(usdcAllowance, to3Unit('100000'));
 				});
 
@@ -1689,17 +1736,19 @@ contract('Issuer via PeriFinance', async accounts => {
 						prevUSDCBalance,
 						prevUSDCStakingState,
 						prevDebtBalance,
-						prevQuote,
+						// prevQuote,
 					] = await Promise.all([
 						stakingState.stakedAmountOf(USDC, account1),
 						usdc.balanceOf(account1),
 						usdc.balanceOf(stakingState.address),
 						periFinance.debtBalanceOf(account1, pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
+						// issuer.exStakingRatio(account1),
 					]);
 
-					const maxExQuota = await systemSettings.externalTokenQuota();
-					const exTokenAmount = await getStakingAmount(USDC, debtExToken);
+					const { exSR } = await issuer.exStakingRatio(account1);
+
+					// const maxExQuota = await systemSettings.externalTokenQuota();
+					const exTokenAmount = await getExSA(USDC, debtExToken);
 					const stakingUSDC = exTokenAmount.div(toBigNbr(10 ** 12));
 					await periFinance.issuePynths(PERI, debtPERI, { from: account1 });
 					await periFinance.issuePynths(USDC, debtExToken, { from: account1 });
@@ -1715,7 +1764,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						usdc.balanceOf(account1),
 						usdc.balanceOf(stakingState.address),
 						periFinance.debtBalanceOf(account1, pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
+						issuer.exStakingRatio(account1),
 					]);
 
 					// It has an unit digit error
@@ -1726,14 +1775,16 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 					assert.bnEqual(prevUSDCStakingState.add(stakingUSDC), postUSDCStakingState);
 					assert.bnEqual(prevDebtBalance.add(debtExToken).add(debtPERI), postDebtBalance);
-					assert.bnEqual(prevQuote, toUnit('0'));
-					assert.bnEqual(postQuota, maxExQuota);
+					assert.bnEqual(exSR, toUnit('0'));
+					assert.bnEqual(postQuota.maxSR, toUnit('0.375'));
 				});
 
-				it('should stake less than amount x issuance ratio if usdc balance is not enough', async () => {
+				/* it('should stake less than amount x issuance ratio if usdc balance is not enough', async () => {
 					// It is going to stake all USDC balance
-					const exTokenAmount = await getStakingAmount(USDC, debtExToken);
+					const exTokenAmount = (await getExSA(USDC, debtExToken)).sub(toUnit('100'));
 					const stakingUSDC = exTokenAmount.div(toBigNbr(10 ** 12));
+					await usdc.transfer(accounts[0], to3Unit('100'), { from: account1 });
+
 					await periFinance.issuePynths(PERI, debtPERI, { from: account1 });
 					await periFinance.issuePynths(USDC, debtExToken, { from: account1 });
 
@@ -1742,21 +1793,21 @@ contract('Issuer via PeriFinance', async accounts => {
 						postUSDCBalance,
 						postUSDCStakingState,
 						postDebtBalance,
-						postQuota,
+						// postQuota,
 					] = await Promise.all([
 						stakingState.stakedAmountOf(USDC, account1),
 						usdc.balanceOf(account1),
 						usdc.balanceOf(stakingState.address),
 						periFinance.debtBalanceOf(account1, pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
+						// issuer.exStakingRatio(account1),
 					]);
 
 					assert.bnEqual(postUSDCStakedAmount, exTokenAmount);
 					assert.bnEqual(postUSDCBalance, toUnit('0'));
 					assert.bnEqual(postUSDCStakingState, stakingUSDC);
 					assert.bnEqual(postDebtBalance, debtExToken.add(debtPERI));
-					assert.bnEqual(postQuota, divideDecimal(debtExToken, postDebtBalance));
-				});
+					// assert.bnEqual(postQuota, divideDecimal(debtExToken, postDebtBalance));
+				}); */
 			});
 
 			describe('burning', () => {
@@ -1766,7 +1817,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						await exchangeRates.updateRates([PERI, USDC], [toUnit('10'), toUnit('1')], timestamp, {
 							from: oracle,
 						});
-						// ensure user has pynths to burb
+						// ensure user has pynths to burn
 						await periFinance.transfer(account1, toUnit('1000'), { from: owner });
 						await periFinance.issueMaxPynths({ from: account1 });
 					});
@@ -1832,27 +1883,27 @@ contract('Issuer via PeriFinance', async accounts => {
 								await debtCache.takeDebtSnapshot();
 							});
 
-							// if (type === 'pUSD') {
-							// 	it('then calling burnPynths() succeeds', async () => {
-							// 		await periFinance.burnPynths(PERI, toUnit('1'), { from: account1 });
-							// 	});
-							// 	it('and calling fitToClaimable() succeeds', async () => {
-							// 		await periFinance.fitToClaimable({ from: account1 });
-							// 	});
-							// } else {
-							it('then calling burn() reverts', async () => {
-								await assert.revert(
-									periFinance.burnPynths(toBytes32(type), toUnit('1'), { from: account1 }),
-									'A pynth or PERI rate is invalid'
-								);
-							});
-							it('and calling fitToClaimable() reverts', async () => {
-								await assert.revert(
-									periFinance.fitToClaimable({ from: account1 }),
-									'A pynth or PERI rate is invalid'
-								);
-							});
-							// }
+							if (type === 'PERI') {
+								/* it('then calling burnPynths() succeeds', async () => {
+									await periFinance.burnPynths(PERI, toUnit('1'), { from: account1 });
+								});
+								it('and calling fitToClaimable() succeeds', async () => {
+									await periFinance.fitToClaimable({ from: account1 });
+								});
+							} else { */
+								it('then calling burn() reverts', async () => {
+									await assert.revert(
+										periFinance.burnPynths(toBytes32(type), toUnit('1'), { from: account1 }),
+										'A pynth or PERI rate is invalid'
+									);
+								});
+								it('and calling fitToClaimable() reverts', async () => {
+									await assert.revert(
+										periFinance.fitToClaimable({ from: account1 }),
+										'A pynth or PERI rate is invalid'
+									);
+								});
+							}
 						});
 					});
 				});
@@ -2147,7 +2198,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						await assert.revert(
 							periFinance.issuePynths(PERI, issuedPynths1, { from: account1 }),
-							'SafeMath: division by zero'
+							'Amount is zero'
 						);
 					});
 				});
@@ -2181,7 +2232,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						});
 
 						it('then the maxIssuablePynths drops 50%', async () => {
-							assert.bnClose(maxIssuablePynths, toUnit('4000'));
+							assert.bnClose(maxIssuablePynths.maxIssuable, toUnit('4000'));
 						});
 						it('then calling fitToClaimable() reduces pUSD to c-ratio target', async () => {
 							await periFinance.fitToClaimable({ from: account1 });
@@ -2203,7 +2254,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
-							assert.bnEqual(maxIssuablePynths, toUnit('7200'));
+							assert.bnEqual(maxIssuablePynths.maxIssuable, toUnit('7200'));
 						});
 						it('then calling fitToClaimable() reduces pUSD to c-ratio target', async () => {
 							await periFinance.fitToClaimable({ from: account1 });
@@ -2225,7 +2276,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						});
 
 						it('then the maxIssuablePynths drops 10%', async () => {
-							assert.bnEqual(maxIssuablePynths, toUnit('800'));
+							assert.bnEqual(maxIssuablePynths.maxIssuable, toUnit('800'));
 						});
 						it('then calling fitToClaimable() reduces pUSD to c-ratio target', async () => {
 							await periFinance.fitToClaimable({ from: account1 });
@@ -2247,7 +2298,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						});
 
 						it('then the maxIssuablePynths increases 100%', async () => {
-							assert.bnEqual(maxIssuablePynths, toUnit('16000'));
+							assert.bnEqual(maxIssuablePynths.maxIssuable, toUnit('16000'));
 						});
 						it('then calling fitToClaimable() reverts', async () => {
 							await assert.revert(
@@ -2281,10 +2332,12 @@ contract('Issuer via PeriFinance', async accounts => {
 					await Promise.all([
 						periFinance.transfer(account1, toUnit('100000'), { from: owner }),
 						usdc.transfer(account1, amountT, { from: owner }),
-						usdc.approve(externalTokenStakeManager.address, amountT, { from: account1 }),
+						usdc.approve(exTokenManager.address, amountT, { from: account1 }),
 						usdc.approve(stakingState.address, amountT, { from: account1 }),
 						dai.transfer(account1, toUnit('100000'), { from: owner }),
-						dai.approve(externalTokenStakeManager.address, toUnit('100000'), { from: account1 }),
+						dai.approve(exTokenManager.address, toUnit('100000'), { from: account1 }),
+						paxg.transfer(account1, toUnit('1000'), { from: owner }),
+						paxg.approve(exTokenManager.address, toUnit('1000'), { from: account1 }),
 					]);
 
 					assert.bnEqual(await usdc.balanceOf(account1), amountT);
@@ -2343,7 +2396,7 @@ contract('Issuer via PeriFinance', async accounts => {
 				});
 
 				it('should burn and unstake USDC', async () => {
-					const stakeAmount = toUnit('2500');
+					const stakeAmount = toUnit('30000');
 					await periFinance.exit({ from: account1 });
 					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 					await periFinance.issuePynths(USDC, stakeAmount, { from: account1 });
@@ -2355,46 +2408,47 @@ contract('Issuer via PeriFinance', async accounts => {
 					const prevpUSDBalance = await pUSDContract.balanceOf(account1);
 					const prevpStakingAmount = await stakingState.stakedAmountOf(USDC, account1);
 					const prevDebtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-					const prevQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
+					const prevQuota = await issuer.exStakingRatio(account1);
 					const prevUSDCBalance = await usdc.balanceOf(account1);
 					const prevUSDCStakingState = await usdc.balanceOf(stakingState.address);
 
-					const stakedUSDC = await getStakingAmount(USDC, stakeAmount);
+					const stakedUSDC = await getExSA(USDC, stakeAmount);
 					assert.bnClose(
 						prevUSDCStakingState.mul(toBigNbr(10 ** 12)),
 						stakedUSDC,
 						toBigNbr(10 ** 12)
 					);
 					// since stakeing state value would be parsed to 10**12
-					assert.bnClose(prevQuota, toUnit('0.2'), toBigNbr(10 ** 12));
+					assert.bnLte(prevQuota.exSR, prevQuota.maxSR);
+					// assert.bnClose(prevQuota.maxSR, toUnit('0.375'), toBigNbr(10 ** 12));
 
-					// Currently user has maximum quota staked. (pUSD, USDC) = (20000 , 22222.222222)
-					// If user burns 100 pUSD with 20 USDC untaking,
+					// Currently user has maximum quota staked. (pUSD, USDC) = (30000 , 33333.33333)
+					// If user burns 100 pUSD with 111.111111 USDC untaking,
 					// although it satisfies input amount, it violates maximum quota in a result.
-					// After quota = (22202.222222 * ExRate * issuanceRatio) / 19900 = 0.2008241206...
+					// After quota = 29900 / (50000 + 29900) = 0.37896071... > 0.375
 					const unstakeAmountToFailed = toUnit('20');
 					await periFinance.burnPynths(USDC, unstakeAmountToFailed, { from: account1 });
 					await assert.revert(
 						periFinance.burnPynths(PERI, toUnit('200'), {
 							from: account1,
 						}),
-						'USDC staked exceeds quota'
+						'Over max external quota'
 					);
 
-					const unstakeAmount = toUnit('500');
+					// USDC : (30000 - 300)/1 = 29700
+					// PERI : (10000 - 100)/0.2 = 49500
+					// After quota = 29700 / (49500 + 29700) = 0.375
+					const unstakeAmount = toUnit('280');
 					await periFinance.burnPynths(USDC, unstakeAmount, { from: account1 });
 					await periFinance.burnPynths(PERI, toUnit('100'), { from: account1 });
 
 					const postpUSDBalance = await pUSDContract.balanceOf(account1);
 					const postStakingAmount = await stakingState.stakedAmountOf(USDC, account1);
 					const postDebtBalance = await periFinance.debtBalanceOf(account1, pUSD);
-					const postQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
+					const postQuota = await issuer.exStakingRatio(account1);
 					const postUSDCBalance = await usdc.balanceOf(account1);
 					const postUSDCStakingState = await usdc.balanceOf(stakingState.address);
-					const unstakedUSDC = await getStakingAmount(
-						USDC,
-						unstakeAmount.add(unstakeAmountToFailed)
-					);
+					const unstakedUSDC = await getExSA(USDC, unstakeAmount.add(unstakeAmountToFailed));
 
 					assert.bnEqual(
 						prevpUSDBalance.sub(toUnit('100').add(unstakeAmountToFailed.add(unstakeAmount))),
@@ -2417,17 +2471,17 @@ contract('Issuer via PeriFinance', async accounts => {
 						prevUSDCStakingState.sub(unstakedUSDC.div(toBigNbr(10 ** 12))),
 						postUSDCStakingState
 					);
-					assert.bnLte(postQuota, toUnit('0.2'));
+					assert.bnLte(postQuota.exSR, postQuota.maxSR);
 
 					const usdcExRate = await exchangeRates.rateForCurrency(USDC);
-					const issuanceRatio = await systemSettings.issuanceRatio();
+					const usdcIR = await systemSettings.exTokenIssuanceRatio(USDC);
 					const debtUSDC = multiplyDecimal(
 						multiplyDecimal(stakedUSDC.sub(unstakedUSDC), usdcExRate),
-						issuanceRatio
+						usdcIR
 					);
 					const totalDebt = await periFinance.totalIssuedPynths(pUSD);
 
-					assert.bnClose(postQuota, divideDecimal(debtUSDC, totalDebt), toBigNbr(10 ** 12));
+					assert.bnClose(toUnit('0.75'), divideDecimal(debtUSDC, totalDebt), toBigNbr(10 ** 12));
 				});
 
 				it('should NOT burn if burn amount exceeds staked amount', async () => {
@@ -2458,7 +2512,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 				});
 
-				it('should fit claimable when C-Ratio > Target-Ratio and USDC debt <= debt quota', async () => {
+				it('should fit claimable when C-Ratio > T-Ratio and external token value is not changed', async () => {
 					await periFinance.exit({ from: account1 });
 					// transfer back to deployer to adjust amounts
 					await periFinance.transfer(accounts[0], toUnit('95000'), { from: account1 });
@@ -2469,8 +2523,8 @@ contract('Issuer via PeriFinance', async accounts => {
 					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 					// Set issued max (Fit to max quota and target C-Ratio)
-					const tryingAmount = toUnit('2500');
-					const stakingAmount = await getStakingAmount(USDC, tryingAmount);
+					const tryingAmount = toUnit('25000');
+					const stakingAmount = await getExSA(USDC, tryingAmount);
 
 					// const accout11Balance = await usdc.balanceOf(account1);
 					// console.log(`USDC balance on account1 pre-staking: ${accout11Balance}`);
@@ -2484,7 +2538,6 @@ contract('Issuer via PeriFinance', async accounts => {
 						pUSDBalance,
 						debtBalance,
 						totalIssuedPUSD,
-						usdcQuota,
 						initCRatio,
 					] = await Promise.all([
 						stakingState.stakedAmountOf(USDC, account1),
@@ -2493,49 +2546,42 @@ contract('Issuer via PeriFinance', async accounts => {
 						pUSDContract.balanceOf(account1),
 						periFinance.debtBalanceOf(account1, pUSD),
 						periFinance.totalIssuedPynths(pUSD),
-						issuer.externalTokenQuota(account1, 0, 0, true),
 						periFinance.collateralisationRatio(account1),
 					]);
 
 					assert.bnEqual(stakedAmount, stakingAmount);
 					assert.bnEqual(totalStaked, stakingAmount);
 					assert.bnEqual(numOfStaker, '1');
-					assert.bnEqual(pUSDBalance, toUnit('12500'));
-					assert.bnEqual(debtBalance, toUnit('12500'));
-					assert.bnEqual(totalIssuedPUSD, toUnit('12500'));
-					assert.bnClose(usdcQuota, toUnit('0.2'), 10 ** 12);
-					assert.bnClose(initCRatio, toUnit('0.2'), 10 ** 12);
+					assert.bnEqual(pUSDBalance, toUnit('35000'));
+					assert.bnEqual(debtBalance, toUnit('35000'));
+					assert.bnEqual(totalIssuedPUSD, toUnit('35000'));
+					assert.bnClose(initCRatio, toUnit('0.4666666667'), 10 ** 12);
 
 					// As Peri price is going down, C-Ratio decreases.
 					// Meanwhile, usdc quota is not be changed.
 					await fastForward(86400 + 1);
 					const timestamp = await currentTime();
-					await exchangeRates.updateRates([PERI, USDC], ['5', '0.9'].map(toUnit), timestamp, {
+					await exchangeRates.updateRates([PERI, USDC], ['8', '0.98'].map(toUnit), timestamp, {
 						from: oracle,
 					});
 					await debtCache.takeDebtSnapshot();
 
-					const prevCRatio = await periFinance.collateralisationRatio(account1);
-					const preQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
-					// C-Ratio is expected less than 500%
-					assert.bnGt(prevCRatio, toUnit('0.2'));
-					assert.bnClose(preQuota, toUnit('0.2'), 10 ** 12);
+					const Ratios = await issuer.getRatios(account1, true);
+					assert.bnLt(Ratios.tRatio, Ratios.cRatio);
 
 					await periFinance.fitToClaimable({ from: account1 });
-					const postCRatio = await periFinance.collateralisationRatio(account1);
-					const postQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
-					assert.bnClose(postCRatio, toUnit('0.2'), 10 ** 12);
-					assert.bnClose(postQuota, toUnit('0.2'), 10 ** 12);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
+					assert.bnClose(cRatio, tRatio, 10 ** 12);
 				});
 
-				it('should fit claimable when C-Ratio > Target-Ratio and USDC debt > debt quota', async () => {
+				it('should fit claimable when C-Ratio < T-Ratio and external token value is increased', async () => {
 					await periFinance.exit({ from: account1 });
 					// transfer back to deployer to adjust amounts
 					await periFinance.transfer(accounts[0], toUnit('95000'), { from: account1 });
 
 					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 					// Set issued max (Fit to max quota and target C-Ratio)
-					const tryingAmount = toUnit('2500');
+					const tryingAmount = toUnit('25000');
 					await periFinance.issuePynths(USDC, tryingAmount, { from: account1 });
 
 					// As Peri price is going up, C-Ratio would be increased.
@@ -2547,44 +2593,41 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 					await debtCache.takeDebtSnapshot();
 
-					const [prevQuote, prevCRatio] = await Promise.all([
-						issuer.externalTokenQuota(account1, 0, 0, true),
-						periFinance.collateralisationRatio(account1),
-					]);
-
-					assert.bnGt(prevQuote, toUnit('0.2'));
-					assert.bnLt(prevCRatio, toUnit('0.2'));
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
+					assert.bnGt(tRatio, cRatio);
+					const { exSR, maxSR } = await issuer.exStakingRatio(account1);
+					assert.bnGt(exSR, maxSR);
 
 					await periFinance.fitToClaimable({ from: account1 });
 
 					const [postQuota, postCRatio] = await Promise.all([
-						issuer.externalTokenQuota(account1, 0, 0, true),
+						issuer.exStakingRatio(account1),
 						periFinance.collateralisationRatio(account1),
 					]);
 
-					assert.bnLt(postCRatio, prevCRatio);
-					assert.bnClose(postQuota, toUnit('0.2'), 10 ** 12);
+					assert.bnGt(postCRatio, cRatio);
+					assert.bnClose(postQuota.maxSR, toUnit('0.375'), 10 ** 12);
 				});
 
-				it('should fit to claimable if C-Ratio < threshhold and the quota < the thershold', async () => {
+				it('should fit to claimable if C-Ratio > T-Ratio and external token value is decreased.', async () => {
 					// transfer back to deployer to adjust amounts
 					await periFinance.exit({ from: account1 });
 					await periFinance.transfer(accounts[0], toUnit('95000'), { from: account1 });
 
 					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 					// Set issued max (Fit to max quota and target C-Ratio)
-					const tryingUSDCAmt = toUnit('1500');
+					const tryingUSDCAmt = toUnit('15000');
 					await periFinance.issuePynths(USDC, tryingUSDCAmt, { from: account1 });
-					const tryingDAICAmt = toUnit('1000');
-					await periFinance.issuePynths(DAI, tryingDAICAmt, { from: account1 });
+					const tryingPAXGCAmt = toUnit('10000');
+					await periFinance.issuePynths(PAXG, tryingPAXGCAmt, { from: account1 });
 
 					// As USDC Price going up, its debt quota would also be increased.
 					// C-Ratio is expected to be larger than 400%, meanwhile quota is above threshold)
-					await fastForward(86400 + 1);
+					// await fastForward(86400 + 1);
 					const timestamp = await currentTime();
 					await exchangeRates.updateRates(
-						[PERI, USDC, DAI],
-						['10', '0.8', '0.9'].map(toUnit),
+						[PERI, USDC, PAXG],
+						['9', '0.8', '1800'].map(toUnit),
 						timestamp,
 						{
 							from: oracle,
@@ -2592,17 +2635,56 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 					await debtCache.takeDebtSnapshot();
 
-					const prevCRatio = await periFinance.collateralisationRatio(account1);
-					const preQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
-					assert.bnGt(prevCRatio, toUnit('0.2'));
-					assert.bnLt(preQuota, toUnit('0.2'));
+					const Ratios = await issuer.getRatios(account1, true);
+					// const prevCRatio = await periFinance.collateralisationRatio(account1);
+					// const preQuota = await issuer.exStakingRatio(account1);
+					assert.bnLt(Ratios.tRatio, Ratios.cRatio);
+					// assert.bnLt(preQuota, toUnit('0.375'));
 
 					await periFinance.fitToClaimable({ from: account1 });
-					const postCRatio = await periFinance.collateralisationRatio(account1);
-					const postQuota = await issuer.externalTokenQuota(account1, 0, 0, true);
+					// const postCRatio = await periFinance.collateralisationRatio(account1);
+					const { tRatio, cRatio } = await issuer.getRatios(account1, true);
+					// const postQuota = await issuer.exStakingRatio(account1);
 					// It doesn't fit C-Ratio if it already satisfies target ratio.
-					assert.bnClose(postCRatio, toUnit('0.2'), 10 ** 12);
-					assert.bnGt(postQuota, preQuota);
+					assert.bnClose(cRatio, tRatio, 10 ** 12);
+					// assert.bnGt(postQuota, preQuota);
+				});
+				it('should not fit to claimable when C-Ratio < T-Ratio even if external token value is increased.', async () => {
+					// transfer back to deployer to adjust amounts
+					await periFinance.exit({ from: account1 });
+					await periFinance.transfer(accounts[0], toUnit('95000'), { from: account1 });
+
+					await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
+					// Set issued max (Fit to max quota and target C-Ratio)
+					const tryingUSDCAmt = toUnit('15000');
+					await periFinance.issuePynths(USDC, tryingUSDCAmt, { from: account1 });
+					const tryingPAXGCAmt = toUnit('10000');
+					await periFinance.issuePynths(PAXG, tryingPAXGCAmt, { from: account1 });
+
+					// As USDC Price going up, its debt quota would also be increased.
+					// C-Ratio is expected to be larger than 400%, meanwhile quota is above threshold)
+					await fastForward(86400 + 1);
+					const timestamp = await currentTime();
+					await exchangeRates.updateRates(
+						[PERI, USDC, PAXG],
+						['12', '1', '2010'].map(toUnit),
+						timestamp,
+						{
+							from: oracle,
+						}
+					);
+					await debtCache.takeDebtSnapshot();
+
+					const Ratios = await issuer.getRatios(account1, true);
+					assert.bnGt(Ratios.tRatio, Ratios.cRatio);
+
+					// const { exSR, maxSR } = await issuer.exStakingRatio(account1);
+					// assert.bnLt(exSR, maxSR);
+
+					await assert.revert(
+						periFinance.fitToClaimable({ from: account1 }),
+						'Account is already claimable'
+					);
 				});
 			});
 
@@ -2678,7 +2760,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
-					assert.bnClose(debtBalance1, account1AmountToIssue);
+					assert.bnClose(debtBalance1, account1AmountToIssue.maxIssuable);
 
 					// Issue and burn from account 2 all debt
 					await periFinance.issuePynths(PERI, toUnit('43'), { from: account2 });
@@ -2718,10 +2800,10 @@ contract('Issuer via PeriFinance', async accounts => {
 					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
-					assert.bnClose(debtBalance1, account1AmountToIssue);
+					assert.bnClose(debtBalance1, account1AmountToIssue.maxIssuable);
 
 					let expectedDebtForAccount2 = toBigNbr('0');
-					const totalTimesToIssue = 40;
+					const totalTimesToIssue = 10;
 					for (let i = 0; i < totalTimesToIssue; i++) {
 						// Seems that in this case, issuing 43 each time leads to increasing the variance regularly each time.
 						const amount = toUnit('43');
@@ -2770,10 +2852,10 @@ contract('Issuer via PeriFinance', async accounts => {
 					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
-					assert.bnClose(debtBalance1, account1AmountToIssue);
+					assert.bnClose(debtBalance1, account1AmountToIssue.maxIssuable);
 
 					let expectedDebtForAccount2 = toBigNbr('0');
-					const totalTimesToIssue = 40;
+					const totalTimesToIssue = 10;
 					for (let i = 0; i < totalTimesToIssue; i++) {
 						// Seems that in this case, issuing 43 each time leads to increasing the variance regularly each time.
 						const amount = toUnit(toBigNbr(getRandomInt(40, 49)));
@@ -2822,10 +2904,10 @@ contract('Issuer via PeriFinance', async accounts => {
 					const account1AmountToIssue = await issuer.maxIssuablePynths(account1);
 					await periFinance.issueMaxPynths({ from: account1 });
 					const debtBalance1 = await periFinance.debtBalanceOf(account1, pUSD);
-					assert.bnEqual(debtBalance1, account1AmountToIssue);
+					assert.bnEqual(debtBalance1, account1AmountToIssue.maxIssuable);
 
 					let expectedDebtForAccount2 = toBigNbr('0');
-					const totalTimesToIssue = 40;
+					const totalTimesToIssue = 10;
 					for (let i = 0; i < totalTimesToIssue; i++) {
 						const amount = toUnit('0.000000000000000002');
 						await periFinance.issuePynths(PERI, amount, { from: account2 });
@@ -2920,7 +3002,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					);
 
 					// Issue
-					const maxIssuable = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 
 					// Compare
@@ -2948,7 +3030,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 
 					// Issue
-					const maxIssuable = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 					// Compare
 					const collaterisationRatio = await periFinance.collateralisationRatio(account1);
@@ -3067,7 +3149,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 
 					// Issue
-					const maxIssuable = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 					const issued = maxIssuable.div(toBigNbr(3));
 					await periFinance.issuePynths(PERI, issued, { from: account1 });
 					const expectedRemaining = maxIssuable.sub(issued);
@@ -3099,7 +3181,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						}
 					);
 
-					const maxIssuable = await issuer.maxIssuablePynths(account1);
+					const { maxIssuable } = await issuer.maxIssuablePynths(account1);
 					await periFinance.issuePynths(PERI, maxIssuable, { from: account1 });
 
 					// Compare

@@ -27,12 +27,16 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	// Note: require this here as silent error is detected on require that impacts pretty-error
 	const solc = require('solc');
 
-	const networkScanKey = ['mumbai', 'polygon'].includes(network)
+	const networkScanKey = ['mumbai', 'polygon', 'amoy'].includes(network)
 		? process.env.POLYGONSCAN_KEY
 		: ['bsc', 'bsctest'].includes(network)
 		? process.env.BSCSCAN_KEY
 		: ['moonriver', 'moonbase-alphanet'].includes(network)
+		? process.env.MOONRIVERSCAN_KEY
+		: ['moonbeam'].includes(network)
 		? process.env.MOONBEAMSCAN_KEY
+		: ['base', 'base-sepolia'].includes(network)
+		? process.env.BASESCAN_KEY
 		: process.env.ETHERSCAN_KEY;
 
 	ensureNetwork(network);
@@ -58,7 +62,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 		);
 	}
 
-	const { etherscanUrl, etherscanLinkPrefix } = loadConnections({ network });
+	const { blockscanUrl, blockscanLinkPrefix } = loadConnections({ network });
 	console.log(gray(`Starting ${network.toUpperCase()} contract verification on ${network}scan...`));
 
 	const tableData = [];
@@ -66,7 +70,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 	for (const name of Object.keys(config)) {
 		const { address } = deployment.targets[name];
 		// Check if this contract already has been verified.
-		let result = await axios.get(etherscanUrl, {
+		let result = await axios.get(blockscanUrl, {
 			params: {
 				module: 'contract',
 				action: 'getabi',
@@ -82,7 +86,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 			);
 
 			// Get the transaction that created the contract with its resulting bytecode.
-			result = await axios.get(etherscanUrl, {
+			result = await axios.get(blockscanUrl, {
 				params: {
 					module: 'account',
 					action: 'txlist',
@@ -108,7 +112,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 			const deployedBytecode = result.data.result[0].input;
 
 			// add the transaction and timestamp to the json file
-			deployment.targets[name].txn = `${etherscanLinkPrefix}/tx/${result.data.result[0].hash}`;
+			deployment.targets[name].txn = `${blockscanLinkPrefix}/tx/${result.data.result[0].hash}`;
 			deployment.targets[name].timestamp = new Date(result.data.result[0].timeStamp * 1000);
 
 			fs.writeFileSync(deploymentFile, stringify(deployment));
@@ -172,7 +176,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 				: optimizerRuns;
 
 			result = await axios.post(
-				etherscanUrl,
+				blockscanUrl,
 				qs.stringify({
 					module: 'contract',
 					action: 'verifysourcecode',
@@ -218,7 +222,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 			while (status !== 'Pass - Verified') {
 				console.log(gray(' - Checking verification status...'));
 
-				result = await axios.get(etherscanUrl, {
+				result = await axios.get(blockscanUrl, {
 					params: {
 						module: 'contract',
 						action: 'checkverifystatus',
@@ -238,7 +242,7 @@ const verify = async ({ buildPath, network, deploymentPath }) => {
 
 				if (status !== 'Pass - Verified') {
 					console.log(gray(' - Sleeping for 5 seconds and re-checking.'));
-					await new Promise(resolve => setTimeout(resolve, 5000));
+					await new Promise(resolve => setTimeout(resolve, 6000));
 				} else {
 					console.log(green(` - Verified ${name}`));
 					tableData.push([name, address, 'Successfully verified']);

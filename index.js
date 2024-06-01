@@ -20,6 +20,10 @@ const data = {
 	shibuya: require('./publish/deployed/shibuya'),
 	'moonbase-alphanet': require('./publish/deployed/moonbase-alphanet'),
 	moonriver: require('./publish/deployed/moonriver'),
+	'base-sepolia': require('./publish/deployed/base-sepolia'),
+	base: require('./publish/deployed/base'),
+	moonbeam: require('./publish/deployed/moonbeam'),
+	sepolia: require('./publish/deployed/sepolia'),
 };
 
 const assets = require('./publish/assets.json');
@@ -41,6 +45,10 @@ const networks = [
 	'shibuya',
 	'moonbase-alphanet',
 	'moonriver',
+	'moonbeam',
+	'base-sepolia',
+	'base',
+	'sepolia',
 ];
 
 const chainIdMapping = Object.entries({
@@ -59,14 +67,17 @@ const chainIdMapping = Object.entries({
 	42: {
 		network: 'kovan',
 	},
+	84532: {
+		network: 'base-sepolia',
+	},
 
 	// Hardhat fork of mainnet: https://hardhat.org/config/#hardhat-network
-	31337: {
-		network: 'mainnet',
+	1337: {
+		network: 'polyton',
 		fork: true,
 	},
 
-	1337: {
+	31337: {
 		network: 'local',
 	},
 	/* // OVM networks: see https://github.com/ethereum-optimism/regenesis/
@@ -102,8 +113,17 @@ const chainIdMapping = Object.entries({
 	1287: {
 		network: 'moonbase-alphanet',
 	},
+	1284: {
+		network: 'moonbeam',
+	},
 	1285: {
 		network: 'moonriver',
+	},
+	8453: {
+		network: 'base',
+	},
+	11155111: {
+		network: 'sepolia',
 	},
 }).reduce((memo, [id, body]) => {
 	memo[id] = Object.assign({ useOvm: false, fork: false }, body);
@@ -143,7 +163,8 @@ const constants = {
 
 	OVM_MAX_GAS_LIMIT: '8999999',
 
-	inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+	// inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
+	inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
 };
 
 const knownAccounts = {
@@ -171,6 +192,10 @@ const knownAccounts = {
 	bsc: [],
 	'moonbase-alphanet': [],
 	moonriver: [],
+	moonbeam: [],
+	'base-sepolia': [],
+	base: [],
+	sepolia: [],
 };
 
 // The solidity defaults are managed here in the same format they will be stored, hence all
@@ -185,13 +210,18 @@ const defaults = {
 		.div(w3utils.toBN(4))
 		.toString(), // 1/4 = 0.25
 	MAX_EXTERNAL_TOKEN_QUOTA: w3utils
-		.toBN(2)
+		.toBN(5)
 		.mul(w3utils.toBN(1e17))
 		.toString(),
 	FEE_PERIOD_DURATION: (60 * 60 * (24 * 7 - 3)).toString(), // 1 week - 3 hours
 	TARGET_THRESHOLD: '1', // 1% target threshold (it will be converted to a decimal when set)
 	LIQUIDATION_DELAY: (60 * 60 * 24 * 1).toString(), // 1 days
 	LIQUIDATION_RATIO: w3utils.toWei('0.666666666666666666'), // 150% cratio
+	LIQUIDATION_RATIOS: {
+		P: w3utils.toWei('0.666666666666666666'),
+		C: w3utils.toWei('0.8'),
+		I: w3utils.toWei('0.833333333333333333'),
+	},
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
@@ -209,6 +239,18 @@ const defaults = {
 		.mul(w3utils.toBN(1e18))
 		.div(w3utils.toBN(20))
 		.toString(), // 1/20 5%
+	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
+	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
+	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${2e6}`),
+	LAST_MINT_EVENT: 1713052800, // Sun Apr 14 2024 00:00:00 GMT+0000
+	INFLATION_WEEK_COUNTER: 144, // 140,
+	EXTERNAL_TOKEN_ISSUANCE_RATIO: {
+		USDC: w3utils.toWei('1'),
+		USDT: w3utils.toWei('1'),
+		DAI: w3utils.toWei('1'),
+		PAXG: w3utils.toWei('0.75'),
+		XAUT: w3utils.toWei('0.75'),
+	},
 	AGGREGATOR_WARNING_FLAGS: {
 		mainnet: '0x4A5b9B4aD08616D11F3A402FF7cBEAcB732a76C6',
 		kovan: '0x6292aa9a6650ae14fbf974e5029f36f95a1848fd',
@@ -226,6 +268,10 @@ const defaults = {
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
+		moonbeam: constants.ZERO_ADDRESS,
+		'base-sepolia': constants.ZERO_ADDRESS,
+		base: constants.ZERO_ADDRESS,
+		sepolia: constants.ZERO_ADDRESS,
 		// local : '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D', <-- fork
 	},
 	USDC_ERC20_ADDRESSES: {
@@ -235,12 +281,16 @@ const defaults = {
 		rinkeby: '0x6bA629E9df8dC7f4039e0FfD1Ff8FF08b609d11C',
 		ropsten: '0x7A7Ed4851B607811C10E51b5538203599437AAD3',
 		mumbai: '0xcE954FC4c52A9E6e25306912A36eC59293da41E3',
-		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
-		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+		polygon: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174', // 6 decimals
+		bsc: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d', // 18 decimals
 		bsctest: '0x8EDc640693b518c8d531A8516A5C0Ae98b641a03',
 		shibuya: '0xa6bEF2115B3a9EF9E00EF8162a24f866F9F50118',
 		'moonbase-alphanet': '0xDF17D7AaCC4cE7f675d3600A07b3CEA843F3669f',
-		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D',
+		moonriver: '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', // 6 decimals
+		moonbeam: '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b', // 6 decimals
+		'base-sepolia': '0xfec043ba43c733069cbc2243b36bc4fa33afcc28',
+		base: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913', // 6 decimals
+		sepolia: '0x38d4e2EefDD05970f7d198F74E25D94e70D049D5', // 6 decimals
 		// local : '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', <-- fork
 	},
 	DAI_ERC20_ADDRESSES: {
@@ -256,7 +306,59 @@ const defaults = {
 		shibuya: '0xf9f6A3D3ED2b12483e271D92F68FcbC716BEba9F',
 		'moonbase-alphanet': '0x33B86de94702C5Ff1ECba36D38Ea2Fc238894315',
 		moonriver: '0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844',
+		moonbeam: '0x06e605775296e851FF43b4dAa541Bb0984E9D6fD',
+		'base-sepolia': '0x1AdC5b1bca919F59a00FC0fE8646C9e9C41338Eb',
+		base: '0x50c5725949a6f0c72e6c4a641f24049a917db0cb',
+		sepolia: '0x4ABf615437fb7eCE1b6702E57B23a7547F945545',
 		// local : '0x6b175474e89094c44da98b954eedeac495271d0f', <-- fork
+	},
+	USDT_ERC20_ADDRESSES: {
+		mainnet: '0xdac17f958d2ee523a2206206994597c13d831ec7', // 6 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: '0xbf56f5Af97F6818f451F92ca917D8eeb87BbEc7c', // 6 decimals
+		polygon: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', // 6 decimals
+		bsc: '0x55d398326f99059ff775485246999027b3197955', // 18 decimals
+		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0x321449E0Be9798881e11925666aBaA324162930B', // 6 decimals
+		moonbeam: '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73', // 6 decimals
+		moonriver: '0xB44a9B6905aF7c801311e8F4E76932ee959c663C', // 6 decimals
+		sepolia: '0x2436953d15Ae8b9119c787e1d50e393aFEe3426A', // 6 decimals
+	},
+	XAUT_ERC20_ADDRESSES: {
+		mainnet: '0x68749665FF8D2d112Fa859AA293F07A622782F38', // 6 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: '0xc20c3c3Ff7C418C6372287106b1668ae40c1bC39', // 6 decimals
+		polygon: constants.ZERO_ADDRESS,
+		bsc: constants.ZERO_ADDRESS,
+		bsctest: constants.ZERO_ADDRESS,
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0xFA85FfEf4186339892557bb80E4F9C5F3E4df97f', // 6 decimals
+		sepolia: '0x16B7Cf4F16608D76aEAD2b7b10f85090EfC7B746',
+	},
+	// USDbC_ERC20_ADDRESSES: {
+	// 	base: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+	// 	'base-sepolia': '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+	// },
+	PAXG_ERC20_ADDRESSES: {
+		mainnet: '0x45804880De22913dAFE09f4980848ECE6EcbAf78', // 18 decimals
+		kovan: constants.ZERO_ADDRESS,
+		goerli: constants.ZERO_ADDRESS,
+		rinkeby: constants.ZERO_ADDRESS,
+		ropsten: constants.ZERO_ADDRESS,
+		mumbai: '0x644eAb1a0Ed9E034ad9eDFe75dbE67D614Fb7e7f', // 18 decimals
+		polygon: '0x553d3D295e0f695B9228246232eDF400ed3560B5',
+		bsc: '0x7950865a9140cB519342433146Ed5b40c6F210f7', // 18 decimals
+		bsctest: '0xd3145aB4D7271740C1d4BdB0deD5CDEE0d08ee10', // 18 decimals
+		shibuya: constants.ZERO_ADDRESS,
+		'moonbase-alphanet': '0xE00A06E4938c015ba83F3AcB7B3499B36cf58502', // 18 decimals
+		sepolia: '0x0567327A31A812344B71e6f95a64626EB72c1B22',
 	},
 	MINTER_ROLE_ADDRESS: {
 		mainnet: '0x9923263fA127b3d1484cFD649df8f1831c2A74e4',
@@ -271,6 +373,10 @@ const defaults = {
 		shibuya: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
+		moonbeam: constants.ZERO_ADDRESS,
+		'base-sepolia': constants.ZERO_ADDRESS,
+		base: constants.ZERO_ADDRESS,
+		sepolia: constants.ZERO_ADDRESS,
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	DEBT_MANAGER_ADDRESS: {
@@ -286,6 +392,10 @@ const defaults = {
 		shibuya: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		'moonbase-alphanet': '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		moonriver: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
+		moonbeam: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
+		'base-sepolia': '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
+		base: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
+		sepolia: '0x08a76Fb0B5511b0a10DC4141C4DAD6E2471803ba',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	INFLATION_MINTER_ADDRESS: {
@@ -301,6 +411,10 @@ const defaults = {
 		shibuya: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		'moonbase-alphanet': '0x727bd962784C27C269E8287F9202312208B83FA7',
 		moonriver: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		moonbeam: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		'base-sepolia': '0x727bd962784C27C269E8287F9202312208B83FA7',
+		base: '0x727bd962784C27C269E8287F9202312208B83FA7',
+		sepolia: '0x727bd962784C27C269E8287F9202312208B83FA7',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	ORACLE_ADDRESS: {
@@ -316,6 +430,10 @@ const defaults = {
 		shibuya: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		'moonbase-alphanet': '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		moonriver: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		moonbeam: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		'base-sepolia': '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		base: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
+		sepolia: '0x055ca0b950E129fF387dE1dbF53CaBcb434A64be',
 		local: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
 	},
 	CHILD_CHAIN_MANAGER_ADDRESS: {
@@ -324,12 +442,16 @@ const defaults = {
 		goerli: constants.ZERO_ADDRESS,
 		rinkeby: constants.ZERO_ADDRESS,
 		ropsten: constants.ZERO_ADDRESS,
-		mumbai: '0xb5505a6d998549090530911180f38aC5130101c6',
-		polygon: '0xA6FA4fB5f76172d178d61B04b0ecd319C5d1C0aa',
+		mumbai: '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
+		polygon: '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
 		bsc: constants.ZERO_ADDRESS,
 		bsctest: constants.ZERO_ADDRESS,
 		'moonbase-alphanet': constants.ZERO_ADDRESS,
 		moonriver: constants.ZERO_ADDRESS,
+		moonbeam: constants.ZERO_ADDRESS,
+		'base-sepolia': '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
+		base: '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
+		sepolia: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
 		mainnet: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
@@ -346,27 +468,61 @@ const defaults = {
 			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
 		],
 		moonriver: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		moonbeam: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		'base-sepolia': [
+			{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' },
+		],
+		base: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
+		sepolia: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
 	},
 	BRIDGE_NETWORK_STATUS: {
 		mainnet: [
 			{ network: 'bsc', isOpened: true },
 			{ network: 'polygon', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		bsc: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'polygon', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		polygon: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'bsc', isOpened: true },
 			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
 		],
 		moonriver: [
 			{ network: 'mainnet', isOpened: true },
 			{ network: 'bsc', isOpened: true },
 			{ network: 'polygon', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+			{ network: 'base', isOpened: true },
+		],
+		moonbeam: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'bsc', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+			{ network: 'base', isOpened: true },
+		],
+		base: [
+			{ network: 'mainnet', isOpened: true },
+			{ network: 'bsc', isOpened: true },
+			{ network: 'polygon', isOpened: true },
+			{ network: 'moonriver', isOpened: true },
+			{ network: 'moonbeam', isOpened: true },
+		],
+		sepolia: [
+			{ network: 'base-sepolia', isOpened: true },
+			{ network: 'bsctest', isOpened: true },
+			{ network: 'mumbai', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
 		],
 		kovan: [
 			{ network: 'bsctest', isOpened: true },
@@ -376,31 +532,37 @@ const defaults = {
 		rinkeby: [{ network: 'moonbase-alphanet', isOpened: true }],
 		ropsten: [{ network: 'moonbase-alphanet', isOpened: true }],
 		bsctest: [
-			{ network: 'kovan', isOpened: true },
+			{ network: 'sepolia', isOpened: true },
 			{ network: 'mumbai', isOpened: true },
 			{ network: 'moonbase-alphanet', isOpened: true },
+			{ network: 'base-sepolia', isOpened: true },
 		],
 		mumbai: [
 			{ network: 'bsctest', isOpened: true },
-			{ network: 'kovan', isOpened: true },
+			{ network: 'sepolia', isOpened: true },
 			{ network: 'moonbase-alphanet', isOpened: true },
+			{ network: 'base-sepolia', isOpened: true },
 		],
 		goerli: [{ network: 'moonbase-alphanet', isOpened: true }],
+		'moonbase-alphanet': [
+			{ network: 'bsctest', isOpened: true },
+			{ network: 'sepolia', isOpened: true },
+			{ network: 'mumbai', isOpened: true },
+			{ network: 'base-sepolia', isOpened: true },
+		],
+		'base-sepolia': [
+			{ network: 'moonbase-alphanet', isOpened: true },
+			{ network: 'mumbai', isOpened: true },
+			{ network: 'bsctest', isOpened: true },
+			{ network: 'sepolia', isOpened: true },
+		],
 		local: [
 			{ network: 'mumbai', isOpened: true },
 			{ network: 'bsctest', isOpened: true },
-			{ network: 'kovan', isOpened: true },
-			{ network: 'goerli', isOpened: true },
-		],
-		'moonbase-alphanet': [
-			{ network: 'bsctest', isOpened: true },
-			{ network: 'kovan', isOpened: true },
-			{ network: 'mumbai', isOpened: true },
+			{ network: 'sepolia', isOpened: true },
+			{ network: 'moonbase-alphanet', isOpened: true },
 		],
 	},
-	BRIDGE_CLAIM_GAS_COST: w3utils.toWei(`7095534.6`, 'gwei'),
-	BRIDGE_TRANSFER_GAS_COST: w3utils.toWei(`8867349.3`, 'gwei'),
-	INITIAL_ISSUANCE: 0, // w3utils.toWei(`${11e6}`),
 	CROSS_DOMAIN_DEPOSIT_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,
@@ -745,6 +907,10 @@ const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
 		mumbai: Object.assign({}, base),
 		moonriver: Object.assign({}, base),
 		polygon: Object.assign({}, base, {
+			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
+		}),
+		bsc: Object.assign({}, base, {
 			owner: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 			deployer: '0xcFE81E615C4409FfeDD36faa99e88059cAab9267',
 		}),

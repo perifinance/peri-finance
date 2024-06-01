@@ -192,7 +192,7 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
      * @return totalSystemValue debt,
      * @return anyRateIsInvalid any rate is invalid
      */
-    function currentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey)
+    function currentNetworkIssuedDebtOf(bytes32 currencyKey)
         external
         view
         returns (uint totalSystemValue, bool anyRateIsInvalid)
@@ -214,7 +214,7 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
      * @return totalSystemValue debt,
      * @return anyRateIsInvalid any rate is invalid
      */
-    function currentNetworkAdaptedActiveDebtValue(bytes32 currencyKey)
+    function currentNetworkActiveDebtOf(bytes32 currencyKey)
         external
         view
         returns (uint totalSystemValue, bool anyRateIsInvalid)
@@ -227,7 +227,14 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
 
         (uint currencyRate, bool currencyRateInvalid) = exchangeRates().rateAndInvalid(currencyKey);
 
-        return (totalSystemValue.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
+        totalSystemValue = totalSystemValue
+            .decimalToPreciseDecimal()
+            .divideDecimalRoundPrecise(currencyRate.decimalToPreciseDecimal())
+            .preciseDecimalToDecimal();
+
+        anyRateIsInvalid = anyRateIsInvalid || currencyRateInvalid;
+
+        // return (totalSystemValue.divideDecimalRound(currencyRate), anyRateIsInvalid || currencyRateInvalid);
     }
 
     /**
@@ -634,37 +641,28 @@ contract CrossChainManager is Owned, MixinResolver, LimitedSetup, ICrossChainMan
      * @dev deprecated
      * @param amount  debt amount
      */
-    function addTotalNetworkDebt(uint amount) external {
-        // uint totalNetworkDebtLedger = amount;
-    }
+    function addTotalNetworkDebt(uint amount) external {}
 
     /**
      * @notice subtract amount from current sum of total network system debt
      * @dev deprecated
      * @param amount debt amount
      */
-    function subtractTotalNetworkDebt(uint amount) external {
-        // uint totalNetworkDebtLedger = amount;
-    }
+    function subtractTotalNetworkDebt(uint amount) external {}
 
     /**
      * @notice set user's cross chain debt entry index
      * @dev deprecated
      * @param account user's address
      */
-    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external {
-        // state().setCrossNetworkUserData(account, userStateDebtLedgerIndex);
-        // uint totalNetworkDebtLedgerIndex = userStateDebtLedgerIndex;
-    }
+    function setCrossNetworkUserDebt(address account, uint userStateDebtLedgerIndex) external {}
 
     /**
      * @notice clear user's cross chain debt entry index
      * @dev deprecated
      * @param account user's address
      */
-    function clearCrossNetworkUserDebt(address account) external {
-        // address accountAddress = account;
-    }
+    function clearCrossNetworkUserDebt(address account) external {}
 
     //*********************** Events ***************************
     /**

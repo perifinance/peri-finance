@@ -355,7 +355,7 @@ class Deployer {
 		// now update the flags to indicate it no longer needs deployment,
 		// ignoring this step for local, which wants a full deployment by default
 		if (this.configFile && this.network !== 'local' && !this.dryRun) {
-			this.updatedConfig[name] = { deploy: false };
+			this.updatedConfig[name] = { ...this.updatedConfig[name], deploy: false };
 			fs.writeFileSync(this.configFile, stringify(this.updatedConfig));
 		}
 	}
@@ -401,23 +401,35 @@ class Deployer {
 		return deployedContract;
 	}
 
+	updateMigrateDone({ name }) {
+		if (this.updatedConfig[name]) {
+			this.updatedConfig[name] = { ...this.updatedConfig[name], migrate: false };
+			fs.writeFileSync(this.configFile, stringify(this.updatedConfig));
+		}
+	}
+
 	makeContract({ abi, address }) {
 		return new this.web3.eth.Contract(abi, address);
 	}
 
 	getExistingContract({ contract }) {
 		let address;
-		if (this.network === 'local') {
-			if (!this.deployment.targets[contract]) return undefined;
-			address = this.deployment.targets[contract].address;
-		} else {
-			const contractVersion = getVersions({
-				network: this.network,
-				useOvm: this.useOvm,
-				byContract: true,
-			})[contract];
-			const lastEntry = contractVersion.slice(-1)[0];
-			address = lastEntry.address;
+		try {
+			if (this.network === 'local') {
+				if (!this.deployment.targets[contract]) return undefined;
+				address = this.deployment.targets[contract].address;
+			} else {
+				const contractVersion = getVersions({
+					network: this.network,
+					useOvm: this.useOvm,
+					byContract: true,
+				})[contract];
+				const lastEntry = contractVersion.slice(-1)[0];
+				address = lastEntry.address;
+			}
+		} catch (err) {
+			console.log(gray(`Cannot find existing contract for ${contract}`));
+			return undefined;
 		}
 
 		const { source } = this.deployment.targets[contract];

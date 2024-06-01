@@ -14,6 +14,7 @@ interface ICrossChainManager {
 
     function minterReward() external view returns (uint);
 }
+
 // https://docs.peri.finance/contracts/source/contracts/periFinance
 contract PeriFinance is BasePeriFinance {
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
@@ -115,8 +116,9 @@ contract PeriFinance is BasePeriFinance {
 
         // Set minted PERI balance to RewardEscrow's balance
         // Minus the minterReward and set balance of minter to add reward
+        uint minterReward = supplySchedule().minterReward();
         // uint minterReward = _supplySchedule.minterReward();
-        uint minterReward = crossChainManager().minterReward();
+        // uint minterReward = crossChainManager().minterReward();
 
         // Get the remainder
         uint amountToDistribute = supplyToMint.sub(minterReward);
@@ -174,7 +176,7 @@ contract PeriFinance is BasePeriFinance {
         uint _amount,
         uint _destChainId,
         IBridgeState.Signature calldata _sign
-    ) external payable optionalProxy {
+    ) external payable optionalProxy blacklisted(messageSender) {
         require(_amount > 0, "0 amount");
         (uint transferable, ) =
             issuer().transferablePeriFinanceAndAnyRateIsInvalid(messageSender, tokenState.balanceOf(messageSender));

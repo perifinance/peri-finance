@@ -98,7 +98,7 @@ const replacePynths = async ({
 		}
 	}
 
-	const { providerUrl, privateKey: envPrivateKey, etherscanLinkPrefix } = loadConnections({
+	const { providerUrl, privateKey: envPrivateKey, blockscanLinkPrefix } = loadConnections({
 		network,
 	});
 
@@ -224,7 +224,7 @@ const replacePynths = async ({
 			account,
 			gasLimit: methodCallGasLimit,
 			gasPrice,
-			etherscanLinkPrefix,
+			blockscanLinkPrefix,
 		});
 
 	for (const { currencyKey, Pynth, Proxy, TokenState } of deployedPynths) {

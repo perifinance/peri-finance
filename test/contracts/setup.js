@@ -17,7 +17,7 @@ const {
 		FEE_PERIOD_DURATION,
 		TARGET_THRESHOLD,
 		LIQUIDATION_DELAY,
-		LIQUIDATION_RATIO,
+		LIQUIDATION_RATIOS,
 		LIQUIDATION_PENALTY,
 		RATE_STALE_PERIOD,
 		MINIMUM_STAKE_TIME,
@@ -27,6 +27,7 @@ const {
 		CROSS_DOMAIN_ESCROW_GAS_LIMIT,
 		CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT,
 		SYNC_STALE_THRESHOLD,
+		EXTERNAL_TOKEN_ISSUANCE_RATIO,
 	},
 } = require('../../');
 // const { leftPad } = require('web3-utils');
@@ -1101,10 +1102,12 @@ const setupAllContracts = async ({
 			const tokenAddress = await returnObj['StakingState'].tokenAddress(toBytes32(stable));
 			if (tokenAddress !== ZERO_ADDRESS) continue;
 
+			const decimals = await await returnObj[`${stable}`].decimals();
+
 			await returnObj['StakingState'].setTargetToken(
 				toBytes32(await returnObj[`${stable}`].symbol()),
 				await returnObj[`${stable}`].address,
-				await returnObj[`${stable}`].decimals(),
+				decimals,
 				{ from: owner }
 			);
 		}
@@ -1171,6 +1174,14 @@ const setupAllContracts = async ({
 
 	// now setup defaults for the system (note: this dupes logic from the deploy script)
 	if (returnObj['SystemSettings']) {
+		const exTokens = Object.keys(EXTERNAL_TOKEN_ISSUANCE_RATIO).map(name => toBytes32(name));
+		const exTokenRatios = Object.values(EXTERNAL_TOKEN_ISSUANCE_RATIO).map(ratio => ratio);
+		const lqdTypes = Object.keys(LIQUIDATION_RATIOS).map(name => toBytes32(name));
+		const lqdRatios = Object.values(LIQUIDATION_RATIOS).map(ratio => ratio);
+		// console.log(
+		// 	'exTokenRatios',
+		// 	exTokenRatios.map(r => r.toString())
+		// );
 		await Promise.all([
 			returnObj['SystemSettings'].setWaitingPeriodSecs(WAITING_PERIOD_SECS, { from: owner }),
 			returnObj['SystemSettings'].setPriceDeviationThresholdFactor(
@@ -1198,7 +1209,7 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setFeePeriodDuration(FEE_PERIOD_DURATION, { from: owner }),
 			returnObj['SystemSettings'].setTargetThreshold(TARGET_THRESHOLD, { from: owner }),
 			returnObj['SystemSettings'].setLiquidationDelay(LIQUIDATION_DELAY, { from: owner }),
-			returnObj['SystemSettings'].setLiquidationRatio(LIQUIDATION_RATIO, { from: owner }),
+			returnObj['SystemSettings'].setLiquidationRatios(lqdTypes, lqdRatios, { from: owner }),
 			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, { from: owner }),
 			returnObj['SystemSettings'].setRateStalePeriod(RATE_STALE_PERIOD, { from: owner }),
 			returnObj['SystemSettings'].setMinimumStakeTime(MINIMUM_STAKE_TIME, { from: owner }),
@@ -1206,6 +1217,7 @@ const setupAllContracts = async ({
 				from: owner,
 			}),
 			returnObj['SystemSettings'].setSyncStaleThreshold(SYNC_STALE_THRESHOLD, { from: owner }),
+			returnObj['SystemSettings'].setExTokenIssuanceRatio(exTokens, exTokenRatios, { from: owner }),
 		]);
 	}
 

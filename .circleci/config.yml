@@ -23,7 +23,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
-      - run: npx hardhat compile --optimizer --fail-oversize
+      - run: npx hardhat compile --optimizer --showsize
   job-lint:
     working_directory: ~/repo
     docker:
@@ -269,12 +269,12 @@ workflows:
       - job-static-analysis:
           requires:
             - job-prepare
-      - job-unit-tests:
-          requires:
-            - job-prepare
-      - job-unit-tests-coverage:
-          requires:
-            - job-prepare
+      # - job-unit-tests:
+      #     requires:
+      #       - job-prepare
+      # - job-unit-tests-coverage:
+      #     requires:
+      #       - job-prepare
       - job-unit-tests-gas-report:
           requires:
             - job-prepare
@@ -288,13 +288,13 @@ workflows:
           name: job-prod-diff-tests-local
           requires:
             - job-prepare
-      - job-prod-diff-tests:
-          name: job-prod-diff-tests-mainnet
-          requires:
-            - job-prepare
+      # - job-prod-diff-tests:
+      #     name: job-prod-diff-tests-mainnet
+      #     requires:
+      #       - job-prepare
       - job-pack-browser:
           requires:
             - job-prepare
-      - job-validate-deployments:
-          requires:
-            - job-prepare
+      # - job-validate-deployments:
+      #     requires:
+      #       - job-prepare

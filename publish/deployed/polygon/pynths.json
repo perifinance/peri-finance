@@ -7,32 +7,11 @@
 	{
 		"name": "pBTC",
 		"asset": "BTC",
-		"subclass": "MultiCollateralPynth",
-		"category": "crypto"
+		"subclass": "MultiCollateralPynth"
 	},
 	{
 		"name": "pETH",
 		"asset": "ETH",
-		"category": "crypto"
-	},
-	{
-		"name": "pBNB",
-		"asset": "BNB",
-		"category": "crypto"
-	},
-	{
-		"name": "pAVAX",
-		"asset": "AVAX",
-		"category": "crypto"
-	},
-	{
-		"name": "pUNI",
-		"asset": "UNI",
-		"category": "crypto"
-	},
-	{
-		"name": "pMKR",
-		"asset": "MKR",
 		"category": "crypto"
 	},
 	{
@@ -41,8 +20,88 @@
 		"category": "crypto"
 	},
 	{
+		"name": "pADA",
+		"asset": "ADA",
+		"category": "crypto"
+	},
+	{
+		"name": "pAVAX",
+		"asset": "AVAX",
+		"category": "crypto"
+	},
+	{
+		"name": "pAXS",
+		"asset": "AXS",
+		"category": "crypto"
+	},
+	{
+		"name": "pBCH",
+		"asset": "BCH",
+		"category": "crypto"
+	},
+	{
+		"name": "pBNB",
+		"asset": "BNB",
+		"category": "crypto"
+	},
+	{
 		"name": "pCOMP",
 		"asset": "COMP",
+		"category": "crypto"
+	},
+	{
+		"name": "pCRV",
+		"asset": "CRV",
+		"category": "crypto"
+	},
+	{
+		"name": "pDOGE",
+		"asset": "DOGE",
+		"category": "crypto"
+	},
+	{
+		"name": "pDOT",
+		"asset": "DOT",
+		"category": "crypto"
+	},
+	{
+		"name": "pEOS",
+		"asset": "EOS",
+		"category": "crypto"
+	},
+	{
+		"name": "pFTM",
+		"asset": "FTM",
+		"category": "crypto"
+	},
+	{
+		"name": "pGRT",
+		"asset": "GRT",
+		"category": "crypto"
+	},
+	{
+		"name": "pICP",
+		"asset": "ICP",
+		"category": "crypto"
+	},
+	{
+		"name": "pLINK",
+		"asset": "LINK",
+		"category": "crypto"
+	},
+	{
+		"name": "pLTC",
+		"asset": "LTC",
+		"category": "crypto"
+	},
+	{
+		"name": "pMATIC",
+		"asset": "MATIC",
+		"category": "crypto"
+	},
+	{
+		"name": "pMKR",
+		"asset": "MKR",
 		"category": "crypto"
 	},
 	{
@@ -56,8 +115,13 @@
 		"category": "crypto"
 	},
 	{
-		"name": "pCRV",
-		"asset": "CRV",
+		"name": "pSAND",
+		"asset": "SAND",
+		"category": "crypto"
+	},
+	{
+		"name": "pUNI",
+		"asset": "UNI",
 		"category": "crypto"
 	},
 	{
@@ -71,33 +135,8 @@
 		"category": "crypto"
 	},
 	{
-		"name": "pLINK",
-		"asset": "LINK",
-		"category": "crypto"
-	},
-	{
-		"name": "pDOT",
-		"asset": "DOT",
-		"category": "crypto"
-	},
-	{
 		"name": "pXRP",
 		"asset": "XRP",
-		"category": "crypto"
-	},
-	{
-		"name": "pAXS",
-		"asset": "AXS",
-		"category": "crypto"
-	},
-	{
-		"name": "pEUR",
-		"asset": "EUR",
-		"category": "forex"
-	},
-	{
-		"name": "pSAND",
-		"asset": "SAND",
 		"category": "crypto"
 	},
 	{
@@ -109,5 +148,60 @@
 		"name": "pSOL",
 		"asset": "SOL",
 		"category": "crypto"
+	},
+	{
+		"name": "pPAXG",
+		"asset": "PAXG",
+		"category": "crypto"
+	},
+	{
+		"name": "pXAU",
+		"asset": "XAU",
+		"category": "commodity"
+	},
+	{
+		"name": "pXAG",
+		"asset": "XAU",
+		"category": "commodity"
+	},
+	{
+		"name": "pEUR",
+		"asset": "EUR",
+		"category": "forex"
+	},
+	{
+		"name": "pGBP",
+		"asset": "GBP",
+		"category": "forex"
+	},
+	{
+		"name": "pJPY",
+		"asset": "JPY",
+		"category": "forex"
+	},
+	{
+		"name": "pCHF",
+		"asset": "CHF",
+		"category": "forex"
+	},
+	{
+		"name": "pAUD",
+		"asset": "AUD",
+		"category": "forex"
+	},
+	{
+		"name": "pNZD",
+		"asset": "NZD",
+		"category": "forex"
+	},
+	{
+		"name": "pCAD",
+		"asset": "CAD",
+		"category": "forex"
+	},
+	{
+		"name": "pDPI",
+		"asset": "DPI",
+		"category": "index"
 	}
 ]

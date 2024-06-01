@@ -21,7 +21,7 @@ const { getTarget, getSource } = wrap({ network, fs, path });
 describe(`Etherscan on ${network}`, () => {
 	// we need this outside the test runner in order to generate tests per contract name
 	const targets = getTarget();
-	const { providerUrl, etherscanUrl, etherscanLinkPrefix } = loadConnections({
+	const { providerUrl, blockscanUrl, blockscanLinkPrefix } = loadConnections({
 		network,
 	});
 
@@ -38,8 +38,8 @@ describe(`Etherscan on ${network}`, () => {
 
 	Object.values(targets).forEach(({ name, source, address }) => {
 		describe(`${name}`, () => {
-			it(`Etherscan has the correct ABI at ${etherscanLinkPrefix}/address/${address}`, async () => {
-				const response = await axios.get(etherscanUrl, {
+			it(`Etherscan has the correct ABI at ${blockscanLinkPrefix}/address/${address}`, async () => {
+				const response = await axios.get(blockscanUrl, {
 					params: {
 						module: 'contract',
 						action: 'getabi',

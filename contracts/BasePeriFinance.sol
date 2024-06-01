@@ -145,7 +145,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     // }
 
     function maxIssuablePynths(address account) external view returns (uint maxIssuable) {
-        return issuer().maxIssuablePynths(account);
+        (maxIssuable, , ) = issuer().maxIssuablePynths(account);
     }
 
     function remainingIssuablePynths(address account)
@@ -347,11 +347,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         issuer().burnPynths(messageSender, _currencyKey, _burnAmount);
     }
 
-    function fitToClaimable() external issuanceActive optionalProxy blacklisted(messageSender) {
+    function fitToClaimable() external payable issuanceActive optionalProxy blacklisted(messageSender) {
         issuer().fitToClaimable(messageSender);
     }
 
-    function forceFitToClaimable(address _target) external onlyOwner {
+    function forceFitToClaimable(address _target) external payable onlyOwner {
         issuer().fitToClaimable(_target);
     }
 

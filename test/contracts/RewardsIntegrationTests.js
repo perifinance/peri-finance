@@ -333,10 +333,16 @@ contract('RewardsIntegrationTests', accounts => {
 			await periFinance.issuePynths(PERI, toUnit('666'), { from: account1 });
 			await periFinance.issuePynthsToMaxQuota(USDC, { from: account1 });
 
+			// const usdcSA = await externalTokenStakeManager.stakedAmountOf(account1, USDC, pUSD);
+
+			// const exRatios0 = await issuer.getRatios(account1, false);
+
 			// make USDC quota above 20%
 			await exchangeRates.updateRates([USDC], [toUnit('1.2')], await currentTime(), {
 				from: oracle,
 			});
+
+			// const exRatios1 = await issuer.getRatios(account1, false);
 
 			await assert.revert(feePool.claimFees({ from: account1 }), 'C-Ratio below penalty threshold');
 		});
@@ -474,11 +480,12 @@ contract('RewardsIntegrationTests', accounts => {
 
 			// console.log(`rollOverRewards ${rollOverRewards}`);
 
+			// FastForward a bit to be able to mint
+			await fastForwardAndUpdateRates(MINUTE);
+
 			// Get the PERI mintableSupply - the minter reward of 200 PERI
 			const mintedRewardsSupply = (await supplySchedule.mintableSupply()).sub(MINTER_PERI_REWARD);
 
-			// FastForward a bit to be able to mint
-			await fastForwardAndUpdateRates(MINUTE);
 			// Mint the staking rewards
 			await periFinance.inflationalMint({ from: minterRole });
 			// Close the extra week
@@ -1098,10 +1105,10 @@ contract('RewardsIntegrationTests', accounts => {
 				from: account1,
 			});
 
-			const alreadyIssued = await issuer.debtBalanceOf(account1, pUSD);
-			const maxIssuablePynthForAccount1 = await issuer.maxIssuablePynths(account1);
+			// const alreadyIssued = await issuer.debtBalanceOf(account1, pUSD);
+			const { maxIssuable, existDebt } = await issuer.maxIssuablePynths(account1);
 
-			await periFinance.issuePynths(PERI, maxIssuablePynthForAccount1.sub(alreadyIssued), {
+			await periFinance.issuePynths(PERI, maxIssuable.sub(existDebt), {
 				from: account1,
 			});
 

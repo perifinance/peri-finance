@@ -31,6 +31,8 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_BRIDGE_TRANSFER_GAS_COST = "bridgeTransferGasCost";
     bytes32 internal constant SETTING_BRIDGE_CLAIM_GAS_COST = "bridgeClaimGasCost";
     bytes32 internal constant SETTING_SYNC_STALE_THRESHOLD = "syncStalThreshold";
+    bytes32 internal constant SETTING_EXTOKEN_ISSUANCE_RATIO = "exTokenIssuanceRatio";
+    bytes32 internal constant SETTING_LIQUIDATION_RATIOS = "liquidationRatios";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
 
@@ -142,5 +144,21 @@ contract MixinSystemSettings is MixinResolver {
 
     function getSyncStaleThreshold() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_SYNC_STALE_THRESHOLD);
+    }
+
+    function getExTokenIssuanceRatio(bytes32 tokenKey) internal view returns (uint) {
+        return
+            flexibleStorage().getUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_EXTOKEN_ISSUANCE_RATIO, tokenKey))
+            );
+    }
+
+    function getLiquidationRatios(bytes32 types) internal view returns (uint) {
+        return
+            flexibleStorage().getUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_LIQUIDATION_RATIOS, types))
+            );
     }
 }

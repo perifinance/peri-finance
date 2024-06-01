@@ -344,6 +344,24 @@ module.exports = ({ web3 } = {}) => {
 		// Ensure you pass in all the args you need to assert on.
 	};
 
+	const assertNEventEqual = (actualEventOrTransaction, expectedEvent, param, expectedArgs) => {
+		// If they pass in a whole transaction we need to extract the first log, otherwise we already have what we need
+		const event = Array.isArray(actualEventOrTransaction.logs)
+			? actualEventOrTransaction.logs[param]
+			: actualEventOrTransaction;
+
+		if (!event) {
+			assert.fail(new Error('No event was generated from this transaction'));
+		}
+
+		// Assert the names are the same.
+		assert.strictEqual(event.event, expectedEvent);
+
+		assertDeepEqual(event.args, expectedArgs);
+		// Note: this means that if you don't assert args they'll pass regardless.
+		// Ensure you pass in all the args you need to assert on.
+	};
+
 	/**
 	 * Converts a hex string of bytes into a UTF8 string with \0 characters (from padding) removed
 	 */
@@ -623,6 +641,7 @@ module.exports = ({ web3 } = {}) => {
 		preciseUnitToUnit,
 
 		assertEventEqual,
+		assertNEventEqual,
 		assertEventsEqual,
 		assertBNEqual,
 		assertBNNotEqual,

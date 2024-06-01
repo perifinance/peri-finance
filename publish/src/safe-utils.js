@@ -308,13 +308,13 @@ const createAndSaveApprovalTransaction = async ({
 		txGasPrice: gasPrice,
 	});
 
-	const { etherscanLinkPrefix } = loadConnections({
+	const { blockscanLinkPrefix } = loadConnections({
 		network,
 	});
 
 	console.log(
 		green(
-			`Successfully emitted approveHash() with transaction: ${etherscanLinkPrefix}/tx/${transaction.transactionHash}`
+			`Successfully emitted approveHash() with transaction: ${blockscanLinkPrefix}/tx/${transaction.transactionHash}`
 		)
 	);
 

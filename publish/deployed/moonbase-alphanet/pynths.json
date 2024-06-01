@@ -6,13 +6,11 @@
 	},
 	{
 		"name": "pBTC",
-		"asset": "BTC",
-		"subclass": "MultiCollateralPynth"
+		"asset": "BTC"
 	},
 	{
 		"name": "pETH",
-		"asset": "ETH",
-		"subclass": "MultiCollateralPynth"
+		"asset": "ETH"
 	},
 	{
 		"name": "pBNB",
@@ -25,9 +23,5 @@
 	{
 		"name": "pLINK",
 		"asset": "LINK"
-	},
-	{
-		"name": "pLUNA",
-		"asset": "LUNA"
 	}
 ]

@@ -24,6 +24,41 @@ Will attempt to deploy (or reuse) all of the contracts listed in the given `cont
 node publish deploy # "--help" for options
 ```
 
+### Check List(fresh deploy)
+
+1. make sure if chain information is listed in index.js file on root folder
+
+- networks: chain name
+- chainIdMapping: chain id mapping
+- staking tokens' addresses
+- operation addresses
+- last mint event & inflation counter
+- add correct netorks in BRIDGE_NETWORK_STATUS for adding chain
+
+2. make sure if chain information is added in util.js
+
+- loadConnections
+- getEtherscanLinkPrefix
+- gas tracker
+
+3. make sure if rpc is correct in
+
+- .env file
+
+4. make sure to add deployment folder
+
+- no deployment.json file
+- list pynths in pynths.json
+- list feeds info in feeds.json
+- double check feed aggregator address in feeds.json
+- clear version.json
+- list all contracts in config.json file
+
+5. make sure network name is list in deploy.js
+6. make sure crosschains BRIDGE_NETWORK_STATUS in
+7. make sure VirtualPynthIssuer to be in config.json
+8. check pynthExchangeRateOverride for ExchangeFeeRate.
+
 ### CLI Options
 
 - `-a, --add-new-pynths` Whether or not any new pynths in the pynths.json file should be deployed if there is no entry in the config file.

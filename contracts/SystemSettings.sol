@@ -15,7 +15,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     using SafeDecimalMath for uint;
 
     // No more pynths may be issued than the value of PERI backing them.
-    uint public constant MAX_ISSUANCE_RATIO = 1e18;
+    uint public constant MAX_ISSUANCE_RATIO = 1e18; // 1 issuance ratio  (collateral / debt)
 
     // The fee period must be between 1 day and 60 days.
     uint public constant MIN_FEE_PERIOD_DURATION = 1 days;
@@ -146,6 +146,14 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     function syncStaleThreshold() external view returns (uint) {
         return getSyncStaleThreshold();
+    }
+
+    function exTokenIssuanceRatio(bytes32 tokenKey) external view returns (uint) {
+        return getExTokenIssuanceRatio(tokenKey);
+    }
+
+    function liquidationRatios(bytes32 tokenKey) external view returns (uint) {
+        return getLiquidationRatios(tokenKey);
     }
 
     // ========== RESTRICTED ==========
@@ -309,6 +317,45 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit SyncStaleThresholdUpdated(_percent);
     }
 
+    function setExTokenIssuanceRatio(bytes32[] calldata tokenKeys, uint256[] calldata exTokenIssuanceRatios)
+        external
+        onlyOwner
+    {
+        require(tokenKeys.length == exTokenIssuanceRatios.length, "Array lengths dont match");
+        for (uint i = 0; i < tokenKeys.length; i++) {
+            require(exTokenIssuanceRatios[i] <= MAX_ISSUANCE_RATIO, "MAX_ISSUANCE_RATIO exceeded");
+            flexibleStorage().setUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_EXTOKEN_ISSUANCE_RATIO, tokenKeys[i])),
+                exTokenIssuanceRatios[i]
+            );
+            emit ExchangeFeeUpdated(tokenKeys[i], exTokenIssuanceRatios[i]);
+        }
+    }
+
+    function setLiquidationRatios(bytes32[] calldata _types, uint256[] calldata _liquidationRatios) external onlyOwner {
+        require(_types.length == _liquidationRatios.length, "Array lengths dont match");
+        for (uint i = 0; i < _types.length; i++) {
+            require(
+                _liquidationRatios[i] <=
+                    MAX_LIQUIDATION_RATIO.divideDecimal(SafeDecimalMath.unit().add(getLiquidationPenalty())),
+                "liquidationRatio > MAX_LIQUIDATION_RATIO / (1 + penalty)"
+            );
+
+            // MIN_LIQUIDATION_RATIO is a product of target issuance ratio * RATIO_FROM_TARGET_BUFFER
+            // Ensures that liquidation ratio is set so that there is a buffer between the issuance ratio and liquidation ratio.
+            uint MIN_LIQUIDATION_RATIO = getIssuanceRatio().multiplyDecimal(RATIO_FROM_TARGET_BUFFER);
+            require(_liquidationRatios[i] >= MIN_LIQUIDATION_RATIO, "liquidationRatio < MIN_LIQUIDATION_RATIO");
+
+            flexibleStorage().setUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_LIQUIDATION_RATIOS, _types[i])),
+                _liquidationRatios[i]
+            );
+            emit LiquidationRatiosUpdated(_types[i], _liquidationRatios[i]);
+        }
+    }
+
     // ========== EVENTS ==========
     event CrossDomainMessageGasLimitChanged(CrossDomainMessageGasLimits gasLimitType, uint newLimit);
     event TradingRewardsEnabled(bool enabled);
@@ -327,4 +374,6 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event AggregatorWarningFlagsUpdated(address flags);
     event ExternalTokenQuotaUpdated(uint quota);
     event SyncStaleThresholdUpdated(uint newRatio);
+    event ExTokenIssuanceRatioUpdated(bytes32 pynthKey, uint exTokenIssuanceRatio);
+    event LiquidationRatiosUpdated(bytes32 types, uint liquidationRatio);
 }

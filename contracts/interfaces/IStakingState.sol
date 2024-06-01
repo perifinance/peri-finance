@@ -22,6 +22,11 @@ interface IStakingState {
         uint _amount
     ) external returns (bool);
 
+    /* 
+    function setTargetRatio(address _account, uint _targetRatio) external;
+
+    function setExTargetRatio(address _account, uint _exTRatio) external;
+ */
     // View
     function targetTokens(bytes32 _currencyKey)
         external
@@ -47,4 +52,9 @@ interface IStakingState {
     function tokenActivated(bytes32 _currencyKey) external view returns (bool);
 
     function getTokenCurrencyKeys() external view returns (bytes32[] memory);
+    /* 
+    function getTargetRatio(address _account) external view returns (uint);
+
+    function getExTargetRatio(address _account) external view returns (uint);
+ */
 }

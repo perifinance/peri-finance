@@ -9,13 +9,14 @@ const { loadCompiledFiles, getLatestSolTimestamp } = require('../solidity');
 const checkAggregatorPrices = require('../check-aggregator-prices');
 const pLimit = require('p-limit');
 
-const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver'];
+const mainnet = ['mainnet', 'polygon', 'bsc', 'moonriver', 'moonbeam', 'base'];
 // const testnet = ['kovan', 'mumbai', 'bsctest', 'moonbase-alphanet'];
 
-const polygon = ['polygon', 'mumbai'];
+const polygon = ['polygon', 'mumbai', 'amoy'];
 const bsc = ['bsc', 'bsctest'];
-const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local'];
-const moonriver = ['moonriver', 'moonbase-alphanet', 'shibuya'];
+const ethereum = ['mainnet', 'kovan', 'rinkeby', 'ropsten', 'goerli', 'local', 'sepolia'];
+/* const moonriver = ['moonriver', 'moonbase-alphanet', 'shibuya'];
+const base = ['base', 'base-sepolia']; */
 
 const {
 	ensureNetwork,
@@ -93,7 +94,7 @@ const deploy = async ({
 	}
 
 	if (priority) {
-		gasPrice = w3utils.toBN(await checkGasPrice(network, priority));
+		gasPrice = await checkGasPrice(network, priority);
 	}
 
 	const limitPromise = pLimit(concurrency);
@@ -223,6 +224,17 @@ const deploy = async ({
 		return effectiveValue;
 	};
 
+	// const testCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+	// const bClaimGasCost = (
+	// 	testCost.mul(w3utils.toBN(w3utils.toWei(gasPrice, 'gwei'))) / w3utils.toBN(10e9)
+	// ).toString();
+
+	// const testTCost = w3utils.toBN(await getDeployParameter('BRIDGE_TRANSFER_GAS_COST'));
+	// const bTGasCost = (
+	// 	testTCost.mul(w3utils.toBN(w3utils.toWei(gasPrice, 'gwei'))) / w3utils.toBN(10e9)
+	// ).toString();
+	// console.log(`bClaimGasCos: ${bClaimGasCost}`, `bTGasCost: ${bTGasCost}`, `gasPrice: ${gasPrice}`);
+
 	console.log(
 		gray('Checking all contracts not flagged for deployment have addresses in this network...')
 	);
@@ -248,7 +260,7 @@ const deploy = async ({
 	const {
 		providerUrl: envProviderUrl,
 		privateKey: envPrivateKey,
-		etherscanLinkPrefix,
+		blockscanLinkPrefix,
 	} = loadConnections({
 		network,
 		useFork,
@@ -303,41 +315,58 @@ const deploy = async ({
 	try {
 		const oldPeriFinance = deployer.getExistingContract({ contract: 'PeriFinance' });
 		currentPeriFinanceSupply = await oldPeriFinance.methods.totalSupply().call();
-
-		// inflationSupplyToDate = total supply - 100m
-		const inflationSupplyToDate = w3utils
-			.toBN(currentPeriFinanceSupply)
-			.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
-
-		// current weekly inflation 75m / 52
-		const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
-		currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
-
-		// Check result is > 0 else set to 0 for currentWeek
-		currentWeekOfInflation = currentWeekOfInflation.gt(w3utils.toBN('0'))
-			? currentWeekOfInflation.toNumber()
-			: 0;
-
-		// Calculate lastMintEvent as Inflation start date + number of weeks issued * secs in weeks
-		const mintingBuffer = 86400;
-		const secondsInWeek = 604800;
-		const inflationStartDate = inflationStartTimestampInSecs;
-		currentLastMintEvent =
-			inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
-	} catch (err) {
-		console.log(err);
-		if (freshDeploy) {
-			currentPeriFinanceSupply = await getDeployParameter('INITIAL_ISSUANCE');
-			currentWeekOfInflation = 0;
-			currentLastMintEvent = 0;
+		const oldSupplySchedule = deployer.getExistingContract({ contract: 'SupplySchedule' });
+		if (!config['SupplySchedule'].deploy && oldSupplySchedule) {
+			currentLastMintEvent = await oldSupplySchedule.methods.lastMintEvent().call();
+			currentWeekOfInflation = await oldSupplySchedule.methods.weekCounter().call();
 		} else {
-			console.error(
-				red(
-					'Cannot connect to existing PeriFinance contract. Please double check the deploymentPath is correct for the network allocated'
-				)
-			);
-			process.exitCode = 1;
-			return;
+			// inflationSupplyToDate = total supply - 100m
+			const inflationSupplyToDate = w3utils
+				.toBN(currentPeriFinanceSupply)
+				.sub(w3utils.toBN(w3utils.toWei((100e6).toString())));
+
+			// current weekly inflation 75m / 52
+			const weeklyInflation = w3utils.toBN(w3utils.toWei((75e6 / 52).toString()));
+			currentWeekOfInflation = inflationSupplyToDate.div(weeklyInflation);
+
+			// Check result is > 0 else set to 0 for currentWeek
+			currentWeekOfInflation = currentWeekOfInflation.gt(w3utils.toBN('0'))
+				? currentWeekOfInflation.toNumber()
+				: 0;
+
+			// Calculate lastMintEvent as Inflation start date + number of weeks issued * secs in weeks
+			const mintingBuffer = 86400;
+			const secondsInWeek = 604800;
+			const inflationStartDate = inflationStartTimestampInSecs;
+			currentLastMintEvent =
+				inflationStartDate + currentWeekOfInflation * secondsInWeek + mintingBuffer;
+		}
+	} catch (err) {
+		currentPeriFinanceSupply = await getDeployParameter('INITIAL_ISSUANCE');
+		currentWeekOfInflation = await getDeployParameter('INFLATION_WEEK_COUNTER');
+		currentLastMintEvent = await getDeployParameter('LAST_MINT_EVENT');
+
+		if (!freshDeploy) {
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing PeriFinance contract. 
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Using default values for current PeriFinance supply: ${currentPeriFinanceSupply}
+								\n Inflation week counter: ${currentWeekOfInflation}
+								\n Last Mint Event: ${currentLastMintEvent}
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
+			}
 		}
 	}
 
@@ -347,17 +376,28 @@ const deploy = async ({
 			oracleExrates = await oldExrates.methods.oracle().call();
 		}
 	} catch (err) {
-		if (freshDeploy) {
-			oracleExrates = oracleExrates || account;
-			oldExrates = undefined; // unset to signify that a fresh one will be deployed
-		} else {
-			console.error(
-				red(
-					'Cannot connect to existing ExchangeRates contract. Please double check the deploymentPath is correct for the network allocated'
-				)
-			);
-			process.exitCode = 1;
-			return;
+		oracleExrates = oracleExrates || account;
+		oldExrates = undefined; // unset to signify that a fresh one will be deployed
+		if (!freshDeploy) {
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing ExchangeRates contract.
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Using default values for oldExrates: ${undefined}
+								\n oracleExrates: ${oracleExrates}
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
+			}
 		}
 	}
 
@@ -370,13 +410,23 @@ const deploy = async ({
 		systemSuspendedReason = systemSuspensionStatus.reason;
 	} catch (err) {
 		if (!freshDeploy) {
-			console.error(
-				red(
-					'Cannot connect to existing SystemStatus contract. Please double check the deploymentPath is correct for the network allocated'
-				)
-			);
-			process.exitCode = 1;
-			return;
+			if (!yes) {
+				try {
+					await confirmAction(
+						yellow(
+							`⚠⚠⚠ WARNING: Cannot connect to existing SystemStatus contract.
+								\n Please double check the deploymentPath is correct for the network allocated.
+								\n Fresh Deploy: ${freshDeploy ? 'Yes' : 'No'}\n`
+						) +
+							gray('-'.repeat(50)) +
+							'\nDo you want to continue? (y/n) '
+					);
+				} catch (err) {
+					console.log(gray('Operation cancelled'));
+					process.exitCode = 1;
+					return;
+				}
+			}
 		}
 	}
 
@@ -394,17 +444,21 @@ const deploy = async ({
 
 	let aggregatedPriceResults = 'N/A';
 
-	if (oldExrates && network !== 'local') {
-		const padding = '\n\t\t\t\t';
-		const aggResults = await checkAggregatorPrices({
-			network,
-			useOvm,
-			providerUrl,
-			pynths,
-			oldExrates,
-			standaloneFeeds,
-		});
-		aggregatedPriceResults = padding + aggResults.join(padding);
+	try {
+		if (oldExrates && network !== 'local') {
+			const padding = '\n\t\t\t\t';
+			const aggResults = await checkAggregatorPrices({
+				network,
+				useOvm,
+				providerUrl,
+				pynths,
+				oldExrates,
+				standaloneFeeds,
+			});
+			aggregatedPriceResults = padding + aggResults.join(padding);
+		}
+	} catch (err) {
+		console.error(red('Error checking aggregator prices: ', err));
 	}
 
 	const deployerBalance = parseInt(
@@ -502,7 +556,7 @@ const deploy = async ({
 			...opts,
 			account,
 			gasPrice,
-			etherscanLinkPrefix,
+			blockscanLinkPrefix,
 			ownerActions,
 			ownerActionsFile,
 			dryRun,
@@ -676,9 +730,10 @@ const deploy = async ({
 		args: [account, ZERO_ADDRESS],
 	});
 
-	const oldFeePool = config[`FeePool`].deploy
-		? await deployer.getExistingContract({ contract: 'FeePool' })
-		: undefined;
+	const oldFeePool =
+		!freshDeploy && config[`FeePool`].deploy
+			? await deployer.getExistingContract({ contract: 'FeePool' })
+			: undefined;
 
 	const feePool = await deployer.deployContract({
 		name: 'FeePool',
@@ -856,7 +911,7 @@ const deploy = async ({
 				writeArg: minterRoleAddress,
 			});
 		}
-	} else if (moonriver.includes(network)) {
+	} else {
 		periFinance = await deployer.deployContract({
 			name: 'PeriFinance',
 			source: 'PeriFinance',
@@ -1007,12 +1062,12 @@ const deploy = async ({
 
 	const exchanger = await deployer.deployContract({
 		name: 'Exchanger',
-		source: useOvm ? 'Exchanger' : 'ExchangerWithVirtualPynth',
+		source: 'Exchanger',
 		deps: ['AddressResolver'],
 		args: [account, addressOf(readProxyForResolver)],
 	});
 
-	if (config['Exchanger'].deploy) {
+	if (freshDeploy || config['Exchanger'].deploy) {
 		await deployer.deployContract({
 			name: 'VirtualPynthIssuer',
 			source: 'VirtualPynthIssuer',
@@ -1053,7 +1108,7 @@ const deploy = async ({
 	}
 
 	// only reset token state if redeploying
-	if (tokenStatePeriFinance && config['TokenStatePeriFinance'].deploy) {
+	if (tokenStatePeriFinance && (freshDeploy || config['TokenStatePeriFinance'].deploy)) {
 		const initialIssuance = await getDeployParameter('INITIAL_ISSUANCE');
 		await runStep({
 			contract: 'TokenStatePeriFinance',
@@ -1256,7 +1311,7 @@ const deploy = async ({
 		if (pynthConfig.deploy) {
 			try {
 				oldPynth = deployer.getExistingContract({ contract: `Pynth${currencyKey}` });
-				originalTotalSupply = await oldPynth.methods.totalSupply().call();
+				originalTotalSupply = oldPynth ? await oldPynth.methods.totalSupply().call() : 0;
 			} catch (err) {
 				if (!freshDeploy) {
 					// only throw if not local - allows local environments to handle both new
@@ -1477,6 +1532,63 @@ const deploy = async ({
 		DAI_ADDRESS = addressOf(DAI);
 	}
 
+	const USDT_ADDRESS = (await getDeployParameter('USDT_ERC20_ADDRESSES'))[network];
+	/* if (!USDT_ADDRESS || USDT_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			throw new Error('USDT address is not known');
+		}
+
+		const USDT = await deployer.deployContract({
+			name: 'USDT',
+			source: 'MockToken',
+			args: ['Tether USD test', 'USDT', 6],
+		});
+
+		USDT_ADDRESS = addressOf(USDT);
+	} */
+
+	const XAUT_ADDRESS = (await getDeployParameter('XAUT_ERC20_ADDRESSES'))[network];
+	// const USDBC_ADDRESS = (await getDeployParameter('USDbC_ERC20_ADDRESSES'))[network];
+	/* if (!XAUT_ADDRESS || XAUT_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			console.error(
+				red(
+					'XAUT address is not known. Please provide the address of the XAUT contract on this network.'
+				)
+			);
+			XAUT_ADDRESS = ZERO_ADDRESS;
+		} else {
+			const XAUT = await deployer.deployContract({
+				name: 'XAUT',
+				source: 'MockToken',
+				args: ['Tether Gold test', 'XAUT', 6],
+			});
+
+			XAUT_ADDRESS = addressOf(XAUT);
+		}
+	} */
+
+	const PAXG_ADDRESS = (await getDeployParameter('PAXG_ERC20_ADDRESSES'))[network];
+	/* if (!PAXG_ADDRESS || PAXG_ADDRESS === ZERO_ADDRESS) {
+		if (mainnet.includes(network)) {
+			console.error(
+				red(
+					'PAXG address is not known. Please provide the address of the PAXG contract on this network.'
+				)
+			);
+			PAXG_ADDRESS = ZERO_ADDRESS;
+		} else {
+			const PAXG = await deployer.deployContract({
+				name: 'PAXG',
+				source: 'MockToken',
+				args: ['Paxos Gold test', 'PAXG', 18],
+			});
+
+			PAXG_ADDRESS = addressOf(PAXG);
+		}
+	} */
+	// const WBTC_ADDRESS = (await getDeployParameter('WBTC_ERC20_ADDRESSES'))[network];
+
 	console.log(gray(`\n------ DEPLOY StakingState CONTRACTS ------\n`));
 
 	const stakingState = await deployer.deployContract({
@@ -1521,6 +1633,40 @@ const deploy = async ({
 				},
 				{ currencyKey: toBytes32('DAI'), decimal: '18', address: DAI_ADDRESS },
 			];
+			USDT_ADDRESS &&
+				USDT_ADDRESS !== ZERO_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('USDT'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: USDT_ADDRESS,
+				});
+			PAXG_ADDRESS &&
+				PAXG_ADDRESS !== ZERO_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('PAXG'),
+					decimal: '18',
+					address: PAXG_ADDRESS,
+				});
+			XAUT_ADDRESS &&
+				XAUT_ADDRESS !== ZERO_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('XAUT'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: XAUT_ADDRESS,
+				});
+			/* WBTC_ADDRESS &&
+				WBTC_ADDRESS !== ZERO_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('WBTC'),
+					decimal: ['bsc'].includes(network) ? '18' : '6',
+					address: WBTC_ADDRESS,
+				}); */
+			/* USDBC_ADDRESS &&
+				stakingStateCurrencies.push({
+					currencyKey: toBytes32('USDbC'),
+					decimal: '6',
+					addres: USDBC_ADDRESS,
+				}); */
 
 			for (const { currencyKey, decimal, address } of stakingStateCurrencies) {
 				await runStep({
@@ -1539,8 +1685,9 @@ const deploy = async ({
 	console.log(gray(`\n------ Deploy multi chain debt share related contracts ------\n`));
 
 	const crossStateConfig = config[`CrossChainState`] || {};
+
 	let oldCrossChainState;
-	if (crossStateConfig.deploy) {
+	if (crossStateConfig.deploy || crossStateConfig.migrate) {
 		try {
 			oldCrossChainState = deployer.getExistingContract({ contract: `CrossChainState` });
 		} catch (err) {
@@ -2424,6 +2571,11 @@ const deploy = async ({
 			pSAND: w3utils.toWei('0.003'),
 			pMANA: w3utils.toWei('0.003'),
 			pSOL: w3utils.toWei('0.003'),
+			pMATIC: w3utils.toWei('0.003'),
+			pATOM: w3utils.toWei('0.003'),
+			pGLMR: w3utils.toWei('0.003'),
+			pOP: w3utils.toWei('0.003'),
+			pAPT: w3utils.toWei('0.003'),
 		};
 
 		const pynthsRatesToUpdate = pynths
@@ -2506,13 +2658,29 @@ const deploy = async ({
 			writeArg: await getDeployParameter('ISSUANCE_RATIO'),
 		});
 
+		const exTokenIssuanceRatio = await getDeployParameter('EXTERNAL_TOKEN_ISSUANCE_RATIO');
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'exTokenIssuanceRatio',
+			readArg: [toBytes32('USDC')],
+			expected: input => input !== '0', // only change if zero
+			write: 'setExTokenIssuanceRatio',
+			writeArg: [
+				Object.keys(exTokenIssuanceRatio).map(name => toBytes32(name)),
+				Object.values(exTokenIssuanceRatio).map(ratio => ratio),
+			],
+		});
+
+		const externalTokenQuota = await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA');
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
 			read: 'externalTokenQuota',
-			expected: input => input !== '0', // only change if zero
+			expected: input => input === externalTokenQuota,
 			write: 'setExternalTokenQuota',
-			writeArg: await getDeployParameter('MAX_EXTERNAL_TOKEN_QUOTA'),
+			writeArg: externalTokenQuota,
 		});
 
 		await runStep({
@@ -2551,6 +2719,21 @@ const deploy = async ({
 			writeArg: await getDeployParameter('LIQUIDATION_RATIO'),
 		});
 
+		const liquidatioinRatios = await getDeployParameter('LIQUIDATION_RATIOS');
+
+		await runStep({
+			contract: 'SystemSettings',
+			target: systemSettings,
+			read: 'liquidationRatios',
+			readArg: [toBytes32('P')],
+			expected: input => input !== '0', // only change if zero
+			write: 'setLiquidationRatios',
+			writeArg: [
+				Object.keys(liquidatioinRatios).map(name => toBytes32(name)),
+				Object.values(liquidatioinRatios).map(ratio => ratio),
+			],
+		});
+
 		await runStep({
 			contract: 'SystemSettings',
 			target: systemSettings,
@@ -2587,29 +2770,39 @@ const deploy = async ({
 			writeArg: await getDeployParameter('DEBT_SNAPSHOT_STALE_TIME'),
 		});
 
-		await runStep({
-			contract: 'SystemSettings',
-			target: systemSettings,
-			read: 'bridgeClaimGasCost',
-			expected: input => input !== '0', // only change if zero
-			write: 'setBridgeClaimGasCost',
-			writeArg: (
-				(await getDeployParameter('BRIDGE_CLAIM_GAS_COST')) *
-				(await checkGasPrice(network, 'standard'))
-			).toString(), // multiply by gasPrice
-		});
+		let gPrice = gasPrice;
+		try {
+			gPrice = await checkGasPrice(network, 'standard');
+		} catch (e) {}
+		gPrice = w3utils.toBN(w3utils.toWei(gPrice, 'gwei'));
 
-		await runStep({
-			contract: 'SystemSettings',
-			target: systemSettings,
-			read: 'bridgeTransferGasCost',
-			expected: input => input !== '0', // only change if zero
-			write: 'setBridgeTransferGasCost',
-			writeArg: (
-				(await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')) *
-				(await checkGasPrice(network, 'standard'))
-			).toString(), // multiply by gasPrice
-		});
+		const bridgeClaimGasCost = w3utils.toBN(await getDeployParameter('BRIDGE_CLAIM_GAS_COST'));
+		const bridgeCCost = bridgeClaimGasCost.mul(gPrice).div(w3utils.toBN(10e9));
+		bridgeClaimGasCost &&
+			(await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'bridgeClaimGasCost',
+				expected: input => input !== '0', // only change if zero
+				// expected: input => input === bridgeCCost.toString(),
+				write: 'setBridgeClaimGasCost',
+				writeArg: bridgeCCost.toString(), // multiply by gasPrice
+			}));
+
+		const bridgeTransferGasCost = w3utils.toBN(
+			await getDeployParameter('BRIDGE_TRANSFER_GAS_COST')
+		);
+		const bridgeTCost = bridgeTransferGasCost.mul(gPrice).div(w3utils.toBN(10e9));
+		bridgeTransferGasCost &&
+			(await runStep({
+				contract: 'SystemSettings',
+				target: systemSettings,
+				read: 'bridgeTransferGasCost',
+				expected: input => input !== '0', // only change if zero
+				// expected: input => input === bridgeTCost.toString(),
+				write: 'setBridgeTransferGasCost',
+				writeArg: bridgeTCost.toString(), // multiply by gasPrice
+			}));
 
 		await runStep({
 			contract: 'SystemSettings',
@@ -2758,14 +2951,14 @@ const deploy = async ({
 		// 	writeArg: [networkIds],
 		// });
 
-		// ----------------
-		if (crossStateConfig.deploy && oldCrossChainState) {
+		if (crossStateConfig.migrate && oldCrossChainState) {
 			await runStep({
 				contract: 'CrossChainManager',
 				target: crossChainManager,
 				write: 'setInitialCurrentIssuedDebt',
 				writeArg: addressOf(oldCrossChainState),
 			});
+			deployer.updateMigrateDone({ name: 'CrossChainState' });
 		}
 	}
 

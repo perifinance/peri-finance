@@ -158,6 +158,9 @@
 	"StakingRewardsPeriEthUniV2": {
 		"deploy": false
 	},
+	"VirtualPynthIssuer": {
+		"deploy": false
+	},
 	"CrossChainState": {
 		"deploy": false
 	},

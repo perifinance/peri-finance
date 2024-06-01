@@ -393,13 +393,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // have already claimed from the old period, available in the new period.
         // The subtraction is important so we don't create a ticking time bomb of an ever growing
         // number of fees that can never decrease and will eventually overflow at the end of the fee pool.
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodClosing
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).feesToDistribute = periodToRollover
             .feesToDistribute
-            .add(periodToRollover.feesToDistribute)
+            .add(periodClosing.feesToDistribute)
             .sub(periodToRollover.feesClaimed);
-        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodClosing
+        _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = periodToRollover
             .rewardsToDistribute
-            .add(periodToRollover.rewardsToDistribute)
+            .add(periodClosing.rewardsToDistribute)
             .sub(periodToRollover.rewardsClaimed);
 
         // _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2).rewardsToDistribute = _perifinance
@@ -444,18 +444,18 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function _claimFees(address claimingAddress) internal returns (bool) {
-        uint rewardsPaid = 0;
-        uint feesPaid = 0;
+        uint rewardsPaid;
+        uint feesPaid;
         uint availableFees;
         uint availableRewards;
 
         // Address won't be able to claim fees if it is too far below the target c-ratio.
         // It will need to burn pynths then try claiming again.
-        (bool feesClaimable, bool anyRateIsInvalid) = _isFeesClaimableAndAnyRatesInvalid(claimingAddress);
+        bool feesClaimable = _isFeesClaimableAndAnyRatesInvalid(claimingAddress, true);
 
         require(feesClaimable, "C-Ratio below penalty threshold");
 
-        require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
+        // require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
 
         // Get the claimingAddress available fees and rewards
         (availableFees, availableRewards) = feesAvailable(claimingAddress);
@@ -694,43 +694,44 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // return (totalFees, totalRewards);
     }
 
-    function _isFeesClaimableAndAnyRatesInvalid(address account)
+    function _isFeesClaimableAndAnyRatesInvalid(address account, bool _checkRate)
         internal
         view
-        returns (bool feesClaimable, bool anyRateIsInvalid)
+        returns (bool feesClaimable)
     {
+        // complete: Check if this is still needed
         // External token staked amount should not over the quota limit.
-        uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
+        /* uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
         if (
             accountExternalTokenQuota > getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
         ) {
             return (false, false);
-        }
+        } */
 
-        uint ratio;
+        (uint tRatio, uint ratio, , , uint exSR, uint maxSR) = issuer().getRatios(account, _checkRate);
+
+        // uint ratio;
         // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
-        //  0  <  10%:   Claimable
-        // 10% > above:  Unable to claim
-        (ratio, anyRateIsInvalid) = issuer().collateralisationRatioAndAnyRatesInvalid(account);
-        uint targetRatio = getIssuanceRatio();
+        // 10 decimals round-up is used to ensure that the threshold is reached when the ratio is above the target ratio.
 
         feesClaimable = true;
         // Claimable if collateral ratio below target ratio
-        if (ratio < targetRatio) {
-            return (feesClaimable, anyRateIsInvalid);
+        if (ratio <= tRatio && exSR <= maxSR) {
+            return feesClaimable;
         }
 
         // Calculate the threshold for collateral ratio before fees can't be claimed.
-        uint ratio_threshold = targetRatio.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
+        uint ratio_threshold = tRatio.roundUpDecimal(uint(10));
+        uint exSR_threshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
 
         // Not claimable if collateral ratio above threshold
-        if (ratio > ratio_threshold) {
+        if (ratio > ratio_threshold || exSR > exSR_threshold) {
             feesClaimable = false;
         }
     }
 
     function isFeesClaimable(address account) external view returns (bool feesClaimable) {
-        (feesClaimable, ) = _isFeesClaimableAndAnyRatesInvalid(account);
+        return _isFeesClaimableAndAnyRatesInvalid(account, false);
     }
 
     /**

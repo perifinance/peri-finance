@@ -21,6 +21,7 @@ const {
 		FEEDS_FILENAME,
 	},
 	wrap,
+	networkToChainId,
 } = require('../..');
 
 const {
@@ -126,14 +127,17 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 };
 
 const getEtherscanLinkPrefix = network => {
-	if (['polygon', 'mumbai'].includes(network)) {
+	if (['polygon', 'mumbai', 'amoy'].includes(network)) {
 		return `https://${network !== 'polygon' ? network + '.' : ''}polygonscan.com`;
 	}
 	if (['bsc', 'bsctest'].includes(network)) {
 		return `https://${network !== 'bsc' ? 'testnet.' : ''}bscscan.com`;
 	}
-	if (['moonbase-alphanet', 'moonriver'].includes(network)) {
-		return `https://${network === 'moonriver' ? network : 'moonbase'}.moonscan.io`;
+	if (['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)) {
+		return `https://${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io`;
+	}
+	if (['base-sepolia', 'base'].includes(network)) {
+		return `https://${network === 'base' ? network : 'sepolia'}.basescan.org`;
 	}
 	return `https://${network !== 'mainnet' ? network + '.' : ''}etherscan.io`;
 };
@@ -161,33 +165,45 @@ const loadConnections = ({ network, useFork }) => {
 			providerUrl = process.env.PROVIDER_URL_MOONBASE_ALPHANET;
 		} else if (network === 'moonriver') {
 			providerUrl = process.env.PROVIDER_URL_MOONRIVER;
+		} else if (network === 'moonbeam') {
+			providerUrl = process.env.PROVIDER_URL_MOONBEAM;
+		} else if (network === 'base-sepolia') {
+			providerUrl = process.env.PROVIDER_URL_BASE_SEPOLIA;
+		} else if (network === 'base') {
+			providerUrl = process.env.PROVIDER_URL_BASE;
+		} else if (network === 'sepolia') {
+			providerUrl = process.env.PROVIDER_URL_SEPOLIA;
 		} else {
 			providerUrl = process.env.PROVIDER_URL.replace('network', network);
 		}
 	}
 
-	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver'].includes(network)
+	const privateKey = ['mainnet', 'polygon', 'bsc', 'moonriver', 'base', 'moonbeam'].includes(
+		network
+	)
 		? process.env.DEPLOY_PRIVATE_KEY
 		: ['shibuya'].includes(network)
 		? process.env.SUBSTRATE_PRIVATE_KEY
 		: process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
-	const etherscanUrl =
+	const blockscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
-			: ['kovan', 'goerli', 'ropsten', 'rinkeby'].includes(network)
+			: ['kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia'].includes(network)
 			? `https://api-${network}.etherscan.io/api`
 			: ['bsc', 'bsctest'].includes(network)
 			? `https://api${network === 'bsc' ? '' : '-testnet'}.bscscan.com/api`
-			: ['polygon', 'mumbai'].includes(network)
+			: ['polygon', 'mumbai', 'amoy'].includes(network)
 			? `https://api${network === 'polygon' ? '' : '-testnet'}.polygonscan.com/api`
-			: ['moonbase-alphanet', 'moonriver'].includes(network)
-			? `https://api-${network === 'moonriver' ? network : 'moonbase'}.moonscan.io/api`
+			: ['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)
+			? `https://api-${network === 'moonbase-alphanet' ? 'moonbase' : network}.moonscan.io/api`
+			: ['base-sepolia', 'base'].includes(network)
+			? `https://api${network === 'base' ? '' : '-sepolia'}.basescan.org/api`
 			: ['shibuya'].includes(network)
 			? `https://${network}.api.subscan.io`
 			: '';
 
-	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
+	const blockscanLinkPrefix = getEtherscanLinkPrefix(network);
 
 	const rolePrivateKeys = {
 		oracle: process.env.ORACLE_PRIVATE_KEY,
@@ -197,7 +213,7 @@ const loadConnections = ({ network, useFork }) => {
 		validator: process.env.VALIDATOR_PRIVATE_KEY,
 	};
 
-	return { providerUrl, privateKey, etherscanUrl, etherscanLinkPrefix, rolePrivateKeys };
+	return { providerUrl, privateKey, blockscanUrl, blockscanLinkPrefix, rolePrivateKeys };
 };
 
 const confirmAction = prompt =>
@@ -211,7 +227,7 @@ const confirmAction = prompt =>
 		});
 	});
 
-const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, etherscanLinkPrefix }) => ({
+const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, blockscanLinkPrefix }) => ({
 	key,
 	action,
 	target,
@@ -221,7 +237,7 @@ const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, etherscanL
 		target,
 		action,
 		complete: false,
-		link: `${etherscanLinkPrefix}/address/${target}#writeContract`,
+		link: `${blockscanLinkPrefix}/address/${target}#writeContract`,
 		data,
 	};
 	fs.writeFileSync(ownerActionsFile, stringify(ownerActions));
@@ -246,7 +262,7 @@ const performTransactionalStep = async ({
 	writeArg, // none, 1 or an array of args, array will be spread into params
 	gasLimit,
 	gasPrice,
-	etherscanLinkPrefix,
+	blockscanLinkPrefix,
 	ownerActions,
 	ownerActionsFile,
 	dryRun,
@@ -350,7 +366,7 @@ const performTransactionalStep = async ({
 		const appendOwnerAction = appendOwnerActionGenerator({
 			ownerActions,
 			ownerActionsFile,
-			etherscanLinkPrefix,
+			blockscanLinkPrefix,
 		});
 
 		data = target.methods[write](...argumentsForWriteFunction).encodeABI();
@@ -426,7 +442,7 @@ function reportDeployedContracts({ deployer }) {
 	}
 }
 
-function estimateEtherGasPice(network, priority) {
+const estimateEtherGasPice = async (network, priority) => {
 	const gasStationUrl = `https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=${process.env.ETHERSCAN_KEY}`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
@@ -445,7 +461,7 @@ function estimateEtherGasPice(network, priority) {
 			}
 		})
 		.catch(e => console.log(e));
-}
+};
 
 function estimatePolygonGasPice(network, priority) {
 	const gasStationUrl = `https://${
@@ -501,8 +517,49 @@ function estimateBSCGasPice(network, priority) {
 		.catch(e => console.log(e));
 }
 
+function estimateGasPice(network, priority) {
+	const Auth = Buffer.from(
+		process.env.INFURA_API_KEY + ':' + process.env.INFURA_API_KEY_SECRET
+	).toString('base64');
+
+	const gasStationUrl = `https://gas.api.infura.io/networks/${networkToChainId[network]}/suggestedGasFees`;
+
+	return axios
+		.get(gasStationUrl, {
+			headers: { Authorization: `Basic ${Auth}` },
+		})
+		.then(({ data }) => {
+			// console.log('Gas', data);
+			const { low, medium, high } = data;
+
+			var gasPrice = 0;
+			switch (priority) {
+				case 'fast':
+					gasPrice =
+						Number(high.suggestedMaxFeePerGas) + Number(high.suggestedMaxPriorityFeePerGas);
+					break;
+				case 'standard':
+					gasPrice =
+						Number(medium.suggestedMaxFeePerGas) + Number(medium.suggestedMaxPriorityFeePerGas);
+					break;
+				default:
+					gasPrice = Number(low.suggestedMaxFeePerGas) + Number(low.suggestedMaxPriorityFeePerGas);
+			}
+			return gasPrice.toString();
+		})
+		.catch(e => {
+			// console.log(e);
+			if (network === 'base-sepolia') return '0.002';
+			else return '1';
+		});
+}
+
 function estimateMoonBeamGasPrice(network, priority) {
-	const gasStationUrl = `https://gmriver.blockscan.com/gasapi.ashx`;
+	if (network === 'moonbase-alphanet') return '1';
+
+	const gasStationUrl = `https://${
+		network === 'moonriver' ? 'gmriver' : 'gmbeam'
+	}.blockscan.com/gasapi.ashx`;
 	console.log(`requesting gas price for ${network} : ${gasStationUrl}`);
 
 	return axios
@@ -527,20 +584,29 @@ function estimateMoonBeamGasPrice(network, priority) {
 }
 
 async function checkGasPrice(network, priority) {
-	let gasPrice;
+	let gasPrice = '1';
 
 	if (['polygon', 'mumbai'].includes(network)) {
 		gasPrice = await estimatePolygonGasPice(network, priority);
-	} else if (['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'local'].includes(network)) {
-		gasPrice = await estimateEtherGasPice(priority);
+	} else if (
+		['mainnet', 'kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia', 'local'].includes(network)
+	) {
+		gasPrice = await estimateEtherGasPice(network, priority);
 	} else if (['bsc', 'bsctest'].includes(network)) {
 		gasPrice = await estimateBSCGasPice(network, priority);
-	} else if (['moonbase-alphanet', 'moonriver'].includes(network)) {
+	} else if (['moonbase-alphanet', 'moonriver', 'moonbeam'].includes(network)) {
 		gasPrice = await estimateMoonBeamGasPrice(network, priority);
+	} else {
+		gasPrice = await estimateGasPice(network, priority);
 	}
 
-	console.log(`using gas price : ${gasPrice}`);
 	if (!gasPrice) throw new Error('gas price is undefined');
+	gasPrice = (parseInt(gasPrice) > 1
+		? Math.round(Number(gasPrice))
+		: Math.round(Number(gasPrice) * 1e9) / 1e9
+	).toString();
+
+	console.log(`using gas price : ${gasPrice}`);
 
 	return gasPrice;
 }
@@ -549,6 +615,15 @@ function sleep(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms);
 	});
+}
+
+// Fixed point multiplication utilities
+function multiplyDecimal(x, y) {
+	const xBN = w3utils.BN.isBN(x) ? x : w3utils.toBN(x);
+	const yBN = w3utils.BN.isBN(y) ? y : w3utils.toBN(y);
+
+	const unit = w3utils.toBN(w3utils.toWei('1'));
+	return xBN.mul(yBN).div(unit);
 }
 
 module.exports = {
@@ -566,4 +641,5 @@ module.exports = {
 	reportDeployedContracts,
 	checkGasPrice,
 	sleep,
+	multiplyDecimal,
 };

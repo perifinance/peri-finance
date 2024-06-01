@@ -17,9 +17,9 @@ interface ICrossChainManager {
 
     // function getNetworkId(bytes32 _chainID) external view returns (uint);
 
-    function currentNetworkAdaptedIssuedDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+    function currentNetworkIssuedDebtOf(bytes32 currencyKey) external view returns (uint, bool);
 
-    function currentNetworkAdaptedActiveDebtValue(bytes32 currencyKey) external view returns (uint, bool);
+    function currentNetworkActiveDebtOf(bytes32 currencyKey) external view returns (uint, bool);
 
     function currentNetworkIssuedDebt() external view returns (uint);
 

@@ -38,6 +38,7 @@ process.yml
 # Temp files
 .tmp/
 
+
 # CSV files
 *.csv
 
@@ -49,3 +50,9 @@ node_modules
 #Buidler files
 cache
 artifacts
+
+memo.txt
+
+
+# remix save files
+.deploys

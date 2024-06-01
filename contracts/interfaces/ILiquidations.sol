@@ -11,11 +11,11 @@ interface ILiquidations {
 
     function liquidationDelay() external view returns (uint);
 
-    function liquidationRatio() external view returns (uint);
+    function liquidationRatio(address account) external view returns (uint);
 
     function liquidationPenalty() external view returns (uint);
 
-    function calculateAmountToFixCollateral(uint debtBalance, uint collateral) external view returns (uint);
+    // function calcAmtToFixCollateral(address account, uint debtBalance, uint collateral) external view returns (uint);
 
     // Mutative Functions
     function flagAccountForLiquidation(address account) external;
@@ -23,8 +23,12 @@ interface ILiquidations {
     // Restricted: used internally to Issuer
     function removeAccountInLiquidation(address account) external;
 
-    function liquidateAccount(address account, uint pusdAmount, uint debtBalance) 
-        external returns (uint totalRedeemedinUSD, uint amountToLiquidate);
+    function liquidateAccount(
+        address account,
+        address liquidator,
+        uint pusdAmount,
+        uint debtBalance
+    ) external returns (uint totalRedeemed, uint amountToLiquidate);
 
     function checkAndRemoveAccountInLiquidation(address account) external;
 }

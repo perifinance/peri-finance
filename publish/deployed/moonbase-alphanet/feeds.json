@@ -1,15 +1,28 @@
 {
-	"PERI": {
-		"asset": "PERI",
-		"feed": ""
-	},
 	"USDC": {
 		"asset": "USDC",
-		"feed": ""
+		"feed": "",
+		"standalone": true
 	},
 	"DAI": {
 		"asset": "DAI",
-		"feed": ""
+		"feed": "",
+		"standalone": true
+	},
+	"USDT": {
+		"asset": "USDT",
+		"feed": "",
+		"standalone": true
+	},
+	"PAXG": {
+		"asset": "PAXG",
+		"feed": "",
+		"standalone": true
+	},
+	"XAUT": {
+		"asset": "XAUT",
+		"feed": "",
+		"standalone": true
 	},
 	"ETH": {
 		"asset": "ETH",
@@ -33,11 +46,6 @@
 	},
 	"LINK": {
 		"asset": "LINK",
-		"feed": "",
-		"standalone": true
-	},
-	"LUNA": {
-		"asset": "LUNA",
 		"feed": "",
 		"standalone": true
 	}
