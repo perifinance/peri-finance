@@ -59,7 +59,7 @@ const settle = async ({
 
 	console.log(gray('Using network:', yellow(network)));
 
-	const { providerUrl, privateKey: envPrivateKey, etherscanLinkPrefix } = loadConnections({
+	const { providerUrl, privateKey: envPrivateKey, blockscanLinkPrefix } = loadConnections({
 		network,
 		useFork,
 	});
@@ -98,7 +98,7 @@ const settle = async ({
 				gas,
 				gasPrice,
 			});
-			console.log(gray(`${etherscanLinkPrefix}/tx/${transactionHash}`));
+			console.log(gray(`${blockscanLinkPrefix}/tx/${transactionHash}`));
 		}
 	}
 
@@ -315,7 +315,7 @@ const settle = async ({
 						nonce: nonce++,
 					});
 
-					console.log(gray(`${etherscanLinkPrefix}/tx/${transactionHash}`));
+					console.log(gray(`${blockscanLinkPrefix}/tx/${transactionHash}`));
 				} catch (err) {
 					console.log(red('Could not transact:', err));
 				}

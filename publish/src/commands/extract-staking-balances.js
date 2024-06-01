@@ -36,7 +36,7 @@ async function extractStakingBalances({ network = DEFAULTS.network, deploymentPa
 	/** *********** Replace Settings Here *********** **/
 
 	// The RPC endpoint that the results will be retrieved from. Preferably this is an archive node.
-	const { providerUrl, etherscanUrl } = loadConnections({
+	const { providerUrl, blockscanUrl } = loadConnections({
 		network,
 	});
 
@@ -63,7 +63,7 @@ async function extractStakingBalances({ network = DEFAULTS.network, deploymentPa
 	const stakingAddress = lastStakingVersionThatsCurrent.address;
 	console.log(gray(`Using StakingRewards${pynth} address of`), yellow(stakingAddress));
 
-	const result = await axios.get(etherscanUrl, {
+	const result = await axios.get(blockscanUrl, {
 		params: {
 			module: 'account',
 			action: 'txlist',

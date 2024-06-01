@@ -81,7 +81,7 @@ const removePynths = async ({
 		}
 	}
 
-	const { providerUrl, privateKey: envPrivateKey, etherscanLinkPrefix } = loadConnections({
+	const { providerUrl, privateKey: envPrivateKey, blockscanLinkPrefix } = loadConnections({
 		network,
 	});
 
@@ -181,7 +181,7 @@ const removePynths = async ({
 				writeArg: toBytes32(currencyKey),
 				gasLimit,
 				gasPrice,
-				etherscanLinkPrefix,
+				blockscanLinkPrefix,
 				ownerActions,
 				ownerActionsFile,
 				encodeABI: network === 'mainnet',

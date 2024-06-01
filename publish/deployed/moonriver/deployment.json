@@ -140,8 +140,8 @@
 			"address": "0x46a39DEee1F3c154aF6538Fc8B307d1C684EA052",
 			"source": "Liquidations",
 			"link": "https://moonriver.moonscan.io/address/0x46a39DEee1F3c154aF6538Fc8B307d1C684EA052",
-			"timestamp": "2024-04-23T05:29:13.615Z",
-			"txn": "",
+			"timestamp": "2024-04-23T05:29:00.000Z",
+			"txn": "https://moonriver.moonscan.io/tx/0xcb8430eefdc0be49d2921f8701a41bbf7357e0f364eeeb4ec893ec2e9ffdad85",
 			"network": "moonriver"
 		},
 		"EternalStorageLiquidations": {
@@ -401,8 +401,8 @@
 			"address": "0x9ec6613eaafc049AC8B7d87Abeade6da7C4bD50f",
 			"source": "ExternalTokenStakeManager",
 			"link": "https://moonriver.moonscan.io/address/0x9ec6613eaafc049AC8B7d87Abeade6da7C4bD50f",
-			"timestamp": "2024-04-21T16:40:45.608Z",
-			"txn": "",
+			"timestamp": "2024-04-21T16:40:30.000Z",
+			"txn": "https://moonriver.moonscan.io/tx/0x63d29d49900d76b98beb4e450d06b8f28a28e1b781b8b6b6d90eec31e3a2352a",
 			"network": "moonriver"
 		},
 		"CrossChainState": {

@@ -44,7 +44,7 @@ program
 
 			const contractAddress = /^0x/.test(contract) ? contract : getTarget({ contract }).address;
 
-			const etherscanUrl =
+			const blockscanUrl =
 				network === 'mainnet'
 					? 'https://api.etherscan.io/api'
 					: `https://api-${network}.etherscan.io/api`;
@@ -52,7 +52,7 @@ program
 			let abi;
 			if (blockNumber) {
 				// try fetch ABI from etherscan (as our version might be to new)
-				const result = await axios.get(etherscanUrl, {
+				const result = await axios.get(blockscanUrl, {
 					params: {
 						module: 'contract',
 						action: 'getabi',

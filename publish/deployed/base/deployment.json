@@ -140,8 +140,8 @@
 			"address": "0x8D4d1390fC720fF291923A53F0a2164b007f84CE",
 			"source": "Liquidations",
 			"link": "https://base.basescan.org/address/0x8D4d1390fC720fF291923A53F0a2164b007f84CE",
-			"timestamp": "2024-04-23T05:32:56.429Z",
-			"txn": "",
+			"timestamp": "2024-04-23T05:32:55.000Z",
+			"txn": "https://base.basescan.org/tx/0x3333d02fa07d7e80eb1af35353171ca58d927e4bcbe81b5a178b4a6d02db0c9b",
 			"network": "base"
 		},
 		"EternalStorageLiquidations": {
@@ -221,8 +221,8 @@
 			"address": "0x0f2Af7246e1FcbEC5e334092B1F0D91BDA924faD",
 			"source": "PeriFinance",
 			"link": "https://base.basescan.org/address/0x0f2Af7246e1FcbEC5e334092B1F0D91BDA924faD",
-			"timestamp": "2024-04-17T17:10:29.013Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:27.000Z",
+			"txn": "https://base.basescan.org/tx/0x59f89b402d18ab86d7067b9e544b37a4c52efc1571f471cd24674a569ef82d96",
 			"network": "base"
 		},
 		"BridgeState": {
@@ -230,8 +230,8 @@
 			"address": "0x16235FBaB43f4Df258fdF2A7fc382A15A6E8089b",
 			"source": "BridgeState",
 			"link": "https://base.basescan.org/address/0x16235FBaB43f4Df258fdF2A7fc382A15A6E8089b",
-			"timestamp": "2024-04-17T17:10:42.618Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:10:41.000Z",
+			"txn": "https://base.basescan.org/tx/0x301e05091ef9944eb3ad25964ce15ffd43b2a1ad3b85caf16227bc5ed4f3a953",
 			"network": "base"
 		},
 		"DebtCache": {
@@ -275,8 +275,8 @@
 			"address": "0xBE4af9D62A7d2095E78B2F81c1c1F45E797aAeca",
 			"source": "Issuer",
 			"link": "https://base.basescan.org/address/0xBE4af9D62A7d2095E78B2F81c1c1F45E797aAeca",
-			"timestamp": "2024-04-17T17:11:48.462Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:11:47.000Z",
+			"txn": "https://base.basescan.org/tx/0x7f8e7b86e7eae9b45c89610eff7924602f6238ebf0c1f2c4ccf1be9d1078725e",
 			"network": "base"
 		},
 		"TradingRewards": {
@@ -590,8 +590,8 @@
 			"address": "0x46879973EB529F64e7fC5ae90709Ae95DcCA7f19",
 			"source": "StakingState",
 			"link": "https://base.basescan.org/address/0x46879973EB529F64e7fC5ae90709Ae95DcCA7f19",
-			"timestamp": "2024-04-17T17:17:21.181Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:17:19.000Z",
+			"txn": "https://base.basescan.org/tx/0xe1a05b0493c2a0a1849bd4e81e758cc4d06f2cfcbd09b8d7c78a26a33bceb095",
 			"network": "base"
 		},
 		"ExternalTokenStakeManager": {
@@ -599,8 +599,8 @@
 			"address": "0x13f872abfA72c8b676f24c11b7F6Bb3fB4651AD7",
 			"source": "ExternalTokenStakeManager",
 			"link": "https://base.basescan.org/address/0x13f872abfA72c8b676f24c11b7F6Bb3fB4651AD7",
-			"timestamp": "2024-04-21T16:01:43.128Z",
-			"txn": "",
+			"timestamp": "2024-04-21T16:01:41.000Z",
+			"txn": "https://base.basescan.org/tx/0x7344c7714b43c71faaec34b752dd0a1f5a6e3d2cd00f722cddd4bc35c1b991b1",
 			"network": "base"
 		},
 		"CrossChainState": {
@@ -608,8 +608,8 @@
 			"address": "0x0959B8628B111954375CAfD4bc25b97179cA3893",
 			"source": "CrossChainState",
 			"link": "https://base.basescan.org/address/0x0959B8628B111954375CAfD4bc25b97179cA3893",
-			"timestamp": "2024-04-17T17:17:42.792Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:17:41.000Z",
+			"txn": "https://base.basescan.org/tx/0xbe388c84ad4c957fb85c7462abb72334afd8fdebe6497fada00717efe14bd3c5",
 			"network": "base"
 		},
 		"CrossChainManager": {
@@ -617,8 +617,8 @@
 			"address": "0xACD30b5445620D4F9368bf4E104957294862Bb06",
 			"source": "CrossChainManager",
 			"link": "https://base.basescan.org/address/0xACD30b5445620D4F9368bf4E104957294862Bb06",
-			"timestamp": "2024-04-17T17:17:47.027Z",
-			"txn": "",
+			"timestamp": "2024-04-17T17:17:45.000Z",
+			"txn": "https://base.basescan.org/tx/0x9d3cde429a2b1059fd1d90665a715a03a33e26a3c4bce3c4212dd8d8c81b55ac",
 			"network": "base"
 		},
 		"Depot": {

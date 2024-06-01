@@ -9,7 +9,7 @@ const { toBytes32 } = require('../../.');
 
 module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, standaloneFeeds }) => {
 	const output = [];
-	const { etherscanUrl } = loadConnections({ network });
+	const { blockscanUrl } = loadConnections({ network });
 
 	const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
 
@@ -35,7 +35,7 @@ module.exports = async ({ network, useOvm, providerUrl, pynths, oldExrates, stan
 					// Note: assumes all use the same ABI
 					const {
 						data: { result },
-					} = await axios.get(etherscanUrl, {
+					} = await axios.get(blockscanUrl, {
 						params: {
 							module: 'contract',
 							action: 'getabi',

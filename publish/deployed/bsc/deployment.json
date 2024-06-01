@@ -176,8 +176,8 @@
 			"address": "0x864aF672614D0c221e91CACbe7DF2EeB0BD3bbdd",
 			"source": "Liquidations",
 			"link": "https://bscscan.com/address/0x864aF672614D0c221e91CACbe7DF2EeB0BD3bbdd",
-			"timestamp": "2024-04-23T05:17:40.002Z",
-			"txn": "",
+			"timestamp": "2024-04-23T05:17:39.000Z",
+			"txn": "https://bscscan.com/tx/0x00be459ba4b9bb77d101e191e32200dc3e9f3a25327263df8f43d620602dba35",
 			"network": "bsc"
 		},
 		"EternalStorageLiquidations": {
@@ -239,8 +239,8 @@
 			"address": "0x61E9D2F669199F712559bb096adbaD8166AFee60",
 			"source": "Exchanger",
 			"link": "https://bscscan.com/address/0x61E9D2F669199F712559bb096adbaD8166AFee60",
-			"timestamp": "2024-04-30T08:38:43.007Z",
-			"txn": "",
+			"timestamp": "2024-04-30T08:38:42.000Z",
+			"txn": "https://bscscan.com/tx/0xba55b645dcac1b49ddfbcb5625659c8d34f50fa556a1ab8c0a6457976bdfc09d",
 			"network": "bsc"
 		},
 		"ExchangeState": {
@@ -329,8 +329,8 @@
 			"address": "0x7f77a4465d5324272Ba1c733af44fb44295613e3",
 			"source": "ExternalTokenStakeManager",
 			"link": "https://bscscan.com/address/0x7f77a4465d5324272Ba1c733af44fb44295613e3",
-			"timestamp": "2024-04-21T15:56:07.901Z",
-			"txn": "",
+			"timestamp": "2024-04-21T15:56:07.000Z",
+			"txn": "https://bscscan.com/tx/0x1cf5da4a51a7d7d6ecb60373f25e34a969806bf641da1cd9caa9358c85991deb",
 			"network": "bsc"
 		},
 		"ExternalRateAggregator": {
@@ -536,8 +536,8 @@
 			"address": "0xAd82926f0FEEee45088F5C8352EbD560ca26EFEF",
 			"source": "MultiCollateralPynth",
 			"link": "https://bscscan.com/address/0xAd82926f0FEEee45088F5C8352EbD560ca26EFEF",
-			"timestamp": "2024-04-20T12:06:01.509Z",
-			"txn": "",
+			"timestamp": "2024-04-20T12:06:00.000Z",
+			"txn": "https://bscscan.com/tx/0x7ae0c0cbcca69269d0d7895ad54b32246cfe9f5f5c387ced1f234a3960ef1b01",
 			"network": "bsc"
 		},
 		"TokenStatepETH": {
@@ -590,8 +590,8 @@
 			"address": "0xB6E71cd07b73B781CC4d12B4147339D64f21CCFD",
 			"source": "Pynth",
 			"link": "https://bscscan.com/address/0xB6E71cd07b73B781CC4d12B4147339D64f21CCFD",
-			"timestamp": "2024-04-20T12:06:37.643Z",
-			"txn": "",
+			"timestamp": "2024-04-20T12:06:36.000Z",
+			"txn": "https://bscscan.com/tx/0xdd85a977bca463437be951973a91ce9228fbd9d3de7fa954b1dfcb7bf1e8e81c",
 			"network": "bsc"
 		},
 		"TokenStatepADA": {

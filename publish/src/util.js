@@ -186,7 +186,7 @@ const loadConnections = ({ network, useFork }) => {
 		? process.env.SUBSTRATE_PRIVATE_KEY
 		: process.env.TESTNET_DEPLOY_PRIVATE_KEY;
 
-	const etherscanUrl =
+	const blockscanUrl =
 		network === 'mainnet'
 			? 'https://api.etherscan.io/api'
 			: ['kovan', 'goerli', 'ropsten', 'rinkeby', 'sepolia'].includes(network)
@@ -203,7 +203,7 @@ const loadConnections = ({ network, useFork }) => {
 			? `https://${network}.api.subscan.io`
 			: '';
 
-	const etherscanLinkPrefix = getEtherscanLinkPrefix(network);
+	const blockscanLinkPrefix = getEtherscanLinkPrefix(network);
 
 	const rolePrivateKeys = {
 		oracle: process.env.ORACLE_PRIVATE_KEY,
@@ -213,7 +213,7 @@ const loadConnections = ({ network, useFork }) => {
 		validator: process.env.VALIDATOR_PRIVATE_KEY,
 	};
 
-	return { providerUrl, privateKey, etherscanUrl, etherscanLinkPrefix, rolePrivateKeys };
+	return { providerUrl, privateKey, blockscanUrl, blockscanLinkPrefix, rolePrivateKeys };
 };
 
 const confirmAction = prompt =>
@@ -227,7 +227,7 @@ const confirmAction = prompt =>
 		});
 	});
 
-const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, etherscanLinkPrefix }) => ({
+const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, blockscanLinkPrefix }) => ({
 	key,
 	action,
 	target,
@@ -237,7 +237,7 @@ const appendOwnerActionGenerator = ({ ownerActions, ownerActionsFile, etherscanL
 		target,
 		action,
 		complete: false,
-		link: `${etherscanLinkPrefix}/address/${target}#writeContract`,
+		link: `${blockscanLinkPrefix}/address/${target}#writeContract`,
 		data,
 	};
 	fs.writeFileSync(ownerActionsFile, stringify(ownerActions));
@@ -262,7 +262,7 @@ const performTransactionalStep = async ({
 	writeArg, // none, 1 or an array of args, array will be spread into params
 	gasLimit,
 	gasPrice,
-	etherscanLinkPrefix,
+	blockscanLinkPrefix,
 	ownerActions,
 	ownerActionsFile,
 	dryRun,
@@ -366,7 +366,7 @@ const performTransactionalStep = async ({
 		const appendOwnerAction = appendOwnerActionGenerator({
 			ownerActions,
 			ownerActionsFile,
-			etherscanLinkPrefix,
+			blockscanLinkPrefix,
 		});
 
 		data = target.methods[write](...argumentsForWriteFunction).encodeABI();

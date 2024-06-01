@@ -260,7 +260,7 @@ const deploy = async ({
 	const {
 		providerUrl: envProviderUrl,
 		privateKey: envPrivateKey,
-		etherscanLinkPrefix,
+		blockscanLinkPrefix,
 	} = loadConnections({
 		network,
 		useFork,
@@ -556,7 +556,7 @@ const deploy = async ({
 			...opts,
 			account,
 			gasPrice,
-			etherscanLinkPrefix,
+			blockscanLinkPrefix,
 			ownerActions,
 			ownerActionsFile,
 			dryRun,

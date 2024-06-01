@@ -73,7 +73,7 @@ const purgePynths = async ({
 		return;
 	}
 
-	const { providerUrl, privateKey: envPrivateKey, etherscanLinkPrefix } = loadConnections({
+	const { providerUrl, privateKey: envPrivateKey, blockscanLinkPrefix } = loadConnections({
 		network,
 	});
 
@@ -199,7 +199,7 @@ const purgePynths = async ({
 					writeArg: [entries], // explicitly pass array of args so array not splat as params
 					gasLimit,
 					gasPrice,
-					etherscanLinkPrefix,
+					blockscanLinkPrefix,
 					encodeABI: network === 'mainnet',
 				});
 			}

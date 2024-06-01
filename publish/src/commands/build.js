@@ -21,7 +21,7 @@ const {
 
 const DEFAULTS = {
 	buildPath: path.join(__dirname, '..', '..', '..', BUILD_FOLDER),
-	optimizerRuns: 200,
+	optimizerRuns: 1000,
 };
 const overrides = require('../contract-overrides');
 
