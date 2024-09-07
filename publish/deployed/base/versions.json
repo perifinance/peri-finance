@@ -145,8 +145,9 @@
 			},
 			"Exchanger": {
 				"address": "0xf566040B93d6fDB2728F8D4660220D6b43A0aC5A",
-				"status": "current",
-				"keccak256": "0xd92a1bc336c63374de3fff06819426ce04575b2dffa763092a25f935837ba2ba"
+				"status": "replaced",
+				"keccak256": "0xd92a1bc336c63374de3fff06819426ce04575b2dffa763092a25f935837ba2ba",
+				"replaced_in": "v0.7.32-polygon"
 			},
 			"VirtualPynthIssuer": {
 				"address": "0x70Cf53fDaE23DC73B6738062d844D13Cd5EA1fEf",
@@ -551,6 +552,21 @@
 				"address": "0x232a0621dF8b997c0d4EEea9aeac0DFDeCA441e1",
 				"status": "current",
 				"keccak256": "0xadb3a05908fa3a1a9aa53c6130ef3efb4319f5ce6fc455544733c34c42f8aed2"
+			}
+		}
+	},
+	"v0.7.32-polygon": {
+		"tag": "v0.7.32",
+		"fulltag": "v0.7.32-polygon",
+		"release": "peri-finance",
+		"network": "base",
+		"date": "2024-06-01T13:13:14+09:00",
+		"commit": "5019a7be74c16aa59d10d0543796da0ebd03c851",
+		"contracts": {
+			"Exchanger": {
+				"address": "0x7C9e1fE07a39E466df79bbEEC8B96Fb9dA938996",
+				"status": "current",
+				"keccak256": "0x2afdeb260156e03a095396b11ac1041603665242b18fe949c844f990cba5fc70"
 			}
 		}
 	}

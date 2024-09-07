@@ -721,14 +721,51 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         }
 
         // Calculate the threshold for collateral ratio before fees can't be claimed.
-        uint ratio_threshold = tRatio.roundUpDecimal(uint(10));
-        uint exSR_threshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
+        uint ratioThreshold = ratio.roundDownDecimal(uint(12));
+        uint exSRThreshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
 
         // Not claimable if collateral ratio above threshold
-        if (ratio > ratio_threshold || exSR > exSR_threshold) {
+        if (ratioThreshold > tRatio || exSR > exSRThreshold) {
             feesClaimable = false;
         }
     }
+
+    // function FeesClaimableRates(address account, bool _checkRate)
+    //     external
+    //     view
+    //     returns (bool feesClaimable, uint ratioThreshold, uint exSRThreshold)
+
+    // {
+    //     // complete: Check if this is still needed
+    //     // External token staked amount should not over the quota limit.
+    //     /* uint accountExternalTokenQuota = issuer().externalTokenQuota(account, 0, 0, true);
+    //     if (
+    //         accountExternalTokenQuota > getExternalTokenQuota().multiplyDecimal(SafeDecimalMath.unit().add(quotaTolerance))
+    //     ) {
+    //         return (false, false);
+    //     } */
+
+    //     (uint tRatio, uint ratio, , , uint exSR, uint maxSR) = issuer().getRatios(account, _checkRate);
+
+    //     // uint ratio;
+    //     // Threshold is calculated from ratio % above the target ratio (issuanceRatio).
+    //     // 10 decimals round-up is used to ensure that the threshold is reached when the ratio is above the target ratio.
+
+    //     feesClaimable = true;
+    //     // Claimable if collateral ratio below target ratio
+    //     if (ratio <= tRatio && exSR <= maxSR) {
+    //         return (feesClaimable, 0, 0);
+    //     }
+
+    //     // Calculate the threshold for collateral ratio before fees can't be claimed.
+    //     ratioThreshold = ratio.roundDownDecimal(uint(12));
+    //     exSRThreshold = maxSR.multiplyDecimal(SafeDecimalMath.unit().add(getTargetThreshold()));
+
+    //     // Not claimable if collateral ratio above threshold
+    //     if (ratioThreshold > tRatio || exSR > exSRThreshold) {
+    //         feesClaimable = false;
+    //     }
+    // }
 
     function isFeesClaimable(address account) external view returns (bool feesClaimable) {
         return _isFeesClaimableAndAnyRatesInvalid(account, false);

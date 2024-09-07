@@ -73,7 +73,7 @@ const chainIdMapping = Object.entries({
 
 	// Hardhat fork of mainnet: https://hardhat.org/config/#hardhat-network
 	1337: {
-		network: 'polyton',
+		network: 'polygon',
 		fork: true,
 	},
 

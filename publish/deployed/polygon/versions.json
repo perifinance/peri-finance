@@ -1025,7 +1025,6 @@
 	"v0.7.24": {
 		"tag": "v0.7.24",
 		"fulltag": "v0.7.24",
-
 		"release": "peri-finance",
 		"network": "polygon",
 		"date": "2023-12-07T23:58:08+09:00",
@@ -1044,8 +1043,9 @@
 			},
 			"FeePool": {
 				"address": "0xdeeEef4729337bA53b28E60d176334F21769fc5f",
-				"status": "current",
-				"keccak256": "0xb382dae5285e0584640559fb09741f0eac6f962650863b012105d57d91cfe143"
+				"status": "replaced",
+				"keccak256": "0xb382dae5285e0584640559fb09741f0eac6f962650863b012105d57d91cfe143",
+				"replaced_in": "v0.7.32-polygon"
 			},
 			"PeriFinance": {
 				"address": "0x8f151e700772d6e8Dc7dA8B260c9e0C3eCbF4174",
@@ -1489,6 +1489,21 @@
 				"address": "0x741aAb879CBeA6beA8F167Db59317b6A9Da38940",
 				"status": "current",
 				"keccak256": "0x50abe6bdeda177e0921004e180e628a891be16967f733eb372c11f603030c0a3"
+			}
+		}
+	},
+	"v0.7.32-polygon": {
+		"tag": "v0.7.32",
+		"fulltag": "v0.7.32-polygon",
+		"release": "peri-finance",
+		"network": "polygon",
+		"date": "2024-06-01T13:13:14+09:00",
+		"commit": "5019a7be74c16aa59d10d0543796da0ebd03c851",
+		"contracts": {
+			"FeePool": {
+				"address": "0x2e177816779E72C3D28d8745093B8370D9Ebdba6",
+				"status": "current",
+				"keccak256": "0x4a7de577d7fa887b3134d2d6972f599294d3d949d02246306d0a61fcc52c7baf"
 			}
 		}
 	}
