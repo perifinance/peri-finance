@@ -16,6 +16,7 @@ const {
 	loadAndCheckRequiredSources,
 	loadConnections,
 	confirmAction,
+	sleep,
 } = require('../util');
 
 const nominate = async ({
@@ -97,6 +98,8 @@ const nominate = async ({
 		if (!deployedContract.methods.owner) {
 			continue;
 		}
+
+		sleep(100);
 
 		const currentOwner = (await deployedContract.methods.owner().call()).toLowerCase();
 		const nominatedOwner = (await deployedContract.methods.nominatedOwner().call()).toLowerCase();
