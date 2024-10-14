@@ -1,6 +1,6 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 
-// https://docs.peri.finance/contracts/source/interfaces/isupplyschedule
+// https://docs.synthetix.io/contracts/source/interfaces/isupplyschedule
 interface ISupplySchedule {
     // Views
     function mintableSupply() external view returns (uint);
@@ -10,5 +10,5 @@ interface ISupplySchedule {
     function minterReward() external view returns (uint);
 
     // Mutative functions
-    function recordMintEvent(uint supplyMinted) external returns (bool);
+    function recordMintEvent(uint supplyMinted) external returns (uint);
 }

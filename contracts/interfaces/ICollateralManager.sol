@@ -1,4 +1,4 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 
 interface ICollateralManager {
     // Manager information
@@ -63,8 +63,7 @@ interface ICollateralManager {
 
     function removePynths(bytes32[] calldata pynths, bytes32[] calldata pynthKeys) external;
 
-    function addShortablePynths(bytes32[2][] calldata requiredPynthAndInverseNamesInResolver, bytes32[] calldata pynthKeys)
-        external;
+    function addShortableSynths(bytes32[] calldata requiredSynthNamesInResolver, bytes32[] calldata synthKeys) external;
 
     function removeShortablePynths(bytes32[] calldata pynths) external;
 
@@ -80,4 +79,14 @@ interface ICollateralManager {
     function incrementShorts(bytes32 pynth, uint amount) external;
 
     function decrementShorts(bytes32 pynth, uint amount) external;
+
+    function accrueInterest(
+        uint interestIndex,
+        bytes32 currency,
+        bool isShort
+    ) external returns (uint difference, uint index);
+
+    function updateBorrowRatesCollateral(uint rate) external;
+
+    function updateShortRatesCollateral(bytes32 currency, uint rate) external;
 }

@@ -6,6 +6,7 @@ pragma experimental ABIEncoderV2;
 import "./Owned.sol";
 import "./MixinSystemSettings.sol";
 import "./interfaces/ICollateralLoan.sol";
+import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/SafeERC20.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
@@ -16,7 +17,6 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IPynth.sol";
-import "./interfaces/IERC20.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IShortingRewards.sol";
@@ -25,6 +25,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     /* ========== LIBRARIES ========== */
     using SafeMath for uint;
     using SafeDecimalMath for uint;
+    using SafeERC20 for IERC20;
 
     /* ========== CONSTANTS ========== */
 
@@ -360,6 +361,20 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 15. Emit event
         emit LoanCreated(msg.sender, id, amount, collateral, currency, issueFee);
+    }
+
+    function _close(address borrower, uint id) internal rateIsValid issuanceIsActive returns (uint amount, uint collateral) {
+        // 0. Get the loan and accrue interest.
+        Loan storage loan = _getLoanAndAccrueInterest(id, borrower);
+
+        // 1. Check loan is open and last interaction time.
+        _checkLoanAvailable(loan);
+
+        // 2. Record loan as closed.
+        (amount, collateral) = _closeLoan(borrower, borrower, loan);
+
+        // 3. Emit the event for the closed loan.
+        emit LoanClosed(borrower, id);
     }
 
     function closeInternal(address borrower, uint id) internal rateIsValid returns (uint collateral) {

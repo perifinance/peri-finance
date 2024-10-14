@@ -1,6 +1,6 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 
-// https://docs.peri.finance/contracts/source/interfaces/ifeepool
+// https://docs.synthetix.io/contracts/source/interfaces/ifeepool
 interface IFeePool {
     // Views
 
@@ -8,6 +8,10 @@ interface IFeePool {
     function FEE_ADDRESS() external view returns (address);
 
     function feesAvailable(address account) external view returns (uint, uint);
+
+    function feesBurned(address account) external view returns (uint);
+
+    function feesToBurn(address account) external view returns (uint);
 
     function feePeriodDuration() external view returns (uint);
 
@@ -17,11 +21,9 @@ interface IFeePool {
 
     function totalFeesAvailable() external view returns (uint);
 
+    function totalFeesBurned() external view returns (uint);
+
     function totalRewardsAvailable() external view returns (uint);
-
-    function everDistributedFeeRewards() external view returns (bool);
-
-    // function everAllocatedFeeRewards() external view returns (bool);
 
     // Mutative Functions
     function claimFees() external returns (bool);
@@ -30,18 +32,9 @@ interface IFeePool {
 
     function closeCurrentFeePeriod() external;
 
-    // Restricted: used internally to PeriFinance
-    function appendAccountIssuanceRecord(
-        address account,
-        uint lockedAmount,
-        uint debtEntryIndex
-    ) external;
+    function closeSecondary(uint snxBackedDebt, uint debtShareSupply) external;
 
-    function recordFeePaid(uint pUSDAmount) external;
+    function recordFeePaid(uint sUSDAmount) external;
 
     function setRewardsToDistribute(uint amount) external;
-
-    function distributeFeeRewards(uint[] calldata feeRewards) external;
-
-    function recentFeePeriods(uint index) external view returns (uint64, uint64, uint64, uint, uint, uint, uint);
 }

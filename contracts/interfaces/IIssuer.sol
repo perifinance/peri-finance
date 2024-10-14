@@ -1,19 +1,29 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 
 import "../interfaces/IPynth.sol";
 
-// https://docs.peri.finance/contracts/source/interfaces/iissuer
+// https://docs.synthetix.io/contracts/source/interfaces/iissuer
 interface IIssuer {
     // Views
-    function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
+
+    function allNetworksDebtInfo()
+        external
+        view
+        returns (
+            uint256 debt,
+            uint256 sharesSupply,
+            bool isStale
+        );
+
+    function anySynthOrSNXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 
-    function availablePynthCount() external view returns (uint);
+    function availableSynthCount() external view returns (uint);
 
-    function availablePynths(uint index) external view returns (IPynth);
+    function availableSynths(uint index) external view returns (IPynth);
 
-    function canBurnPynths(address account) external view returns (bool);
+    function canBurnSynths(address account) external view returns (bool);
 
     function collateral(address account) external view returns (uint);
 
@@ -25,6 +35,8 @@ interface IIssuer {
         returns (uint cratio, bool anyRateIsInvalid);
 
     function debtBalanceOf(address issuer, bytes32 currencyKey) external view returns (uint debtBalance);
+
+    function issuanceRatio() external view returns (uint);
 
     function lastIssueEvent(address account) external view returns (uint);
 
@@ -44,36 +56,7 @@ interface IIssuer {
     //     bool _isIssue
     // ) external view returns (uint);
 
-    // function debtsCollateral(address _account, bool _rateCheck) external
-    //     view
-    //     returns (
-    //         uint,
-    //         uint,
-    //         uint
-    //     );
-    function getRatios(address _account, bool _checkRate)
-        external
-        view
-        returns (
-            uint,
-            uint,
-            uint,
-            uint,
-            uint,
-            uint
-        );
-
-    function getTargetRatio(address account) external view returns (uint);
-
-    // function getTRatioCRatio(address _account)
-    //     external
-    //     view
-    //     returns (
-    //         uint,
-    //         uint,
-    //         uint,
-    //         uint
-    //     );
+    function minimumStakeTime() external view returns (uint);
 
     function remainingIssuablePynths(address issuer)
         external
@@ -99,7 +82,19 @@ interface IIssuer {
 
     function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
 
-    // Restricted: used internally to PeriFinance
+    function liquidationAmounts(address account, bool isSelfLiquidation)
+        external
+        view
+        returns (
+            uint totalRedeemed,
+            uint debtToRemove,
+            uint escrowToLiquidate,
+            uint initialDebtBalance
+        );
+
+    // Restricted: used internally to Synthetix
+    function addSynths(IPynth[] calldata synthsToAdd) external;
+
     function issuePynths(
         address _issuer,
         bytes32 _currencyKey,
@@ -125,4 +120,59 @@ interface IIssuer {
         uint pusdAmount,
         address liquidator
     ) external returns (uint totalRedeemed, uint amountToLiquidate);
+
+    function issueSynthsOnBehalf(
+        address issueFor,
+        address from,
+        uint amount
+    ) external;
+
+    function issueMaxSynthsOnBehalf(address issueFor, address from) external;
+
+    function burnSynthsOnBehalf(
+        address burnForAddress,
+        address from,
+        uint amount
+    ) external;
+
+    function burnSynthsToTarget(address from) external;
+
+    function burnSynthsToTargetOnBehalf(address burnForAddress, address from) external;
+
+    function burnForRedemption(
+        address deprecatedSynthProxy,
+        address account,
+        uint balance
+    ) external;
+
+    function setCurrentPeriodId(uint128 periodId) external;
+
+    function liquidateAccount(address account, bool isSelfLiquidation)
+        external
+        returns (
+            uint totalRedeemed,
+            uint debtRemoved,
+            uint escrowToLiquidate
+        );
+
+    function issueSynthsWithoutDebt(
+        bytes32 currencyKey,
+        address to,
+        uint amount
+    ) external returns (bool rateInvalid);
+
+    function burnSynthsWithoutDebt(
+        bytes32 currencyKey,
+        address to,
+        uint amount
+    ) external returns (bool rateInvalid);
+
+    function burnAndIssueSynthsWithoutDebtCache(
+        address account,
+        bytes32 currencyKey,
+        uint amountOfSynth,
+        uint amountInsUSD
+    ) external;
+
+    function modifyDebtSharesForMigration(address account, uint amount) external;
 }

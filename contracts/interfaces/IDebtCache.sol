@@ -1,11 +1,13 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
+
+import "./IIssuer.sol";
 
 interface IDebtCache {
     // Views
 
     function cachedDebt() external view returns (uint);
 
-    function cachedPynthDebt(bytes32 currencyKey) external view returns (uint);
+    function cachedSynthDebt(bytes32 currencyKey) external view returns (uint);
 
     function cacheTimestamp() external view returns (uint);
 
@@ -13,12 +15,21 @@ interface IDebtCache {
 
     function cacheStale() external view returns (bool);
 
-    function currentPynthDebts(bytes32[] calldata currencyKeys)
+    function isInitialized() external view returns (bool);
+
+    function currentSynthDebts(bytes32[] calldata currencyKeys)
         external
         view
-        returns (uint[] memory debtValues, bool anyRateIsInvalid);
+        returns (
+            uint[] memory debtValues,
+            uint futuresDebt,
+            uint excludedDebt,
+            bool anyRateIsInvalid
+        );
 
-    function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
+    function cachedSynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
+
+    function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid);
 
@@ -32,17 +43,25 @@ interface IDebtCache {
             bool isStale
         );
 
+    function excludedIssuedDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory excludedDebts);
+
     // Mutative functions
 
-    function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external;
+    function updateCachedSynthDebts(bytes32[] calldata currencyKeys) external;
 
-    function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
+    function updateCachedSynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
 
-    function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
+    function updateCachedSynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
-    function purgeCachedPynthDebt(bytes32 currencyKey) external;
+    function purgeCachedSynthDebt(bytes32 currencyKey) external;
 
     function takeDebtSnapshot() external;
+
+    function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external;
+
+    function updateCachedsUSDDebt(int amount) external;
+
+    function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external;
 }

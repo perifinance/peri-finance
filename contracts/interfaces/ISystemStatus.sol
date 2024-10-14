@@ -1,6 +1,6 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 
-// https://docs.peri.finance/contracts/source/interfaces/isystemstatus
+// https://docs.synthetix.io/contracts/source/interfaces/isystemstatus
 interface ISystemStatus {
     struct Status {
         bool canSuspend;
@@ -19,13 +19,21 @@ interface ISystemStatus {
 
     function requireSystemActive() external view;
 
+    function systemSuspended() external view returns (bool);
+
     function requireIssuanceActive() external view;
 
     function requireExchangeActive() external view;
 
+    function requireFuturesActive() external view;
+
+    function requireFuturesMarketActive(bytes32 marketKey) external view;
+
     function requireExchangeBetweenPynthsAllowed(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
 
     function requirePynthActive(bytes32 currencyKey) external view;
+
+    function pynthSuspended(bytes32 currencyKey) external view returns (bool);
 
     function requirePynthsActive(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view;
 
@@ -35,22 +43,35 @@ interface ISystemStatus {
 
     function exchangeSuspension() external view returns (bool suspended, uint248 reason);
 
-    function pynthExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function futuresSuspension() external view returns (bool suspended, uint248 reason);
 
-    function pynthSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function synthExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
 
-    function getPynthExchangeSuspensions(bytes32[] calldata pynths)
+    function synthSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+
+    function futuresMarketSuspension(bytes32 marketKey) external view returns (bool suspended, uint248 reason);
+
+    function getSynthExchangeSuspensions(bytes32[] calldata synths)
         external
         view
         returns (bool[] memory exchangeSuspensions, uint256[] memory reasons);
 
-    function getPynthSuspensions(bytes32[] calldata pynths)
+    function getSynthSuspensions(bytes32[] calldata synths)
+        external
+        view
+        returns (bool[] memory suspensions, uint256[] memory reasons);
+
+    function getFuturesMarketSuspensions(bytes32[] calldata marketKeys)
         external
         view
         returns (bool[] memory suspensions, uint256[] memory reasons);
 
     // Restricted functions
-    function suspendPynth(bytes32 currencyKey, uint256 reason) external;
+    function suspendIssuance(uint256 reason) external;
+
+    function suspendSynth(bytes32 currencyKey, uint256 reason) external;
+
+    function suspendFuturesMarket(bytes32 marketKey, uint256 reason) external;
 
     function updateAccessControl(
         bytes32 section,
