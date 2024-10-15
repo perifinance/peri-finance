@@ -39,7 +39,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     // Stores loans
     CollateralState public state;
 
-    address public manager;
+    ICollateralManager public manager;
 
     // The pynths that this contract can issue.
     bytes32[] public pynths;
@@ -83,7 +83,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     constructor(
         CollateralState _state,
         address _owner,
-        address _manager,
+        ICollateralManager _manager,
         address _resolver,
         bytes32 _collateralKey,
         uint _minCratio,
@@ -208,6 +208,13 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         return true;
     }
 
+    /* ---------- SETTERS ---------- */
+
+    function setMinCollateral(uint _minCollateral) external onlyOwner {
+        minCollateral = _minCollateral;
+        emit MinCollateralUpdated(minCollateral);
+    }
+
     /* ---------- UTILITIES ---------- */
 
     // Check the account has enough of the pynth to make the payment
@@ -227,6 +234,10 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     function issuanceRatio() internal view returns (uint ratio) {
         ratio = SafeDecimalMath.unit().divideDecimalRound(minCratio);
+    }
+
+    function _isLoanOpen(uint interestIndex) internal pure {
+        require(interestIndex != 0, "Loan is closed");
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
@@ -271,9 +282,9 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         emit InteractionDelayUpdated(interactionDelay);
     }
 
-    function setManager(address _newManager) external onlyOwner {
+    function setManager(ICollateralManager _newManager) external onlyOwner {
         manager = _newManager;
-        emit ManagerUpdated(manager);
+        emit ManagerUpdated(address(manager));
     }
 
     function setCanOpenLoans(bool _canOpenLoans) external onlyOwner {
@@ -283,7 +294,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
     /* ---------- LOAN INTERACTIONS ---------- */
 
-    function openInternal(
+    function _open(
         uint collateral,
         uint amount,
         bytes32 currency,
@@ -363,21 +374,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         emit LoanCreated(msg.sender, id, amount, collateral, currency, issueFee);
     }
 
-    function _close(address borrower, uint id) internal rateIsValid issuanceIsActive returns (uint amount, uint collateral) {
-        // 0. Get the loan and accrue interest.
-        Loan storage loan = _getLoanAndAccrueInterest(id, borrower);
-
-        // 1. Check loan is open and last interaction time.
-        _checkLoanAvailable(loan);
-
-        // 2. Record loan as closed.
-        (amount, collateral) = _closeLoan(borrower, borrower, loan);
-
-        // 3. Emit the event for the closed loan.
-        emit LoanClosed(borrower, id);
-    }
-
-    function closeInternal(address borrower, uint id) internal rateIsValid returns (uint collateral) {
+    function _close(address borrower, uint id) internal rateIsValid returns (uint amount, uint collateral) {
         // 0. Check the system is active.
         _systemStatus().requireIssuanceActive();
 
@@ -389,55 +386,19 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 3. Accrue interest on the loan.
         loan = accrueInterest(loan);
+        // 2. Record loan as closed.
+        (amount, collateral) = _closeLoan(borrower, borrower, loan);
 
-        // 4. Work out the total amount owing on the loan.
-        uint total = loan.amount.add(loan.accruedInterest);
-
-        // 5. Check they have enough balance to close the loan.
-        _checkPynthBalance(loan.account, loan.currency, total);
-
-        // 6. Burn the pynths
-        require(
-            !_exchanger().hasWaitingPeriodOrSettlementOwing(borrower, loan.currency),
-            "Waiting secs or settlement owing"
-        );
-        _pynth(pynthsByKey[loan.currency]).burn(borrower, total);
-
-        // 7. Tell the manager.
-        if (loan.short) {
-            _manager().decrementShorts(loan.currency, loan.amount);
-
-            if (shortingRewards[loan.currency] != address(0)) {
-                IShortingRewards(shortingRewards[loan.currency]).withdraw(borrower, loan.amount);
-            }
-        } else {
-            _manager().decrementLongs(loan.currency, loan.amount);
-        }
-
-        // 8. Assign the collateral to be returned.
-        collateral = loan.collateral;
-
-        // 9. Pay fees
-        _payFees(loan.accruedInterest, loan.currency);
-
-        // 10. Record loan as closed
-        loan.amount = 0;
-        loan.collateral = 0;
-        loan.accruedInterest = 0;
-        loan.interestIndex = 0;
-        loan.lastInteraction = block.timestamp;
-        state.updateLoan(loan);
-
-        // 11. Emit the event
+        // 3. Emit the event for the closed loan.
         emit LoanClosed(borrower, id);
     }
 
-    function closeByLiquidationInternal(
+    function _closeLoan(
         address borrower,
         address liquidator,
         Loan memory loan
-    ) internal returns (uint collateral) {
-        // 1. Work out the total amount owing on the loan.
+    ) internal returns (uint amount, uint collateral) {
+        // 0. Work out the total amount owing on the loan.
         uint total = loan.amount.add(loan.accruedInterest);
 
         // 2. Store this for the event.
@@ -476,11 +437,11 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         emit LoanClosedByLiquidation(borrower, loan.id, liquidator, amount, collateral);
     }
 
-    function depositInternal(
+    function _deposit(
         address account,
         uint id,
         uint amount
-    ) internal rateIsValid {
+    ) internal rateIsValid returns (uint, uint) {
         // 0. Check the system is active.
         _systemStatus().requireIssuanceActive();
 
@@ -507,9 +468,11 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 8. Emit the event
         emit CollateralDeposited(account, id, amount, loan.collateral);
+
+        return (loan.amount, loan.collateral);
     }
 
-    function withdrawInternal(uint id, uint amount) internal rateIsValid returns (uint withdraw) {
+    function _withdraw(uint id, uint amount) internal rateIsValid returns (uint, uint) {
         // 0. Check the system is active.
         _systemStatus().requireIssuanceActive();
 
@@ -535,13 +498,12 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         state.updateLoan(loan);
 
         // 8. Assign the return variable.
-        withdraw = amount;
-
+        return (loan.amount, loan.collateral);
         // 9. Emit the event.
         emit CollateralWithdrawn(msg.sender, id, amount, loan.collateral);
     }
 
-    function liquidateInternal(
+    function _liquidate(
         address borrower,
         uint id,
         uint payment
@@ -578,7 +540,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 10. If its greater than the amount owing, we need to close the loan.
         if (amountToLiquidate >= amountOwing) {
-            return closeByLiquidationInternal(borrower, msg.sender, loan);
+            (, collateralLiquidated) = _closeLoan(borrower, msg.sender, loan);
+            return collateralLiquidated;
         }
 
         // 11. Process the payment to workout interest/principal split.
@@ -602,12 +565,12 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         emit LoanPartiallyLiquidated(borrower, id, msg.sender, amountToLiquidate, collateralLiquidated);
     }
 
-    function repayInternal(
+    function _repay(
         address borrower,
         address repayer,
         uint id,
         uint payment
-    ) internal rateIsValid {
+    ) internal rateIsValid returns (uint, uint) {
         // 0. Check the system is active.
         _systemStatus().requireIssuanceActive();
 
@@ -641,9 +604,12 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 10. Emit the event.
         emit LoanRepaymentMade(borrower, repayer, id, payment, loan.amount);
+
+        // 8. Return the loan amount and collateral after repaying.
+        return (loan.amount, loan.collateral);
     }
 
-    function drawInternal(uint id, uint amount) internal rateIsValid {
+    function _draw(uint id, uint amount) internal rateIsValid returns (uint, uint) {
         // 0. Check the system is active.
         _systemStatus().requireIssuanceActive();
 
@@ -692,6 +658,8 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
 
         // 12. Emit the event.
         emit LoanDrawnDown(msg.sender, id, amount);
+
+        return (loan.amount, loan.collateral);
     }
 
     // Update the cumulative interest rate for the currency that was interacted with.
@@ -770,6 +738,14 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         }
     }
 
+    function _recordLoanAsClosed(Loan storage loan) internal {
+        loan.amount = 0;
+        loan.collateral = 0;
+        loan.accruedInterest = 0;
+        loan.interestIndex = 0;
+        loan.lastInteraction = block.timestamp;
+    }
+
     // ========== MODIFIERS ==========
 
     modifier rateIsValid() {
@@ -778,10 +754,20 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
     }
 
     function _requireRateIsValid() private view {
-        require(!_exchangeRates().rateIsInvalid(collateralKey), "Collateral rate is invalid");
+        require(!_exchangeRates().rateIsInvalid(collateralKey), "Invalid rate");
+    }
+
+    modifier issuanceIsActive() {
+        _requireIssuanceIsActive();
+        _;
+    }
+
+    function _requireIssuanceIsActive() private view {
+        _systemStatus().requireIssuanceActive();
     }
 
     // ========== EVENTS ==========
+
     // Setters
     event MinCratioRatioUpdated(uint minCratio);
     event MinCollateralUpdated(uint minCollateral);
@@ -812,4 +798,5 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         uint amountLiquidated,
         uint collateralLiquidated
     );
+    event LoanClosedByRepayment(address indexed account, uint id, uint amountRepaid, uint collateralAfter);
 }

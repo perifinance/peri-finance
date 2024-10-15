@@ -45,18 +45,18 @@ interface ISystemStatus {
 
     function futuresSuspension() external view returns (bool suspended, uint248 reason);
 
-    function synthExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function pynthExchangeSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
 
-    function synthSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
+    function pynthSuspension(bytes32 currencyKey) external view returns (bool suspended, uint248 reason);
 
     function futuresMarketSuspension(bytes32 marketKey) external view returns (bool suspended, uint248 reason);
 
-    function getSynthExchangeSuspensions(bytes32[] calldata synths)
+    function getPynthExchangeSuspensions(bytes32[] calldata pynths)
         external
         view
         returns (bool[] memory exchangeSuspensions, uint256[] memory reasons);
 
-    function getSynthSuspensions(bytes32[] calldata synths)
+    function getPynthSuspensions(bytes32[] calldata pynths)
         external
         view
         returns (bool[] memory suspensions, uint256[] memory reasons);
@@ -69,7 +69,7 @@ interface ISystemStatus {
     // Restricted functions
     function suspendIssuance(uint256 reason) external;
 
-    function suspendSynth(bytes32 currencyKey, uint256 reason) external;
+    function suspendPynth(bytes32 currencyKey, uint256 reason) external;
 
     function suspendFuturesMarket(bytes32 marketKey, uint256 reason) external;
 

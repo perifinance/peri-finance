@@ -106,6 +106,8 @@ interface IExchangeRates {
 
     function rateIsFlagged(bytes32 currencyKey) external view returns (bool);
 
+    function rateIsFrozen(bytes32 currencyKey) external view returns (bool);
+
     function rateIsInvalid(bytes32 currencyKey) external view returns (bool);
 
     function rateIsStale(bytes32 currencyKey) external view returns (bool);

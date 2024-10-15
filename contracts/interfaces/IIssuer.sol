@@ -2,7 +2,6 @@ pragma solidity >=0.4.24;
 
 import "../interfaces/IPynth.sol";
 
-// https://docs.synthetix.io/contracts/source/interfaces/iissuer
 interface IIssuer {
     // Views
 
@@ -15,15 +14,15 @@ interface IIssuer {
             bool isStale
         );
 
-    function anySynthOrSNXRateIsInvalid() external view returns (bool anyRateInvalid);
+    function anyPynthOrSNXRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 
-    function availableSynthCount() external view returns (uint);
+    function availablePynthCount() external view returns (uint);
 
-    function availableSynths(uint index) external view returns (IPynth);
+    function availablePynths(uint index) external view returns (IPynth);
 
-    function canBurnSynths(address account) external view returns (bool);
+    function canBurnPynths(address account) external view returns (bool);
 
     function collateral(address account) external view returns (uint);
 
@@ -92,8 +91,8 @@ interface IIssuer {
             uint initialDebtBalance
         );
 
-    // Restricted: used internally to Synthetix
-    function addSynths(IPynth[] calldata synthsToAdd) external;
+    // Restricted: used internally to PERIFinance
+    function addPynths(IPynth[] calldata pynthsToAdd) external;
 
     function issuePynths(
         address _issuer,
@@ -121,26 +120,26 @@ interface IIssuer {
         address liquidator
     ) external returns (uint totalRedeemed, uint amountToLiquidate);
 
-    function issueSynthsOnBehalf(
+    function issuePynthsOnBehalf(
         address issueFor,
         address from,
         uint amount
     ) external;
 
-    function issueMaxSynthsOnBehalf(address issueFor, address from) external;
+    function issueMaxPynthsOnBehalf(address issueFor, address from) external;
 
-    function burnSynthsOnBehalf(
+    function burnPynthsOnBehalf(
         address burnForAddress,
         address from,
         uint amount
     ) external;
 
-    function burnSynthsToTarget(address from) external;
+    function burnPynthsToTarget(address from) external;
 
-    function burnSynthsToTargetOnBehalf(address burnForAddress, address from) external;
+    function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
 
     function burnForRedemption(
-        address deprecatedSynthProxy,
+        address deprecatedPynthProxy,
         address account,
         uint balance
     ) external;
@@ -155,24 +154,38 @@ interface IIssuer {
             uint escrowToLiquidate
         );
 
-    function issueSynthsWithoutDebt(
+    function issuePynthsWithoutDebt(
         bytes32 currencyKey,
         address to,
         uint amount
     ) external returns (bool rateInvalid);
 
-    function burnSynthsWithoutDebt(
+    function burnPynthsWithoutDebt(
         bytes32 currencyKey,
         address to,
         uint amount
     ) external returns (bool rateInvalid);
 
-    function burnAndIssueSynthsWithoutDebtCache(
+    function burnAndIssuePynthsWithoutDebtCache(
         address account,
         bytes32 currencyKey,
-        uint amountOfSynth,
+        uint amountOfPynth,
         uint amountInsUSD
     ) external;
 
     function modifyDebtSharesForMigration(address account, uint amount) external;
+
+    function getRatios(address _account, bool _checkRate)
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint,
+            uint,
+            uint,
+            uint
+        );
+
+    function getTargetRatio(address account) external view returns (uint);
 }

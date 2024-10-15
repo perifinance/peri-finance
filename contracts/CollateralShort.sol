@@ -12,7 +12,7 @@ contract CollateralShort is Collateral {
     constructor(
         CollateralState _state,
         address _owner,
-        address _manager,
+        ICollateralManager _manager,
         address _resolver,
         bytes32 _collateralKey,
         uint _minCratio,
@@ -29,13 +29,13 @@ contract CollateralShort is Collateral {
             "Allowance not high enough"
         );
 
-        openInternal(collateral, amount, currency, true);
+        _open(collateral, amount, currency, true);
 
         IERC20(address(_pynthpUSD())).transferFrom(msg.sender, address(this), collateral);
     }
 
     function close(uint id) external {
-        uint collateral = closeInternal(msg.sender, id);
+        (uint amount, uint collateral) = _close(msg.sender, id);
 
         IERC20(address(_pynthpUSD())).transfer(msg.sender, collateral);
     }
@@ -49,12 +49,11 @@ contract CollateralShort is Collateral {
 
         IERC20(address(_pynthpUSD())).transferFrom(msg.sender, address(this), amount);
 
-        depositInternal(borrower, id, amount);
+        _deposit(borrower, id, amount);
     }
 
     function withdraw(uint id, uint amount) external {
-        uint withdrawnAmount = withdrawInternal(id, amount);
-
+        (uint withdrawnAmount, uint collateral) = _withdraw(id, amount);
         IERC20(address(_pynthpUSD())).transfer(msg.sender, withdrawnAmount);
     }
 
@@ -63,11 +62,11 @@ contract CollateralShort is Collateral {
         uint id,
         uint amount
     ) external {
-        repayInternal(borrower, msg.sender, id, amount);
+        _repay(borrower, msg.sender, id, amount);
     }
 
     function draw(uint id, uint amount) external {
-        drawInternal(id, amount);
+        _draw(id, amount);
     }
 
     function liquidate(
@@ -75,7 +74,7 @@ contract CollateralShort is Collateral {
         uint id,
         uint amount
     ) external {
-        uint collateralLiquidated = liquidateInternal(borrower, id, amount);
+        uint collateralLiquidated = _liquidate(borrower, id, amount);
 
         IERC20(address(_pynthpUSD())).transfer(msg.sender, collateralLiquidated);
     }

@@ -37,4 +37,26 @@ interface IFeePool {
     function recordFeePaid(uint sUSDAmount) external;
 
     function setRewardsToDistribute(uint amount) external;
+
+    function distributeFeeRewards(uint[] calldata feeRewards) external;
+
+    function recentFeePeriods(uint index)
+        external
+        view
+        returns (
+            uint64,
+            uint64,
+            uint64,
+            uint,
+            uint,
+            uint,
+            uint
+        );
+
+    // Restricted: used internally to PeriFinance
+    function appendAccountIssuanceRecord(
+        address account,
+        uint lockedAmount,
+        uint debtEntryIndex
+    ) external;
 }

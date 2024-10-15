@@ -227,8 +227,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) = getRoundIdsAtPeriodEnd(exchangeEntry);
 
             // given these round ids, determine what effective value they should have received
-            uint destinationAmount =
-                exchangeRates().effectiveValueAtRound(
+            (uint destinationAmount, , ) =
+                exchangeRates().effectiveValueAndRatesAtRound(
                     exchangeEntry.src,
                     exchangeEntry.amount,
                     exchangeEntry.dest,
@@ -721,7 +721,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         }
 
         // if no last exchange for this pynth, then we need to look up last 3 rates (+1 for current rate)
-        (uint[] memory rates, ) = exchangeRates().ratesAndUpdatedTimeForCurrencyLastNRounds(currencyKey, 4);
+        (uint[] memory rates, ) = exchangeRates().ratesAndUpdatedTimeForCurrencyLastNRounds(currencyKey, 4, 0);
 
         // start at index 1 to ignore current rate
         for (uint i = 1; i < rates.length; i++) {

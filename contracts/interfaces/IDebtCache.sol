@@ -7,7 +7,7 @@ interface IDebtCache {
 
     function cachedDebt() external view returns (uint);
 
-    function cachedSynthDebt(bytes32 currencyKey) external view returns (uint);
+    function cachedPynthDebt(bytes32 currencyKey) external view returns (uint);
 
     function cacheTimestamp() external view returns (uint);
 
@@ -17,17 +17,17 @@ interface IDebtCache {
 
     function isInitialized() external view returns (bool);
 
-    function currentSynthDebts(bytes32[] calldata currencyKeys)
+    function currentPynthDebts(bytes32[] calldata currencyKeys)
         external
         view
         returns (
             uint[] memory debtValues,
-            uint futuresDebt,
-            uint excludedDebt,
+            // uint futuresDebt,
+            // uint excludedDebt,
             bool anyRateIsInvalid
         );
 
-    function cachedSynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
+    function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
 
     function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
@@ -47,15 +47,15 @@ interface IDebtCache {
 
     // Mutative functions
 
-    function updateCachedSynthDebts(bytes32[] calldata currencyKeys) external;
+    function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external;
 
-    function updateCachedSynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
+    function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external;
 
-    function updateCachedSynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
+    function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
-    function purgeCachedSynthDebt(bytes32 currencyKey) external;
+    function purgeCachedPynthDebt(bytes32 currencyKey) external;
 
     function takeDebtSnapshot() external;
 

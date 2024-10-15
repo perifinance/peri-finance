@@ -35,6 +35,14 @@ interface ISystemSettings {
 
     function minimumStakeTime() external view returns (uint);
 
+    function externalTokenQuota() external view returns (uint);
+
+    function bridgeTransferGasCost() external view returns (uint);
+
+    function bridgeClaimGasCost() external view returns (uint);
+
+    function syncStaleThreshold() external view returns (uint);
+
     function debtSnapshotStaleTime() external view returns (uint);
 
     function aggregatorWarningFlags() external view returns (address);
