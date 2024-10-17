@@ -1,10 +1,10 @@
-pragma solidity >=0.4.24;
+pragma solidity 0.5.16;
 
-// https://docs.synthetix.io/contracts/source/interfaces/isystemsettings
+// https://docs.peri.finance/contracts/source/interfaces/isystemsettings
 interface ISystemSettings {
     // Views
     function waitingPeriodSecs() external view returns (uint);
-
+    
     function priceDeviationThresholdFactor() external view returns (uint);
 
     function issuanceRatio() external view returns (uint);
