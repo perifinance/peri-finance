@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./IDirectIntegrationManager.sol";
 
-// https://docs.synthetix.io/contracts/source/interfaces/iexchangerates
+// https://docs.periFinance.io/contracts/source/interfaces/iexchangerates
 interface IExchangeRates {
     // Structs
     struct RateAndUpdatedTime {

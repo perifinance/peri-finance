@@ -13,7 +13,7 @@ import "./Proxy.sol";
 import "./interfaces/IPeriFinance.sol";
 import "./interfaces/IERC20.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/supplyschedule
+// https://docs.periFinance.io/contracts/source/contracts/supplyschedule
 contract SupplySchedule is Owned, ISupplySchedule {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -29,18 +29,18 @@ contract SupplySchedule is Owned, ISupplySchedule {
 
     uint public constant INFLATION_START_DATE = 1551830400; // 2019-03-06T00:00:00+00:00
 
-    // The number of SNX rewarded to the caller of Synthetix.mint()
+    // The number of PERI rewarded to the caller of PeriFinance.mint()
     uint public minterReward = 100 * 1e18;
 
-    // The number of SNX minted per week
+    // The number of PERI minted per week
     uint public inflationAmount;
 
     uint public maxInflationAmount = 3e6 * 1e18; // max inflation amount 3,000,000
 
-    // Address of the SynthetixProxy for the onlySynthetix modifier
-    address payable public synthetixProxy;
+    // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
+    address payable public periFinanceProxy;
 
-    // Max SNX rewards for minter
+    // Max PERI rewards for minter
     uint public constant MAX_MINTER_REWARD = 200 * 1e18;
 
     // How long each inflation period is before mint can be called
@@ -60,7 +60,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== VIEWS ==========
 
     /**
-     * @return The amount of SNX mintable for the inflationary supply
+     * @return The amount of PERI mintable for the inflationary supply
      */
     function mintableSupply() external view returns (uint) {
         uint totalAmount;
@@ -100,13 +100,13 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== MUTATIVE FUNCTIONS ==========
 
     /**
-     * @notice Record the mint event from Synthetix by incrementing the inflation
+     * @notice Record the mint event from PeriFinance by incrementing the inflation
      * week counter for the number of weeks minted (probabaly always 1)
      * and store the time of the event.
-     * @param supplyMinted the amount of SNX the total supply was inflated by.
-     * @return minterReward the amount of SNX reward for caller
+     * @param supplyMinted the amount of PERI the total supply was inflated by.
+     * @return minterReward the amount of PERI reward for caller
      * */
-    function recordMintEvent(uint supplyMinted) external onlySynthetix returns (uint) {
+    function recordMintEvent(uint supplyMinted) external onlyPeriFinance returns (uint) {
         uint numberOfWeeksIssued = weeksSinceLastIssuance();
 
         // add number of weeks minted to weekCounter
@@ -123,11 +123,11 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== SETTERS ========== */
 
     /**
-     * @notice Sets the reward amount of SNX for the caller of the public
-     * function Synthetix.mint().
+     * @notice Sets the reward amount of PERI for the caller of the public
+     * function PeriFinance.mint().
      * This incentivises anyone to mint the inflationary supply and the mintr
      * Reward will be deducted from the inflationary supply and sent to the caller.
-     * @param amount the amount of SNX to reward the minter.
+     * @param amount the amount of PERI to reward the minter.
      * */
     function setMinterReward(uint amount) external onlyOwner {
         require(amount <= MAX_MINTER_REWARD, "Reward cannot exceed max minter reward");
@@ -136,14 +136,14 @@ contract SupplySchedule is Owned, ISupplySchedule {
     }
 
     /**
-     * @notice Set the SynthetixProxy should it ever change.
-     * SupplySchedule requires Synthetix address as it has the authority
+     * @notice Set the PeriFinanceProxy should it ever change.
+     * SupplySchedule requires PeriFinance address as it has the authority
      * to record mint event.
      * */
-    function setSynthetixProxy(IPeriFinance _synthetixProxy) external onlyOwner {
-        require(address(_synthetixProxy) != address(0), "Address cannot be 0");
-        synthetixProxy = address(uint160(address(_synthetixProxy)));
-        emit SynthetixProxyUpdated(synthetixProxy);
+    function setPeriFinanceProxy(IPeriFinance _periFinanceProxy) external onlyOwner {
+        require(address(_periFinanceProxy) != address(0), "Address cannot be 0");
+        periFinanceProxy = address(uint160(address(_periFinanceProxy)));
+        emit PeriFinanceProxyUpdated(periFinanceProxy);
     }
 
     /**
@@ -165,12 +165,12 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // ========== MODIFIERS ==========
 
     /**
-     * @notice Only the Synthetix contract is authorised to call this function
+     * @notice Only the PeriFinance contract is authorised to call this function
      * */
-    modifier onlySynthetix() {
+    modifier onlyPeriFinance() {
         require(
-            msg.sender == address(Proxy(address(synthetixProxy)).target()),
-            "Only the synthetix contract can perform this action"
+            msg.sender == address(Proxy(address(periFinanceProxy)).target()),
+            "Only the periFinance contract can perform this action"
         );
         _;
     }
@@ -182,7 +182,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     event SupplyMinted(uint supplyMinted, uint numberOfWeeksIssued, uint lastMintEvent, uint timestamp);
 
     /**
-     * @notice Emitted when the SNX minter reward amount is updated
+     * @notice Emitted when the PERI minter reward amount is updated
      * */
     event MinterRewardUpdated(uint newRewardAmount);
 
@@ -197,7 +197,7 @@ contract SupplySchedule is Owned, ISupplySchedule {
     event MaxInflationAmountUpdated(uint newInflationAmount);
 
     /**
-     * @notice Emitted when setSynthetixProxy is called changing the Synthetix Proxy address
+     * @notice Emitted when setPeriFinanceProxy is called changing the PeriFinance Proxy address
      * */
-    event SynthetixProxyUpdated(address newAddress);
+    event PeriFinanceProxyUpdated(address newAddress);
 }

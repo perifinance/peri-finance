@@ -8,7 +8,7 @@ import "./interfaces/ISystemSettings.sol";
 import "./SystemSettingsLib.sol";
 
 
-// https://docs.synthetix.io/contracts/source/contracts/systemsettings
+// https://docs.periFinance.io/contracts/source/contracts/systemsettings
 contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     // SystemSettingsLib is a way to split out the setters to reduce contract size
     using SystemSettingsLib for IFlexibleStorage;
@@ -81,8 +81,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-251 Differentiate Liquidation Penalties
-    // penalty taken away from target of SNX liquidation (with 18 decimals). E.g. 30% is 0.3e18
-    function snxLiquidationPenalty() external view returns (uint) {
+    // penalty taken away from target of PERI liquidation (with 18 decimals). E.g. 30% is 0.3e18
+    function periLiquidationPenalty() external view returns (uint) {
         return getSnxLiquidationPenalty();
     }
 
@@ -284,7 +284,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-229 Atomic exchanges
-    // enable/disable sending of synths cross chain
+    // enable/disable sending of pynths cross chain
     function crossChainSynthTransferEnabled(bytes32 currencyKey) external view returns (uint) {
         return getCrossChainSynthTransferEnabled(currencyKey);
     }
@@ -356,7 +356,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     function setSnxLiquidationPenalty(uint penalty) external onlyOwner {
-        flexibleStorage().setSnxLiquidationPenalty(SETTING_SNX_LIQUIDATION_PENALTY, penalty);
+        flexibleStorage().setSnxLiquidationPenalty(SETTING_PERI_LIQUIDATION_PENALTY, penalty);
         emit SnxLiquidationPenaltyUpdated(penalty);
     }
 

@@ -68,7 +68,6 @@ contract('TradingRewards', accounts => {
 
 	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
-			console.log("aaa");
 			({
 				PeriFinance: periFinance,
 				TradingRewards: rewards,

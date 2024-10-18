@@ -5,16 +5,16 @@ import "../interfaces/IPynth.sol";
 interface IIssuer {
     // Views
 
-    function allNetworksDebtInfo()
-        external
-        view
-        returns (
-            uint256 debt,
-            uint256 sharesSupply,
-            bool isStale
-        );
+    // function allNetworksDebtInfo()
+    //     external
+    //     view
+    //     returns (
+    //         uint256 debt,
+    //         uint256 sharesSupply,
+    //         bool isStale
+    //     );
 
-    function anyPynthOrSNXRateIsInvalid() external view returns (bool anyRateInvalid);
+    //function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
 
     function availableCurrencyKeys() external view returns (bytes32[] memory);
 
@@ -81,15 +81,15 @@ interface IIssuer {
 
     function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
 
-    function liquidationAmounts(address account, bool isSelfLiquidation)
-        external
-        view
-        returns (
-            uint totalRedeemed,
-            uint debtToRemove,
-            uint escrowToLiquidate,
-            uint initialDebtBalance
-        );
+    // function liquidationAmounts(address account, bool isSelfLiquidation)
+    //     external
+    //     view
+    //     returns (
+    //         uint totalRedeemed,
+    //         uint debtToRemove,
+    //         uint escrowToLiquidate,
+    //         uint initialDebtBalance
+    //     );
 
     // Restricted: used internally to PERIFinance
     function addPynths(IPynth[] calldata pynthsToAdd) external;
@@ -120,60 +120,60 @@ interface IIssuer {
         address liquidator
     ) external returns (uint totalRedeemed, uint amountToLiquidate);
 
-    function issuePynthsOnBehalf(
-        address issueFor,
-        address from,
-        uint amount
-    ) external;
+    // function issuePynthsOnBehalf(
+    //     address issueFor,
+    //     address from,
+    //     uint amount
+    // ) external;
 
-    function issueMaxPynthsOnBehalf(address issueFor, address from) external;
+    // function issueMaxPynthsOnBehalf(address issueFor, address from) external;
 
-    function burnPynthsOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external;
+    // function burnPynthsOnBehalf(
+    //     address burnForAddress,
+    //     address from,
+    //     uint amount
+    // ) external;
 
-    function burnPynthsToTarget(address from) external;
+    // function burnPynthsToTarget(address from) external;
 
-    function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
+    // function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
 
-    function burnForRedemption(
-        address deprecatedPynthProxy,
-        address account,
-        uint balance
-    ) external;
+    // function burnForRedemption(
+    //     address deprecatedPynthProxy,
+    //     address account,
+    //     uint balance
+    // ) external;
 
-    function setCurrentPeriodId(uint128 periodId) external;
+    //function setCurrentPeriodId(uint128 periodId) external;
 
-    function liquidateAccount(address account, bool isSelfLiquidation)
-        external
-        returns (
-            uint totalRedeemed,
-            uint debtRemoved,
-            uint escrowToLiquidate
-        );
+    // function liquidateAccount(address account, bool isSelfLiquidation)
+    //     external
+    //     returns (
+    //         uint totalRedeemed,
+    //         uint debtRemoved,
+    //         uint escrowToLiquidate
+    //     );
 
-    function issuePynthsWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    // function issuePynthsWithoutDebt(
+    //     bytes32 currencyKey,
+    //     address to,
+    //     uint amount
+    // ) external returns (bool rateInvalid);
 
-    function burnPynthsWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    // function burnPynthsWithoutDebt(
+    //     bytes32 currencyKey,
+    //     address to,
+    //     uint amount
+    // ) external returns (bool rateInvalid);
 
-    function burnAndIssuePynthsWithoutDebtCache(
-        address account,
-        bytes32 currencyKey,
-        uint amountOfPynth,
-        uint amountInsUSD
-    ) external;
+    // function burnAndIssuePynthsWithoutDebtCache(
+    //     address account,
+    //     bytes32 currencyKey,
+    //     uint amountOfPynth,
+    //     uint amountInsUSD
+    // ) external;
 
-    function modifyDebtSharesForMigration(address account, uint amount) external;
+    //function modifyDebtSharesForMigration(address account, uint amount) external;
 
     function getRatios(address _account, bool _checkRate)
         external

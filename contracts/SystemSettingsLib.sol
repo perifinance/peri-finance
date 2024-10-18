@@ -179,7 +179,7 @@ library SystemSettingsLib {
         bytes32 settingName,
         uint penalty
     ) external {
-        // MAX_LIQUIDATION_PENALTY is enforced on both Collateral and SNX liquidations
+        // MAX_LIQUIDATION_PENALTY is enforced on both Collateral and PERI liquidations
         require(penalty <= MAX_LIQUIDATION_PENALTY, "penalty > MAX_LIQUIDATION_PENALTY");
 
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, penalty);

@@ -1,6 +1,6 @@
 pragma solidity ^0.5.16;
 
-// https://docs.synthetix.io/contracts/source/interfaces/ICircuitBreaker
+// https://docs.periFinance.io/contracts/source/interfaces/ICircuitBreaker
 interface ICircuitBreaker {
     // Views
     function isInvalid(address oracleAddress, uint value) external view returns (bool);

@@ -1,6 +1,6 @@
 pragma solidity >=0.4.24;
 
-// https://docs.synthetix.io/contracts/source/interfaces/ifeepool
+// https://docs.periFinance.io/contracts/source/interfaces/ifeepool
 interface IFeePool {
     // Views
 
@@ -32,7 +32,7 @@ interface IFeePool {
 
     function closeCurrentFeePeriod() external;
 
-    function closeSecondary(uint snxBackedDebt, uint debtShareSupply) external;
+    function closeSecondary(uint periBackedDebt, uint debtShareSupply) external;
 
     function recordFeePaid(uint sUSDAmount) external;
 

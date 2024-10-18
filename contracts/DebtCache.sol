@@ -1,11 +1,21 @@
 pragma solidity 0.5.16;
 
+// Libraries
+import "./SafeDecimalMath.sol";
+
 // Inheritance
 import "./BaseDebtCache.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/debtcache
 contract DebtCache is BaseDebtCache {
+    using SafeDecimalMath for uint;
+
+    bytes32 public constant CONTRACT_NAME = "DebtCache";
+
     constructor(address _owner, address _resolver) public BaseDebtCache(_owner, _resolver) {}
+
+    bytes32 internal constant EXCLUDED_DEBT_KEY = "EXCLUDED_DEBT";
+    bytes32 internal constant FUTURES_DEBT_KEY = "FUTURES_DEBT";
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
@@ -86,6 +96,31 @@ contract DebtCache is BaseDebtCache {
      */
     function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchangerOrPynthpUSD {
         _updateDebtCacheValidity(currentlyInvalid);
+    }
+
+    function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external 
+    //onlyDebtIssuer 
+    {
+        // int256 newExcludedDebt = int256(_excludedIssuedDebt[currencyKey]) + delta;
+
+        // require(newExcludedDebt >= 0, "Excluded debt cannot become negative");
+
+        // _excludedIssuedDebt[currencyKey] = uint(newExcludedDebt);
+    }
+
+    function updateCachedsUSDDebt(int amount) external 
+    //onlyIssuer
+     {
+        // uint delta = SafeDecimalMath.abs(amount);
+        // if (amount > 0) {
+        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].add(delta);
+        //     _cachedDebt = _cachedDebt.add(delta);
+        // } else {
+        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].sub(delta);
+        //     _cachedDebt = _cachedDebt.sub(delta);
+        // }
+
+        // emit DebtCacheUpdated(_cachedDebt);
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
