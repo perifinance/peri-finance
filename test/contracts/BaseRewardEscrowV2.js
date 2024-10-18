@@ -35,14 +35,20 @@ contract('BaseRewardEscrowV2', async accounts => {
 			accounts: accounts.slice(10), // mock using accounts after the first few
 		}));
 
+		console.log('1');
 		// set feePool address
 		feePoolAccount = mocks['FeePool'].address;
+
+		console.log('2');
 
 		// initialise escrow contract
 		baseRewardEscrowV2 = await artifacts.require('BaseRewardEscrowV2').new(owner, resolver.address);
 
+		console.log('3');
+
 		// update the resolver for baseRewardEscrowV2
 		await baseRewardEscrowV2.rebuildCache({ from: owner });
+		console.log('4');
 	});
 
 	it('ensure only expected functions are mutative', async () => {

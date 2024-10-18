@@ -176,7 +176,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     /* ========== MUTATIVE FUNCTIONS ========== */
 
     /// zeros out a single entry
-    function setZeroAmount(address account, uint entryId) public withFallback onlyAssociatedContract {
+    function setZeroAmount(address account, uint entryId) public withFallback onlyAssociatedContract1 {
         // load storage entry
         StorageEntry storage storedEntry = _vestingSchedules[account][entryId];
         // endTime is used for cache invalidation
@@ -205,7 +205,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     )
         external
         withFallback
-        onlyAssociatedContract
+        onlyAssociatedContract1
         returns (
             uint total,
             uint endIndex,
@@ -244,7 +244,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         return (total, i, entry.endTime);
     }
 
-    function updateEscrowAccountBalance(address account, int delta) external withFallback onlyAssociatedContract {
+    function updateEscrowAccountBalance(address account, int delta) external withFallback onlyAssociatedContract1 {
         // add / subtract to previous balance
         int total = int(totalEscrowedAccountBalance(account)).add(delta);
         require(total >= 0, "updateEscrowAccountBalance: balance must be positive");
@@ -257,7 +257,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         updateTotalEscrowedBalance(delta);
     }
 
-    function updateVestedAccountBalance(address account, int delta) external withFallback onlyAssociatedContract {
+    function updateVestedAccountBalance(address account, int delta) external withFallback onlyAssociatedContract1 {
         // add / subtract to previous balance
         int total = int(totalVestedAccountBalance(account)).add(delta);
         require(total >= 0, "updateVestedAccountBalance: balance must be positive");
@@ -269,7 +269,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
 
     /// this method is unused in contracts (because updateEscrowAccountBalance uses it), but it is here
     /// for completeness, in case a fix to one of these values is needed (but not the other)
-    function updateTotalEscrowedBalance(int delta) public withFallback onlyAssociatedContract {
+    function updateTotalEscrowedBalance(int delta) public withFallback onlyAssociatedContract1 {
         int total = int(totalEscrowedBalance()).add(delta);
         require(total >= 0, "updateTotalEscrowedBalance: balance must be positive");
         _totalEscrowedBalance = uint(total);
@@ -279,7 +279,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     function addVestingEntry(address account, VestingEntries.VestingEntry calldata entry)
         external
         withFallback
-        onlyAssociatedContract
+        onlyAssociatedContract1
         returns (uint)
     {
         // zero time is used as read-miss flag in this contract

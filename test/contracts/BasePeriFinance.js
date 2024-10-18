@@ -576,7 +576,6 @@ contract('BasePeriFinance', async accounts => {
 			const totalSupply = await basePeriFinance.totalSupply();
 			const balance = await basePeriFinance.balanceOf(owner);
 			assert.bnEqual(totalSupply, balance);
-
 			// Issue max pynths.
 			await basePeriFinance.issueMaxPynths({ from: owner });
 

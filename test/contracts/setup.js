@@ -453,6 +453,7 @@ const setupContract = async ({
 			toUnit(50000000),
 			0,
 			0,
+			0,
 		],
 		StakingState: [owner, owner],
 		ExternalTokenStakeManager: [
@@ -644,6 +645,17 @@ const setupContract = async ({
 				)
 			);
 		},
+		// async Issuer() {
+		// 	await Promise.all([
+		// 		cache['SystemStatus'].updateAccessControl(
+		// 			toBytes32('Issuance'),
+		// 			instance.address,
+		// 			true,
+		// 			false,
+		// 			{ from: owner }
+		// 		),
+		// 	]);
+		// },
 		async PeriFinance() {
 			// first give all PERI supply to the owner (using the hack that the deployerAccount was setup as the associatedContract via
 			// the constructor args)
@@ -816,17 +828,6 @@ const setupContract = async ({
 						}) || []
 					)
 			);
-		},
-		async Issuer() {
-			await Promise.all([
-				cache['SystemStatus'].updateAccessControl(
-					toBytes32('Issuance'),
-					instance.address,
-					true,
-					false,
-					{ from: owner }
-				),
-			]);
 		},
 		async DelegateApprovals() {
 			await cache['EternalStorageDelegateApprovals'].setAssociatedContract(instance.address, {
@@ -1262,6 +1263,12 @@ const setupContract = async ({
 
 	// now run any postDeploy tasks (connecting contracts together)
 	if (!skipPostDeploy && postDeployTasks[contract]) {
+		// if(contract == "Issuer") {
+		// 	console.log(contract);
+		// 	console.log(postDeployTasks[contract].toString());
+		// 	throw new Error("issuer")
+		// }
+
 		await postDeployTasks[contract]();
 	}
 
@@ -1347,7 +1354,7 @@ const setupAllContracts = async ({
 		{
 			contract: 'RewardEscrowV2Storage',
 			deps: ['RewardEscrowV2Frozen'],
-			mocks: ['PeriFinance', 'FeePool', 'RewardEscrow', 'PeriFinanceBridgeToOptimism', 'Issuer'],
+			mocks: ['PeriFinance', 'PeriFinance', 'FeePool', 'RewardEscrow', 'PeriFinanceBridgeToOptimism', 'Issuer'],
 		},
 		{
 			contract: 'BaseRewardEscrowV2',
@@ -1684,7 +1691,11 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'CollateralManager',
-			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 'DebtCache'],
+			deps: ['AddressResolver', 'SystemStatus', 'Issuer', 'ExchangeRates', 
+				'DebtCache',
+				'CollateralUtil',
+				'CollateralManagerState'
+			],
 		},
 		{
 			contract: 'StakingState',

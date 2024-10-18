@@ -63,7 +63,7 @@ interface ICollateralManager {
 
     function removePynths(bytes32[] calldata pynths, bytes32[] calldata pynthKeys) external;
 
-    function addShortableSynths(bytes32[] calldata requiredSynthNamesInResolver, bytes32[] calldata synthKeys) external;
+    function addShortablePynths(bytes32[2][] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys) external;
 
     function removeShortablePynths(bytes32[] calldata pynths) external;
 
@@ -73,7 +73,7 @@ interface ICollateralManager {
     function updateShortRates(bytes32 currency, uint rate) external;
 
     function incrementLongs(bytes32 pynth, uint amount) external;
-
+    
     function decrementLongs(bytes32 pynth, uint amount) external;
 
     function incrementShorts(bytes32 pynth, uint amount) external;

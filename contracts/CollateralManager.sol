@@ -43,7 +43,10 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all collateral contracts.
     AddressSetLib.AddressSet internal _collaterals;
 
-    // The set of all pynths issuable by the various collateral contracts
+    // The set of all available currency keys.
+    Bytes32SetLib.Bytes32Set internal _currencyKeys;
+
+    // The set of all synths issuable by the various collateral contracts
     Bytes32SetLib.Bytes32Set internal _pynths;
 
     // Map from currency key to pynth contract name.
@@ -59,6 +62,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // The maximum amount of debt in pUSD that can be issued by non peri collateral.
     uint public maxDebt;
+
+    // The rate that determines the skew limit maximum.
+    uint public maxSkewRate;
 
     // The base interest rate applied to all borrows.
     uint public baseBorrowRate;
@@ -79,6 +85,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         address _owner,
         address _resolver,
         uint _maxDebt,
+        uint _maxSkewRate,
         uint _baseBorrowRate,
         uint _baseShortRate
     ) public Owned(_owner) Pausable() MixinResolver(_resolver) {
@@ -86,6 +93,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         state = _state;
 
         setMaxDebt(_maxDebt);
+        setMaxSkewRate(_maxSkewRate);
         setBaseBorrowRate(_baseBorrowRate);
         setBaseShortRate(_baseShortRate);
 
@@ -201,7 +209,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         }
     }
 
-    function getBorrowRate() external view returns (uint borrowRate, bool anyRateIsInvalid) {
+    function getBorrowRate() public view returns (uint borrowRate, bool anyRateIsInvalid) {
         // get the peri backed debt.
         (uint periDebt, ) = _issuer().totalIssuedPynths(pUSD, true);
 
@@ -223,7 +231,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         anyRateIsInvalid = ratesInvalid;
     }
 
-    function getShortRate(bytes32 pynth) external view returns (uint shortRate, bool rateIsInvalid) {
+    function getShortRate(bytes32 pynth) public view returns (uint shortRate, bool rateIsInvalid) {
         bytes32 pynthKey = _pynth(pynth).currencyKey();
 
         rateIsInvalid = _exchangeRates().rateIsInvalid(pynthKey);
@@ -250,7 +258,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function getRatesAndTime(uint index)
-        external
+        public
         view
         returns (
             uint entryRate,
@@ -263,7 +271,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     }
 
     function getShortRatesAndTime(bytes32 currency, uint index)
-        external
+        public
         view
         returns (
             uint entryRate,
@@ -293,12 +301,18 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     function setUtilisationMultiplier(uint _utilisationMultiplier) public onlyOwner {
         require(_utilisationMultiplier > 0, "Must be greater than 0");
         utilisationMultiplier = _utilisationMultiplier;
+        emit UtilisationMultiplierUpdated(utilisationMultiplier);
     }
 
     function setMaxDebt(uint _maxDebt) public onlyOwner {
         require(_maxDebt > 0, "Must be greater than 0");
         maxDebt = _maxDebt;
         emit MaxDebtUpdated(maxDebt);
+    }
+
+    function setMaxSkewRate(uint _maxSkewRate) public onlyOwner {
+        maxSkewRate = _maxSkewRate;
+        emit MaxSkewRateUpdated(maxSkewRate);
     }
 
     function setBaseBorrowRate(uint _baseBorrowRate) public onlyOwner {
@@ -346,6 +360,8 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
                 emit PynthAdded(pynthName);
             }
         }
+
+        rebuildCache();
     }
 
     function arePynthsAndCurrenciesSet(bytes32[] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys)
@@ -461,11 +477,19 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     /* ---------- STATE MUTATIONS ---------- */
 
-    function updateBorrowRates(uint rate) external onlyCollateral {
+    function updateBorrowRates(uint rate) public onlyCollateral {
         state.updateBorrowRates(rate);
     }
 
-    function updateShortRates(bytes32 currency, uint rate) external onlyCollateral {
+    function updateBorrowRatesCollateral(uint rate) external onlyCollateral {
+        state.updateBorrowRates(rate);
+    }
+
+    function updateShortRatesCollateral(bytes32 currency, uint rate) external onlyCollateral {
+        state.updateShortRates(currency, rate);
+    }
+
+    function updateShortRates(bytes32 currency, uint rate) public onlyCollateral {
         state.updateShortRates(currency, rate);
     }
 
@@ -485,6 +509,35 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         state.decrementShorts(pynth, amount);
     }
 
+    function accrueInterest(
+        uint interestIndex,
+        bytes32 currency,
+        bool isShort
+    ) external onlyCollateral returns (uint difference, uint index) {
+        // 1. Get the rates we need.
+        (uint entryRate, uint lastRate, uint lastUpdated, uint newIndex) =
+            isShort ? getShortRatesAndTime(currency, interestIndex) : getRatesAndTime(interestIndex);
+
+        // 2. Get the instantaneous rate.
+        (uint rate, bool invalid) = isShort ? getShortRate(currency) : getBorrowRate();
+
+        require(!invalid, "Invalid rate");
+
+        // 3. Get the time since we last updated the rate.
+        // TODO: consider this in the context of l2 time.
+        uint timeDelta = block.timestamp.sub(lastUpdated).mul(1e18);
+
+        // 4. Get the latest cumulative rate. F_n+1 = F_n + F_last
+        uint latestCumulative = lastRate.add(rate.multiplyDecimal(timeDelta));
+
+        // 5. Return the rate differential and the new interest index.
+        difference = latestCumulative.sub(entryRate);
+        index = newIndex;
+
+        // 5. Update rates with the lastest cumulative rate. This also updates the time.
+        isShort ? updateShortRates(currency, latestCumulative) : updateBorrowRates(latestCumulative);
+    }
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyCollateral {
@@ -496,9 +549,11 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // ========== EVENTS ==========
     event MaxDebtUpdated(uint maxDebt);
+    event MaxSkewRateUpdated(uint maxSkewRate);
     event LiquidationPenaltyUpdated(uint liquidationPenalty);
     event BaseBorrowRateUpdated(uint baseBorrowRate);
     event BaseShortRateUpdated(uint baseShortRate);
+    event UtilisationMultiplierUpdated(uint utilisationMultiplier);
 
     event CollateralAdded(address collateral);
     event CollateralRemoved(address collateral);
