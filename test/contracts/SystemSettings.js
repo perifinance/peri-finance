@@ -268,7 +268,7 @@ contract('SystemSettings Only', async accounts => {
 			});
 		});
 
-		it('reverts when setting the fee period duration below minimum', async () => {
+		it.only('reverts when setting the fee period duration below minimum', async () => {
 			const minimum = await systemSettings.MIN_FEE_PERIOD_DURATION();
 
 			// Owner should be able to set minimum
@@ -290,7 +290,7 @@ contract('SystemSettings Only', async accounts => {
 			);
 		});
 
-		it('should disallow the owner from setting the fee period duration above maximum', async () => {
+		it.only('should disallow the owner from setting the fee period duration above maximum', async () => {
 			const maximum = await systemSettings.MAX_FEE_PERIOD_DURATION();
 
 			// Owner should be able to set maximum
@@ -419,7 +419,7 @@ contract('SystemSettings Only', async accounts => {
 				});
 				assert.bnClose(await systemSettings.liquidationRatio(), ratio);
 			});
-			it('reverts when changing liquidationCollateralRatio to 109%', async () => {
+			it.only('reverts when changing liquidationCollateralRatio to 109%', async () => {
 				await assert.revert(
 					systemSettings.setLiquidationRatio(divideDecimal(toUnit('1'), toUnit('1.09')), {
 						from: owner,

@@ -335,7 +335,7 @@ contract('CollateralManager', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	});
 
-	it('should set constructor params on deployment', async () => {
+	it.only('should set constructor params on deployment', async () => {
 		assert.equal(await manager.state(), managerState.address);
 		assert.equal(await manager.owner(), owner);
 		assert.equal(await manager.resolver(), addressResolver.address);

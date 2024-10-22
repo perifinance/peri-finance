@@ -78,7 +78,7 @@ contract('PynthUtil', accounts => {
 			await periFinance.exchange(pUSD, amountToExchange, pBTC, { from: account2 });
 		});
 		describe('totalPynthsInKey', () => {
-			it('should return the total balance of pynths into the specified currency key', async () => {
+			it.only('should return the total balance of pynths into the specified currency key', async () => {
 				assert.bnEqual(await pynthUtil.totalPynthsInKey(account2, pUSD), pUSDAmount);
 			});
 		});

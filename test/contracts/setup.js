@@ -411,7 +411,7 @@ const setupContract = async ({
 		FeePoolState: [owner, tryGetAddressOf('FeePool')],
 		EtherWrapper: [owner, tryGetAddressOf('AddressResolver'), tryGetAddressOf('WETH')],
 		NativeEtherWrapper: [owner, tryGetAddressOf('AddressResolver')],
-		// WrapperFactory: [owner, tryGetAddressOf('AddressResolver')],
+		WrapperFactory: [owner, tryGetAddressOf('AddressResolver')],
 		FeePool: [tryGetAddressOf('ProxyFeePool'), owner, tryGetAddressOf('AddressResolver')],
 		Pynth: [
 			tryGetAddressOf('ProxyERC20Pynth'),
@@ -1361,6 +1361,11 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'RewardEscrowV2Storage'],
 			mocks: ['PeriFinance', 'FeePool', 'Issuer'],
 		},
+		// {
+		// 	contract: 'BaseRewardEscrowV2',
+		// 	deps: ['AddressResolver'],
+		// 	mocks: ['PeriFinance', 'FeePool'],
+		// },
 		{
 			contract: 'RewardEscrowV2',
 			deps: ['AddressResolver', 'SystemStatus', 'RewardEscrowV2Storage'],
@@ -1449,11 +1454,11 @@ const setupAllContracts = async ({
 			mocks: [],
 			deps: ['AddressResolver', 'EtherWrapper', 'WETH', 'SynthsETH'],
 		},
-		// {
-		// 	contract: 'WrapperFactory',
-		// 	mocks: [],
-		// 	deps: ['AddressResolver', 'SystemSettings'],
-		// },
+		{
+			contract: 'WrapperFactory',
+			mocks: [],
+			deps: ['AddressResolver', 'SystemSettings'],
+		},
 		// {
 		// 	contract: 'SynthRedeemer',
 		// 	mocks: ['Issuer'],
@@ -1483,7 +1488,7 @@ const setupAllContracts = async ({
 				'FlexibleStorage',
 				'CrossChainManager',
 				'ExternalTokenStakeManager',
-				//'WrapperFactory',
+				'WrapperFactory',
 				'EtherWrapper',
 				//'SynthRedeemer',
 				//'DynamicSynthRedeemer',
@@ -1666,7 +1671,7 @@ const setupAllContracts = async ({
 				'CrossChainManager',
 				'EtherWrapper',
 				'FuturesMarketManager',
-				//'WrapperFactory',
+				'WrapperFactory',
 				//'PeriFinanceBridgeToOptimism',
 				'ExchangeRates',
 			],

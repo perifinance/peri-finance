@@ -78,7 +78,7 @@ contract StakingState is Owned, State {
         bytes32 _currencyKey,
         address _account,
         uint _amount
-    ) external onlyAssociatedContract2 {
+    ) external onlyAssociatedContract {
         _requireTokenRegistered(_currencyKey);
         require(targetTokens[_currencyKey].activated, "Target token is not activated");
 
@@ -96,7 +96,7 @@ contract StakingState is Owned, State {
         bytes32 _currencyKey,
         address _account,
         uint _amount
-    ) external onlyAssociatedContract2 {
+    ) external onlyAssociatedContract {
         require(stakedAmountOf[_currencyKey][_account] >= _amount, "Account doesn't have enough staked amount");
         require(totalStakedAmount[_currencyKey] >= _amount, "Not enough staked amount to withdraw");
 
@@ -114,7 +114,7 @@ contract StakingState is Owned, State {
         bytes32 _currencyKey,
         address _account,
         uint _amount
-    ) external onlyAssociatedContract2 returns (bool) {
+    ) external onlyAssociatedContract returns (bool) {
         uint decimalDiff = targetTokens[_currencyKey].decimals < 18 ? 18 - targetTokens[_currencyKey].decimals : 0;
 
         return tokenInstance(_currencyKey).transfer(_account, _amount.div(10**decimalDiff));

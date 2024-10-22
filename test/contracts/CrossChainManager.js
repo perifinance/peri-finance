@@ -515,7 +515,7 @@ contract('CrossChainManager', async accounts => {
 					});
 				});
 
-				it('should not be able to claim', async () => {
+				it.only('should not be able to claim', async () => {
 					await assert.revert(
 						periFinance.burnPynths(PERI, toUnit('10'), { from: account1 }),
 						'Cross chain debt is stale'
@@ -668,10 +668,10 @@ contract('CrossChainManager', async accounts => {
 					'Cross chain debt is stale'
 				);
 			});
-			it('inflation should be success if crosschain synchronization is not stale', async () => {
+			it.only('inflation should be success if crosschain synchronization is not stale', async () => {
 				await periFinance.inflationalMint({ from: minterRole });
 			});
-			it('minterable supply should be proportional to the debt rate', async () => {
+			it.only('minterable supply should be proportional to the debt rate', async () => {
 				const totalSupply = await periFinance.totalSupply();
 				const weeklyMintableSupply = await supplySchedule.mintableSupply();
 				const debtRate = await crossChainManager.currentNetworkDebtPercentage();

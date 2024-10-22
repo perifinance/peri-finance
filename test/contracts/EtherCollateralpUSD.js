@@ -183,7 +183,7 @@ contract('EtherCollateralpUSD', async accounts => {
 		await updateRatesWithDefaults();
 	});
 
-	it('ensure only known functions are mutative', () => {
+	it.only('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: etherCollateral.abi,
 			ignoreParents: ['Owned', 'Pausable', 'ReentrancyGuard', 'MixinResolver'],

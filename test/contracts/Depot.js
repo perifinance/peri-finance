@@ -36,8 +36,11 @@ contract('Depot', async accounts => {
 		// Approve Transaction
 		await pynth.approve(depot.address, pynthsToDeposit, { from: depositor });
 
+		let b = await pynth.balanceOf(depositor);
+		console.log('pynth balance of depositor', b.toString());
+
 		// Deposit pUSD in Depot
-		// console.log('Deposit pUSD in Depot amount', pynthsToDeposit, depositor);
+		console.log('Deposit pUSD in Depot amount', pynthsToDeposit.toString(), depositor);
 		const txn = await depot.depositPynths(pynthsToDeposit, {
 			from: depositor,
 		});
@@ -204,7 +207,6 @@ contract('Depot', async accounts => {
 		const depositor = address1;
 
 		beforeEach(async () => {
-			// Set up the depositor with an amount of pynths to deposit.
 			await pynth.transfer(depositor, pynthsBalance, {
 				from: owner,
 			});
@@ -238,6 +240,7 @@ contract('Depot', async accounts => {
 			assert.equal(initialSmallDepositsBalance, 0);
 
 			await approveAndDepositPynths(pynthsToDeposit, depositor);
+			
 
 			// Now balance should be equal to the amount we just sent
 			const smallDepositsBalance = await depot.smallDeposits(depositor);

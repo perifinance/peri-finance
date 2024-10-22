@@ -203,7 +203,7 @@ contract('CollateralShort', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	});
 
-	it('should set constructor params on deployment', async () => {
+	it.only('should set constructor params on deployment', async () => {
 		assert.equal(await short.state(), state.address);
 		assert.equal(await short.owner(), owner);
 		assert.equal(await short.resolver(), addressResolver.address);

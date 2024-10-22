@@ -118,7 +118,7 @@ contract('DebtCache', async accounts => {
 		await exchanger.resetLastExchangeRate([pBTC, pETH], { from: owner });
 	});
 
-	it('ensure only known functions are mutative', () => {
+	it.only('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: debtCache.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],

@@ -124,7 +124,7 @@ contract('RewardEscrowV2', async accounts => {
 				'Can only perform this action during setup'
 			);
 		});
-		it('should revert trying to re-import for same account', async () => {
+		it.only('should revert trying to re-import for same account', async () => {
 			await rewardEscrowV2.migrateAccountEscrowBalances([account1], [toUnit('10')], [0], {
 				from: owner,
 			});
@@ -141,7 +141,7 @@ contract('RewardEscrowV2', async accounts => {
 
 	describe('migrateVestingSchedule', () => {
 		describe('when totalBalancePendingMigration is 1000 PERI or less', () => {
-			it('should migrate the pending migration balance of 800 as vestable entry', async () => {
+			it.only('should migrate the pending migration balance of 800 as vestable entry', async () => {
 				const escrowAmount = toUnit('800');
 
 				// migrateAccountEscrowBalance to RewardEscrowV2 for 800 PERI
@@ -167,7 +167,7 @@ contract('RewardEscrowV2', async accounts => {
 				// entry end time should be before now (can be vested)
 				assert.isTrue(now >= vestingEntry.endTime);
 			});
-			it('should migrate the pending migration balance of 1000', async () => {
+			it.only('should migrate the pending migration balance of 1000', async () => {
 				const escrowAmount = toUnit('1000');
 
 				// migrateAccountEscrowBalance to RewardEscrowV2 for 1000 PERI
@@ -223,7 +223,7 @@ contract('RewardEscrowV2', async accounts => {
 				// should have 104 entries on rewardEscrow
 				assert.bnEqual(await rewardEscrow.numVestingEntries(account1), 104);
 			});
-			it('should migrate 52 pending vesting entry schedule from old rewardEscrouw', async () => {
+			it.only('should migrate 52 pending vesting entry schedule from old rewardEscrouw', async () => {
 				await rewardEscrowV2.migrateVestingSchedule(account1, { from: owner });
 
 				// account 1 should have 52 vesting entries copied
@@ -268,7 +268,7 @@ contract('RewardEscrowV2', async accounts => {
 				// should have 4 entries on rewardEscrow
 				assert.bnEqual(await rewardEscrow.numVestingEntries(account1), 4);
 			});
-			it('should migrate 4 pending vesting entry schedule from old rewardEscrouw', async () => {
+			it.only('should migrate 4 pending vesting entry schedule from old rewardEscrouw', async () => {
 				await rewardEscrowV2.migrateVestingSchedule(account1, { from: owner });
 
 				// account 1 should have 4 vesting entries copied

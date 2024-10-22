@@ -26,7 +26,7 @@ contract TokenState is Owned, State {
         address tokenOwner,
         address spender,
         uint value
-    ) external onlyAssociatedContract1 {
+    ) external onlyAssociatedContract {
         allowance[tokenOwner][spender] = value;
     }
 
@@ -36,7 +36,7 @@ contract TokenState is Owned, State {
      * @param account The account whose value to set.
      * @param value The new balance of the given account.
      */
-    function setBalanceOf(address account, uint value) external onlyAssociatedContract1 {
+    function setBalanceOf(address account, uint value) external onlyAssociatedContract {
         balanceOf[account] = value;
     }
 }

@@ -2,11 +2,12 @@ pragma solidity 0.5.16;
 
 import "../ExternStateToken.sol";
 import "../interfaces/ISystemStatus.sol";
+import "../interfaces/IAddressResolver.sol";
 
 // Mock pynth that also adheres to system status
 
 contract MockPynth is ExternStateToken {
-    ISystemStatus private systemStatus;
+    IAddressResolver private addressResolver;
     bytes32 public currencyKey;
 
     constructor(
@@ -21,9 +22,8 @@ contract MockPynth is ExternStateToken {
         currencyKey = _currencyKey;
     }
 
-    // Allow SystemStatus to be passed in directly
-    function setSystemStatus(ISystemStatus _status) external {
-        systemStatus = _status;
+    function setAddressResolver(IAddressResolver _resolver) external {
+        addressResolver = _resolver;
     }
 
     // Used for PurgeablePynth to test removal
@@ -32,9 +32,9 @@ contract MockPynth is ExternStateToken {
     }
 
     function transfer(address to, uint value) external optionalProxy returns (bool) {
-        systemStatus.requirePynthActive(currencyKey);
-
-        return _transferByProxy(messageSender, to, value);
+        ISystemStatus(addressResolver.getAddress("SystemStatus")).requirePynthActive(currencyKey);
+        bool b = _transferByProxy(messageSender, to, value); 
+        return b;
     }
 
     function transferFrom(
@@ -42,8 +42,7 @@ contract MockPynth is ExternStateToken {
         address to,
         uint value
     ) external optionalProxy returns (bool) {
-        systemStatus.requirePynthActive(currencyKey);
-
+        ISystemStatus(addressResolver.getAddress("SystemStatus")).requirePynthActive(currencyKey);
         return _transferFromByProxy(messageSender, from, to, value);
     }
 

@@ -46,7 +46,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @param account The address to set the data for.
      * @param initialDebtOwnership The initial debt ownership for this address.
      */
-    function setCurrentIssuanceData(address account, uint initialDebtOwnership) external onlyAssociatedContract2 {
+    function setCurrentIssuanceData(address account, uint initialDebtOwnership) external onlyAssociatedContract {
         issuanceData[account].initialDebtOwnership = initialDebtOwnership;
         issuanceData[account].debtEntryIndex = debtLedger.length;
     }
@@ -56,7 +56,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @dev Only the associated contract may call this.
      * @param account The address to clear the data for.
      */
-    function clearIssuanceData(address account) external onlyAssociatedContract2 {
+    function clearIssuanceData(address account) external onlyAssociatedContract {
         delete issuanceData[account];
     }
 
@@ -64,7 +64,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @notice Increment the total issuer count
      * @dev Only the associated contract may call this.
      */
-    function incrementTotalIssuerCount() external onlyAssociatedContract2 {
+    function incrementTotalIssuerCount() external onlyAssociatedContract {
         totalIssuerCount = totalIssuerCount.add(1);
     }
 
@@ -72,7 +72,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @notice Decrement the total issuer count
      * @dev Only the associated contract may call this.
      */
-    function decrementTotalIssuerCount() external onlyAssociatedContract2 {
+    function decrementTotalIssuerCount() external onlyAssociatedContract {
         totalIssuerCount = totalIssuerCount.sub(1);
     }
 
@@ -81,7 +81,7 @@ contract PeriFinanceState is Owned, State, IPeriFinanceState {
      * @dev Only the associated contract may call this.
      * @param value The new value to be added to the debt ledger.
      */
-    function appendDebtLedgerValue(uint value) external onlyAssociatedContract2 {
+    function appendDebtLedgerValue(uint value) external onlyAssociatedContract {
         debtLedger.push(value);
     }
 
