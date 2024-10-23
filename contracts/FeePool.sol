@@ -98,7 +98,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_SYNTHETIX_BRIDGE_TO_OPTIMISM = "SynthetixBridgeToOptimism";
     bytes32 private constant CONTRACT_SYNTHETIX_BRIDGE_TO_BASE = "SynthetixBridgeToBase";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS = "ext:AggregatorIssuedSynths";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS = "ext:AggregatorIssuedPynths";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     /* ========== ETERNAL STORAGE CONSTANTS ========== */
@@ -134,7 +134,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[11] = CONTRACT_CROSSCHAINMANAGER;
         newAddresses[12] = CONTRACT_WRAPPER_FACTORY;
         newAddresses[13] = CONTRACT_ETHER_WRAPPER;
-        newAddresses[14] = CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS;
+        newAddresses[14] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
         newAddresses[15] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
         newAddresses[16] = CONTRACT_FUTURES_MARKET_MANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
@@ -218,7 +218,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function allNetworksSnxBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
         (, int256 rawData, , uint timestamp, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS)).latestRoundData();
+            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS)).latestRoundData();
 
         debt = uint(rawData);
         updatedAt = timestamp;
@@ -226,7 +226,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function allNetworksDebtSharesSupply() public view returns (uint256 sharesSupply, uint256 updatedAt) {
         (, int256 rawIssuedSynths, , uint issuedSynthsUpdatedAt, ) =
-            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS)).latestRoundData();
+            AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS)).latestRoundData();
 
         (, int256 rawRatio, , uint ratioUpdatedAt, ) =
             AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();

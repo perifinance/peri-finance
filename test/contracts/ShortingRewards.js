@@ -164,6 +164,7 @@ contract('ShortingRewards', accounts => {
 			maxDebt,
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}

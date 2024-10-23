@@ -27,7 +27,8 @@ library SystemSettingsLib {
 
     uint public constant MAX_LIQUIDATION_RATIO = 1e18; // 100% issuance ratio
 
-    uint public constant MAX_LIQUIDATION_PENALTY = 1e18 / 4; // Max 25% liquidation penalty / bonus
+    uint public constant MAX_LIQUIDATION_PENALTY = 1e18 / 2; // Max 50% liquidation penalty / bonus
+    //uint public constant MAX_LIQUIDATION_PENALTY = 1e18 / 4; // Max 25% liquidation penalty / bonus
 
     uint public constant RATIO_FROM_TARGET_BUFFER = 2e18; // 200% - mininimum buffer between issuance ratio and liquidation ratio
 
@@ -150,11 +151,11 @@ library SystemSettingsLib {
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,
         uint _liquidationRatio,
-        uint getSnxLiquidationPenalty,
+        uint getPeriLiquidationPenalty,
         uint getIssuanceRatio
     ) external {
         require(
-            _liquidationRatio <= MAX_LIQUIDATION_RATIO.divideDecimal(SafeDecimalMath.unit().add(getSnxLiquidationPenalty)),
+            _liquidationRatio <= MAX_LIQUIDATION_RATIO.divideDecimal(SafeDecimalMath.unit().add(getPeriLiquidationPenalty)),
             "liquidationRatio > MAX_LIQUIDATION_RATIO / (1 + penalty)"
         );
 
@@ -174,7 +175,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, duration);
     }
 
-    function setSnxLiquidationPenalty(
+    function setPeriLiquidationPenalty(
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,
         uint penalty

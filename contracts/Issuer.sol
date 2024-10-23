@@ -68,7 +68,7 @@ interface IIssuerInternalDebtCache {
             bool isStale
         );
 
-    // function updateCachedsUSDDebt(int amount) external;
+    // function updateCachedpUSDDebt(int amount) external;
 }
 
 // https://docs.peri.finance/contracts/source/contracts/issuer
@@ -120,7 +120,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM = "DebtMigratorOnEthereum";
     bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_OPTIMISM = "DebtMigratorOnOptimism";
 
-    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS = "ext:AggregatorIssuedSynths";
+    bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS = "ext:AggregatorIssuedPynths";
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_DEBT_RATIO = "ext:AggregatorDebtRatio";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
@@ -605,7 +605,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //     )
     // {
     //     (, int256 rawIssuedSynths, , uint issuedSynthsUpdatedAt, ) =
-    //         _latestRoundData(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_SYNTHS));
+    //         _latestRoundData(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS));
 
     //     (uint rawRatio, uint ratioUpdatedAt) = _rawDebtRatioAndUpdatedAt();
 
@@ -1354,7 +1354,7 @@ function issuePynths(
 
     //     // Account for the issued debt in the cache
     //     (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
-    //     debtCache().updateCachedsUSDDebt(SafeCast.toInt256(amount.multiplyDecimal(rate)));
+    //     debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amount.multiplyDecimal(rate)));
 
     //     // returned so that the caller can decide what to do if the rate is invalid
     //     return rateInvalid;
@@ -1375,7 +1375,7 @@ function issuePynths(
 
     //     // Account for the burnt debt in the cache. If rate is invalid, the user won't be able to exchange
     //     (uint rate, bool rateInvalid) = _rateAndInvalid(currencyKey);
-    //     //debtCache().updateCachedsUSDDebt(-SafeCast.toInt256(amount.multiplyDecimal(rate)));
+    //     //debtCache().updateCachedpUSDDebt(-SafeCast.toInt256(amount.multiplyDecimal(rate)));
 
     //     // returned so that the caller can decide what to do if the rate is invalid
     //     return rateInvalid;
@@ -1710,7 +1710,7 @@ function issuePynths(
     //     } else {
     //         // In the case of forced Liquidation
     //         // Get the forced liquidation penalty and sum of the flag and liquidate rewards.
-    //         penalty = getSnxLiquidationPenalty();
+    //         penalty = getPeriLiquidationPenalty();
     //         uint rewardsSum = getLiquidateReward().add(getFlagReward());
 
     //         // Get the total USD value of their PERI collateral (including escrow and rewards minus the flag and liquidate rewards)

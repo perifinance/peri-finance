@@ -330,7 +330,7 @@ const setupContract = async ({
 		PeriFinanceBridgeToBase: [owner, tryGetAddressOf('AddressResolver')],
 		TradingRewards: [owner, owner, tryGetAddressOf('AddressResolver')],
 		AddressResolver: [owner],
-		OneNetAggregatorIssuedSynths: [tryGetAddressOf('AddressResolver')],
+		OneNetAggregatorIssuedPynths: [tryGetAddressOf('AddressResolver')],
 		OneNetAggregatorDebtRatio: [tryGetAddressOf('AddressResolver')],
 		SystemStatus: [owner],
 		FlexibleStorage: [tryGetAddressOf('AddressResolver')],
@@ -1300,15 +1300,14 @@ const setupAllContracts = async ({
 		{ contract: 'BlacklistManager' },
 		{ contract: 'BridgeState' },
 		{ contract: 'BridgeState', forContract: 'Pynth' },
-
-		// {
-		// 	contract: 'OneNetAggregatorIssuedSynths',
-		// 	resolverAlias: 'ext:AggregatorIssuedSynths',
-		// },
-		// {
-		// 	contract: 'OneNetAggregatorDebtRatio',
-		// 	resolverAlias: 'ext:AggregatorDebtRatio',
-		// },
+		{
+			contract: 'OneNetAggregatorIssuedPynths',
+			resolverAlias: 'ext:AggregatorIssuedPynths',
+		},
+		{
+			contract: 'OneNetAggregatorDebtRatio',
+			resolverAlias: 'ext:AggregatorDebtRatio',
+		},
 		{ contract: 'SystemStatus' },
 		{ contract: 'ExchangeState' },
 		{ contract: 'ExternalTokenStakeManager' },
@@ -1494,7 +1493,7 @@ const setupAllContracts = async ({
 				//'DynamicSynthRedeemer',
 			],
 			deps: [
-				'OneNetAggregatorIssuedSynths',
+				'OneNetAggregatorIssuedPynths',
 				'OneNetAggregatorDebtRatio',
 				'AddressResolver',
 				'SystemStatus',
@@ -1676,6 +1675,8 @@ const setupAllContracts = async ({
 				'ExchangeRates',
 			],
 			deps: [
+				'OneNetAggregatorIssuedPynths',
+				'OneNetAggregatorDebtRatio',
 				'FeePoolState',
 				'SystemStatus',
 				'PeriFinanceDebtShare',
@@ -2035,12 +2036,15 @@ const setupAllContracts = async ({
 
 		// deploy the contract
 		// HACK: if MintablePeriFinance is deployed then rename it
-		let contractRegistered = contract;
-		if (contract === 'MintablePeriFinance' || contract === 'BasePeriFinance') {
-			contractRegistered = 'PeriFinance';
-		} else if (contract === 'BridgeState' && forContract === 'Pynth') {
-			forContractName = 'pUSD';
-		}
+		// let contractRegistered = contract;
+		// if (contract === 'MintablePeriFinance' || contract === 'BasePeriFinance') {
+		// 	contractRegistered = 'PeriFinance';
+		// } else if (contract === 'BridgeState' && forContract === 'Pynth') {
+		// 	forContractName = 'pUSD';
+		// }
+
+		const contractRegistered = resolverAlias || contract;
+
 
 		returnObj[contractRegistered + forContractName] = await setupContract({
 			accounts,
@@ -2219,9 +2223,7 @@ const setupAllContracts = async ({
 			// 	from: owner,
 			// }),
 			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, { from: owner }),
-			// returnObj['SystemSettings'].setSnxLiquidationPenalty(PERI_LIQUIDATION_PENALTY, {
-			// 	from: owner,
-			// }),
+			returnObj['SystemSettings'].setPeriLiquidationPenalty(PERI_LIQUIDATION_PENALTY, {from: owner}),
 			// returnObj['SystemSettings'].setSelfLiquidationPenalty(SELF_LIQUIDATION_PENALTY, {
 			// 	from: owner,
 			// }),

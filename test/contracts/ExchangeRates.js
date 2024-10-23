@@ -90,7 +90,7 @@ contract('Exchange Rates', async accounts => {
 		timeSent = await currentTime();
 	});
 
-	it.only('only expected functions should be mutative', () => {
+	it('only expected functions should be mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: instance.abi,
 			ignoreParents: ['Owned', 'MixinResolver'],
@@ -104,6 +104,7 @@ contract('Exchange Rates', async accounts => {
 				'setOracle',
 				'updateRates',
 				'setCurrencyToExternalAggregator',
+				'rateWithSafetyChecks'
 			],
 		});
 	});
@@ -213,7 +214,7 @@ contract('Exchange Rates', async accounts => {
 			);
 		});
 
-		it.only('should be able to handle lots of currencies on creation', async () => {
+		it('should be able to handle lots of currencies on creation', async () => {
 			const creationTime = await currentTime();
 			const numberOfCurrencies = 100;
 			const { currencyKeys, rates } = createRandomKeysAndRates(numberOfCurrencies);
@@ -1072,7 +1073,7 @@ contract('Exchange Rates', async accounts => {
 		it('rateIsFrozen for a regular pynth returns false', async () => {
 			assert.equal(false, await instance.rateIsFrozen(pEUR));
 		});
-		it.only('and list of invertedKeys is empty', async () => {
+		it('and list of invertedKeys is empty', async () => {
 			await assert.invalidOpcode(instance.invertedKeys(0));
 		});
 		describe('when attempting to add inverse pynths', () => {
@@ -1388,7 +1389,7 @@ contract('Exchange Rates', async accounts => {
 					lowerLimit: toUnit(75),
 				});
 			});
-			it.only('and the list of invertedKeys lists them both', async () => {
+			it('and the list of invertedKeys lists them both', async () => {
 				assert.equal('iBTC', bytesToString(await instance.invertedKeys(0)));
 				assert.equal('iETH', bytesToString(await instance.invertedKeys(1)));
 				await assert.invalidOpcode(instance.invertedKeys(2));
@@ -1689,7 +1690,7 @@ contract('Exchange Rates', async accounts => {
 							});
 						});
 
-						it.only('and the list of invertedKeys still lists them both', async () => {
+						it('and the list of invertedKeys still lists them both', async () => {
 							assert.equal('iBTC', bytesToString(await instance.invertedKeys(0)));
 							assert.equal('iETH', bytesToString(await instance.invertedKeys(1)));
 							await assert.invalidOpcode(instance.invertedKeys(2));
@@ -1822,7 +1823,7 @@ contract('Exchange Rates', async accounts => {
 							lowerLimit: 0,
 						});
 					});
-					it.only('and the list of invertedKeys contains only iETH', async () => {
+					it('and the list of invertedKeys contains only iETH', async () => {
 						assert.equal('iETH', bytesToString(await instance.invertedKeys(0)));
 						await assert.invalidOpcode(instance.invertedKeys(1));
 					});
@@ -1868,14 +1869,14 @@ contract('Exchange Rates', async accounts => {
 			assert.equal(await instance.getCurrentRoundId(pUSD), '1');
 		});
 
-		it.only('ratesAndUpdatedTimeForCurrencyLastNRounds() shows first entry for pUSD', async () => {
+		it('ratesAndUpdatedTimeForCurrencyLastNRounds() shows first entry for pUSD', async () => {
 			const timeOfpUSDRateSetOnInit = await instance.lastRateUpdateTimes(pUSD);
 			assert.deepEqual(await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(pUSD, '3'), [
 				[toUnit('1'), '0', '0'],
 				[timeOfpUSDRateSetOnInit, '0', '0'],
 			]);
 		});
-		it.only('ratesAndUpdatedTimeForCurrencyLastNRounds() returns 0s for other currency keys', async () => {
+		it('ratesAndUpdatedTimeForCurrencyLastNRounds() returns 0s for other currency keys', async () => {
 			const fiveZeros = new Array(5).fill('0');
 			assert.deepEqual(await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(pAUD, '5'), [
 				fiveZeros,

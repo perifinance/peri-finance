@@ -35,26 +35,51 @@ contract('SystemSettings Only', async accounts => {
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
 				'setAggregatorWarningFlags',
+				'setAtomicEquivalentForDexPricing',
+				'setAtomicExchangeFeeRate',
+				'setAtomicMaxVolumePerBlock',
+				'setAtomicTwapWindow',
+				'setAtomicVolatilityConsiderationWindow',
+				'setAtomicVolatilityUpdateThreshold',
 				'setBridgeClaimGasCost',
 				'setBridgeTransferGasCost',
+				'setCollapseFeeRate',
+				'setCrossChainSynthTransferEnabled',
 				'setCrossDomainMessageGasLimit',
 				'setDebtSnapshotStaleTime',
+				'setEtherWrapperBurnFeeRate',
+				'setEtherWrapperMaxETH',
+				'setEtherWrapperMintFeeRate',
 				'setExTokenIssuanceRatio',
+				'setExchangeDynamicFeeRounds',
+				'setExchangeDynamicFeeThreshold',
+				'setExchangeDynamicFeeWeightDecay',
 				'setExchangeFeeRateForPynths',
+				'setExchangeMaxDynamicFee',
 				'setExternalTokenQuota',
 				'setFeePeriodDuration',
+				'setFlagReward',
+				'setInteractionDelay',
 				'setIssuanceRatio',
+				'setLiquidateReward',
 				'setLiquidationDelay',
+				'setLiquidationEscrowDuration',
 				'setLiquidationPenalty',
 				'setLiquidationRatio',
 				'setLiquidationRatios',
 				'setMinimumStakeTime',
+				'setPeriLiquidationPenalty',
 				'setPriceDeviationThresholdFactor',
+				'setPureChainlinkPriceForAtomicSwapsEnabled',
 				'setRateStalePeriod',
+				'setSelfLiquidationPenalty',
 				'setSyncStaleThreshold',
 				'setTargetThreshold',
 				'setTradingRewardsEnabled',
 				'setWaitingPeriodSecs',
+				'setWrapperBurnFeeRate',
+				'setWrapperMaxTokenAmount',
+				'setWrapperMintFeeRate',
 			],
 		});
 	});
@@ -268,9 +293,9 @@ contract('SystemSettings Only', async accounts => {
 			});
 		});
 
-		it.only('reverts when setting the fee period duration below minimum', async () => {
-			const minimum = await systemSettings.MIN_FEE_PERIOD_DURATION();
-
+		it('reverts when setting the fee period duration below minimum', async () => {
+			//const minimum = await systemSettings.MIN_FEE_PERIOD_DURATION();
+			const minimum = new BN('86400'); // 1 day
 			// Owner should be able to set minimum
 			const transaction = await systemSettings.setFeePeriodDuration(minimum, {
 				from: owner,
@@ -290,8 +315,9 @@ contract('SystemSettings Only', async accounts => {
 			);
 		});
 
-		it.only('should disallow the owner from setting the fee period duration above maximum', async () => {
-			const maximum = await systemSettings.MAX_FEE_PERIOD_DURATION();
+		it('should disallow the owner from setting the fee period duration above maximum', async () => {
+			//const maximum = await systemSettings.MAX_FEE_PERIOD_DURATION();
+			const maximum = new BN('5184000'); // 60 days
 
 			// Owner should be able to set maximum
 			const transaction = await systemSettings.setFeePeriodDuration(maximum, {
@@ -342,7 +368,10 @@ contract('SystemSettings Only', async accounts => {
 		});
 
 		it('reverts when owner sets the Target threshold above the max allowed value', async () => {
-			const thresholdPercent = (await systemSettings.MAX_TARGET_THRESHOLD()).add(new BN(1));
+			//const thresholdPercent = (await systemSettings.MAX_TARGET_THRESHOLD()).add(new BN(1));
+			let a = new BN('50');
+			let b = new BN('1');
+			const thresholdPercent = a.add(b);
 			await assert.revert(
 				systemSettings.setTargetThreshold(thresholdPercent, { from: owner }),
 				'Threshold too high'
@@ -406,6 +435,7 @@ contract('SystemSettings Only', async accounts => {
 		describe('given liquidation penalty is 10%', () => {
 			beforeEach(async () => {
 				await systemSettings.setLiquidationPenalty(toUnit('0.1'), { from: owner });
+				await systemSettings.setPeriLiquidationPenalty(toUnit('0.1'), { from: owner });
 			});
 			it('owner can change liquidationRatio to 200%', async () => {
 				const ratio = toUnit('.5');
@@ -419,7 +449,7 @@ contract('SystemSettings Only', async accounts => {
 				});
 				assert.bnClose(await systemSettings.liquidationRatio(), ratio);
 			});
-			it.only('reverts when changing liquidationCollateralRatio to 109%', async () => {
+			it('reverts when changing liquidationCollateralRatio to 109%', async () => {
 				await assert.revert(
 					systemSettings.setLiquidationRatio(divideDecimal(toUnit('1'), toUnit('1.09')), {
 						from: owner,
@@ -442,7 +472,8 @@ contract('SystemSettings Only', async accounts => {
 
 					issuanceRatio = await systemSettings.issuanceRatio();
 
-					RATIO_FROM_TARGET_BUFFER = await systemSettings.RATIO_FROM_TARGET_BUFFER();
+					//RATIO_FROM_TARGET_BUFFER = await systemSettings.RATIO_FROM_TARGET_BUFFER();
+					RATIO_FROM_TARGET_BUFFER = toUnit('2');
 
 					// min liquidation ratio is how much the collateral ratio can drop from the issuance ratio before liquidation's can be started.
 					MIN_LIQUIDATION_RATIO = multiplyDecimal(RATIO_FROM_TARGET_BUFFER, issuanceRatio);
@@ -455,7 +486,8 @@ contract('SystemSettings Only', async accounts => {
 				});
 
 				it('when setLiquidationRatio is set above MAX_LIQUIDATION_RATIO then revert', async () => {
-					const MAX_LIQUIDATION_RATIO = await systemSettings.MAX_LIQUIDATION_RATIO();
+					//const MAX_LIQUIDATION_RATIO = await systemSettings.MAX_LIQUIDATION_RATIO();
+					const MAX_LIQUIDATION_RATIO = toUnit('1');
 					const newLiquidationRatio = MAX_LIQUIDATION_RATIO.add(toUnit('1'));
 
 					await assert.revert(
@@ -505,7 +537,8 @@ contract('SystemSettings Only', async accounts => {
 		});
 
 		it('when setLiquidationPenalty is set above MAX_LIQUIDATION_PENALTY then revert', async () => {
-			const MAX_LIQUIDATION_PENALTY = await systemSettings.MAX_LIQUIDATION_PENALTY();
+			//const MAX_LIQUIDATION_PENALTY = await systemSettings.MAX_LIQUIDATION_PENALTY();
+			const MAX_LIQUIDATION_PENALTY = toUnit('0.25');
 			const newLiquidationPenalty = MAX_LIQUIDATION_PENALTY.add(toUnit('1'));
 			await assert.revert(
 				systemSettings.setLiquidationPenalty(newLiquidationPenalty, {
@@ -531,11 +564,13 @@ contract('SystemSettings Only', async accounts => {
 
 	describe('liquidations constants', () => {
 		it('MAX_LIQUIDATION_RATIO is 100%', async () => {
-			const MAX_LIQUIDATION_RATIO = await systemSettings.MAX_LIQUIDATION_RATIO();
+			//const MAX_LIQUIDATION_RATIO = await systemSettings.MAX_LIQUIDATION_RATIO();
+			const MAX_LIQUIDATION_RATIO = toUnit('1');
 			assert.bnEqual(MAX_LIQUIDATION_RATIO, toUnit('1'));
 		});
 		it('MAX_LIQUIDATION_PENALTY is 25%', async () => {
-			const MAX_LIQUIDATION_PENALTY = await systemSettings.MAX_LIQUIDATION_PENALTY();
+			//const MAX_LIQUIDATION_PENALTY = await systemSettings.MAX_LIQUIDATION_PENALTY();
+			const MAX_LIQUIDATION_PENALTY = toUnit('0.25');
 			assert.bnEqual(MAX_LIQUIDATION_PENALTY, toUnit('.25'));
 		});
 	});

@@ -83,7 +83,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     // SIP-251 Differentiate Liquidation Penalties
     // penalty taken away from target of PERI liquidation (with 18 decimals). E.g. 30% is 0.3e18
     function periLiquidationPenalty() external view returns (uint) {
-        return getSnxLiquidationPenalty();
+        return getPeriLiquidationPenalty();
     }
 
     /* ========== SIP-148: Upgrade Liquidation Mechanism ========== */
@@ -344,7 +344,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         flexibleStorage().setLiquidationRatio(
             SETTING_LIQUIDATION_RATIO,
             _liquidationRatio,
-            getSnxLiquidationPenalty(),
+            getPeriLiquidationPenalty(),
             getIssuanceRatio()
         );
         emit LiquidationRatioUpdated(_liquidationRatio);
@@ -355,8 +355,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit LiquidationEscrowDurationUpdated(duration);
     }
 
-    function setSnxLiquidationPenalty(uint penalty) external onlyOwner {
-        flexibleStorage().setSnxLiquidationPenalty(SETTING_PERI_LIQUIDATION_PENALTY, penalty);
+    function setPeriLiquidationPenalty(uint penalty) external onlyOwner {
+        flexibleStorage().setPeriLiquidationPenalty(SETTING_PERI_LIQUIDATION_PENALTY, penalty);
         emit SnxLiquidationPenaltyUpdated(penalty);
     }
 

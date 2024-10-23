@@ -129,6 +129,7 @@ contract('CollateralEth', async accounts => {
 			maxDebt,
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}
@@ -223,7 +224,7 @@ contract('CollateralEth', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	});
 
-	it.only('should set constructor params on deployment', async () => {
+	it('should set constructor params on deployment', async () => {
 		// assert.equal(await ceth.proxy(), account1);
 		assert.equal(await ceth.state(), state.address);
 		assert.equal(await ceth.owner(), owner);

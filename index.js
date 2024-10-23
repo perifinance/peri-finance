@@ -223,6 +223,7 @@ const defaults = {
 		I: w3utils.toWei('0.833333333333333333'),
 	},
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
+	PERI_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for PERI Liquidations)
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
 	EXCHANGE_FEE_RATES: {
 		forex: w3utils.toWei('0.003'),

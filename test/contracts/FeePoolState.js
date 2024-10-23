@@ -358,7 +358,7 @@ contract('FeePoolState', async accounts => {
 	});
 
 	// TODO checks PeriFinanceState debt entry is same as stored FeePoolState Entry
-	// it.only('should allow an issuer to issue max pynths and track debt issuance in feePool', async function() {
+	// it('should allow an issuer to issue max pynths and track debt issuance in feePool', async function() {
 	// 	// Send a price update to guarantee we're not depending on values from outside this test.
 	// 	const oracle = await exchangeRates.oracle();
 	// 	const timestamp = await currentTime();

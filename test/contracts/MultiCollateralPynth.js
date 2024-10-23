@@ -122,6 +122,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			toUnit(10000),
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}

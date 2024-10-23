@@ -98,7 +98,7 @@ contract('Pynth', async accounts => {
 		await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 	});
 
-	it.only('should set constructor params on deployment', async () => {
+	it('should set constructor params on deployment', async () => {
 		const pynth = await Pynth.new(
 			account1,
 			account2,

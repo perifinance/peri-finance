@@ -15,7 +15,7 @@ contract('Collateral', async accounts => {
 		Collateral = artifacts.require(`Collateral`);
 	});
 
-	it.only('should ensure only expected functions are mutative', async () => {
+	it('should ensure only expected functions are mutative', async () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: Collateral.abi,
 			ignoreParents: ['Owned', 'Pausable', 'MixinResolver', 'Proxy'],

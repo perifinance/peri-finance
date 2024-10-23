@@ -161,6 +161,7 @@ contract('CollateralErc20', async accounts => {
 			maxDebt,
 			0,
 			0,
+			0,
 			{
 				from: deployerAccount,
 			}
@@ -265,7 +266,7 @@ contract('CollateralErc20', async accounts => {
 		await debtCache.takeDebtSnapshot();
 	});
 
-	it.only('should set constructor params on deployment', async () => {
+	it('should set constructor params on deployment', async () => {
 		assert.equal(await cerc20.state(), state.address);
 		assert.equal(await cerc20.owner(), owner);
 		assert.equal(await cerc20.resolver(), addressResolver.address);

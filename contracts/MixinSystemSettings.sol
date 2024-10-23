@@ -152,7 +152,7 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_PENALTY);
     }
 
-    function getSnxLiquidationPenalty() internal view returns (uint) {
+    function getPeriLiquidationPenalty() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_PERI_LIQUIDATION_PENALTY);
     }
 
