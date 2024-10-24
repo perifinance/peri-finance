@@ -467,7 +467,7 @@ contract('EtherCollateralpUSD', async accounts => {
 						beforeEach(async () => {
 							await setStatus({ owner, systemStatus, section, suspend: false });
 						});
-						it('then calling openLoan() succeeds', async () => {
+						it.only('then calling openLoan() succeeds', async () => {
 							await etherCollateral.openLoan(testLoanAmount, {
 								value: toUnit('1'),
 								from: address1,
@@ -490,7 +490,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					beforeEach(async () => {
 						await updateRatesWithDefaults();
 					});
-					it('then calling openLoan() succeeds', async () => {
+					it.only('then calling openLoan() succeeds', async () => {
 						await etherCollateral.openLoan(testLoanAmount, { value: toUnit('1'), from: address1 });
 					});
 				});
@@ -514,7 +514,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					'Loan Amount exceeds the supply cap.'
 				);
 			});
-			it('attempting to issue more near the supply cap', async () => {
+			it.only('attempting to issue more near the supply cap', async () => {
 				// reduce the supply cap to 100 pUSD
 				await etherCollateral.setIssueLimit(toUnit('200'), { from: owner });
 
@@ -580,7 +580,7 @@ contract('EtherCollateralpUSD', async accounts => {
 				loan1ID = await getLoanID(openLoanTransaction);
 			});
 
-			it('increase the totalLoansCreated', async () => {
+			it.only('increase the totalLoansCreated', async () => {
 				assert.equal(await etherCollateral.totalLoansCreated(), 1);
 			});
 			it('increase the totalOpenLoanCount', async () => {
@@ -1196,7 +1196,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					await fastForwardAndUpdateRates(WEEK * 2);
 				});
 
-				it('when loanID does not exist, then it reverts', async () => {
+				it.only('when loanID does not exist, then it reverts', async () => {
 					await assert.revert(etherCollateral.closeLoan(9999, { from: address1 }));
 				});
 
@@ -1311,7 +1311,7 @@ contract('EtherCollateralpUSD', async accounts => {
 					expectedFeepUSD = await calculateLoanInterestFees(address1, openLoanID);
 				});
 
-				it('does not change the totalLoansCreated', async () => {
+				it.only('does not change the totalLoansCreated', async () => {
 					assert.equal(await etherCollateral.totalLoansCreated(), 1);
 				});
 
@@ -1405,7 +1405,7 @@ contract('EtherCollateralpUSD', async accounts => {
 			await fastForwardAndUpdateRates(DAY * 94);
 			await etherCollateral.setLoanLiquidationOpen(true, { from: owner });
 		});
-		it('when bob attempts to liquidate alices loan and he has no pUSD then it reverts', async () => {
+		it.only('when bob attempts to liquidate alices loan and he has no pUSD then it reverts', async () => {
 			await assert.revert(
 				etherCollateral.liquidateUnclosedLoan(alice, loanID, { from: bob }),
 				'You do not have the required Pynth balance to close this loan.'
@@ -1591,7 +1591,7 @@ contract('EtherCollateralpUSD', async accounts => {
 			loanID = await getLoanID(openLoanTransaction);
 		});
 
-		it('should revert if the sender does not send any eth', async () => {
+		it.only('should revert if the sender does not send any eth', async () => {
 			await assert.revert(
 				etherCollateral.depositCollateral(alice, loanID, { from: alice, value: 0 }),
 				'Deposit amount must be greater than 0'
@@ -1653,7 +1653,7 @@ contract('EtherCollateralpUSD', async accounts => {
 			loanID = await getLoanID(openLoanTransaction);
 		});
 
-		it('should revert if the sender passes 0 as the withdraw amount', async () => {
+		it.only('should revert if the sender passes 0 as the withdraw amount', async () => {
 			await assert.revert(
 				etherCollateral.withdrawCollateral(loanID, 0, { from: alice }),
 				'Amount to withdraw must be greater than 0'
@@ -1719,7 +1719,7 @@ contract('EtherCollateralpUSD', async accounts => {
 			loanID = await getLoanID(openLoanTransaction);
 		});
 
-		it('should revert if the sender does not have enough pUSD to repay the amount requested', async () => {
+		it.only('should revert if the sender does not have enough pUSD to repay the amount requested', async () => {
 			pUSDPynth.transfer(bob, await pUSDPynth.balanceOf(alice), { from: alice });
 			await assert.revert(
 				etherCollateral.repayLoan(alice, loanID, openLoanAmount, { from: alice }),

@@ -2,6 +2,8 @@ pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 interface IPeriFinanceBridgeToOptimism {
+    function closeFeePeriod(uint snxBackedDebt, uint debtSharesSupply) external;
+
     // Invoked by the relayer on L1
     function completeWithdrawal(address account, uint amount) external;
 
@@ -14,3 +16,14 @@ interface IPeriFinanceBridgeToOptimism {
 
     function depositAndMigrateEscrow(uint256 depositAmount, uint256[][] calldata entryIDs) external;
 }
+
+
+  
+//     function migrateEscrow(uint256[][] calldata entryIDs) external;
+
+//     function depositTo(address to, uint amount) external;
+
+//     function depositReward(uint amount) external;
+
+//     function depositAndMigrateEscrow(uint256 depositAmount, uint256[][] calldata entryIDs) external;
+// }

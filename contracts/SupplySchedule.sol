@@ -27,7 +27,13 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Counter for number of weeks since the start of supply inflation
     uint public weekCounter;
 
+    uint public constant INITIAL_WEEKLY_SUPPLY = 76924719527063029689120;
     uint public constant INFLATION_START_DATE = 1551830400; // 2019-03-06T00:00:00+00:00
+    uint public constant MINT_BUFFER = 1 days;
+    uint8 public constant SUPPLY_DECAY_START = 52;
+    uint8 public constant SUPPLY_DECAY_END = 172; // 40 months
+
+
 
     // The number of PERI rewarded to the caller of PeriFinance.mint()
     uint public minterReward = 100 * 1e18;
@@ -40,13 +46,17 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
 
+  
     // Max PERI rewards for minter
     uint public constant MAX_MINTER_REWARD = 200 * 1e18;
 
     // How long each inflation period is before mint can be called
     uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
-    uint public constant MINT_BUFFER = 1 days;
+    uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
+
+    // Percentage growth of terminal supply per annum
+    uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 50000000000000000; // 5% pa
 
     constructor(
         address _owner,
@@ -58,8 +68,32 @@ contract SupplySchedule is Owned, ISupplySchedule {
     }
 
     // ========== VIEWS ==========
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
 
     /**
+     * @return The amount of PERI mintable for the inflationary supply
+     */
+       /**
      * @return The amount of PERI mintable for the inflationary supply
      */
     function mintableSupply() external view returns (uint) {
@@ -69,11 +103,53 @@ contract SupplySchedule is Owned, ISupplySchedule {
             return totalAmount;
         }
 
-        // Get total amount to mint * by number of weeks to mint
-        totalAmount = inflationAmount.mul(weeksSinceLastIssuance());
+        uint remainingWeeksToMint = weeksSinceLastIssuance();
+
+        uint currentWeek = weekCounter;
+
+        // Calculate total mintable supply from exponential decay function
+        // The decay function stops after week 172
+        while (remainingWeeksToMint > 0) {
+            currentWeek++;
+
+            if (currentWeek < SUPPLY_DECAY_START) {
+                // If current week is before supply decay we add initial supply to mintableSupply
+                totalAmount = totalAmount.add(INITIAL_WEEKLY_SUPPLY);
+                remainingWeeksToMint--;
+            } else if (currentWeek <= SUPPLY_DECAY_END) {
+                // if current week before supply decay ends we add the new supply for the week
+                // diff between current week and (supply decay start week - 1)
+                uint decayCount = currentWeek.sub(SUPPLY_DECAY_START - 1);
+
+                totalAmount = totalAmount.add(tokenDecaySupplyForWeek(decayCount));
+                remainingWeeksToMint--;
+            } else {
+                // Terminal supply is calculated on the total supply of PeriFinance including any new supply
+                // We can compound the remaining week's supply at the fixed terminal rate
+                uint totalSupply = IERC20(periFinanceProxy).totalSupply();
+                uint currentTotalSupply = totalSupply.add(totalAmount);
+
+                totalAmount = totalAmount.add(terminalInflationSupply(currentTotalSupply, remainingWeeksToMint));
+                remainingWeeksToMint = 0;
+            }
+        }
 
         return totalAmount;
     }
+
+    /**
+     * @return A unit amount of decaying inflationary supply from the INITIAL_WEEKLY_SUPPLY
+     * @dev New token supply reduces by the decay rate each week calculated as supply = INITIAL_WEEKLY_SUPPLY * ()
+     */
+    function tokenDecaySupplyForWeek(uint counter) public pure returns (uint) {
+        // Apply exponential decay function to number of weeks since
+        // start of inflation smoothing to calculate diminishing supply for the week.
+        uint effectiveDecay = (SafeDecimalMath.unit().sub(DECAY_RATE)).powDecimal(counter);
+        uint supplyForWeek = INITIAL_WEEKLY_SUPPLY.multiplyDecimal(effectiveDecay);
+
+        return supplyForWeek;
+    }
+
 
     /**
      * @dev Take timeDiff in seconds (Dividend) and MINT_PERIOD_DURATION as (Divisor)
@@ -156,6 +232,19 @@ contract SupplySchedule is Owned, ISupplySchedule {
         inflationAmount = amount;
         emit InflationAmountUpdated(inflationAmount);
     }
+
+        /**
+     * @return A unit amount of terminal inflation supply
+     * @dev Weekly compound rate based on number of weeks
+     */
+    function terminalInflationSupply(uint totalSupply, uint numOfWeeks) public pure returns (uint) {
+        // rate = (1 + weekly rate) ^ num of weeks
+        uint effectiveCompoundRate = SafeDecimalMath.unit().add(TERMINAL_SUPPLY_RATE_ANNUAL.div(52)).powDecimal(numOfWeeks);
+
+        // return Supply * (effectiveRate - 1) for extra supply to issue based on number of weeks
+        return totalSupply.multiplyDecimal(effectiveCompoundRate.sub(SafeDecimalMath.unit()));
+    }
+
 
     function setMaxInflationAmount(uint amount) external onlyOwner {
         maxInflationAmount = amount;

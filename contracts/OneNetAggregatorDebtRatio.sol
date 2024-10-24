@@ -19,7 +19,7 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
         )
     {
         (uint totalIssuedPynths, ) =
-            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedPynths("sUSD", true);
+            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedPynths("pUSD", true);
         uint totalDebtShares =
             ISynthetixDebtShare(resolver.requireAndGetAddress("SynthetixDebtShare", "aggregate debt info")).totalSupply();
 

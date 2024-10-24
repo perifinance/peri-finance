@@ -173,7 +173,7 @@ contract('RealtimeDebtCache', async accounts => {
 				]);
 			});
 
-			it.only('Cached values report current numbers without cache resynchronisation', async () => {
+			it('Cached values report current numbers without cache resynchronisation', async () => {
 				let debts = await realtimeDebtCache.currentPynthDebts([pUSD, pEUR, pAUD, pETH]);
 				assert.bnEqual(debts[0][0], toUnit(100));
 				assert.bnEqual(debts[0][1], toUnit(200));

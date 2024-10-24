@@ -49,6 +49,7 @@ const networks = [
 	'base-sepolia',
 	'base',
 	'sepolia',
+	'polygon-fork',
 ];
 
 const chainIdMapping = Object.entries({

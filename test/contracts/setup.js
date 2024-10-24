@@ -2032,7 +2032,7 @@ const setupAllContracts = async ({
 
 		// the name of the contract - the contract plus it's forContract
 		// (e.g. Proxy + FeePool)
-		const forContractName = forContract || '';
+		let forContractName = forContract || '';
 
 		// deploy the contract
 		// HACK: if MintablePeriFinance is deployed then rename it
@@ -2043,7 +2043,14 @@ const setupAllContracts = async ({
 		// 	forContractName = 'pUSD';
 		// }
 
-		const contractRegistered = resolverAlias || contract;
+		let contractRegistered = resolverAlias || contract;
+
+
+		if (contract === 'MintablePeriFinance' || contract === 'BasePeriFinance') {
+			contractRegistered = 'PeriFinance';
+		} else if (contract === 'BridgeState' && forContract === 'Pynth') {
+			forContractName = 'pUSD';
+		}
 
 
 		returnObj[contractRegistered + forContractName] = await setupContract({

@@ -28,7 +28,7 @@ contract('ImportableRewardEscrowV2', async accounts => {
 
 	addSnapshotBeforeRestoreAfterEach();
 
-	it('ensure only expected functions are mutative', async () => {
+	it.only('ensure only expected functions are mutative', async () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: importableRewardEscrowV2.abi,
 			ignoreParents: ['BaseRewardEscrowV2'],

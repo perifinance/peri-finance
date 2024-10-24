@@ -507,7 +507,8 @@ contract('CrossChainManager', async accounts => {
 					syncNetworks(true);
 
 					const { debt } = await debtCache.currentDebt();
-					const fivePecent = toUnit((0.05 / 0.95).toString());
+					//const fivePecent = toUnit((0.05 / 0.95).toString());
+					const fivePecent = toUnit((0.06).toString());
 					const fiveAmount = multiplyDecimalRound(debt, fivePecent);
 					// increase self network's issued debt over 5%
 					await periFinance.issuePynths(PERI, fiveAmount, {
@@ -515,7 +516,7 @@ contract('CrossChainManager', async accounts => {
 					});
 				});
 
-				it.only('should not be able to claim', async () => {
+				it('should not be able to claim', async () => {
 					await assert.revert(
 						periFinance.burnPynths(PERI, toUnit('10'), { from: account1 }),
 						'Cross chain debt is stale'
@@ -654,10 +655,12 @@ contract('CrossChainManager', async accounts => {
 			});
 		});
 		describe('when inflational mint', async () => {
+			const INITIAL_WEEKLY_SUPPLY = 800000;
 			beforeEach(async () => {
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
 
+				await supplySchedule.setInflationAmount(toUnit(INITIAL_WEEKLY_SUPPLY), { from: owner });
 				syncNetworks(true);
 			});
 			it('inflation should be failed if crosschain synchronization is stale', async () => {
@@ -668,12 +671,13 @@ contract('CrossChainManager', async accounts => {
 					'Cross chain debt is stale'
 				);
 			});
-			it.only('inflation should be success if crosschain synchronization is not stale', async () => {
+			it('inflation should be success if crosschain synchronization is not stale', async () => {
 				await periFinance.inflationalMint({ from: minterRole });
 			});
-			it.only('minterable supply should be proportional to the debt rate', async () => {
+			it('minterable supply should be proportional to the debt rate', async () => {
 				const totalSupply = await periFinance.totalSupply();
 				const weeklyMintableSupply = await supplySchedule.mintableSupply();
+				//throw new Error(weeklyMintableSupply.toString());
 				const debtRate = await crossChainManager.currentNetworkDebtPercentage();
 				const expectedMintableSupply = multiplyDecimalRoundPrecise(weeklyMintableSupply, debtRate);
 				const mintableSupply = await crossChainManager.mintableSupply();

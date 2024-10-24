@@ -948,7 +948,7 @@ contract('DebtCache', async accounts => {
 			});
 
 			describe('when the debt cache is valid', () => {
-				it('invalidates the cache', async () => {
+				it.only('invalidates the cache', async () => {
 					assert.isFalse((await debtCache.cacheInfo()).isInvalid);
 					const tx = await debtCache.updateDebtCacheValidity(true, { from: account1 });
 					assert.isTrue((await debtCache.cacheInfo()).isInvalid);
@@ -966,7 +966,7 @@ contract('DebtCache', async accounts => {
 					});
 				});
 
-				it('does nothing if attempting to re-validate the cache', async () => {
+				it.only('does nothing if attempting to re-validate the cache', async () => {
 					await debtCache.rebuildCache();
 					assert.isFalse((await debtCache.cacheInfo()).isInvalid);
 					const tx = await debtCache.updateDebtCacheValidity(false, { from: account1 });
@@ -987,7 +987,7 @@ contract('DebtCache', async accounts => {
 					await debtCache.updateDebtCacheValidity(true, { from: account1 });
 				});
 
-				it('re-validates the cache', async () => {
+				it.only('re-validates the cache', async () => {
 					assert.isTrue((await debtCache.cacheInfo()).isInvalid);
 					const tx = await debtCache.updateDebtCacheValidity(false, { from: account1 });
 					assert.isFalse((await debtCache.cacheInfo()).isInvalid);

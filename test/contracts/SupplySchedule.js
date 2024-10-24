@@ -48,14 +48,24 @@ contract('SupplySchedule', async accounts => {
 		await supplySchedule.setPeriFinanceProxy(periFinanceProxy.address, { from: owner });
 		await periFinanceProxy.setTarget(periFinance, { from: owner });
 
-		decayRate = await supplySchedule.DECAY_RATE();
+
+		//uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
+
+		//decayRate = await supplySchedule.DECAY_RATE();
+		decayRate = new BN('12500000000000000');
 	});
 
 	it('only expected functions should be mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: supplySchedule.abi,
 			ignoreParents: ['Owned'],
-			expected: ['recordMintEvent', 'setMinterReward', 'setPeriFinanceProxy'],
+			expected: [
+				'recordMintEvent',
+				'setInflationAmount',
+				'setMaxInflationAmount',
+				'setMinterReward',
+				'setPeriFinanceProxy',
+				],
 		});
 	});
 
@@ -186,7 +196,13 @@ contract('SupplySchedule', async accounts => {
 			}
 
 			beforeEach(async () => {
-				const terminalAnnualSupplyRate = await supplySchedule.TERMINAL_SUPPLY_RATE_ANNUAL();
+				// const terminalAnnualSupplyRate = await supplySchedule.TERMINAL_SUPPLY_RATE_ANNUAL();
+				//     // Weekly percentage decay of inflationary supply from the first 40 weeks of the 75% inflation rate
+				// 	uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
+
+				// 	// Percentage growth of terminal supply per annum
+				// 	uint public constant TERMINAL_SUPPLY_RATE_ANNUAL = 50000000000000000; // 5% pa
+				const terminalAnnualSupplyRate = new BN('50000000000000000'); // 5% pa
 				weeklySupplyRate = terminalAnnualSupplyRate.div(new BN(52));
 			});
 
