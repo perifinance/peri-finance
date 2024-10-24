@@ -26,10 +26,10 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     /* ========== ENCODED NAMES ========== */
 
-    bytes32 internal constant sUSD = "sUSD";
+    bytes32 internal constant pUSD = "pUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_SYNTH_SUSD = "SynthsUSD";
+    bytes32 private constant CONTRACT_SYNTH_SUSD = "SynthpUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -73,7 +73,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function synthsUSD() internal view returns (IPynth) {
+    function synthpUSD() internal view returns (IPynth) {
         return IPynth(requireAndGetAddress(CONTRACT_SYNTH_SUSD));
     }
 
@@ -113,7 +113,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     function totalIssuedSynths() public view returns (uint) {
         // synths issued by this contract is always exactly equal to the balance of reserves
-        return exchangeRates().effectiveValue(currencyKey, targetSynthIssued, sUSD);
+        return exchangeRates().effectiveValue(currencyKey, targetSynthIssued, pUSD);
     }
 
     function getReserves() public view returns (uint) {
@@ -232,14 +232,14 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         uint reserves = getReserves();
 
         uint excessAmount = reserves > targetSynthIssued.add(amount) ? reserves.sub(targetSynthIssued.add(amount)) : 0;
-        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, sUSD);
+        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
         // Mint `amount` to user.
         synth().issue(msg.sender, amount);
 
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            synthsUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            synthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
         // in the case of a negative fee extra synths will be issued, billed to the snx stakers
@@ -252,7 +252,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         // this is logically equivalent to getReserves() - (targetSynthIssued - amount), without going negative
         uint excessAmount = reserves.add(amount) > targetSynthIssued ? reserves.add(amount).sub(targetSynthIssued) : 0;
 
-        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, sUSD);
+        uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
         // Burn `amount` of currencyKey from user.
         synth().burn(msg.sender, amount);
@@ -261,7 +261,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         // This saves an approval and is cheaper.
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            synthsUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            synthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
         // in the case of a negative fee fewer synths will be burned, billed to the snx stakers

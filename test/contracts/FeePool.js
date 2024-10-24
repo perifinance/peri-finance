@@ -330,24 +330,19 @@ contract('Fee Pool', async accounts => {
 				assert.bnEqual(remainedTotalReward, unclaimedReward);
 			});
 
-			it.only('the ramnant rewards of a period should be added to next inflation reward', async () => {
+			it('the ramnant rewards of a period should be added to next inflation reward', async () => {
 				// claim rewards on account1 and account2
 				await feePool.claimFees({ from: account1 });
 				await feePool.claimFees({ from: account2 });
 
 				const { rewardsToDistribute, rewardsClaimed } = await feePool.recentFeePeriods(1);
-				console.log('rewardsToDistribute', rewardsToDistribute.toString());
-				console.log('rewardsClaimed', rewardsClaimed.toString());
 				const unclaimedReward = rewardsToDistribute.sub(rewardsClaimed);
 				const totalEscrowed1st = await rewardEscrowV2.totalEscrowedBalance();
 				// 2nd minting
-				const { mintAmount } = await closeFeePeriod(false, account1);
+				const { mintAmount } = await closeFeePeriod(true, account1);
 				await updateRatesWithDefaults();
 
 				const totalReward = await feePool.totalRewardsAvailable();
-				console.log(totalReward.toString());
-				console.log(mintAmount.toString());
-				console.log(unclaimedReward.toString());
 				assert.bnEqual(totalReward, mintAmount.add(unclaimedReward));
 				
 				// claim rewards on account3 only
@@ -940,7 +935,7 @@ contract('Fee Pool', async accounts => {
 								await feePool.claimFees({ from: owner });
 							});
 						} else {
-							it.only('reverts on claimFees', async () => {
+							it('reverts on claimFees', async () => {
 								await assert.revert(
 									feePool.claimFees({ from: owner }),
 									'A pynth or PERI rate is invalid'
@@ -1046,7 +1041,7 @@ contract('Fee Pool', async accounts => {
 				assert.bnClose(feesAvailableAcc1[0], totalFees.div(web3.utils.toBN('2')), '8');
 			});
 
-			it.only('should allow a user to claim their fees in pUSD (as half of total) after some exchanging', async () => {
+			it('should allow a user to claim their fees in pUSD (as half of total) after some exchanging', async () => {
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
 				// Issue 10,000 pUSD for two different accounts.
@@ -1247,7 +1242,7 @@ contract('Fee Pool', async accounts => {
 				}
 			});
 
-			it.only('should revert when users try to claim fees with > 10% of threshold', async () => {
+			it('should revert when users try to claim fees with > 10% of threshold', async () => {
 				// Issue 10,000 pUSD for two different accounts.
 				await periFinance.transfer(account1, toUnit('1000000'), {
 					from: owner,
@@ -1290,7 +1285,7 @@ contract('Fee Pool', async accounts => {
 				);
 			});
 
-			it.only('should be able to set the Target threshold to 15% and claim fees', async () => {
+			it('should be able to set the Target threshold to 15% and claim fees', async () => {
 				// Issue 10,000 pUSD for two different accounts.
 				await periFinance.transfer(account1, toUnit('1000000'), {
 					from: owner,
@@ -1342,7 +1337,7 @@ contract('Fee Pool', async accounts => {
 		});
 
 		describe('effectiveDebtRatioForPeriod', async () => {
-			it.only('should revert if period is > than FEE_PERIOD_LENGTH', async () => {
+			it('should revert if period is > than FEE_PERIOD_LENGTH', async () => {
 				// returns length of periods
 				const length = (await feePool.FEE_PERIOD_LENGTH()).toNumber();
 
@@ -1353,7 +1348,7 @@ contract('Fee Pool', async accounts => {
 				);
 			});
 
-			it.only('should revert if checking current unclosed period ', async () => {
+			it('should revert if checking current unclosed period ', async () => {
 				await assert.revert(
 					feePool.effectiveDebtRatioForPeriod(owner, 0),
 					'Current period is not closed yet'
@@ -1439,7 +1434,7 @@ contract('Fee Pool', async accounts => {
 								await feePool.claimOnBehalf(authoriser, { from: delegate });
 							});
 						} else {
-							it.only('reverts on claimFees', async () => {
+							it('reverts on claimFees', async () => {
 								await assert.revert(
 									feePool.claimOnBehalf(authoriser, { from: delegate }),
 									'A pynth or PERI rate is invalid'

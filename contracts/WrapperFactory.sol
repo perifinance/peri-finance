@@ -17,7 +17,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     bytes32 public constant CONTRACT_NAME = "WrapperFactory";
 
     bytes32 internal constant CONTRACT_FLEXIBLESTORAGE = "FlexibleStorage";
-    bytes32 internal constant CONTRACT_SYNTH_SUSD = "SynthsUSD";
+    bytes32 internal constant CONTRACT_SYNTH_SUSD = "SynthpUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
 
     uint internal constant WRAPPER_VERSION = 1;
@@ -33,7 +33,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function synthsUSD() internal view returns (IERC20) {
+    function synthpUSD() internal view returns (IERC20) {
         return IERC20(requireAndGetAddress(CONTRACT_SYNTH_SUSD));
     }
 
@@ -53,7 +53,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     function feesEscrowed() public view returns (uint) {
-        return synthsUSD().balanceOf(address(this));
+        return synthpUSD().balanceOf(address(this));
     }
 
     // ========== RESTRICTED ==========
@@ -86,12 +86,12 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     function distributeFees() external {
-        // Normalize fee to sUSD
+        // Normalize fee to pUSD
         uint amountSUSD = feesEscrowed();
 
         if (amountSUSD > 0) {
-            // Transfer sUSD to the fee pool
-            bool success = synthsUSD().transfer(feePool().FEE_ADDRESS(), amountSUSD);
+            // Transfer pUSD to the fee pool
+            bool success = synthpUSD().transfer(feePool().FEE_ADDRESS(), amountSUSD);
             require(success, "Transfer did not succeed");
         }
     }

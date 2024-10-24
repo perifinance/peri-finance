@@ -1,10 +1,14 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./Collateral.sol";
 import "./interfaces/ICollateralErc20.sol";
+
+// Internal references
+import "./CollateralState.sol";
+//import "./interfaces/IERC20.sol";
 
 // This contract handles the specific ERC20 implementation details of managing a loan.
 contract CollateralErc20 is ICollateralErc20, Collateral {
@@ -73,7 +77,7 @@ contract CollateralErc20 is ICollateralErc20, Collateral {
         // scale up before entering the system.
         uint scaledAmount = scaleUpCollateral(amount);
 
-        //uint withdrawnAmount = withdrawInternal(id, scaledAmount);
+        (collateral, ) = _withdraw(id, scaledAmount);
 
         // scale down before transferring back.
         uint scaledWithdraw = scaleDownCollateral(collateral);

@@ -94,7 +94,7 @@ contract DebtCache is BaseDebtCache {
     /**
      * @notice invalidate the cached debt if needed
      */
-    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchangerOrPynthpUSD {
+    function updateDebtCacheValidity(bool currentlyInvalid) external onlyIssuerOrExchanger {
         _updateDebtCacheValidity(currentlyInvalid);
     }
 
@@ -113,10 +113,10 @@ contract DebtCache is BaseDebtCache {
      {
         // uint delta = SafeDecimalMath.abs(amount);
         // if (amount > 0) {
-        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].add(delta);
+        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].add(delta);
         //     _cachedDebt = _cachedDebt.add(delta);
         // } else {
-        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].sub(delta);
+        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].sub(delta);
         //     _cachedDebt = _cachedDebt.sub(delta);
         // }
 
@@ -126,7 +126,7 @@ contract DebtCache is BaseDebtCache {
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _updateDebtCacheValidity(bool currentlyInvalid) internal {
-        if (_cacheInvalid != currentlyInvalid) {
+        if (_cacheInvalid != currentlyInvalid) {            
             _cacheInvalid = currentlyInvalid;
             emit DebtCacheValidityChanged(currentlyInvalid);
         }

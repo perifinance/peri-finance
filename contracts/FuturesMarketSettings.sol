@@ -126,7 +126,7 @@ contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMar
     }
 
     /*
-     * The minimum amount of sUSD paid to a liquidator when they successfully liquidate a position.
+     * The minimum amount of pUSD paid to a liquidator when they successfully liquidate a position.
      * This quantity must be no greater than `minInitialMargin`.
      */
     function minKeeperFee() external view returns (uint) {
@@ -247,10 +247,10 @@ contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMar
         setSkewScaleUSD(_marketKey, _skewScaleUSD);
     }
 
-    function setMinKeeperFee(uint _sUSD) external onlyOwner {
-        require(_sUSD <= _minInitialMargin(), "min margin < liquidation fee");
-        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MIN_KEEPER_FEE, _sUSD);
-        emit MinKeeperFeeUpdated(_sUSD);
+    function setMinKeeperFee(uint _pUSD) external onlyOwner {
+        require(_pUSD <= _minInitialMargin(), "min margin < liquidation fee");
+        _flexibleStorage().setUIntValue(SETTING_CONTRACT_NAME, SETTING_MIN_KEEPER_FEE, _pUSD);
+        emit MinKeeperFeeUpdated(_pUSD);
     }
 
     function setLiquidationFeeRatio(uint _ratio) external onlyOwner {
@@ -272,7 +272,7 @@ contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMar
     /* ========== EVENTS ========== */
 
     event ParameterUpdated(bytes32 indexed marketKey, bytes32 indexed parameter, uint value);
-    event MinKeeperFeeUpdated(uint sUSD);
+    event MinKeeperFeeUpdated(uint pUSD);
     event LiquidationFeeRatioUpdated(uint bps);
     event LiquidationBufferRatioUpdated(uint bps);
     event MinInitialMarginUpdated(uint minMargin);

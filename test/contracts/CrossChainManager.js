@@ -106,7 +106,7 @@ contract('CrossChainManager', async accounts => {
 				'SystemSettings',
 				'SupplySchedule',
 				/* 'EtherCollateral',
-				'EtherCollateralsUSD', */
+				'EtherCollateralpUSD', */
 				'CollateralManager',
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'ExternalTokenStakeManager',

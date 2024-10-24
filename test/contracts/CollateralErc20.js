@@ -922,7 +922,7 @@ contract('CollateralErc20', async accounts => {
 					beforeEach(async () => {
 						await setStatus({ owner, systemStatus, section, suspend: true });
 					});
-					it.only('then calling depopsit() reverts', async () => {
+					it('then calling depopsit() reverts', async () => {
 						await assert.revert(
 							cerc20.withdraw(id, oneRenBTC, { from: account1 }),
 							'Operation prohibited'
@@ -941,15 +941,15 @@ contract('CollateralErc20', async accounts => {
 		});
 
 		describe('revert conditions', async () => {
-			it.only('should revert if the withdraw would put them under minimum collateralisation', async () => {
+			it('should revert if the withdraw would put them under minimum collateralisation', async () => {
 				await assert.revert(cerc20.withdraw(id, twoRenBTC, { from: account1 }), 'Cratio too low');
 			});
 
-			it.only('should revert if they try to withdraw all the collateral', async () => {
+			it('should revert if they try to withdraw all the collateral', async () => {
 				await assert.revert(cerc20.withdraw(id, twoRenBTC, { from: account1 }), 'Cratio too low');
 			});
 
-			it.only('should revert if the sender is not borrower', async () => {
+			it('should revert if the sender is not borrower', async () => {
 				await issuepBTCtoAccount(oneRenBTC, account2);
 				await renBTC.approve(cerc20.address, oneRenBTC, { from: account2 });
 
@@ -966,7 +966,7 @@ contract('CollateralErc20', async accounts => {
 				});
 			});
 
-			it.only('should decrease the total collateral of the loan', async () => {
+			it('should decrease the total collateral of the loan', async () => {
 				loan = await state.getLoan(account1, id);
 
 				const expectedCollateral = toUnit(2).sub(toUnit(1));
@@ -974,7 +974,7 @@ contract('CollateralErc20', async accounts => {
 				assert.bnEqual(loan.collateral, expectedCollateral);
 			});
 
-			it.only('should transfer the withdrawn collateral to the borrower', async () => {
+			it('should transfer the withdrawn collateral to the borrower', async () => {
 				const bal = await renBTC.balanceOf(account1);
 
 				assert.bnEqual(bal, accountRenBalBefore.add(oneRenBTC));
@@ -1357,8 +1357,8 @@ contract('CollateralErc20', async accounts => {
 				assert.bnEqual(bal, accountRenBalBefore);
 			});
 
-			it.only('should emit the event', async () => {
-				assert.eventEqual(tx, 'LoanClosed', {
+			it('should emit the event', async () => {
+				assert.eventEqual(tx, 'LoanClosedByLiquidation', {
 					account: account1,
 					id: id,
 				});

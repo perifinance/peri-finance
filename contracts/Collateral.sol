@@ -457,6 +457,7 @@ contract Collateral is ICollateralLoan, Owned, MixinSystemSettings {
         // 4. Accrue interest
         loan = accrueInterest(loan);
 
+
         // 5. Add the collateral
         loan.collateral = loan.collateral.add(amount);
 

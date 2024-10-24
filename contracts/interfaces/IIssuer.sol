@@ -170,7 +170,7 @@ interface IIssuer {
     //     address account,
     //     bytes32 currencyKey,
     //     uint amountOfPynth,
-    //     uint amountInsUSD
+    //     uint amountInpUSD
     // ) external;
 
     //function modifyDebtSharesForMigration(address account, uint amount) external;

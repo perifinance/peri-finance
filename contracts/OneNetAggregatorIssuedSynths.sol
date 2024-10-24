@@ -19,7 +19,7 @@ contract OneNetAggregatorIssuedPynths is BaseOneNetAggregator {
         )
     {
         (uint totalIssuedSynths, ) =
-            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedPynths("sUSD", true);
+            IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedPynths("pUSD", true);
 
         uint dataTimestamp = now;
 

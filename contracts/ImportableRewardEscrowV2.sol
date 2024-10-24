@@ -47,6 +47,17 @@ contract ImportableRewardEscrowV2 is BaseRewardEscrowV2 {
         }
     }
 
+    // function _importVestingEntry(address account, VestingEntries.VestingEntry memory entry) internal {
+    //     uint entryID = nextEntryId;
+    //     vestingSchedules[account][entryID] = entry;
+
+    //     /* append entryID to list of entries for account */
+    //     accountVestingEntryIDs[account].push(entryID);
+
+    //     /* Increment the next entry id. */
+    //     nextEntryId = nextEntryId.add(1);
+    // }
+
     modifier onlyPeriFinanceBridge() {
         require(msg.sender == periFinanceBridgeToBase(), "Can only be invoked by PeriFinanceBridgeToBase contract");
         _;

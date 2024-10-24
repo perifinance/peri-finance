@@ -150,10 +150,10 @@ contract RealtimeDebtCache is BaseDebtCache {
     {
      //   uint delta = SafeDecimalMath.abs(amount);
         // if (amount > 0) {
-        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].add(delta);
+        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].add(delta);
         //     _cachedDebt = _cachedDebt.add(delta);
         // } else {
-        //     _cachedSynthDebt[sUSD] = _cachedSynthDebt[sUSD].sub(delta);
+        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].sub(delta);
         //     _cachedDebt = _cachedDebt.sub(delta);
         // }
 

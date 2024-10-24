@@ -1286,8 +1286,8 @@ contract('CollateralEth', async accounts => {
 				assert.bnGt(balAfter, bal);
 			});
 
-			it.only('should emit the event', async () => {
-				assert.eventEqual(tx, 'LoanClosed', {
+			it('should emit the event', async () => {
+				assert.eventEqual(tx, 'LoanClosedByLiquidation', {
 					account: account1,
 					id: id,
 				});

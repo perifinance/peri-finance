@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
 // Inheritance
 import "./Owned.sol";
@@ -13,7 +13,7 @@ import "./Proxy.sol";
 import "./interfaces/IPeriFinance.sol";
 import "./interfaces/IERC20.sol";
 
-// https://docs.periFinance.io/contracts/source/contracts/supplyschedule
+// https://docs.peri.finance/contracts/source/contracts/supplyschedule
 contract SupplySchedule is Owned, ISupplySchedule {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -27,16 +27,9 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Counter for number of weeks since the start of supply inflation
     uint public weekCounter;
 
+    uint public minterReward = 0;
+
     uint public constant INITIAL_WEEKLY_SUPPLY = 76924719527063029689120;
-    uint public constant INFLATION_START_DATE = 1551830400; // 2019-03-06T00:00:00+00:00
-    uint public constant MINT_BUFFER = 1 days;
-    uint8 public constant SUPPLY_DECAY_START = 52;
-    uint8 public constant SUPPLY_DECAY_END = 172; // 40 months
-
-
-
-    // The number of PERI rewarded to the caller of PeriFinance.mint()
-    uint public minterReward = 100 * 1e18;
 
     // The number of PERI minted per week
     uint public inflationAmount;
@@ -46,13 +39,18 @@ contract SupplySchedule is Owned, ISupplySchedule {
     // Address of the PeriFinanceProxy for the onlyPeriFinance modifier
     address payable public periFinanceProxy;
 
-  
     // Max PERI rewards for minter
-    uint public constant MAX_MINTER_REWARD = 200 * 1e18;
+    uint public constant MAX_MINTER_REWARD = 200 ether;
 
     // How long each inflation period is before mint can be called
     uint public constant MINT_PERIOD_DURATION = 1 weeks;
 
+    uint public constant INFLATION_START_DATE = 1625875200; // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
+    uint public constant MINT_BUFFER = 1 days;
+    uint8 public constant SUPPLY_DECAY_START = 52;
+    uint8 public constant SUPPLY_DECAY_END = 172; // 40 months
+
+    // Weekly percentage decay of inflationary supply from the first 40 weeks of the 75% inflation rate
     uint public constant DECAY_RATE = 12500000000000000; // 1.25% weekly
 
     // Percentage growth of terminal supply per annum
@@ -68,32 +66,8 @@ contract SupplySchedule is Owned, ISupplySchedule {
     }
 
     // ========== VIEWS ==========
-    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len;
-        while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
 
     /**
-     * @return The amount of PERI mintable for the inflationary supply
-     */
-       /**
      * @return The amount of PERI mintable for the inflationary supply
      */
     function mintableSupply() external view returns (uint) {
@@ -150,6 +124,17 @@ contract SupplySchedule is Owned, ISupplySchedule {
         return supplyForWeek;
     }
 
+    /**
+     * @return A unit amount of terminal inflation supply
+     * @dev Weekly compound rate based on number of weeks
+     */
+    function terminalInflationSupply(uint totalSupply, uint numOfWeeks) public pure returns (uint) {
+        // rate = (1 + weekly rate) ^ num of weeks
+        uint effectiveCompoundRate = SafeDecimalMath.unit().add(TERMINAL_SUPPLY_RATE_ANNUAL.div(52)).powDecimal(numOfWeeks);
+
+        // return Supply * (effectiveRate - 1) for extra supply to issue based on number of weeks
+        return totalSupply.multiplyDecimal(effectiveCompoundRate.sub(SafeDecimalMath.unit()));
+    }
 
     /**
      * @dev Take timeDiff in seconds (Dividend) and MINT_PERIOD_DURATION as (Divisor)
@@ -193,10 +178,9 @@ contract SupplySchedule is Owned, ISupplySchedule {
         lastMintEvent = INFLATION_START_DATE.add(weekCounter.mul(MINT_PERIOD_DURATION)).add(MINT_BUFFER);
 
         emit SupplyMinted(supplyMinted, numberOfWeeksIssued, lastMintEvent, now);
-        return minterReward;
+        //return minterReward;
+        return 1;
     }
-
-    // ========== SETTERS ========== */
 
     /**
      * @notice Sets the reward amount of PERI for the caller of the public
@@ -210,6 +194,8 @@ contract SupplySchedule is Owned, ISupplySchedule {
         minterReward = amount;
         emit MinterRewardUpdated(minterReward);
     }
+
+    // ========== SETTERS ========== */
 
     /**
      * @notice Set the PeriFinanceProxy should it ever change.
@@ -232,19 +218,6 @@ contract SupplySchedule is Owned, ISupplySchedule {
         inflationAmount = amount;
         emit InflationAmountUpdated(inflationAmount);
     }
-
-        /**
-     * @return A unit amount of terminal inflation supply
-     * @dev Weekly compound rate based on number of weeks
-     */
-    function terminalInflationSupply(uint totalSupply, uint numOfWeeks) public pure returns (uint) {
-        // rate = (1 + weekly rate) ^ num of weeks
-        uint effectiveCompoundRate = SafeDecimalMath.unit().add(TERMINAL_SUPPLY_RATE_ANNUAL.div(52)).powDecimal(numOfWeeks);
-
-        // return Supply * (effectiveRate - 1) for extra supply to issue based on number of weeks
-        return totalSupply.multiplyDecimal(effectiveCompoundRate.sub(SafeDecimalMath.unit()));
-    }
-
 
     function setMaxInflationAmount(uint amount) external onlyOwner {
         maxInflationAmount = amount;

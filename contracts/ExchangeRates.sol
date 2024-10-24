@@ -884,6 +884,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         revert("Cannot be run on this layer");
     }
 
+    function getInvertedKeys(uint index) external view returns (bytes32) {
+        require(index < invertedKeys.length, "index out of bounds");
+        return invertedKeys[index];
+    }
+
     /* ========== MODIFIERS ========== */
 
     modifier onlyOracle {

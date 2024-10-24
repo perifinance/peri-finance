@@ -922,7 +922,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         issuables = issuables.multiplyDecimal(getExTokenIssuanceRatio(_currencyKey));
     }
 
-    function maxIssuablePynths(address _issuer) 
+    function maxIssuablePynths(address _issuer)
         external
         view
         returns (
@@ -935,7 +935,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (maxIssuable, tRatio) = _maxIssuablePynths(_issuer, existDebt);
     }
 
-/* 
+    /* 
     function debtBalanceOfAndTotalDebt(address _issuer, bytes32 currencyKey)
         external
         view
@@ -1210,7 +1210,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //     exTokenManager().stake(_staker, _amount, _targetCurrency, _inputCurrency);
     // }
     //
-function issuePynths(
+    function issuePynths(
         address _issuer,
         bytes32 _currencyKey,
         uint _issueAmount
@@ -1450,7 +1450,7 @@ function issuePynths(
     //     _voluntaryBurnSynths(burnForAddress, amount, false);
     // }
 
-  function burnPynths(
+    function burnPynths(
         address _from,
         bytes32 _currencyKey,
         uint _burnAmount
@@ -2036,7 +2036,7 @@ function issuePynths(
             // crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
         }
 
-            // update current network issued debt
+        // update current network issued debt
         crossChainManager().subtractCurrentNetworkIssuedDebt(debtToRemove);
 
         // Update our cumulative ledger. This is also a high precision integer.

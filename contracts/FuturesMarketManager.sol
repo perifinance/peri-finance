@@ -62,8 +62,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     bytes32 public constant CONTRACT_NAME = "FuturesMarketManager";
 
-    bytes32 internal constant SUSD = "sUSD";
-    bytes32 internal constant CONTRACT_SYNTHSUSD = "SynthsUSD";
+    bytes32 internal constant SUSD = "pUSD";
+    bytes32 internal constant CONTRACT_SYNTHSUSD = "SynthpUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 internal constant CONTRACT_EXCHANGER = "Exchanger";
 
@@ -365,7 +365,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     }
 
     /*
-     * Allows a market to issue sUSD to an account when it withdraws margin.
+     * Allows a market to issue pUSD to an account when it withdraws margin.
      * This function is not callable through the proxy, only underlying contracts interact;
      * it reverts if not called by a known market.
      */
@@ -375,7 +375,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     }
 
     /*
-     * Allows a market to burn sUSD from an account when it deposits margin.
+     * Allows a market to burn pUSD from an account when it deposits margin.
      * This function is not callable through the proxy, only underlying contracts interact;
      * it reverts if not called by a known market.
      */
