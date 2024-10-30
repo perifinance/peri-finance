@@ -56,7 +56,7 @@ interface IIssuerInternalDebtCache {
 
     function updateDebtCacheValidity(bool currentlyInvalid) external;
 
-    // function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
+    function totalNonPeriBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
     function cacheInfo()
         external
@@ -113,7 +113,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "ExternalTokenStakeManager";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
-    bytes32 private constant CONTRACT_DYNAMICSYNTHREDEEMER = "DynamicSynthRedeemer";
+    bytes32 private constant CONTRACT_DYNAMICSYNTHREDEEMER = "DynamicPynthRedeemer";
     bytes32 private constant CONTRACT_SYNTHREDEEMER = "SynthRedeemer";
     bytes32 private constant CONTRACT_PERIFINANCEBRIDGETOOPTIMISM = "PeriFinanceBridgeToOptimism";
     bytes32 private constant CONTRACT_PERIFINANCEBRIDGETOBASE = "PeriFinanceBridgeToBase";
@@ -695,7 +695,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     //     // Add total issued pynths from non peri collateral back into the total if not excluded
     //     if (!excludeCollateral) {
-    //         (uint nonSnxDebt, bool invalid) = debtCache().totalNonSnxBackedDebt();
+    //         (uint nonSnxDebt, bool invalid) = debtCache().totalNonPeriBackedDebt();
     //         debt = debt.add(nonSnxDebt);
     //         anyRateIsInvalid = anyRateIsInvalid || invalid;
     //     }
@@ -744,7 +744,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //         bool anyRateIsInvalid
     //     )
     // {
-    //     (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), sUSD);
+    //     (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_issuer), pUSD);
     //     (uint issuable, bool isInvalid) = _maxIssuableSynths(_issuer);
     //     maxIssuable = issuable;
     //     anyRateIsInvalid = anyRateIsInvalid || isInvalid;
@@ -765,7 +765,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // }
 
     // function _maxIssuableSynths(address _issuer) internal view returns (uint, bool) {
-    //     // What is the value of their PERI balance in sUSD
+    //     // What is the value of their PERI balance in pUSD
     //     (uint periRate, bool isInvalid) = _rateAndInvalid(PERI);
     //     uint destinationValue = _periToUSD(_collateral(_issuer), periRate);
 
@@ -1102,9 +1102,9 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // /// @param account The account to be liquidated
     // /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     // /// @return totalRedeemed the total amount of collateral (PERI) to redeem (liquid and escrow)
-    // /// @return debtToRemove the amount of debt (sUSD) to burn in order to fix the account's c-ratio
+    // /// @return debtToRemove the amount of debt (pUSD) to burn in order to fix the account's c-ratio
     // /// @return escrowToLiquidate the amount of escrow PERI that will be revoked during liquidation
-    // /// @return initialDebtBalance the amount of initial (sUSD) debt the account has
+    // /// @return initialDebtBalance the amount of initial (pUSD) debt the account has
     // function liquidationAmounts(address account, bool isSelfLiquidation)
     //     external
     //     view
@@ -1383,25 +1383,27 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     /**
      * SIP-2059: Dynamic Redemption
-     * Function used to burn spot pynths and issue the equivalent in sUSD at chainlink price * discount rate
+     * Function used to burn spot pynths and issue the equivalent in pUSD at chainlink price * discount rate
      */
-    // function burnAndIssueSynthsWithoutDebtCache(
-    //     address account,
-    //     bytes32 currencyKey,
-    //     uint amountOfSynth,
-    //     uint amountInsUSD
-    // ) external onlySynthRedeemer {
-    //     exchanger().settle(account, currencyKey);
+    function burnAndIssuePynthsWithoutDebtCache(
+        address account,
+        bytes32 currencyKey,
+        uint amountOfSynth,
+        uint pUSD
+    ) external 
+    //onlySynthRedeemer 
+    {
+        exchanger().settle(account, currencyKey);
 
-    //     // Burn their redeemed pynths
-    //     pynths[currencyKey].burn(account, amountOfSynth);
+        // Burn their redeemed pynths
+        pynths[currencyKey].burn(account, amountOfSynth);
 
-    //     // record issue timestamp
-    //     _setLastIssueEvent(account);
+        // record issue timestamp
+        _setLastIssueEvent(account);
 
-    //     // Issuer their sUSD equivalent
-    //     pynths[pUSD].issue(account, amountInsUSD);
-    // }
+        // Issuer their pUSD equivalent
+        //pynths[pUSD].issue(account, amountInpUSD);
+    }
 
     // function modifyDebtSharesForMigration(address account, uint amount) external onlyTrustedMigrators {
     //     IPeriFinanceDebtShare sds = periFinanceDebtShare();
@@ -1635,7 +1637,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // /// @param account The account to be liquidated
     // /// @param isSelfLiquidation boolean to determine if this is a forced or self-invoked liquidation
     // /// @return totalRedeemed the total amount of collateral (PERI) to redeem (liquid and escrow)
-    // /// @return debtRemoved the amount of debt (sUSD) to burn in order to fix the account's c-ratio
+    // /// @return debtRemoved the amount of debt (pUSD) to burn in order to fix the account's c-ratio
     // /// @return escrowToLiquidate the amount of escrow PERI that will be revoked during liquidation
     // function liquidateAccount(address account, bool isSelfLiquidation)
     //     external
@@ -1677,7 +1679,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     // {
     //     // Get the account's debt balance
     //     bool anyRateIsInvalid;
-    //     (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), sUSD);
+    //     (debtBalance, , anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(account), pUSD);
 
     //     // Get the PERI rate
     //     (uint periRate, bool periRateInvalid) = _rateAndInvalid(PERI);
@@ -1716,7 +1718,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     //         // Get the total USD value of their PERI collateral (including escrow and rewards minus the flag and liquidate rewards)
     //         uint collateralForAccountUSD = _periToUSD(_collateral(account).sub(rewardsSum), periRate);
 
-    //         // Calculate the amount of debt to remove and the sUSD value of the PERI required to liquidate.
+    //         // Calculate the amount of debt to remove and the pUSD value of the PERI required to liquidate.
     //         debtToRemove = liquidator().calculateAmountToFixCollateral(debtBalance, collateralForAccountUSD, penalty);
     //         uint redeemTarget = _usdToSnx(debtToRemove, periRate).multiplyDecimal(SafeDecimalMath.unit().add(penalty));
 
