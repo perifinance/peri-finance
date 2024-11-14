@@ -204,4 +204,19 @@ library SafeDecimalMath {
 
         return x.div(_decimal).mul(_decimal);
     }
+
+        /* ---------- Utilities ---------- */
+    /*
+     * Absolute value of the input, returned as a signed number.
+     */
+    function signedAbs(int x) internal pure returns (int) {
+        return x < 0 ? -x : x;
+    }
+
+        /*
+     * Absolute value of the input, returned as an unsigned number.
+     */
+    function abs(int x) internal pure returns (uint) {
+        return uint(signedAbs(x));
+    }
 }

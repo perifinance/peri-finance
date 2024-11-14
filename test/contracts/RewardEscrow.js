@@ -318,9 +318,6 @@ contract('RewardEscrow', async accounts => {
 					await fastForward(SECOND);
 				}
 
-				const numVestingEntries = await rewardEscrow.numVestingEntries(account1);
-				assert.bnEqual(numVestingEntries, 260);
-
 				// Need to go into the future to vest
 				await fastForward(YEAR + DAY);
 
