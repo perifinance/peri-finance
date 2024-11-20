@@ -6,7 +6,7 @@ import "./IVirtualPynth.sol";
 // https://docs.peri.finance/contracts/source/interfaces/iperiFinance
 interface IPeriFinance {
     // Views
-    function getRequiredAddress(bytes32 contractName) external view returns (address);
+    //function getRequiredAddress(bytes32 contractName) external view returns (address);
 
     // function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
 
@@ -16,7 +16,7 @@ interface IPeriFinance {
 
     // function availablePynths(uint index) external view returns (IPynth);
 
-    function collateral(address account) external view returns (uint);
+    // function collateral(address account) external view returns (uint);
 
     function collateralisationRatio(address issuer) external view returns (uint);
 
@@ -35,30 +35,34 @@ interface IPeriFinance {
             uint totalSystemDebt
         );
 
-    // function pynths(bytes32 currencyKey) external view returns (IPynth);
+    function pynths(bytes32 currencyKey) external view returns (IPynth);
 
-    // function pynthsByAddress(address pynthAddress) external view returns (bytes32);
+    function pynthsByAddress(address pynthAddress) external view returns (bytes32);
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint);
 
-    function totalIssuedPynthsExcludeEtherCollateral(bytes32 currencyKey) external view returns (uint);
+    function totalIssuedPynthsExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 
-    function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
+    //function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
 
     // Mutative Functions
-    function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
+    //function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
+    function issuePynths(uint _issueAmount) external;
+
 
     function issueMaxPynths() external;
 
-    function issuePynthsToMaxQuota(bytes32 _currencyKey) external;
+    //function issuePynthsToMaxQuota(bytes32 _currencyKey) external;
 
-    function burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
+    //abifunction burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
+    function burnPynths(uint _burnAmount) external;
+
 
     // function fitToClaimable() external payable;
 
-    function exit() external;
+    //function exit() external;
 
     function exchange(
         bytes32 sourceCurrencyKey,
@@ -81,6 +85,15 @@ interface IPeriFinance {
         bytes32 trackingCode
     ) external returns (uint amountReceived);
 
+    function exchangeWithTrackingForInitiator(
+        bytes32 sourceCurrencyKey,
+        uint sourceAmount,
+        bytes32 destinationCurrencyKey,
+        address rewardAddress,
+        bytes32 trackingCode
+    ) external returns (uint amountReceived);
+
+
     function exchangeOnBehalfWithTracking(
         address exchangeForAddress,
         bytes32 sourceCurrencyKey,
@@ -97,7 +110,9 @@ interface IPeriFinance {
         bytes32 trackingCode
     ) external returns (uint amountReceived, IVirtualPynth vPynth);
 
-    function mint(address _user, uint _amount) external returns (bool);
+    //function mint(address _user, uint _amount) external returns (bool);
+
+    //function mint() external returns (bool);
 
     function inflationalMint() external returns (bool);
 

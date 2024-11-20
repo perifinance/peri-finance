@@ -1,22 +1,14 @@
-pragma solidity 0.5.16;
+pragma solidity >=0.4.24;
 pragma experimental ABIEncoderV2;
 
 import "./IDirectIntegrationManager.sol";
 
-// https://docs.periFinance.io/contracts/source/interfaces/iexchangerates
+// https://docs.synthetix.io/contracts/source/interfaces/iexchangerates
 interface IExchangeRates {
     // Structs
     struct RateAndUpdatedTime {
         uint216 rate;
         uint40 time;
-    }
-
-    struct InversePricing {
-        uint entryPoint;
-        uint upperLimit;
-        uint lowerLimit;
-        bool frozenAtUpperLimit;
-        bool frozenAtLowerLimit;
     }
 
     // Views
@@ -26,11 +18,7 @@ interface IExchangeRates {
 
     function anyRateIsInvalid(bytes32[] calldata currencyKeys) external view returns (bool);
 
-   function anyRateIsInvalidAtRound(bytes32[] calldata currencyKeys, uint[] calldata roundIds) external view returns (bool);
-
-    function canFreezeRate(bytes32 currencyKey) external view returns (bool);
-
-    function currentRoundForRate(bytes32 currencyKey) external view returns (uint);
+    function anyRateIsInvalidAtRound(bytes32[] calldata currencyKeys, uint[] calldata roundIds) external view returns (bool);
 
     function currenciesUsingAggregator(address aggregator) external view returns (bytes32[] memory);
 
@@ -68,7 +56,7 @@ interface IExchangeRates {
             uint destinationRate
         );
 
- function effectiveAtomicValueAndRates(
+    function effectiveAtomicValueAndRates(
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
@@ -106,20 +94,7 @@ interface IExchangeRates {
         uint timediff
     ) external view returns (uint);
 
-    function inversePricing(bytes32 currencyKey)
-        external
-        view
-        returns (
-            uint entryPoint,
-            uint upperLimit,
-            uint lowerLimit,
-            bool frozenAtUpperLimit,
-            bool frozenAtLowerLimit
-        );
-
     function lastRateUpdateTimes(bytes32 currencyKey) external view returns (uint256);
-
-    function oracle() external view returns (address);
 
     function rateAndTimestampAtRound(bytes32 currencyKey, uint roundId) external view returns (uint rate, uint time);
 
@@ -130,8 +105,6 @@ interface IExchangeRates {
     function rateForCurrency(bytes32 currencyKey) external view returns (uint);
 
     function rateIsFlagged(bytes32 currencyKey) external view returns (bool);
-
-    function rateIsFrozen(bytes32 currencyKey) external view returns (bool);
 
     function rateIsInvalid(bytes32 currencyKey) external view returns (bool);
 
@@ -152,12 +125,9 @@ interface IExchangeRates {
 
     function ratesForCurrencies(bytes32[] calldata currencyKeys) external view returns (uint[] memory);
 
-    // Mutative functions
-    function freezeRate(bytes32 currencyKey) external;
+    function pynthTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
 
-     function synthTooVolatileForAtomicExchange(bytes32 currencyKey) external view returns (bool);
-
-    function synthTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings calldata settings)
+    function pynthTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings calldata settings)
         external
         view
         returns (bool);

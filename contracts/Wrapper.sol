@@ -42,7 +42,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     bytes32 public currencyKey;
     bytes32 public synthContractName;
 
-    uint public targetSynthIssued;
+    uint public targetPynthIssued;
 
     constructor(
         address _owner,
@@ -54,7 +54,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         token = _token;
         currencyKey = _currencyKey;
         synthContractName = _synthContractName;
-        targetSynthIssued = 0;
+        targetPynthIssued = 0;
         token.approve(address(this), uint256(-1));
     }
 
@@ -113,7 +113,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
 
     function totalIssuedPynths() public view returns (uint) {
         // synths issued by this contract is always exactly equal to the balance of reserves
-        return exchangeRates().effectiveValue(currencyKey, targetSynthIssued, pUSD);
+        return exchangeRates().effectiveValue(currencyKey, targetPynthIssued, pUSD);
     }
 
     function getReserves() public view returns (uint) {
@@ -186,19 +186,19 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         require(!exchangeRates().rateIsInvalid(currencyKey), "Currency rate is invalid");
         require(totalIssuedPynths() > 0, "Contract cannot burn for token, token balance is zero");
 
-        (uint burnFee, bool negative) = calculateBurnFee(targetSynthIssued);
+        (uint burnFee, bool negative) = calculateBurnFee(targetPynthIssued);
 
         uint burnAmount;
         uint amountOut;
         if (negative) {
-            burnAmount = targetSynthIssued < amountIn ? targetSynthIssued.sub(burnFee) : amountIn;
+            burnAmount = targetPynthIssued < amountIn ? targetPynthIssued.sub(burnFee) : amountIn;
 
             amountOut = burnAmount.multiplyDecimal(
                 // -1e18 <= burnFeeRate <= 1e18 so this operation is safe
                 uint(int(SafeDecimalMath.unit()) - burnFeeRate())
             );
         } else {
-            burnAmount = targetSynthIssued.add(burnFee) < amountIn ? targetSynthIssued.add(burnFee) : amountIn;
+            burnAmount = targetPynthIssued.add(burnFee) < amountIn ? targetPynthIssued.add(burnFee) : amountIn;
             amountOut = burnAmount.divideDecimal(
                 // -1e18 <= burnFeeRate <= 1e18 so this operation is safe
                 uint(int(SafeDecimalMath.unit()) + burnFeeRate())
@@ -231,7 +231,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function _mint(uint amount) internal {
         uint reserves = getReserves();
 
-        uint excessAmount = reserves > targetSynthIssued.add(amount) ? reserves.sub(targetSynthIssued.add(amount)) : 0;
+        uint excessAmount = reserves > targetPynthIssued.add(amount) ? reserves.sub(targetPynthIssued.add(amount)) : 0;
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
         // Mint `amount` to user.
@@ -249,8 +249,8 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function _burn(uint amount) internal {
         uint reserves = getReserves();
 
-        // this is logically equivalent to getReserves() - (targetSynthIssued - amount), without going negative
-        uint excessAmount = reserves.add(amount) > targetSynthIssued ? reserves.add(amount).sub(targetSynthIssued) : 0;
+        // this is logically equivalent to getReserves() - (targetPynthIssued - amount), without going negative
+        uint excessAmount = reserves.add(amount) > targetPynthIssued ? reserves.add(amount).sub(targetPynthIssued) : 0;
 
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
@@ -268,10 +268,10 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         _setTargetSynthIssued(reserves);
     }
 
-    function _setTargetSynthIssued(uint _targetSynthIssued) internal {
-        debtCache().recordExcludedDebtChange(currencyKey, int256(_targetSynthIssued) - int256(targetSynthIssued));
+    function _setTargetSynthIssued(uint _targetPynthIssued) internal {
+        debtCache().recordExcludedDebtChange(currencyKey, int256(_targetPynthIssued) - int256(targetPynthIssued));
 
-        targetSynthIssued = _targetSynthIssued;
+        targetPynthIssued = _targetPynthIssued;
     }
 
     function _safeTransferFrom(
