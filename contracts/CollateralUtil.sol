@@ -62,7 +62,7 @@ contract CollateralUtil is ICollateralUtil, ICollateralLoan, MixinSystemSettings
      * D = debt value in pUSD
      * V = collateral value in pUSD
      * P = liquidation penalty
-     * Calculates amount of synths = (D - V * r) / (1 - (1 + P) * r)
+     * Calculates amount of pynths = (D - V * r) / (1 - (1 + P) * r)
      * Note: if you pass a loan in here that is not eligible for liquidation it will revert.
      * We check the ratio first in liquidateInternal and only pass eligible loans in.
      */

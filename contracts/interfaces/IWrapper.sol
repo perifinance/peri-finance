@@ -2,7 +2,7 @@ pragma solidity >=0.4.24;
 
 import "./IERC20.sol";
 
-// https://docs.synthetix.io/contracts/source/interfaces/iwrapper
+// https://docs.periFinance.io/contracts/source/interfaces/iwrapper
 interface IWrapper {
     function mint(uint amount) external;
 

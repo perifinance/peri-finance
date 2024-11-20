@@ -774,8 +774,8 @@
 			"txn": "",
 			"network": "polygon"
 		},
-		"TokenStatepSNX": {
-			"name": "TokenStatepSNX",
+		"TokenStatepPERI": {
+			"name": "TokenStatepPERI",
 			"address": "0xd22945328a8d8ab206b110cC777e7cc4E3A82b67",
 			"source": "TokenState",
 			"link": "https://polygonscan.com/address/0xd22945328a8d8ab206b110cC777e7cc4E3A82b67",
@@ -783,8 +783,8 @@
 			"txn": "",
 			"network": "polygon"
 		},
-		"ProxyERC20pSNX": {
-			"name": "ProxyERC20pSNX",
+		"ProxyERC20pPERI": {
+			"name": "ProxyERC20pPERI",
 			"address": "0x5f533cC501a8193C161f188A115712D1aAe653da",
 			"source": "ProxyERC20",
 			"link": "https://polygonscan.com/address/0x5f533cC501a8193C161f188A115712D1aAe653da",
@@ -792,8 +792,8 @@
 			"txn": "",
 			"network": "polygon"
 		},
-		"PynthpSNX": {
-			"name": "PynthpSNX",
+		"PynthpPERI": {
+			"name": "PynthpPERI",
 			"address": "0xD44f8bB4E3dC4dB7d9b1835872A66fa5caAbd4E8",
 			"source": "Pynth",
 			"link": "https://polygonscan.com/address/0xD44f8bB4E3dC4dB7d9b1835872A66fa5caAbd4E8",

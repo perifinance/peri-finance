@@ -199,14 +199,14 @@ contract('AddressResolver', accounts => {
 						AddressResolver: resolver,
 					},
 					pynths: ['pUSD'],
-					//synths: ['sUSD', 'sETH', 'sEUR', 'sAUD'],
+					//pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD'],
 					contracts: ['PeriFinance', 'StakingState', 'BridgeState', 'CrossChainManager'],
 				}));
 			});
 
 			it('when getPynth() is invoked with these pynth keys, they are returned correctly', async () => {
 				assert.equal(await resolver.getPynth(toBytes32('pUSD')), pUSDContract.address);
-				//assert.equal(await resolver.getSynth(toBytes32('sETH')), sETHContract.address);
+				//assert.equal(await resolver.getPynth(toBytes32('pETH')), pETHContract.address);
 			});
 		});
 	});

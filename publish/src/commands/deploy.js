@@ -2559,7 +2559,7 @@ const deploy = async ({
 			pAAVE: w3utils.toWei('0.003'),
 			pCOMP: w3utils.toWei('0.003'),
 			pSUSHI: w3utils.toWei('0.003'),
-			pSNX: w3utils.toWei('0.003'),
+			pPERI: w3utils.toWei('0.003'),
 			pCRV: w3utils.toWei('0.003'),
 			pYFI: w3utils.toWei('0.003'),
 			p1INCH: w3utils.toWei('0.003'),

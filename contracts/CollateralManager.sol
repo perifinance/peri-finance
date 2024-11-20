@@ -46,7 +46,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all available currency keys.
     Bytes32SetLib.Bytes32Set internal _currencyKeys;
 
-    // The set of all synths issuable by the various collateral contracts
+    // The set of all pynths issuable by the various collateral contracts
     Bytes32SetLib.Bytes32Set internal _pynths;
 
     // Map from currency key to pynth contract name.

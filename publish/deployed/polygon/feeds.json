@@ -99,8 +99,8 @@
 		"asset": "SUSHI",
 		"feed": "0x49B0c695039243BBfEb8EcD054EB70061fd54aa0"
 	},
-	"SNX": {
-		"asset": "SNX",
+	"PERI": {
+		"asset": "PERI",
 		"feed": "0xbF90A5D9B6EE9019028dbFc2a9E50056d5252894"
 	},
 	"SAND": {

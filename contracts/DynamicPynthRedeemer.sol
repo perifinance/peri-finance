@@ -21,7 +21,7 @@ contract DynamicPynthRedeemer is Owned, IDynamicPynthRedeemer, MixinResolver {
     uint public discountRate;
     bool public redemptionActive;
 
-    bytes32 internal constant sUSD = "sUSD";
+    bytes32 internal constant pUSD = "pUSD";
 
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
@@ -82,7 +82,7 @@ contract DynamicPynthRedeemer is Owned, IDynamicPynthRedeemer, MixinResolver {
 
     function redeemPartial(bytes32 currencyKey, uint amountOfPynth) external requireRedemptionActive {
         address pynthProxy = _proxyAddressForKey(currencyKey);
-        // technically this check isn't necessary - Synth.burn would fail due to safe sub,
+        // technically this check isn't necessary - Pynth.burn would fail due to safe sub,
         // but this is a useful error message to the user
         require(IERC20(pynthProxy).balanceOf(msg.sender) >= amountOfPynth, "Insufficient balance");
         _redeem(pynthProxy, currencyKey, amountOfPynth);
@@ -94,7 +94,7 @@ contract DynamicPynthRedeemer is Owned, IDynamicPynthRedeemer, MixinResolver {
         uint amountOfPynth
     ) internal {
         require(amountOfPynth > 0, "No balance of pynth to redeem");
-        require(currencyKey != sUSD, "Cannot redeem sUSD");
+        require(currencyKey != pUSD, "Cannot redeem pUSD");
 
         // Discount rate applied to chainlink price for dynamic redemptions
         (uint rate, bool invalid) = _exchangeRates().rateAndInvalid(currencyKey);

@@ -13,7 +13,7 @@ import "./AddressSetLib.sol";
  * Note: it changed the interface to manage the associated contracts from `setAssociatedContract`
  * to `addAssociatedContracts` or `removeAssociatedContracts` and the modifier is now plural
  */
-// https://docs.synthetix.io/contracts/source/contracts/StateShared
+// https://docs.periFinance.io/contracts/source/contracts/StateShared
 contract StateShared is Owned {
     using AddressSetLib for AddressSetLib.AddressSet;
 

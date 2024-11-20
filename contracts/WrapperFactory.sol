@@ -12,7 +12,7 @@ import "./interfaces/IFeePool.sol";
 import "./interfaces/IFlexibleStorage.sol";
 import "./interfaces/IWrapperFactory.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/wrapperfactory
+// https://docs.periFinance.io/contracts/source/contracts/wrapperfactory
 contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     bytes32 public constant CONTRACT_NAME = "WrapperFactory";
 
@@ -33,7 +33,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function synthpUSD() internal view returns (IERC20) {
+    function pynthpUSD() internal view returns (IERC20) {
         return IERC20(requireAndGetAddress(CONTRACT_SYNTH_SUSD));
     }
 
@@ -47,13 +47,13 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
     // ========== VIEWS ==========
     // Returns the version of a wrapper created by this wrapper factory
-    // Used by MultiCollateralSynth to know if it should trust the wrapper contract
+    // Used by MultiCollateralPynth to know if it should trust the wrapper contract
     function isWrapper(address possibleWrapper) external view returns (bool) {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, bytes32(uint(address(possibleWrapper)))) > 0;
     }
 
     function feesEscrowed() public view returns (uint) {
-        return synthpUSD().balanceOf(address(this));
+        return pynthpUSD().balanceOf(address(this));
     }
 
     // ========== RESTRICTED ==========
@@ -69,15 +69,15 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     function createWrapper(
         IERC20 token,
         bytes32 currencyKey,
-        bytes32 synthContractName
+        bytes32 pynthContractName
     ) external onlyOwner returns (address) {
         // Create the wrapper instance
-        Wrapper wrapper = new Wrapper(owner, address(resolver), token, currencyKey, synthContractName);
+        Wrapper wrapper = new Wrapper(owner, address(resolver), token, currencyKey, pynthContractName);
 
         // Rebuild caches immediately since it will almost certainly need to be done
         wrapper.rebuildCache();
 
-        // Register it so that MultiCollateralSynth knows to trust it
+        // Register it so that MultiCollateralPynth knows to trust it
         flexibleStorage().setUIntValue(CONTRACT_NAME, bytes32(uint(address(wrapper))), WRAPPER_VERSION);
 
         emit WrapperCreated(address(token), currencyKey, address(wrapper));
@@ -91,7 +91,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
 
         if (amountSUSD > 0) {
             // Transfer pUSD to the fee pool
-            bool success = synthpUSD().transfer(feePool().FEE_ADDRESS(), amountSUSD);
+            bool success = pynthpUSD().transfer(feePool().FEE_ADDRESS(), amountSUSD);
             require(success, "Transfer did not succeed");
         }
     }

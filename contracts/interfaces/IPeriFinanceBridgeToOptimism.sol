@@ -2,7 +2,7 @@ pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 interface IPeriFinanceBridgeToOptimism {
-    function closeFeePeriod(uint snxBackedDebt, uint debtSharesSupply) external;
+    function closeFeePeriod(uint periBackedDebt, uint debtSharesSupply) external;
 
     // Invoked by the relayer on L1
     function completeWithdrawal(address account, uint amount) external;

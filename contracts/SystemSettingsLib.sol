@@ -233,15 +233,15 @@ library SystemSettingsLib {
     function setExchangeFeeRateForPynths(
         IFlexibleStorage flexibleStorage,
         bytes32 settingExchangeFeeRate,
-        bytes32[] calldata synthKeys,
+        bytes32[] calldata pynthKeys,
         uint256[] calldata exchangeFeeRates
     ) external {
-        require(synthKeys.length == exchangeFeeRates.length, "Array lengths dont match");
-        for (uint i = 0; i < synthKeys.length; i++) {
+        require(pynthKeys.length == exchangeFeeRates.length, "Array lengths dont match");
+        for (uint i = 0; i < pynthKeys.length; i++) {
             require(exchangeFeeRates[i] <= MAX_EXCHANGE_FEE_RATE, "MAX_EXCHANGE_FEE_RATE exceeded");
             flexibleStorage.setUIntValue(
                 SETTINGS_CONTRACT_NAME,
-                keccak256(abi.encodePacked(settingExchangeFeeRate, synthKeys[i])),
+                keccak256(abi.encodePacked(settingExchangeFeeRate, pynthKeys[i])),
                 exchangeFeeRates[i]
             );
         }
@@ -473,7 +473,7 @@ library SystemSettingsLib {
         );
     }
 
-    function setCrossChainSynthTransferEnabled(
+    function setCrossChainPynthTransferEnabled(
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,
         bytes32 _currencyKey,

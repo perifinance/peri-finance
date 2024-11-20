@@ -19,7 +19,7 @@ import "./MixinSystemSettings.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/wrapper
+// https://docs.periFinance.io/contracts/source/contracts/wrapper
 contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrapper {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -40,7 +40,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     // NOTE: these values should ideally be `immutable` instead of public
     IERC20 public token;
     bytes32 public currencyKey;
-    bytes32 public synthContractName;
+    bytes32 public pynthContractName;
 
     uint public targetPynthIssued;
 
@@ -49,11 +49,11 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         address _resolver,
         IERC20 _token,
         bytes32 _currencyKey,
-        bytes32 _synthContractName
+        bytes32 _pynthContractName
     ) public Owned(_owner) MixinSystemSettings(_resolver) {
         token = _token;
         currencyKey = _currencyKey;
-        synthContractName = _synthContractName;
+        pynthContractName = _pynthContractName;
         targetPynthIssued = 0;
         token.approve(address(this), uint256(-1));
     }
@@ -63,7 +63,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](6);
         newAddresses[0] = CONTRACT_SYNTH_SUSD;
-        newAddresses[1] = synthContractName;
+        newAddresses[1] = pynthContractName;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_DEBTCACHE;
         newAddresses[4] = CONTRACT_SYSTEMSTATUS;
@@ -73,12 +73,12 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     }
 
     /* ========== INTERNAL VIEWS ========== */
-    function synthpUSD() internal view returns (IPynth) {
+    function pynthpUSD() internal view returns (IPynth) {
         return IPynth(requireAndGetAddress(CONTRACT_SYNTH_SUSD));
     }
 
-    function synth() internal view returns (IPynth) {
-        return IPynth(requireAndGetAddress(synthContractName));
+    function pynth() internal view returns (IPynth) {
+        return IPynth(requireAndGetAddress(pynthContractName));
     }
 
     function exchangeRates() internal view returns (IExchangeRates) {
@@ -112,7 +112,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     }
 
     function totalIssuedPynths() public view returns (uint) {
-        // synths issued by this contract is always exactly equal to the balance of reserves
+        // pynths issued by this contract is always exactly equal to the balance of reserves
         return exchangeRates().effectiveValue(currencyKey, targetPynthIssued, pUSD);
     }
 
@@ -179,10 +179,10 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         emit Minted(msg.sender, mintAmount, negative ? 0 : feeAmountTarget, actualAmountIn);
     }
 
-    // Burns `amountIn` synth for `amountIn - fees` amount of token.
+    // Burns `amountIn` pynth for `amountIn - fees` amount of token.
     // `amountIn` is inclusive of fees, calculable via `calculateBurnFee`.
     function burn(uint amountIn) external notPaused issuanceActive {
-        require(amountIn <= IERC20(address(synth())).balanceOf(msg.sender), "Balance is too low");
+        require(amountIn <= IERC20(address(pynth())).balanceOf(msg.sender), "Balance is too low");
         require(!exchangeRates().rateIsInvalid(currencyKey), "Currency rate is invalid");
         require(totalIssuedPynths() > 0, "Contract cannot burn for token, token balance is zero");
 
@@ -235,15 +235,15 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
         // Mint `amount` to user.
-        synth().issue(msg.sender, amount);
+        pynth().issue(msg.sender, amount);
 
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            synthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            pynthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee extra synths will be issued, billed to the snx stakers
-        _setTargetSynthIssued(reserves);
+        // in the case of a negative fee extra pynths will be issued, billed to the peri stakers
+        _setTargetPynthIssued(reserves);
     }
 
     function _burn(uint amount) internal {
@@ -255,20 +255,20 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         uint excessAmountUsd = exchangeRates().effectiveValue(currencyKey, excessAmount, pUSD);
 
         // Burn `amount` of currencyKey from user.
-        synth().burn(msg.sender, amount);
+        pynth().burn(msg.sender, amount);
 
         // We use burn/issue instead of burning the principal and transferring the fee.
         // This saves an approval and is cheaper.
         // Escrow fee.
         if (excessAmountUsd > 0) {
-            synthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
+            pynthpUSD().issue(address(wrapperFactory()), excessAmountUsd);
         }
 
-        // in the case of a negative fee fewer synths will be burned, billed to the snx stakers
-        _setTargetSynthIssued(reserves);
+        // in the case of a negative fee fewer pynths will be burned, billed to the peri stakers
+        _setTargetPynthIssued(reserves);
     }
 
-    function _setTargetSynthIssued(uint _targetPynthIssued) internal {
+    function _setTargetPynthIssued(uint _targetPynthIssued) internal {
         debtCache().recordExcludedDebtChange(currencyKey, int256(_targetPynthIssued) - int256(targetPynthIssued));
 
         targetPynthIssued = _targetPynthIssued;

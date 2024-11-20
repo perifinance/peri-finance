@@ -77,29 +77,29 @@ contract RealtimeDebtCache is BaseDebtCache {
     function updateDebtCacheValidity(bool currentlyInvalid) external {}
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    // This function exists in case a synth is ever somehow removed without its snapshot being updated.
-    function purgeCachedSynthDebt(bytes32 currencyKey) external onlyOwner {
-        // require(issuer().synths(currencyKey) == ISynth(0), "Synth exists");
-        // delete _cachedSynthDebt[currencyKey];
+    // This function exists in case a pynth is ever somehow removed without its snapshot being updated.
+    function purgeCachedPynthDebt(bytes32 currencyKey) external onlyOwner {
+        // require(issuer().pynths(currencyKey) == IPynth(0), "Pynth exists");
+        // delete _cachedPynthDebt[currencyKey];
     }
 
     //function takeDebtSnapshot() external requireSystemActiveIfNotOwner {
         // bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
-        // (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentSynthDebts(currencyKeys);
+        // (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentPynthDebts(currencyKeys);
 
-        // // The total SNX-backed debt is the debt of futures markets plus the debt of circulating synths.
-        // uint snxCollateralDebt = futuresDebt;
-        // _cachedSynthDebt[FUTURES_DEBT_KEY] = futuresDebt;
+        // // The total PERI-backed debt is the debt of futures markets plus the debt of circulating pynths.
+        // uint periCollateralDebt = futuresDebt;
+        // _cachedPynthDebt[FUTURES_DEBT_KEY] = futuresDebt;
         // uint numValues = values.length;
         // for (uint i; i < numValues; i++) {
         //     uint value = values[i];
-        //     snxCollateralDebt = snxCollateralDebt.add(value);
-        //     _cachedSynthDebt[currencyKeys[i]] = value;
+        //     periCollateralDebt = periCollateralDebt.add(value);
+        //     _cachedPynthDebt[currencyKeys[i]] = value;
         // }
 
-        // // Subtract out the excluded non-SNX backed debt from our total
-        // _cachedSynthDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
-        // uint newDebt = snxCollateralDebt.floorsub(excludedDebt);
+        // // Subtract out the excluded non-PERI backed debt from our total
+        // _cachedPynthDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
+        // uint newDebt = periCollateralDebt.floorsub(excludedDebt);
         // _cachedDebt = newDebt;
         // _cacheTimestamp = block.timestamp;
         // emit DebtCacheUpdated(newDebt);
@@ -111,22 +111,22 @@ contract RealtimeDebtCache is BaseDebtCache {
 
     // function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
     //     // (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
-    //     // _updateCachedSynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
+    //     // _updateCachedPynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     // }
 
     // function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
-    //     bytes32[] memory synthKeyArray = new bytes32[](1);
-    //     synthKeyArray[0] = currencyKey;
-    //     uint[] memory synthRateArray = new uint[](1);
-    //     synthRateArray[0] = currencyRate;
-    //     _updateCachedSynthDebtsWithRates(synthKeyArray, synthRateArray, false);
+    //     bytes32[] memory pynthKeyArray = new bytes32[](1);
+    //     pynthKeyArray[0] = currencyKey;
+    //     uint[] memory pynthRateArray = new uint[](1);
+    //     pynthRateArray[0] = currencyRate;
+    //     _updateCachedPynthDebtsWithRates(pynthKeyArray, pynthRateArray, false);
     // }
 
     // function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates)
     //     external
     //     onlyIssuerOrExchanger
     // {
-    //     _updateCachedSynthDebtsWithRates(currencyKeys, currencyRates, false);
+    //     _updateCachedPynthDebtsWithRates(currencyKeys, currencyRates, false);
     // }
 
     //function updateDebtCacheValidity(bool currentlyInvalid) external 
@@ -150,10 +150,10 @@ contract RealtimeDebtCache is BaseDebtCache {
     {
      //   uint delta = SafeDecimalMath.abs(amount);
         // if (amount > 0) {
-        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].add(delta);
+        //     _cachedPynthDebt[pUSD] = _cachedPynthDebt[pUSD].add(delta);
         //     _cachedDebt = _cachedDebt.add(delta);
         // } else {
-        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].sub(delta);
+        //     _cachedPynthDebt[pUSD] = _cachedPynthDebt[pUSD].sub(delta);
         //     _cachedDebt = _cachedDebt.sub(delta);
         // }
 
@@ -169,8 +169,8 @@ contract RealtimeDebtCache is BaseDebtCache {
     //     }
     // }
 
-    // // Updated the global debt according to a rate/supply change in a subset of issued synths.
-    // function _updateCachedSynthDebtsWithRates(
+    // // Updated the global debt according to a rate/supply change in a subset of issued pynths.
+    // function _updateCachedPynthDebtsWithRates(
     //     bytes32[] memory currencyKeys,
     //     uint[] memory currentRates,
     //     bool anyRateIsInvalid
@@ -178,19 +178,19 @@ contract RealtimeDebtCache is BaseDebtCache {
     //     uint numKeys = currencyKeys.length;
     //     require(numKeys == currentRates.length, "Input array lengths differ");
 
-    //     // Compute the cached and current debt sum for the subset of synths provided.
+    //     // Compute the cached and current debt sum for the subset of pynths provided.
     //     uint cachedSum;
     //     uint currentSum;
-    //     uint[] memory currentValues = _issuedSynthValues(currencyKeys, currentRates);
+    //     uint[] memory currentValues = _issuedPynthValues(currencyKeys, currentRates);
 
     //     for (uint i = 0; i < numKeys; i++) {
     //         bytes32 key = currencyKeys[i];
-    //         uint currentSynthDebt = currentValues[i];
+    //         uint currentPynthDebt = currentValues[i];
 
-    //         cachedSum = cachedSum.add(_cachedSynthDebt[key]);
-    //         currentSum = currentSum.add(currentSynthDebt);
+    //         cachedSum = cachedSum.add(_cachedPynthDebt[key]);
+    //         currentSum = currentSum.add(currentPynthDebt);
 
-    //         _cachedSynthDebt[key] = currentSynthDebt;
+    //         _cachedPynthDebt[key] = currentPynthDebt;
     //     }
 
     //     // Apply the debt update.

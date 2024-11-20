@@ -19,14 +19,14 @@ import "./Proxyable.sol";
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";
 
 /**
- * Compares current exchange rate to previous, and suspends a synth if the
+ * Compares current exchange rate to previous, and suspends a pynth if the
  * difference is outside of deviation bounds.
- * Stores last "good" rate for each synth on each invocation.
+ * Stores last "good" rate for each pynth on each invocation.
  * Inteded use is to use in combination with ExchangeRates on mutative exchange-like
  * methods.
  * Suspend functionality is public, resume functionality is controlled by owner.
  *
- * https://docs.synthetix.io/contracts/source/contracts/CircuitBreaker
+ * https://docs.periFinance.io/contracts/source/contracts/CircuitBreaker
  */
 contract CircuitBreaker is Owned, MixinSystemSettings, ICircuitBreaker {
     using SafeMath for uint;
@@ -93,7 +93,7 @@ contract CircuitBreaker is Owned, MixinSystemSettings, ICircuitBreaker {
      * Checks rate deviation from previous and its "invalid" oracle state (stale rate, of flagged by oracle).
      * If its valid, set the `circuitBoken` flag and return false. Continue storing price updates as normal.
      * Also, checks that system is not suspended currently, if it is - doesn't perform any checks, and
-     * returns last rate and the current broken state, to prevent synths suspensions during maintenance.
+     * returns last rate and the current broken state, to prevent pynths suspensions during maintenance.
      */
     function probeCircuitBreaker(address oracleAddress, uint value) external onlyProbers returns (bool circuitBroken) {
         require(oracleAddress != address(0), "Oracle address is 0");
@@ -119,7 +119,7 @@ contract CircuitBreaker is Owned, MixinSystemSettings, ICircuitBreaker {
     /**
      * SIP-139
      * resets the stored value for _lastValue for multiple currencies to the latest rate
-     * can be used to enable synths after a broken circuit happenned
+     * can be used to enable pynths after a broken circuit happenned
      * doesn't check deviations here, so believes that owner knows better
      * emits LastRateOverridden
      */

@@ -248,13 +248,13 @@
 	"PynthpSUSHI": {
 		"deploy": false
 	},
-	"TokenStatepSNX": {
+	"TokenStatepPERI": {
 		"deploy": false
 	},
-	"ProxyERC20pSNX": {
+	"ProxyERC20pPERI": {
 		"deploy": false
 	},
-	"PynthpSNX": {
+	"PynthpPERI": {
 		"deploy": false
 	},
 	"TokenStatepCRV": {

@@ -815,17 +815,17 @@
 				"status": "current",
 				"keccak256": "0x67d8cf2957b67b94e8cdb895f55e65678298fcbdf33ea1d1e6234736e30f7f06"
 			},
-			"TokenStatepSNX": {
+			"TokenStatepPERI": {
 				"address": "0xd22945328a8d8ab206b110cC777e7cc4E3A82b67",
 				"status": "current",
 				"keccak256": "0xabe39a92203ae4f0e0e4d894d45b77c88ba03cebb4dbe5b109dcd6c914133afd"
 			},
-			"ProxyERC20pSNX": {
+			"ProxyERC20pPERI": {
 				"address": "0x5f533cC501a8193C161f188A115712D1aAe653da",
 				"status": "current",
 				"keccak256": "0x4ee55f23dc2908768ecec4e68cdf09573a0c1038caa3bbf2a755d08f782e4dad"
 			},
-			"PynthpSNX": {
+			"PynthpPERI": {
 				"address": "0xD44f8bB4E3dC4dB7d9b1835872A66fa5caAbd4E8",
 				"status": "current",
 				"keccak256": "0x67d8cf2957b67b94e8cdb895f55e65678298fcbdf33ea1d1e6234736e30f7f06"

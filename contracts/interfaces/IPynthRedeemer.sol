@@ -4,20 +4,20 @@ import "./IERC20.sol";
 
 interface IPynthRedeemer {
     // Rate of redemption - 0 for none
-    function redemptions(address synthProxy) external view returns (uint redeemRate);
+    function redemptions(address pynthProxy) external view returns (uint redeemRate);
 
-    // sUSD balance of deprecated token holder
-    function balanceOf(IERC20 synthProxy, address account) external view returns (uint balanceOfInsUSD);
+    // pUSD balance of deprecated token holder
+    function balanceOf(IERC20 pynthProxy, address account) external view returns (uint balanceOfInpUSD);
 
-    // Full sUSD supply of token
-    function totalSupply(IERC20 synthProxy) external view returns (uint totalSupplyInsUSD);
+    // Full pUSD supply of token
+    function totalSupply(IERC20 pynthProxy) external view returns (uint totalSupplyInpUSD);
 
-    function redeem(IERC20 synthProxy) external;
+    function redeem(IERC20 pynthProxy) external;
 
-    function redeemAll(IERC20[] calldata synthProxies) external;
+    function redeemAll(IERC20[] calldata pynthProxies) external;
 
-    function redeemPartial(IERC20 synthProxy, uint amountOfPynth) external;
+    function redeemPartial(IERC20 pynthProxy, uint amountOfPynth) external;
 
     // Restricted to Issuer
-    function deprecate(IERC20 synthProxy, uint rateToRedeem) external;
+    function deprecate(IERC20 pynthProxy, uint rateToRedeem) external;
 }

@@ -127,7 +127,7 @@ contract('OneNetAggregators', async accounts => {
 
 	describe('OneNetAggregatorIssuedPynths', () => {
 		describe('getRoundData(uint80)', () => {
-			it('gets current issued synths', async () => {
+			it('gets current issued pynths', async () => {
 				assert.bnEqual((await aggregatorIssuedPynths.getRoundData(0))[1], toUnit(500));
 			});
 		});
@@ -135,7 +135,7 @@ contract('OneNetAggregators', async accounts => {
 
 	describe('OneNetAggregatorDebtRatio', () => {
 		describe('getRoundData(uint80)', async () => {
-			it('gets current issued synths', async () => {
+			it('gets current issued pynths', async () => {
 				assert.bnEqual((await aggregatorDebtRatio.getRoundData(0))[1], toPreciseUnit('0.5'));
 			});
 		});

@@ -144,8 +144,8 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
 
-    // function synthetixDebtShare() internal view returns (ISynthetixDebtShare) {
-    //     return ISynthetixDebtShare(requireAndGetAddress(CONTRACT_SYNTHETIXDEBTSHARE));
+    // function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
+    //     return IPeriFinanceDebtShare(requireAndGetAddress(CONTRACT_SYNTHETIXDEBTSHARE));
     // }
 
     function feePoolState() internal view returns (FeePoolState) {
@@ -225,15 +225,15 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     function allNetworksDebtSharesSupply() public view returns (uint256 sharesSupply, uint256 updatedAt) {
-        (, int256 rawIssuedSynths, , uint issuedSynthsUpdatedAt, ) =
+        (, int256 rawIssuedPynths, , uint issuedPynthsUpdatedAt, ) =
             AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS)).latestRoundData();
 
         (, int256 rawRatio, , uint ratioUpdatedAt, ) =
             AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_DEBT_RATIO)).latestRoundData();
 
-        uint debt = uint(rawIssuedSynths);
+        uint debt = uint(rawIssuedPynths);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
-        updatedAt = issuedSynthsUpdatedAt < ratioUpdatedAt ? issuedSynthsUpdatedAt : ratioUpdatedAt;
+        updatedAt = issuedPynthsUpdatedAt < ratioUpdatedAt ? issuedPynthsUpdatedAt : ratioUpdatedAt;
     }
 
     function recentFeePeriods(uint index)
@@ -494,13 +494,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     //     // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
     //     // get current oracle values
-    //     (uint snxBackedDebt, ) = allNetworksSnxBackedDebt();
+    //     (uint periBackedDebt, ) = allNetworksSnxBackedDebt();
 
-    //     require(false, "test");
     //     (uint debtSharesSupply, ) = allNetworksDebtSharesSupply();
 
     //     // close on this chain
-    //     _closeSecondary(snxBackedDebt, debtSharesSupply);
+    //     _closeSecondary(periBackedDebt, debtSharesSupply);
 
 
     //     //inform other chain of the chosen values
@@ -510,7 +509,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     //             "Missing contract: PeriFinanceBridgeToOptimism"
     //         )
     //     )
-    //         .closeFeePeriod(snxBackedDebt, debtSharesSupply);
+    //         .closeFeePeriod(periBackedDebt, debtSharesSupply);
     // }
 
     function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
@@ -524,7 +523,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         etherWrapper().distributeFees();
         wrapperFactory().distributeFees();
 
-        // before closing the current fee period, set the recorded snxBackedDebt and debtSharesSupply
+        // before closing the current fee period, set the recorded periBackedDebt and debtSharesSupply
         _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
         _recentFeePeriodsStorage(0).allNetworksSnxBackedDebt = allNetworksSnxBackedDebt;
 
@@ -549,7 +548,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // Note: As of SIP-255, all pUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
         if (_recentFeePeriodsStorage(0).feesToDistribute > 0) {
-            //issuer().burnSynthsWithoutDebt(pUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
+            //issuer().burnPynthsWithoutDebt(pUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
 
             // Mark the burnt fees as claimed.
             _recentFeePeriodsStorage(0).feesClaimed = _recentFeePeriodsStorage(0).feesToDistribute;
@@ -874,7 +873,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * This also does not consider pending fees in the wrappers since they are distributed at fee period close.
      */
     function feesToBurn(address account) public view returns (uint feesFromPeriod) {
-        // ISynthetixDebtShare sds = synthetixDebtShare();
+        // IPeriFinanceDebtShare sds = periFinanceDebtShare();
         // uint userOwnershipPercentage = sds.sharePercent(account);
         // (feesFromPeriod, ) = _feesAndRewardsFromPeriod(0, userOwnershipPercentage);
         // return feesFromPeriod;

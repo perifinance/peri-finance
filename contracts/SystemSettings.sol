@@ -210,7 +210,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP 112: ETH Wrappr
-    // The fee for burning sETH and releasing ETH from the EtherWrapper.
+    // The fee for burning pETH and releasing ETH from the EtherWrapper.
     function etherWrapperBurnFeeRate() external view returns (uint) {
         return getEtherWrapperBurnFeeRate();
     }
@@ -228,7 +228,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP 182: Wrapper Factory
-    // The fee for burning synth and releasing token from the Wrapper.
+    // The fee for burning pynth and releasing token from the Wrapper.
     function wrapperBurnFeeRate(address wrapper) external view returns (int) {
         return getWrapperBurnFeeRate(wrapper);
     }
@@ -254,25 +254,25 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-120 Atomic exchanges
-    // equivalent asset to use for a synth when considering external prices for atomic exchanges
+    // equivalent asset to use for a pynth when considering external prices for atomic exchanges
     function atomicEquivalentForDexPricing(bytes32 currencyKey) external view returns (address) {
         return getAtomicEquivalentForDexPricing(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // fee rate override for atomic exchanges into a synth
+    // fee rate override for atomic exchanges into a pynth
     function atomicExchangeFeeRate(bytes32 currencyKey) external view returns (uint) {
         return getAtomicExchangeFeeRate(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // consideration window for determining synth volatility
+    // consideration window for determining pynth volatility
     function atomicVolatilityConsiderationWindow(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityConsiderationWindow(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // update threshold for determining synth volatility
+    // update threshold for determining pynth volatility
     function atomicVolatilityUpdateThreshold(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityUpdateThreshold(currencyKey);
     }
@@ -285,8 +285,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
 
     // SIP-229 Atomic exchanges
     // enable/disable sending of pynths cross chain
-    function crossChainSynthTransferEnabled(bytes32 currencyKey) external view returns (uint) {
-        return getCrossChainSynthTransferEnabled(currencyKey);
+    function crossChainPynthTransferEnabled(bytes32 currencyKey) external view returns (uint) {
+        return getCrossChainPynthTransferEnabled(currencyKey);
     }
 
     // ========== RESTRICTED ==========
@@ -590,9 +590,9 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit PureChainlinkPriceForAtomicSwapsEnabledUpdated(_currencyKey, _enabled);
     }
 
-    function setCrossChainSynthTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
-        flexibleStorage().setCrossChainSynthTransferEnabled(SETTING_CROSS_SYNTH_TRANSFER_ENABLED, _currencyKey, _value);
-        emit CrossChainSynthTransferEnabledUpdated(_currencyKey, _value);
+    function setCrossChainPynthTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
+        flexibleStorage().setCrossChainPynthTransferEnabled(SETTING_CROSS_SYNTH_TRANSFER_ENABLED, _currencyKey, _value);
+        emit CrossChainPynthTransferEnabledUpdated(_currencyKey, _value);
     }
 
     // ========== EVENTS ==========
@@ -636,10 +636,10 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event CollapseFeeRateUpdated(uint collapseFeeRate);
     event AtomicMaxVolumePerBlockUpdated(uint newMaxVolume);
     event AtomicTwapWindowUpdated(uint newWindow);
-    event AtomicEquivalentForDexPricingUpdated(bytes32 synthKey, address equivalent);
-    event AtomicExchangeFeeUpdated(bytes32 synthKey, uint newExchangeFeeRate);
-    event AtomicVolatilityConsiderationWindowUpdated(bytes32 synthKey, uint newVolatilityConsiderationWindow);
-    event AtomicVolatilityUpdateThresholdUpdated(bytes32 synthKey, uint newVolatilityUpdateThreshold);
-    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 synthKey, bool enabled);
-    event CrossChainSynthTransferEnabledUpdated(bytes32 synthKey, uint value);
+    event AtomicEquivalentForDexPricingUpdated(bytes32 pynthKey, address equivalent);
+    event AtomicExchangeFeeUpdated(bytes32 pynthKey, uint newExchangeFeeRate);
+    event AtomicVolatilityConsiderationWindowUpdated(bytes32 pynthKey, uint newVolatilityConsiderationWindow);
+    event AtomicVolatilityUpdateThresholdUpdated(bytes32 pynthKey, uint newVolatilityUpdateThreshold);
+    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 pynthKey, bool enabled);
+    event CrossChainPynthTransferEnabledUpdated(bytes32 pynthKey, uint value);
 }

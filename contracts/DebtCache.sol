@@ -99,28 +99,28 @@ contract DebtCache is BaseDebtCache {
     }
 
     function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external 
-    //onlyDebtIssuer 
+    onlyDebtIssuer 
     {
-        // int256 newExcludedDebt = int256(_excludedIssuedDebt[currencyKey]) + delta;
+        int256 newExcludedDebt = int256(_excludedIssuedDebt[currencyKey]) + delta;
 
-        // require(newExcludedDebt >= 0, "Excluded debt cannot become negative");
+        require(newExcludedDebt >= 0, "Excluded debt cannot become negative");
 
-        // _excludedIssuedDebt[currencyKey] = uint(newExcludedDebt);
+        _excludedIssuedDebt[currencyKey] = uint(newExcludedDebt);
     }
 
     function updateCachedpUSDDebt(int amount) external 
-    //onlyIssuer
+    onlyIssuer
      {
-        // uint delta = SafeDecimalMath.abs(amount);
-        // if (amount > 0) {
-        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].add(delta);
-        //     _cachedDebt = _cachedDebt.add(delta);
-        // } else {
-        //     _cachedSynthDebt[pUSD] = _cachedSynthDebt[pUSD].sub(delta);
-        //     _cachedDebt = _cachedDebt.sub(delta);
-        // }
+        uint delta = SafeDecimalMath.abs(amount);
+        if (amount > 0) {
+            _cachedPynthDebt[pUSD] = _cachedPynthDebt[pUSD].add(delta);
+            _cachedDebt = _cachedDebt.add(delta);
+        } else {
+            _cachedPynthDebt[pUSD] = _cachedPynthDebt[pUSD].sub(delta);
+            _cachedDebt = _cachedDebt.sub(delta);
+        }
 
-        // emit DebtCacheUpdated(_cachedDebt);
+        emit DebtCacheUpdated(_cachedDebt);
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */

@@ -18,7 +18,7 @@ import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
 import "./interfaces/ICircuitBreaker.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/exchangerates
+// https://docs.periFinance.io/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
     using SafeDecimalMath for uint;

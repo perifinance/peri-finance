@@ -87,7 +87,7 @@ interface IExchanger {
         bool virtualPynth,
         address rewardAddress,
         bytes32 trackingCode
-    ) external returns (uint amountReceived, IVirtualPynth vSynth);
+    ) external returns (uint amountReceived, IVirtualPynth vPynth);
 
     function exchangeAtomically(
         address from,
@@ -108,7 +108,7 @@ interface IExchanger {
         );
 }
 
-// Used to have strongly-typed access to internal mutative functions in Synthetix
+// Used to have strongly-typed access to internal mutative functions in PeriFinance
 interface IPeriFinanceInternal {
     function emitExchangeTracking(
         bytes32 trackingCode,
@@ -126,7 +126,7 @@ interface IPeriFinanceInternal {
         address toAddress
     ) external;
 
-    function emitAtomicSynthExchange(
+    function emitAtomicPynthExchange(
         address account,
         bytes32 fromCurrencyKey,
         uint fromAmount,
