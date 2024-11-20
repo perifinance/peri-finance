@@ -3,8 +3,9 @@ pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./Owned.sol";
-import "./MixinResolver.sol";
 import "./MixinSystemSettings.sol";
+import "./MixinResolver.sol";
+import "./interfaces/IERC20.sol";
 import "./interfaces/IExchangeRates.sol";
 
 // Libraries
@@ -15,14 +16,9 @@ import "./SafeDecimalMath.sol";
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/AggregatorV2V3Interface.sol";
 // FlagsInterface from Chainlink addresses SIP-76
 import "@chainlink/contracts-0.0.10/src/v0.5/interfaces/FlagsInterface.sol";
-import "./interfaces/IExchanger.sol";
 import "./interfaces/ICircuitBreaker.sol";
 
-interface IExternalRateAggregator {
-    function getRateAndUpdatedTime(bytes32 _currencyKey) external view returns (uint, uint);
-}
-
-// https://docs.peri.finance/contracts/source/contracts/exchangerates
+// https://docs.synthetix.io/contracts/source/contracts/exchangerates
 contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
@@ -34,15 +30,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     //slither-disable-next-line naming-convention
     bytes32 internal constant pUSD = "pUSD";
 
-
-    // Exchange rates and update times stored by currency code, e.g. 'PERI', or 'pUSD'
-    mapping(bytes32 => mapping(uint => RateAndUpdatedTime)) private _rates;
-
-    // The address of the oracle which pushes rate updates to this contract
-    address public oracle;
-
-    mapping(bytes32 => bool) public currencyByExternal;
-
     // Decentralized oracle networks that feed into pricing aggregators
     mapping(bytes32 => AggregatorV2V3Interface) public aggregators;
 
@@ -51,135 +38,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     // List of aggregator keys for convenient iteration
     bytes32[] public aggregatorKeys;
 
-    // Do not allow the oracle to submit times any further forward into the future than this constant.
-    uint private constant ORACLE_FUTURE_LIMIT = 10 minutes;
-
-    mapping(bytes32 => InversePricing) public inversePricing;
-
-    bytes32[] public invertedKeys;
-
-    mapping(bytes32 => uint) public currentRoundForRate;
-
-    mapping(bytes32 => uint) public roundFrozen;
-
-    /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
-
-    //
     // ========== CONSTRUCTOR ==========
 
-    constructor(
-        address _owner,
-        address _oracle,
-        address _resolver,
-        bytes32[] memory _currencyKeys,
-        uint[] memory _newRates
-    ) public Owned(_owner) MixinSystemSettings(_resolver) {
-        require(_currencyKeys.length == _newRates.length, "Currency key length and rate length must match.");
-
-        oracle = _oracle;
-
-        // The pUSD rate is always 1 and is never stale.
-        _setRate("pUSD", SafeDecimalMath.unit(), now);
-
-        internalUpdateRates(_currencyKeys, _newRates, now);
-    }
-
-    /* ========== SETTERS ========== */
-
-    function setOracle(address _oracle) external onlyOwner {
-        oracle = _oracle;
-        emit OracleUpdated(oracle);
-    }
-
-    function setCurrencyToExternalAggregator(bytes32 _currencyKey, bool _set) external onlyOwner {
-        currencyByExternal[_currencyKey] = _set;
-    }
+    constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
     /* ========== MUTATIVE FUNCTIONS ========== */
-
-    function updateRates(
-        bytes32[] calldata currencyKeys,
-        uint[] calldata newRates,
-        uint timeSent
-    ) external onlyOracle returns (bool) {
-        return internalUpdateRates(currencyKeys, newRates, timeSent);
-    }
-
-    function deleteRate(bytes32 currencyKey) external onlyOracle {
-        require(_getRate(currencyKey) > 0, "Rate is zero");
-
-        delete _rates[currencyKey][currentRoundForRate[currencyKey]];
-
-        currentRoundForRate[currencyKey]--;
-
-        emit RateDeleted(currencyKey);
-    }
-
-    function setInversePricing(
-        bytes32 currencyKey,
-        uint entryPoint,
-        uint upperLimit,
-        uint lowerLimit,
-        bool freezeAtUpperLimit,
-        bool freezeAtLowerLimit
-    ) external onlyOwner {
-        // 0 < lowerLimit < entryPoint => 0 < entryPoint
-        require(lowerLimit > 0, "lowerLimit must be above 0");
-        require(upperLimit > entryPoint, "upperLimit must be above the entryPoint");
-        require(upperLimit < entryPoint.mul(2), "upperLimit must be less than double entryPoint");
-        require(lowerLimit < entryPoint, "lowerLimit must be below the entryPoint");
-
-        require(!(freezeAtUpperLimit && freezeAtLowerLimit), "Cannot freeze at both limits");
-
-        InversePricing storage inverse = inversePricing[currencyKey];
-        if (inverse.entryPoint == 0) {
-            // then we are adding a new inverse pricing, so add this
-            invertedKeys.push(currencyKey);
-        }
-        inverse.entryPoint = entryPoint;
-        inverse.upperLimit = upperLimit;
-        inverse.lowerLimit = lowerLimit;
-
-        if (freezeAtUpperLimit || freezeAtLowerLimit) {
-            // When indicating to freeze, we need to know the rate to freeze it at - either upper or lower
-            // this is useful in situations where ExchangeRates is updated and there are existing inverted
-            // rates already frozen in the current contract that need persisting across the upgrade
-
-            inverse.frozenAtUpperLimit = freezeAtUpperLimit;
-            inverse.frozenAtLowerLimit = freezeAtLowerLimit;
-            uint roundId = _getCurrentRoundId(currencyKey);
-            roundFrozen[currencyKey] = roundId;
-            emit InversePriceFrozen(currencyKey, freezeAtUpperLimit ? upperLimit : lowerLimit, roundId, msg.sender);
-        } else {
-            // unfreeze if need be
-            inverse.frozenAtUpperLimit = false;
-            inverse.frozenAtLowerLimit = false;
-            // remove any tracking
-            roundFrozen[currencyKey] = 0;
-        }
-
-        // SIP-78
-        uint rate = _getRate(currencyKey);
-        if (rate > 0) {
-            exchanger().setLastExchangeRateForPynth(currencyKey, rate);
-        }
-
-        emit InversePriceConfigured(currencyKey, entryPoint, upperLimit, lowerLimit);
-    }
-
-    function removeInversePricing(bytes32 currencyKey) external onlyOwner {
-        require(inversePricing[currencyKey].entryPoint > 0, "No inverted price exists");
-
-        delete inversePricing[currencyKey];
-
-        // now remove inverted key from array
-        bool wasRemoved = removeFromArray(currencyKey, invertedKeys);
-
-        if (wasRemoved) {
-            emit InversePriceConfigured(currencyKey, 0, 0, 0);
-        }
-    }
 
     function addAggregator(bytes32 currencyKey, address aggregatorAddress) external onlyOwner {
         AggregatorV2V3Interface aggregator = AggregatorV2V3Interface(aggregatorAddress);
@@ -237,48 +100,18 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             _rateIsFlagged(currencyKey, FlagsInterface(getAggregatorWarningFlags()));
     }
 
-    // SIP-75 Public keeper function to freeze a pynth that is out of bounds
-    function freezeRate(bytes32 currencyKey) external {
-        InversePricing storage inverse = inversePricing[currencyKey];
-        require(inverse.entryPoint > 0, "Cannot freeze non-inverse rate");
-        require(!inverse.frozenAtUpperLimit && !inverse.frozenAtLowerLimit, "The rate is already frozen");
-
-        uint rate = _getRate(currencyKey);
-
-        if (rate > 0 && (rate >= inverse.upperLimit || rate <= inverse.lowerLimit)) {
-            inverse.frozenAtUpperLimit = (rate == inverse.upperLimit);
-            inverse.frozenAtLowerLimit = (rate == inverse.lowerLimit);
-            uint currentRoundId = _getCurrentRoundId(currencyKey);
-            roundFrozen[currencyKey] = currentRoundId;
-            emit InversePriceFrozen(currencyKey, rate, currentRoundId, msg.sender);
-        } else {
-            revert("Rate within bounds");
-        }
-    }
-
     /* ========== VIEWS ========== */
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
         bytes32[] memory newAddresses = new bytes32[](1);
-        //newAddresses[0] = CONTRACT_CIRCUIT_BREAKER;
-        newAddresses[0] = CONTRACT_EXCHANGER;
-        addresses = combineArrays(existingAddresses, newAddresses);
+        newAddresses[0] = CONTRACT_CIRCUIT_BREAKER;
+
+        return combineArrays(existingAddresses, newAddresses);
     }
 
     function circuitBreaker() internal view returns (ICircuitBreaker) {
         return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
-    }
-
-    // SIP-75 View to determine if freezeRate can be called safely
-    function canFreezeRate(bytes32 currencyKey) external view returns (bool) {
-        InversePricing memory inverse = inversePricing[currencyKey];
-        if (inverse.entryPoint == 0 || inverse.frozenAtUpperLimit || inverse.frozenAtLowerLimit) {
-            return false;
-        } else {
-            uint rate = _getRate(currencyKey);
-            return (rate > 0 && (rate >= inverse.upperLimit || rate <= inverse.lowerLimit));
-        }
     }
 
     function currenciesUsingAggregator(address aggregator) external view returns (bytes32[] memory currencies) {
@@ -352,7 +185,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             (destinationRate, ) = _getRateAndTimestampAtRound(destinationCurrencyKey, roundIdForDest);
             // prevent divide-by 0 error (this happens if the dest is not a valid rate)
             if (destinationRate > 0) {
-        // Calculate the effective value by going from source -> USD -> destination
+                // Calculate the effective value by going from source -> USD -> destination
                 value = sourceAmount.multiplyDecimalRound(sourceRate).divideDecimalRound(destinationRate);
             }
         }
@@ -480,15 +313,15 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function rateAndInvalid(bytes32 currencyKey) public view returns (uint rate, bool isInvalid) {
         RateAndUpdatedTime memory rateAndTime = _getRateAndUpdatedTime(currencyKey);
-
+    
         if (currencyKey == "pUSD") {
             return (rateAndTime.rate, false);
         }
         return (
-            rateAndTime.rate,
+            rateAndTime.rate, 
             _rateIsStaleWithTime(getRateStalePeriod(), rateAndTime.time) ||
-                _rateIsFlagged(currencyKey, FlagsInterface(getAggregatorWarningFlags())) 
-                //|| _rateIsCircuitBroken(currencyKey, rateAndTime.rate)
+                _rateIsFlagged(currencyKey, FlagsInterface(getAggregatorWarningFlags())) ||
+                _rateIsCircuitBroken(currencyKey, rateAndTime.rate)
         );
     }
 
@@ -508,9 +341,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             // do one lookup of the rate & time to minimize gas
             RateAndUpdatedTime memory rateEntry = _getRateAndUpdatedTime(currencyKeys[i]);
             rates[i] = rateEntry.rate;
-            if (!anyRateInvalid && currencyKeys[i] != "pUSD") {
-                anyRateInvalid = flagList[i] || _rateIsStaleWithTime(_rateStalePeriod, rateEntry.time);
-                //||_rateIsCircuitBroken(currencyKeys[i], rateEntry.rate);
+            if (!anyRateInvalid && currencyKeys[i] != pUSD) {
+                anyRateInvalid =
+                    flagList[i] ||
+                    _rateIsStaleWithTime(_rateStalePeriod, rateEntry.time) ||
+                    _rateIsCircuitBroken(currencyKeys[i], rateEntry.rate);
             }
         }
     }
@@ -519,14 +354,9 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         return _rateIsStale(currencyKey, getRateStalePeriod());
     }
 
-    function rateIsFrozen(bytes32 currencyKey) external view returns (bool) {
-        return _rateIsFrozen(currencyKey);
-    }
-
     function rateIsInvalid(bytes32 currencyKey) external view returns (bool) {
-        return
-            _rateIsStale(currencyKey, getRateStalePeriod()) ||
-            _rateIsFlagged(currencyKey, FlagsInterface(getAggregatorWarningFlags()));
+        (, bool invalid) = rateAndInvalid(currencyKey);
+        return invalid;
     }
 
     function rateIsFlagged(bytes32 currencyKey) external view returns (bool) {
@@ -540,7 +370,16 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         bool[] memory flagList = getFlagsForRates(currencyKeys);
 
         for (uint i = 0; i < currencyKeys.length; i++) {
-            if (flagList[i] || _rateIsStale(currencyKeys[i], _rateStalePeriod)) {
+            if (currencyKeys[i] == pUSD) {
+                continue;
+            }
+
+            RateAndUpdatedTime memory rateEntry = _getRateAndUpdatedTime(currencyKeys[i]);
+            if (
+                flagList[i] ||
+                _rateIsStaleWithTime(_rateStalePeriod, rateEntry.time) ||
+                _rateIsCircuitBroken(currencyKeys[i], rateEntry.rate)
+            ) {
                 return true;
             }
         }
@@ -573,9 +412,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
             // but thats not how the functionality has worked prior to this change so that is why it works this way here
             // if you are adding new code taht calls this function and the rate is a long time ago, note that this function may resolve an invalid rate when its actually valid!
             (uint rate, uint time) = _getRateAndTimestampAtRound(currencyKeys[i], roundIds[i]);
-            if (flagList[i] || _rateIsStaleWithTime(_rateStalePeriod, time) 
-            //|| _rateIsCircuitBroken(currencyKeys[i], rate)
-            ) {
+            if (flagList[i] || _rateIsStaleWithTime(_rateStalePeriod, time) || _rateIsCircuitBroken(currencyKeys[i], rate)) {
                 return true;
             }
         }
@@ -583,11 +420,11 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         return false;
     }
 
-    function synthTooVolatileForAtomicExchange(bytes32) public view returns (bool) {
+    function pynthTooVolatileForAtomicExchange(bytes32) public view returns (bool) {
         _notImplemented();
     }
 
-    function synthTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings memory)
+    function pynthTooVolatileForAtomicExchange(IDirectIntegrationManager.ParameterIntegrationSettings memory)
         public
         view
         returns (bool)
@@ -596,10 +433,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
-
-    function exchanger() internal view returns (IExchanger) {
-        return IExchanger(requireAndGetAddress(CONTRACT_EXCHANGER));
-    }
 
     function getFlagsForRates(bytes32[] memory currencyKeys) internal view returns (bool[] memory flagList) {
         FlagsInterface _flags = FlagsInterface(getAggregatorWarningFlags());
@@ -616,64 +449,6 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         } else {
             flagList = new bool[](currencyKeys.length);
         }
-    }
-
-    function _setRate(
-        bytes32 currencyKey,
-        uint256 rate,
-        uint256 time
-    ) internal {
-        // Note: this will effectively start the rounds at 1, which matches Chainlink's Agggregators
-        currentRoundForRate[currencyKey]++;
-
-        _rates[currencyKey][currentRoundForRate[currencyKey]] = RateAndUpdatedTime({
-            rate: uint216(rate),
-            time: uint40(time)
-        });
-    }
-
-    function nowPlusLimit()
-        external
-        view
-        returns (
-            uint,
-            uint,
-            uint
-        )
-    {
-        return (now, ORACLE_FUTURE_LIMIT, now + ORACLE_FUTURE_LIMIT);
-    }
-
-    function internalUpdateRates(
-        bytes32[] memory currencyKeys,
-        uint[] memory newRates,
-        uint timeSent
-    ) internal returns (bool) {
-        require(currencyKeys.length == newRates.length, "Currency key array length must match rates array length.");
-        require(timeSent < (now + ORACLE_FUTURE_LIMIT), "Time is too far into the future");
-
-        // Loop through each key and perform update.
-        for (uint i = 0; i < currencyKeys.length; i++) {
-            bytes32 currencyKey = currencyKeys[i];
-
-            // Should not set any rate to zero ever, as no asset will ever be
-            // truely worthless and still valid. In this scenario, we should
-            // delete the rate and remove it from the system.
-            require(newRates[i] != 0, "Zero is not a valid rate, please call deleteRate instead.");
-            require(currencyKey != "pUSD", "Rate of pUSD cannot be updated, it's always UNIT.");
-
-            // We should only update the rate if it's at least the same age as the last rate we've got.
-            if (timeSent < _getUpdatedTime(currencyKey)) {
-                continue;
-            }
-
-            // Ok, go ahead with the update.
-            _setRate(currencyKey, newRates[i], timeSent);
-        }
-
-        emit RatesUpdated(currencyKeys, newRates);
-
-        return true;
     }
 
     function removeFromArray(bytes32 entry, bytes32[] storage array) internal returns (bool) {
@@ -695,119 +470,83 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         return false;
     }
 
-    function _rateOrInverted(
-        bytes32 currencyKey,
-        uint rate,
-        uint roundId
-    ) internal view returns (uint newRate) {
-        // if an inverse mapping exists, adjust the price accordingly
-        InversePricing memory inverse = inversePricing[currencyKey];
-        if (inverse.entryPoint == 0 || rate == 0) {
-            // when no inverse is set or when given a 0 rate, return the rate, regardless of the inverse status
-            // (the latter is so when a new inverse is set but the underlying has no rate, it will return 0 as
-            // the rate, not the lowerLimit)
-            return rate;
-        }
-
-        newRate = rate;
-
-        // Determine when round was frozen (if any)
-        uint roundWhenRateFrozen = roundFrozen[currencyKey];
-        // And if we're looking at a rate after frozen, and it's currently frozen, then apply the bounds limit even
-        // if the current price is back within bounds
-        if (roundId >= roundWhenRateFrozen && inverse.frozenAtUpperLimit) {
-            newRate = inverse.upperLimit;
-        } else if (roundId >= roundWhenRateFrozen && inverse.frozenAtLowerLimit) {
-            newRate = inverse.lowerLimit;
-        } else {
-            // this ensures any rate outside the limit will never be returned
-            uint doubleEntryPoint = inverse.entryPoint.mul(2);
-            if (doubleEntryPoint <= rate) {
-                // avoid negative numbers for unsigned ints, so set this to 0
-                // which by the requirement that lowerLimit be > 0 will
-                // cause this to freeze the price to the lowerLimit
-                newRate = 0;
-            } else {
-                newRate = doubleEntryPoint.sub(rate);
-            }
-
-            // now ensure the rate is between the bounds
-            if (newRate >= inverse.upperLimit) {
-                newRate = inverse.upperLimit;
-            } else if (newRate <= inverse.lowerLimit) {
-                newRate = inverse.lowerLimit;
-            }
-        }
-    }
-
     function _formatAggregatorAnswer(bytes32 currencyKey, int256 rate) internal view returns (uint) {
         require(rate >= 0, "Negative rate not supported");
-        if (currencyKeyDecimals[currencyKey] > 0) {
-            uint multiplier = 10**uint(SafeMath.sub(18, currencyKeyDecimals[currencyKey]));
-            return uint(uint(rate).mul(multiplier));
+        uint decimals = currencyKeyDecimals[currencyKey];
+        uint result = uint(rate);
+        if (decimals == 0 || decimals == 18) {
+            // do not convert for 0 (part of implicit interface), and not needed for 18
+        } else if (decimals < 18) {
+            // increase precision to 18
+            uint multiplier = 10**(18 - decimals); // SafeMath not needed since decimals is small
+            result = result.mul(multiplier);
+        } else if (decimals > 18) {
+            // decrease precision to 18
+            uint divisor = 10**(decimals - 18); // SafeMath not needed since decimals is small
+            result = result.div(divisor);
         }
-        return uint(rate);
-    }
-
-    function _isFromAggregator(bytes32 _currencyKey) internal view returns (bool) {
-        return !currencyByExternal[_currencyKey] && aggregators[_currencyKey] != AggregatorV2V3Interface(0);
+        return result;
     }
 
     function _getRateAndUpdatedTime(bytes32 currencyKey) internal view returns (RateAndUpdatedTime memory) {
-        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
-
-        if (_isFromAggregator(currencyKey)) {
-            // this view from the aggregator is the most gas efficient but it can throw when there's no data,
-            // so let's call it low-level to suppress any reverts
-            bytes memory payload = abi.encodeWithSignature("latestRoundData()");
-            // solhint-disable avoid-low-level-calls
-            (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
-
-            if (success) {
-                (uint80 roundId, int256 answer, , uint256 updatedAt, ) =
-                    abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
-                return
-                    RateAndUpdatedTime({
-                        rate: uint216(_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId)),
-                        time: uint40(updatedAt)
-                    });
-            }
+        // pUSD rate is 1.0
+        if (currencyKey == pUSD) {
+            return RateAndUpdatedTime({rate: uint216(SafeDecimalMath.unit()), time: 0});
         } else {
-            uint roundId = currentRoundForRate[currencyKey];
-            RateAndUpdatedTime memory entry = _rates[currencyKey][roundId];
+            AggregatorV2V3Interface aggregator = aggregators[currencyKey];
+            if (aggregator != AggregatorV2V3Interface(0)) {
+                // this view from the aggregator is the most gas efficient but it can throw when there's no data,
+                // so let's call it low-level to suppress any reverts
+                bytes memory payload = abi.encodeWithSignature("latestRoundData()");
+                // solhint-disable avoid-low-level-calls
+                // slither-disable-next-line low-level-calls
+                (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
 
-            return RateAndUpdatedTime({rate: uint216(_rateOrInverted(currencyKey, entry.rate, roundId)), time: entry.time});
+                if (success) {
+                    (, int256 answer, , uint256 updatedAt, ) =
+                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
+
+                    return
+                        RateAndUpdatedTime({
+                            rate: uint216(_formatAggregatorAnswer(currencyKey, answer)),
+                            time: uint40(updatedAt)
+                        });
+                } // else return defaults, to avoid reverting in views
+            } // else return defaults, to avoid reverting in viewse
         }
     }
 
     function _getCurrentRoundId(bytes32 currencyKey) internal view returns (uint) {
-        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
-
-        if (_isFromAggregator(currencyKey)) {
-            return aggregator.latestRound();
-        } else {
-            return currentRoundForRate[currencyKey];
+        if (currencyKey == pUSD) {
+            return 0;
         }
+        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
+        if (aggregator != AggregatorV2V3Interface(0)) {
+            return aggregator.latestRound();
+        } // else return defaults, to avoid reverting in views
     }
 
     function _getRateAndTimestampAtRound(bytes32 currencyKey, uint roundId) internal view returns (uint rate, uint time) {
-        AggregatorV2V3Interface aggregator = aggregators[currencyKey];
-
-        if (_isFromAggregator(currencyKey)) {
-            // this view from the aggregator is the most gas efficient but it can throw when there's no data,
-            // so let's call it low-level to suppress any reverts
-            bytes memory payload = abi.encodeWithSignature("getRoundData(uint80)", roundId);
-            // solhint-disable avoid-low-level-calls
-            (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
-
-            if (success) {
-                (, int256 answer, , uint256 updatedAt, ) =
-                    abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
-                return (_rateOrInverted(currencyKey, _formatAggregatorAnswer(currencyKey, answer), roundId), updatedAt);
-            }
+        // short circuit pUSD
+        if (currencyKey == pUSD) {
+            // pUSD has no rounds, and 0 time is preferrable for "volatility" heuristics
+            // which are used in atomic swaps and fee reclamation
+            return (SafeDecimalMath.unit(), 0);
         } else {
-            RateAndUpdatedTime memory update = _rates[currencyKey][roundId];
-            return (_rateOrInverted(currencyKey, update.rate, roundId), update.time);
+            AggregatorV2V3Interface aggregator = aggregators[currencyKey];
+            if (aggregator != AggregatorV2V3Interface(0)) {
+                // this view from the aggregator is the most gas efficient but it can throw when there's no data,
+                // so let's call it low-level to suppress any reverts
+                bytes memory payload = abi.encodeWithSignature("getRoundData(uint80)", roundId);
+                // solhint-disable avoid-low-level-calls
+                (bool success, bytes memory returnData) = address(aggregator).staticcall(payload);
+
+                if (success) {
+                    (, int256 answer, , uint256 updatedAt, ) =
+                        abi.decode(returnData, (uint80, int256, uint256, uint256, uint80));
+                    return (_formatAggregatorAnswer(currencyKey, answer), updatedAt);
+                } // else return defaults, to avoid reverting in views
+            } // else return defaults, to avoid reverting in views
         }
     }
 
@@ -849,23 +588,72 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
 
     function _rateIsStale(bytes32 currencyKey, uint _rateStalePeriod) internal view returns (bool) {
         // pUSD is a special case and is never stale (check before an SLOAD of getRateAndUpdatedTime)
-        if (currencyKey == "pUSD") return false;
-
+        if (currencyKey == pUSD) {
+            return false;
+        }
         return _rateIsStaleWithTime(_rateStalePeriod, _getUpdatedTime(currencyKey));
     }
+
+
+function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+
+
+
+function toString(address account) public pure returns(string memory) {
+    return toString(abi.encodePacked(account));
+}
+
+function toString(uint256 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes32 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes memory data) public pure returns(string memory) {
+    bytes memory alphabet = "0123456789abcdef";
+
+    bytes memory str = new bytes(2 + data.length * 2);
+    str[0] = "0";
+    str[1] = "x";
+    for (uint i = 0; i < data.length; i++) {
+        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+    }
+    return string(str);
+}
 
     function _rateIsStaleWithTime(uint _rateStalePeriod, uint _time) internal view returns (bool) {
         return _time.add(_rateStalePeriod) < now;
     }
 
-    function _rateIsFrozen(bytes32 currencyKey) internal view returns (bool) {
-        InversePricing memory inverse = inversePricing[currencyKey];
-        return inverse.frozenAtUpperLimit || inverse.frozenAtLowerLimit;
-    }
-
     function _rateIsFlagged(bytes32 currencyKey, FlagsInterface flags) internal view returns (bool) {
         // pUSD is a special case and is never invalid
-        if (currencyKey == "pUSD") return false;
+        if (currencyKey == pUSD) {
+            return false;
+        }
         address aggregator = address(aggregators[currencyKey]);
         // when no aggregator or when the flags haven't been setup
         if (aggregator == address(0) || flags == FlagsInterface(0)) {
@@ -875,8 +663,7 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
     }
 
     function _rateIsCircuitBroken(bytes32 currencyKey, uint curRate) internal view returns (bool) {
-        return false;
-        //return circuitBreaker().isInvalid(address(aggregators[currencyKey]), curRate);
+        return circuitBreaker().isInvalid(address(aggregators[currencyKey]), curRate);
     }
 
     function _notImplemented() internal pure {
@@ -884,29 +671,8 @@ contract ExchangeRates is Owned, MixinSystemSettings, IExchangeRates {
         revert("Cannot be run on this layer");
     }
 
-    function getInvertedKeys(uint index) external view returns (bytes32) {
-        require(index < invertedKeys.length, "index out of bounds");
-        return invertedKeys[index];
-    }
-
-    /* ========== MODIFIERS ========== */
-
-    modifier onlyOracle {
-        _onlyOracle();
-        _;
-    }
-
-    function _onlyOracle() internal view {
-        require(msg.sender == oracle, "Only the oracle can perform this action");
-    }
-
     /* ========== EVENTS ========== */
 
-    event OracleUpdated(address newOracle);
-    event RatesUpdated(bytes32[] currencyKeys, uint[] newRates);
-    event RateDeleted(bytes32 currencyKey);
-    event InversePriceConfigured(bytes32 currencyKey, uint entryPoint, uint upperLimit, uint lowerLimit);
-    event InversePriceFrozen(bytes32 currencyKey, uint rate, uint roundId, address initiator);
     event AggregatorAdded(bytes32 currencyKey, address aggregator);
     event AggregatorRemoved(bytes32 currencyKey, address aggregator);
 }
