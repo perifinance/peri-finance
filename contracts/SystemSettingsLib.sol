@@ -230,7 +230,7 @@ library SystemSettingsLib {
         flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, period);
     }
 
-    function setExchangeFeeRateForSynths(
+    function setExchangeFeeRateForPynths(
         IFlexibleStorage flexibleStorage,
         bytes32 settingExchangeFeeRate,
         bytes32[] calldata synthKeys,

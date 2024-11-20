@@ -29,7 +29,7 @@ interface IDebtCache {
 
     function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues);
 
-    //function totalNonSnxBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
+    function totalNonPeriBackedDebt() external view returns (uint excludedDebt, bool isInvalid);
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid);
 
@@ -43,7 +43,7 @@ interface IDebtCache {
             bool isStale
         );
 
-    //function excludedIssuedDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory excludedDebts);
+    function excludedIssuedDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory excludedDebts);
 
     // Mutative functions
 
@@ -63,5 +63,5 @@ interface IDebtCache {
 
     function updateCachedpUSDDebt(int amount) external;
 
-    //function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external;
+    function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external;
 }

@@ -14,7 +14,7 @@ contract IEtherWrapper {
 
     function getReserves() external view returns (uint);
 
-    function totalIssuedSynths() external view returns (uint);
+    function totalIssuedPynths() external view returns (uint);
 
     function calculateMintFee(uint amount) public view returns (uint);
 

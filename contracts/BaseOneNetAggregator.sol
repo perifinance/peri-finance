@@ -4,7 +4,7 @@ pragma solidity ^0.5.16;
 
 import "./AddressResolver.sol";
 import "./interfaces/IDebtCache.sol";
-import "./interfaces/ISynthetixDebtShare.sol";
+import "./interfaces/IPeriFinanceDebtShare.sol";
 import "./interfaces/AggregatorV2V3Interface.sol";
 
 import "./SafeDecimalMath.sol";

@@ -29,7 +29,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     bytes32 internal constant pUSD = "pUSD";
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
-    bytes32 private constant CONTRACT_SYNTH_SUSD = "SynthpUSD";
+    bytes32 private constant CONTRACT_SYNTH_SUSD = "PynthpUSD";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
@@ -111,7 +111,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
         return maxToken.sub(balance);
     }
 
-    function totalIssuedSynths() public view returns (uint) {
+    function totalIssuedPynths() public view returns (uint) {
         // synths issued by this contract is always exactly equal to the balance of reserves
         return exchangeRates().effectiveValue(currencyKey, targetSynthIssued, pUSD);
     }
@@ -184,7 +184,7 @@ contract Wrapper is Owned, Pausable, MixinResolver, MixinSystemSettings, IWrappe
     function burn(uint amountIn) external notPaused issuanceActive {
         require(amountIn <= IERC20(address(synth())).balanceOf(msg.sender), "Balance is too low");
         require(!exchangeRates().rateIsInvalid(currencyKey), "Currency rate is invalid");
-        require(totalIssuedSynths() > 0, "Contract cannot burn for token, token balance is zero");
+        require(totalIssuedPynths() > 0, "Contract cannot burn for token, token balance is zero");
 
         (uint burnFee, bool negative) = calculateBurnFee(targetSynthIssued);
 

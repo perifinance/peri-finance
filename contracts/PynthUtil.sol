@@ -79,9 +79,9 @@ contract PynthUtil {
         bytes32[] memory frozenPynthsKeys = new bytes32[](numPynths);
         for (uint i; i < numPynths; i++) {
             IPynth pynth = issuer.availablePynths(i);
-            if (exchangeRates.rateIsFrozen(pynth.currencyKey())) {
-                frozenPynthsKeys[i] = pynth.currencyKey();
-            }
+            // if (exchangeRates.rateIsFrozen(pynth.currencyKey())) {
+            //     frozenPynthsKeys[i] = pynth.currencyKey();
+            // }
         }
         return frozenPynthsKeys;
     }

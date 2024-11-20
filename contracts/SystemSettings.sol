@@ -390,7 +390,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         external
         onlyOwner
     {
-         flexibleStorage().setExchangeFeeRateForSynths(SETTING_EXCHANGE_FEE_RATE, pynthKeys, exchangeFeeRates);
+         flexibleStorage().setExchangeFeeRateForPynths(SETTING_EXCHANGE_FEE_RATE, pynthKeys, exchangeFeeRates);
         for (uint i = 0; i < pynthKeys.length; i++) {
             emit ExchangeFeeUpdated(pynthKeys[i], exchangeFeeRates[i]);
         }

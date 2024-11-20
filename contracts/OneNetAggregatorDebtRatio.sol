@@ -1,10 +1,10 @@
 pragma solidity ^0.5.16;
 
 import "./BaseOneNetAggregator.sol";
+import "./interfaces/IPeriFinanceDebtShare.sol";
 
 contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
     bytes32 public constant CONTRACT_NAME = "OneNetAggregatorDebtRatio";
-
     constructor(AddressResolver _resolver) public BaseOneNetAggregator(_resolver) {}
 
     function getRoundData(uint80)
@@ -18,10 +18,10 @@ contract OneNetAggregatorDebtRatio is BaseOneNetAggregator {
             uint80
         )
     {
-        (uint totalIssuedPynths, ) =
+        uint totalIssuedPynths =
             IIssuer(resolver.requireAndGetAddress("Issuer", "aggregate debt info")).totalIssuedPynths("pUSD", true);
-        uint totalDebtShares =
-            ISynthetixDebtShare(resolver.requireAndGetAddress("SynthetixDebtShare", "aggregate debt info")).totalSupply();
+        uint totalDebtShares = 
+            IPeriFinanceDebtShare(resolver.requireAndGetAddress("PeriFinanceDebtShare", "aggregate debt info")).totalSupply();
 
         uint result =
             totalDebtShares == 0 ? 10**27 : totalIssuedPynths.decimalToPreciseDecimal().divideDecimalRound(totalDebtShares);

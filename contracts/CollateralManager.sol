@@ -211,7 +211,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     function getBorrowRate() public view returns (uint borrowRate, bool anyRateIsInvalid) {
         // get the peri backed debt.
-        (uint periDebt, ) = _issuer().totalIssuedPynths(pUSD, true);
+        uint periDebt = _issuer().totalIssuedPynths(pUSD, true);
 
         // now get the non peri backed debt.
         (uint nonPeriDebt, bool ratesInvalid) = totalLong();
