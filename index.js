@@ -165,7 +165,9 @@ const constants = {
 	OVM_MAX_GAS_LIMIT: '8999999',
 
 	// inflationStartTimestampInSecs: 1626480000, // Saturday, July 17, 2021 9:00:00 AM GMT+09:00
-	inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
+	// inflationStartTimestampInSecs: 1625875200, // Saturday, July 10, 2021 9:00:00 AM GMT+09:00
+	inflationStartTimestampInSecs: 1720569600, // Wed Jul 10 2024 09:00:00 GMT+0900 (Korean Standard Time)
+	
 };
 
 const knownAccounts = {
@@ -223,6 +225,14 @@ const defaults = {
 		C: w3utils.toWei('0.8'),
 		I: w3utils.toWei('0.833333333333333333'),
 	},
+	
+	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
+	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty (used for Collateral liquidations)
+	SNX_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for SNX Liquidations)
+	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
+	FLAG_REWARD: w3utils.toWei('10'), // 10 SNX
+	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 SNX
+
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	PERI_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for PERI Liquidations)
 	RATE_STALE_PERIOD: (3600 * 25).toString(), // 25 hours
@@ -598,6 +608,20 @@ const defaults = {
 		ISSUE_FEE_RATE: w3utils.toWei('0.005'),
 		INTERACTION_DELAY: '3600', // 1 hour in secs
 	},
+
+	ETHER_WRAPPER_MAX_ETH: w3utils.toWei('5000'),
+	ETHER_WRAPPER_MINT_FEE_RATE: w3utils.toWei('0.005'), // 5 bps
+	ETHER_WRAPPER_BURN_FEE_RATE: '0',
+
+	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 pUSD min keeper fee
+	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 pUSD min keeper fee
+	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive
+	FUTURES_LIQUIDATION_BUFFER_RATIO: w3utils.toWei('0.0025'), // 25 basis points liquidation buffer
+	FUTURES_MIN_INITIAL_MARGIN: w3utils.toWei('40'), // minimum initial margin for all markets
+	PERPSV2_KEEPER_LIQUIDATION_FEE: w3utils.toWei('2'), // 2 pUSD keeper liquidation fee (not flagger)
+	// SIP-120
+	ATOMIC_MAX_VOLUME_PER_BLOCK: w3utils.toWei(`${2e5}`), // 200k
+	ATOMIC_TWAP_WINDOW: '1800', // 30 mins
 };
 
 /**
