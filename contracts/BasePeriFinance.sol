@@ -1,13 +1,11 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./interfaces/IERC20.sol";
 import "./ExternStateToken.sol";
 import "./MixinResolver.sol";
 import "./interfaces/IPeriFinance.sol";
-
-// Libraries
-import "./SafeDecimalMath.sol";
 
 // Internal references
 import "./interfaces/IPynth.sol";
@@ -18,16 +16,16 @@ import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/ISystemSettings.sol";
+// import "./interfaces/ILiquidator.sol";
+// import "./interfaces/ILiquidatorRewards.sol";
 import "./interfaces/IVirtualPynth.sol";
+import "./interfaces/IRewardEscrowV2.sol";
 
 interface IBlacklistManager {
     function flagged(address _account) external view returns (bool);
 }
 
 contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinance {
-    using SafeMath for uint;
-    using SafeDecimalMath for uint;
-
     // ========== STATE VARIABLES ==========
 
     // Available Pynths which can be used with the system
@@ -43,6 +41,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
     bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
+    // bytes32 private constant CONTRACT_LIQUIDATORREWARDS = "LiquidatorRewards";
+    // bytes32 private constant CONTRACT_LIQUIDATOR = "Liquidator";
+    bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
+    bytes32 private constant CONTRACT_V3_LEGACYMARKET = "LegacyMarket";
+    bytes32 private constant CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM = "DebtMigratorOnEthereum";
 
     IBlacklistManager public blacklistManager;
 
@@ -67,13 +70,16 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
     // Note: use public visibility so that it can be invoked in a subclass
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
-        addresses = new bytes32[](6);
+        addresses = new bytes32[](7);
         addresses[0] = CONTRACT_PERIFINANCESTATE;
         addresses[1] = CONTRACT_SYSTEMSTATUS;
         addresses[2] = CONTRACT_EXCHANGER;
         addresses[3] = CONTRACT_ISSUER;
         addresses[4] = CONTRACT_REWARDSDISTRIBUTION;
         addresses[5] = CONTRACT_SYSTEMSETTINGS;
+        // addresses[4] = CONTRACT_LIQUIDATORREWARDS;
+        // addresses[5] = CONTRACT_LIQUIDATOR;
+        addresses[6] = CONTRACT_REWARDESCROW_V2;
     }
 
     function periFinanceState() internal view returns (IPeriFinanceState) {
@@ -95,57 +101,65 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     function rewardsDistribution() internal view returns (IRewardsDistribution) {
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
     }
-
-    function systemSettings() internal view returns (ISystemSettings) {
+    
+        function systemSettings() internal view returns (ISystemSettings) {
         return ISystemSettings(requireAndGetAddress(CONTRACT_SYSTEMSETTINGS));
     }
 
-    function getRequiredAddress(bytes32 _contractName) external view returns (address) {
-        return requireAndGetAddress(_contractName);
+    // function liquidatorRewards() internal view returns (ILiquidatorRewards) {
+    //     return ILiquidatorRewards(requireAndGetAddress(CONTRACT_LIQUIDATORREWARDS));
+    // }
+
+    function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
+        return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
+
+    // function liquidator() internal view returns (ILiquidator) {
+    //     return ILiquidator(requireAndGetAddress(CONTRACT_LIQUIDATOR));
+    // }
 
     function debtBalanceOf(address account, bytes32 currencyKey) external view returns (uint) {
         return issuer().debtBalanceOf(account, currencyKey);
     }
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint totalIssued) {
-        (totalIssued, ) = issuer().totalIssuedPynths(currencyKey, false);
+        totalIssued = issuer().totalIssuedPynths(currencyKey, false);
+    }
+    
+    function totalIssuedPynthsExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint totalIssued) {
+        totalIssued = issuer().totalIssuedPynths(currencyKey, true);
     }
 
-    function totalIssuedPynthsExcludeEtherCollateral(bytes32 currencyKey) external view returns (uint totalIssued) {
-        (totalIssued, ) = issuer().totalIssuedPynths(currencyKey, true);
+    function availableCurrencyKeys() external view returns (bytes32[] memory) {
+        return issuer().availableCurrencyKeys();
     }
 
-    // function availableCurrencyKeys() external view returns (bytes32[] memory) {
-    //     return issuer().availableCurrencyKeys();
-    // }
+    function availablePynthCount() external view returns (uint) {
+        return issuer().availablePynthCount();
+    }
 
-    // function availablePynthCount() external view returns (uint) {
-    //     return issuer().availablePynthCount();
-    // }
+    function availablePynths(uint index) external view returns (IPynth) {
+        return issuer().availablePynths(index);
+    }
 
-    // function availablePynths(uint index) external view returns (IPynth) {
-    //     return issuer().availablePynths(index);
-    // }
+    function pynths(bytes32 currencyKey) external view returns (IPynth) {
+        return issuer().pynths(currencyKey);
+    }
 
-    // function pynths(bytes32 currencyKey) external view returns (IPynth) {
-    //     return issuer().pynths(currencyKey);
-    // }
-
-    // function pynthsByAddress(address pynthAddress) external view returns (bytes32) {
-    //     return issuer().pynthsByAddress(pynthAddress);
-    // }
+    function pynthsByAddress(address pynthAddress) external view returns (bytes32) {
+        return issuer().pynthsByAddress(pynthAddress);
+    }
 
     function isWaitingPeriod(bytes32 currencyKey) external view returns (bool) {
         return exchanger().maxSecsLeftInWaitingPeriod(messageSender, currencyKey) > 0;
     }
 
-    // function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid) {
-    //     return issuer().anyPynthOrPERIRateIsInvalid();
-    // }
+    function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid) {
+        return issuer().anyPynthOrPERIRateIsInvalid();
+    }
 
     function maxIssuablePynths(address account) external view returns (uint maxIssuable) {
-        (maxIssuable, , ) = issuer().maxIssuablePynths(account);
+        return issuer().maxIssuablePynths(account);
     }
 
     function remainingIssuablePynths(address account)
@@ -172,19 +186,38 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         (transferable, ) = issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
     }
 
-    function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake) {
-        (burnAmount, exTokenAmountToUnstake) = issuer().amountsToFitClaimable(account);
+    /// the index of the first non zero RewardEscrowV2 entry for an account in order of iteration over accountVestingEntryIDs.
+    /// This is intended as a convenience off-chain view for liquidators to calculate the startIndex to pass
+    /// into liquidateDelinquentAccountEscrowIndex to save gas.
+    function getFirstNonZeroEscrowIndex(address account) external view returns (uint) {
+        uint numIds = rewardEscrowV2().numVestingEntries(account);
+        uint entryID;
+        VestingEntries.VestingEntry memory entry;
+        for (uint i = 0; i < numIds; i++) {
+            entryID = rewardEscrowV2().accountVestingEntryIDs(account, i);
+            entry = rewardEscrowV2().vestingSchedules(account, entryID);
+            if (entry.escrowAmount > 0) {
+                return i;
+            }
+        }
+        revert("all entries are zero");
     }
 
-    function _canTransfer(address account, uint value) internal view returns (bool) {
-        (uint initialDebtOwnership, ) = periFinanceState().issuanceData(account);
+    function _canTransfer(address account, uint value) internal returns (bool) {
+        //Always allow legacy market to transfer
+        //note if legacy market is not yet available this will just return 0 address and it  will never be true
+        address legacyMarketAddress = resolver.getAddress(CONTRACT_V3_LEGACYMARKET);
+        if ((messageSender != address(0) && messageSender == legacyMarketAddress) || account == legacyMarketAddress) {
+            return true;
+        }
 
-        if (initialDebtOwnership > 0) {
+        if (issuer().debtBalanceOf(account, pUSD) > 0) {
             (uint transferable, bool anyRateIsInvalid) =
                 issuer().transferablePeriFinanceAndAnyRateIsInvalid(account, tokenState.balanceOf(account));
-            require(value <= transferable, "Check Transferable");
-            require(!anyRateIsInvalid, "Rate invalid");
+            require(value <= transferable, "Cannot transfer staked or escrowed PERI");
+            require(!anyRateIsInvalid, "A pynth or PERI rate is invalid");
         }
+
         return true;
     }
 
@@ -195,19 +228,28 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
 
         blacklistManager = IBlacklistManager(_blacklistManager);
     }
-
     function exchange(
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        external
-        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
-        optionalProxy
+    ) 
+        external 
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey) 
+        optionalProxy 
         blacklisted(messageSender)
-        returns (uint amountReceived)
+        returns (uint amountReceived) 
     {
-        return exchanger().exchange(messageSender, sourceCurrencyKey, sourceAmount, destinationCurrencyKey, messageSender);
+        (amountReceived, ) = exchanger().exchange(
+            messageSender,
+            messageSender,
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey,
+            messageSender,
+            false,
+            messageSender,
+            bytes32(0)
+        );
     }
 
     function exchangeOnBehalf(
@@ -215,28 +257,30 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey
-    )
-        external
-        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
-        optionalProxy
-        blacklisted(messageSender)
-        blacklisted(exchangeForAddress)
-        returns (uint amountReceived)
+    ) 
+        external 
+        exchangeActive(sourceCurrencyKey, destinationCurrencyKey) 
+        optionalProxy 
+        // blacklisted(messageSender)
+        // blacklisted(exchangeForAddress)
+    returns (uint amountReceived) 
     {
-        return
-            exchanger().exchangeOnBehalf(
-                exchangeForAddress,
-                messageSender,
-                sourceCurrencyKey,
-                sourceAmount,
-                destinationCurrencyKey
-            );
+        (amountReceived, ) = exchanger().exchange(
+            exchangeForAddress,
+            messageSender,
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey,
+            exchangeForAddress,
+            false,
+            exchangeForAddress,
+            bytes32(0)
+        );
     }
 
     function settle(bytes32 currencyKey)
         external
         optionalProxy
-        blacklisted(messageSender)
         returns (
             uint reclaimed,
             uint refunded,
@@ -250,25 +294,20 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
-        address originator,
+        address rewardAddress,
         bytes32 trackingCode
-    )
-        external
-        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
-        optionalProxy
-        blacklisted(messageSender)
-        returns (uint amountReceived)
-    {
-        return
-            exchanger().exchangeWithTracking(
-                messageSender,
-                sourceCurrencyKey,
-                sourceAmount,
-                destinationCurrencyKey,
-                messageSender,
-                originator,
-                trackingCode
-            );
+    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        (amountReceived, ) = exchanger().exchange(
+            messageSender,
+            messageSender,
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey,
+            messageSender,
+            false,
+            rewardAddress,
+            trackingCode
+        );
     }
 
     function exchangeOnBehalfWithTracking(
@@ -276,29 +315,23 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
-        address originator,
+        address rewardAddress,
         bytes32 trackingCode
-    )
-        external
-        exchangeActive(sourceCurrencyKey, destinationCurrencyKey)
-        optionalProxy
-        blacklisted(messageSender)
-        blacklisted(exchangeForAddress)
-        returns (uint amountReceived)
-    {
-        return
-            exchanger().exchangeOnBehalfWithTracking(
-                exchangeForAddress,
-                messageSender,
-                sourceCurrencyKey,
-                sourceAmount,
-                destinationCurrencyKey,
-                originator,
-                trackingCode
-            );
+    ) external exchangeActive(sourceCurrencyKey, destinationCurrencyKey) optionalProxy returns (uint amountReceived) {
+        (amountReceived, ) = exchanger().exchange(
+            exchangeForAddress,
+            messageSender,
+            sourceCurrencyKey,
+            sourceAmount,
+            destinationCurrencyKey,
+            exchangeForAddress,
+            false,
+            rewardAddress,
+            trackingCode
+        );
     }
 
-    function transfer(address to, uint value) external optionalProxy systemActive blacklisted(messageSender) returns (bool) {
+    function transfer(address to, uint value) external onlyProxyOrInternal systemActive returns (bool) {
         // Ensure they're not trying to exceed their locked amount -- only if they have debt.
         _canTransfer(messageSender, value);
 
@@ -312,7 +345,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         address from,
         address to,
         uint value
-    ) external optionalProxy systemActive blacklisted(messageSender) blacklisted(from) returns (bool) {
+    ) external onlyProxyOrInternal systemActive returns (bool) {
         // Ensure they're not trying to exceed their locked amount -- only if they have debt.
         _canTransfer(from, value);
 
@@ -321,42 +354,178 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return _transferFromByProxy(messageSender, from, to, value);
     }
 
-    function issuePynths(bytes32 _currencyKey, uint _issueAmount)
+    // SIP-252: migration of PERI token balance from old to new escrow rewards contract
+    function migrateEscrowContractBalance() external onlyOwner {
+        address from = resolver.requireAndGetAddress("RewardEscrowV2Frozen", "Old escrow address unset");
+        // technically the below could use `rewardEscrowV2()`, but in the case of a migration it's better to avoid
+        // using the cached value and read the most updated one directly from the resolver
+        address to = resolver.requireAndGetAddress("RewardEscrowV2", "New escrow address unset");
+        require(to != from, "cannot migrate to same address");
+
+        uint currentBalance = tokenState.balanceOf(from);
+        // allow no-op for idempotent migration steps in case action was performed already
+        if (currentBalance > 0) {
+            _internalTransfer(from, to, currentBalance);
+        }
+    }
+
+    function issuePynths(uint amount) external issuanceActive optionalProxy {
+        return issuer().issuePynths(messageSender, amount);
+    }
+
+    function issuePynthsOnBehalf(address issueForAddress, uint amount) external issuanceActive optionalProxy {
+        return issuer().issuePynthsOnBehalf(issueForAddress, messageSender, amount);
+    }
+
+    function issueMaxPynths() external issuanceActive optionalProxy {
+        return issuer().issueMaxPynths(messageSender);
+    }
+
+    function issueMaxPynthsOnBehalf(address issueForAddress) external issuanceActive optionalProxy {
+        return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
+    }
+
+    function burnPynths(uint amount) external issuanceActive optionalProxy {
+        return issuer().burnPynths(messageSender, amount);
+    }
+
+    function burnPynthsOnBehalf(address burnForAddress, uint amount) external issuanceActive optionalProxy {
+        return issuer().burnPynthsOnBehalf(burnForAddress, messageSender, amount);
+    }
+
+    function burnPynthsToTarget() external issuanceActive optionalProxy {
+        return issuer().burnPynthsToTarget(messageSender);
+    }
+
+    function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
+        return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
+    }
+
+    /// @notice Force liquidate a delinquent account and distribute the redeemed PERI rewards amongst the appropriate recipients.
+    /// @dev The PERI transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
+    function liquidateDelinquentAccount(address account, uint pusdAmount) external systemActive optionalProxy returns (bool) {
+        return _liquidateDelinquentAccount(account, 0, messageSender);
+    }
+
+    /// @param escrowStartIndex: index into the account's vesting entries list to start iterating from
+    /// when liquidating from escrow in order to save gas (the default method uses 0 as default)
+    function liquidateDelinquentAccountEscrowIndex(address account, uint escrowStartIndex)
         external
-        issuanceActive
+        systemActive
         optionalProxy
-        blacklisted(messageSender)
+        returns (bool)
     {
-        issuer().issuePynths(messageSender, _currencyKey, _issueAmount);
+        return _liquidateDelinquentAccount(account, escrowStartIndex, messageSender);
     }
 
-    function issueMaxPynths() external issuanceActive optionalProxy blacklisted(messageSender) {
-        issuer().issueMaxPynths(messageSender);
+    /// @notice Force liquidate a delinquent account and distribute the redeemed PERI rewards amongst the appropriate recipients.
+    /// @dev The PERI transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).
+    function _liquidateDelinquentAccount(
+        address account,
+        uint escrowStartIndex,
+        address liquidatorAccount
+    ) internal returns (bool) {
+        // ensure the user has no liquidation rewards (also counted towards collateral) outstanding
+        //liquidatorRewards().getReward(account);
+
+        // (uint totalRedeemed, uint debtToRemove, uint escrowToLiquidate) = issuer().liquidateAccount(account, false);
+
+        // // This transfers the to-be-liquidated part of escrow to the account (!) as liquid PERI.
+        // // It is transferred to the account instead of to the rewards because of the liquidator / flagger
+        // // rewards that may need to be paid (so need to be transferrable, to avoid edge cases)
+        // if (escrowToLiquidate > 0) {
+        //     rewardEscrowV2().revokeFrom(account, account, escrowToLiquidate, escrowStartIndex);
+        // }
+
+        // emitAccountLiquidated(account, totalRedeemed, debtToRemove, liquidatorAccount);
+
+        // // First, pay out the flag and liquidate rewards.
+        // uint flagReward = liquidator().flagReward();
+        // uint liquidateReward = liquidator().liquidateReward();
+
+        // // Transfer the flagReward to the account who flagged this account for liquidation.
+        // address flagger = liquidator().getLiquidationCallerForAccount(account);
+        // bool flagRewardTransferSucceeded = _transferByProxy(account, flagger, flagReward);
+        // require(flagRewardTransferSucceeded, "Flag reward transfer did not succeed");
+
+        // // Transfer the liquidateReward to liquidator (the account who invoked this liquidation).
+        // bool liquidateRewardTransferSucceeded = _transferByProxy(account, liquidatorAccount, liquidateReward);
+        // require(liquidateRewardTransferSucceeded, "Liquidate reward transfer did not succeed");
+
+        // if (totalRedeemed > 0) {
+        //     // Send the remaining PERI to the LiquidatorRewards contract.
+        //     bool liquidatorRewardTransferSucceeded = _transferByProxy(account, address(liquidatorRewards()), totalRedeemed);
+        //     require(liquidatorRewardTransferSucceeded, "Transfer to LiquidatorRewards failed");
+
+        //     // Inform the LiquidatorRewards contract about the incoming PERI rewards.
+        //     liquidatorRewards().notifyRewardAmount(totalRedeemed);
+        // }
+
+        return true;
     }
 
-    function issuePynthsToMaxQuota(bytes32 _currencyKey) external issuanceActive optionalProxy blacklisted(messageSender) {
-        issuer().issuePynthsToMaxQuota(messageSender, _currencyKey);
+    /// @notice Allows an account to self-liquidate anytime its c-ratio is below the target issuance ratio.
+    function liquidateSelf() external systemActive optionalProxy returns (bool) {
+        // require(resolver.getAddress(CONTRACT_V3_LEGACYMARKET) == address(0), "Must liquidate using V3");
+
+        // // must store liquidated account address because below functions may attempt to transfer PERI which changes messageSender
+        // address liquidatedAccount = messageSender;
+
+        // // ensure the user has no liquidation rewards (also counted towards collateral) outstanding
+        // liquidatorRewards().getReward(liquidatedAccount);
+
+        // // Self liquidate the account (`isSelfLiquidation` flag must be set to `true`).
+        // // escrowToLiquidate is unused because it cannot be used for self-liquidations
+        // (uint totalRedeemed, uint debtRemoved, ) = issuer().liquidateAccount(liquidatedAccount, true);
+        // require(debtRemoved > 0, "cannot self liquidate");
+
+        // emitAccountLiquidated(liquidatedAccount, totalRedeemed, debtRemoved, liquidatedAccount);
+
+        // // Transfer the redeemed PERI to the LiquidatorRewards contract.
+        // // Reverts if amount to redeem is more than balanceOf account (i.e. due to escrowed balance).
+        // bool success = _transferByProxy(liquidatedAccount, address(liquidatorRewards()), totalRedeemed);
+        // require(success, "Transfer to LiquidatorRewards failed");
+
+        // // Inform the LiquidatorRewards contract about the incoming PERI rewards.
+        // liquidatorRewards().notifyRewardAmount(totalRedeemed);
+
+        //return success;
+        return true;
     }
 
-    function burnPynths(bytes32 _currencyKey, uint _burnAmount)
+    function migrateAccountBalances(address account)
         external
-        issuanceActive
-        optionalProxy
-        blacklisted(messageSender)
+        systemActive
+        returns (uint totalEscrowRevoked, uint totalLiquidBalance)
     {
-        issuer().burnPynths(messageSender, _currencyKey, _burnAmount);
+        address debtMigratorOnEthereum = resolver.getAddress(CONTRACT_DEBT_MIGRATOR_ON_ETHEREUM);
+        // require(
+        //     msg.sender == debtMigratorOnEthereum || msg.sender == resolver.getAddress(CONTRACT_V3_LEGACYMARKET),
+        //     "Only L1 DebtMigrator or LegacyMarket"
+        // );
+
+        // get their liquid PERI balance and transfer it to the migrator contract
+        totalLiquidBalance = tokenState.balanceOf(account);
+        if (totalLiquidBalance > 0) {
+            bool succeeded = _transferByProxy(account, msg.sender, totalLiquidBalance);
+            require(succeeded, "peri transfer failed");
+        }
+
+        // get their escrowed PERI balance and revoke it all
+        totalEscrowRevoked = rewardEscrowV2().totalEscrowedAccountBalance(account);
+        if (totalEscrowRevoked > 0) {
+            rewardEscrowV2().revokeFrom(account, msg.sender, totalEscrowRevoked, 0);
+        }
     }
 
-    function fitToClaimable() external payable issuanceActive optionalProxy blacklisted(messageSender) {
-        issuer().fitToClaimable(messageSender);
-    }
-
-    function forceFitToClaimable(address _target) external payable onlyOwner {
-        issuer().fitToClaimable(_target);
-    }
-
-    function exit() external issuanceActive optionalProxy blacklisted(messageSender) {
-        issuer().exit(messageSender);
+    function exchangeWithTrackingForInitiator(
+        bytes32,
+        uint,
+        bytes32,
+        address,
+        bytes32
+    ) external returns (uint) {
+        _notImplemented();
     }
 
     function exchangeWithVirtual(
@@ -368,9 +537,30 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _notImplemented();
     }
 
-    function liquidateDelinquentAccount(address, uint) external returns (bool) {
+    function exchangeAtomically(
+        bytes32,
+        uint,
+        bytes32,
+        bytes32,
+        uint
+    ) external pure returns (uint) {
         _notImplemented();
     }
+
+
+    // function mint(address, uint) external payable returns (bool) {
+    //     _notImplemented();
+    //     //return false;
+    // }
+
+    // function mint() external returns (bool) {
+    //     return false;
+    // }
+    
+    function inflationalMint() external returns (bool){
+        _notImplemented();
+    }
+    
 
     function mintSecondary(address, uint) external {
         _notImplemented();
@@ -385,7 +575,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _notImplemented() internal pure {
-        revert("Can't run");
+        revert("Cannot be run on this layer");
     }
 
     // ========== MODIFIERS ==========
@@ -433,10 +623,62 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     }
 
     function _onlyExchanger() private view {
-        require(msg.sender == address(exchanger()), "OnlyExchanger");
+        require(msg.sender == address(exchanger()), "Only Exchanger can invoke this");
+    }
+
+    modifier onlyProxyOrInternal {
+        _onlyProxyOrInternal();
+        _;
+    }
+
+    function _onlyProxyOrInternal() internal {
+        if (msg.sender == address(proxy)) {
+            // allow proxy through, messageSender should be already set correctly
+            return;
+        } else if (_isInternalTransferCaller(msg.sender)) {
+            // optionalProxy behaviour only for the internal legacy contracts
+            messageSender = msg.sender;
+        } else {
+            revert("Only the proxy can call");
+        }
+    }
+
+    /// some legacy internal contracts use transfer methods directly on implementation
+    /// which isn't supported due to SIP-238 for other callers
+    function _isInternalTransferCaller(address caller) internal view returns (bool) {
+        // These entries are not required or cached in order to allow them to not exist (==address(0))
+        // e.g. due to not being available on L2 or at some future point in time.
+        return
+            // ordered to reduce gas for more frequent calls, bridge first, vesting and migrating after, legacy last
+            caller == resolver.getAddress("PeriFinanceBridgeToOptimism") ||
+            caller == resolver.getAddress("RewardEscrowV2") ||
+            caller == resolver.getAddress("DebtMigratorOnOptimism") ||
+            // legacy contracts
+            caller == resolver.getAddress("RewardEscrow") ||
+            caller == resolver.getAddress("PeriFinanceEscrow") ||
+            caller == resolver.getAddress("Depot");
     }
 
     // ========== EVENTS ==========
+    event AccountLiquidated(address indexed account, uint periRedeemed, uint amountLiquidated, address liquidator);
+    bytes32 internal constant ACCOUNTLIQUIDATED_SIG = keccak256("AccountLiquidated(address,uint256,uint256,address)");
+
+    function emitAccountLiquidated(
+        address account,
+        uint256 periRedeemed,
+        uint256 amountLiquidated,
+        address liquidator
+    ) internal {
+        proxy._emit(
+            abi.encode(periRedeemed, amountLiquidated, liquidator),
+            2,
+            ACCOUNTLIQUIDATED_SIG,
+            addressToBytes32(account),
+            0,
+            0
+        );
+    }
+
     event PynthExchange(
         address indexed account,
         bytes32 fromCurrencyKey,
@@ -445,7 +687,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         uint256 toAmount,
         address toAddress
     );
-    bytes32 internal constant PYNTHEXCHANGE_SIG =
+    bytes32 internal constant SYNTH_EXCHANGE_SIG =
         keccak256("PynthExchange(address,bytes32,uint256,bytes32,uint256,address)");
 
     function emitPynthExchange(
@@ -459,22 +701,23 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         proxy._emit(
             abi.encode(fromCurrencyKey, fromAmount, toCurrencyKey, toAmount, toAddress),
             2,
-            PYNTHEXCHANGE_SIG,
+            SYNTH_EXCHANGE_SIG,
             addressToBytes32(account),
             0,
             0
         );
     }
 
-    event ExchangeTracking(bytes32 indexed trackingCode, bytes32 toCurrencyKey, uint256 toAmount);
-    bytes32 internal constant EXCHANGE_TRACKING_SIG = keccak256("ExchangeTracking(bytes32,bytes32,uint256)");
+    event ExchangeTracking(bytes32 indexed trackingCode, bytes32 toCurrencyKey, uint256 toAmount, uint256 fee);
+    bytes32 internal constant EXCHANGE_TRACKING_SIG = keccak256("ExchangeTracking(bytes32,bytes32,uint256,uint256)");
 
     function emitExchangeTracking(
         bytes32 trackingCode,
         bytes32 toCurrencyKey,
-        uint256 toAmount
+        uint256 toAmount,
+        uint256 fee
     ) external onlyExchanger {
-        proxy._emit(abi.encode(toCurrencyKey, toAmount), 2, EXCHANGE_TRACKING_SIG, trackingCode, 0, 0);
+        proxy._emit(abi.encode(toCurrencyKey, toAmount, fee), 2, EXCHANGE_TRACKING_SIG, trackingCode, 0, 0);
     }
 
     event ExchangeReclaim(address indexed account, bytes32 currencyKey, uint amount);
