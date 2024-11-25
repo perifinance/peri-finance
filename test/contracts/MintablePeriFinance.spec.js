@@ -5,7 +5,7 @@ const { toWei } = web3.utils;
 const { toBytes32 } = require('../..');
 const BN = require('bn.js');
 
-const PERIFINANCE_TOTAL_SUPPLY = toWei('100000000');
+const SYNTHETIX_TOTAL_SUPPLY = toWei('100000000');
 
 contract('MintablePeriFinance (spec tests)', accounts => {
 	const [, owner, periFinanceBridgeToBase, account1] = accounts;
@@ -14,7 +14,7 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 	let addressResolver;
 	let rewardsDistribution;
 	let rewardEscrow;
-	describe.skip('when system is setup', () => {
+	describe('when system is setup', () => {
 		before('deploy a new instance', async () => {
 			({
 				PeriFinance: mintablePeriFinance, // we request PeriFinance instead of MintablePeriFinance because it is renamed in setup.js
@@ -28,7 +28,6 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 					'MintablePeriFinance',
 					'RewardsDistribution',
 					'RewardEscrowV2',
-					'StakingStateUSDC',
 				],
 			}));
 			// update resolver
@@ -57,7 +56,7 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 			});
 
 			it('should increase the total supply', async () => {
-				const newSupply = new BN(PERIFINANCE_TOTAL_SUPPLY).add(new BN(amount));
+				const newSupply = new BN(SYNTHETIX_TOTAL_SUPPLY).add(new BN(amount));
 				assert.bnEqual(await mintablePeriFinance.totalSupply(), newSupply);
 			});
 

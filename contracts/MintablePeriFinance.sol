@@ -1,4 +1,5 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./BasePeriFinance.sol";
@@ -15,6 +16,7 @@ contract MintablePeriFinance is BasePeriFinance {
         address _resolver,
         address _blacklistManager
     ) public BasePeriFinance(_proxy, _tokenState, _owner, _totalSupply, _resolver, _blacklistManager) {}
+
 
     /* ========== INTERNALS =================== */
 
@@ -64,4 +66,5 @@ contract MintablePeriFinance is BasePeriFinance {
         emitTransfer(account, address(0), amount);
         totalSupply = totalSupply.sub(amount);
     }
+
 }
