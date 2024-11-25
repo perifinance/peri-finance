@@ -6,11 +6,14 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 let MultiCollateralPynth;
 let CollateralState;
-let CollateralManagerState;
-let CollateralManager;
 
-const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
-const { toUnit, currentTime, fastForward } = require('../utils')();
+const {
+	onlyGivenAddressCanInvoke,
+	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+const { toUnit, fastForward } = require('../utils')();
 const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
@@ -18,10 +21,11 @@ const {
 
 const { setupAllContracts, setupContract } = require('./setup');
 
-contract('MultiCollateralPynth @gas-skip', accounts => {
-	const [deployerAccount, owner, oracle, , , validator, account1] = accounts;
+contract('MultiCollateralPynth', accounts => {
+	const [deployerAccount, owner, , ,validator, account1] = accounts;
 
 	const pETH = toBytes32('pETH');
+	const pBTC = toBytes32('pBTC');
 
 	let issuer,
 		resolver,
@@ -33,7 +37,6 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		pUSDPynth,
 		feePool,
 		pynths;
-	// bridgeState;
 
 	const getid = async tx => {
 		const event = tx.logs.find(log => log.event === 'LoanCreated');
@@ -63,31 +66,15 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		});
 	};
 
-	const updateRatesWithDefaults = async () => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates([pETH], ['100'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-
-		const pBTC = toBytes32('pBTC');
-
-		await exchangeRates.updateRates([pBTC], ['10000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
-	};
-
 	before(async () => {
 		MultiCollateralPynth = artifacts.require('MultiCollateralPynth');
 		CollateralState = artifacts.require('CollateralState');
-		CollateralManagerState = artifacts.require('CollateralManagerState');
-		CollateralManager = artifacts.require('CollateralManager');
-
-		MultiCollateralPynth.link(await artifacts.require('SafeDecimalMath').new());
 	});
 
+	const onlyInternalString = 'Only internal contracts allowed';
+
 	before(async () => {
-		pynths = ['pUSD', 'pETH', 'pBTC'];
+		pynths = ['pUSD'];
 		({
 			AddressResolver: resolver,
 			Issuer: issuer,
@@ -96,6 +83,8 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			DebtCache: debtCache,
 			FeePool: feePool,
 			CollateralManager: manager,
+			CollateralManagerState: managerState,
+			CollateralEth: ceth,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -107,26 +96,16 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 				'SystemStatus',
 				'Exchanger',
 				'FeePool',
+				'CollateralUtil',
 				'CollateralManager',
-				'StakingState',
-				// 'CrossChainManager',
+				'CollateralManagerState',
+				'CollateralEth',
+				'FuturesMarketManager',
 			],
 		}));
 
-		managerState = await CollateralManagerState.new(owner, ZERO_ADDRESS, { from: deployerAccount });
-
-		manager = await CollateralManager.new(
-			managerState.address,
-			owner,
-			resolver.address,
-			toUnit(10000),
-			0,
-			0,
-			0,
-			{
-				from: deployerAccount,
-			}
-		);
+		await setupPriceAggregators(exchangeRates, owner, [pETH, pBTC]);
+		await updateAggregatorRates(exchangeRates, null, [pETH, pBTC], [100, 10000].map(toUnit));
 
 		await managerState.setAssociatedContract(manager.address, { from: owner });
 
@@ -156,9 +135,7 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 		await feePool.rebuildCache();
 		await debtCache.rebuildCache();
 
-		await manager.addCollaterals([ceth.address, pUSDPynth.address], { from: owner });
-
-		await updateRatesWithDefaults();
+		await manager.addCollaterals([ceth.address], { from: owner });
 
 		await issuepUSDToAccount(toUnit(1000), owner);
 		await debtCache.takeDebtSnapshot();
@@ -166,13 +143,18 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 
 	addSnapshotBeforeRestoreAfterEach();
 
-	const deployPynth = async ({ currencyKey }) => {
+	const deployPynth = async ({ currencyKey, proxy, tokenState }) => {
 		// As either of these could be legacy, we require them in the testing context (see buidler.config.js)
-		const proxy = await artifacts.require('ProxyERC20').new(owner, { from: deployerAccount });
-		// set associated contract as deployerAccount so we can setBalanceOf to the owner below
-		const tokenState = await artifacts
-			.require('TokenState')
-			.new(owner, ZERO_ADDRESS, { from: deployerAccount });
+		const TokenState = artifacts.require('TokenState');
+		const Proxy = artifacts.require('Proxy');
+
+		tokenState =
+			tokenState ||
+			(await TokenState.new(owner, ZERO_ADDRESS, {
+				from: deployerAccount,
+			}));
+
+		proxy = proxy || (await Proxy.new(owner, { from: deployerAccount }));
 
 		const pynth = await MultiCollateralPynth.new(
 			proxy.address,
@@ -209,23 +191,18 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			const { pynth, tokenState, proxy } = await deployPynth({
 				currencyKey: 'sXYZ',
 			});
-			const pynths = [pynth.address];
 			await tokenState.setAssociatedContract(pynth.address, { from: owner });
 			await proxy.setTarget(pynth.address, { from: owner });
-			await issuer.addPynths(pynths, { from: owner });
+			await issuer.addPynth(pynth.address, { from: owner });
 			this.pynth = pynth;
+			this.pynthViaProxy = await MultiCollateralPynth.at(proxy.address);
 		});
 
 		it('ensure only known functions are mutative', () => {
 			ensureOnlyExpectedMutativeFunctions({
 				abi: this.pynth.abi,
 				ignoreParents: ['Pynth'],
-				expected: [
-					'claimAllBridgedAmounts',
-					'overchainTransfer',
-					'setBridgeState',
-					'setBridgeValidator',
-				], // issue and burn are both overridden in MultiCollateral from Pynth
+				expected: [], // issue and burn are both overridden in MultiCollateral from Pynth
 			});
 		});
 
@@ -233,8 +210,51 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			const actual = await this.pynth.resolverAddressesRequired();
 			assert.deepEqual(
 				actual,
-				['SystemStatus', 'Exchanger', 'Issuer', 'FeePool', 'CollateralManager'].map(toBytes32)
+				[
+					'SystemStatus',
+					'Exchanger',
+					'Issuer',
+					'FeePool',
+					'FuturesMarketManager',
+					'CollateralManager',
+					'EtherWrapper',
+					'WrapperFactory',
+				].map(toBytes32)
 			);
+		});
+
+		// SIP-238
+		describe('implementation does not allow transfer calls (but allows approve)', () => {
+			const revertMsg = 'Only the proxy';
+			const amount = toUnit('100');
+			beforeEach(async () => {
+				// approve for transferFrom to work
+				await this.pynthViaProxy.approve(account1, amount, { from: owner });
+			});
+			it('approve does not revert', async () => {
+				await this.pynth.approve(account1, amount, { from: owner });
+			});
+			it('transfer reverts', async () => {
+				await assert.revert(this.pynth.transfer(account1, amount, { from: owner }), revertMsg);
+			});
+			it('transferFrom reverts', async () => {
+				await assert.revert(
+					this.pynth.transferFrom(owner, account1, amount, { from: account1 }),
+					revertMsg
+				);
+			});
+			it('transferAndSettle reverts', async () => {
+				await assert.revert(
+					this.pynth.transferAndSettle(account1, amount, { from: account1 }),
+					revertMsg
+				);
+			});
+			it('transferFromAndSettle reverts', async () => {
+				await assert.revert(
+					this.pynth.transferFromAndSettle(owner, account1, amount, { from: account1 }),
+					revertMsg
+				);
+			});
 		});
 
 		describe('when non-multiCollateral tries to issue', () => {
@@ -260,11 +280,9 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 
 		describe('when multiCollateral is set to the owner', () => {
 			beforeEach(async () => {
-				const timestamp = await currentTime();
-
-				await exchangeRates.updateRates([toBytes32('sXYZ')], [toUnit(5)], timestamp, {
-					from: oracle,
-				});
+				const sXYZ = toBytes32('sXYZ');
+				await setupPriceAggregators(exchangeRates, owner, [sXYZ]);
+				await updateAggregatorRates(exchangeRates, null, [sXYZ], [toUnit(5)]);
 			});
 			describe('when multiCollateral tries to issue', () => {
 				it('then it can issue new pynths', async () => {
@@ -308,19 +326,21 @@ contract('MultiCollateralPynth @gas-skip', accounts => {
 			});
 
 			describe('when periFinance set to account1', () => {
+				const accountToIssue = account1;
+				const issueAmount = toUnit('1');
+
 				beforeEach(async () => {
 					// have account1 simulate being Issuer so we can invoke issue and burn
-					await resolver.importAddresses([toBytes32('Issuer')], [account1], { from: owner });
+					await resolver.importAddresses([toBytes32('Issuer')], [accountToIssue], { from: owner });
 					// now have the pynth resync its cache
 					await this.pynth.rebuildCache();
 				});
+
 				it('then it can issue new pynths as account1', async () => {
-					const accountToIssue = account1;
-					const issueAmount = toUnit('1');
 					const totalSupplyBefore = await this.pynth.totalSupply();
 					const balanceOfBefore = await this.pynth.balanceOf(accountToIssue);
 
-					await this.pynth.issue(accountToIssue, issueAmount, { from: account1 });
+					await this.pynth.issue(accountToIssue, issueAmount, { from: accountToIssue });
 
 					assert.bnEqual(await this.pynth.totalSupply(), totalSupplyBefore.add(issueAmount));
 					assert.bnEqual(

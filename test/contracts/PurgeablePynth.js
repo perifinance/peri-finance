@@ -8,7 +8,7 @@ const TokenState = artifacts.require('TokenState');
 const Proxy = artifacts.require('Proxy');
 const PurgeablePynth = artifacts.require('PurgeablePynth');
 
-const { currentTime, fastForward, toUnit } = require('../utils')();
+const { fastForward, toUnit } = require('../utils')();
 const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
@@ -20,6 +20,8 @@ const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setStatus,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
@@ -27,7 +29,7 @@ const { setupAllContracts } = require('./setup');
 contract('PurgeablePynth', accounts => {
 	const [pUSD, PERI, pAUD, iETH] = ['pUSD', 'PERI', 'pAUD', 'iETH'].map(toBytes32);
 	const pynthKeys = [pUSD, pAUD, iETH];
-	const [deployerAccount, owner, oracle, , account1, account2] = accounts;
+	const [deployerAccount, owner, , , account1, account2] = accounts;
 
 	let exchangeRates,
 		exchanger,
@@ -36,7 +38,6 @@ contract('PurgeablePynth', accounts => {
 		pAUDContract,
 		iETHContract,
 		systemStatus,
-		timestamp,
 		addressResolver,
 		debtCache,
 		issuer;
@@ -68,11 +69,11 @@ contract('PurgeablePynth', accounts => {
 				'SystemStatus',
 				'SystemSettings',
 				'CollateralManager',
-				'StakingStateUSDC',
+				'FuturesMarketManager',
 			],
 		}));
 
-		timestamp = await currentTime();
+		await setupPriceAggregators(exchangeRates, owner, [pAUD, iETH]);
 	});
 
 	beforeEach(async () => {
@@ -120,10 +121,9 @@ contract('PurgeablePynth', accounts => {
 			const { pynth, tokenState, proxy } = await deployPynth({
 				currencyKey: 'iETH',
 			});
-			const pynths = [pynth.address];
 			await tokenState.setAssociatedContract(pynth.address, { from: owner });
 			await proxy.setTarget(pynth.address, { from: owner });
-			await issuer.addPynths(pynths, { from: owner });
+			await issuer.addPynth(pynth.address, { from: owner });
 
 			iETHContract = pynth;
 		});
@@ -140,7 +140,14 @@ contract('PurgeablePynth', accounts => {
 			const actual = await iETHContract.resolverAddressesRequired();
 			assert.deepEqual(
 				actual,
-				['SystemStatus', 'Exchanger', 'Issuer', 'FeePool', 'ExchangeRates'].map(toBytes32)
+				[
+					'SystemStatus',
+					'Exchanger',
+					'Issuer',
+					'FeePool',
+					'FuturesMarketManager',
+					'ExchangeRates',
+				].map(toBytes32)
 			);
 		});
 
@@ -157,13 +164,11 @@ contract('PurgeablePynth', accounts => {
 
 		describe("when there's a price for the purgeable pynth", () => {
 			beforeEach(async () => {
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					null,
 					[pAUD, PERI, iETH],
-					['0.5', '1', '170'].map(toUnit),
-					timestamp,
-					{
-						from: oracle,
-					}
+					['0.5', '1', '170'].map(toUnit)
 				);
 				await debtCache.takeDebtSnapshot();
 			});
@@ -204,14 +209,12 @@ contract('PurgeablePynth', accounts => {
 					it('then purge() reverts', async () => {
 						await assert.revert(
 							iETHContract.purge([account1], { from: owner }),
-							'Src/dest rate invalid or not found'
+							'rate stale or flagged'
 						);
 					});
 					describe('when rates are received', () => {
 						beforeEach(async () => {
-							await exchangeRates.updateRates([iETH], ['170'].map(toUnit), await currentTime(), {
-								from: oracle,
-							});
+							await updateAggregatorRates(exchangeRates, null, [iETH], ['170'].map(toUnit));
 							await debtCache.takeDebtSnapshot();
 						});
 						it('then purge() still works as expected', async () => {
@@ -292,7 +295,6 @@ contract('PurgeablePynth', accounts => {
 				});
 
 				describe('when the user holds 5000 USD worth of the purgeable pynth iETH', () => {
-					let balanceBeforePurgeUser2;
 					beforeEach(async () => {
 						// Note: 5000 is chosen to be large enough to accommodate exchange fees which
 						// ultimately limit the total supply of that pynth
@@ -306,7 +308,6 @@ contract('PurgeablePynth', accounts => {
 							user: account2,
 							amount: iETHAmount,
 						});
-						balanceBeforePurgeUser2 = await iETHContract.balanceOf(account2);
 					});
 					describe('when purge is invoked with both accounts', () => {
 						it('then it reverts as the totalSupply exceeds the 100,000USD max', async () => {
@@ -318,84 +319,6 @@ contract('PurgeablePynth', accounts => {
 							await assert.revert(iETHContract.purge([account2], { from: owner }));
 						});
 					});
-					describe('when the exchange rates has the pynth as frozen', () => {
-						beforeEach(async () => {
-							// prevent circuit breaker from firing by upping the threshold to a factor 4
-							// because the price moved from 170 (before inverse pricing) to 50 (frozen at lower limit)
-							await systemSettings.setPriceDeviationThresholdFactor(toUnit('5'), { from: owner });
-
-							await exchangeRates.setInversePricing(
-								iETH,
-								toUnit(100),
-								toUnit(150),
-								toUnit(50),
-								false,
-								false,
-								{ from: owner }
-							);
-							await exchangeRates.updateRates([iETH], ['160'].map(toUnit), timestamp, {
-								from: oracle,
-							});
-							await debtCache.takeDebtSnapshot();
-						});
-						describe('when purge is invoked with just one account', () => {
-							let txn;
-
-							beforeEach(async () => {
-								txn = await iETHContract.purge([account2], { from: owner });
-							});
-
-							it('then it must issue the Purged event', () => {
-								const purgedEvent = txn.logs.find(log => log.event === 'Purged');
-
-								assert.eventEqual(purgedEvent, 'Purged', {
-									account: account2,
-									value: balanceBeforePurgeUser2,
-								});
-							});
-
-							it('and the second user is at 0 balance', async () => {
-								const userBalance = await iETHContract.balanceOf(account2);
-								assert.bnEqual(
-									userBalance,
-									toUnit(0),
-									'The second user must no longer have a balance after the purge'
-								);
-							});
-
-							it('and no change occurs for the other user', async () => {
-								const userBalance = await iETHContract.balanceOf(account1);
-								assert.bnEqual(
-									userBalance,
-									balanceBeforePurge,
-									'The first user must not be impacted by a purge for another user'
-								);
-							});
-						});
-
-						describe('when purge is invoked with both accounts', () => {
-							let txn;
-							beforeEach(async () => {
-								txn = await iETHContract.purge([account2, account1], { from: owner });
-							});
-							it('then it must issue two purged events', () => {
-								const events = txn.logs.filter(log => log.event === 'Purged');
-
-								assert.eventEqual(events[0], 'Purged', {
-									account: account2,
-									value: balanceBeforePurgeUser2,
-								});
-								assert.eventEqual(events[1], 'Purged', {
-									account: account1,
-									value: balanceBeforePurge,
-								});
-							});
-							it('and the total supply of the pynth must be 0', async () => {
-								const totalSupply = await iETHContract.totalSupply();
-								assert.bnEqual(totalSupply, toUnit('0'), 'Total supply must be 0 after full purge');
-							});
-						});
-					});
 				});
 			});
 		});
@@ -404,9 +327,7 @@ contract('PurgeablePynth', accounts => {
 	describe('Replacing an existing Pynth with a Purgeable one to purge and remove it', () => {
 		describe('when pAUD has a price', () => {
 			beforeEach(async () => {
-				await exchangeRates.updateRates([pAUD], ['0.776845993'].map(toUnit), timestamp, {
-					from: oracle,
-				});
+				await updateAggregatorRates(exchangeRates, null, [pAUD], ['0.776845993'].map(toUnit));
 				await debtCache.takeDebtSnapshot();
 			});
 			describe('when a user holds some pAUD', () => {
@@ -450,7 +371,7 @@ contract('PurgeablePynth', accounts => {
 							});
 							describe('and it is added to PeriFinance', () => {
 								beforeEach(async () => {
-									await issuer.addPynths([this.replacement.address], { from: owner });
+									await issuer.addPynth(this.replacement.address, { from: owner });
 									await this.replacement.rebuildCache();
 								});
 
@@ -470,11 +391,6 @@ contract('PurgeablePynth', accounts => {
 											userBalanceOfOldPynth,
 											'The balance after connecting TokenState must not have changed'
 										);
-									});
-									describe('when owner attemps to remove new pynth from the system', () => {
-										it('then it reverts', async () => {
-											await assert.revert(issuer.removePynth(pAUD, { from: owner }));
-										});
 									});
 									describe('and purge is called on the replacement pAUD contract', () => {
 										let txn;

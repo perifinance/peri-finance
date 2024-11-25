@@ -52,7 +52,8 @@ contract PurgeablePynth is Pynth {
 
         // Only allow purge when total supply is lte the max or the rate is frozen in ExchangeRates
         require(
-            totalSupply <= maxSupplyToPurge || exRates.rateIsFrozen(currencyKey),
+            totalSupply <= maxSupplyToPurge, 
+            //|| exRates.rateIsFrozen(currencyKey),
             "Cannot purge as total supply is above threshold and rate is not frozen."
         );
 
@@ -62,7 +63,9 @@ contract PurgeablePynth is Pynth {
             uint amountHeld = tokenState.balanceOf(holder);
 
             if (amountHeld > 0) {
-                exchanger().exchange(holder, currencyKey, amountHeld, "pUSD", holder);
+                //exchanger().exchange(holder, currencyKey, amountHeld, "pUSD", holder);
+                exchanger().exchange(holder, holder, currencyKey, amountHeld, "pUSD", holder, false, address(0), bytes32(0));
+                
                 emitPurged(holder, amountHeld);
             }
         }

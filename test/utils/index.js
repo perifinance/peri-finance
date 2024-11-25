@@ -166,21 +166,21 @@ module.exports = ({ web3 } = {}) => {
 	const toPreciseUnit = amount => {
 		// Code is largely lifted from the guts of web3 toWei here:
 		// https://github.com/ethjs/ethjs-unit/blob/master/src/index.js
-		let amountString = amount.toString();
+		const amountString = amount.toString();
 
 		// Is it negative?
 		var negative = amountString.substring(0, 1) === '-';
 		if (negative) {
-			amountString = amountString.substring(1);
+			amount = amount.substring(1);
 		}
 
-		if (amountString === '.') {
+		if (amount === '.') {
 			throw new Error(`Error converting number ${amount} to precise unit, invalid value`);
 		}
 
 		// Split it into a whole and fractional part
 		// eslint-disable-next-line prefer-const
-		let [whole, fraction, ...rest] = amountString.split('.');
+		let [whole, fraction, ...rest] = amount.split('.');
 		if (rest.length > 0) {
 			throw new Error(`Error converting number ${amount} to precise unit, too many decimal points`);
 		}
@@ -409,21 +409,20 @@ module.exports = ({ web3 } = {}) => {
 	/**
 	 *  Convenience method to assert that two BN.js instances are within 100 units of each other.
 	 *  @param actualBN The BN.js instance you received
-	 *  @param expectedBN The BN.js amount you expected to receive, allowing a varience of +/- 100 units
+	 *  @param expectedBN The BN.js amount you expected to receive, allowing a variance of +/- 100 units
 	 */
 	const assertBNClose = (actualBN, expectedBN, varianceParam = '10') => {
 		const actual = BN.isBN(actualBN) ? actualBN : new BN(actualBN);
 		const expected = BN.isBN(expectedBN) ? expectedBN : new BN(expectedBN);
 		const variance = BN.isBN(varianceParam) ? varianceParam : new BN(varianceParam);
-		const actualDelta = expected.sub(actual).abs();
 
 		assert.ok(
 			actual.gte(expected.sub(variance)),
-			`Number is too small to be close (Delta between actual and expected is ${actualDelta.toString()}, but variance was only ${variance.toString()}`
+			`${actual} !~= ${expected} (maxVariance ${variance.toString()})`
 		);
 		assert.ok(
 			actual.lte(expected.add(variance)),
-			`Number is too large to be close (Delta between actual and expected is ${actualDelta.toString()}, but variance was only ${variance.toString()})`
+			`${actual} !~= ${expected} (maxVariance ${variance.toString()})`
 		);
 	};
 
@@ -484,6 +483,19 @@ module.exports = ({ web3 } = {}) => {
 		}
 		// Otherwise dig through the deeper object and recurse
 		else if (Array.isArray(expected)) {
+			// check lengths
+			let len = actual.length;
+			if (len === undefined) {
+				// If `actual` is not a real array we'll try to interpret the keys of it
+				// as if it secretly wants to be one.
+				// We take the keys that are integers as the array part, and get the `length` of that.
+				// This is because this method is used to check event args or view result structs
+				// that are shaped like {0: bla, 1: foo, blaName: bla, fooName: foo}. FML-JS
+				const intLike = Object.keys(actual).filter(k => k.match(/^\d+$/g) !== null);
+				len = intLike.length;
+			}
+			assert.strictEqual(len, expected.length, `array length`);
+			// check elements
 			for (let i = 0; i < expected.length; i++) {
 				assertDeepEqual(actual[i], expected[i], `(array index: ${i}) `);
 			}
@@ -526,10 +538,10 @@ module.exports = ({ web3 } = {}) => {
 			const result = typeof blockOrPromise === 'function' ? blockOrPromise() : blockOrPromise;
 			await result;
 		} catch (error) {
-			assert.include(error.message, 'revert', reason);
-			/* if (reason) {
+			assert.include(error.message, 'revert');
+			if (reason) {
 				assert.include(error.message, reason);
-			} */
+			}
 			errorCaught = true;
 		}
 
@@ -574,6 +586,24 @@ module.exports = ({ web3 } = {}) => {
 		const { earliestCompiledTimestamp } = loadCompiledFiles({ buildPath });
 
 		return latestSolTimestamp > earliestCompiledTimestamp;
+	};
+
+	// create a factory to deploy mock price aggregators
+	const createMockAggregatorFactory = async account => {
+		const { abi, bytecode } = getCompiledArtifacts('MockAggregatorV2V3');
+		return new ethers.ContractFactory(abi, bytecode, account);
+	};
+
+	// load artifacts needed for contract instances
+	const getCompiledArtifacts = contract => {
+		const { compiled } = loadCompiledFiles({ buildPath });
+		const {
+			abi,
+			evm: {
+				bytecode: { object: bytecode },
+			},
+		} = compiled[contract];
+		return { abi, bytecode };
 	};
 
 	const setupProvider = ({ providerUrl, privateKey, publicKey }) => {
@@ -632,6 +662,7 @@ module.exports = ({ web3 } = {}) => {
 
 		to3Unit,
 		toBigNbr,
+		toBN,
 		toUnit,
 		fromUnit,
 
@@ -661,6 +692,8 @@ module.exports = ({ web3 } = {}) => {
 
 		loadLocalUsers,
 		isCompileRequired,
+		getCompiledArtifacts,
+		createMockAggregatorFactory,
 
 		setupProvider,
 		getContract,
