@@ -62,9 +62,6 @@ contract RealtimeDebtCache is BaseDebtCache {
 
     // Stub out all mutative functions as no-ops;
     // since they do nothing, their access restrictions have been dropped
-
-    function purgeCachedPynthDebt(bytes32 currencyKey) external {}
-
     function takeDebtSnapshot() external {}
 
     function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external {}

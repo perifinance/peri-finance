@@ -12,10 +12,13 @@ import "./interfaces/IBridgeState.sol";
 import "./interfaces/ISystemSettings.sol";
 import "./interfaces/IDebtCache.sol";
 
-import "./SafeDecimalMath.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/multicollateralpynth
 contract MultiCollateralPynth is Pynth {
+
+    /* The number representing 1.0. */
+    uint8 public constant decimals = 18;
+    uint public constant UNIT = 10**uint(decimals);
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
@@ -115,7 +118,7 @@ contract MultiCollateralPynth is Pynth {
 
         require(_internalBurn(messageSender, _amount), "burning failed");
 
-        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
+        debtCache().updateCachedPynthDebtWithRate(pUSD, UNIT);
 
         bridgeState.appendOutboundingRequest(messageSender, _amount, _destChainId, _sign);
     }
@@ -141,7 +144,7 @@ contract MultiCollateralPynth is Pynth {
         bridgeState.claimInbound(_index, amount);
 
         _internalIssue(account, amount);
-        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
+        debtCache().updateCachedPynthDebtWithRate(pUSD, UNIT);
 
         return true;
     }

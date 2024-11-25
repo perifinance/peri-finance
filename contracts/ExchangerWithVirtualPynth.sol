@@ -1,11 +1,12 @@
 pragma solidity 0.5.16;
+pragma experimental ABIEncoderV2;
 
 // Inheritance
 import "./Exchanger.sol";
 
 // Internal references
 import "./interfaces/IVirtualPynth.sol";
-import "./VirtualPynth.sol";
+//import "./VirtualPynth.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/exchangerwithvirtualpynth
 contract ExchangerWithVirtualPynth is Exchanger {
@@ -20,8 +21,8 @@ contract ExchangerWithVirtualPynth is Exchanger {
         // prevent inverse pynths from being allowed due to purgeability
         require(currencyKey[0] != 0x69, "Cannot virtualize this pynth");
 
-        vPynth = new VirtualPynth(pynth, resolver, recipient, amount, currencyKey);
-        emit VirtualPynthCreated(address(pynth), recipient, address(vPynth), currencyKey, amount);
+        // vPynth = new VirtualPynth(pynth, resolver, recipient, amount, currencyKey);
+        // emit VirtualPynthCreated(address(pynth), recipient, address(vPynth), currencyKey, amount);
     }
 
     event VirtualPynthCreated(

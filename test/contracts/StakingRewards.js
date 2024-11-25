@@ -2,16 +2,22 @@ const { contract } = require('hardhat');
 const { toBN } = require('web3-utils');
 
 const { toBytes32 } = require('../..');
-const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
+const {
+	onlyGivenAddressCanInvoke,
+	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { mockToken, setupAllContracts, setupContract } = require('./setup');
+const { artifacts } = require('hardhat');
 const { currentTime, toUnit, fastForward } = require('../utils')();
 
 contract('StakingRewards', accounts => {
 	const [
 		,
 		owner,
-		oracle,
+		,
 		authority,
 		rewardEscrowAddress,
 		stakingAccount1,
@@ -20,33 +26,26 @@ contract('StakingRewards', accounts => {
 
 	// PeriFinance is the rewardsToken
 	let rewardsToken,
+		rewardsTokenProxy,
 		stakingToken,
 		externalRewardsToken,
 		exchangeRates,
 		stakingRewards,
 		rewardsDistribution,
 		systemSettings,
-		feePool,
-		// stakingStateUSDC,
-		pynths;
+		feePool;
 
 	const DAY = 86400;
 	const ZERO_BN = toBN(0);
 
 	const setRewardsTokenExchangeRate = async ({ rateStaleDays } = { rateStaleDays: 7 }) => {
 		const rewardsTokenIdentifier = await rewardsToken.symbol();
+		const tokenKey = toBytes32(rewardsTokenIdentifier);
 
 		await systemSettings.setRateStalePeriod(DAY * rateStaleDays, { from: owner });
-		const updatedTime = await currentTime();
-		await exchangeRates.updateRates(
-			[toBytes32(rewardsTokenIdentifier)],
-			[toUnit('2')],
-			updatedTime,
-			{
-				from: oracle,
-			}
-		);
-		assert.equal(await exchangeRates.rateIsStale(toBytes32(rewardsTokenIdentifier)), false);
+		await setupPriceAggregators(exchangeRates, owner, [tokenKey]);
+		await updateAggregatorRates(exchangeRates, null, [tokenKey], [toUnit('2')]);
+		assert.equal(await exchangeRates.rateIsStale(tokenKey), false);
 	};
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -69,9 +68,9 @@ contract('StakingRewards', accounts => {
 			RewardsDistribution: rewardsDistribution,
 			FeePool: feePool,
 			PeriFinance: rewardsToken,
+			ProxyERC20PeriFinance: rewardsTokenProxy,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
-			// StakingStateUSDC: stakingStateUSDC,
 		} = await setupAllContracts({
 			pynths,
 			accounts,
@@ -81,8 +80,13 @@ contract('StakingRewards', accounts => {
 				'FeePool',
 				'SystemSettings',
 				'StakingState',
+				'PeriFinanceState',
+				'CrossChainManager',
 			],
 		}));
+
+		// use implementation ABI on the proxy address to simplify calling
+		rewardsToken = await artifacts.require('PeriFinance').at(rewardsTokenProxy.address);
 
 		stakingRewards = await setupContract({
 			accounts,
@@ -117,7 +121,6 @@ contract('StakingRewards', accounts => {
 				'setRewardsDistribution',
 				'setRewardsDuration',
 				'recoverERC20',
-				'updatePeriodFinish',
 			],
 		});
 	});
@@ -176,15 +179,6 @@ contract('StakingRewards', accounts => {
 			await onlyGivenAddressCanInvoke({
 				fnc: stakingRewards.setPaused,
 				args: [true],
-				address: owner,
-				accounts,
-			});
-		});
-
-		it('only owner can call updatePeriodFinish', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: stakingRewards.updatePeriodFinish,
-				args: [0],
 				address: owner,
 				accounts,
 			});
@@ -575,26 +569,6 @@ contract('StakingRewards', accounts => {
 
 		it('cannot withdraw 0', async () => {
 			await assert.revert(stakingRewards.withdraw('0'), 'Cannot withdraw 0');
-		});
-	});
-
-	describe('updatePeriodFinish()', () => {
-		const updateTimeStamp = toUnit('100');
-
-		before(async () => {
-			await stakingRewards.updatePeriodFinish(updateTimeStamp, {
-				from: owner,
-			});
-		});
-
-		it('should update periodFinish', async () => {
-			const periodFinish = await stakingRewards.periodFinish();
-			assert.bnEqual(periodFinish, updateTimeStamp);
-		});
-
-		it('should update rewardRate to zero', async () => {
-			const rewardRate = await stakingRewards.rewardRate();
-			assert.bnEqual(rewardRate, ZERO_BN);
 		});
 	});
 

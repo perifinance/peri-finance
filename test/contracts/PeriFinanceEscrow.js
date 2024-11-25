@@ -4,7 +4,7 @@ const { contract } = require('hardhat');
 
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
-const { setupAllContracts } = require('./setup');
+const { mockToken, setupContract } = require('./setup');
 
 const { currentTime, fastForward, toUnit } = require('../utils')();
 
@@ -18,7 +18,7 @@ contract('PeriFinanceEscrow', async accounts => {
 	const YEAR = 31556926;
 
 	const [, owner, , account1, account2] = accounts;
-	let escrow, periFinance, pynths;
+	let escrow, periFinance;
 
 	const getYearFromNow = async () => {
 		const timestamp = await currentTime();
@@ -32,12 +32,16 @@ contract('PeriFinanceEscrow', async accounts => {
 
 	// Run once at beginning - snapshots will take care of resetting this before each test
 	before(async () => {
-		pynths = ['pUSD'];
-		({ PeriFinanceEscrow: escrow, PeriFinance: periFinance } = await setupAllContracts({
-			pynths,
+		// Mock PERI
+		({ token: periFinance } = await mockToken({ accounts, name: 'PeriFinance', symbol: 'PERI' }));
+
+		escrow = await setupContract({
 			accounts,
-			contracts: ['PeriFinanceEscrow', 'PeriFinance'],
-		}));
+			contract: 'PeriFinanceEscrow',
+			cache: {
+				PeriFinance: periFinance,
+			},
+		});
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
@@ -46,11 +50,6 @@ contract('PeriFinanceEscrow', async accounts => {
 		it('should set periFinance on contructor', async () => {
 			const periFinanceAddress = await escrow.periFinance();
 			assert.equal(periFinanceAddress, periFinance.address);
-		});
-
-		it('should set addressToRefund on contructor', async () => {
-			const addressToRefund = await escrow.addressToRefund();
-			assert.equal(addressToRefund, owner);
 		});
 
 		it('should set owner on contructor', async () => {
@@ -62,12 +61,6 @@ contract('PeriFinanceEscrow', async accounts => {
 			await escrow.setPeriFinance(ZERO_ADDRESS, { from: owner });
 			const periFinanceAddress = await escrow.periFinance();
 			assert.equal(periFinanceAddress, ZERO_ADDRESS);
-		});
-
-		it('should allow owner to set addressToRefund', async () => {
-			await escrow.setAddressToRefund(ZERO_ADDRESS, { from: owner });
-			const addresstoRefund = await escrow.addressToRefund();
-			assert.equal(addresstoRefund, ZERO_ADDRESS);
 		});
 	});
 
@@ -104,28 +97,6 @@ contract('PeriFinanceEscrow', async accounts => {
 
 			assert.isAtLeast(times[0], parseInt(await escrow.getVestingTime(account1, 0)));
 			assert.isAtLeast(times[1], parseInt(await escrow.getVestingTime(account1, 1)));
-		});
-		it('should NOT allow owner to call functions after setup duration', async () => {
-			await fastForward(8 * WEEK + 1);
-
-			await assert.revert(
-				escrow.appendVestingEntry(account1, await getYearFromNow(), toUnit('1000'), {
-					from: owner,
-				}),
-				'Can only perform this action during setup'
-			);
-
-			await assert.revert(
-				escrow.purgeAccount(account1, { from: owner }),
-				'Can only perform this action during setup'
-			);
-
-			const times = [await weeksFromNow(1), await weeksFromNow(2)];
-			const quantities = [toUnit('100'), toUnit('100')];
-			await assert.revert(
-				escrow.addVestingSchedule(account1, times, quantities, { from: owner }),
-				'Can only perform this action during setup'
-			);
 		});
 	});
 
@@ -232,7 +203,7 @@ contract('PeriFinanceEscrow', async accounts => {
 
 		describe('Partial Vesting', async () => {
 			beforeEach(async () => {
-				// Transfer of PERI to the escrow must occur before creating a vesting entry
+				// Transfer of PERI to the escrow must occur before creating a vestinng entry
 				await periFinance.transfer(escrow.address, toUnit('6000'), {
 					from: owner,
 				});

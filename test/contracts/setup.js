@@ -477,6 +477,7 @@ const setupContract = async ({
 			toUnit(2),
 		],
 		CollateralShort: [
+			tryGetAddressOf('CollateralState'),
 			owner,
 			tryGetAddressOf('CollateralManager'),
 			tryGetAddressOf('AddressResolver'),
@@ -1353,7 +1354,7 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'RewardEscrowV2',
-			deps: ['AddressResolver', 'SystemStatus', 'RewardEscrowV2Storage'],
+			deps: ['AddressResolver', 'SystemStatus', 'RewardEscrowV2Storage', 'SystemSettings'],
 			mocks: ['PeriFinance', 'FeePool', 'RewardEscrow', 'PeriFinanceBridgeToOptimism', 'Issuer'],
 		},
 		{
@@ -1451,8 +1452,8 @@ const setupAllContracts = async ({
 		},
 		{
 			contract: 'DynamicPynthRedeemer',
-			mocks: ['Issuer'],
-			deps: ['AddressResolver', 'ExchangeRates'],
+			mocks: ['Issuer', 'CrossChainManager', 'PeriFinanceDebtShare', 'ExternalTokenStakeManager',],
+			deps: ['AddressResolver', 'ExchangeRates', 'PeriFinanceDebtShare', 'ExternalTokenStakeManager','SystemSettings', 'StakingState'],
 		},
 		{
 			contract: 'DebtCache',
@@ -2432,13 +2433,15 @@ const setupAllContracts = async ({
 		// setup PERI price feed and any other feeds
 		const keys = ['PERI', ...(feeds || [])].map(toBytes32);
 		const prices = ['0.2', ...(feeds || []).map(() => '1.0')].map(toUnit);
-		await setupPriceAggregators(returnObj['ExchangeRates'], owner, keys);
-		await updateAggregatorRates(
-			returnObj['ExchangeRates'],
-			returnObj['CircuitBreaker'],
-			keys,
-			prices
-		);
+		if(returnObj['ExchangeRates'].addAggregator){
+			await setupPriceAggregators(returnObj['ExchangeRates'], owner, keys);
+			await updateAggregatorRates(
+				returnObj['ExchangeRates'],
+				returnObj['CircuitBreaker'],
+				keys,
+				prices
+			);
+		}
 	}
 
 	return returnObj;

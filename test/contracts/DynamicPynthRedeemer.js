@@ -15,11 +15,11 @@ const { setupAllContracts } = require('../contracts/setup');
 const { toBytes32 } = require('../..');
 
 contract('DynamicPynthRedeemer', async accounts => {
-	const pynths = ['pUSD', 'pBTC', 'pETH', 'ETH', 'SNX', 'sLINK'];
-	const [pBTC, pETH, ETH, pUSD, SNX, sLINK] = ['pBTC', 'pETH', 'ETH', 'pUSD', 'SNX', 'sLINK'].map(
+	const pynths = ['pUSD', 'pBTC', 'pETH', 'ETH', 'PERI', 'sLINK', 'USDC'];
+	const [pBTC, pETH, ETH, pUSD, PERI, sLINK, USDC] = ['pBTC', 'pETH', 'ETH', 'pUSD', 'PERI', 'sLINK', 'USDC'].map(
 		toBytes32
 	);
-	const [priceBTC, priceETH, priceSNX, priceLINK] = ['70000', '3500', '2192', '100'].map(toUnit);
+	const [priceBTC, priceETH, pricePERI, priceLINK] = ['70000', '3500', '2192', '100'].map(toUnit);
 
 	const [, owner, , , account1] = accounts;
 
@@ -37,6 +37,7 @@ contract('DynamicPynthRedeemer', async accounts => {
 		periFinance,
 		systemSettings,
 		wrapperFactory,
+		debtShares,
 		weth;
 
 	before(async () => {
@@ -53,6 +54,7 @@ contract('DynamicPynthRedeemer', async accounts => {
 			PeriFinance: periFinance,
 			SystemSettings: systemSettings,
 			WrapperFactory: wrapperFactory,
+			PeriFinanceDebtShare: debtShares,
 			WETH: weth,
 		} = await setupAllContracts({
 			accounts,
@@ -69,7 +71,9 @@ contract('DynamicPynthRedeemer', async accounts => {
 				'PeriFinance',
 				'SystemSettings',
 				'WrapperFactory',
+				'CrossChainManager',
 				'WETH',
+				'PeriFinanceDebtShare',
 			],
 		}));
 
@@ -77,12 +81,12 @@ contract('DynamicPynthRedeemer', async accounts => {
 		periFinance = await artifacts.require('PeriFinance').at(proxyPeriFinance.address);
 
 		// setup aggregators
-		await setupPriceAggregators(exchangeRates, owner, [pBTC, pETH, ETH, SNX, sLINK]);
+		await setupPriceAggregators(exchangeRates, owner, [pBTC, pETH, ETH, PERI, sLINK]);
 		await updateAggregatorRates(
 			exchangeRates,
 			null,
-			[pBTC, pETH, ETH, SNX, sLINK],
-			[priceBTC, priceETH, priceETH, priceSNX, priceLINK]
+			[pBTC, pETH, ETH, PERI, sLINK],
+			[priceBTC, priceETH, priceETH, pricePERI, priceLINK]
 		);
 
 		// deploy an eth wrapper
@@ -333,7 +337,7 @@ contract('DynamicPynthRedeemer', async accounts => {
 
 			it('reverts when user attempts to redeem a non-pynth token', async () => {
 				await assert.revert(
-					instance.redeem(SNX, {
+					instance.redeem(PERI, {
 						from: account1,
 					})
 				);

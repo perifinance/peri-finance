@@ -8,7 +8,7 @@ import "./MixinResolver.sol";
 // Libraries
 import "./SafeDecimalMath.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/synthetixdebtshare
+// https://docs.periFinance.io/contracts/source/contracts/periFinancedebtshare
 contract PeriFinanceDebtShare is Owned, MixinResolver, IPeriFinanceDebtShare {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
