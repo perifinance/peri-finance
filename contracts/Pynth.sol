@@ -57,7 +57,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
 
     /* ========== MUTATIVE FUNCTIONS ========== */
 
-    function transfer(address to, uint value) public optionalProxy returns (bool) {
+    function transfer(address to, uint value) public onlyProxyOrInternal returns (bool) {
         _ensureCanTransfer(messageSender, value);
 
         // transfers to FEE_ADDRESS will be exchanged into pUSD and recorded as fee
@@ -73,7 +73,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
         return super._internalTransfer(messageSender, to, value);
     }
 
-    function transferAndSettle(address to, uint value) public optionalProxy returns (bool) {
+    function transferAndSettle(address to, uint value) public onlyProxyOrInternal returns (bool) {
         // Exchanger.settle ensures pynth is active
         (, , uint numEntriesSettled) = exchanger().settle(messageSender, currencyKey);
 
@@ -94,7 +94,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
         address from,
         address to,
         uint value
-    ) public optionalProxy returns (bool) {
+    ) public onlyProxyOrInternal returns (bool) {
         _ensureCanTransfer(from, value);
 
         return _internalTransferFrom(from, to, value);
@@ -104,7 +104,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
         address from,
         address to,
         uint value
-    ) public optionalProxy returns (bool) {
+    ) public onlyProxyOrInternal returns (bool) {
         // Exchanger.settle() ensures pynth is active
         (, , uint numEntriesSettled) = exchanger().settle(from, currencyKey);
 
@@ -134,7 +134,18 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
             super._internalTransfer(messageSender, to, value);
         } else {
             // else exchange pynth into pUSD and send to FEE_ADDRESS
-            amountInUSD = exchanger().exchange(messageSender, currencyKey, value, "pUSD", FEE_ADDRESS);
+            //amountInUSD = exchanger().exchange(messageSender, currencyKey, value, "pUSD", FEE_ADDRESS);
+                  (amountInUSD, ) = exchanger().exchange(
+                messageSender,
+                messageSender,
+                currencyKey,
+                value,
+                "pUSD",
+                FEE_ADDRESS,
+                false,
+                address(0),
+                bytes32(0)
+            );
         }
 
         // Notify feePool to record pUSD to distribute as fees
@@ -246,6 +257,40 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
 
         require(isFeePool || isExchanger || isIssuer, "Only FeePool, Exchanger or Issuer contracts allowed");
         _;
+    }
+
+
+    modifier onlyProxyOrInternal {
+        _onlyProxyOrInternal();
+        _;
+    }
+
+    function _onlyProxyOrInternal() internal {
+        if (msg.sender == address(proxy)) {
+            // allow proxy through, messageSender should be already set correctly
+            return;
+        } else if (_isInternalTransferCaller(msg.sender)) {
+            // optionalProxy behaviour only for the internal legacy contracts
+            messageSender = msg.sender;
+        } else {
+            revert("Only the proxy can call");
+        }
+    }
+
+    /// some legacy internal contracts use transfer methods directly on implementation
+    /// which isn't supported due to SIP-238 for other callers
+    function _isInternalTransferCaller(address caller) internal view returns (bool) {
+        // These entries are not required or cached in order to allow them to not exist (==address(0))
+        // e.g. due to not being available on L2 or at some future point in time.
+        return
+            // ordered to reduce gas for more frequent calls
+            caller == resolver.getAddress("CollateralShort") ||
+            // not used frequently
+            caller == resolver.getAddress("PynthRedeemer") ||
+            caller == resolver.getAddress("WrapperFactory") || // transfer not used by users
+            // legacy
+            caller == resolver.getAddress("NativeEtherWrapper") ||
+            caller == resolver.getAddress("Depot");
     }
 
     /* ========== EVENTS ========== */

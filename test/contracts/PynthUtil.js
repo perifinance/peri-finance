@@ -3,17 +3,20 @@
 const { contract } = require('hardhat');
 const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { toBytes32 } = require('../..');
-const { toUnit, currentTime } = require('../utils')();
-const { setExchangeFeeRateForPynths } = require('./helpers');
+const { toUnit } = require('../utils')();
+const {
+	setExchangeFeeRateForPynths,
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
 
 const { setupAllContracts } = require('./setup');
-const ZERO_BYTES32 = '0x' + '0'.repeat(64);
 
 contract('PynthUtil', accounts => {
-	const [, ownerAccount, oracle, account2] = accounts;
-	let pynthUtil, pUSDContract, periFinance, exchangeRates, timestamp, systemSettings, debtCache;
+	const [, ownerAccount, , account2] = accounts;
+	let pynthUtil, pUSDContract, periFinance, exchangeRates, systemSettings, debtCache, circuitBreaker;
 
-	const [PERI, pUSD, pBTC, iBTC] = ['PERI', 'pUSD', 'pBTC', 'iBTC'].map(toBytes32);
+	const [pUSD, pBTC, iBTC, PERI] = ['pUSD', 'pBTC', 'iBTC', 'PERI'].map(toBytes32);
 	const pynthKeys = [pUSD, pBTC, iBTC];
 	const pynthPrices = [toUnit('1'), toUnit('5000'), toUnit('5000')];
 
@@ -24,6 +27,7 @@ contract('PynthUtil', accounts => {
 			PeriFinance: periFinance,
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
+			CircuitBreaker: circuitBreaker,
 			DebtCache: debtCache,
 		} = await setupAllContracts({
 			accounts,
@@ -39,21 +43,27 @@ contract('PynthUtil', accounts => {
 				'SystemSettings',
 				'DebtCache',
 				'Issuer',
+				// 'LiquidatorRewards',
 				'CollateralManager',
+				'CircuitBreaker',
 				'RewardEscrowV2', // required for issuer._collateral to read collateral
-				'StakingStateUSDC',
+				// 'StakingStateUSDC',
 				'CrossChainManager',
 			],
 		}));
+
+		await setupPriceAggregators(exchangeRates, ownerAccount, [pBTC, iBTC]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-		await exchangeRates.updateRates([pBTC, iBTC], ['5000', '5000'].map(toUnit), timestamp, {
-			from: oracle,
-		});
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
+			[pBTC, iBTC, PERI],
+			['5000', '5000', '0.2'].map(toUnit)
+		);
 		await debtCache.takeDebtSnapshot();
 
 		// set a 0% default exchange fee rate for test purpose
@@ -71,7 +81,7 @@ contract('PynthUtil', accounts => {
 		const amountToExchange = toUnit('50');
 		const pUSDAmount = toUnit('100');
 		beforeEach(async () => {
-			await periFinance.issuePynths(PERI, pUSDMinted, {
+			await periFinance.issuePynths(pUSDMinted, {
 				from: ownerAccount,
 			});
 			await pUSDContract.transfer(account2, pUSDAmount, { from: ownerAccount });
@@ -90,31 +100,6 @@ contract('PynthUtil', accounts => {
 					[toUnit('50'), effectiveValue, 0],
 					[toUnit('50'), toUnit('50'), 0],
 				]);
-			});
-		});
-		describe('frozenPynths', () => {
-			it('should not return any currency keys when no pynths are frozen', async () => {
-				assert.deepEqual(
-					await pynthUtil.frozenPynths(),
-					pynthKeys.map(pynth => ZERO_BYTES32)
-				);
-			});
-			it('should return currency keys of frozen pynths', async () => {
-				await exchangeRates.setInversePricing(
-					iBTC,
-					toUnit('100'),
-					toUnit('150'),
-					toUnit('90'),
-					true,
-					false,
-					{
-						from: ownerAccount,
-					}
-				);
-				assert.deepEqual(
-					await pynthUtil.frozenPynths(),
-					pynthKeys.map(pynth => (pynth === iBTC ? iBTC : ZERO_BYTES32))
-				);
 			});
 		});
 		describe('pynthsRates', () => {

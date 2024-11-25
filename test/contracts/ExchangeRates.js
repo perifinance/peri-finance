@@ -35,15 +35,15 @@ const MockAggregator = artifacts.require('MockAggregatorV2V3');
 
 contract('Exchange Rates', async accounts => {
 	const [deployerAccount, owner, oracle, dexPriceAggregator, accountOne, accountTwo] = accounts;
-	const [SNX, sJPY, sETH, sXTZ, sBNB, pUSD, sEUR, sAUD, GOLD, fastGasPrice, debtRatio] = [
-		'SNX',
+	const [PERI, sJPY, pETH, sXTZ, sBNB, pUSD, pEUR, pAUD, GOLD, fastGasPrice, debtRatio] = [
+		'PERI',
 		'sJPY',
-		'sETH',
+		'pETH',
 		'sXTZ',
 		'sBNB',
 		'pUSD',
-		'sEUR',
-		'sAUD',
+		'pEUR',
+		'pAUD',
 		'GOLD',
 		'fastGasPrice',
 		'DebtRatio',
@@ -127,17 +127,17 @@ contract('Exchange Rates', async accounts => {
 		describe('anyRateIsInvalid()', () => {
 			describe('stale scenarios', () => {
 				it('anyRateIsInvalid conforms to rateStalePeriod', async () => {
-					await setupAggregators([SNX, GOLD]);
+					await setupAggregators([PERI, GOLD]);
 
-					await updateRates([SNX, GOLD], [toUnit(0.1), toUnit(0.2)]);
+					await updateRates([PERI, GOLD], [toUnit(0.1), toUnit(0.2)]);
 
-					assert.equal(await instance.anyRateIsInvalid([SNX, GOLD]), false);
+					assert.equal(await instance.anyRateIsInvalid([PERI, GOLD]), false);
 
 					await fastForward(await instance.rateStalePeriod());
-					assert.equal(await instance.anyRateIsInvalid([SNX, GOLD]), true);
+					assert.equal(await instance.anyRateIsInvalid([PERI, GOLD]), true);
 
-					await updateRates([SNX, GOLD], [toUnit(0.1), toUnit(0.2)]);
-					assert.equal(await instance.anyRateIsInvalid([SNX, GOLD]), false);
+					await updateRates([PERI, GOLD], [toUnit(0.1), toUnit(0.2)]);
+					assert.equal(await instance.anyRateIsInvalid([PERI, GOLD]), false);
 				});
 
 				it('should be able to confirm no rates are stale from a subset', async () => {
@@ -296,7 +296,7 @@ contract('Exchange Rates', async accounts => {
 							from: owner,
 						});
 					});
-					describe('when aggregated synth has rates', () => {
+					describe('when aggregated pynth has rates', () => {
 						beforeEach(async () => {
 							const timestamp = await currentTime();
 							await aggregatorJPY.setLatestAnswer(convertToDecimals(100, 8), timestamp);
@@ -387,20 +387,20 @@ contract('Exchange Rates', async accounts => {
 			describe('when a price is sent to the oracle', () => {
 				beforeEach(async () => {
 					// Send a price update to guarantee we're not depending on values from outside this test.
-					const keys = [sAUD, sEUR, SNX];
+					const keys = [pAUD, pEUR, PERI];
 					await setupAggregators(keys);
 					await updateRates(keys, ['0.5', '1.25', '0.1'].map(toUnit));
 				});
 
 				it('should correctly calculate an exchange rate in effectiveValue()', async () => {
-					// 1 pUSD should be worth 2 sAUD.
-					assert.bnEqual(await instance.effectiveValue(pUSD, toUnit('1'), sAUD), toUnit('2'));
+					// 1 pUSD should be worth 2 pAUD.
+					assert.bnEqual(await instance.effectiveValue(pUSD, toUnit('1'), pAUD), toUnit('2'));
 
-					// 10 SNX should be worth 1 pUSD.
-					assert.bnEqual(await instance.effectiveValue(SNX, toUnit('10'), pUSD), toUnit('1'));
+					// 10 PERI should be worth 1 pUSD.
+					assert.bnEqual(await instance.effectiveValue(PERI, toUnit('10'), pUSD), toUnit('1'));
 
-					// 2 sEUR should be worth 2.50 pUSD
-					assert.bnEqual(await instance.effectiveValue(sEUR, toUnit('2'), pUSD), toUnit('2.5'));
+					// 2 pEUR should be worth 2.50 pUSD
+					assert.bnEqual(await instance.effectiveValue(pEUR, toUnit('2'), pUSD), toUnit('2.5'));
 				});
 
 				it('should calculate updated rates in effectiveValue()', async () => {
@@ -408,28 +408,28 @@ contract('Exchange Rates', async accounts => {
 					await fastForward((await instance.rateStalePeriod()) + 1);
 
 					// Update all rates except pUSD.
-					await updateRates([sEUR, SNX], ['1.25', '0.1'].map(toUnit));
+					await updateRates([pEUR, PERI], ['1.25', '0.1'].map(toUnit));
 
 					const amountOfPynthetixs = toUnit('10');
 					const amountOfEur = toUnit('0.8');
 
-					// Should now be able to convert from SNX to sEUR since they are both not stale.
-					assert.bnEqual(await instance.effectiveValue(SNX, amountOfPynthetixs, sEUR), amountOfEur);
+					// Should now be able to convert from PERI to pEUR since they are both not stale.
+					assert.bnEqual(await instance.effectiveValue(PERI, amountOfPynthetixs, pEUR), amountOfEur);
 				});
 
 				it('should return 0 when relying on a non-existant dest exchange rate in effectiveValue()', async () => {
-					assert.equal(await instance.effectiveValue(SNX, toUnit('10'), toBytes32('XYZ')), 0);
+					assert.equal(await instance.effectiveValue(PERI, toUnit('10'), toBytes32('XYZ')), 0);
 				});
 
 				it('should revert when relying on a non-existing src rate in effectiveValue', async () => {
-					assert.equal(await instance.effectiveValue(toBytes32('XYZ'), toUnit('10'), SNX), 0);
+					assert.equal(await instance.effectiveValue(toBytes32('XYZ'), toUnit('10'), PERI), 0);
 				});
 
 				it('effectiveValueAndRates() should return rates as well with pUSD on one side', async () => {
 					const { value, sourceRate, destinationRate } = await instance.effectiveValueAndRates(
 						pUSD,
 						toUnit('1'),
-						sAUD
+						pAUD
 					);
 
 					assert.bnEqual(value, toUnit('2'));
@@ -439,7 +439,7 @@ contract('Exchange Rates', async accounts => {
 
 				it('effectiveValueAndRates() should return rates as well with pUSD on the other side', async () => {
 					const { value, sourceRate, destinationRate } = await instance.effectiveValueAndRates(
-						sAUD,
+						pAUD,
 						toUnit('1'),
 						pUSD
 					);
@@ -451,9 +451,9 @@ contract('Exchange Rates', async accounts => {
 
 				it('effectiveValueAndRates() should return rates as well with two live rates', async () => {
 					const { value, sourceRate, destinationRate } = await instance.effectiveValueAndRates(
-						sAUD,
+						pAUD,
 						toUnit('1'),
-						sEUR
+						pEUR
 					);
 
 					assert.bnEqual(value, toUnit('0.4')); // 0.5/1.25 = 0.4
@@ -597,7 +597,7 @@ contract('Exchange Rates', async accounts => {
 
 					describe('when the owner adds the same aggregator to two other rates', () => {
 						beforeEach(async () => {
-							await instance.addAggregator(sEUR, aggregatorJPY.address, {
+							await instance.addAggregator(pEUR, aggregatorJPY.address, {
 								from: owner,
 							});
 							await instance.addAggregator(sBNB, aggregatorJPY.address, {
@@ -607,7 +607,7 @@ contract('Exchange Rates', async accounts => {
 						it('and currenciesUsingAggregator for that aggregator returns sJPY', async () => {
 							assert.deepEqual(await instance.currenciesUsingAggregator(aggregatorJPY.address), [
 								sJPY,
-								sEUR,
+								pEUR,
 								sBNB,
 							]);
 						});
@@ -1047,7 +1047,7 @@ contract('Exchange Rates', async accounts => {
 							it('then it returns zeros', async () => {
 								const fiveZeros = new Array(5).fill('0');
 								assert.deepEqual(
-									await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(sAUD, '5', '0'),
+									await instance.ratesAndUpdatedTimeForCurrencyLastNRounds(pAUD, '5', '0'),
 									[fiveZeros, fiveZeros]
 								);
 							});
@@ -1262,10 +1262,10 @@ contract('Exchange Rates', async accounts => {
 		describe('src/dest do not have an atomic equivalent for dex pricing', () => {
 			beforeEach(async () => {
 				const MockToken = artifacts.require('MockToken');
-				const sethDexEquivalentToken = await MockToken.new('esETH equivalent', 'esETH', '18');
-				// set sETH equivalent but don't set pUSD equivalent
+				const sethDexEquivalentToken = await MockToken.new('epETH equivalent', 'epETH', '18');
+				// set pETH equivalent but don't set pUSD equivalent
 				await systemSettings.setAtomicEquivalentForDexPricing(
-					sETH,
+					pETH,
 					sethDexEquivalentToken.address,
 					{ from: owner }
 				);
@@ -1273,13 +1273,13 @@ contract('Exchange Rates', async accounts => {
 
 			it('reverts on src not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(pUSD, toUnit('1'), sETH),
+					instance.effectiveAtomicValueAndRates(pUSD, toUnit('1'), pETH),
 					'No atomic equivalent for source'
 				);
 			});
 			it('reverts on dest not having equivalent', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(sETH, toUnit('1'), pUSD),
+					instance.effectiveAtomicValueAndRates(pETH, toUnit('1'), pUSD),
 					'No atomic equivalent for dest'
 				);
 			});
@@ -1380,13 +1380,13 @@ contract('Exchange Rates', async accounts => {
 				dexPriceAggregator = await MockDexPriceAggregator.new();
 
 				susdDexEquivalentToken = await MockToken.new('epUSD equivalent', 'epUSD', '18');
-				sethDexEquivalentToken = await MockToken.new('esETH equivalent', 'esETH', '18');
+				sethDexEquivalentToken = await MockToken.new('epETH equivalent', 'epETH', '18');
 			});
 
 			beforeEach('set initial configuration', async () => {
 				await ethAggregator.setDecimals('8');
 				await ethAggregator.setLatestAnswer(convertToDecimals(1, 8), await currentTime()); // this will be overwritten by the appropriate rate as needed
-				await instance.addAggregator(sETH, ethAggregator.address, {
+				await instance.addAggregator(pETH, ethAggregator.address, {
 					from: owner,
 				});
 				await instance.setDexPriceAggregator(dexPriceAggregator.address, {
@@ -1400,7 +1400,7 @@ contract('Exchange Rates', async accounts => {
 					}
 				);
 				await systemSettings.setAtomicEquivalentForDexPricing(
-					sETH,
+					pETH,
 					sethDexEquivalentToken.address,
 					{
 						from: owner,
@@ -1423,16 +1423,16 @@ contract('Exchange Rates', async accounts => {
 				});
 				it('reverts', async () => {
 					await assert.revert(
-						instance.effectiveAtomicValueAndRates(pUSD, one, sETH),
+						instance.effectiveAtomicValueAndRates(pUSD, one, pETH),
 						'mock assetToAsset() reverted'
 					);
 				});
 			});
 
-			describe('trades pUSD -> sETH', () => {
+			describe('trades pUSD -> pETH', () => {
 				const amountIn = toUnit('1000');
 				const srcToken = pUSD;
-				const destToken = sETH;
+				const destToken = pETH;
 
 				// P_DEX of 0.01, P_CL of 0.011
 				itGivesTheCorrectRates({
@@ -1513,9 +1513,9 @@ contract('Exchange Rates', async accounts => {
 				});
 			});
 
-			describe('trades sETH -> pUSD', () => {
+			describe('trades pETH -> pUSD', () => {
 				const amountIn = toUnit('10');
-				const srcToken = sETH;
+				const srcToken = pETH;
 				const destToken = pUSD;
 
 				// P_DEX of 100, P_CL of 110
@@ -1600,7 +1600,7 @@ contract('Exchange Rates', async accounts => {
 			describe('when tokens use non-18 decimals', () => {
 				beforeEach('set up non-18 decimal tokens', async () => {
 					susdDexEquivalentToken = await MockToken.new('pUSD equivalent', 'epUSD', '6'); // mimic USDC and USDT
-					sethDexEquivalentToken = await MockToken.new('sETH equivalent', 'esETH', '8'); // mimic WBTC
+					sethDexEquivalentToken = await MockToken.new('pETH equivalent', 'epETH', '8'); // mimic WBTC
 					await systemSettings.setAtomicEquivalentForDexPricing(
 						pUSD,
 						susdDexEquivalentToken.address,
@@ -1609,7 +1609,7 @@ contract('Exchange Rates', async accounts => {
 						}
 					);
 					await systemSettings.setAtomicEquivalentForDexPricing(
-						sETH,
+						pETH,
 						sethDexEquivalentToken.address,
 						{
 							from: owner,
@@ -1617,9 +1617,9 @@ contract('Exchange Rates', async accounts => {
 					);
 				});
 
-				describe('pUSD -> sETH', () => {
+				describe('pUSD -> pETH', () => {
 					const rate = '100';
-					// esETH has 8 decimals
+					// epETH has 8 decimals
 					const rateIn8 = convertToDecimals(rate, 8);
 
 					const amountIn = toUnit('1000');
@@ -1648,13 +1648,13 @@ contract('Exchange Rates', async accounts => {
 
 					// TODO: update decimals test
 					xit('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(pUSD, amountIn, sETH);
+						const rates = await instance.effectiveAtomicValueAndRates(pUSD, amountIn, pETH);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn8, unitIn8); // use 8 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
 				});
 
-				describe('sETH -> pUSD', () => {
+				describe('pETH -> pUSD', () => {
 					const rate = '100';
 					// epUSD has 6 decimals
 					const rateIn6 = convertToDecimals(rate, 6);
@@ -1686,7 +1686,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					it('still provides results in 18 decimals', async () => {
-						const rates = await instance.effectiveAtomicValueAndRates(sETH, amountIn, pUSD);
+						const rates = await instance.effectiveAtomicValueAndRates(pETH, amountIn, pUSD);
 						const expectedOutput = multiplyDecimal(amountIn, rateIn6, unitIn6); // use 6 as decimal base to get 18 decimals
 						assert.bnEqual(rates.value, expectedOutput);
 					});
@@ -1699,7 +1699,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange pricing', () => {
 			it('errors with not implemented when attempting to fetch atomic rate', async () => {
 				await assert.revert(
-					instance.effectiveAtomicValueAndRates(sETH, toUnit('10'), pUSD),
+					instance.effectiveAtomicValueAndRates(pETH, toUnit('10'), pUSD),
 					'Cannot be run on this layer'
 				);
 			});
@@ -1709,29 +1709,29 @@ contract('Exchange Rates', async accounts => {
 	const itReportsRateTooVolatileForAtomicExchanges = () => {
 		describe('pynthTooVolatileForAtomicExchange', async () => {
 			const minute = 60;
-			const synth = sETH;
+			const pynth = pETH;
 			let aggregator;
 
 			beforeEach('set up eth aggregator mock', async () => {
 				aggregator = await MockAggregator.new({ from: owner });
 				await aggregator.setDecimals('8');
-				await instance.addAggregator(synth, aggregator.address, {
+				await instance.addAggregator(pynth, aggregator.address, {
 					from: owner,
 				});
 			});
 
 			describe('when consideration window is not set', () => {
-				it('does not consider synth to be volatile', async () => {
+				it('does not consider pynth to be volatile', async () => {
 					assert.isFalse(
-						await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+						await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 					);
 				});
 			});
 
 			describe('when update threshold is not set', () => {
-				it('does not consider synth to be volatile', async () => {
+				it('does not consider pynth to be volatile', async () => {
 					assert.isFalse(
-						await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+						await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 					);
 				});
 			});
@@ -1741,10 +1741,10 @@ contract('Exchange Rates', async accounts => {
 
 				beforeEach('set system settings', async () => {
 					// Window of 10min and threshold of 2 (i.e. max two updates allowed)
-					await systemSettings.setAtomicVolatilityConsiderationWindow(synth, considerationWindow, {
+					await systemSettings.setAtomicVolatilityConsiderationWindow(pynth, considerationWindow, {
 						from: owner,
 					});
-					await systemSettings.setAtomicVolatilityUpdateThreshold(synth, 2, {
+					await systemSettings.setAtomicVolatilityUpdateThreshold(pynth, 2, {
 						from: owner,
 					});
 				});
@@ -1757,15 +1757,15 @@ contract('Exchange Rates', async accounts => {
 						);
 					});
 
-					it('does not consider synth to be volatile', async () => {
+					it('does not consider pynth to be volatile', async () => {
 						assert.isFalse(
-							await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+							await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 						);
 					});
 				});
 
 				describe('when last aggregator update is inside consideration window', () => {
-					function itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+					function itReportsThePynthsVolatilityBasedOnOracleUpdates({
 						oracleUpdateTimesFromNow = [],
 						volatile,
 					}) {
@@ -1778,16 +1778,16 @@ contract('Exchange Rates', async accounts => {
 							}
 						});
 
-						it(`${volatile ? 'considers' : 'does not consider'} synth to be volatile`, async () => {
+						it(`${volatile ? 'considers' : 'does not consider'} pynth to be volatile`, async () => {
 							assert.equal(
-								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth),
+								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth),
 								volatile
 							);
 						});
 					}
 
 					describe('when the allowed update threshold is not reached', () => {
-						itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+						itReportsThePynthsVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow + 5 * minute,
@@ -1798,7 +1798,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					describe('when the allowed update threshold is reached', () => {
-						itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+						itReportsThePynthsVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow - 5 * minute,
@@ -1810,7 +1810,7 @@ contract('Exchange Rates', async accounts => {
 
 					describe('when the allowed update threshold is reached with updates at the edge of the consideration window', () => {
 						// The consideration window is inclusive on both sides (i.e. [])
-						itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+						itReportsThePynthsVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [
 								considerationWindow + 10 * minute,
 								considerationWindow - 5, // small 5s fudge for block times and querying speed
@@ -1821,7 +1821,7 @@ contract('Exchange Rates', async accounts => {
 					});
 
 					describe('when there is not enough oracle history to assess', () => {
-						itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+						itReportsThePynthsVolatilityBasedOnOracleUpdates({
 							oracleUpdateTimesFromNow: [considerationWindow - 5 * minute],
 							volatile: true,
 						});
@@ -1829,7 +1829,7 @@ contract('Exchange Rates', async accounts => {
 
 					describe('when there is just enough oracle history to assess', () => {
 						describe('when all updates are inside consideration window', () => {
-							itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+							itReportsThePynthsVolatilityBasedOnOracleUpdates({
 								oracleUpdateTimesFromNow: [
 									considerationWindow - 5 * minute,
 									considerationWindow - 7 * minute,
@@ -1839,7 +1839,7 @@ contract('Exchange Rates', async accounts => {
 						});
 
 						describe('when not all updates are inside consideration window', () => {
-							itReportsTheSynthsVolatilityBasedOnOracleUpdates({
+							itReportsThePynthsVolatilityBasedOnOracleUpdates({
 								oracleUpdateTimesFromNow: [
 									considerationWindow + 5 * minute,
 									considerationWindow - 5 * minute,
@@ -1859,9 +1859,9 @@ contract('Exchange Rates', async accounts => {
 							);
 						});
 
-						it('does not consider synth to be volatile', async () => {
+						it('does not consider pynth to be volatile', async () => {
 							assert.isFalse(
-								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 							);
 						});
 					});
@@ -1874,9 +1874,9 @@ contract('Exchange Rates', async accounts => {
 							);
 						});
 
-						it('considers synth to be volatile', async () => {
+						it('considers pynth to be volatile', async () => {
 							assert.isTrue(
-								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 							);
 						});
 					});
@@ -1886,9 +1886,9 @@ contract('Exchange Rates', async accounts => {
 							await aggregator.setAllRoundDataShouldRevert(true);
 						});
 
-						it('considers synth to be volatile', async () => {
+						it('considers pynth to be volatile', async () => {
 							assert.isTrue(
-								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](synth)
+								await instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pynth)
 							);
 						});
 					});
@@ -1901,7 +1901,7 @@ contract('Exchange Rates', async accounts => {
 		describe('Atomic exchange volatility control', () => {
 			it('errors with not implemented when attempting to assess volatility for atomic exchanges', async () => {
 				await assert.revert(
-					instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](sETH),
+					instance.methods['pynthTooVolatileForAtomicExchange(bytes32)'](pETH),
 					'Cannot be run on this layer'
 				);
 			});
