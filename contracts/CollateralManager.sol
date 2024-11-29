@@ -55,7 +55,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
     // The set of all pynths that are shortable.
     Bytes32SetLib.Bytes32Set internal _shortablePynths;
 
-    mapping(bytes32 => bytes32) public pynthToInversePynth;
+    mapping(bytes32 => bytes32) public __pynthToInversePynth;
 
     // The factor that will scale the utilisation ratio.
     uint public utilisationMultiplier = 1e18;
@@ -107,16 +107,16 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         staticAddresses[0] = CONTRACT_ISSUER;
         staticAddresses[1] = CONTRACT_EXRATES;
 
-        // we want to cache the name of the pynth and the name of its corresponding iPynth
+        // we want to cache the name of the pynth and the name of its corresponding iPysnth
         bytes32[] memory shortAddresses;
         uint length = _shortablePynths.elements.length;
 
         if (length > 0) {
-            shortAddresses = new bytes32[](length * 2);
+            shortAddresses = new bytes32[](length);
 
             for (uint i = 0; i < length; i++) {
                 shortAddresses[i] = _shortablePynths.elements[i];
-                shortAddresses[i + length] = pynthToInversePynth[_shortablePynths.elements[i]];
+                //shortAddresses[i + length] = pynthToInversePynth[_shortablePynths.elements[i]];
             }
         }
 
@@ -238,9 +238,9 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
         // get the spot supply of the pynth, its iPynth
         uint longSupply = IERC20(address(_pynth(pynth))).totalSupply();
-        uint inverseSupply = IERC20(address(_pynth(pynthToInversePynth[pynth]))).totalSupply();
+        //uint inverseSupply = IERC20(address(_pynth(pynthToInversePynth[pynth]))).totalSupply();
         // add the iPynth to supply properly reflect the market skew.
-        uint shortSupply = state.short(pynthKey).add(inverseSupply);
+        uint shortSupply = state.short(pynthKey);//.add(inverseSupply);
 
         // in this case, the market is skewed long so its free to short.
         if (longSupply > shortSupply) {
@@ -399,7 +399,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
 
     // When we add a shortable pynth, we need to know the iPynth as well
     // This is so we can get the proper skew for the short rate.
-    function addShortablePynths(bytes32[2][] calldata requiredPynthAndInverseNamesInResolver, bytes32[] calldata pynthKeys)
+    function addShortablePynths(bytes32[] calldata requiredPynthAndInverseNamesInResolver, bytes32[] calldata pynthKeys)
         external
         onlyOwner
     {
@@ -408,15 +408,15 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         for (uint i = 0; i < requiredPynthAndInverseNamesInResolver.length; i++) {
             // setting these explicitly for clarity
             // Each entry in the array is [Pynth, iPynth]
-            bytes32 pynth = requiredPynthAndInverseNamesInResolver[i][0];
-            bytes32 iPynth = requiredPynthAndInverseNamesInResolver[i][1];
+            bytes32 pynth = requiredPynthAndInverseNamesInResolver[i];
+            //bytes32 iPynth = requiredPynthAndInverseNamesInResolver[i][1];
 
             if (!_shortablePynths.contains(pynth)) {
                 // Add it to the address set lib.
                 _shortablePynths.add(pynth);
 
                 // store the mapping to the iPynth so we can get its total supply for the borrow rate.
-                pynthToInversePynth[pynth] = iPynth;
+                //pynthToInversePynth[pynth] = iPynth;
 
                 emit ShortablePynthAdded(pynth);
 
@@ -442,7 +442,8 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
         // first check contract state
         for (uint i = 0; i < requiredPynthNamesInResolver.length; i++) {
             bytes32 pynthName = requiredPynthNamesInResolver[i];
-            if (!_shortablePynths.contains(pynthName) || pynthToInversePynth[pynthName] == bytes32(0)) {
+            if (!_shortablePynths.contains(pynthName)){
+            // || pynthToInversePynth[pynthName] == bytes32(0)) {
                 return false;
             }
         }
@@ -468,7 +469,7 @@ contract CollateralManager is ICollateralManager, Owned, Pausable, MixinResolver
                 state.removeShortCurrency(pynthKey);
 
                 // remove the inverse mapping.
-                delete pynthToInversePynth[pynths[i]];
+                //delete pynthToInversePynth[pynths[i]];
 
                 emit ShortablePynthRemoved(pynths[i]);
             }

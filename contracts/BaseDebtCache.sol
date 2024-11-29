@@ -18,6 +18,9 @@ import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICollateralManager.sol";
+import "./interfaces/IEtherWrapper.sol";
+import "./interfaces/IWrapperFactory.sol";
+import "./interfaces/IDynamicPynthRedeemer.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/debtcache
 contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
@@ -26,8 +29,12 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     uint internal _cachedDebt;
     mapping(bytes32 => uint) internal _cachedPynthDebt;
+    mapping(bytes32 => uint) internal _excludedIssuedDebt;
     uint internal _cacheTimestamp;
     bool internal _cacheInvalid = true;
+
+       // flag to ensure importing excluded debt is invoked only once
+    bool public isInitialized = false; // public to avoid needing an event
 
     /* ========== ENCODED NAMES ========== */
 
@@ -43,6 +50,9 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_ETHERCOLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
+    bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
+    bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
+    bytes32 private constant CONTRACT_DYNAMICPYNTHREDEEMER = "DynamicPynthRedeemer";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -50,7 +60,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](7);
+        bytes32[] memory newAddresses = new bytes32[](10);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -58,6 +68,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
         newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
         newAddresses[6] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[7] = CONTRACT_WRAPPER_FACTORY;
+        newAddresses[8] = CONTRACT_ETHER_WRAPPER;
+        newAddresses[9] = CONTRACT_DYNAMICPYNTHREDEEMER;
+        
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -89,12 +103,71 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
     }
 
+    function etherWrapper() internal view returns (IEtherWrapper) {
+        return IEtherWrapper(requireAndGetAddress(CONTRACT_ETHER_WRAPPER));
+    }
+
+   function dynamicPynthRedeemer() internal view returns (IDynamicPynthRedeemer) {
+        return IDynamicPynthRedeemer(requireAndGetAddress(CONTRACT_DYNAMICPYNTHREDEEMER));
+    }
+
+    function wrapperFactory() internal view returns (IWrapperFactory) {
+        return IWrapperFactory(requireAndGetAddress(CONTRACT_WRAPPER_FACTORY));
+    }
+
     function debtSnapshotStaleTime() external view returns (uint) {
         return getDebtSnapshotStaleTime();
     }
 
     function cachedDebt() external view returns (uint) {
         return _cachedDebt;
+    }
+
+    function _excludedIssuedDebts(bytes32[] memory currencyKeys) internal view returns (uint[] memory) {
+        uint numKeys = currencyKeys.length;
+        uint[] memory debts = new uint[](numKeys);
+        for (uint i = 0; i < numKeys; i++) {
+            debts[i] = _excludedIssuedDebt[currencyKeys[i]];
+        }
+        return debts;
+    }
+
+    function excludedIssuedDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory excludedDebts) {
+        return _excludedIssuedDebts(currencyKeys);
+    }
+
+    /// used when migrating to new DebtCache instance in order to import the excluded debt records
+    /// If this method is not run after upgrading the contract, the debt will be
+    /// incorrect w.r.t to wrapper factory assets until the values are imported from
+    /// previous instance of the contract
+    /// Also, in addition to this method it's possible to use recordExcludedDebtChange since
+    /// it's accessible to owner in case additional adjustments are required
+    function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external onlyOwner {
+        // this can only be run once so that recorded debt deltas aren't accidentally
+        // lost or double counted
+        require(!isInitialized, "already initialized");
+        isInitialized = true;
+
+        // get the currency keys from **previous** issuer, in case current issuer
+        // doesn't have all the pynths at this point
+        // warning: if a pynth won't be added to the current issuer before the next upgrade of this contract,
+        // its entry will be lost (because it won't be in the prevIssuer for next time).
+        // if for some reason this is a problem, it should be possible to use recordExcludedDebtChange() to amend
+        bytes32[] memory keys = prevIssuer.availableCurrencyKeys();
+
+        require(keys.length > 0, "previous Issuer has no pynths");
+
+        // query for previous debt records
+        uint[] memory debts = prevDebtCache.excludedIssuedDebts(keys);
+
+        // store the values
+        for (uint i = 0; i < keys.length; i++) {
+            if (debts[i] > 0) {
+                // adding the values instead of overwriting in case some deltas were recorded in this
+                // contract already (e.g. if the upgrade was not atomic)
+                _excludedIssuedDebt[keys[i]] = _excludedIssuedDebt[keys[i]].add(debts[i]);
+            }
+        }
     }
 
     function cachedPynthDebt(bytes32 currencyKey) external view returns (uint) {
@@ -124,16 +197,18 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         uint numValues = currencyKeys.length;
         uint[] memory values = new uint[](numValues);
         IPynth[] memory pynths = issuer().getPynths(currencyKeys);
+        uint discountRate = dynamicPynthRedeemer().getDiscountRate();
 
         for (uint i = 0; i < numValues; i++) {
             bytes32 key = currencyKeys[i];
+            
             address pynthAddress = address(pynths[i]);
             require(pynthAddress != address(0), "Pynth does not exist");
             uint supply = IERC20(pynthAddress).totalSupply();
+            
 
             if (collateralManager().isPynthManaged(key)) {
                 uint collateralIssued = collateralManager().long(key);
-
                 // this is an edge case --
                 // if a pynth other than pUSD is only issued by non PERI collateral
                 // the long value will exceed the supply if there was a minting fee,
@@ -155,7 +230,11 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
                 supply = supply.sub(etherCollateralSupply);
             }
 
-            values[i] = supply.multiplyDecimalRound(rates[i]);
+            uint value = supply.multiplyDecimalRound(rates[i]);
+            uint multiplier = (pynths[i].currencyKey() != pUSD) ? discountRate : SafeDecimalMath.unit();
+            
+            values[i] = value.multiplyDecimalRound(multiplier);
+          
         }
         return values;
     }
@@ -188,6 +267,40 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory periIssuedDebts) {
         return _cachedPynthDebts(currencyKeys);
+    }
+
+
+    // Returns the total pUSD debt backed by non-PERI collateral.
+    function totalNonPeriBackedDebt() external view returns (uint excludedDebt, bool isInvalid) {
+        bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
+        (uint[] memory rates, bool ratesAreInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
+
+        return _totalNonPeriBackedDebt(currencyKeys, rates, ratesAreInvalid);
+    }
+
+    function _totalNonPeriBackedDebt(
+        bytes32[] memory currencyKeys,
+        uint[] memory rates,
+        bool ratesAreInvalid
+    ) internal view returns (uint excludedDebt, bool isInvalid) {
+        // Calculate excluded debt.
+        // 1. MultiCollateral long debt + short debt.
+        (uint longValue, bool anyTotalLongRateIsInvalid) = collateralManager().totalLong();
+        (uint shortValue, bool anyTotalShortRateIsInvalid) = collateralManager().totalShort();
+        isInvalid = ratesAreInvalid || anyTotalLongRateIsInvalid || anyTotalShortRateIsInvalid;
+        excludedDebt = longValue.add(shortValue);
+
+        // 2. EtherWrapper.
+        // Subtract pETH and pUSD issued by EtherWrapper.
+        excludedDebt = excludedDebt.add(etherWrapper().totalIssuedPynths());
+
+        // 3. WrapperFactory.
+        // Get the debt issued by the Wrappers.
+        for (uint i = 0; i < currencyKeys.length; i++) {
+            excludedDebt = excludedDebt.add(_excludedIssuedDebt[currencyKeys[i]].multiplyDecimalRound(rates[i]));
+        }
+
+        return (excludedDebt, isInvalid);
     }
 
     function _currentDebt() internal view returns (uint debt, bool anyRateIsInvalid) {
@@ -269,12 +382,35 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         _;
     }
 
+    function _onlyIssuer() internal view {
+        require(msg.sender == address(issuer()), "Sender is not Issuer");
+    }
+
+    modifier onlyIssuer() {
+        _onlyIssuer();
+        _;
+    }
+
     function _onlyIssuerOrExchanger() internal view {
         require(msg.sender == address(issuer()) || msg.sender == address(exchanger()), "Sender is not Issuer or Exchanger");
     }
 
     modifier onlyIssuerOrExchanger() {
         _onlyIssuerOrExchanger();
+        _;
+    }
+
+        function _onlyDebtIssuer() internal view {
+        bool isWrapper = wrapperFactory().isWrapper(msg.sender);
+
+        // owner included for debugging and fixing in emergency situation
+        bool isOwner = msg.sender == owner;
+
+        require(isOwner || isWrapper, "Only debt issuers may call this");
+    }
+
+    modifier onlyDebtIssuer() {
+        _onlyDebtIssuer();
         _;
     }
 }

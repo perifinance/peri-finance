@@ -63,7 +63,7 @@ interface ICollateralManager {
 
     function removePynths(bytes32[] calldata pynths, bytes32[] calldata pynthKeys) external;
 
-    function addShortablePynths(bytes32[2][] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys) external;
+    function addShortablePynths(bytes32[] calldata requiredPynthNamesInResolver, bytes32[] calldata pynthKeys) external;
 
     function removeShortablePynths(bytes32[] calldata pynths) external;
 

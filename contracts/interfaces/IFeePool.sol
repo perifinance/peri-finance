@@ -54,9 +54,9 @@ interface IFeePool {
         );
 
     // Restricted: used internally to PeriFinance
-    function appendAccountIssuanceRecord(
-        address account,
-        uint lockedAmount,
-        uint debtEntryIndex
-    ) external;
+    // function appendAccountIssuanceRecord(
+    //     address account,
+    //     uint lockedAmount,
+    //     uint debtEntryIndex
+    // ) external;
 }

@@ -89,7 +89,7 @@ contract EmptyCollateralManager is ICollateralManager {
 
     function removePynths(bytes32[] calldata, bytes32[] calldata) external {}
 
-    function addShortablePynths(bytes32[2][] calldata, bytes32[] calldata) external {}
+    function addShortablePynths(bytes32[] calldata, bytes32[] calldata) external {}
 
     function removeShortablePynths(bytes32[] calldata) external {}
 
