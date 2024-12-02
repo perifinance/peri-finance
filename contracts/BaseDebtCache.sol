@@ -21,6 +21,7 @@ import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IWrapperFactory.sol";
 import "./interfaces/IDynamicPynthRedeemer.sol";
+import "./interfaces/IFuturesMarketManager.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/debtcache
 contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
@@ -51,6 +52,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
+    bytes32 private constant CONTRACT_FUTURESMARKETMANAGER = "FuturesMarketManager";
     bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
     bytes32 private constant CONTRACT_DYNAMICPYNTHREDEEMER = "DynamicPynthRedeemer";
 
@@ -60,7 +62,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](10);
+        bytes32[] memory newAddresses = new bytes32[](11);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -71,6 +73,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         newAddresses[7] = CONTRACT_WRAPPER_FACTORY;
         newAddresses[8] = CONTRACT_ETHER_WRAPPER;
         newAddresses[9] = CONTRACT_DYNAMICPYNTHREDEEMER;
+        newAddresses[10] = CONTRACT_FUTURESMARKETMANAGER;
         
         addresses = combineArrays(existingAddresses, newAddresses);
     }
@@ -109,6 +112,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
    function dynamicPynthRedeemer() internal view returns (IDynamicPynthRedeemer) {
         return IDynamicPynthRedeemer(requireAndGetAddress(CONTRACT_DYNAMICPYNTHREDEEMER));
+    }
+
+    function futuresMarketManager() internal view returns (IFuturesMarketManager) {
+        return IFuturesMarketManager(requireAndGetAddress(CONTRACT_FUTURESMARKETMANAGER));
     }
 
     function wrapperFactory() internal view returns (IWrapperFactory) {
@@ -316,7 +323,12 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
         total = total.sub(pusdValue);
 
-        isInvalid = isInvalid || shortInvalid;
+            // Add in the debt accounted for by futures
+        (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
+        total = total.add(futuresDebt);
+
+
+        isInvalid = isInvalid || shortInvalid || futuresDebtIsInvalid;
 
         return (total, isInvalid);
     }
