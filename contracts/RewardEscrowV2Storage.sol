@@ -105,7 +105,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         // read from fallback if this entryId was created in the old contract and wasn't written locally
         // this assumes that no new entries can be created with endTime = 0 (checked during addVestingEntry)
         if (entryId < firstNonFallbackId && entry.endTime == 0) {
-          //  entry = fallbackRewardEscrow.vestingSchedules(account, entryId);
+          entry = fallbackRewardEscrow.vestingSchedules(account, entryId);
         }
         return entry;
     }
@@ -116,8 +116,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         // this assumes no new entries can be created in the old contract
         // any added entries in the old contract after this value is cached will be ignored
         if (index < fallbackCount) {
-            return 0;
-            //return fallbackRewardEscrow.accountVestingEntryIDs(account, index);
+            return fallbackRewardEscrow.accountVestingEntryIDs(account, index);
         } else {
             return _accountVestingEntryIds[account][index - fallbackCount];
         }
@@ -133,8 +132,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
 
         // 0 should never be stored to prevent reading stale value from fallback
         if (v == 0) {
-            return 0;
-            //return fallbackRewardEscrow.totalEscrowedAccountBalance(account);
+            return fallbackRewardEscrow.totalEscrowedAccountBalance(account);
         } else {
             return _readWithZeroPlaceholder(v);
         }
@@ -146,8 +144,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
 
         // 0 should never be stored to prevent reading stale value from fallback
         if (v == 0) {
-            return 0;
-            //return fallbackRewardEscrow.totalVestedAccountBalance(account);
+            return fallbackRewardEscrow.totalVestedAccountBalance(account);
         } else {
             return _readWithZeroPlaceholder(v);
         }
@@ -166,8 +163,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         int v = _fallbackCounts[account];
         if (v == 0) {
             // uninitialized
-            return 0;
-            //return fallbackRewardEscrow.numVestingEntries(account);
+            return fallbackRewardEscrow.numVestingEntries(account);
         } else {
             return _readWithZeroPlaceholder(v);
         }
@@ -184,7 +180,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         // update endTime from fallback if this is first time this entry is written in this contract
         if (endTime == 0) {
             // entry should be in fallback, otherwise it would have endTime or be uninitialized
-            //endTime = fallbackRewardEscrow.vestingSchedules(account, entryId).endTime;
+            endTime = fallbackRewardEscrow.vestingSchedules(account, entryId).endTime;
         }
         _setZeroAmountWithEndTime(account, entryId, endTime);
     }
@@ -224,6 +220,8 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
         uint entryID;
         uint i;
         VestingEntries.VestingEntry memory entry;
+        
+
         for (i = startIndex; i < numIds; i++) {
             entryID = accountVestingEntryIDs(account, i);
             entry = vestingSchedules(account, entryID);
@@ -323,8 +321,8 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     /// during looping
     function _cacheFallbackIDCount(address account) internal {
         if (_fallbackCounts[account] == 0) {
-            //uint fallbackCount = fallbackRewardEscrow.numVestingEntries(account);
-            uint fallbackCount = 0;
+            uint fallbackCount = fallbackRewardEscrow.numVestingEntries(account);
+            //uint fallbackCount = 0;
             // cache the value but don't write zero
             _fallbackCounts[account] = _writeWithZeroPlaceholder(fallbackCount);
         }
@@ -345,7 +343,7 @@ contract RewardEscrowV2Storage is IRewardEscrowV2Storage, State {
     /* ========== Modifier ========== */
 
     modifier withFallback() {
-        //require(address(fallbackRewardEscrow) != address(0), "fallback not set");
+        require(address(fallbackRewardEscrow) != address(0), "fallback not set");
         _;
     }
 }
