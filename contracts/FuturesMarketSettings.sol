@@ -9,7 +9,7 @@ import "./interfaces/IFuturesMarketSettings.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IFuturesMarket.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/FuturesMarketSettings
+// https://docs.periFinance.io/contracts/source/contracts/FuturesMarketSettings
 contract FuturesMarketSettings is Owned, MixinFuturesMarketSettings, IFuturesMarketSettings {
     /* ========== CONSTANTS ========== */
 

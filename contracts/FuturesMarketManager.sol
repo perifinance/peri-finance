@@ -39,7 +39,7 @@ interface IMarketViews {
     function getAllTargets() external view returns (address[] memory);
 }
 
-// https://docs.synthetix.io/contracts/source/contracts/FuturesMarketManager
+// https://docs.periFinance.io/contracts/source/contracts/FuturesMarketManager
 contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     using SafeMath for uint;
     using AddressSetLib for AddressSetLib.AddressSet;
@@ -62,8 +62,8 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     bytes32 public constant CONTRACT_NAME = "FuturesMarketManager";
 
-    bytes32 internal constant SUSD = "pUSD";
-    bytes32 internal constant CONTRACT_SYNTHSUSD = "SynthpUSD";
+    bytes32 internal constant PUSD = "pUSD";
+    bytes32 internal constant CONTRACT_PYNTHSUSD = "PynthpUSD";
     bytes32 internal constant CONTRACT_FEEPOOL = "FeePool";
     bytes32 internal constant CONTRACT_EXCHANGER = "Exchanger";
 
@@ -75,13 +75,13 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         addresses = new bytes32[](3);
-        addresses[0] = CONTRACT_SYNTHSUSD;
+        addresses[0] = CONTRACT_PYNTHSUSD;
         addresses[1] = CONTRACT_FEEPOOL;
         addresses[2] = CONTRACT_EXCHANGER;
     }
 
     function _pUSD() internal view returns (IPynth) {
-        return IPynth(requireAndGetAddress(CONTRACT_SYNTHSUSD));
+        return IPynth(requireAndGetAddress(CONTRACT_PYNTHSUSD));
     }
 
     function _feePool() internal view returns (IFeePool) {
@@ -370,7 +370,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
      * it reverts if not called by a known market.
      */
     function issueSUSD(address account, uint amount) external onlyMarketImplementations {
-        // No settlement is required to issue synths into the target account.
+        // No settlement is required to issue pynths into the target account.
         _pUSD().issue(account, amount);
     }
 
@@ -384,9 +384,9 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
         // If the settlement reduces the user's balance below the requested amount,
         // the settled remainder will be the resulting deposit.
 
-        // Exchanger.settle ensures synth is active
+        // Exchanger.settle ensures pynth is active
         IPynth pUSD = _pUSD();
-        (uint reclaimed, , ) = _exchanger().settle(account, SUSD);
+        (uint reclaimed, , ) = _exchanger().settle(account, PUSD);
 
         uint balanceAfter = amount;
         if (0 < reclaimed) {

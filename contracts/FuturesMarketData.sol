@@ -8,7 +8,7 @@ import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IFuturesMarketSettings.sol";
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/FuturesMarketData
+// https://docs.periFinance.io/contracts/source/contracts/FuturesMarketData
 // A utility contract to allow the front end to query market data in a single call.
 contract FuturesMarketData {
     /* ========== TYPES ========== */
