@@ -860,7 +860,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					let currencyKey, pynth, pynthProxy;
 
 					beforeEach(async () => {
-						const symbol = 'sBTC';
+						const symbol = 'pBTC';
 						currencyKey = toBytes32(symbol);
 
 						({ token: pynth, proxy: pynthProxy } = await mockToken({
@@ -1000,7 +1000,7 @@ contract('Issuer via PeriFinance', async accounts => {
 									it('issues the equivalent amount of pUSD', async () => {
 										const amountOfpUSDIssued = await pUSDContract.balanceOf(pynthRedeemer.address);
 
-										// 100 units of sBTC at a rate of 2:1
+										// 100 units of pBTC at a rate of 2:1
 										assert.bnEqual(amountOfpUSDIssued, toUnit('200'));
 									});
 									it('it invokes deprecate on the redeemer via the proxy', async () => {
@@ -1021,7 +1021,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					let currencyKey, pynth;
 
 					beforeEach(async () => {
-						const symbol = 'sBTC';
+						const symbol = 'pBTC';
 						currencyKey = toBytes32(symbol);
 
 						({ token: pynth } = await mockToken({

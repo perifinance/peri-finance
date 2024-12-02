@@ -3,12 +3,18 @@ pragma solidity 0.5.16;
 import "../ExternStateToken.sol";
 import "../interfaces/ISystemStatus.sol";
 import "../interfaces/IAddressResolver.sol";
+import "../interfaces/IFeePool.sol";
 
 // Mock pynth that also adheres to system status
 
 contract MockPynth is ExternStateToken {
     IAddressResolver private addressResolver;
     bytes32 public currencyKey;
+
+        // Where fees are pooled in pUSD
+    address public constant FEE_ADDRESS = 0xfeEFEEfeefEeFeefEEFEEfEeFeefEEFeeFEEFEeF;
+    //address public constant FEE_ADDRESS = 0x21dF544947ba3E8b3c32561399E88B52Dc8b2823;
+
 
     constructor(
         address payable _proxy,
@@ -33,6 +39,18 @@ contract MockPynth is ExternStateToken {
 
     function transfer(address to, uint value) external optionalProxy returns (bool) {
         ISystemStatus(addressResolver.getAddress("SystemStatus")).requirePynthActive(currencyKey);
+
+        // transfers to FEE_ADDRESS will be exchanged into sUSD and recorded as fee
+        if (to == FEE_ADDRESS) {
+            return _transferToFeeAddress(to, value);
+        }
+
+        // transfers to 0x address will be burned
+        if (to == address(0)) {
+            this.burn(messageSender, value);
+            return true;
+        }
+
         bool b = _transferByProxy(messageSender, to, value); 
         return b;
     }
@@ -61,5 +79,27 @@ contract MockPynth is ExternStateToken {
         tokenState.setBalanceOf(account, tokenState.balanceOf(account).sub(amount));
         totalSupply = totalSupply.sub(amount);
         emit Burned(account, amount);
+    }
+
+
+    /**
+     * @notice _transferToFeeAddress function
+     * non-sUSD synths are exchanged into sUSD via synthInitiatedExchange
+     * notify feePool to record amount as fee paid to feePool */
+    function _transferToFeeAddress(address to, uint value) internal returns (bool) {
+        uint amountInUSD;
+
+        // sUSD can be transferred to FEE_ADDRESS directly
+        if (currencyKey == "pUSD") {
+            amountInUSD = value;
+            _transferByProxy(messageSender, to, value);
+        } else {
+            // for now, do nothing
+        }
+
+        // Notify feePool to record sUSD to distribute as fees
+        IFeePool(addressResolver.getAddress("FeePool")).recordFeePaid(amountInUSD);
+
+        return true;
     }
 }

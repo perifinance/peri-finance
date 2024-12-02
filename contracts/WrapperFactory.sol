@@ -88,7 +88,7 @@ contract WrapperFactory is Owned, MixinResolver, IWrapperFactory {
     function distributeFees() external {
         // Normalize fee to pUSD
         uint amountSUSD = feesEscrowed();
-
+     
         if (amountSUSD > 0) {
             // Transfer pUSD to the fee pool
             bool success = pynthpUSD().transfer(feePool().FEE_ADDRESS(), amountSUSD);
