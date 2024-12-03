@@ -5,7 +5,7 @@ const { toWei } = web3.utils;
 const { toBytes32 } = require('../..');
 const BN = require('bn.js');
 
-const SYNTHETIX_TOTAL_SUPPLY = toWei('100000000');
+const PERIFINANCE_TOTAL_SUPPLY = toWei('100000000');
 
 contract('MintablePeriFinance (spec tests)', accounts => {
 	const [, owner, periFinanceBridgeToBase, account1] = accounts;
@@ -56,7 +56,7 @@ contract('MintablePeriFinance (spec tests)', accounts => {
 			});
 
 			it('should increase the total supply', async () => {
-				const newSupply = new BN(SYNTHETIX_TOTAL_SUPPLY).add(new BN(amount));
+				const newSupply = new BN(PERIFINANCE_TOTAL_SUPPLY).add(new BN(amount));
 				assert.bnEqual(await mintablePeriFinance.totalSupply(), newSupply);
 			});
 
