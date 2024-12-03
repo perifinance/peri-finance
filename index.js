@@ -228,10 +228,10 @@ const defaults = {
 	
 	LIQUIDATION_ESCROW_DURATION: (3600 * 24 * 365).toString(), // 1 year
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty (used for Collateral liquidations)
-	SNX_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for SNX Liquidations)
+	PERI_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for PERI Liquidations)
 	SELF_LIQUIDATION_PENALTY: w3utils.toWei('0.2'), // 20% penalty
-	FLAG_REWARD: w3utils.toWei('10'), // 10 SNX
-	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 SNX
+	FLAG_REWARD: w3utils.toWei('10'), // 10 PERI
+	LIQUIDATE_REWARD: w3utils.toWei('20'), // 20 PERI
 
 	LIQUIDATION_PENALTY: w3utils.toWei('0.1'), // 10% penalty
 	PERI_LIQUIDATION_PENALTY: w3utils.toWei('0.3'), // 30% penalty (used for PERI Liquidations)

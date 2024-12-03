@@ -3,7 +3,7 @@
 [![Discord](https://img.shields.io/discord/818411536900030486.svg?color=768AD4&label=discord&logo=https%3A%2F%2Fdiscordapp.com%2Fassets%2F8c9701b98ad4372b58f13fd9f65f966e.svg)](https://discord.com/channels/818411536900030486/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/PERIFinance.svg?label=PERIfinance&style=social)](https://twitter.com/PERIfinance)
 
-PERI Finance is a crpyto-backed synthetic asset platform forking from Synthetix.
+PERI Finance is a crpyto-backed synthetic asset platform forking from PeriFinance.
 
 It is powered by USDC Stablecoin and PERI, the Peri Protocol Token. PERI and USDC holders can stake them into PERI Liquidity Pool to issue Pynth called pUSD.
 
