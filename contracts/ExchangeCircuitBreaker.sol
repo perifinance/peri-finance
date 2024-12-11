@@ -17,7 +17,7 @@ import "./interfaces/IExchangeRates.sol";
 import "./Proxyable.sol";
 
 /**
- * Compares current exchange rate to previous, and suspends a synth if the
+ * Compares current exchange rate to previous, and suspends a pynth if the
  * difference is outside of deviation bounds.
  *
  * This contract's functionality has been superseded by `CircuitBreaker`, and therefore its *deprecated*.

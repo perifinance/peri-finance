@@ -9,14 +9,14 @@ const {
 		CROSS_DOMAIN_REWARD_GAS_LIMIT,
 		CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT,
 	},
-} = require('../..');
+} = require('../../');
 
-contract('PeriFinanceBridgeToBase (spec tests)', accounts => {
-	const [, owner, user] = accounts;
+contract('PeriFinanceBridgeToBase (spec tests) @ovm-skip', accounts => {
+	const [, owner, user, randomAddress] = accounts;
 
 	let mintablePeriFinance, periFinanceBridgeToBase, systemSettings;
 
-	describe.skip('when deploying the system', () => {
+	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
 				PeriFinance: mintablePeriFinance, // we request PeriFinance instead of MintablePeriFinance because it is renamed in setup.js
@@ -24,12 +24,14 @@ contract('PeriFinanceBridgeToBase (spec tests)', accounts => {
 				SystemSettings: systemSettings,
 			} = await setupAllContracts({
 				accounts,
+				pynths: ['pUSD', 'pBTC', 'pETH'],
 				contracts: [
-					'MintablePeriFinance',
-					'PeriFinanceBridgeToBase',
-					'SystemSettings',
-					'StakingStateUSDC',
-				],
+					'MintablePeriFinance'
+					, 'PeriFinanceBridgeToBase'
+					, 'SystemSettings'
+					, 'CrossChainManager'
+				]
+
 			}));
 		});
 
@@ -63,11 +65,33 @@ contract('PeriFinanceBridgeToBase (spec tests)', accounts => {
 
 		describe('when a user has the required balance', () => {
 			const amountToWithdraw = 1;
+			let userBalanceBefore;
+			let initialSupply;
 
 			describe('when requesting a withdrawal', () => {
-				let userBalanceBefore;
-				let initialSupply;
+				before('record user balance and initial total supply', async () => {
+					userBalanceBefore = await mintablePeriFinance.balanceOf(owner);
+					initialSupply = await mintablePeriFinance.totalSupply();
+				});
 
+				before('initiate a withdrawal', async () => {
+					await periFinanceBridgeToBase.initiateWithdrawal(amountToWithdraw, {
+						from: owner,
+					});
+				});
+
+				it('reduces the user balance', async () => {
+					const userBalanceAfter = await mintablePeriFinance.balanceOf(owner);
+					assert.bnEqual(userBalanceBefore.sub(toBN(amountToWithdraw)), userBalanceAfter);
+				});
+
+				it('reduces the total supply', async () => {
+					const supplyAfter = await mintablePeriFinance.totalSupply();
+					assert.bnEqual(initialSupply.sub(toBN(amountToWithdraw)), supplyAfter);
+				});
+			});
+
+			describe('when requesting a withdrawal to a different address', () => {
 				before('record user balance and initial total supply', async () => {
 					userBalanceBefore = await mintablePeriFinance.balanceOf(owner);
 					initialSupply = await mintablePeriFinance.totalSupply();

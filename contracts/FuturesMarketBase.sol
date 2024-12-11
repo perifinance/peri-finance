@@ -26,7 +26,7 @@ import "./interfaces/IERC20.sol";
  * continually tallied against this margin. If a user's margin runs out, then their position is closed
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
- * The Synthetix debt pool is effectively the counterparty to each trade, so if a particular position
+ * The PeriFinance debt pool is effectively the counterparty to each trade, so if a particular position
  * is in profit, then the debt pool pays by issuing sUSD into their margin account,
  * while if the position makes a loss then the debt pool burns sUSD from the margin, reducing the
  * debt load in the system.

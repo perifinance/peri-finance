@@ -9,23 +9,41 @@ const {
 		CROSS_DOMAIN_REWARD_GAS_LIMIT,
 		CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT,
 	},
-} = require('../..');
+} = require('../../');
+const { artifacts } = require('hardhat');
 
-contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
+contract('PeriFinanceBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 	const [, owner, newBridge] = accounts;
 
-	let periFinance, periFinanceBridgeToOptimism, systemSettings;
+	let periFinance,
+		periFinanceProxy,
+		periFinanceBridgeToOptimism,
 
-	describe.skip('when deploying the system', () => {
+		systemSettings,
+		rewardsDistribution;
+
+	describe('when deploying the system', () => {
 		before('deploy all contracts', async () => {
 			({
 				PeriFinance: periFinance,
+				ProxyERC20PeriFinance: periFinanceProxy,
 				PeriFinanceBridgeToOptimism: periFinanceBridgeToOptimism,
 				SystemSettings: systemSettings,
+				RewardsDistribution: rewardsDistribution,
 			} = await setupAllContracts({
 				accounts,
-				contracts: ['PeriFinance', 'Issuer', 'PeriFinanceBridgeToOptimism', 'StakingStateUSDC'],
+				pynths: ['pUSD', 'pBTC', 'pETH'],
+				contracts: [
+					'PeriFinance',
+					'PeriFinanceBridgeToOptimism',
+					'SystemSettings',
+					'RewardsDistribution',
+					'CrossChainManager'
+				],
 			}));
+
+			// use implementation ABI on the proxy address to simplify calling
+			periFinance = await artifacts.require('PeriFinance').at(periFinanceProxy.address);
 		});
 
 		it('returns the expected cross domain message gas limit', async () => {
@@ -115,9 +133,59 @@ contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
 			});
 		});
 
+		describe('depositTo', () => {
+			const amountToDeposit = toBN(1);
+
+			describe('when a user has not provided allowance to the bridge contract', () => {
+				it('the deposit should fail', async () => {
+					await assert.revert(
+						periFinanceBridgeToOptimism.initiateDeposit(amountToDeposit, { from: owner }),
+						'SafeMath: subtraction overflow'
+					);
+				});
+			});
+
+			describe('when a user has provided allowance to the bridge contract', () => {
+				before('approve PeriFinanceBridgeToOptimism', async () => {
+					await periFinance.approve(periFinanceBridgeToOptimism.address, amountToDeposit, {
+						from: owner,
+					});
+				});
+
+				describe('when performing a deposit', () => {
+					let userBalanceBefore;
+					let contractBalanceBefore;
+
+					before('record balances before', async () => {
+						userBalanceBefore = await periFinance.balanceOf(owner);
+						//contractBalanceBefore = await periFinance.balanceOf(periFinanceBridgeEscrow.address);
+					});
+
+					before('perform a deposit to a separate address', async () => {
+						await periFinanceBridgeToOptimism.initiateDeposit(amountToDeposit, {
+							from: owner,
+						});
+					});
+
+					it('reduces the user balance', async () => {
+						const userBalanceAfter = await periFinance.balanceOf(owner);
+
+						assert.bnEqual(userBalanceBefore.sub(toBN(amountToDeposit)), userBalanceAfter);
+					});
+
+					// it("increases the escrow's balance", async () => {
+					// 	assert.bnEqual(
+					// 		await periFinance.balanceOf(periFinanceBridgeToOptimism.address),
+					// 		contractBalanceBefore.add(amountToDeposit)
+					// 	);
+					// });
+				});
+			});
+		});
+
 		describe('initiateRewardDeposit', () => {
 			describe('when a user has provided allowance to the bridge contract', () => {
-				const amountToDeposit = 1;
+				const amountToDeposit = toBN(1);
 
 				before('approve PeriFinanceBridgeToOptimism', async () => {
 					await periFinance.approve(periFinanceBridgeToOptimism.address, amountToDeposit, {
@@ -127,9 +195,12 @@ contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
 
 				describe('when performing a deposit', () => {
 					let userBalanceBefore;
+					let contractBalanceBefore;
 
 					before('record balance before', async () => {
 						userBalanceBefore = await periFinance.balanceOf(owner);
+						contractBalanceBefore = await periFinance.balanceOf(periFinanceBridgeToOptimism.address);
+
 					});
 
 					before('perform a initiateRewardDeposit', async () => {
@@ -147,9 +218,61 @@ contract('PeriFinanceBridgeToOptimism (spec tests)', accounts => {
 					it("increases the contract's balance", async () => {
 						assert.bnEqual(
 							await periFinance.balanceOf(periFinanceBridgeToOptimism.address),
-							amountToDeposit * 2
+							contractBalanceBefore.add(amountToDeposit)
 						);
 					});
+				});
+			});
+		});
+
+		describe('notifyReward', () => {
+			describe('the owner has added PeriFinanceBridgeToOptimism to rewards distributins list', () => {
+				const amountToDistribute = toBN(1000);
+				before('addRewardDistribution', async () => {
+					await rewardsDistribution.addRewardDistribution(
+						periFinanceBridgeToOptimism.address,
+						amountToDistribute,
+						{
+							from: owner,
+						}
+					);
+				});
+
+				describe('distributing the rewards', () => {
+					let bridgeBalanceBefore;
+					let escrowBalanceBefore;
+
+					before('record balance before', async () => {
+						bridgeBalanceBefore = await periFinance.balanceOf(periFinanceBridgeToOptimism.address);
+						//escrowBalanceBefore = await periFinance.balanceOf(periFinanceBridgeEscrow.address);
+					});
+
+					before('transfer amount to be distributed and distributeRewards', async () => {
+						// first pawn the authority contract
+						await rewardsDistribution.setAuthority(owner, {
+							from: owner,
+						});
+						await periFinance.transfer(rewardsDistribution.address, amountToDistribute, {
+							from: owner,
+						});
+						await rewardsDistribution.distributeRewards(amountToDistribute, {
+							from: owner,
+						});
+					});
+
+					it('the balance of the bridge remains intact', async () => {
+						assert.bnEqual(
+							await periFinance.balanceOf(periFinanceBridgeToOptimism.address),
+							bridgeBalanceBefore
+						);
+					});
+
+					// it("increases the escrow's balance", async () => {
+					// 	assert.bnEqual(
+					// 		await periFinance.balanceOf(periFinanceBridgeEscrow.address),
+					// 		escrowBalanceBefore.add(amountToDistribute)
+					// 	);
+					// });
 				});
 			});
 		});
