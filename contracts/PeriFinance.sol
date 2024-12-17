@@ -6,6 +6,7 @@ import "./BasePeriFinance.sol";
 
 // Internal references
 import "./interfaces/IRewardEscrowV2.sol";
+import "./interfaces/IRewardEscrow.sol";
 import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
 
@@ -59,6 +60,10 @@ contract PeriFinance is BasePeriFinance {
 
     function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
+    }
+
+    function rewardEscrow() internal view returns (IRewardEscrow) {
+        return IRewardEscrow(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
 
     function supplySchedule() internal view returns (ISupplySchedule) {
@@ -142,17 +147,17 @@ contract PeriFinance is BasePeriFinance {
         return true;
     }
 
-    function mint(address _user, uint _amount) external optionalProxy returns (bool) {
-        require(minterRole != address(0), "0 address");
-        require(minterRole == messageSender, "onlyMinter");
+    // function mint(address _user, uint _amount) external optionalProxy returns (bool) {
+    //     require(minterRole != address(0), "0 address");
+    //     require(minterRole == messageSender, "onlyMinter");
 
-        // It won't change totalsupply since it is only for bridge purpose.
-        tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
+    //     // It won't change totalsupply since it is only for bridge purpose.
+    //     tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
 
-        emitTransfer(address(0), _user, _amount);
+    //     emitTransfer(address(0), _user, _amount);
 
-        return true;
-    }
+    //     return true;
+    // }
 
     function liquidateDelinquentAccount(address account, uint pusdAmount)
         external
@@ -231,6 +236,18 @@ contract PeriFinance is BasePeriFinance {
     // function setBridgeState(address _newBridgeState) external onlyOwner {
     //     bridgeState = IBridgeState(_newBridgeState);
     // }
+
+    /* Once off function for SIP-60 to migrate PERI balances in the RewardEscrow contract
+     * To the new RewardEscrowV2 contract
+     */
+    function migrateEscrowBalanceToRewardEscrowV2() external onlyOwner {
+        // Record balanceOf(RewardEscrow) contract
+        uint rewardEscrowBalance = tokenState.balanceOf(address(rewardEscrow()));
+
+        // transfer all of RewardEscrow's balance to RewardEscrowV2
+        // _internalTransfer emits the transfer event
+        _internalTransfer(address(rewardEscrow()), address(rewardEscrowV2()), rewardEscrowBalance);
+    }
 
     // ========== EVENTS ==========
     event AccountLiquidated(address indexed account, uint periRedeemed, uint amountLiquidated, address liquidator);

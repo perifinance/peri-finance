@@ -78,7 +78,7 @@ interface IIssuer {
     // Restricted: used internally to PERIFinance
     function addPynths(IPynth[] calldata pynthsToAdd) external;
 
-    function issuePynths(address from, uint amount) external;
+    function issuePynths(address from, bytes32 _currencyKey, uint amount) external;
 
     function issuePynthsOnBehalf(
         address issueFor,
@@ -91,15 +91,18 @@ interface IIssuer {
     function issueMaxPynthsOnBehalf(address issueFor, address from) external;
 
 
-    //function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external;
+    function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external;
 
-    function burnPynths(address from, uint amount) external;
+    function burnPynths(address from, bytes32 _currencyKey, uint amount) external;
 
     function burnPynthsOnBehalf(
         address burnForAddress,
         address from,
         uint amount
     ) external;
+
+    function fitToClaimable(address _from) external;
+
 
     function burnPynthsToTarget(address from) external;
 
@@ -111,11 +114,11 @@ interface IIssuer {
         uint balance
     ) external;
 
-    // function liquidateDelinquentAccount(
-    //     address account,
-    //     uint pusdAmount,
-    //     address liquidator
-    // ) external returns (uint totalRedeemed, uint amountToLiquidate);
+    function liquidateDelinquentAccount(
+        address account,
+        uint pusdAmount,
+        address liquidator
+    ) external returns (uint totalRedeemed, uint amountToLiquidate);
 
     function setCurrentPeriodId(uint128 periodId) external;
 

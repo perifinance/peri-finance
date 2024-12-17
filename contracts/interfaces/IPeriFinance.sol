@@ -48,19 +48,16 @@ interface IPeriFinance {
     //function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
 
     // Mutative Functions
-    //function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
-    function issuePynths(uint _issueAmount) external;
-
+    function issuePynths(bytes32 _currencyKey, uint _issueAmount) external;
 
     function issueMaxPynths() external;
 
-    //function issuePynthsToMaxQuota(bytes32 _currencyKey) external;
+    function issuePynthsToMaxQuota(bytes32 _currencyKey) external;
 
-    //abifunction burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
-    function burnPynths(uint _burnAmount) external;
+    function burnPynths(bytes32 _currencyKey, uint _burnAmount) external;
 
 
-    // function fitToClaimable() external payable;
+    function fitToClaimable() external payable;
 
     //function exit() external;
 

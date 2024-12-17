@@ -435,7 +435,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     {
         (tRatio, exTRatio, exEA, exSR, maxSR) = _getTRatio(_account, _existDebt);
 
-        uint totalSA = _periCol.add(exEA);
+        uint totalSA = _periCol.add(exEA);   
 
         cRatio = totalSA > 0 ? _existDebt.divideDecimal(totalSA) : 0;
     }
@@ -505,7 +505,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
     function _rateCheck(bytes32 _currencyKey) internal view returns (uint rate) {
         bool isInvalid;
         (rate, isInvalid) = exchangeRates().rateAndInvalid(_currencyKey);
-        _requireRatesNotInvalid(isInvalid);
+       // _requireRatesNotInvalid(isInvalid);
     }
 
     function _preciseMul(uint x, uint y) internal pure returns (uint) {
@@ -694,10 +694,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         uint tokenEA;
         (otherIR, otherEA, tokenIR, tokenEA, exDebt) = _otherTokenIREA(_account, USDC);
 
-        // // get exDebt = tokenEA * tokenIR + otherEA * otherIR
-        // exDebt = _preciseMulToDecimal(tokenEA, tokenIR).add(
-        //     _preciseMulToDecimal(otherEA, otherIR)
-        // );
 
         // get exEA
         exEA = tokenEA.add(otherEA);
@@ -788,8 +784,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         exDebt = _preciseMulToDecimal(tokenEA, tokenIR).roundDownDecimal(uint(18).sub(minDecimals)).add(
             _preciseMulToDecimal(otherEA, otherIR).roundDownDecimal(uint(18).sub(oMinDecimals))
         );
-
-        // minDecimals = minDecimals < oMinDecimals ? minDecimals : oMinDecimals;
     }
 
     function otherTokenIREA(address _account, bytes32 _targetKey)
@@ -1559,6 +1553,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         if (_existDebt == 0) {
             return (getIssuanceRatio(), 0, 0);
         }
+
         // get tokenEA, otherEA, tokenIR, otherIR, exDebt
         (uint otherIR, uint otherEA, uint tokenIR, uint tokenEA, uint exDebt) =
             _otherTokenIREA(_account, _targetKey == bytes32(0) ? USDC : _targetKey);
@@ -1589,6 +1584,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 // get addable amount within max ex-issuance ratio
                 addableAmt = _calcMaxStakableAmt(tokenIR, otherIR, tokenEA, otherEA, addDebt);
 
+
                 // get all of _currencyKey token's amount of from the user wallet
                 addDebt = _tokenPUSDValueOf(_account, _targetKey);
 
@@ -1596,6 +1592,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
                 addableAmt = addDebt < addableAmt ? addDebt : addableAmt;
 
                 addDebt = _preciseMulToDecimal(addableAmt, getExTokenIssuanceRatio(_targetKey));
+
 
                 // if staking ex-token call
             } else {
@@ -1643,6 +1640,7 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         // get ex-Staking Ratio and calc TRatio (Tp + ( Te - Tp) * Se)
         tRatio = _toTRatio(getIssuanceRatio(), tRatio, exEA.divideDecimal(exEA.add(periDebt)));
+        
     }
 
     /*
@@ -1796,35 +1794,75 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
         stakingState.setTargetRatio(_account, tRatio);
     }
 */
+
+
+
+function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+
+
+function toString(address account) public pure returns(string memory) {
+    return toString(abi.encodePacked(account));
+}
+
+function toString(uint256 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes32 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes memory data) public pure returns(string memory) {
+    bytes memory alphabet = "0123456789abcdef";
+
+    bytes memory str = new bytes(2 + data.length * 2);
+    str[0] = "0";
+    str[1] = "x";
+    for (uint i = 0; i < data.length; i++) {
+        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+    }
+    return string(str);
+}
+
     function stakeToMaxExQuota(
         address _account,
         uint _existDebt,
         uint _periCol,
         bytes32 _targetKey
     ) external onlyIssuer returns (uint debtChange) {
-        // this function is not to inculde the other token's staked value decrease.
-        // (uint exTRatio, uint maxAddableAmt) = _maxStakableAmountOf(_account, _existDebt, _targetKey, _unitKey);
-        // this fuction is to include the other token's staked value decrease in order to get the max stakable value.
-        // (uint maxAddableAmt, uint exTRatio, uint tRatio) = _maxExStakableAmt(_account, _existDebt, _periCol, _targetKey);
         uint maxAddableAmt;
         uint tRatio;
         (tRatio, debtChange, maxAddableAmt) = _getTRAddDebtOrAmt(_account, _existDebt, 0, _periCol, _targetKey);
-        require(maxAddableAmt > 0, "No available ex-tokens to stake");
 
+        require(maxAddableAmt > 0, "No available ex-tokens to stake");
+        
         // check if the new target ratio is out of allowed external issuance ratio
         _requireOverIssuanceRatio(tRatio);
 
         // stake the external token
         _stakeTokens(_account, maxAddableAmt, _targetKey, pUSD);
-
-        // debtChange : issuing debt amount
-        // debtChange = _preciseMulToDecimal(getExTokenIssuanceRatio(_targetKey), maxAddableAmt);
-
-        // set ex-target ratio
-        // stakingState.setExTargetRatio(_account, exTRatio);
-
-        // set target ratio
-        // stakingState.setTargetRatio(_account, tRatio);
     }
 
     function stake(

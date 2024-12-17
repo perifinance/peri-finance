@@ -262,8 +262,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynths(amount, { from: owner });
-			await periFinance.issuePynths(amount, { from: account1 });
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount, { from: account1 });
 
 			await closeFeePeriod();
 
@@ -328,8 +328,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynths(amount, { from: owner });
-			await periFinance.issuePynths(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Generate a fee.
 			await periFinance.exchange(pUSD, amount, pAUD, { from: owner });
@@ -388,8 +388,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynths(amount1, { from: owner });
-			await periFinance.issuePynths(amount2, { from: account1 });
+			await periFinance.issuePynths(PERI, amount1, { from: owner });
+			await periFinance.issuePynths(PERI, amount2, { from: account1 });
 
 			// Generate a fee.
 			await periFinance.exchange(pUSD, amount1, pAUD, { from: owner });
@@ -444,8 +444,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynths(amount, { from: owner });
-			await periFinance.issuePynths(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Close out the period to allow both users to be part of the whole fee period.
 			await closeFeePeriod();
@@ -496,8 +496,8 @@ contract('FeePool', async accounts => {
 				from: owner,
 			});
 
-			await periFinance.issuePynths(amount, { from: owner });
-			await periFinance.issuePynths(amount.mul(web3.utils.toBN('2')), { from: account1 });
+			await periFinance.issuePynths(PERI, amount, { from: owner });
+			await periFinance.issuePynths(PERI, amount.mul(web3.utils.toBN('2')), { from: account1 });
 
 			// Close out the period to allow both users to be part of the whole fee period.
 			await closeFeePeriod();
@@ -567,7 +567,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should import feePeriods and close the current fee period correctly', async () => {
 				// Make sure the FeeAddress has enough pynths to burn for the imported periods.
-				await periFinance.issuePynths(toUnit('1000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
 				await pUSDContract.transfer(FEE_ADDRESS, toUnit('1000'), {
 					from: owner,
 				});
@@ -669,7 +669,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should correctly roll over unclaimed fees when closing fee periods', async () => {
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users are only entitled to fees when they've participated in a fee period in its
 				// entirety. Roll over the fee period so fees generated below count for owner.
@@ -690,7 +690,7 @@ contract('FeePool', async accounts => {
 				const length = await feePool.FEE_PERIOD_LENGTH();
 
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users have to have minted before the close of period. Close that fee period
 				// so that there won't be any fees in period. future fees are available.
@@ -736,7 +736,7 @@ contract('FeePool', async accounts => {
 				}
 
 				// Now create the first fee
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 				await pUSDContract.transfer(account1, toUnit('10000'), {
 					from: owner,
 				});
@@ -775,7 +775,7 @@ contract('FeePool', async accounts => {
 
 			it('should receive fees from WrapperFactory', async () => {
 				// Make sure some debt exists otherwise updateCachedpUSDDebt will revert when closing/burning fees.
-				await periFinance.issuePynths(toUnit('1000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
 
 				// Close the current one so we know exactly what we're dealing with
 				await closeFeePeriod();
@@ -857,7 +857,7 @@ contract('FeePool', async accounts => {
 			});
 
 			it('should trigger bridge to close period on other networks', async () => {
-				await periFinance.issuePynths(toUnit(500), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit(500), { from: owner });
 
 				await fastForward(await feePool.feePeriodDuration());
 
@@ -941,7 +941,7 @@ contract('FeePool', async accounts => {
 			});
 			it('should import feePeriods and close the current fee period correctly', async () => {
 				// Make sure the FeeAddress has enough pynths to burn for the imported periods.
-				await periFinance.issuePynths(toUnit('1000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
 				await pUSDContract.transfer(FEE_ADDRESS, toUnit('1000'), {
 					from: owner,
 				});
@@ -1031,7 +1031,7 @@ contract('FeePool', async accounts => {
 			describe('potential blocking conditions', () => {
 				beforeEach(async () => {
 					// ensure claimFees() can succeed by default (generate fees and close period)
-					await periFinance.issuePynths(toUnit('10000'), { from: owner });
+					await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 					await periFinance.exchange(pUSD, toUnit('10'), pAUD, { from: owner });
 					await closeFeePeriod();
 				});
@@ -1089,8 +1089,8 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two exchange transfers, then close it off.
 				for (let i = 0; i <= length; i++) {
@@ -1127,15 +1127,15 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				await periFinance.exchange(pUSD, toUnit(100), pAUD, { from: account1 });
 
 				await closeFeePeriod();
 
 				// Settle our debt
-				await periFinance.burnPynths(toUnit('999999'), { from: owner });
+				await periFinance.burnPynths(PERI, toUnit('999999'), { from: owner });
 
 				assert.bnEqual(
 					await periFinance.debtBalanceOf(owner, toBytes32('pUSD')),
@@ -1167,7 +1167,7 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// For first fee period, do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
@@ -1195,7 +1195,7 @@ contract('FeePool', async accounts => {
 
 				// FeePeriod 2 - account 1 joins and mints 50% of the debt
 				totalFees = web3.utils.toBN('0');
-				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// Generate fees
 				await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
@@ -1228,8 +1228,8 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For each fee period (with one extra to test rollover), do two transfers, then close it off.
 				let totalFees = web3.utils.toBN('0');
@@ -1278,7 +1278,7 @@ contract('FeePool', async accounts => {
 
 			it('should revert when a user tries to double claim their fees', async () => {
 				// Issue 10,000 pUSD.
-				await periFinance.issuePynths(toUnit('10000'), { from: owner });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: owner });
 
 				// Users are only allowed to claim fees in periods they had an issued balance
 				// for the entire period.
@@ -1416,7 +1416,7 @@ contract('FeePool', async accounts => {
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				const amount = await pUSDContract.balanceOf(account1);
-				await periFinance.issuePynths(amount, { from: owner });
+				await periFinance.issuePynths(PERI, amount, { from: owner });
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
@@ -1456,7 +1456,7 @@ contract('FeePool', async accounts => {
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				const amount = await pUSDContract.balanceOf(account1);
-				await periFinance.issuePynths(amount, { from: owner });
+				await periFinance.issuePynths(PERI, amount, { from: owner });
 				await closeFeePeriod();
 
 				// Do a transfer to generate fees
@@ -1517,7 +1517,7 @@ contract('FeePool', async accounts => {
 					from: owner,
 				});
 
-				await periFinance.issuePynths(toUnit('10000'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10000'), { from: account1 });
 
 				// For first fee period, do one exchange.
 				const exchange1 = toUnit((10).toString());
@@ -1653,8 +1653,8 @@ contract('FeePool', async accounts => {
 					const exchange1 = toUnit(((i + 1) * 10).toString());
 
 					// Mint debt each period to fill up feelPoolState issuanceData to [6]
-					await periFinance.issuePynths(toUnit('1000'), { from: owner });
-					await periFinance.issuePynths(toUnit('1000'), { from: account1 });
+					await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
+					await periFinance.issuePynths(PERI, toUnit('1000'), { from: account1 });
 
 					await periFinance.exchange(pUSD, exchange1, pAUD, { from: owner });
 

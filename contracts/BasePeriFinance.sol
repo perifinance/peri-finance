@@ -369,8 +369,8 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         }
     }
 
-    function issuePynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().issuePynths(messageSender, amount);
+    function issuePynths(bytes32 _currencyKey, uint amount) external issuanceActive optionalProxy {
+        return issuer().issuePynths(messageSender, _currencyKey, amount);
     }
 
     function issuePynthsOnBehalf(address issueForAddress, uint amount) external issuanceActive optionalProxy {
@@ -381,12 +381,16 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         return issuer().issueMaxPynths(messageSender);
     }
 
+    function issuePynthsToMaxQuota(bytes32 _currencyKey) external issuanceActive optionalProxy blacklisted(messageSender) {
+        issuer().issuePynthsToMaxQuota(messageSender, _currencyKey);
+    }
+
     function issueMaxPynthsOnBehalf(address issueForAddress) external issuanceActive optionalProxy {
         return issuer().issueMaxPynthsOnBehalf(issueForAddress, messageSender);
     }
 
-    function burnPynths(uint amount) external issuanceActive optionalProxy {
-        return issuer().burnPynths(messageSender, amount);
+    function burnPynths(bytes32 _currencyKey, uint amount) external issuanceActive optionalProxy {
+        return issuer().burnPynths(messageSender, _currencyKey, amount);
     }
 
     function burnPynthsOnBehalf(address burnForAddress, uint amount) external issuanceActive optionalProxy {
@@ -400,6 +404,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     function burnPynthsToTargetOnBehalf(address burnForAddress) external issuanceActive optionalProxy {
         return issuer().burnPynthsToTargetOnBehalf(burnForAddress, messageSender);
     }
+
+    function fitToClaimable() external payable issuanceActive optionalProxy blacklisted(messageSender) {
+        issuer().fitToClaimable(messageSender);
+    }
+
 
     /// @notice Force liquidate a delinquent account and distribute the redeemed PERI rewards amongst the appropriate recipients.
     /// @dev The PERI transfers will revert if the amount to send is more than balanceOf account (i.e. due to escrowed balance).

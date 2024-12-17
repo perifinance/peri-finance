@@ -535,7 +535,7 @@ contract('External token staking integration', async accounts => {
 				await updateRates([toBytes32('AUD')], ['0.9']);
 
 				await assert.revert(
-					periFinance.issuePynths(toBytes32('AUD'), toUnit('1'), { from: users[0] }),
+					periFinance.issuePynths(PERI, toBytes32('AUD'), toUnit('1'), { from: users[0] }),
 					'Target token is not registered'
 				);
 			});
@@ -556,7 +556,7 @@ contract('External token staking integration', async accounts => {
 
 			it.skip('should NOT stake pUSD', async () => {
 				await assert.revert(
-					periFinance.issuePynths(pUSD, toUnit('10'), { from: users[0] }),
+					periFinance.issuePynths(PERI, pUSD, toUnit('10'), { from: users[0] }),
 					'pUSD is not staking coin'
 				);
 			});

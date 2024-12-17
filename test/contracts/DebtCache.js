@@ -1036,7 +1036,7 @@ contract('DebtCache', async accounts => {
 
 				const pynthsToIssue = toUnit('10');
 				await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
-				const tx = await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				const tx = await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.add(pynthsToIssue));
 
 				const logs = await getDecodedLogs({
@@ -1056,7 +1056,7 @@ contract('DebtCache', async accounts => {
 				await debtCache.takeDebtSnapshot();
 				const pynthsToIssue = toUnit('10');
 				await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
-				await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 
 				await circuitBreaker.resetLastValue(
 					[aggregatorIssuedPynths.address, aggregatorDebtRatio.address],
@@ -1071,7 +1071,7 @@ contract('DebtCache', async accounts => {
 
 				const pynthsToBurn = toUnit('5');
 
-				const tx = await periFinance.burnPynths(pynthsToBurn, { from: account1 });
+				const tx = await periFinance.burnPynths(PERI, pynthsToBurn, { from: account1 });
 				assert.bnEqual((await debtCache.cacheInfo())[0], issued.sub(pynthsToBurn));
 
 				const logs = await getDecodedLogs({
@@ -1096,7 +1096,7 @@ contract('DebtCache', async accounts => {
 
 				await periFinanceProxy.transfer(account1, toUnit('10000'), { from: owner });
 
-				const tx = await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				const tx = await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
@@ -1120,13 +1120,13 @@ contract('DebtCache', async accounts => {
 
 				const pynthsToIssue = toUnit('1000');
 				await periFinanceProxy.transfer(account1, toUnit('10000'), { from: owner });
-				await periFinance.issuePynths(pynthsToIssue, { from: account1 });
+				await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 
 				const cachedPynths = (await debtCache.cachedPynthDebts([pUSD]))[0];
 				const issued = (await debtCache.cacheInfo())[0];
 				const pynthsToBurn = toUnit('500');
 
-				const tx = await periFinance.burnPynths(pynthsToBurn, { from: account1 });
+				const tx = await periFinance.burnPynths(PERI, pynthsToBurn, { from: account1 });
 
 				const logs = await getDecodedLogs({
 					hash: tx.tx,
@@ -1153,7 +1153,7 @@ contract('DebtCache', async accounts => {
 
 				await debtCache.takeDebtSnapshot();
 				await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
-				await periFinance.issuePynths(toUnit('10'), { from: account1 });
+				await periFinance.issuePynths(PERI, toUnit('10'), { from: account1 });
 				const issued = (await debtCache.cacheInfo())[0];
 				const debts = await debtCache.cachedPynthDebts([pUSD, pAUD]);
 				const tx = await periFinance.exchange(pUSD, toUnit('5'), pAUD, { from: account1 });
@@ -1571,7 +1571,7 @@ contract('DebtCache', async accounts => {
 			// Issue some debt to avoid a division-by-zero in `getBorrowRate` where
 			// we compute the utilisation.
 			await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
-			await periFinance.issuePynths(toUnit('10'), { from: account1 });
+			await periFinance.issuePynths(PERI, toUnit('10'), { from: account1 });
 
 			totalNonPeriBackedDebt = await getTotalNonPeriBackedDebt();
 			currentDebt = await debtCache.currentDebt();
