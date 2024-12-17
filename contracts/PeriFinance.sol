@@ -237,17 +237,6 @@ contract PeriFinance is BasePeriFinance {
     //     bridgeState = IBridgeState(_newBridgeState);
     // }
 
-    /* Once off function for SIP-60 to migrate PERI balances in the RewardEscrow contract
-     * To the new RewardEscrowV2 contract
-     */
-    function migrateEscrowBalanceToRewardEscrowV2() external onlyOwner {
-        // Record balanceOf(RewardEscrow) contract
-        uint rewardEscrowBalance = tokenState.balanceOf(address(rewardEscrow()));
-
-        // transfer all of RewardEscrow's balance to RewardEscrowV2
-        // _internalTransfer emits the transfer event
-        _internalTransfer(address(rewardEscrow()), address(rewardEscrowV2()), rewardEscrowBalance);
-    }
 
     // ========== EVENTS ==========
     event AccountLiquidated(address indexed account, uint periRedeemed, uint amountLiquidated, address liquidator);

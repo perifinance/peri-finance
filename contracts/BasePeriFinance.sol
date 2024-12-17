@@ -556,7 +556,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         _notImplemented();
     }
 
-
+    
     // function mint(address, uint) external payable returns (bool) {
     //     _notImplemented();
     //     //return false;

@@ -220,8 +220,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         debt = uint(rawIssuedPynths);
         sharesSupply = rawRatio == 0 ? 0 : debt.divideDecimalRoundPrecise(uint(rawRatio));
 
-        //require(rawRatio <= 400000000000000000000000000, uint2str(debt));
-
         uint stalePeriod = getRateStalePeriod();
 
         isStale =
@@ -330,15 +328,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
        (uint periBackedAmount, , bool debtInfoStale) = allNetworksDebtInfo();
 
-        IPeriFinanceState state = periFinanceState();
+
+
+        //IPeriFinanceState state = periFinanceState();
 
         // What was their initial debt ownership?
-        (uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
+        //(uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
         //(totalSystemValue, anyRateIsInvalid) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
         (totalSystemValue,) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
+
 
         // existing functionality requires for us to convert into the exchange rate specified by `currencyKey`
         (uint currencyRate, bool currencyRateInvalid) = _rateAndInvalid(currencyKey);
@@ -350,7 +351,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // If it's zero, they haven't issued, and they have no debt.
         // Note: it's more gas intensive to put this check here rather than before _totalIssuedPynths
         // if they have 0 PERI, but it's a necessary trade-off
-        if (initialDebtOwnership == 0) return (0, totalSystemValue, anyRateIsInvalid);
+        //if (initialDebtOwnership == 0) return (0, totalSystemValue, anyRateIsInvalid);
 
         // Figure out the global debt percentage delta from when they entered the system.
         // This is a high precision integer of 27 (1e27) decimals.
@@ -396,28 +397,32 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return flexibleStorage().getUIntValue(CONTRACT_NAME, keccak256(abi.encodePacked(LAST_ISSUE_EVENT, account)));
     }
 
-    function _remainingIssuablePynths(address _issuer)
+  function _remainingIssuablePynths(address _issuer)
         internal
         view
         returns (
-            uint maxIssuable,
+            uint remainIssuable,
             uint alreadyIssued,
-            uint totalSystemDebt,
-            bool anyRateIsInvalid
+            uint totalSystemDebt
         )
     {
-
+        // get issuer's debt, total system debt
+        bool anyRateIsInvalid;
         (alreadyIssued, totalSystemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
-        (uint issuable, ) = _maxIssuablePynths(_issuer, alreadyIssued);
+        _requireRatesNotInvalid(anyRateIsInvalid);
 
-        maxIssuable = issuable;
-        //anyRateIsInvalid = anyRateIsInvalid || isInvalid <= 0;
+        // if it is ex-tokens, just retrun the debt balance, total system debt
+        /* if (_currencyKey != PERI) {
+            ( ,remainIssuable) = exTokenManager().maxStakableAmountOf(_issuer, alreadyIssued, _currencyKey, pUSD);
+            remainIssuable = remainIssuable.multiplyDecimal(getExTokenIssuanceRatio(_currencyKey));
+            return (remainIssuable, alreadyIssued, totalSystemDebt, anyRateIsInvalid);
+        } */
 
-        if (alreadyIssued >= maxIssuable) {
-            maxIssuable = 0;
-        } else {
-            maxIssuable = maxIssuable.sub(alreadyIssued);
-        }
+        // get the max issuable debt by the account collateral value
+        (remainIssuable, ) = _maxIssuablePynths(_issuer, alreadyIssued);
+
+        // issuable debt based on the collateral's appreaciated value or the assets in stakable state
+        remainIssuable = remainIssuable > alreadyIssued ? remainIssuable.sub(alreadyIssued) : 0;
     }
 
     function _periToUSD(uint amount, uint periRate) internal pure returns (uint) {
@@ -467,15 +472,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // get the account's PERI balance
         uint periAmt = _toUSD(_collateral(_issuer), _rateCheck(PERI));
         
-
-
         // get external token's debt, staked amount and target ratio
         uint exEA;
         uint exDebt;
         (exDebt, exEA, tRatio) = exTokenManager().getExEADebt(_issuer);
         uint periIR = getIssuanceRatio();
-
-        //require(false, uint2str(periIR));
 
         // calc max pUSD by the peri collateral
         periAmt = _preciseMulToDecimal(periAmt, periIR);
@@ -489,23 +490,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             periAmt = exEA.divideDecimal(periAmt);
         } 
         else {
-            //periAmt = _existDebt > 0 ? SafeDecimalMath.unit() : 0;
+            periAmt = _existDebt > 0 ? SafeDecimalMath.unit() : 0;
         }
 
         // Target Ratio =  Peri Issuance Ratio + (exTRatio - Peri Issuance Ratio) * Ex-Staking Ratio
         tRatio = periAmt > 0 ? periIR.add(_preciseMulToDecimal(tRatio.sub(periIR), periAmt)) : 0;
-
-        // get (periSA + exEA)
-        // periAmt = _existDebt > maxIssuable
-        //     ? _preciseDivToDecimal(_existDebt.sub(maxIssuable), getIssuanceRatio()).add(exEA)
-        //     : _existDebt;
-
-        // // Target Ratio =  Peri Issuance Ratio + (exTRatio - Peri Issuance Ratio) * Ex-Staking Ratio
-        // tRatio = periAmt > 0
-        //     ? getIssuanceRatio().add(
-        //             _preciseMulToDecimal(tRatio.sub(getIssuanceRatio()), exEA.divideDecimal(periAmt))
-        //         )
-        //     : 0;
     }
 
     function _collateralisationRatio(address _issuer) internal view returns (uint, bool) {
@@ -533,6 +522,18 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return balance;
     }
 
+    function debtsCollateral(address _account, bool _checkRate)
+        external
+        view
+        returns (
+            uint debt,
+            uint systemDebt,
+            uint periCol
+        )
+    {
+        return _debtsCollateral(_account, _checkRate);
+    }
+
     /**
      *
      * @param _from The address to issue pUSD.
@@ -555,7 +556,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         (debt, systemDebt, anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_from, pUSD);
 
         // get peri rate and check if it's invalid
-        (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
+       (uint rate, bool isInvalid) = exchangeRates().rateAndInvalid(PERI);
         if (_isRateCheck) _requireRatesNotInvalid(anyRateIsInvalid || isInvalid);
 
         // get PERI's collateral amount in pUSD
@@ -630,7 +631,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             uint totalSystemDebt
         )
     {
-        (maxIssuable, alreadyIssued, totalSystemDebt, ) = _remainingIssuablePynths(_issuer);
+        (maxIssuable, alreadyIssued, totalSystemDebt) = _remainingIssuablePynths(_issuer);
     }
 
     function maxIssuablePynths(address _issuer) external view returns (uint) {
@@ -687,6 +688,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         } else {
             transferable = balance.sub(lockedPeriFinanceValue);
         }
+    }
+
+    function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exRefundAmt) {
+        // get the account's debt balance and peri collateral value
+        (uint debtBalance, , uint periCAinUSD) = _debtsCollateral(_account, true);
+
+        // get the amount of debt to be burnt and ex-token to be unstaked to satisfy target c-ratio
+        (burnAmount, exRefundAmt, ) = exTokenManager().burnAmtToFitTR(_account, debtBalance, periCAinUSD);
     }
 
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory) {
@@ -905,7 +914,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // }
     }
 
-    function issuePynths(address from, uint amount) external onlyPeriFinance {
+    function issuePynths(address from, bytes32 _currencyKey, uint amount) external onlyPeriFinance {
         require(amount > 0, "cannot issue 0 pynths");
 
         _issuePynths(from, amount, false);
@@ -913,6 +922,57 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function issueMaxPynths(address from) external onlyPeriFinance {
         _issuePynths(from, 0, true);
+    }
+
+
+    /**
+     * @notice this senario only possible when prices of ex-token(stable coin) is down or staked debt from ex-token is not reached the quota.
+     *          leaving a room for extra debt.
+     *
+     * @param _issuer The address to issue pUSD.
+     * @param _currencyKey The currency key of external token to stake.
+     *
+     */
+    function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external onlyPeriFinance {
+        _requireCurrencyKeyIsNotpUSD(_currencyKey);
+        require(_currencyKey != PERI, "Only external token allowed to stake");
+
+        // get existing debt and total system debt
+        // (uint maxIssuable, uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) =
+        //     _remainingIssuablePynths(_issuer);
+
+        // // get issuer's debt, total system debt
+        // (uint existingDebt, uint totalSystemDebt, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(_issuer, pUSD);
+
+        // // check if any rate is invalid
+        // _requireRatesNotInvalid(anyRateIsInvalid);
+
+        // get issuer's debt, total system debta and peri collateral amount
+        (uint existingDebt, uint totalSystemDebt, uint periColAmt) = _debtsCollateral(_issuer, true);
+        // check if existing debt is zero
+        _requireExistingDebt(existingDebt);
+
+        // // now get to-be-issued debt
+        // (, uint addDebt) = exTokenManager().maxStakableAmountOf(_issuer, existingDebt, _currencyKey, pUSD);
+
+        // require(addDebt > 0, "No available ex-tokens to stake");
+
+        // // stake more amount of ex-tokens
+        // addDebt = exTokenManager().stake(_issuer, existingDebt, addDebt, _currencyKey, pUSD);
+
+        uint addDebt = exTokenManager().stakeToMaxExQuota(_issuer, existingDebt, periColAmt, _currencyKey);
+
+        // in order to meet exIDebtToQ <= maxIssuable
+        // maxIssuable = maxIssuable.add(exIDebtToQ);
+
+        _issuePynths(
+            _issuer,
+            addDebt,
+            false
+        );
+
+        //// For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
+        // exTokenManager().requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
 
     function issuePynthsOnBehalf(
@@ -929,7 +989,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         _issuePynths(issueForAddress, 0, true);
     }
 
-    function burnPynths(address from, uint amount) external onlyPeriFinance {
+    function burnPynths(address from, bytes32 _currencyKey, uint amount) external onlyPeriFinance {
         _voluntaryBurnPynths(from, amount, false);
     }
 
@@ -957,6 +1017,52 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         uint balance
     ) external onlyPynthRedeemer {
         IPynth(IProxy(deprecatedPynthProxy).target()).burn(account, balance);
+    }
+
+     /**
+     * @notice It burns pUSD and unstakes ex-tokens to meet the condition
+     *
+     * @param _from the address to burn pUSD
+     * @param _amount the amount of pUSD to burn
+     * @param _currencyKey the currency key of ex-token to unstake
+     * @param _fitToTRatio  if true, it burns pUSD and unstakes ex-tokens to meet the target ratio
+     */
+    function _unstakeExTokens(
+        address _from,
+        uint _amount,
+        bytes32 _currencyKey,
+        bool _fitToTRatio
+    ) internal {
+        // get debt balance and issued debt
+        (uint debtBalance, uint systemDebt, uint periColAmt) = _debtsCollateral(_from, true);
+        require(debtBalance > 0, "No debt to unstake");
+
+        if (_fitToTRatio) {
+            // get the amount of debt to be burnt and the amount of ex-token to be unstaked
+            _amount = exTokenManager().unstakeToFitTR(_from, debtBalance, periColAmt);
+        } else if (_currencyKey == bytes32(0)) {
+            // unstake all ex-tokens
+            exTokenManager().exit(_from);
+
+            // set the burn amount = the debt balance
+            _amount = debtBalance;
+        } else {
+            // unstake ex-tokens
+            exTokenManager().unstake(_from, _amount, _currencyKey, pUSD);
+        }
+
+        // burn pUSD, set the target ratio and check liquidation
+        _voluntaryBurnPynths(_from, _amount, _fitToTRatio);
+    }
+
+    /**
+     * @notice It burns pUSD and unstakes ex-tokens to meet the target ratio
+     *
+     * @param _from The address to burn pUSD.
+     */
+    function fitToClaimable(address _from) external onlyPeriFinance {
+        // unstake ex-tokens. pass PERI as _currencyKey since it's not used in the function
+        _unstakeExTokens(_from, 0, PERI, true);
     }
 
     // SIP-148: Upgraded Liquidation Mechanism
@@ -1102,6 +1208,36 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+
+    function liquidateDelinquentAccount(
+        address account,
+        uint pusdAmount,
+        address liquidator
+    ) external onlyPeriFinance returns (uint totalRedeemed, uint amountToLiquidate) {
+        // Ensure waitingPeriod and pUSD balance is settled as burning impacts the size of debt pool
+        require(!exchanger().hasWaitingPeriodOrSettlementOwing(liquidator, pUSD), "pUSD needs to be settled");
+
+        // Check account is liquidation open
+        require(liquidations().isOpenForLiquidation(account), "Account not open for liquidation"); //  --> moved to liquidations().liquidateAccount()
+
+        // require liquidator has enough pUSD
+        require(IERC20(address(pynths[pUSD])).balanceOf(liquidator) >= pusdAmount, "Not enough pUSD");
+
+        // What is their debt in pUSD?
+        (uint debtBalance, uint totalDebtIssued, bool anyRateIsInvalid) = _debtBalanceOfAndTotalDebt(account, pUSD);
+        // (uint periRate, bool periRateInvalid) = exchangeRates().rateAndInvalid(PERI);
+        _requireRatesNotInvalid(
+            anyRateIsInvalid /*  || periRateInvalid */
+        );
+
+      
+        (totalRedeemed, amountToLiquidate) = liquidations().liquidateAccount(account, liquidator, pusdAmount, debtBalance);
+
+        // burn pUSD from messageSender (liquidator) and reduce account's debt
+        _burnPynths(account, liquidator, amountToLiquidate, debtBalance);
+    }
+
+
     /* ========== INTERNAL FUNCTIONS ========== */
 
     function _requireRatesNotInvalid(bool anyRateIsInvalid) internal pure {
@@ -1120,23 +1256,29 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         address from,
         uint amount,
         bool issueMax
-    ) internal {
-        if (_verifyCircuitBreakers()) {
-            return;
-        }
+    ) internal returns (uint afterDebt) {
 
-        (uint maxIssuable, , , bool anyRateIsInvalid) = _remainingIssuablePynths(from);
-
-        _requireRatesNotInvalid(anyRateIsInvalid);
+        (uint maxIssuable, , ) = _remainingIssuablePynths(from);
 
         if (!issueMax) {
             require(amount <= maxIssuable, "Amount too large");
         } else {
             amount = maxIssuable;
         }
+      
+
 
         // Keep track of the debt they're about to create
         (uint existingDebt, uint totalSystemDebt , ) = _debtBalanceOfAndTotalDebt(from, pUSD);
+
+        if (_verifyCircuitBreakers()) {
+            return existingDebt;
+        }
+
+          if (amount == 0) {
+            return existingDebt;
+        }
+
         _addToDebtRegister(from, amount, existingDebt, totalSystemDebt);
 
         // record issue timestamp
@@ -1147,6 +1289,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // Account for the issued debt in the cache
         debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amount));
+
+              // Store their locked PERI amount to determine their fee % for the period
+        //_appendAccountIssuanceRecord(from);
+
+        afterDebt = existingDebt.add(amount);
 
     }
 
@@ -1180,7 +1327,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
         //_appendAccountIssuanceRecord(debtAccount);
     }
-
 
 function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
@@ -1229,6 +1375,50 @@ function toString(bytes memory data) public pure returns(string memory) {
     }
     return string(str);
 }
+
+
+//  /**
+//      * @notice It burns debt, set target ratio and removes liquidation if existing debt after burning is <= maxIssuable
+//      *
+//      * @param from The address to burn pUSD.
+//      * @param amount The amount of pUSD to burn.
+//      * @param existingDebt The existing debt of the account.
+//      * @param totalSystemValue The total system value.
+//      * @param burnToTarget If true, burn pUSD to meet the target ratio.
+//      */
+//     function _voluntaryBurnPynths(
+//         address from,
+//         uint amount,
+//         uint existingDebt,
+//         uint totalSystemValue,
+//         bool burnToTarget
+//     ) internal returns (uint tRatio) {
+//         // get the max issuable debt based on the total collateral value
+//         require(existingDebt > 0, "No debt to forgive");
+
+//         if (!burnToTarget) {
+//             // If not burning to target, then burning requires that the minimum stake time has elapsed.
+//             require(_canBurnPynths(from), "Min stake time not reached or chain sync stale");
+//             // First settle anything pending into pUSD as burning or issuing impacts the size of the debt pool
+//             (, uint refunded, uint numEntriesSettled) = exchanger().settle(from, pUSD);
+//             if (numEntriesSettled > 0) {
+//                 amount = exchanger().calculateAmountAfterSettlement(from, pUSD, amount, refunded);
+//             }
+//         }
+
+//         // burn pUSD from the _from account
+//         uint remainingDebt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+//         remainingDebt = existingDebt.sub(remainingDebt);
+
+//         uint maxIssuable;
+//         (maxIssuable, tRatio) = _maxIssuablePynths(from, remainingDebt);
+
+//         // Check and remove liquidation if existingDebt after burning is <= maxIssuable
+//         // Issuance ratio is fixed so should remove any liquidations
+//         if (remainingDebt <= maxIssuable || remainingDebt.sub(maxIssuable) < 1e12) {
+//             liquidations().removeAccountInLiquidation(from);
+//         }
+//     }
 
     // If burning to target, `amount` is ignored, and the correct quantity of pUSD is burnt to reach the target
     // c-ratio, allowing fees to be claimed. In this case, pending settlements will be skipped as the user
@@ -1285,47 +1475,11 @@ function toString(bytes memory data) public pure returns(string memory) {
         uint existingDebt,
         uint totalDebtIssued
     ) internal {
-        IPeriFinanceState state = periFinanceState();
-
-        // What will the new total be including the new value?
-        uint newTotalDebtIssued = amount.add(totalDebtIssued);
-
-        // What is their percentage (as a high precision int) of the total debt?
-        uint debtPercentage = amount.divideDecimalRoundPrecise(newTotalDebtIssued);
-
-        // And what effect does this percentage change have on the global debt holding of other issuers?
-        // The delta specifically needs to not take into account any existing debt as it's already
-        // accounted for in the delta from when they issued previously.
-        // The delta is a high precision integer.
-        uint delta = SafeDecimalMath.preciseUnit().sub(debtPercentage);
-
-        // And what does their debt ownership look like including this previous stake?
-        if (existingDebt > 0) {
-            debtPercentage = amount.add(existingDebt).divideDecimalRoundPrecise(newTotalDebtIssued);
-        } else {
-            // If they have no debt, they're a new issuer; record this.
-            state.incrementTotalIssuerCount();
-        }
-
-        // Save the debt entry parameters
-        state.setCurrentIssuanceData(from, debtPercentage);
-
+   
         // doing nothing just left for version compatibility
         crossChainManager().addCurrentNetworkIssuedDebt(amount);
 
-        // doing nothing just left for version compatibility
-        // crossChainManager().setCrossNetworkUserDebt(from, state.debtLedgerLength());
-
-        // And if we're the first, push 1 as there was no effect to any other holders, otherwise push
-        // the change for the rest of the debt holders. The debt ledger holds high precision integers.
-        if (state.debtLedgerLength() > 0 && state.lastDebtLedgerEntry() != 0) {
-            state.appendDebtLedgerValue(state.lastDebtLedgerEntry().multiplyDecimalRoundPrecise(delta));
-        } else {
-            state.appendDebtLedgerValue(SafeDecimalMath.preciseUnit());
-        }
-    
-        // important: this has to happen before any updates to user's debt shares
-        // liquidatorRewards().updateEntry(from);
+        
 
         IPeriFinanceDebtShare sds = periFinanceDebtShare();
 
@@ -1410,6 +1564,15 @@ function toString(bytes memory data) public pure returns(string memory) {
         return circuitBreaker().probeCircuitBreaker(debtRatioAggregator, uint(rawRatio)) || broken;
     }
 
+    function _requireCurrencyKeyIsNotpUSD(bytes32 _currencyKey) internal pure {
+        require(_currencyKey != pUSD, "pUSD isn't stakable");
+    }
+
+    function _requireExistingDebt(uint existingDebt) internal pure {
+        require(existingDebt > 0, "User has no debt");
+    }
+
+
     /* ========== MODIFIERS ========== */
     modifier onlyPeriFinance() {
         require(msg.sender == address(periFinanceERC20()), "Only PeriFinance");
@@ -1418,7 +1581,7 @@ function toString(bytes memory data) public pure returns(string memory) {
 
     modifier onlyTrustedMinters() {
         address bridgeL1 = resolver.getAddress(CONTRACT_PERIFINANCEBRIDGETOOPTIMISM);
-        // address bridgeL2 = resolver.getAddress(CONTRACT_SYNTHETIXBRIDGETOBASE);
+        // address bridgeL2 = resolver.getAddress(CONTRACT_PERIFINANCEBRIDGETOBASE);
         address feePool = resolver.getAddress(CONTRACT_FEEPOOL);
         //require(msg.sender == bridgeL1 || msg.sender == bridgeL2 || msg.sender == feePool, "only trusted minters");
         require(msg.sender == bridgeL1 || msg.sender == feePool , "only trusted minters");

@@ -145,7 +145,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     }
 
     // function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
-    //     return IPeriFinanceDebtShare(requireAndGetAddress(CONTRACT_SYNTHETIXDEBTSHARE));
+    //     return IPeriFinanceDebtShare(requireAndGetAddress(CONTRACT_PERIFINANCEDEBTSHARE));
     // }
 
     function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
@@ -404,53 +404,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _recentFeePeriodsStorage(0).feesToDistribute = _recentFeePeriodsStorage(0).feesToDistribute.add(amount);
     }
 
-function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len;
-        while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
-function toString(address account) public pure returns(string memory) {
-    return toString(abi.encodePacked(account));
-}
-
-function toString(uint256 value) public pure returns(string memory) {
-    return toString(abi.encodePacked(value));
-}
-
-function toString(bytes32 value) public pure returns(string memory) {
-    return toString(abi.encodePacked(value));
-}
-
-function toString(bytes memory data) public pure returns(string memory) {
-    bytes memory alphabet = "0123456789abcdef";
-
-    bytes memory str = new bytes(2 + data.length * 2);
-    str[0] = "0";
-    str[1] = "x";
-    for (uint i = 0; i < data.length; i++) {
-        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
-        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
-    }
-    return string(str);
-}
-
     /**
      * @notice The RewardsDistribution contract informs us how many PERI rewards are sent to RewardEscrow to be claimed.
      */
@@ -492,8 +445,8 @@ function toString(bytes memory data) public pure returns(string memory) {
         // // inform other chain of the chosen values
         // IPynthetixBridgeToOptimism(
         //     resolver.requireAndGetAddress(
-        //         CONTRACT_SYNTHETIX_BRIDGE_TO_OPTIMISM,
-        //         "Missing contract: SynthetixBridgeToOptimism"
+        //         CONTRACT_PERIFINANCE_BRIDGE_TO_OPTIMISM,
+        //         "Missing contract: PeriFinanceBridgeToOptimism"
         //     )
         // )
         //     .closeFeePeriod(snxBackedDebt, debtSharesSupply);
@@ -554,6 +507,8 @@ function toString(bytes memory data) public pure returns(string memory) {
 
         // Inform Issuer to start recording for the new fee period
         issuer().setCurrentPeriodId(uint128(newFeePeriodId));
+
+        _everDistributedFeeRewards = false;
 
         emitFeePeriodClosed(_recentFeePeriodsStorage(1).feePeriodId);
     }
@@ -766,8 +721,6 @@ function toString(bytes memory data) public pure returns(string memory) {
             // Send them their rewards
             _payRewards(claimingAddress, rewardsPaid);
         }
-
-        //require(false, uint2str(rewardsPaid));
 
         emitFeesClaimed(claimingAddress, feesPaid, rewardsPaid);
 
@@ -1142,15 +1095,10 @@ function toString(bytes memory data) public pure returns(string memory) {
     ) internal view returns (uint, uint) {
         // If it's zero, they haven't issued, and they have no fees OR rewards.
 
-        //require(false, uint2str(ownershipPercentage));
 
         if (ownershipPercentage == 0) return (0, 0);
 
          FeePeriod storage fp = _recentFeePeriodsStorage(period);
-
-        //require(period == 0, uint2str(period));
-
-        //require(false, uint2str(fp.feesToDistribute));
 
         // Calculate their percentage of the fees / rewards in this period
         // This is a high precision integer.

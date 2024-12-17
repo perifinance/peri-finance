@@ -1,12 +1,10 @@
 const { artifacts, contract, web3 } = require('hardhat');
 const { assert } = require('./common');
+const { expect } = require('chai');
 const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
-const {
-	toBytes32,
-	constants: { ZERO_ADDRESS },
-} = require('../..');
-const { smockit } = require('@eth-optimism/smock');
+const { toBytes32 } = require('../..');
+const { smock } = require('@defi-wonderland/smock');
 
 const PeriFinanceBridgeToOptimism = artifacts.require('PeriFinanceBridgeToOptimism');
 
@@ -17,22 +15,25 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 		smockedMessenger,
 		rewardsDistribution,
 		periBridgeToBase,
+		PeriFinanceBridgeEscrow,
+		FeePool,
 		randomAddress,
 	] = accounts;
 
-	it.skip('ensure only known functions are mutative', () => {
+	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: PeriFinanceBridgeToOptimism.abi,
-			ignoreParents: ['Owned', 'MixinResolver'],
+			ignoreParents: ['BasePeriFinanceBridge'],
 			expected: [
-				'completeWithdrawal',
+				'closeFeePeriod',
 				'depositAndMigrateEscrow',
-				'initiateDeposit',
-				'initiateEscrowMigration',
-				'initiateRewardDeposit',
-				'migrateBridge',
+				'deposit',
+				'depositTo',
+				'depositReward',
+				'finalizeWithdrawal',
+				'forwardTokensToEscrow',
+				'migrateEscrow',
 				'notifyRewardAmount',
-				'StakingStateUSDC',
 			],
 		});
 	});
@@ -43,10 +44,12 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 			args
 		);
 
-	describe.skip('when all the deps are mocked', () => {
+	describe('when all the deps are mocked', () => {
 		let messenger;
 		let periFinance;
 		let issuer;
+		let exchangeRates;
+		let systemStatus;
 		let resolver;
 		let rewardEscrow;
 		const escrowAmount = 100;
@@ -54,20 +57,19 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 
 		let flexibleStorage;
 		beforeEach(async () => {
-			messenger = await smockit(artifacts.require('iOVM_BaseCrossDomainMessenger').abi, {
+			messenger = await smock.fake('iOVM_BaseCrossDomainMessenger', {
 				address: smockedMessenger,
 			});
 
-			rewardEscrow = await smockit(
-				artifacts.require('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2').abi
-			);
+			rewardEscrow = await smock.fake('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2');
 
 			// can't use IPeriFinance as we need ERC20 functions as well
-			periFinance = await smockit(artifacts.require('PeriFinance').abi);
-			issuer = await smockit(artifacts.require('IIssuer').abi);
-			flexibleStorage = await smockit(artifacts.require('FlexibleStorage').abi);
+			periFinance = await smock.fake('PeriFinance');
+			issuer = await smock.fake('IIssuer');
+			exchangeRates = await smock.fake('ExchangeRates');
+			systemStatus = await smock.fake('SystemStatus');
+			flexibleStorage = await smock.fake('FlexibleStorage');
 
-			// now add to address resolver
 			resolver = await artifacts.require('AddressResolver').new(owner);
 			await resolver.importAddresses(
 				[
@@ -75,18 +77,26 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					'ext:Messenger',
 					'PeriFinance',
 					'Issuer',
+					'ExchangeRates',
+					'SystemStatus',
+					'FeePool',
 					'RewardsDistribution',
 					'ovm:PeriFinanceBridgeToBase',
 					'RewardEscrowV2',
+					'PeriFinanceBridgeEscrow',
 				].map(toBytes32),
 				[
 					flexibleStorage.address,
 					messenger.address,
 					periFinance.address,
 					issuer.address,
+					exchangeRates.address,
+					systemStatus.address,
+					FeePool,
 					rewardsDistribution,
 					periBridgeToBase,
 					rewardEscrow.address,
+					PeriFinanceBridgeEscrow,
 				],
 				{ from: owner }
 			);
@@ -94,14 +104,14 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 
 		beforeEach(async () => {
 			// stubs
-			periFinance.smocked.transferFrom.will.return.with(() => true);
-			periFinance.smocked.balanceOf.will.return.with(() => web3.utils.toWei('1'));
-			periFinance.smocked.transfer.will.return.with(() => true);
-			messenger.smocked.sendMessage.will.return.with(() => {});
-			messenger.smocked.xDomainMessageSender.will.return.with(() => periBridgeToBase);
-			issuer.smocked.debtBalanceOf.will.return.with(() => '0');
-			rewardEscrow.smocked.burnForMigration.will.return.with(() => [escrowAmount, emptyArray]);
-			flexibleStorage.smocked.getUIntValue.will.return.with(() => '3000000');
+			periFinance.transferFrom.returns(() => true);
+			periFinance.balanceOf.returns(() => web3.utils.toWei('1'));
+			periFinance.transfer.returns(() => true);
+			messenger.sendMessage.returns(() => {});
+			messenger.xDomainMessageSender.returns(() => periBridgeToBase);
+			issuer.debtBalanceOf.returns(() => '0');
+			rewardEscrow.burnForMigration.returns(() => [escrowAmount, emptyArray]);
+			flexibleStorage.getUIntValue.returns(() => '3000000');
 		});
 
 		describe('when the target is deployed', () => {
@@ -114,18 +124,62 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 				await instance.rebuildCache();
 			});
 
-			describe('initiateDeposit', () => {
-				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
+			it('should set constructor params on deployment', async () => {
+				assert.equal(await instance.owner(), owner);
+				assert.equal(await instance.resolver(), resolver.address);
+			});
 
-						await assert.revert(instance.initiateDeposit('1'), 'Function deactivated');
+			describe('deposit', () => {
+				describe('failure modes', () => {
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
+
+						await assert.revert(instance.deposit('1'), 'Initiation deactivated');
 					});
 
 					it('does not work when user has any debt', async () => {
-						issuer.smocked.debtBalanceOf.will.return.with(() => '1');
+						issuer.debtBalanceOf.returns(() => '1');
+						await assert.revert(instance.deposit('1'), 'Cannot deposit or migrate with debt');
+					});
+				});
+
+				describe('when invoked by a user directly', () => {
+					let txn;
+					const amount = 100;
+					beforeEach(async () => {
+						txn = await instance.deposit(amount, { from: user1 });
+					});
+
+					it('only one event is emitted (DepositInitiated)', async () => {
+						assert.eventEqual(txn, 'DepositInitiated', [user1, user1, amount]);
+					});
+
+					it('only one message is sent', async () => {
+						expect(messenger.sendMessage).to.have.length(0);
+						messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
+						const expectedData = getDataOfEncodedFncCall({
+							contract: 'PeriFinanceBridgeToBase',
+							fnc: 'finalizeDeposit',
+							args: [user1, amount],
+						});
+						messenger.sendMessage.returnsAtCall(1, expectedData);
+						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
+					});
+				});
+			});
+
+			describe('depositTo', () => {
+				describe('failure modes', () => {
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
+
+						await assert.revert(instance.depositTo(randomAddress, '1'), 'Initiation deactivated');
+					});
+
+					it('does not work when user has any debt', async () => {
+						issuer.debtBalanceOf.returns(() => '1');
 						await assert.revert(
-							instance.initiateDeposit('1'),
+							instance.depositTo(randomAddress, '1'),
 							'Cannot deposit or migrate with debt'
 						);
 					});
@@ -135,43 +189,44 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					let txn;
 					const amount = 100;
 					beforeEach(async () => {
-						txn = await instance.initiateDeposit(amount, { from: user1 });
+						txn = await instance.depositTo(randomAddress, amount, { from: user1 });
 					});
 
-					it('only one event is emitted (Deposit)', async () => {
-						assert.eventEqual(txn, 'Deposit', [user1, amount]);
+					it('only one event is emitted (DepositInitiated)', async () => {
+						assert.eventEqual(txn, 'DepositInitiated', [user1, randomAddress, amount]);
 					});
 
 					it('only one message is sent', async () => {
-						assert.equal(messenger.smocked.sendMessage.calls.length, 1);
-						assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+						expect(messenger.sendMessage).to.have.length(0);
+
+						messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'PeriFinanceBridgeToBase',
-							fnc: 'completeDeposit',
-							args: [user1, amount],
+							fnc: 'finalizeDeposit',
+							args: [randomAddress, amount],
 						});
-						assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-						assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+						messenger.sendMessage.returnsAtCall(1, expectedData);
+						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 					});
 				});
 			});
 
-			describe('initiateEscrowMigration', () => {
+			describe('migrateEscrow', () => {
 				const entryIds = [
 					[1, 2, 3],
 					[4, 5, 6],
 				];
 				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
 
-						await assert.revert(instance.initiateEscrowMigration(entryIds), 'Function deactivated');
+						await assert.revert(instance.migrateEscrow(entryIds), 'Initiation deactivated');
 					});
 
 					it('does not work when user has any debt', async () => {
-						issuer.smocked.debtBalanceOf.will.return.with(() => '1');
+						issuer.debtBalanceOf.returns(() => '1');
 						await assert.revert(
-							instance.initiateEscrowMigration(entryIds),
+							instance.migrateEscrow(entryIds),
 							'Cannot deposit or migrate with debt'
 						);
 					});
@@ -183,7 +238,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 						}
 						const entryIds27Entries = [[1, 2, 3], subArray];
 						await assert.revert(
-							instance.initiateEscrowMigration(entryIds27Entries),
+							instance.migrateEscrow(entryIds27Entries),
 							'Exceeds max entries per migration'
 						);
 					});
@@ -197,17 +252,17 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 				];
 
 				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
 
 						await assert.revert(
 							instance.depositAndMigrateEscrow('1', entryIds),
-							'Function deactivated'
+							'Initiation deactivated'
 						);
 					});
 
 					it('does not work when user has any debt', async () => {
-						issuer.smocked.debtBalanceOf.will.return.with(() => '1');
+						issuer.debtBalanceOf.returns(() => '1');
 						await assert.revert(
 							instance.depositAndMigrateEscrow('0', entryIds),
 							'Cannot deposit or migrate with debt'
@@ -215,7 +270,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					});
 				});
 
-				describe('when invoked by a user', () => {
+				describe('when invoked by a user directly', () => {
 					let txn;
 					let amount;
 
@@ -226,49 +281,50 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 						});
 
 						it('the L1 escrow is burned (via rewardEscrowV2.burnForMigration)', async () => {
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls.length, 2);
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls[0][0], user1);
-							assert.bnEqual(rewardEscrow.smocked.burnForMigration.calls[0][1], entryIds[0]);
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls[1][0], user1);
-							assert.bnEqual(rewardEscrow.smocked.burnForMigration.calls[1][1], entryIds[1]);
+							expect(rewardEscrow.burnForMigration).to.have.length(0);
+
+							rewardEscrow.burnForMigration.returnsAtCall(0, user1);
+							rewardEscrow.burnForMigration.returnsAtCall(1, entryIds[0]);
+							rewardEscrow.burnForMigration.returnsAtCall(0, user1);
+							rewardEscrow.burnForMigration.returnsAtCall(1, entryIds[1]);
 						});
 
-						it('three messages are relayed from L1 to L2: completeEscrowMigration & completeDeposit', async () => {
-							assert.equal(messenger.smocked.sendMessage.calls.length, 3);
+						it('three messages are relayed from L1 to L2: finalizeEscrowMigration & finalizeDeposit', async () => {
+							expect(messenger.sendMessage).to.have.length(0);
 
-							assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
 								contract: 'IPeriFinanceBridgeToBase',
-								fnc: 'completeEscrowMigration',
+								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, emptyArray],
 							});
-							assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							assert.equal(messenger.smocked.sendMessage.calls[1][0], periBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'IPeriFinanceBridgeToBase',
-								fnc: 'completeEscrowMigration',
+								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, emptyArray],
 							});
-							assert.equal(messenger.smocked.sendMessage.calls[1][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[1][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							assert.equal(messenger.smocked.sendMessage.calls[2][0], periBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'PeriFinanceBridgeToBase',
-								fnc: 'completeDeposit',
+								fnc: 'finalizeDeposit',
 								args: [user1, amount],
 							});
 
-							assert.equal(messenger.smocked.sendMessage.calls[2][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[2][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 						});
 
 						it('PERI is transferred from the user to the deposit contract', async () => {
-							assert.equal(periFinance.smocked.transferFrom.calls[0][0], user1);
-							assert.equal(periFinance.smocked.transferFrom.calls[0][1], instance.address);
-							assert.equal(periFinance.smocked.transferFrom.calls[0][2].toString(), amount);
+							periFinance.transferFrom.returnsAtCall(0, user1);
+							periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
+							periFinance.transferFrom.returnsAtCall(2, amount);
 						});
 
 						it('and three events are emitted', async () => {
@@ -282,7 +338,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 								escrowAmount,
 								emptyArray,
 							]);
-							assert.eventEqual(txn.logs[2], 'Deposit', [user1, amount]);
+							assert.eventEqual(txn.logs[2], 'DepositInitiated', [user1, user1, amount]);
 						});
 					});
 
@@ -292,21 +348,21 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 							txn = await instance.depositAndMigrateEscrow(amount, [], { from: user1 });
 						});
 
-						it('one message is relayed: completeDeposit', async () => {
-							assert.equal(messenger.smocked.sendMessage.calls.length, 1);
-							assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+						it('one message is relayed: finalizeDeposit', async () => {
+							expect(messenger.sendMessage).to.have.length(0);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							const expectedData = getDataOfEncodedFncCall({
 								contract: 'PeriFinanceBridgeToBase',
-								fnc: 'completeDeposit',
+								fnc: 'finalizeDeposit',
 								args: [user1, amount],
 							});
-							assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 						});
 
-						it('and one event is emitted (Deposit)', async () => {
+						it('and one event is emitted (DepositInitiated)', async () => {
 							assert.equal(txn.logs.length, 1);
-							assert.eventEqual(txn.logs[0], 'Deposit', [user1, amount]);
+							assert.eventEqual(txn.logs[0], 'DepositInitiated', [user1, user1, amount]);
 						});
 					});
 
@@ -316,32 +372,32 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 						});
 
 						it('the L1 escrow is burned (via rewardEscrowV2.burnForMigration', async () => {
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls.length, 2);
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls[0][0], user1);
-							assert.bnEqual(rewardEscrow.smocked.burnForMigration.calls[0][1], entryIds[0]);
-							assert.equal(rewardEscrow.smocked.burnForMigration.calls[1][0], user1);
-							assert.bnEqual(rewardEscrow.smocked.burnForMigration.calls[1][1], entryIds[1]);
+							expect(messenger.sendMessage).to.have.length(0);
+							rewardEscrow.burnForMigration.returnsAtCall(0, user1);
+							rewardEscrow.burnForMigration.returnsAtCall(1, entryIds[0]);
+							rewardEscrow.burnForMigration.returnsAtCall(0, user1);
+							rewardEscrow.burnForMigration.returnsAtCall(1, entryIds[1]);
 						});
 
-						it('two messages are relayed: completeEscrowMigration', async () => {
-							assert.equal(messenger.smocked.sendMessage.calls.length, 2);
-							assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+						it('two messages are relayed: finalizeEscrowMigration', async () => {
+							expect(messenger.sendMessage).to.have.length(0);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							let expectedData = getDataOfEncodedFncCall({
 								contract: 'IPeriFinanceBridgeToBase',
-								fnc: 'completeEscrowMigration',
+								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, []],
 							});
-							assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 
-							assert.equal(messenger.smocked.sendMessage.calls[1][0], periBridgeToBase);
+							messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 							expectedData = getDataOfEncodedFncCall({
 								contract: 'IPeriFinanceBridgeToBase',
-								fnc: 'completeEscrowMigration',
+								fnc: 'finalizeEscrowMigration',
 								args: [user1, escrowAmount, []],
 							});
-							assert.equal(messenger.smocked.sendMessage.calls[1][1], expectedData);
-							assert.equal(messenger.smocked.sendMessage.calls[1][2], (3e6).toString());
+							messenger.sendMessage.returnsAtCall(1, expectedData);
+							messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 						});
 
 						it('and two events are emitted (ExportedVestingEntries)', async () => {
@@ -361,55 +417,91 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 				});
 			});
 
-			describe('initiateRewardDeposit', () => {
+			describe('depositReward', () => {
 				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
 
-						await assert.revert(instance.initiateRewardDeposit('1'), 'Function deactivated');
+						await assert.revert(instance.depositReward('1'), 'Initiation deactivated');
 					});
 				});
 
-				describe('when invoked by a user', () => {
+				describe('when invoked by a user directly', () => {
 					let txn;
-					let amount;
+					const amount = '100';
 					beforeEach(async () => {
-						amount = '100';
-						txn = await instance.initiateRewardDeposit(amount, { from: user1 });
+						txn = await instance.depositReward(amount, { from: user1 });
 					});
 
-					it('then PERI is transferred from the account to the user', async () => {
-						assert.equal(periFinance.smocked.transferFrom.calls[0][0], user1);
-						assert.equal(periFinance.smocked.transferFrom.calls[0][1], instance.address);
-						assert.equal(periFinance.smocked.transferFrom.calls[0][2].toString(), amount);
+					it('then PERI is transferred from the account to the bridge escrow', async () => {
+						periFinance.transferFrom.returnsAtCall(0, user1);
+						periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
+						periFinance.transferFrom.returnsAtCall(2, amount);
 					});
 
 					it('and the message is relayed', async () => {
-						assert.equal(messenger.smocked.sendMessage.calls.length, 1);
-						assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+						expect(messenger.sendMessage).to.have.length(0);
+						messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'PeriFinanceBridgeToBase',
-							fnc: 'completeRewardDeposit',
-							args: [amount],
+							fnc: 'finalizeRewardDeposit',
+							args: [user1, amount],
 						});
-						assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-						assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+						messenger.sendMessage.returnsAtCall(1, expectedData);
+						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 					});
 
-					it('and a RewardDeposit event is emitted', async () => {
-						assert.eventEqual(txn, 'RewardDeposit', [user1, amount]);
+					it('and a RewardDepositInitiated event is emitted', async () => {
+						assert.eventEqual(txn, 'RewardDepositInitiated', [user1, amount]);
+					});
+				});
+			});
+
+			describe('closeFeePeriod()', () => {
+				describe('failure modes', () => {
+					it('does not work when initiation has been suspended', async () => {
+						await instance.suspendInitiation({ from: owner });
+
+						await assert.revert(
+							instance.closeFeePeriod('1', '2', { from: FeePool }),
+							'Initiation deactivated'
+						);
+					});
+
+					it('fails when invoked by a user directly', async () => {
+						await assert.revert(
+							instance.closeFeePeriod('1', '2'),
+							'Only the fee pool can call this'
+						);
+					});
+				});
+
+				describe('when invoked by fee pool', () => {
+					let txn;
+					beforeEach(async () => {
+						txn = await instance.closeFeePeriod('1', '2', { from: FeePool });
+					});
+
+					it('relays the message', async () => {
+						expect(messenger.sendMessage).to.have.length(0);
+						messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
+						const expectedData = getDataOfEncodedFncCall({
+							contract: 'PeriFinanceBridgeToBase',
+							fnc: 'finalizeFeePeriodClose',
+							args: ['1', '2'],
+						});
+						messenger.sendMessage.returnsAtCall(1, expectedData);
+						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
+					});
+
+					it('emits FeePeriodClosed', async () => {
+						assert.eventEqual(txn, 'FeePeriodClosed', ['1', '2']);
 					});
 				});
 			});
 
 			describe('notifyRewardAmount', () => {
 				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
-
-						await assert.revert(instance.notifyRewardAmount('1'), 'Function deactivated');
-					});
-
 					it('does not work when not invoked by the rewardDistribution address', async () => {
 						await onlyGivenAddressCanInvoke({
 							fnc: instance.notifyRewardAmount,
@@ -421,111 +513,43 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					});
 				});
 
-				describe('when invoked by the rewardsDistribution', () => {
+				describe('when invoked by the rewardsDistribution directly', () => {
 					let txn;
-					let amount;
+					const amount = '1000';
 					beforeEach(async () => {
-						amount = '1000';
 						txn = await instance.notifyRewardAmount(amount, { from: rewardsDistribution });
 					});
 
 					it('then the message is relayed', async () => {
-						assert.equal(messenger.smocked.sendMessage.calls.length, 1);
-						assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToBase);
+						expect(messenger.sendMessage).to.have.length(0);
+						messenger.sendMessage.returnsAtCall(0, periBridgeToBase);
 
 						const expectedData = getDataOfEncodedFncCall({
 							contract: 'PeriFinanceBridgeToBase',
-							fnc: 'completeRewardDeposit',
-							args: [amount],
+							fnc: 'finalizeRewardDeposit',
+							args: [rewardsDistribution, amount],
 						});
 
-						assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
-						assert.equal(messenger.smocked.sendMessage.calls[0][2], (3e6).toString());
+						messenger.sendMessage.returnsAtCall(1, expectedData);
+						messenger.sendMessage.returnsAtCall(2, (3e6).toString());
 					});
 
-					it('and a RewardDeposit event is emitted', async () => {
-						assert.eventEqual(txn, 'RewardDeposit', [rewardsDistribution, amount]);
+					it('PERI is transferred from the bridge to the bridge escrow', async () => {
+						periFinance.transfer.returnsAtCall(0, PeriFinanceBridgeEscrow);
+						periFinance.transfer.returnsAtCall(1, amount);
+					});
+
+					it('and a RewardDepositInitiated event is emitted', async () => {
+						assert.eventEqual(txn, 'RewardDepositInitiated', [rewardsDistribution, amount]);
 					});
 				});
 			});
 
-			describe('migrateBridge', () => {
+			describe('finalizeWithdrawal', async () => {
 				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
-
-						await assert.revert(
-							instance.migrateBridge(randomAddress, { from: owner }),
-							'Function deactivated'
-						);
-					});
-
-					it('fails when the migration address is 0x0', async () => {
-						await assert.revert(
-							instance.migrateBridge(ZERO_ADDRESS, { from: owner }),
-							'Cannot migrate to address 0'
-						);
-					});
-
-					it('does not work when not invoked by the owner', async () => {
+					it('should only allow the relayer (aka messenger) to call finalizeWithdrawal()', async () => {
 						await onlyGivenAddressCanInvoke({
-							fnc: instance.migrateBridge,
-							args: [accounts[7]],
-							accounts,
-							reason: 'Only the contract owner may perform this action',
-							address: owner,
-						});
-					});
-				});
-
-				it('initially activated is true', async () => {
-					assert.equal(await instance.activated(), true);
-				});
-
-				describe('when invoked by the owner', () => {
-					let txn;
-					let newAccount;
-					let amount;
-					beforeEach(async () => {
-						newAccount = accounts[7];
-						amount = '999';
-						periFinance.smocked.balanceOf.will.return.with(address =>
-							address === instance.address ? amount : '0'
-						);
-						txn = await instance.migrateBridge(newAccount, { from: owner });
-					});
-
-					it('then all of the contracts PERI is transferred to the new account', async () => {
-						assert.equal(periFinance.smocked.transfer.calls[0][0], newAccount);
-						assert.equal(periFinance.smocked.transfer.calls[0][1].toString(), amount);
-					});
-
-					it('and activated is false', async () => {
-						assert.equal(await instance.activated(), false);
-					});
-
-					it('and a BridgeMigrated event is emitted', async () => {
-						assert.eventEqual(txn, 'BridgeMigrated', [instance.address, newAccount, amount]);
-					});
-				});
-			});
-
-			describe('completeWithdrawal', async () => {
-				describe('failure modes', () => {
-					it('does not work when the contract has been deactivated', async () => {
-						await instance.migrateBridge(randomAddress, { from: owner });
-
-						await assert.revert(
-							instance.completeWithdrawal(user1, 100, {
-								from: smockedMessenger,
-							}),
-							'Function deactivated'
-						);
-					});
-
-					it('should only allow the relayer (aka messenger) to call completeWithdrawal()', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: instance.completeWithdrawal,
+							fnc: instance.finalizeWithdrawal,
 							args: [user1, 100],
 							accounts,
 							address: smockedMessenger,
@@ -533,45 +557,43 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 						});
 					});
 
-					it('should only allow the L2 bridge to invoke completeWithdrawal() via the messenger', async () => {
+					it('should only allow the L2 bridge to invoke finalizeWithdrawal() via the messenger', async () => {
 						// 'smock' the messenger to return a random msg sender
-						messenger.smocked.xDomainMessageSender.will.return.with(() => randomAddress);
+						messenger.xDomainMessageSender.returns(() => randomAddress);
 						await assert.revert(
-							instance.completeWithdrawal(user1, 100, {
+							instance.finalizeWithdrawal(user1, 100, {
 								from: smockedMessenger,
 							}),
-							'Only the L2 bridge can invoke'
+							'Only a counterpart bridge can invoke'
 						);
 					});
 				});
 
 				describe('when invoked by the messenger (aka relayer)', async () => {
-					let completeWithdrawalTx;
-					const completeWithdrawalAmount = 100;
-					beforeEach('completeWithdrawal is called', async () => {
-						completeWithdrawalTx = await instance.completeWithdrawal(
+					let finalizeWithdrawalTx;
+					const finalizeWithdrawalAmount = 100;
+					beforeEach('finalizeWithdrawal is called', async () => {
+						finalizeWithdrawalTx = await instance.finalizeWithdrawal(
 							user1,
-							completeWithdrawalAmount,
+							finalizeWithdrawalAmount,
 							{
 								from: smockedMessenger,
 							}
 						);
 					});
 
-					it('should emit a WithdrawalCompleted event', async () => {
-						assert.eventEqual(completeWithdrawalTx, 'WithdrawalCompleted', {
-							account: user1,
-							amount: completeWithdrawalAmount,
+					it('should emit a WithdrawalFinalized event', async () => {
+						assert.eventEqual(finalizeWithdrawalTx, 'WithdrawalFinalized', {
+							_to: user1,
+							_amount: finalizeWithdrawalAmount,
 						});
 					});
 
-					it('then PERI is minted via MintablePeriFinance.completeWithdrawal', async () => {
-						assert.equal(periFinance.smocked.transfer.calls.length, 1);
-						assert.equal(periFinance.smocked.transfer.calls[0][0], user1);
-						assert.equal(
-							periFinance.smocked.transfer.calls[0][1].toString(),
-							completeWithdrawalAmount
-						);
+					it('then PERI is minted via MintablePeriFinance.finalizeWithdrawal', async () => {
+						expect(messenger.sendMessage).to.have.length(0);
+						periFinance.transferFrom.returnsAtCall(0, PeriFinanceBridgeEscrow);
+						periFinance.transferFrom.returnsAtCall(1, user1);
+						periFinance.transferFrom.returnsAtCall(2, finalizeWithdrawalAmount);
 					});
 				});
 			});

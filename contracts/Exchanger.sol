@@ -1,98 +1,36 @@
 pragma solidity 0.5.16;
-
+pragma experimental ABIEncoderV2;
 // Inheritance
 import "./Owned.sol";
 import "./MixinResolver.sol";
 import "./MixinSystemSettings.sol";
-import "./interfaces/IExchanger.sol";
 
 // Libraries
 import "./SafeDecimalMath.sol";
 
 // Internal references
 import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IExchangeState.sol";
-import "./interfaces/IExchangeRates.sol";
+import "./interfaces/IERC20.sol";
+import "./interfaces/ICircuitBreaker.sol";
 import "./interfaces/IPeriFinance.sol";
 import "./interfaces/IFeePool.sol";
 import "./interfaces/IDelegateApprovals.sol";
-import "./interfaces/IIssuer.sol";
 import "./interfaces/ITradingRewards.sol";
 import "./interfaces/IVirtualPynth.sol";
-// import "./interfaces/ICrossChainManager.sol";
+
+import "./ExchangeSettlementLib.sol";
+
 import "./Proxyable.sol";
-
-// Note: use OZ's IERC20 here as using ours will complain about conflicting names
-// during the build (VirtualPynth has IERC20 from the OZ ERC20 implementation)
-import "openzeppelin-solidity-2.3.0/contracts/token/ERC20/IERC20.sol";
-
-// Used to have strongly-typed access to internal mutative functions in PeriFinance
-interface IPeriFinanceInternal {
-    function emitExchangeTracking(
-        bytes32 trackingCode,
-        bytes32 toCurrencyKey,
-        uint256 toAmount
-    ) external;
-
-    function emitPynthExchange(
-        address account,
-        bytes32 fromCurrencyKey,
-        uint fromAmount,
-        bytes32 toCurrencyKey,
-        uint toAmount,
-        address toAddress
-    ) external;
-
-    function emitExchangeReclaim(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
-
-    function emitExchangeRebate(
-        address account,
-        bytes32 currencyKey,
-        uint amount
-    ) external;
-}
-
-interface IExchangerInternalDebtCache {
-    function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external;
-
-    function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external;
-}
-
-interface IExchangerInternalVirtualPynthIssuer {
-    function createVirtualPynth(
-        IERC20 pynth,
-        address recipient,
-        uint amount,
-        bytes32 currencyKey
-    ) external returns (IVirtualPynth);
-}
 
 // https://docs.peri.finance/contracts/source/contracts/exchanger
 contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
+    
 
-    struct ExchangeEntrySettlement {
-        bytes32 src;
-        uint amount;
-        bytes32 dest;
-        uint reclaim;
-        uint rebate;
-        uint srcRoundIdAtPeriodEnd;
-        uint destRoundIdAtPeriodEnd;
-        uint timestamp;
-    }
+    bytes32 public constant CONTRACT_NAME = "Exchanger";
 
     bytes32 private constant pUSD = "pUSD";
-
-    // SIP-65: Decentralized circuit breaker
-    uint public constant CIRCUIT_BREAKER_SUSPENSION_REASON = 65;
-
-    mapping(bytes32 => uint) public lastExchangeRate;
 
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
@@ -105,8 +43,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
-    // bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
-    bytes32 private constant CONTRACT_VIRTUALPYNTHISSUER = "VirtualPynthIssuer";
+    bytes32 private constant CONTRACT_CIRCUIT_BREAKER = "CircuitBreaker";
+    bytes32 private constant CONTRACT_DIRECT_INTEGRATION_MANAGER = "DirectIntegrationManager";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -114,7 +52,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](10);
+        bytes32[] memory newAddresses = new bytes32[](11);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_EXCHANGESTATE;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -124,8 +62,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
         newAddresses[7] = CONTRACT_ISSUER;
         newAddresses[8] = CONTRACT_DEBTCACHE;
-        // newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
-        newAddresses[9] = CONTRACT_VIRTUALPYNTHISSUER;
+        newAddresses[9] = CONTRACT_CIRCUIT_BREAKER;
+        newAddresses[10] = CONTRACT_DIRECT_INTEGRATION_MANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -139,6 +77,10 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function exchangeRates() internal view returns (IExchangeRates) {
         return IExchangeRates(requireAndGetAddress(CONTRACT_EXRATES));
+    }
+
+    function circuitBreaker() internal view returns (ICircuitBreaker) {
+        return ICircuitBreaker(requireAndGetAddress(CONTRACT_CIRCUIT_BREAKER));
     }
 
     function periFinance() internal view returns (IPeriFinance) {
@@ -165,12 +107,22 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return IExchangerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
     }
 
-    // function crossChainManager() internal view returns (ICrossChainManager) {
-    //     return ICrossChainManager(requireAndGetAddress(CONTRACT_CROSSCHAINMANAGER));
-    // }
+    function directIntegrationManager() internal view returns (IDirectIntegrationManager) {
+        return IDirectIntegrationManager(requireAndGetAddress(CONTRACT_DIRECT_INTEGRATION_MANAGER));
+    }
 
-    function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) public view returns (uint) {
-        return secsLeftInWaitingPeriodForExchange(exchangeState().getMaxTimestamp(account, currencyKey));
+    function resolvedAddresses() internal view returns (ExchangeSettlementLib.ResolvedAddresses memory) {
+        ExchangeSettlementLib.ResolvedAddresses memory addresses =
+            ExchangeSettlementLib.ResolvedAddresses(
+                exchangeState(),
+                exchangeRates(),
+                circuitBreaker(),
+                debtCache(),
+                issuer(),
+                periFinance()
+            );
+        return
+            addresses;
     }
 
     function waitingPeriodSecs() external view returns (uint) {
@@ -185,8 +137,8 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         return getPriceDeviationThresholdFactor();
     }
 
-    function virtualPynthIssuer() internal view returns (IExchangerInternalVirtualPynthIssuer) {
-        return IExchangerInternalVirtualPynthIssuer(requireAndGetAddress(CONTRACT_VIRTUALPYNTHISSUER));
+    function lastExchangeRate(bytes32 currencyKey) external view returns (uint) {
+        return circuitBreaker().lastValue(address(exchangeRates().aggregators(currencyKey)));
     }
 
     function settlementOwing(address account, bytes32 currencyKey)
@@ -198,113 +150,30 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             uint numEntries
         )
     {
-        (reclaimAmount, rebateAmount, numEntries, ) = _settlementOwing(account, currencyKey);
-    }
-
-    // Internal function to emit events for each individual rebate and reclaim entry
-    function _settlementOwing(address account, bytes32 currencyKey)
-        internal
-        view
-        returns (
-            uint reclaimAmount,
-            uint rebateAmount,
-            uint numEntries,
-            ExchangeEntrySettlement[] memory
-        )
-    {
-        // Need to sum up all reclaim and rebate amounts for the user and the currency key
-        numEntries = exchangeState().getLengthOfEntries(account, currencyKey);
-
-        // For each unsettled exchange
-        ExchangeEntrySettlement[] memory settlements = new ExchangeEntrySettlement[](numEntries);
-        for (uint i = 0; i < numEntries; i++) {
-            uint reclaim;
-            uint rebate;
-            // fetch the entry from storage
-            IExchangeState.ExchangeEntry memory exchangeEntry = _getExchangeEntry(account, currencyKey, i);
-
-            // determine the last round ids for src and dest pairs when period ended or latest if not over
-            (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd) = getRoundIdsAtPeriodEnd(exchangeEntry);
-
-            // given these round ids, determine what effective value they should have received
-            (uint destinationAmount, , ) =
-                exchangeRates().effectiveValueAndRatesAtRound(
-                    exchangeEntry.src,
-                    exchangeEntry.amount,
-                    exchangeEntry.dest,
-                    srcRoundIdAtPeriodEnd,
-                    destRoundIdAtPeriodEnd
-                );
-
-            // and deduct the fee from this amount using the exchangeFeeRate from storage
-            uint amountShouldHaveReceived = _getAmountReceivedForExchange(destinationAmount, exchangeEntry.exchangeFeeRate);
-
-            // SIP-65 settlements where the amount at end of waiting period is beyond the threshold, then
-            // settle with no reclaim or rebate
-            if (!_isDeviationAboveThreshold(exchangeEntry.amountReceived, amountShouldHaveReceived)) {
-                if (exchangeEntry.amountReceived > amountShouldHaveReceived) {
-                    // if they received more than they should have, add to the reclaim tally
-                    reclaim = exchangeEntry.amountReceived.sub(amountShouldHaveReceived);
-                    reclaimAmount = reclaimAmount.add(reclaim);
-                } else if (amountShouldHaveReceived > exchangeEntry.amountReceived) {
-                    // if less, add to the rebate tally
-                    rebate = amountShouldHaveReceived.sub(exchangeEntry.amountReceived);
-                    rebateAmount = rebateAmount.add(rebate);
-                }
-            }
-
-            settlements[i] = ExchangeEntrySettlement({
-                src: exchangeEntry.src,
-                amount: exchangeEntry.amount,
-                dest: exchangeEntry.dest,
-                reclaim: reclaim,
-                rebate: rebate,
-                srcRoundIdAtPeriodEnd: srcRoundIdAtPeriodEnd,
-                destRoundIdAtPeriodEnd: destRoundIdAtPeriodEnd,
-                timestamp: exchangeEntry.timestamp
-            });
-        }
-
-        return (reclaimAmount, rebateAmount, numEntries, settlements);
-    }
-
-    function _getExchangeEntry(
-        address account,
-        bytes32 currencyKey,
-        uint index
-    ) internal view returns (IExchangeState.ExchangeEntry memory) {
-        (
-            bytes32 src,
-            uint amount,
-            bytes32 dest,
-            uint amountReceived,
-            uint exchangeFeeRate,
-            uint timestamp,
-            uint roundIdForSrc,
-            uint roundIdForDest
-        ) = exchangeState().getEntryAt(account, currencyKey, index);
-
-        return
-            IExchangeState.ExchangeEntry({
-                src: src,
-                amount: amount,
-                dest: dest,
-                amountReceived: amountReceived,
-                exchangeFeeRate: exchangeFeeRate,
-                timestamp: timestamp,
-                roundIdForSrc: roundIdForSrc,
-                roundIdForDest: roundIdForDest
-            });
+        (reclaimAmount, rebateAmount, numEntries, ) = ExchangeSettlementLib.settlementOwing(
+            resolvedAddresses(),
+            account,
+            currencyKey,
+            getWaitingPeriodSecs()
+        );
     }
 
     function hasWaitingPeriodOrSettlementOwing(address account, bytes32 currencyKey) external view returns (bool) {
-        if (maxSecsLeftInWaitingPeriod(account, currencyKey) != 0) {
-            return true;
-        }
+        return
+            ExchangeSettlementLib.hasWaitingPeriodOrSettlementOwing(
+                resolvedAddresses(),
+                account,
+                currencyKey,
+                getWaitingPeriodSecs()
+            );
+    }
 
-        (uint reclaimAmount, , , ) = _settlementOwing(account, currencyKey);
-
-        return reclaimAmount > 0;
+    function maxSecsLeftInWaitingPeriod(address account, bytes32 currencyKey) public view returns (uint) {
+        return
+            ExchangeSettlementLib._secsLeftInWaitingPeriodForExchange(
+                exchangeState().getMaxTimestamp(account, currencyKey),
+                getWaitingPeriodSecs()
+            );
     }
 
     /* ========== SETTERS ========== */
@@ -332,147 +201,74 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
     }
 
     function isPynthRateInvalid(bytes32 currencyKey) external view returns (bool) {
-        return _isPynthRateInvalid(currencyKey, exchangeRates().rateForCurrency(currencyKey));
+        (, bool invalid) = exchangeRates().rateAndInvalid(currencyKey);
+        return invalid;
     }
 
     /* ========== MUTATIVE FUNCTIONS ========== */
     function exchange(
-        address from,
-        bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey,
-        address destinationAddress
-    ) external onlyPeriFinanceorPynth returns (uint amountReceived) {
-        uint fee;
-        (amountReceived, fee, ) = _exchange(
-            from,
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey,
-            destinationAddress,
-            false
-        );
-
-        _processTradingRewards(fee, destinationAddress);
-    }
-
-    function exchangeOnBehalf(
-        address exchangeForAddress,
-        address from,
-        bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey
-    ) external onlyPeriFinanceorPynth returns (uint amountReceived) {
-        require(delegateApprovals().canExchangeFor(exchangeForAddress, from), "Not approved to act on behalf");
-
-        uint fee;
-        (amountReceived, fee, ) = _exchange(
-            exchangeForAddress,
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey,
-            exchangeForAddress,
-            false
-        );
-
-        _processTradingRewards(fee, exchangeForAddress);
-    }
-
-    function exchangeWithTracking(
-        address from,
-        bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey,
-        address destinationAddress,
-        address originator,
-        bytes32 trackingCode
-    ) external onlyPeriFinanceorPynth returns (uint amountReceived) {
-        uint fee;
-        (amountReceived, fee, ) = _exchange(
-            from,
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey,
-            destinationAddress,
-            false
-        );
-
-        _processTradingRewards(fee, originator);
-
-        _emitTrackingEvent(trackingCode, destinationCurrencyKey, amountReceived);
-    }
-
-    function exchangeOnBehalfWithTracking(
         address exchangeForAddress,
         address from,
         bytes32 sourceCurrencyKey,
         uint sourceAmount,
         bytes32 destinationCurrencyKey,
-        address originator,
-        bytes32 trackingCode
-    ) external onlyPeriFinanceorPynth returns (uint amountReceived) {
-        require(delegateApprovals().canExchangeFor(exchangeForAddress, from), "Not approved to act on behalf");
-
-        uint fee;
-        (amountReceived, fee, ) = _exchange(
-            exchangeForAddress,
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey,
-            exchangeForAddress,
-            false
-        );
-
-        _processTradingRewards(fee, originator);
-
-        _emitTrackingEvent(trackingCode, destinationCurrencyKey, amountReceived);
-    }
-
-    function exchangeWithVirtual(
-        address from,
-        bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey,
         address destinationAddress,
+        bool virtualPynth,
+        address rewardAddress,
         bytes32 trackingCode
     ) external onlyPeriFinanceorPynth returns (uint amountReceived, IVirtualPynth vPynth) {
+
         uint fee;
+        if (from != exchangeForAddress) {
+            require(delegateApprovals().canExchangeFor(exchangeForAddress, from), "Not approved to act on behalf");
+        }
+
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
+            _exchangeSettings(from, sourceCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
+            _exchangeSettings(from, destinationCurrencyKey);
+        
         (amountReceived, fee, vPynth) = _exchange(
-            from,
-            sourceCurrencyKey,
+            exchangeForAddress,
+            sourceSettings,
             sourceAmount,
-            destinationCurrencyKey,
+            destinationSettings,
             destinationAddress,
-            true
+            virtualPynth
         );
 
-        _processTradingRewards(fee, destinationAddress);
+        _processTradingRewards(fee, rewardAddress);
 
         if (trackingCode != bytes32(0)) {
-            _emitTrackingEvent(trackingCode, destinationCurrencyKey, amountReceived);
+            _emitTrackingEvent(trackingCode, destinationCurrencyKey, amountReceived, fee);
         }
+    }
+
+    function exchangeAtomically(
+        address,
+        bytes32,
+        uint,
+        bytes32,
+        address,
+        bytes32,
+        uint
+    ) external returns (uint) {
+        _notImplemented();
     }
 
     function _emitTrackingEvent(
         bytes32 trackingCode,
         bytes32 toCurrencyKey,
-        uint256 toAmount
+        uint256 toAmount,
+        uint256 fee
     ) internal {
-        IPeriFinanceInternal(address(periFinance())).emitExchangeTracking(trackingCode, toCurrencyKey, toAmount);
+        IPeriFinanceInternal(address(periFinance())).emitExchangeTracking(trackingCode, toCurrencyKey, toAmount, fee);
     }
 
-    function _processTradingRewards(uint fee, address originator) internal {
-        if (fee > 0 && originator != address(0) && getTradingRewardsEnabled()) {
-            tradingRewards().recordExchangeFeeForAccount(fee, originator);
-        }
-    }
+    function _processTradingRewards(uint fee, address rewardAddress) internal {
 
-    function _suspendIfRateInvalid(bytes32 currencyKey, uint rate) internal returns (bool circuitBroken) {
-        if (_isPynthRateInvalid(currencyKey, rate)) {
-            systemStatus().suspendPynth(currencyKey, CIRCUIT_BREAKER_SUSPENSION_REASON);
-            circuitBroken = true;
-        } else {
-            lastExchangeRate[currencyKey] = rate;
+        if (fee > 0 && rewardAddress != address(0) && getTradingRewardsEnabled()) {
+            tradingRewards().recordExchangeFeeForAccount(fee, rewardAddress);
         }
     }
 
@@ -503,7 +299,14 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         address from,
         bytes32 sourceCurrencyKey
     ) internal returns (uint sourceAmountAfterSettlement) {
-        (, uint refunded, uint numEntriesSettled) = _internalSettle(from, sourceCurrencyKey, false);
+        (, uint refunded, uint numEntriesSettled) =
+            ExchangeSettlementLib.internalSettle(
+                resolvedAddresses(),
+                from,
+                sourceCurrencyKey,
+                false,
+                getWaitingPeriodSecs()
+            );
 
         sourceAmountAfterSettlement = sourceAmount;
 
@@ -516,9 +319,9 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
 
     function _exchange(
         address from,
-        bytes32 sourceCurrencyKey,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings,
         uint sourceAmount,
-        bytes32 destinationCurrencyKey,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
         address destinationAddress,
         bool virtualPynth
     )
@@ -529,48 +332,82 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             IVirtualPynth vPynth
         )
     {
-        _ensureCanExchange(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
 
-        uint sourceAmountAfterSettlement = _settleAndCalcSourceAmountRemaining(sourceAmount, from, sourceCurrencyKey);
-        // uint sourceAmountAfterSettlement = sourceAmount;
+        if (!_ensureCanExchange(sourceSettings.currencyKey, destinationSettings.currencyKey, sourceAmount)) {
+            return (0, 0, IVirtualPynth(0));
+        }
+
+
+        // Using struct to resolve stack too deep error
+        IExchanger.ExchangeEntry memory entry;
+        ExchangeSettlementLib.ResolvedAddresses memory addrs = resolvedAddresses();
+
+        entry.roundIdForSrc = addrs.exchangeRates.getCurrentRoundId(sourceSettings.currencyKey);
+        entry.roundIdForDest = addrs.exchangeRates.getCurrentRoundId(destinationSettings.currencyKey);
+
+        entry.sourceAmountAfterSettlement = _settleAndCalcSourceAmountRemaining(
+            sourceAmount,
+            from,
+            sourceSettings.currencyKey
+        );
+
 
         // If, after settlement the user has no balance left (highly unlikely), then return to prevent
         // emitting events of 0 and don't revert so as to ensure the settlement queue is emptied
-        if (sourceAmountAfterSettlement == 0) {
+        if (entry.sourceAmountAfterSettlement == 0) {
             return (0, 0, IVirtualPynth(0));
         }
 
-        uint exchangeFeeRate;
-        uint sourceRate;
-        uint destinationRate;
-
-        // Note: `fee` is denominated in the destinationCurrencyKey.
-        (amountReceived, fee, exchangeFeeRate, sourceRate, destinationRate) = _getAmountsForExchangeMinusFees(
-            sourceAmountAfterSettlement,
-            sourceCurrencyKey,
-            destinationCurrencyKey
+        (entry.destinationAmount, entry.sourceRate, entry.destinationRate) = addrs
+            .exchangeRates
+            .effectiveValueAndRatesAtRound(
+            sourceSettings.currencyKey,
+            entry.sourceAmountAfterSettlement,
+            destinationSettings.currencyKey,
+            entry.roundIdForSrc,
+            entry.roundIdForDest
         );
 
-        // SIP-65: Decentralized Circuit Breaker
-        if (
-            _suspendIfRateInvalid(sourceCurrencyKey, sourceRate) ||
-            _suspendIfRateInvalid(destinationCurrencyKey, destinationRate)
-        ) {
+        // rates must also be good for the round we are doing
+        _ensureCanExchangeAtRound(
+            sourceSettings.currencyKey,
+            destinationSettings.currencyKey,
+            entry.roundIdForSrc,
+            entry.roundIdForDest
+        );
+
+        bool tooVolatile;
+        (entry.exchangeFeeRate, tooVolatile) = _feeRateForExchangeAtRounds(
+            sourceSettings,
+            destinationSettings,
+            entry.roundIdForSrc,
+            entry.roundIdForDest
+        );
+
+
+        if (tooVolatile) {
+            // do not exchange if rates are too volatile, this to prevent charging
+            // dynamic fees that are over the max value
             return (0, 0, IVirtualPynth(0));
         }
 
-        // Note: We don't need to check their balance as the burn() below will do a safe subtraction which requires
-        // the subtraction to not overflow, which would happen if their balance is not sufficient.
 
+        amountReceived = ExchangeSettlementLib._deductFeesFromAmount(entry.destinationAmount, entry.exchangeFeeRate);
+        // Note: `fee` is denominated in the destinationCurrencyKey.
+        fee = entry.destinationAmount.sub(amountReceived);
+
+        // Note: We don't need to check their balance as the _convert() below will do a safe subtraction which requires
+        // the subtraction to not overflow, which would happen if their balance is not sufficient.
         vPynth = _convert(
-            sourceCurrencyKey,
+            sourceSettings.currencyKey,
             from,
-            sourceAmountAfterSettlement,
-            destinationCurrencyKey,
+            entry.sourceAmountAfterSettlement,
+            destinationSettings.currencyKey,
             amountReceived,
             destinationAddress,
             virtualPynth
         );
+
 
         // When using a virtual pynth, it becomes the destinationAddress for event and settlement tracking
         if (vPynth != IVirtualPynth(0)) {
@@ -581,7 +418,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         if (fee > 0) {
             // Normalize fee to pUSD
             // Note: `fee` is being reused to avoid stack too deep errors.
-            fee = exchangeRates().effectiveValue(destinationCurrencyKey, fee, pUSD);
+            fee = addrs.exchangeRates.effectiveValue(destinationSettings.currencyKey, fee, pUSD);
 
             // Remit the fee in pUSDs
             issuer().pynths(pUSD).issue(feePool().FEE_ADDRESS(), fee);
@@ -595,30 +432,35 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         // Nothing changes as far as issuance data goes because the total value in the system hasn't changed.
         // But we will update the debt snapshot in case exchange rates have fluctuated since the last exchange
         // in these currencies
-        _updatePERIIssuedDebtOnExchange([sourceCurrencyKey, destinationCurrencyKey], [sourceRate, destinationRate]);
+        _updatePERIIssuedDebtOnExchange(
+            [sourceSettings.currencyKey, destinationSettings.currencyKey],
+            [entry.sourceRate, entry.destinationRate]
+        );
 
         // Let the DApps know there was a Pynth exchange
         IPeriFinanceInternal(address(periFinance())).emitPynthExchange(
             from,
-            sourceCurrencyKey,
-            sourceAmountAfterSettlement,
-            destinationCurrencyKey,
+            sourceSettings.currencyKey,
+            entry.sourceAmountAfterSettlement,
+            destinationSettings.currencyKey,
             amountReceived,
             destinationAddress
         );
 
+
+       
+
         // iff the waiting period is gt 0
         if (getWaitingPeriodSecs() > 0) {
             // persist the exchange information for the dest key
-            appendExchange(
+            ExchangeSettlementLib.appendExchange(
+                addrs,
                 destinationAddress,
-                sourceCurrencyKey,
-                sourceAmountAfterSettlement,
-                destinationCurrencyKey,
+                sourceSettings.currencyKey,
+                entry.sourceAmountAfterSettlement,
+                destinationSettings.currencyKey,
                 amountReceived,
-                exchangeFeeRate,
-                sourceRate,
-                destinationRate
+                entry.exchangeFeeRate
             );
         }
     }
@@ -633,27 +475,34 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         bool virtualPynth
     ) internal returns (IVirtualPynth vPynth) {
         // Burn the source amount
+
         issuer().pynths(sourceCurrencyKey).burn(from, sourceAmountAfterSettlement);
 
         // Issue their new pynths
         IPynth dest = issuer().pynths(destinationCurrencyKey);
 
         if (virtualPynth) {
+
+
+
             Proxyable pynth = Proxyable(address(dest));
             vPynth = _createVirtualPynth(IERC20(address(pynth.proxy())), recipient, amountReceived, destinationCurrencyKey);
             dest.issue(address(vPynth), amountReceived);
         } else {
+
             dest.issue(recipient, amountReceived);
+
+
         }
     }
 
     function _createVirtualPynth(
-        IERC20 pynth,
-        address recipient,
-        uint amount,
-        bytes32 currencyKey
+        IERC20,
+        address,
+        uint,
+        bytes32
     ) internal returns (IVirtualPynth) {
-        virtualPynthIssuer().createVirtualPynth(pynth, recipient, amount, currencyKey);
+        _notImplemented();
     }
 
     // Note: this function can intentionally be called by anyone on behalf of anyone else (the caller just pays the gas)
@@ -666,210 +515,254 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         )
     {
         systemStatus().requirePynthActive(currencyKey);
-        return _internalSettle(from, currencyKey, true);
-    }
-
-    function suspendPynthWithInvalidRate(bytes32 currencyKey) external {
-        systemStatus().requireSystemActive();
-        require(issuer().pynths(currencyKey) != IPynth(0), "No such pynth");
-        require(_isPynthRateInvalid(currencyKey, exchangeRates().rateForCurrency(currencyKey)), "Pynth price is valid");
-        systemStatus().suspendPynth(currencyKey, CIRCUIT_BREAKER_SUSPENSION_REASON);
-    }
-
-    // SIP-78
-    function setLastExchangeRateForPynth(bytes32 currencyKey, uint rate) external onlyExchangeRates {
-        require(rate > 0, "Rate must be above 0");
-        lastExchangeRate[currencyKey] = rate;
-    }
-
-    // SIP-139
-    function resetLastExchangeRate(bytes32[] calldata currencyKeys) external onlyOwner {
-        (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
-
-        require(!anyRateInvalid, "Rates for given pynths not valid");
-
-        for (uint i; i < currencyKeys.length; i++) {
-            lastExchangeRate[currencyKeys[i]] = rates[i];
-        }
+        return ExchangeSettlementLib.internalSettle(resolvedAddresses(), from, currencyKey, true, getWaitingPeriodSecs());
     }
 
     /* ========== INTERNAL FUNCTIONS ========== */
 
+    // gets the exchange parameters for a given direct integration (returns default params if no overrides exist)
+    function _exchangeSettings(address from, bytes32 currencyKey)
+        internal
+        view
+        returns (IDirectIntegrationManager.ParameterIntegrationSettings memory settings)
+    {
+        settings = directIntegrationManager().getExchangeParameters(from, currencyKey);
+    }
+
+    // runs basic checks and calls `rateWithSafetyChecks` (which can trigger circuit breakers)
+    // returns if there are any problems found with the rate of the given currencyKey but not reverted
     function _ensureCanExchange(
         bytes32 sourceCurrencyKey,
-        uint sourceAmount,
-        bytes32 destinationCurrencyKey
-    ) internal view {
+        bytes32 destinationCurrencyKey,
+        uint sourceAmount
+    ) internal returns (bool) {
         require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same pynth");
         require(sourceAmount > 0, "Zero amount");
+
+        (, bool srcBroken, bool srcStaleOrInvalid) =
+            sourceCurrencyKey != pUSD ? exchangeRates().rateWithSafetyChecks(sourceCurrencyKey) : (0, false, false);
+        (, bool dstBroken, bool dstStaleOrInvalid) =
+            destinationCurrencyKey != pUSD
+                ? exchangeRates().rateWithSafetyChecks(destinationCurrencyKey)
+                : (0, false, false);
+
+        require(!srcStaleOrInvalid, "src rate stale or flagged");
+        require(!dstStaleOrInvalid, "dest rate stale or flagged");
+
+        return !srcBroken && !dstBroken;
+    }
+
+    // runs additional checks to verify a rate is valid at a specific round`
+    function _ensureCanExchangeAtRound(
+        bytes32 sourceCurrencyKey,
+        bytes32 destinationCurrencyKey,
+        uint roundIdForSrc,
+        uint roundIdForDest
+    ) internal view {
+        require(sourceCurrencyKey != destinationCurrencyKey, "Can't be same pynth");
 
         bytes32[] memory pynthKeys = new bytes32[](2);
         pynthKeys[0] = sourceCurrencyKey;
         pynthKeys[1] = destinationCurrencyKey;
-        require(!exchangeRates().anyRateIsInvalid(pynthKeys), "Src/dest rate invalid or not found");
+
+        uint[] memory roundIds = new uint[](2);
+        roundIds[0] = roundIdForSrc;
+        roundIds[1] = roundIdForDest;
+        require(!exchangeRates().anyRateIsInvalidAtRound(pynthKeys, roundIds), "src/dest rate stale or flagged");
     }
 
-    function _isPynthRateInvalid(bytes32 currencyKey, uint currentRate) internal view returns (bool) {
-        if (currentRate == 0) {
-            return true;
-        }
+    /* ========== Exchange Related Fees ========== */
+    /// @notice public function to get the total fee rate for a given exchange
+    /// @param sourceCurrencyKey The source currency key
+    /// @param destinationCurrencyKey The destination currency key
+    /// @return The exchange fee rate, and whether the rates are too volatile
+    function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey) external view returns (uint) {
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
+            _exchangeSettings(msg.sender, sourceCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
+            _exchangeSettings(msg.sender, destinationCurrencyKey);
 
-        uint lastRateFromExchange = lastExchangeRate[currencyKey];
-
-        if (lastRateFromExchange > 0) {
-            return _isDeviationAboveThreshold(lastRateFromExchange, currentRate);
-        }
-
-        // if no last exchange for this pynth, then we need to look up last 3 rates (+1 for current rate)
-        (uint[] memory rates, ) = exchangeRates().ratesAndUpdatedTimeForCurrencyLastNRounds(currencyKey, 4, 0);
-
-        // start at index 1 to ignore current rate
-        for (uint i = 1; i < rates.length; i++) {
-            // ignore any empty rates in the past (otherwise we will never be able to get validity)
-            if (rates[i] > 0 && _isDeviationAboveThreshold(rates[i], currentRate)) {
-                return true;
-            }
-        }
-
-        return false;
+        (uint feeRate, bool tooVolatile) = _feeRateForExchange(sourceSettings, destinationSettings);
+        require(!tooVolatile, "too volatile");
+        return feeRate;
     }
 
-    function _isDeviationAboveThreshold(uint base, uint comparison) internal view returns (bool) {
-        if (base == 0 || comparison == 0) {
-            return true;
-        }
-
-        uint factor;
-        if (comparison > base) {
-            factor = comparison.divideDecimal(base);
-        } else {
-            factor = base.divideDecimal(comparison);
-        }
-
-        return factor >= getPriceDeviationThresholdFactor();
-    }
-
-    function _internalSettle(
-        address from,
-        bytes32 currencyKey,
-        bool updateCache
-    )
-        internal
-        returns (
-            uint reclaimed,
-            uint refunded,
-            uint numEntriesSettled
-        )
+    /// @notice public function to get the dynamic fee rate for a given exchange
+    /// @param sourceCurrencyKey The source currency key
+    /// @param destinationCurrencyKey The destination currency key
+    /// @return The exchange dynamic fee rate and if rates are too volatile
+    function dynamicFeeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
+        external
+        view
+        returns (uint feeRate, bool tooVolatile)
     {
-        require(maxSecsLeftInWaitingPeriod(from, currencyKey) == 0, "Cannot settle during waiting period");
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
+            _exchangeSettings(msg.sender, sourceCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
+            _exchangeSettings(msg.sender, destinationCurrencyKey);
 
-        (uint reclaimAmount, uint rebateAmount, uint entries, ExchangeEntrySettlement[] memory settlements) =
-            _settlementOwing(from, currencyKey);
-
-        if (reclaimAmount > rebateAmount) {
-            reclaimed = reclaimAmount.sub(rebateAmount);
-            reclaim(from, currencyKey, reclaimed);
-        } else if (rebateAmount > reclaimAmount) {
-            refunded = rebateAmount.sub(reclaimAmount);
-            refund(from, currencyKey, refunded);
-        }
-
-        if (updateCache) {
-            bytes32[] memory key = new bytes32[](1);
-            key[0] = currencyKey;
-            debtCache().updateCachedPynthDebts(key);
-        }
-
-        // emit settlement event for each settled exchange entry
-        for (uint i; i < settlements.length; i++) {
-            emit ExchangeEntrySettled(
-                from,
-                settlements[i].src,
-                settlements[i].amount,
-                settlements[i].dest,
-                settlements[i].reclaim,
-                settlements[i].rebate,
-                settlements[i].srcRoundIdAtPeriodEnd,
-                settlements[i].destRoundIdAtPeriodEnd,
-                settlements[i].timestamp
-            );
-        }
-
-        numEntriesSettled = entries;
-
-        // Now remove all entries, even if no reclaim and no rebate
-        exchangeState().removeEntries(from, currencyKey);
+        return _dynamicFeeRateForExchange(sourceSettings, destinationSettings);
     }
 
-    function reclaim(
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
-        // burn amount from user
-        issuer().pynths(currencyKey).burn(from, amount);
-        IPeriFinanceInternal(address(periFinance())).emitExchangeReclaim(from, currencyKey, amount);
-
-        // updating crosschainmanager's debt is not required as it is only used for issued debt.
-        // these 2 lines are kept for version compatibility
-        // uint reclaimedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
-        // crossChainManager().subtractTotalNetworkDebt(reclaimedDebtInpUSD);
+    /// @notice Calculate the exchange fee for a given source and destination currency key
+    /// @param sourceSettings The source currency key
+    /// @param destinationSettings The destination currency key
+    /// @return The exchange fee rate
+    /// @return The exchange dynamic fee rate and if rates are too volatile
+    function _feeRateForExchange(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings
+    ) internal view returns (uint feeRate, bool tooVolatile) {
+        // Get the exchange fee rate as per the source currencyKey and destination currencyKey
+        uint baseRate = sourceSettings.exchangeFeeRate.add(destinationSettings.exchangeFeeRate);
+        uint dynamicFee;
+        (dynamicFee, tooVolatile) = _dynamicFeeRateForExchange(sourceSettings, destinationSettings);
+        return (baseRate.add(dynamicFee), tooVolatile);
     }
 
-    function refund(
-        address from,
-        bytes32 currencyKey,
-        uint amount
-    ) internal {
-        // issue amount to user
-        issuer().pynths(currencyKey).issue(from, amount);
-        IPeriFinanceInternal(address(periFinance())).emitExchangeRebate(from, currencyKey, amount);
-
-        // updating crosschainmanager's debt is not required as it is only used for issued debt.
-        // these 2 lines are kept for version compatibility
-        // uint refundedDebtInpUSD = exchangeRates().effectiveValue(currencyKey, amount, pUSD);
-        // crossChainManager().addTotalNetworkDebt(refundedDebtInpUSD);
+    /// @notice Calculate the exchange fee for a given source and destination currency key
+    /// @param sourceSettings The source currency key
+    /// @param destinationSettings The destination currency key
+    /// @param roundIdForSrc The round id of the source currency.
+    /// @param roundIdForDest The round id of the target currency.
+    /// @return The exchange fee rate
+    /// @return The exchange dynamic fee rate
+    function _feeRateForExchangeAtRounds(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
+        uint roundIdForSrc,
+        uint roundIdForDest
+    ) internal view returns (uint feeRate, bool tooVolatile) {
+        // Get the exchange fee rate as per the source currencyKey and destination currencyKey
+        uint baseRate = sourceSettings.exchangeFeeRate.add(destinationSettings.exchangeFeeRate);
+        uint dynamicFee;
+        (dynamicFee, tooVolatile) = _dynamicFeeRateForExchangeAtRounds(
+            sourceSettings,
+            destinationSettings,
+            roundIdForSrc,
+            roundIdForDest
+        );
+        return (baseRate.add(dynamicFee), tooVolatile);
     }
 
-    function secsLeftInWaitingPeriodForExchange(uint timestamp) internal view returns (uint) {
-        uint _waitingPeriodSecs = getWaitingPeriodSecs();
-        if (timestamp == 0 || now >= timestamp.add(_waitingPeriodSecs)) {
+    function _dynamicFeeRateForExchange(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
+        (uint dynamicFeeDst, bool dstVolatile) = _dynamicFeeRateForCurrency(destinationSettings);
+        (uint dynamicFeeSrc, bool srcVolatile) = _dynamicFeeRateForCurrency(sourceSettings);
+        dynamicFee = dynamicFeeDst.add(dynamicFeeSrc);
+        // cap to maxFee
+        bool overMax = dynamicFee > sourceSettings.exchangeMaxDynamicFee;
+        dynamicFee = overMax ? sourceSettings.exchangeMaxDynamicFee : dynamicFee;
+        return (dynamicFee, overMax || dstVolatile || srcVolatile);
+    }
+
+    function _dynamicFeeRateForExchangeAtRounds(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings,
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings,
+        uint roundIdForSrc,
+        uint roundIdForDest
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
+        (uint dynamicFeeDst, bool dstVolatile) = _dynamicFeeRateForCurrencyRound(destinationSettings, roundIdForDest);
+        (uint dynamicFeeSrc, bool srcVolatile) = _dynamicFeeRateForCurrencyRound(sourceSettings, roundIdForSrc);
+        dynamicFee = dynamicFeeDst.add(dynamicFeeSrc);
+        // cap to maxFee
+        bool overMax = dynamicFee > sourceSettings.exchangeMaxDynamicFee;
+        dynamicFee = overMax ? sourceSettings.exchangeMaxDynamicFee : dynamicFee;
+        return (dynamicFee, overMax || dstVolatile || srcVolatile);
+    }
+
+    /// @notice Get dynamic dynamicFee for a given currency key (SIP-184)
+    /// @param settings The given currency key
+    /// @return The dynamic fee and if it exceeds max dynamic fee set in config
+    function _dynamicFeeRateForCurrency(IDirectIntegrationManager.ParameterIntegrationSettings memory settings)
+        internal
+        view
+        returns (uint dynamicFee, bool tooVolatile)
+    {
+        // no dynamic dynamicFee for pUSD or too few rounds
+        if (settings.currencyKey == pUSD || settings.exchangeDynamicFeeRounds <= 1) {
+            return (0, false);
+        }
+        uint roundId = exchangeRates().getCurrentRoundId(settings.currencyKey);
+        return _dynamicFeeRateForCurrencyRound(settings, roundId);
+    }
+
+    /// @notice Get dynamicFee for a given currency key (SIP-184)
+    /// @param settings The given currency key
+    /// @param roundId The round id
+    /// @return The dynamic fee and if it exceeds max dynamic fee set in config
+    function _dynamicFeeRateForCurrencyRound(
+        IDirectIntegrationManager.ParameterIntegrationSettings memory settings,
+        uint roundId
+    ) internal view returns (uint dynamicFee, bool tooVolatile) {
+        // no dynamic dynamicFee for pUSD or too few rounds
+        if (settings.currencyKey == pUSD || settings.exchangeDynamicFeeRounds <= 1) {
+            return (0, false);
+        }
+        uint[] memory prices;
+        (prices, ) = exchangeRates().ratesAndUpdatedTimeForCurrencyLastNRounds(
+            settings.currencyKey,
+            settings.exchangeDynamicFeeRounds,
+            roundId
+        );
+        dynamicFee = _dynamicFeeCalculation(
+            prices,
+            settings.exchangeDynamicFeeThreshold,
+            settings.exchangeDynamicFeeWeightDecay
+        );
+        // cap to maxFee
+        bool overMax = dynamicFee > settings.exchangeMaxDynamicFee;
+        dynamicFee = overMax ? settings.exchangeMaxDynamicFee : dynamicFee;
+        return (dynamicFee, overMax);
+    }
+
+    /// @notice Calculate dynamic fee according to SIP-184
+    /// @param prices A list of prices from the current round to the previous rounds
+    /// @param threshold A threshold to clip the price deviation ratop
+    /// @param weightDecay A weight decay constant
+    /// @return uint dynamic fee rate as decimal
+    function _dynamicFeeCalculation(
+        uint[] memory prices,
+        uint threshold,
+        uint weightDecay
+    ) internal pure returns (uint) {
+        // don't underflow
+        if (prices.length == 0) {
             return 0;
         }
 
-        return timestamp.add(_waitingPeriodSecs).sub(now);
+        uint dynamicFee = 0; // start with 0
+        // go backwards in price array
+        for (uint i = prices.length - 1; i > 0; i--) {
+            // apply decay from previous round (will be 0 for first round)
+            dynamicFee = dynamicFee.multiplyDecimal(weightDecay);
+            // calculate price deviation
+            uint deviation = _thresholdedAbsDeviationRatio(prices[i - 1], prices[i], threshold);
+            // add to total fee
+            dynamicFee = dynamicFee.add(deviation);
+        }
+        return dynamicFee;
     }
 
-    function feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        external
-        view
-        returns (uint exchangeFeeRate)
-    {
-        exchangeFeeRate = _feeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
-    }
-
-    function _feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey)
-        internal
-        view
-        returns (uint exchangeFeeRate)
-    {
-        // Get the exchange fee rate as per destination currencyKey
-        exchangeFeeRate = getExchangeFeeRate(destinationCurrencyKey);
-
-        if (sourceCurrencyKey == pUSD || destinationCurrencyKey == pUSD) {
-            return exchangeFeeRate;
+    /// absolute price deviation ratio used by dynamic fee calculation
+    /// deviationRatio = (abs(current - previous) / previous) - threshold
+    /// if negative, zero is returned
+    function _thresholdedAbsDeviationRatio(
+        uint price,
+        uint previousPrice,
+        uint threshold
+    ) internal pure returns (uint) {
+        if (previousPrice == 0) {
+            return 0; // don't divide by zero
         }
-
-        // Is this a swing trade? long to short or short to long skipping pUSD.
-        if (
-            (sourceCurrencyKey[0] == 0x70 && destinationCurrencyKey[0] == 0x69) ||
-            (sourceCurrencyKey[0] == 0x69 && destinationCurrencyKey[0] == 0x70)
-        ) {
-            // Double the exchange fee
-            exchangeFeeRate = exchangeFeeRate.mul(2);
-        }
-
-        return exchangeFeeRate;
+        // abs difference between prices
+        uint absDelta = price > previousPrice ? price - previousPrice : previousPrice - price;
+        // relative to previous price
+        uint deviationRatio = absDelta.divideDecimal(previousPrice);
+        // only the positive difference from threshold
+        return deviationRatio > threshold ? deviationRatio - threshold : 0;
     }
 
     function getAmountsForExchange(
@@ -885,125 +778,57 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
             uint exchangeFeeRate
         )
     {
-        (amountReceived, fee, exchangeFeeRate, , ) = _getAmountsForExchangeMinusFees(
-            sourceAmount,
-            sourceCurrencyKey,
-            destinationCurrencyKey
-        );
-    }
+        IDirectIntegrationManager.ParameterIntegrationSettings memory sourceSettings =
+            _exchangeSettings(msg.sender, sourceCurrencyKey);
+        IDirectIntegrationManager.ParameterIntegrationSettings memory destinationSettings =
+            _exchangeSettings(msg.sender, destinationCurrencyKey);
 
-    function _getAmountsForExchangeMinusFees(
-        uint sourceAmount,
-        bytes32 sourceCurrencyKey,
-        bytes32 destinationCurrencyKey
-    )
-        internal
-        view
-        returns (
-            uint amountReceived,
-            uint fee,
-            uint exchangeFeeRate,
-            uint sourceRate,
-            uint destinationRate
-        )
-    {
-        uint destinationAmount;
-        (destinationAmount, sourceRate, destinationRate) = exchangeRates().effectiveValueAndRates(
-            sourceCurrencyKey,
-            sourceAmount,
-            destinationCurrencyKey
+        require(sourceCurrencyKey == pUSD || !exchangeRates().rateIsInvalid(sourceCurrencyKey), "src pynth rate invalid");
+
+        require(
+            destinationCurrencyKey == pUSD || !exchangeRates().rateIsInvalid(destinationCurrencyKey),
+            "dest pynth rate invalid"
         );
-        exchangeFeeRate = _feeRateForExchange(sourceCurrencyKey, destinationCurrencyKey);
-        amountReceived = _getAmountReceivedForExchange(destinationAmount, exchangeFeeRate);
+
+        // The checks are added for consistency with the checks performed in _exchange()
+        // The reverts (instead of no-op returns) are used order to prevent incorrect usage in calling contracts
+        // (The no-op in _exchange() is in order to trigger system suspension if needed)
+
+        // check pynths active
+        systemStatus().requirePynthActive(sourceCurrencyKey);
+        systemStatus().requirePynthActive(destinationCurrencyKey);
+
+        bool tooVolatile;
+        (exchangeFeeRate, tooVolatile) = _feeRateForExchange(sourceSettings, destinationSettings);
+
+        // check rates volatility result
+        require(!tooVolatile, "exchange rates too volatile");
+
+        (uint destinationAmount, , ) =
+            exchangeRates().effectiveValueAndRates(sourceCurrencyKey, sourceAmount, destinationCurrencyKey);
+
+        amountReceived = ExchangeSettlementLib._deductFeesFromAmount(destinationAmount, exchangeFeeRate);
         fee = destinationAmount.sub(amountReceived);
     }
 
-    function _getAmountReceivedForExchange(uint destinationAmount, uint exchangeFeeRate)
-        internal
-        pure
-        returns (uint amountReceived)
-    {
-        amountReceived = destinationAmount.multiplyDecimal(SafeDecimalMath.unit().sub(exchangeFeeRate));
-    }
-
-    function appendExchange(
-        address account,
-        bytes32 src,
-        uint amount,
-        bytes32 dest,
-        uint amountReceived,
-        uint exchangeFeeRate,
-        uint srcRate,
-        uint destRate
-    ) internal {
-        IExchangeRates exRates = exchangeRates();
-        uint roundIdForSrc = exRates.getCurrentRoundId(src);
-        uint roundIdForDest = exRates.getCurrentRoundId(dest);
-        exchangeState().appendExchangeEntry(
-            account,
-            src,
-            amount,
-            dest,
-            amountReceived,
-            exchangeFeeRate,
-            now,
-            roundIdForSrc,
-            roundIdForDest
-        );
-
-        emit ExchangeEntryAppended(
-            account,
-            src,
-            amount,
-            dest,
-            amountReceived,
-            exchangeFeeRate,
-            roundIdForSrc,
-            roundIdForDest,
-            srcRate,
-            destRate
-        );
-    }
-
-    function getRoundIdsAtPeriodEnd(IExchangeState.ExchangeEntry memory exchangeEntry)
-        internal
-        view
-        returns (uint srcRoundIdAtPeriodEnd, uint destRoundIdAtPeriodEnd)
-    {
-        IExchangeRates exRates = exchangeRates();
-        uint _waitingPeriodSecs = getWaitingPeriodSecs();
-
-        srcRoundIdAtPeriodEnd = exRates.getLastRoundIdBeforeElapsedSecs(
-            exchangeEntry.src,
-            exchangeEntry.roundIdForSrc,
-            exchangeEntry.timestamp,
-            _waitingPeriodSecs
-        );
-        destRoundIdAtPeriodEnd = exRates.getLastRoundIdBeforeElapsedSecs(
-            exchangeEntry.dest,
-            exchangeEntry.roundIdForDest,
-            exchangeEntry.timestamp,
-            _waitingPeriodSecs
-        );
+    function _notImplemented() internal pure {
+        revert("Cannot be run on this layer");
     }
 
     // ========== MODIFIERS ==========
 
     modifier onlyPeriFinanceorPynth() {
+        IPeriFinance _periFinance = periFinance();
         require(
-            msg.sender == address(periFinance()) || issuer().pynthsByAddress(msg.sender) != bytes32(0),
+            msg.sender == address(_periFinance) || _periFinance.pynthsByAddress(msg.sender) != bytes32(0),
             "Exchanger: Only periFinance or a pynth contract can perform this action"
         );
         _;
     }
 
-    modifier onlyExchangeRates() {
-        IExchangeRates _exchangeRates = exchangeRates();
-        require(msg.sender == address(_exchangeRates), "Restricted to ExchangeRates");
-        _;
-    }
-
     // ========== EVENTS ==========
+    // note bot hof these events are actually emitted from `ExchangeSettlementLib`
+    // but they are defined here for interface reasons
     event ExchangeEntryAppended(
         address indexed account,
         bytes32 src,
@@ -1012,9 +837,7 @@ contract Exchanger is Owned, MixinSystemSettings, IExchanger {
         uint256 amountReceived,
         uint256 exchangeFeeRate,
         uint256 roundIdForSrc,
-        uint256 roundIdForDest,
-        uint256 srcRate,
-        uint256 destRate
+        uint256 roundIdForDest
     );
 
     event ExchangeEntrySettled(

@@ -85,12 +85,13 @@ contract PeriFinanceStateWithLimitedSetup is PeriFinanceState, LimitedSetup {
             debtLedger.push(SafeDecimalMath.preciseUnit());
         }
 
+        require(false, "need to check");
         // append issuanceData to FeePoolState
-        feePool.appendAccountIssuanceRecord(
-            account,
-            issuanceData[account].initialDebtOwnership,
-            issuanceData[account].debtEntryIndex
-        );
+        // feePool.appendAccountIssuanceRecord(
+        //     account,
+        //     issuanceData[account].initialDebtOwnership,
+        //     issuanceData[account].debtEntryIndex
+        // );
     }
 
     /* ========== EVENTS ========== */

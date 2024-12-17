@@ -19,7 +19,7 @@ const {
 		FEE_PERIOD_DURATION,
 		TARGET_THRESHOLD,
 		LIQUIDATION_DELAY,
-		LIQUIDATION_RATIO,
+		LIQUIDATION_RATIOS,
 		LIQUIDATION_ESCROW_DURATION,
 		LIQUIDATION_PENALTY,
 		PERI_LIQUIDATION_PENALTY,
@@ -598,6 +598,9 @@ const setupContract = async ({
 
 	let instance;
 	try {
+		if(contract == "ColleteralEth"){
+			console.log(args);
+		}
 		instance = await create({
 			constructorArgs: args.length > 0 ? args : defaultArgs[contract],
 		});
@@ -1664,7 +1667,6 @@ const setupAllContracts = async ({
 				'DelegateApprovals',
 				'FeePoolState',
 				'FeePoolEternalStorage',
-				'RewardsDistribution',
 				'FlexibleStorage',
 				'CollateralManager',
 				'EtherWrapper',
@@ -1679,6 +1681,7 @@ const setupAllContracts = async ({
 				'SystemStatus',
 				'PeriFinanceDebtShare',
 				'AddressResolver',
+				'RewardsDistribution',
 			],
 		},
 		{
@@ -2186,8 +2189,8 @@ const setupAllContracts = async ({
 	if (returnObj['SystemSettings']) {
 		const exTokens = Object.keys(EXTERNAL_TOKEN_ISSUANCE_RATIO).map(name => toBytes32(name));
 		const exTokenRatios = Object.values(EXTERNAL_TOKEN_ISSUANCE_RATIO).map(ratio => ratio);
-		const lqdTypes = Object.keys(LIQUIDATION_RATIO).map(name => toBytes32(name));
-		const lqdRatios = Object.values(LIQUIDATION_RATIO).map(ratio => ratio);
+		const lqdTypes = Object.keys(LIQUIDATION_RATIOS).map(name => toBytes32(name));
+		const lqdRatios = Object.values(LIQUIDATION_RATIOS).map(ratio => ratio);
 		// console.log(
 		// 	'exTokenRatios',
 		// 	exTokenRatios.map(r => r.toString())
@@ -2219,7 +2222,7 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setFeePeriodDuration(FEE_PERIOD_DURATION, { from: owner }),
 			returnObj['SystemSettings'].setTargetThreshold(TARGET_THRESHOLD, { from: owner }),
 			returnObj['SystemSettings'].setLiquidationDelay(LIQUIDATION_DELAY, { from: owner }),
-			//returnObj['SystemSettings'].setLiquidationRatios(lqdTypes, lqdRatios, { from: owner }),
+			returnObj['SystemSettings'].setLiquidationRatios(lqdTypes, lqdRatios, { from: owner }),
 			// returnObj['SystemSettings'].setLiquidationEscrowDuration(LIQUIDATION_ESCROW_DURATION, {
 			// 	from: owner,
 			// }),

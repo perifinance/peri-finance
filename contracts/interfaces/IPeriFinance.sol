@@ -131,4 +131,6 @@ interface IPeriFinance {
     function mintSecondaryRewards(uint amount) external;
 
     function burnSecondary(address account, uint amount) external;
+
+    function migrateAccountBalances(address account) external returns (uint totalEscrowRevoked, uint totalLiquidBalance);
 }
