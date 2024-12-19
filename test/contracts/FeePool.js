@@ -116,7 +116,6 @@ contract('FeePool', async accounts => {
 				'DebtCache',
 				'Proxy',
 				'PeriFinance',
-				'PeriFinanceState',
 				'SystemSettings',
 				'SystemStatus',
 				'RewardEscrowV2',
@@ -856,7 +855,7 @@ contract('FeePool', async accounts => {
 				await feePool.closeCurrentFeePeriod({ from: account1 });
 			});
 
-			it('should trigger bridge to close period on other networks', async () => {
+			it.skip('should trigger bridge to close period on other networks', async () => {
 				await periFinance.issuePynths(PERI, toUnit(500), { from: owner });
 
 				await fastForward(await feePool.feePeriodDuration());

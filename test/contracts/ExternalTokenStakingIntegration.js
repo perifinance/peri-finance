@@ -25,6 +25,12 @@ const {
 	divideDecimalRound,
 } = require('../utils')();
 
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+	
+} = require('./helpers');
+
 const toBN = _val => web3.utils.toBN(String(_val));
 
 const [pUSD, PERI, USDC, DAI, PAXG] = [
@@ -49,8 +55,9 @@ contract('External token staking integration', async accounts => {
 
 	let periFinance,
 		exchangeRates,
-		// periFinanceState,
 		feePool,
+		periFinanceProxy,
+		periFinanceDebtShare,
 		// delegateApprovals,
 		// systemStatus,
 		systemSettings,
@@ -67,13 +74,14 @@ contract('External token staking integration', async accounts => {
 		// blacklistManager,
 		usdc,
 		dai,
+		circuitBreaker,
 		paxg;
 
 	before(async () => {
 		pynths = ['pUSD', 'PERI'];
 		({
 			PeriFinance: periFinance,
-			// PeriFinanceState: periFinanceState,
+			ProxyERC20PeriFinance: periFinanceProxy,
 			// SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
@@ -90,6 +98,8 @@ contract('External token staking integration', async accounts => {
 			// AddressResolver: addressResolver,
 			StakingState: stakingState,
 			ExternalTokenStakeManager: exTokenManager,
+			CircuitBreaker : circuitBreaker,
+			PeriFinanceDebtShare: periFinanceDebtShare,
 			// BlacklistManager: blacklistManager,
 		} = await setupAllContracts({
 			accounts,
@@ -106,10 +116,12 @@ contract('External token staking integration', async accounts => {
 				'Exchanger',
 				'DebtCache',
 				'FlexibleStorage',
-				'FeePoolStateUSDC',
+				//'FeePoolStateUSDC',
 				'StakingState',
 				'ExternalTokenStakeManager',
 				'CrossChainManager',
+				'CircuitBreaker',
+				'PeriFinanceDebtShare',
 			],
 			stables: keys,
 		}));
@@ -135,16 +147,19 @@ contract('External token staking integration', async accounts => {
 		// 	)
 		// );
 		await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
+
+		await setupPriceAggregators(exchangeRates, owner, [pUSD, PERI, USDC, DAI, PAXG], );
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	const updateRates = async (_keys, _rates) => {
-		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates(_keys, _rates.map(toUnit), timestamp, { from: oracle });
-
-		await debtCache.takeDebtSnapshot();
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
+			_keys,
+			_rates.map(toUnit)
+		);
 	};
 
 	beforeEach(async () => {
@@ -216,7 +231,7 @@ contract('External token staking integration', async accounts => {
 
 		beforeEach(async () => {
 			await Promise.all(
-				users.map(_user => periFinance.transfer(_user, toUnit(unitBal), { from: owner }))
+				users.map(_user => periFinanceProxy.transfer(_user, toUnit(unitBal), { from: owner }))
 			);
 
 			const balances = await Promise.all(users.map(_user => periFinance.balanceOf(_user)));
@@ -296,14 +311,14 @@ contract('External token staking integration', async accounts => {
 					issuers.map((_issuer, _idx) =>
 						// eslint-disable-next-line havven/no-assert-revert-without-await
 						assert.revert(
-							periFinance.transfer(
+							periFinanceProxy.transfer(
 								owner,
 								toUnit(unitBal)
 									.sub(expectedLock[_idx])
 									.add(toBN(1)),
 								{ from: _issuer }
 							),
-							'Check Transferable'
+							'Cannot transfer staked or escrowed PERI'
 						)
 					)
 				);
@@ -911,7 +926,7 @@ contract('External token staking integration', async accounts => {
 
 		beforeEach(async () => {
 			await Promise.all(
-				users.map(_user => periFinance.transfer(_user, toUnit(unitBal), { from: owner }))
+				users.map(_user => periFinanceProxy.transfer(_user, toUnit(unitBal), { from: owner }))
 			);
 
 			await Promise.all(
@@ -940,7 +955,6 @@ contract('External token staking integration', async accounts => {
 			beforeEach(async () => {
 				// It locks 4000 PERI with IR: 0.25, exRate: 0.2 [USD/PERI]
 				await periFinance.issuePynths(PERI, toUnit('200'), { from: users[0] });
-
 				// await assert.revert(
 				// 	periFinance.burnPynths(PERI, toUnit('1'), { from: users[0] }),
 				// 	'Minimum stake time not reached'

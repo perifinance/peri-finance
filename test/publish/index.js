@@ -1524,7 +1524,6 @@ describe('publish scripts', () => {
 									'SupplySchedule',
 									'PeriFinance',
 									'PeriFinanceEscrow',
-									'PeriFinanceState',
 									'PynthpETH',
 									'PynthpUSD',
 									'SystemStatus',

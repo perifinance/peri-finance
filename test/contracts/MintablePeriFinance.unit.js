@@ -31,7 +31,6 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 		let rewardsDistribution;
 		let systemStatus;
 		let rewardEscrowV2;
-		let state;
 		let systemSettings;
 		const PERIFINANCE_TOTAL_SUPPLY = toWei('100000000');
 
@@ -43,8 +42,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 			systemStatus = await artifacts.require('SystemStatus').new(owner);
 
 			rewardEscrowV2 = await smock.fake('IRewardEscrowV2');
-			state = await artifacts.require('PeriFinanceState').new(owner, ZERO_ADDRESS);
-
+	
 			const safeDecimalMath = await artifacts.require('SafeDecimalMath').new();
 			const SystemSettingsLib = artifacts.require('SystemSettingsLib');
 			SystemSettingsLib.link(safeDecimalMath);
@@ -63,7 +61,6 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 					// 'LiquidatorRewards',
 					'RewardsDistribution',
 					'RewardEscrowV2',
-					'PeriFinanceState',
 					'SystemSettings',
 				].map(toBytes32),
 				[
@@ -76,7 +73,7 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 					//mockAddress,
 					rewardsDistribution.address,
 					rewardEscrowV2.address,
-					state.address,
+					//state.address,
 					systemSettings.address,
 				],
 				{ from: owner }

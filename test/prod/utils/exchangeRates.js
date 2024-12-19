@@ -9,6 +9,13 @@ const { takeDebtSnapshot } = require('./debtSnapshot');
 const { toUnit } = require('../../utils')();
 const { gray } = require('chalk');
 
+
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
 async function checkRates({ network, deploymentPath }) {
 	const Issuer = await connectContract({
 		network,

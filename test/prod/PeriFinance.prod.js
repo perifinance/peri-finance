@@ -32,7 +32,7 @@ contract('PeriFinance (prod tests)', accounts => {
 
 	let network, deploymentPath;
 
-	let PeriFinance, PeriFinanceState, ReadProxyAddressResolver;
+	let PeriFinance, ReadProxyAddressResolver;
 	let PynthpUSD, PynthpETH;
 
 	before('prepare', async () => {
@@ -52,7 +52,6 @@ contract('PeriFinance (prod tests)', accounts => {
 
 		({
 			PeriFinance,
-			PeriFinanceState,
 			PynthpUSD,
 			PynthpETH,
 			ReadProxyAddressResolver,
@@ -61,7 +60,6 @@ contract('PeriFinance (prod tests)', accounts => {
 			deploymentPath,
 			requests: [
 				{ contractName: 'PeriFinance' },
-				{ contractName: 'PeriFinanceState' },
 				{ contractName: 'ProxyERC20pUSD', abiName: 'Pynth', alias: 'PynthpUSD' },
 				{ contractName: 'ProxypETH', abiName: 'Pynth', alias: 'PynthpETH' },
 				{ contractName: 'ReadProxyAddressResolver' },
@@ -107,9 +105,9 @@ contract('PeriFinance (prod tests)', accounts => {
 
 			it('reports matching totalIssuedPynths and debtLedger', async () => {
 				const totalIssuedPynths = await PeriFinance.totalIssuedPynths(toBytes32('pUSD'));
-				const debtLedgerLength = await PeriFinanceState.debtLedgerLength();
 
-				assert.isFalse(debtLedgerLength > 0 && totalIssuedPynths === 0);
+
+				assert.isFalse(totalIssuedPynths === 0);
 			});
 		});
 

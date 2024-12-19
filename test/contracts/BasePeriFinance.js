@@ -67,7 +67,6 @@ contract('BasePeriFinance', async accounts => {
 			pynths: ['pUSD', 'pETH', 'pEUR', 'pAUD'],
 			contracts: [
 				'BasePeriFinance',
-				'PeriFinanceState',
 				'SupplySchedule',
 				'AddressResolver',
 				'ExchangeRates',
@@ -262,7 +261,7 @@ contract('BasePeriFinance', async accounts => {
 
 		it('mint should revert no matter who the caller is', async () => {
 			await onlyGivenAddressCanInvoke({
-				fnc: basePeriFinance.mint,
+				fnc: basePeriFinance.inflationalMint,
 				accounts,
 				args: [],
 				reason: 'Cannot be run on this layer',

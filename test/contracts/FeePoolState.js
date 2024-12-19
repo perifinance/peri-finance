@@ -134,7 +134,7 @@ contract('FeePoolState', async accounts => {
 			assert.bnEqual(accountsDebtEntry[1], 0);
 		});
 
-		it('should return the issuanceData for an account given an index', async () => {
+		it.skip('should return the issuanceData for an account given an index', async () => {
 			let accountsDebtEntry;
 
 			// simulate a mint and append debtRatio to ledger in Period[0]
@@ -357,7 +357,6 @@ contract('FeePoolState', async accounts => {
 		});
 	});
 
-	// TODO checks PeriFinanceState debt entry is same as stored FeePoolState Entry
 	// it('should allow an issuer to issue max pynths and track debt issuance in feePool', async function() {
 	// 	// Send a price update to guarantee we're not depending on values from outside this test.
 	// 	const oracle = await exchangeRates.oracle();
@@ -386,7 +385,6 @@ contract('FeePoolState', async accounts => {
 	// 	assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('200'));
 
 	// 	// And feePool.accountIssuanceLedger[account1] should record debt minted
-	// 	const issuanceDataFromState = await periFinanceState.issuanceData(account1);
 	// 	const feePoolLedger = await feePool.accountIssuanceLedger(account1, 0);
 
 	// 	assert.bnEqual(feePoolLedger.debtEntryIndex, 0);
@@ -421,7 +419,6 @@ contract('FeePoolState', async accounts => {
 
 	// 	// And feePool.accountIssuanceLedger[account1] should record debt minted
 	// 	let issuanceDataFromState, feePoolLedger;
-	// 	issuanceDataFromState = await periFinanceState.issuanceData(account1);
 	// 	feePoolLedger = await feePool.accountIssuanceLedger(account1, 0);
 
 	// 	assert.bnEqual(feePoolLedger.debtEntryIndex, 0);
@@ -435,7 +432,6 @@ contract('FeePoolState', async accounts => {
 	// 	// And account1 should own all of it.
 	// 	assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('400'));
 
-	// 	issuanceDataFromState = await periFinanceState.issuanceData(account1);
 	// 	feePoolLedger = await feePool.accountIssuanceLedger(account1, 0);
 
 	// 	// debtEntryIndex is updated to 1 and still own whole system

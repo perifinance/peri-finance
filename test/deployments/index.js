@@ -231,7 +231,6 @@ describe('deployments', () => {
 								'SupplySchedule',
 								'PeriFinance',
 								'PeriFinanceEscrow',
-								'PeriFinanceState',
 								'PynthpUSD',
 								'PynthpETH',
 								'SystemSettings',
