@@ -56,10 +56,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     function executeDelayedOrder(address account) external onlyProxy {
         // important!: order of the account, not the sender!
         DelayedOrder memory order = marketState.delayedOrders(account);
-        // check that a previous order exists
-        require(order.sizeDelta != 0, "no previous order");
-
-        require(!order.isOffchain, "use offchain method");
+        _checkOrder(order);  
 
         uint currentRoundId = _exchangeRates().getCurrentRoundId(_baseAsset());
         require(
@@ -105,11 +102,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     function executeOffchainDelayedOrder(address account, bytes[] calldata priceUpdateData) external payable onlyProxy {
         // important!: order of the account, not the sender!
         DelayedOrder memory order = marketState.delayedOrders(account);
-        // check that a previous order exists
-        require(order.sizeDelta != 0, "no previous order");
-
-        require(order.isOffchain, "use onchain method");
-
+        _checkOrder(order);  
         // update price feed (this is payable)
         _perpsV2ExchangeRate().updatePythPrice.value(msg.value)(messageSender, priceUpdateData);
 
@@ -148,12 +141,15 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     function cancelDelayedOrder(address account) external onlyProxy {
         // important!! order of the account, not the msg.sender
         DelayedOrder memory order = marketState.delayedOrders(account);
-        // check that a previous order exists
+        _checkOrder(order);        
+        _cancelDelayedOrder(account, order);
+    }
+
+    function _checkOrder(DelayedOrder memory order) pure internal{
+// check that a previous order exists
         require(order.sizeDelta != 0, "no previous order");
 
         require(!order.isOffchain, "use offchain method");
-
-        _cancelDelayedOrder(account, order);
     }
 
     /**
@@ -169,10 +165,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     function cancelOffchainDelayedOrder(address account) external onlyProxy {
         // important!! order of the account, not the msg.sender
         DelayedOrder memory order = marketState.delayedOrders(account);
-        // check that a previous order exists
-        require(order.sizeDelta != 0, "no previous order");
-
-        require(order.isOffchain, "use onchain method");
+         _checkOrder(order);  
 
         _cancelDelayedOrder(account, order);
     }

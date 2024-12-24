@@ -18,7 +18,6 @@ import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IWrapperFactory.sol";
 import "./interfaces/IDynamicPynthRedeemer.sol";
 import "./interfaces/IFuturesMarketManager.sol";
@@ -104,10 +103,6 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function collateralManager() internal view returns (ICollateralManager) {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
-    }
-
-    function etherWrapper() internal view returns (IEtherWrapper) {
-        return IEtherWrapper(requireAndGetAddress(CONTRACT_ETHER_WRAPPER));
     }
 
    function dynamicPynthRedeemer() internal view returns (IDynamicPynthRedeemer) {
@@ -299,7 +294,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
         // 2. EtherWrapper.
         // Subtract pETH and pUSD issued by EtherWrapper.
-        excludedDebt = excludedDebt.add(etherWrapper().totalIssuedPynths());
+        //excludedDebt = excludedDebt.add(etherWrapper().totalIssuedPynths());
 
         // 3. WrapperFactory.
         // Get the debt issued by the Wrappers.
@@ -310,6 +305,56 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return (excludedDebt, isInvalid);
     }
 
+
+
+function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+
+function toString(address account) public pure returns(string memory) {
+    return toString(abi.encodePacked(account));
+}
+
+function toString(uint256 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes32 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes memory data) public pure returns(string memory) {
+    bytes memory alphabet = "0123456789abcdef";
+
+    bytes memory str = new bytes(2 + data.length * 2);
+    str[0] = "0";
+    str[1] = "x";
+    for (uint i = 0; i < data.length; i++) {
+        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+    }
+    return string(str);
+}
+
     function _currentDebt() internal view returns (uint debt, bool anyRateIsInvalid) {
         (uint[] memory values, bool isInvalid) = _currentPynthDebts(issuer().availableCurrencyKeys());
         uint numValues = values.length;
@@ -317,6 +362,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         for (uint i; i < numValues; i++) {
             total = total.add(values[i]);
         }
+
+        //require(false, uint2str(values[2]));
 
         // subtract the USD value of all shorts.
         (uint pusdValue, bool shortInvalid) = collateralManager().totalShort();

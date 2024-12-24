@@ -76,60 +76,60 @@ contract DebtMigratorOnEthereum is BaseDebtMigrator {
     }
 
     function _migrateDebt(address _account) internal {
-        // // Require the account to not be flagged or open for liquidation
-        // require(!_liquidator().isLiquidationOpen(_account, false), "Cannot migrate if open for liquidation");
+    //     // // Require the account to not be flagged or open for liquidation
+    //     // require(!_liquidator().isLiquidationOpen(_account, false), "Cannot migrate if open for liquidation");
 
-        // // Important: this has to happen before any updates to user's debt shares
-        // _liquidatorRewards().getReward(_account);
+    //     // // Important: this has to happen before any updates to user's debt shares
+    //     // _liquidatorRewards().getReward(_account);
 
-        // First, remove all debt shares on L1
-        IPeriFinanceDebtShare sds = _synthetixDebtShare();
-        uint totalDebtShares = sds.balanceOf(_account);
-        require(totalDebtShares > 0, "No debt to migrate");
+    //     // First, remove all debt shares on L1
+    //     IPeriFinanceDebtShare sds = _synthetixDebtShare();
+    //     uint totalDebtShares = sds.balanceOf(_account);
+    //     require(totalDebtShares > 0, "No debt to migrate");
 
-        // Increment the in-flight debt counter by their SDS balance
-        _incrementDebtTransferCounter(DEBT_TRANSFER_SENT, totalDebtShares);
-        _issuer().modifyDebtSharesForMigration(_account, totalDebtShares);
+    //     // Increment the in-flight debt counter by their SDS balance
+    //     _incrementDebtTransferCounter(DEBT_TRANSFER_SENT, totalDebtShares);
+    //     _issuer().modifyDebtSharesForMigration(_account, totalDebtShares);
 
-        // Deposit all of the liquid & revoked escrowed SNX to the migrator on L2
-        (uint totalEscrowRevoked, uint totalLiquidBalance) =
-            IPeriFinance(requireAndGetAddress(CONTRACT_SYNTHETIX)).migrateAccountBalances(_account);
-        uint totalAmountToDeposit = totalLiquidBalance.add(totalEscrowRevoked);
+    //     // Deposit all of the liquid & revoked escrowed SNX to the migrator on L2
+    //     (uint totalEscrowRevoked, uint totalLiquidBalance) =
+    //         IPeriFinance(requireAndGetAddress(CONTRACT_SYNTHETIX)).migrateAccountBalances(_account);
+    //     uint totalAmountToDeposit = totalLiquidBalance.add(totalEscrowRevoked);
 
-        require(totalAmountToDeposit > 0, "Cannot migrate zero balances");
-        require(
-            resolver.getAddress(CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM) != address(0),
-            "Debt Migrator On Optimism not set"
-        );
+    //     require(totalAmountToDeposit > 0, "Cannot migrate zero balances");
+    //     require(
+    //         resolver.getAddress(CONTRACT_OVM_DEBT_MIGRATOR_ON_OPTIMISM) != address(0),
+    //         "Debt Migrator On Optimism not set"
+    //     );
 
-        _synthetixERC20().approve(address(_synthetixBridgeToOptimism()), totalAmountToDeposit);
-       // _synthetixBridgeToOptimism().depositTo(_debtMigratorOnOptimism(), totalAmountToDeposit);
+    //     _synthetixERC20().approve(address(_synthetixBridgeToOptimism()), totalAmountToDeposit);
+    //    // _synthetixBridgeToOptimism().depositTo(_debtMigratorOnOptimism(), totalAmountToDeposit);
 
-        // Require all zeroed balances
-        require(_synthetixDebtShare().balanceOf(_account) == 0, "Debt share balance is not zero");
-        require(_synthetixERC20().balanceOf(_account) == 0, "SNX balance is not zero");
-        require(_rewardEscrowV2().balanceOf(_account) == 0, "Escrow balanace is not zero");
-        //require(_liquidatorRewards().earned(_account) == 0, "Earned balance is not zero");
+    //     // Require all zeroed balances
+    //     require(_synthetixDebtShare().balanceOf(_account) == 0, "Debt share balance is not zero");
+    //     require(_synthetixERC20().balanceOf(_account) == 0, "SNX balance is not zero");
+    //     require(_rewardEscrowV2().balanceOf(_account) == 0, "Escrow balanace is not zero");
+    //     //require(_liquidatorRewards().earned(_account) == 0, "Earned balance is not zero");
 
-        // Create the data payloads to be relayed on L2
-        IIssuer issuer;
-        bytes memory _debtPayload =
-            abi.encodeWithSelector(issuer.modifyDebtSharesForMigration.selector, _account, totalDebtShares);
+    //     // Create the data payloads to be relayed on L2
+    //     IIssuer issuer;
+    //     bytes memory _debtPayload =
+    //         abi.encodeWithSelector(issuer.modifyDebtSharesForMigration.selector, _account, totalDebtShares);
 
-        // Send a message with the debt & escrow payloads to L2 to finalize the migration
-        IDebtMigrator debtMigratorOnOptimism;
-        bytes memory messageData =
-            abi.encodeWithSelector(
-                debtMigratorOnOptimism.finalizeDebtMigration.selector,
-                _account,
-                totalDebtShares,
-                totalEscrowRevoked,
-                totalLiquidBalance,
-                _debtPayload
-            );
-        _messenger().sendMessage(_debtMigratorOnOptimism(), messageData, _getCrossDomainGasLimit(0)); // passing zero will use the system setting default
+    //     // Send a message with the debt & escrow payloads to L2 to finalize the migration
+    //     IDebtMigrator debtMigratorOnOptimism;
+    //     bytes memory messageData =
+    //         abi.encodeWithSelector(
+    //             debtMigratorOnOptimism.finalizeDebtMigration.selector,
+    //             _account,
+    //             totalDebtShares,
+    //             totalEscrowRevoked,
+    //             totalLiquidBalance,
+    //             _debtPayload
+    //         );
+    //     _messenger().sendMessage(_debtMigratorOnOptimism(), messageData, _getCrossDomainGasLimit(0)); // passing zero will use the system setting default
 
-        emit MigrationInitiated(_account, totalDebtShares, totalEscrowRevoked, totalLiquidBalance);
+    //     emit MigrationInitiated(_account, totalDebtShares, totalEscrowRevoked, totalLiquidBalance);
     }
 
     /* ========= RESTRICTED ========= */

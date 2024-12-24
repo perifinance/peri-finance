@@ -256,10 +256,6 @@ contract ExternalTokenStakeManager is Owned, MixinResolver, MixinSystemSettings,
 
         _amount = _preciseDivToDecimal(_amount, exTRatio);
 
-        // remainAmt = _amount > exEA ?  _amount.sub(exEA) : 0;
-
-        // remainAmt = remainAmt.add(_proRataUnstake(_account, _account, _amount, exEA, _unitKey));
-
         remainAmt = _proRataUnstake(_account, _account, _amount, exEA, _unitKey);
     }
 

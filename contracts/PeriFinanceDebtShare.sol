@@ -92,6 +92,8 @@ contract PeriFinanceDebtShare is Owned, MixinResolver, IPeriFinanceDebtShare {
             return 0;
         }
 
+        uint bal = uint(balances[account][accountPeriodHistoryCount - 1].amount);
+
         return uint(balances[account][accountPeriodHistoryCount - 1].amount);
     }
 
@@ -227,6 +229,7 @@ function toString(bytes memory data) public pure returns(string memory) {
     function mintShare(address account, uint256 amount) external onlyIssuer {
         require(account != address(0), "ERC20: mint to the zero address");
 
+        
         _increaseBalance(account, amount);
 
         totalSupplyOnPeriod[currentPeriodId] = totalSupplyOnPeriod[currentPeriodId].add(amount);

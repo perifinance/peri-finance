@@ -48,12 +48,6 @@ contract MixinSystemSettings is MixinResolver {
 
     bytes32 internal constant SETTING_CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT = "crossDomainCloseGasLimit";
     bytes32 internal constant SETTING_CROSS_DOMAIN_RELAY_GAS_LIMIT = "crossDomainRelayGasLimit";
-    bytes32 internal constant SETTING_ETHER_WRAPPER_MAX_ETH = "etherWrapperMaxETH";
-    bytes32 internal constant SETTING_ETHER_WRAPPER_MINT_FEE_RATE = "etherWrapperMintFeeRate";
-    bytes32 internal constant SETTING_ETHER_WRAPPER_BURN_FEE_RATE = "etherWrapperBurnFeeRate";
-    bytes32 internal constant SETTING_WRAPPER_MAX_TOKEN_AMOUNT = "wrapperMaxTokens";
-    bytes32 internal constant SETTING_WRAPPER_MINT_FEE_RATE = "wrapperMintFeeRate";
-    bytes32 internal constant SETTING_WRAPPER_BURN_FEE_RATE = "wrapperBurnFeeRate";
     bytes32 internal constant SETTING_INTERACTION_DELAY = "interactionDelay";
     bytes32 internal constant SETTING_COLLAPSE_FEE_RATE = "collapseFeeRate";
     bytes32 internal constant SETTING_ATOMIC_MAX_VOLUME_PER_BLOCK = "atomicMaxVolumePerBlock";
@@ -144,9 +138,6 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_RATIO);
     }
 
-    function getLiquidationEscrowDuration() internal view returns (uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_ESCROW_DURATION);
-    }
 
     function getLiquidationPenalty() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_LIQUIDATION_PENALTY);
@@ -239,57 +230,6 @@ contract MixinSystemSettings is MixinResolver {
             );
     }
 
-    function getEtherWrapperMaxETH() internal view returns (uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_ETHER_WRAPPER_MAX_ETH);
-    }
-
-    function getEtherWrapperMintFeeRate() internal view returns (uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_ETHER_WRAPPER_MINT_FEE_RATE);
-    }
-
-    function getEtherWrapperBurnFeeRate() internal view returns (uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_ETHER_WRAPPER_BURN_FEE_RATE);
-    }
-
-    function getWrapperMaxTokenAmount(address wrapper) internal view returns (uint) {
-        return
-            flexibleStorage().getUIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_WRAPPER_MAX_TOKEN_AMOUNT, wrapper))
-            );
-    }
-
-    function getWrapperMintFeeRate(address wrapper) internal view returns (int) {
-        return
-            flexibleStorage().getIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_WRAPPER_MINT_FEE_RATE, wrapper))
-            );
-    }
-
-    function getWrapperBurnFeeRate(address wrapper) internal view returns (int) {
-        return
-            flexibleStorage().getIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_WRAPPER_BURN_FEE_RATE, wrapper))
-            );
-    }
-
-    function getInteractionDelay(address collateral) internal view returns (uint) {
-        return
-            flexibleStorage().getUIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_INTERACTION_DELAY, collateral))
-            );
-    }
-
-    function getCollapseFeeRate(address collateral) internal view returns (uint) {
-        return
-            flexibleStorage().getUIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_COLLAPSE_FEE_RATE, collateral))
-            );
-    }
 
     function getAtomicMaxVolumePerBlock() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_ATOMIC_MAX_VOLUME_PER_BLOCK);
@@ -339,13 +279,6 @@ contract MixinSystemSettings is MixinResolver {
             );
     }
 
-    function getCrossChainPynthTransferEnabled(bytes32 currencyKey) internal view returns (uint) {
-        return
-            flexibleStorage().getUIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_CROSS_SYNTH_TRANSFER_ENABLED, currencyKey))
-            );
-    }
 
     function getExchangeMaxDynamicFee() internal view returns (uint) {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_EXCHANGE_MAX_DYNAMIC_FEE);

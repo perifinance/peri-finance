@@ -8,14 +8,6 @@ interface IPeriFinance {
     // Views
     //function getRequiredAddress(bytes32 contractName) external view returns (address);
 
-    // function anyPynthOrPERIRateIsInvalid() external view returns (bool anyRateInvalid);
-
-    // function availableCurrencyKeys() external view returns (bytes32[] memory);
-
-    // function availablePynthCount() external view returns (uint);
-
-    // function availablePynths(uint index) external view returns (IPynth);
-
     // function collateral(address account) external view returns (uint);
 
     function collateralisationRatio(address issuer) external view returns (uint);
@@ -37,8 +29,6 @@ interface IPeriFinance {
 
     function pynths(bytes32 currencyKey) external view returns (IPynth);
 
-    function pynthsByAddress(address pynthAddress) external view returns (bytes32);
-
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint);
 
     function totalIssuedPynthsExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
@@ -59,7 +49,7 @@ interface IPeriFinance {
 
     function fitToClaimable() external payable;
 
-    //function exit() external;
+    function exit() external;
 
     function exchange(
         bytes32 sourceCurrencyKey,
@@ -132,5 +122,5 @@ interface IPeriFinance {
 
     function burnSecondary(address account, uint amount) external;
 
-    function migrateAccountBalances(address account) external returns (uint totalEscrowRevoked, uint totalLiquidBalance);
+    // function migrateAccountBalances(address account) external returns (uint totalEscrowRevoked, uint totalLiquidBalance);
 }

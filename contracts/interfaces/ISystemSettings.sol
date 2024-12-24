@@ -21,7 +21,7 @@ interface ISystemSettings {
 
     function liquidationPenalty() external view returns (uint);
 
-    function periLiquidationPenalty() external view returns (uint);
+    //function periLiquidationPenalty() external view returns (uint);
 
     function selfLiquidationPenalty() external view returns (uint);
 
@@ -49,17 +49,6 @@ interface ISystemSettings {
 
     function tradingRewardsEnabled() external view returns (bool);
 
-    function wrapperMaxTokenAmount(address wrapper) external view returns (uint);
-
-    function wrapperMintFeeRate(address wrapper) external view returns (int);
-
-    function wrapperBurnFeeRate(address wrapper) external view returns (int);
-
-    function etherWrapperMaxETH() external view returns (uint);
-
-    function etherWrapperBurnFeeRate() external view returns (uint);
-
-    function etherWrapperMintFeeRate() external view returns (uint);
 
     function interactionDelay(address collateral) external view returns (uint);
 

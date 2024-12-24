@@ -47,7 +47,7 @@ contract TestableFuturesMarket is FuturesMarket {
      * The minimal margin at which liquidation can happen. Is the sum of liquidationBuffer and liquidationFee.
      * Reverts if position size is 0.
      * @param account address of the position account
-     * @return lMargin liquidation margin to maintain in sUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in pUSD fixed point decimal units
      */
     function liquidationMargin(address account) external view returns (uint lMargin) {
         require(positions[account].size != 0, "0 size position"); // reverts because otherwise minKeeperFee is returned

@@ -23,16 +23,13 @@ import "./interfaces/IPeriFinanceDebtShare.sol";
 import "./FeePoolEternalStorage.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IIssuer.sol";
-import "./interfaces/IPeriFinanceState.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IRewardsDistribution.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/ICrossChainManager.sol";
-import "./interfaces/IEtherWrapper.sol";
 import "./interfaces/IFuturesMarketManager.sol";
-import "./interfaces/IWrapperFactory.sol";
 import "./interfaces/IPeriFinanceBridgeToOptimism.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/feepool
@@ -84,16 +81,13 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_FEEPOOLETERNALSTORAGE = "FeePoolEternalStorage";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
-    bytes32 private constant CONTRACT_PERIFINANCESTATE = "PeriFinanceState";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
     bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
-    bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
     bytes32 private constant CONTRACT_FUTURES_MARKET_MANAGER = "FuturesMarketManager";
-    bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
 
     bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE_TO_OPTIMISM = "PeriFinanceBridgeToOptimism";
     bytes32 private constant CONTRACT_PERIFINANCE_BRIDGE_TO_BASE = "PeriFinanceBridgeToBase";
@@ -118,35 +112,27 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](17);
+        bytes32[] memory newAddresses = new bytes32[](14);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
-        // newAddresses[1] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_PERIFINANCEDEBTSHARE;
         newAddresses[2] = CONTRACT_FEEPOOLETERNALSTORAGE;
         newAddresses[3] = CONTRACT_EXCHANGER;
         newAddresses[4] = CONTRACT_ISSUER;
-        newAddresses[5] = CONTRACT_PERIFINANCESTATE;
-        newAddresses[6] = CONTRACT_REWARDESCROW_V2;
-        newAddresses[7] = CONTRACT_DELEGATEAPPROVALS;
-        newAddresses[8] = CONTRACT_ETH_COLLATERAL_PUSD;
-        newAddresses[9] = CONTRACT_REWARDSDISTRIBUTION;
-        newAddresses[10] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[11] = CONTRACT_CROSSCHAINMANAGER;
-        newAddresses[12] = CONTRACT_WRAPPER_FACTORY;
-        newAddresses[13] = CONTRACT_ETHER_WRAPPER;
-        newAddresses[14] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
-        newAddresses[15] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
-        newAddresses[16] = CONTRACT_FUTURES_MARKET_MANAGER;
+        newAddresses[5] = CONTRACT_REWARDESCROW_V2;
+        newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
+        newAddresses[7] = CONTRACT_ETH_COLLATERAL_PUSD;
+        newAddresses[8] = CONTRACT_REWARDSDISTRIBUTION;
+        newAddresses[9] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[10] = CONTRACT_CROSSCHAINMANAGER;
+        newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
+        newAddresses[12] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
+        newAddresses[13] = CONTRACT_FUTURES_MARKET_MANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
     function systemStatus() internal view returns (ISystemStatus) {
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
     }
-
-    // function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
-    //     return IPeriFinanceDebtShare(requireAndGetAddress(CONTRACT_PERIFINANCEDEBTSHARE));
-    // }
 
     function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
         return IPeriFinanceDebtShare(requireAndGetAddress(CONTRACT_PERIFINANCEDEBTSHARE));
@@ -176,10 +162,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return IIssuer(requireAndGetAddress(CONTRACT_ISSUER));
     }
 
-    function periFinanceState() internal view returns (IPeriFinanceState) {
-        return IPeriFinanceState(requireAndGetAddress(CONTRACT_PERIFINANCESTATE));
-    }
-
     function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
         return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
     }
@@ -192,17 +174,10 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return IRewardsDistribution(requireAndGetAddress(CONTRACT_REWARDSDISTRIBUTION));
     }
 
-    function etherWrapper() internal view returns (IEtherWrapper) {
-        return IEtherWrapper(requireAndGetAddress(CONTRACT_ETHER_WRAPPER));
-    }
-
     function futuresMarketManager() internal view returns (IFuturesMarketManager) {
         return IFuturesMarketManager(requireAndGetAddress(CONTRACT_FUTURES_MARKET_MANAGER));
     }
 
-    function wrapperFactory() internal view returns (IWrapperFactory) {
-        return IWrapperFactory(requireAndGetAddress(CONTRACT_WRAPPER_FACTORY));
-    }
 
     function issuanceRatio() external view returns (uint) {
         return getIssuanceRatio();
@@ -371,29 +346,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     //     );
     // }
 
-//     /**
-//      * @notice Logs an accounts issuance data per fee period
-//      * @param account Message.Senders account address
-//      * @param debtRatio Debt percentage this account has locked after minting or burning their pynth
-//      * @param debtEntryIndex The index in the global debt ledger. periFinanceState.issuanceData(account)
-//      * @dev onlyIssuer to call me on periFinance.issue() & periFinance.burn() calls to store the locked PERI
-//      * per fee period so we know to allocate the correct proportions of fees and rewards per period
-//      */
-//     function appendAccountIssuanceRecord(
-//         address account,
-//         uint debtRatio,
-//         uint debtEntryIndex
-//     ) external onlyIssuerAndPeriFinanceState {
-//         require(false, "not implemented");
-//   //      feePoolState().appendAccountIssuanceRecord(
-//         //     account,
-//         //     debtRatio,
-//         //     debtEntryIndex,
-//         //     _recentFeePeriodsStorage(0).startingDebtIndex
-//         // );
-
-//         emitIssuanceDebtRatioEntry(account, debtRatio, debtEntryIndex, _recentFeePeriodsStorage(0).startingDebtIndex);
-//     }
 
     /**
      * @notice The Exchanger contract informs us when fees are paid.
@@ -443,13 +395,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         _closeSecondary(snxBackedDebt, debtSharesSupply);
 
         // // inform other chain of the chosen values
-        // IPynthetixBridgeToOptimism(
+        // IPeriFinanceBridgeToOptimism(
         //     resolver.requireAndGetAddress(
         //         CONTRACT_PERIFINANCE_BRIDGE_TO_OPTIMISM,
         //         "Missing contract: PeriFinanceBridgeToOptimism"
         //     )
-        // )
-        //     .closeFeePeriod(snxBackedDebt, debtSharesSupply);
+        // ).closeFeePeriod(snxBackedDebt, debtSharesSupply);
     }
 
     function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
@@ -460,8 +411,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
      * @notice Close the current fee period and start a new one.
      */
     function _closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) internal {
-        etherWrapper().distributeFees();
-        wrapperFactory().distributeFees();
 
         // before closing the current fee period, set the recorded snxBackedDebt and debtSharesSupply
         _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
@@ -485,7 +434,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             .sub(periodToRollover.rewardsClaimed)
             .add(periodClosing.rewardsToDistribute);
 
-        // Note: As of SIP-255, all sUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
+        // Note: As of SIP-255, all pUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
         if (_recentFeePeriodsStorage(0).feesToDistribute > 0) {
             issuer().burnPynthsWithoutDebt(pUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
 
@@ -740,8 +689,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint rewardsClaimed
     ) public optionalProxy_onlyOwner onlyDuringSetup {
         require(feePeriodIndex < FEE_PERIOD_LENGTH, "invalid fee period index");
-        //require(startingDebtIndex <= periFinanceState().debtLedgerLength(), "Cannot import bad data");
-
+ 
         _recentFeePeriods[_currentFeePeriod.add(feePeriodIndex).mod(FEE_PERIOD_LENGTH)] = FeePeriod({
             feePeriodId: uint64(feePeriodId),
             //startingDebtIndex: uint64(startingDebtIndex),
@@ -1110,12 +1058,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // uint debtOwnershipForPeriod = ownershipPercentage;
 
-        // // If period has closed we want to calculate debtPercentage for the period
-        // if (period > 0) {
-        //     uint closingDebtIndex = uint256(_recentFeePeriodsStorage(period - 1).startingDebtIndex).sub(1);
-        //     debtOwnershipForPeriod = _effectiveDebtRatioForPeriod(closingDebtIndex, ownershipPercentage, debtEntryIndex);
-        // }
-
         // // Calculate their percentage of the fees / rewards in this period
         // // This is a high precision integer.
         // uint feesFromPeriod = _recentFeePeriodsStorage(period).feesToDistribute.multiplyDecimal(debtOwnershipForPeriod);
@@ -1124,23 +1066,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         //     _recentFeePeriodsStorage(period).rewardsToDistribute.multiplyDecimal(debtOwnershipForPeriod);
 
         // return (feesFromPeriod.preciseDecimalToDecimal(), rewardsFromPeriod.preciseDecimalToDecimal());
-    }
-
-    function _effectiveDebtRatioForPeriod(
-        uint closingDebtIndex,
-        uint ownershipPercentage,
-        uint debtEntryIndex
-    ) internal view returns (uint) {
-        // Figure out their global debt percentage delta at end of fee Period.
-        // This is a high precision integer.
-        IPeriFinanceState _periFinanceState = periFinanceState();
-        uint feePeriodDebtOwnership =
-            _periFinanceState
-                .debtLedger(closingDebtIndex)
-                .divideDecimalRoundPrecise(_periFinanceState.debtLedger(debtEntryIndex))
-                .multiplyDecimalRoundPrecise(ownershipPercentage);
-
-        return feePeriodDebtOwnership;
     }
     
     function effectiveDebtRatioForPeriod(address account, uint period) external view returns (uint) {
@@ -1195,9 +1120,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             account == address(exchanger()) ||
             issuer().pynthsByAddress(account) != bytes32(0) ||
             collateralManager().hasCollateral(account) ||
-            account == address(futuresMarketManager()) ||
-            account == address(wrapperFactory()) ||
-            account == address(etherWrapper());
+            account == address(futuresMarketManager());
     }
 
     modifier onlyInternalContracts {
@@ -1210,14 +1133,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             msg.sender == address(this) || msg.sender == resolver.getAddress(CONTRACT_PERIFINANCE_BRIDGE_TO_BASE),
             "Only valid relayer can call"
         );
-        _;
-    }
-
-
-    modifier onlyIssuerAndPeriFinanceState {
-        bool isIssuer = msg.sender == address(issuer());
-        bool isPeriFinanceState = msg.sender == address(periFinanceState());
-        require(isIssuer || isPeriFinanceState, "Issuer and PeriFinanceState only");
         _;
     }
 

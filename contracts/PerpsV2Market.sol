@@ -15,8 +15,8 @@ import "./interfaces/IPerpsV2Market.sol";
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
  * The PeriFinance debt pool is effectively the counterparty to each trade, so if a particular position
- * is in profit, then the debt pool pays by issuing sUSD into their margin account,
- * while if the position makes a loss then the debt pool burns sUSD from the margin, reducing the
+ * is in profit, then the debt pool pays by issuing pUSD into their margin account,
+ * while if the position makes a loss then the debt pool burns pUSD from the margin, reducing the
  * debt load in the system.
  *
  * As the debt pool underwrites all positions, the debt-inflation risk to the system is proportional to the
@@ -32,7 +32,7 @@ import "./interfaces/IPerpsV2Market.sol";
  *
  *     - FuturesMarketManager.sol:  the manager keeps track of which markets exist, and is the main window between
  *                                  futures and perpsV2 markets and the rest of the system. It accumulates the total debt
- *                                  over all markets, and issues and burns sUSD on each market's behalf.
+ *                                  over all markets, and issues and burns pUSD on each market's behalf.
  *
  *     - PerpsV2MarketSettings.sol: Holds the settings for each market in the global FlexibleStorage instance used
  *                                  by SystemSettings, and provides an interface to modify these values. Other than
@@ -136,7 +136,7 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
             // A positive margin delta corresponds to a deposit, which will be burnt from their
-            // sUSD balance and credited to their margin account.
+            // pUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
             uint postReclamationAmount = _manager().burnSUSD(sender, absDelta);
@@ -146,7 +146,7 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
             }
         } else if (marginDelta < 0) {
             // A negative margin delta corresponds to a withdrawal, which will be minted into
-            // their sUSD balance, and debited from their margin account.
+            // their pUSD balance, and debited from their margin account.
             _manager().issueSUSD(sender, absDelta);
         } else {
             // Zero delta is a no-op
@@ -174,8 +174,8 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
 
     /*
      * Alter the amount of margin in a position. A positive input triggers a deposit; a negative one, a
-     * withdrawal. The margin will be burnt or issued directly into/out of the caller's sUSD wallet.
-     * Reverts on deposit if the caller lacks a sufficient sUSD balance.
+     * withdrawal. The margin will be burnt or issued directly into/out of the caller's pUSD wallet.
+     * Reverts on deposit if the caller lacks a sufficient pUSD balance.
      * Reverts on withdrawal if the amount to be withdrawn would expose an open position to liquidation.
      */
     function transferMargin(int marginDelta) external onlyProxy {

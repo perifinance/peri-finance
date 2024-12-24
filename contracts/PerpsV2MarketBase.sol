@@ -48,7 +48,7 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
     int private constant _UNIT = int(10**uint(18));
 
     //slither-disable-next-line naming-convention
-    bytes32 internal constant sUSD = "sUSD";
+    bytes32 internal constant pUSD = "pUSD";
 
     /* ========== STATE VARIABLES ========== */
 
@@ -360,11 +360,11 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
 
     /**
      * The fee charged from the margin during liquidation. Fee is proportional to position size
-     * but is between _minKeeperFee() and _maxKeeperFee() expressed in sUSD to prevent underincentivising
+     * but is between _minKeeperFee() and _maxKeeperFee() expressed in pUSD to prevent underincentivising
      * liquidations of small positions, or overpaying.
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in sUSD fixed point decimal units
-     * @return lFee liquidation fee to be paid to liquidator in sUSD fixed point decimal units
+     * @param price price of single baseAsset unit in pUSD fixed point decimal units
+     * @return lFee liquidation fee to be paid to liquidator in pUSD fixed point decimal units
      */
     function _liquidationFee(int positionSize, uint price) internal view returns (uint lFee) {
         // size * price * fee-ratio
@@ -381,8 +381,8 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
      * The minimal margin at which liquidation can happen.
      * Is the sum of liquidationBuffer, liquidationFee (for flagger) and keeperLiquidationFee (for liquidator)
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in sUSD fixed point decimal units
-     * @return lMargin liquidation margin to maintain in sUSD fixed point decimal units
+     * @param price price of single baseAsset unit in pUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in pUSD fixed point decimal units
      * @dev The liquidation margin contains a buffer that is proportional to the position
      * size. The buffer should prevent liquidation happening at negative margin (due to next price being worse)
      * so that stakers would not leak value to liquidators through minting rewards that are not from the
@@ -414,7 +414,7 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
      *
      * @param positionSize Size of the position we want to liquidate
      * @param currentPrice The current oracle price (not fillPrice)
-     * @return The premium to be paid upon liquidation in sUSD
+     * @return The premium to be paid upon liquidation in pUSD
      */
     function _liquidationPremium(int positionSize, uint currentPrice) internal view returns (uint) {
         if (positionSize == 0) {
@@ -485,12 +485,12 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
         return baseFee + takerFee + makerFee;
     }
 
-    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from sUSD to baseAsset
+    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from pUSD to baseAsset
     /// this assumes dynamic fee is symmetric in direction of trade.
     /// @dev this is a pretty expensive action in terms of execution gas as it queries a lot
     ///   of past rates from oracle. Shouldn't be much of an issue on a rollup though.
     function _dynamicFeeRate() internal view returns (uint feeRate, bool tooVolatile) {
-        return _exchanger().dynamicFeeRateForExchange(sUSD, _baseAsset());
+        return _exchanger().dynamicFeeRateForExchange(pUSD, _baseAsset());
     }
 
     function _latestFundingIndex() internal view returns (uint) {

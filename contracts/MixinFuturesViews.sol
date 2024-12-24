@@ -9,7 +9,7 @@ import "./FuturesMarketBase.sol";
  */
 contract MixinFuturesViews is FuturesMarketBase {
     /*
-     * Sizes of the long and short sides of the market (in sUSD)
+     * Sizes of the long and short sides of the market (in pUSD)
      */
     function marketSizes() public view returns (uint long, uint short) {
         int size = int(marketSize);
@@ -110,7 +110,7 @@ contract MixinFuturesViews is FuturesMarketBase {
      * Returns 0 if account cannot be liquidated right now.
      * @param account address of the trader's account
      * @return fee that will be paid for liquidating the account if it can be liquidated
-     *  in sUSD fixed point decimal units or 0 if account is not liquidatable.
+     *  in pUSD fixed point decimal units or 0 if account is not liquidatable.
      */
     function liquidationFee(address account) external view returns (uint) {
         (uint price, bool invalid) = assetPrice();
@@ -137,7 +137,7 @@ contract MixinFuturesViews is FuturesMarketBase {
      * expensive than ones that decrease it. Dynamic fee is added according to the recent volatility
      * according to SIP-184.
      * @param sizeDelta size of the order in baseAsset units (negative numbers for shorts / selling)
-     * @return fee in sUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
+     * @return fee in pUSD decimal, and invalid boolean flag for invalid rates or dynamic fee that is
      * too high due to recent volatility.
      */
     function orderFee(int sizeDelta) external view returns (uint fee, bool invalid) {

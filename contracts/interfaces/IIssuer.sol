@@ -39,8 +39,14 @@ interface IIssuer {
 
     function lastIssueEvent(address account) external view returns (uint);
 
-    function maxIssuablePynths(address issuer) external view returns (uint maxIssuable);
-
+  function maxIssuablePynths(address issuer)
+        external
+        view
+        returns (
+            uint,
+            uint,
+            uint
+        );
     function minimumStakeTime() external view returns (uint);
 
     function remainingIssuablePynths(address issuer)
@@ -80,39 +86,27 @@ interface IIssuer {
 
     function issuePynths(address from, bytes32 _currencyKey, uint amount) external;
 
-    function issuePynthsOnBehalf(
-        address issueFor,
-        address from,
-        uint amount
-    ) external;
 
     function issueMaxPynths(address _issuer) external;
 
-    function issueMaxPynthsOnBehalf(address issueFor, address from) external;
-
+ 
 
     function issuePynthsToMaxQuota(address _issuer, bytes32 _currencyKey) external;
 
     function burnPynths(address from, bytes32 _currencyKey, uint amount) external;
 
-    function burnPynthsOnBehalf(
-        address burnForAddress,
-        address from,
-        uint amount
-    ) external;
 
     function fitToClaimable(address _from) external;
 
 
-    function burnPynthsToTarget(address from) external;
-
-    function burnPynthsToTargetOnBehalf(address burnForAddress, address from) external;
 
     function burnForRedemption(
         address deprecatedPynthProxy,
         address account,
         uint balance
     ) external;
+    
+    function exit(address _from) external;
 
     function liquidateDelinquentAccount(
         address account,

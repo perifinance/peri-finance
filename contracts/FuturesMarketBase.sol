@@ -27,8 +27,8 @@ import "./interfaces/IERC20.sol";
  * by a liquidation keeper, which is rewarded with a flat fee extracted from the margin.
  *
  * The PeriFinance debt pool is effectively the counterparty to each trade, so if a particular position
- * is in profit, then the debt pool pays by issuing sUSD into their margin account,
- * while if the position makes a loss then the debt pool burns sUSD from the margin, reducing the
+ * is in profit, then the debt pool pays by issuing pUSD into their margin account,
+ * while if the position makes a loss then the debt pool burns pUSD from the margin, reducing the
  * debt load in the system.
  *
  * As the debt pool underwrites all positions, the debt-inflation risk to the system is proportional to the
@@ -51,7 +51,7 @@ import "./interfaces/IERC20.sol";
  *
  *     - FuturesMarketManager.sol:  the manager keeps track of which markets exist, and is the main window between
  *                                  futures markets and the rest of the system. It accumulates the total debt
- *                                  over all markets, and issues and burns sUSD on each market's behalf.
+ *                                  over all markets, and issues and burns pUSD on each market's behalf.
  *
  *     - FuturesMarketSettings.sol: Holds the settings for each market in the global FlexibleStorage instance used
  *                                  by SystemSettings, and provides an interface to modify these values. Other than
@@ -92,7 +92,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     int private constant _UNIT = int(10**uint(18));
 
     //slither-disable-next-line naming-convention
-    bytes32 internal constant sUSD = "sUSD";
+    bytes32 internal constant pUSD = "pUSD";
 
     /* ========== STATE VARIABLES ========== */
 
@@ -391,11 +391,11 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
     /**
      * The fee charged from the margin during liquidation. Fee is proportional to position size
-     * but is at least the _minKeeperFee() of sUSD to prevent underincentivising
+     * but is at least the _minKeeperFee() of pUSD to prevent underincentivising
      * liquidations of small positions.
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in sUSD fixed point decimal units
-     * @return lFee liquidation fee to be paid to liquidator in sUSD fixed point decimal units
+     * @param price price of single baseAsset unit in pUSD fixed point decimal units
+     * @return lFee liquidation fee to be paid to liquidator in pUSD fixed point decimal units
      */
     function _liquidationFee(int positionSize, uint price) internal view returns (uint lFee) {
         // size * price * fee-ratio
@@ -408,8 +408,8 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /**
      * The minimal margin at which liquidation can happen. Is the sum of liquidationBuffer and liquidationFee
      * @param positionSize size of position in fixed point decimal baseAsset units
-     * @param price price of single baseAsset unit in sUSD fixed point decimal units
-     * @return lMargin liquidation margin to maintain in sUSD fixed point decimal units
+     * @param price price of single baseAsset unit in pUSD fixed point decimal units
+     * @return lMargin liquidation margin to maintain in pUSD fixed point decimal units
      * @dev The liquidation margin contains a buffer that is proportional to the position
      * size. The buffer should prevent liquidation happenning at negative margin (due to next price being worse)
      * so that stakers would not leak value to liquidators through minting rewards that are not from the
@@ -455,12 +455,12 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         return _abs(notionalDiff.multiplyDecimal(int(feeRate)));
     }
 
-    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from sUSD to baseAsset
+    /// Uses the exchanger to get the dynamic fee (SIP-184) for trading from pUSD to baseAsset
     /// this assumes dynamic fee is symmetric in direction of trade.
     /// @dev this is a pretty expensive action in terms of execution gas as it queries a lot
     ///   of past rates from oracle. Shoudn't be much of an issue on a rollup though.
     function _dynamicFeeRate() internal view returns (uint feeRate, bool tooVolatile) {
-        return _exchanger().dynamicFeeRateForExchange(sUSD, baseAsset);
+        return _exchanger().dynamicFeeRateForExchange(pUSD, baseAsset);
     }
 
     function _latestFundingIndex() internal view returns (uint) {
@@ -753,7 +753,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         uint absDelta = _abs(marginDelta);
         if (marginDelta > 0) {
             // A positive margin delta corresponds to a deposit, which will be burnt from their
-            // sUSD balance and credited to their margin account.
+            // pUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
             uint postReclamationAmount = _manager().burnSUSD(sender, absDelta);
@@ -763,7 +763,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
             }
         } else if (marginDelta < 0) {
             // A negative margin delta corresponds to a withdrawal, which will be minted into
-            // their sUSD balance, and debited from their margin account.
+            // their pUSD balance, and debited from their margin account.
             _manager().issueSUSD(sender, absDelta);
         } else {
             // Zero delta is a no-op
@@ -821,8 +821,8 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
 
     /*
      * Alter the amount of margin in a position. A positive input triggers a deposit; a negative one, a
-     * withdrawal. The margin will be burnt or issued directly into/out of the caller's sUSD wallet.
-     * Reverts on deposit if the caller lacks a sufficient sUSD balance.
+     * withdrawal. The margin will be burnt or issued directly into/out of the caller's pUSD wallet.
+     * Reverts on deposit if the caller lacks a sufficient pUSD balance.
      * Reverts on withdrawal if the amount to be withdrawn would expose an open position to liquidation.
      */
     function transferMargin(int marginDelta) external {

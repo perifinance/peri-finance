@@ -67,6 +67,7 @@ contract RealtimeDebtCache is BaseDebtCache {
     function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external {}
 
     function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external {}
+    
 
     function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates) external {}
 
@@ -80,44 +81,12 @@ contract RealtimeDebtCache is BaseDebtCache {
         // delete _cachedPynthDebt[currencyKey];
     }
 
-    //function takeDebtSnapshot() external requireSystemActiveIfNotOwner {
-        // bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
-        // (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentPynthDebts(currencyKeys);
-
-        // // The total PERI-backed debt is the debt of futures markets plus the debt of circulating pynths.
-        // uint periCollateralDebt = futuresDebt;
-        // _cachedPynthDebt[FUTURES_DEBT_KEY] = futuresDebt;
-        // uint numValues = values.length;
-        // for (uint i; i < numValues; i++) {
-        //     uint value = values[i];
-        //     periCollateralDebt = periCollateralDebt.add(value);
-        //     _cachedPynthDebt[currencyKeys[i]] = value;
-        // }
-
-        // // Subtract out the excluded non-PERI backed debt from our total
-        // _cachedPynthDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
-        // uint newDebt = periCollateralDebt.floorsub(excludedDebt);
-        // _cachedDebt = newDebt;
-        // _cacheTimestamp = block.timestamp;
-        // emit DebtCacheUpdated(newDebt);
-        // emit DebtCacheSnapshotTaken(block.timestamp);
-
-        // // (in)validate the cache if necessary
-        // _updateDebtCacheValidity(isInvalid);
-    //}
-
     // function updateCachedPynthDebts(bytes32[] calldata currencyKeys) external requireSystemActiveIfNotOwner {
     //     // (uint[] memory rates, bool anyRateInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
     //     // _updateCachedPynthDebtsWithRates(currencyKeys, rates, anyRateInvalid);
     // }
 
-    // function updateCachedPynthDebtWithRate(bytes32 currencyKey, uint currencyRate) external onlyIssuer {
-    //     bytes32[] memory pynthKeyArray = new bytes32[](1);
-    //     pynthKeyArray[0] = currencyKey;
-    //     uint[] memory pynthRateArray = new uint[](1);
-    //     pynthRateArray[0] = currencyRate;
-    //     _updateCachedPynthDebtsWithRates(pynthKeyArray, pynthRateArray, false);
-    // }
+  
 
     // function updateCachedPynthDebtsWithRates(bytes32[] calldata currencyKeys, uint[] calldata currencyRates)
     //     external

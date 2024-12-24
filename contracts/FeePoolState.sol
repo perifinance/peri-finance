@@ -47,21 +47,6 @@ contract FeePoolState is Owned, LimitedSetup {
 
     /* ========== VIEWS ========== */
 
-    /**
-     * @notice Get an accounts issuanceData for
-     * @param account users account
-     * @param index Index in the array to retrieve. Upto FEE_PERIOD_LENGTH
-     */
-    function getAccountsDebtEntry(address account, uint index)
-        public
-        view
-        returns (uint debtPercentage, uint debtEntryIndex)
-    {
-        require(index < FEE_PERIOD_LENGTH, "index exceeds the FEE_PERIOD_LENGTH");
-
-        debtPercentage = accountIssuanceLedger[account][index].debtPercentage;
-        debtEntryIndex = accountIssuanceLedger[account][index].debtEntryIndex;
-    }
 
     /**
      * @notice Find the oldest debtEntryIndex for the corresponding closingDebtIndex
@@ -86,7 +71,6 @@ contract FeePoolState is Owned, LimitedSetup {
      * @notice Logs an accounts issuance data in the current fee period which is then stored historically
      * @param account Message.Senders account address
      * @param debtRatio Debt of this account as a percentage of the global debt.
-     * @param debtEntryIndex The index in the global debt ledger. periFinance.periFinanceState().issuanceData(account)
      * @param currentPeriodStartDebtIndex The startingDebtIndex of the current fee period
      * @dev onlyFeePool to call me on periFinance.issue() & periFinance.burn() calls to store the locked PERI
      * per fee period so we know to allocate the correct proportions of fees and rewards per period

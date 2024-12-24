@@ -6,7 +6,6 @@ import "./BasePeriFinance.sol";
 
 // Internal references
 import "./interfaces/IRewardEscrowV2.sol";
-import "./interfaces/IRewardEscrow.sol";
 import "./interfaces/ISupplySchedule.sol";
 import "./interfaces/IBridgeState.sol";
 
@@ -58,13 +57,6 @@ contract PeriFinance is BasePeriFinance {
 
     // ========== VIEWS ==========
 
-    function rewardEscrowV2() internal view returns (IRewardEscrowV2) {
-        return IRewardEscrowV2(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
-    }
-
-    function rewardEscrow() internal view returns (IRewardEscrow) {
-        return IRewardEscrow(requireAndGetAddress(CONTRACT_REWARDESCROW_V2));
-    }
 
     function supplySchedule() internal view returns (ISupplySchedule) {
         return ISupplySchedule(requireAndGetAddress(CONTRACT_SUPPLYSCHEDULE));
@@ -218,11 +210,6 @@ contract PeriFinance is BasePeriFinance {
         require(_mintByProxy(account, amount), "MintFail");
 
         return true;
-    }
-
-    function setMinterRole(address _newMinter) external onlyOwner {
-        // If address is set to zero address, mint is not prohibited
-        minterRole = _newMinter;
     }
 
     function setBridgeValidator(address payable _bridgeValidator) external onlyOwner {
