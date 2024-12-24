@@ -98,14 +98,6 @@ interface IIssuer {
 
     function fitToClaimable(address _from) external;
 
-
-
-    function burnForRedemption(
-        address deprecatedPynthProxy,
-        address account,
-        uint balance
-    ) external;
-    
     function exit(address _from) external;
 
     function liquidateDelinquentAccount(
@@ -149,12 +141,6 @@ interface IIssuer {
         uint amount
     ) external returns (bool rateInvalid);
 
-    function burnAndIssuePynthsWithoutDebtCache(
-        address account,
-        bytes32 currencyKey,
-        uint amountOfPynth,
-        uint amountInpUSD
-    ) external;
 
     function modifyDebtSharesForMigration(address account, uint amount) external;
 }

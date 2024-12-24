@@ -22,7 +22,6 @@ import "./interfaces/IExternalTokenStakeManager.sol";
 import "./interfaces/IHasBalance.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ILiquidations.sol";
-import "./interfaces/IPynthRedeemer.sol";
 import "./interfaces/ISystemStatus.sol";
 import "./Proxyable.sol";
 
@@ -90,7 +89,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "ExternalTokenStakeManager";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
-    bytes32 private constant CONTRACT_DYNAMICSYNTHREDEEMER = "DynamicPynthRedeemer";
     bytes32 private constant CONTRACT_SYNTHREDEEMER = "PynthRedeemer";
     bytes32 private constant CONTRACT_PERIFINANCEBRIDGETOOPTIMISM = "PeriFinanceBridgeToOptimism";
 
@@ -103,7 +101,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](17);
+        bytes32[] memory newAddresses = new bytes32[](16);
         newAddresses[0] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -118,9 +116,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
         newAddresses[12] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
         newAddresses[13] = CONTRACT_SYNTHREDEEMER;
-        newAddresses[14] = CONTRACT_DYNAMICSYNTHREDEEMER;
-        newAddresses[15] = CONTRACT_PERIFINANCEBRIDGETOOPTIMISM;
-        newAddresses[16] = CONTRACT_PERIFINANCEDEBTSHARE;
+        newAddresses[14] = CONTRACT_PERIFINANCEBRIDGETOOPTIMISM;
+        newAddresses[15] = CONTRACT_PERIFINANCEDEBTSHARE;
         // newAddresses[18] = CONTRACT_ETHERCOLLATERAL;
         // newAddresses[19] = CONTRACT_ETHERCOLLATERAL_PUSD;
         // newAddresses[20] = CONTRACT_PERIFINANCEESCROW;
@@ -164,10 +161,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
     function debtCache() internal view returns (IIssuerInternalDebtCache) {
         return IIssuerInternalDebtCache(requireAndGetAddress(CONTRACT_DEBTCACHE));
-    }
-
-    function pynthRedeemer() internal view returns (IPynthRedeemer) {
-        return IPynthRedeemer(requireAndGetAddress(CONTRACT_SYNTHREDEEMER));
     }
 
     function periFinanceDebtShare() internal view returns (IPeriFinanceDebtShare) {
@@ -681,11 +674,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             (uint amountOfpUSD, uint rateToRedeem, ) =
                 exchangeRates().effectiveValueAndRates(currencyKey, pynthSupply, "pUSD");
             require(rateToRedeem > 0, "Cannot remove without rate");
-            IPynthRedeemer _pynthRedeemer = pynthRedeemer();
-            pynths[pUSD].issue(address(_pynthRedeemer), amountOfpUSD);
             // ensure the debt cache is aware of the new pUSD issued
             debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amountOfpUSD));
-            _pynthRedeemer.deprecate(IERC20(address(Proxyable(pynthToRemove).proxy())), rateToRedeem);
         }
 
         // Remove the pynth from the availablePynths array.
@@ -778,33 +768,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // returned so that the caller can decide what to do if the rate is invalid
         return rateInvalid;
     }
-
-    /**
-     * SIP-2059: Dynamic Redemption
-     * Function used to burn spot synths and issue the equivalent in pUSD at chainlink price * discount rate
-     * @param account The address of the account that is redeeming
-     * @param currencyKey The pynth to be redeemed
-     * @param amountOfPynth The amount of redeeming pynth to burn
-     * @param amountInpUSD The amount of pUSD to issue
-     */
-    function burnAndIssuePynthsWithoutDebtCache(
-        address account,
-        bytes32 currencyKey,
-        uint amountOfPynth,
-        uint amountInpUSD
-    ) external onlyPynthRedeemer {
-        exchanger().settle(account, currencyKey);
-
-        // Burn their redeemed pynths
-        pynths[currencyKey].burn(account, amountOfPynth);
-
-        // record issue timestamp
-        _setLastIssueEvent(account);
-
-        // Issuer their pUSD equivalent
-        pynths[pUSD].issue(account, amountInpUSD);
-    }
-
 
  function issuePynths(address _issuer, bytes32 _currencyKey, uint _issueAmount) external onlyPeriFinance {
         require(_issueAmount > 0, "cannot issue 0 pynths");
@@ -939,17 +902,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             _currencyKey != PERI || debtBalance.roundDownDecimal(uint(12)) <= getExternalTokenQuota(),
             "Over max external quota"
         );
-    }
-
-
-
-
-    function burnForRedemption(
-        address deprecatedPynthProxy,
-        address account,
-        uint balance
-    ) external onlyPynthRedeemer {
-        IPynth(IProxy(deprecatedPynthProxy).target()).burn(account, balance);
     }
 
      /**
@@ -1471,19 +1423,6 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
         address feePool = resolver.getAddress(CONTRACT_FEEPOOL);
         //require(msg.sender == bridgeL1 || msg.sender == bridgeL2 || msg.sender == feePool, "only trusted minters");
         require(msg.sender == bridgeL1 || msg.sender == feePool , "only trusted minters");
-        _;
-    }
-
-
-    function _onlyPynthRedeemer() internal view {
-        require(
-            msg.sender == address(pynthRedeemer()) || msg.sender == resolver.getAddress(CONTRACT_DYNAMICSYNTHREDEEMER),
-            "Only PynthRedeemer"
-        );
-    }
-
-    modifier onlyPynthRedeemer() {
-        _onlyPynthRedeemer();
         _;
     }
 

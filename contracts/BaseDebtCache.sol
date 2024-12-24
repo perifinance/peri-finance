@@ -18,8 +18,6 @@ import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IWrapperFactory.sol";
-import "./interfaces/IDynamicPynthRedeemer.sol";
 import "./interfaces/IFuturesMarketManager.sol";
 
 // https://docs.peri.finance/contracts/source/contracts/debtcache
@@ -53,7 +51,6 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
     bytes32 private constant CONTRACT_FUTURESMARKETMANAGER = "FuturesMarketManager";
     bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
-    bytes32 private constant CONTRACT_DYNAMICPYNTHREDEEMER = "DynamicPynthRedeemer";
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -61,7 +58,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](11);
+        bytes32[] memory newAddresses = new bytes32[](9);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -69,10 +66,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
         newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
         newAddresses[6] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[7] = CONTRACT_WRAPPER_FACTORY;
-        newAddresses[8] = CONTRACT_ETHER_WRAPPER;
-        newAddresses[9] = CONTRACT_DYNAMICPYNTHREDEEMER;
-        newAddresses[10] = CONTRACT_FUTURESMARKETMANAGER;
+        newAddresses[7] = CONTRACT_ETHER_WRAPPER;
+        newAddresses[8] = CONTRACT_FUTURESMARKETMANAGER;
         
         addresses = combineArrays(existingAddresses, newAddresses);
     }
@@ -105,16 +100,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
     }
 
-   function dynamicPynthRedeemer() internal view returns (IDynamicPynthRedeemer) {
-        return IDynamicPynthRedeemer(requireAndGetAddress(CONTRACT_DYNAMICPYNTHREDEEMER));
-    }
-
     function futuresMarketManager() internal view returns (IFuturesMarketManager) {
         return IFuturesMarketManager(requireAndGetAddress(CONTRACT_FUTURESMARKETMANAGER));
-    }
-
-    function wrapperFactory() internal view returns (IWrapperFactory) {
-        return IWrapperFactory(requireAndGetAddress(CONTRACT_WRAPPER_FACTORY));
     }
 
     function debtSnapshotStaleTime() external view returns (uint) {
@@ -199,8 +186,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         uint numValues = currencyKeys.length;
         uint[] memory values = new uint[](numValues);
         IPynth[] memory pynths = issuer().getPynths(currencyKeys);
-        uint discountRate = dynamicPynthRedeemer().getDiscountRate();
-
+ 
         for (uint i = 0; i < numValues; i++) {
             bytes32 key = currencyKeys[i];
             
@@ -232,10 +218,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
                 supply = supply.sub(etherCollateralSupply);
             }
 
-            uint value = supply.multiplyDecimalRound(rates[i]);
-            uint multiplier = (pynths[i].currencyKey() != pUSD) ? discountRate : SafeDecimalMath.unit();
-            
-            values[i] = value.multiplyDecimalRound(multiplier);
+
+            values[i] = supply.multiplyDecimalRound(rates[i]);
           
         }
         return values;
@@ -456,20 +440,6 @@ function toString(bytes memory data) public pure returns(string memory) {
 
     modifier onlyIssuerOrExchanger() {
         _onlyIssuerOrExchanger();
-        _;
-    }
-
-        function _onlyDebtIssuer() internal view {
-        bool isWrapper = wrapperFactory().isWrapper(msg.sender);
-
-        // owner included for debugging and fixing in emergency situation
-        bool isOwner = msg.sender == owner;
-
-        require(isOwner || isWrapper, "Only debt issuers may call this");
-    }
-
-    modifier onlyDebtIssuer() {
-        _onlyDebtIssuer();
         _;
     }
 }
