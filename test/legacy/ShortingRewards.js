@@ -10,6 +10,13 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 const { setupAllContracts, setupContract } = require('./setup');
 const { currentTime, toUnit, fastForward } = require('../utils')();
 
+
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
 let CollateralManager;
 let CollateralState;
 let CollateralManagerState;
@@ -134,6 +141,7 @@ contract('ShortingRewards', accounts => {
 			RewardsDistribution: rewardsDistribution,
 			PeriFinance: rewardsToken,
 			SystemSettings: systemSettings,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			pynths,

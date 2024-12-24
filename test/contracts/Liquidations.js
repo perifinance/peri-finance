@@ -48,7 +48,6 @@ contract('Liquidations', accounts => {
 		liquidations,
 		pUSDContract,
 		periFinance,
-		periFinanceState,
 		periFinanceProxy,
 		systemSettings,
 		systemStatus,
@@ -71,7 +70,6 @@ contract('Liquidations', accounts => {
 			Liquidations: liquidations,
 			PynthpUSD: pUSDContract,
 			PeriFinance: periFinance,
-			PeriFinanceState: periFinanceState,
 			ProxyERC20PeriFinance: periFinanceProxy,
 			SystemSettings: systemSettings,
 			SystemStatus: systemStatus,
@@ -97,7 +95,6 @@ contract('Liquidations', accounts => {
 				'SystemStatus', // test system status controls
 				'SystemSettings',
 				'PeriFinance',
-				'PeriFinanceState',
 				'CollateralManager',
 				'RewardEscrowV2', // required for Issuer._collateral() to load balances
 				'StakingState',
@@ -962,17 +959,7 @@ contract('Liquidations', accounts => {
 										'1' + '0'.repeat(12)
 									);
 								});
-								it.skip('then Alice issuance ratio is updated in feePoolState', async () => {
-									const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
-									const issuanceState = await periFinanceState.issuanceData(alice);
-
-									assert.bnEqual(
-										issuanceState.initialDebtOwnership,
-										accountsDebtEntry.debtPercentage
-									);
-
-									assert.bnEqual(issuanceState.debtEntryIndex, accountsDebtEntry.debtEntryIndex);
-								});
+						
 								describe('given carol has obtained pUSD to liquidate alice', () => {
 									const pUSD5 = toUnit('5');
 									const pUSD50 = toUnit('50');
@@ -1029,20 +1016,7 @@ contract('Liquidations', accounts => {
 											const totBalance = periBalance.add(usdcBalance).add(xautSA);
 											assert.bnEqual(totBalance, carolPERIBefore.add(PERI55));
 										});
-										it.skip('then Alice issuance ratio is updated in feePoolState', async () => {
-											const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
-											const issuanceState = await periFinanceState.issuanceData(alice);
-
-											assert.bnEqual(
-												issuanceState.initialDebtOwnership,
-												accountsDebtEntry.debtPercentage
-											);
-
-											assert.bnEqual(
-												issuanceState.debtEntryIndex,
-												accountsDebtEntry.debtEntryIndex
-											);
-										});
+						
 									});
 									describe('when carol liquidates Alice with 50 pUSD', () => {
 										let liquidationTransaction;
@@ -1093,20 +1067,7 @@ contract('Liquidations', accounts => {
 												.sub(alicePERIAfter.add(aliceSAAfter));
 											assert.bnEqual(usdcDiff, toUnit('55'));
 										});
-										it.skip('then Alice issuance ratio is updated in feePoolState', async () => {
-											const accountsDebtEntry = await feePoolState.getAccountsDebtEntry(alice, 0);
-											const issuanceState = await periFinanceState.issuanceData(alice);
-
-											assert.bnEqual(
-												issuanceState.initialDebtOwnership,
-												accountsDebtEntry.debtPercentage
-											);
-
-											assert.bnEqual(
-												issuanceState.debtEntryIndex,
-												accountsDebtEntry.debtEntryIndex
-											);
-										});
+						
 										it('then events AccountLiquidated are emitted', async () => {
 											assert.eventNEqual(liquidationTransaction, 'AccountLiquidated', 2, {
 												account: alice,

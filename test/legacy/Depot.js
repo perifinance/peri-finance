@@ -19,6 +19,13 @@ const {
 	setStatus,
 } = require('./helpers');
 
+
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
 const { mockToken, setupAllContracts } = require('./setup');
 
 const { GAS_PRICE } = require('../../hardhat.config');
@@ -61,6 +68,7 @@ contract('Depot', async accounts => {
 			ExchangeRates: exchangeRates,
 			SystemStatus: systemStatus,
 			PeriFinance: periFinance,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			mocks: {

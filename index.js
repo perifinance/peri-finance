@@ -609,10 +609,6 @@ const defaults = {
 		INTERACTION_DELAY: '3600', // 1 hour in secs
 	},
 
-	ETHER_WRAPPER_MAX_ETH: w3utils.toWei('5000'),
-	ETHER_WRAPPER_MINT_FEE_RATE: w3utils.toWei('0.005'), // 5 bps
-	ETHER_WRAPPER_BURN_FEE_RATE: '0',
-
 	FUTURES_MIN_KEEPER_FEE: w3utils.toWei('1'), // 1 pUSD min keeper fee
 	FUTURES_MAX_KEEPER_FEE: w3utils.toWei('1000'), // 1000 pUSD min keeper fee
 	FUTURES_LIQUIDATION_FEE_RATIO: w3utils.toWei('0.0035'), // 35 basis points liquidation incentive

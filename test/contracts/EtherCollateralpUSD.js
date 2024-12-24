@@ -138,6 +138,8 @@ contract('EtherCollateralpUSD', async accounts => {
 			ExchangeRates: exchangeRates,
 			SystemStatus: systemStatus,
 			CollateralManager: manager,
+			CircuitBreaker : circuitBreaker,
+
 		} = await setupAllContracts({
 			accounts,
 			mocks: {

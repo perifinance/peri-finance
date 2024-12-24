@@ -555,9 +555,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     //  * @notice Close the current fee period and start a new one.
     //  */
     // function _closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) internal {
-    //     etherWrapper().distributeFees();
-    //     wrapperFactory().distributeFees();
-
+ 
     //     // before closing the current fee period, set the recorded periBackedDebt and debtSharesSupply
     //     _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
     //     _recentFeePeriodsStorage(0).allNetworksSnxBackedDebt = allNetworksSnxBackedDebt;

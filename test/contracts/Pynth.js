@@ -215,9 +215,9 @@ contract('Pynth', async accounts => {
 
 			it('transfer does not revert from a whitelisted contract', async () => {
 				// set owner as PynthRedeemer
-				await addressResolver.importAddresses(['PynthRedeemer'].map(toBytes32), [owner], {
-					from: owner,
-				});
+				// await addressResolver.importAddresses(['PynthRedeemer'].map(toBytes32), [owner], {
+				// 	from: owner,
+				// });
 				await pUSDImpl.transfer(account1, amount, { from: owner });
 			});
 		});

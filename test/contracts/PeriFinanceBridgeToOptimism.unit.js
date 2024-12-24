@@ -15,7 +15,6 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 		smockedMessenger,
 		rewardsDistribution,
 		periBridgeToBase,
-		PeriFinanceBridgeEscrow,
 		FeePool,
 		randomAddress,
 	] = accounts;
@@ -83,7 +82,6 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					'RewardsDistribution',
 					'ovm:PeriFinanceBridgeToBase',
 					'RewardEscrowV2',
-					'PeriFinanceBridgeEscrow',
 				].map(toBytes32),
 				[
 					flexibleStorage.address,
@@ -96,7 +94,6 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					rewardsDistribution,
 					periBridgeToBase,
 					rewardEscrow.address,
-					PeriFinanceBridgeEscrow,
 				],
 				{ from: owner }
 			);
@@ -323,7 +320,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 
 						it('PERI is transferred from the user to the deposit contract', async () => {
 							periFinance.transferFrom.returnsAtCall(0, user1);
-							periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
+							//periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
 							periFinance.transferFrom.returnsAtCall(2, amount);
 						});
 
@@ -435,7 +432,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 
 					it('then PERI is transferred from the account to the bridge escrow', async () => {
 						periFinance.transferFrom.returnsAtCall(0, user1);
-						periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
+						//periFinance.transferFrom.returnsAtCall(1, PeriFinanceBridgeEscrow);
 						periFinance.transferFrom.returnsAtCall(2, amount);
 					});
 
@@ -535,7 +532,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 					});
 
 					it('PERI is transferred from the bridge to the bridge escrow', async () => {
-						periFinance.transfer.returnsAtCall(0, PeriFinanceBridgeEscrow);
+						//periFinance.transfer.returnsAtCall(0, PeriFinanceBridgeEscrow);
 						periFinance.transfer.returnsAtCall(1, amount);
 					});
 
@@ -591,7 +588,7 @@ contract('PeriFinanceBridgeToOptimism (unit tests)', accounts => {
 
 					it('then PERI is minted via MintablePeriFinance.finalizeWithdrawal', async () => {
 						expect(messenger.sendMessage).to.have.length(0);
-						periFinance.transferFrom.returnsAtCall(0, PeriFinanceBridgeEscrow);
+						//periFinance.transferFrom.returnsAtCall(0, PeriFinanceBridgeEscrow);
 						periFinance.transferFrom.returnsAtCall(1, user1);
 						periFinance.transferFrom.returnsAtCall(2, finalizeWithdrawalAmount);
 					});

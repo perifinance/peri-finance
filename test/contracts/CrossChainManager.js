@@ -10,6 +10,8 @@ const {
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
 	setExchangeFeeRateForPynths,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
 
 const { toBytes32 } = require('../..');
@@ -34,7 +36,6 @@ contract('CrossChainManager', async accounts => {
 		crossChainState,
 		debtCache,
 		periFinance,
-		/* periFinanceState, */
 		bridgeStatepUSD,
 		supplySchedule,
 		exchangeRates,
@@ -82,7 +83,6 @@ contract('CrossChainManager', async accounts => {
 			CrossChainState: crossChainState,
 			DebtCache: debtCache,
 			PeriFinance: periFinance,
-			/* PeriFinanceState: periFinanceState, */
 			ExchangeRates: exchangeRates,
 			SystemSettings: systemSettings,
 			BridgeStatepUSD: bridgeStatepUSD,
@@ -90,6 +90,7 @@ contract('CrossChainManager', async accounts => {
 			PynthpBTC: pBTCPynth,
 			PynthpETH: pETHPynth,
 			SupplySchedule: supplySchedule,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			pynths: ['pUSD', 'pBTC', 'pETH'],

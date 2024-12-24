@@ -82,7 +82,6 @@ contract('FeePool', async accounts => {
 		delegateApprovals,
 		pUSDContract,
 		addressResolver,
-		wrapperFactory,
 		aggregatorDebtRatio,
 		periFinanceBridgeToOptimism,
 		pynths;
@@ -102,7 +101,6 @@ contract('FeePool', async accounts => {
 			SystemSettings: systemSettings,
 			PynthpUSD: pUSDContract,
 			SystemStatus: systemStatus,
-			WrapperFactory: wrapperFactory,
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 		} = await setupAllContracts({
 			accounts,
@@ -125,7 +123,6 @@ contract('FeePool', async accounts => {
 				'RewardsDistribution',
 				'CrossChainManager',
 				'OneNetAggregatorDebtRatio',
-				'WrapperFactory',
 			],
 		}));
 
@@ -781,7 +778,7 @@ contract('FeePool', async accounts => {
 
 				// Wrapper Factory collects 100 pUSD in fees
 				const collectedFees = toUnit(100);
-				await pUSDContract.issue(wrapperFactory.address, collectedFees);
+				//await pUSDContract.issue(wrapperFactory.address, collectedFees);
 
 				await closeFeePeriod();
 

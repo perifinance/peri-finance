@@ -217,8 +217,6 @@ contract('MultiCollateralPynth', accounts => {
 					'FeePool',
 					'FuturesMarketManager',
 					'CollateralManager',
-					'EtherWrapper',
-					'WrapperFactory',
 				].map(toBytes32)
 			);
 		});

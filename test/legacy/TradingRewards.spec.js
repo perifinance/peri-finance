@@ -6,6 +6,13 @@ const { currentTime, toUnit, multiplyDecimal } = require('../utils')();
 const { setExchangeFeeRateForPynths, getDecodedLogs, decodedEventEqual } = require('./helpers');
 const { toBytes32 } = require('../..');
 
+
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
 /*
  * This tests the TradingRewards contract's integration
  * with the rest of the PeriFinance system.
@@ -78,6 +85,7 @@ contract('TradingRewards', accounts => {
 				PynthpETH: pETHContract,
 				PynthpBTC: pBTCContract,
 				SystemSettings: systemSettings,
+				CircuitBreaker : circuitBreaker,
 			} = await setupAllContracts({
 				accounts,
 				pynths,

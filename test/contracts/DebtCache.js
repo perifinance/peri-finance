@@ -58,11 +58,8 @@ contract('DebtCache', async accounts => {
 		pynths,
 		addressResolver,
 		exchanger,
-		dynamicPynthRedeemer,
 		// Futures market
 		futuresMarketManager,
-		wrapperFactory,
-		weth,
 		// MultiCollateral tests.
 		ceth,
 		// Short tests.
@@ -136,7 +133,6 @@ contract('DebtCache', async accounts => {
 		await debtCache.rebuildCache();
 		await feePool.rebuildCache();
 		await issuer.rebuildCache();
-		await wrapperFactory.rebuildCache();
 
 		await manager.addCollaterals([ceth.address], { from: owner });
 
@@ -236,24 +232,6 @@ contract('DebtCache', async accounts => {
 		await pUSDContract.approve(short.address, toUnit(100000), { from: account1 });
 	};
 
-	const setupDebtIssuer = async () => {
-		const etherWrapperCreateTx = await wrapperFactory.createWrapper(
-			weth.address,
-			pETH,
-			toBytes32('PynthpETH'),
-			{ from: owner }
-		);
-
-		// extract address from events
-		const etherWrapperAddress = etherWrapperCreateTx.logs.find(l => l.event === 'WrapperCreated')
-			.args.wrapperAddress;
-
-		await systemSettings.setWrapperMaxTokenAmount(etherWrapperAddress, toUnit('1000000'), {
-			from: owner,
-		});
-
-		return artifacts.require('Wrapper').at(etherWrapperAddress);
-	};
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
 	// care of resetting to this state
@@ -273,12 +251,10 @@ contract('DebtCache', async accounts => {
 
 			FeePool: feePool,
 			DebtCache: debtCache,
-			DynamicPynthRedeemer: dynamicPynthRedeemer,
 			Issuer: issuer,
 			AddressResolver: addressResolver,
 			Exchanger: exchanger,
 			FuturesMarketManager: futuresMarketManager,
-			WrapperFactory: wrapperFactory,
 			WETH: weth,
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 			'ext:AggregatorIssuedPynths': aggregatorIssuedPynths,
@@ -298,7 +274,6 @@ contract('DebtCache', async accounts => {
 				'Issuer',
 				// 'LiquidatorRewards',
 				'DebtCache',
-				'DynamicPynthRedeemer', // necessary for checking discountRate changes
 				'Exchanger', // necessary for burnPynths to check settlement of pUSD
 				'DelegateApprovals', // necessary for *OnBehalf functions
 				'FlexibleStorage',
@@ -306,7 +281,6 @@ contract('DebtCache', async accounts => {
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'CollateralUtil',
 				'FuturesMarketManager',
-				'WrapperFactory',
 				'CrossChainManager',
 				'WETH',
 			],
@@ -667,15 +641,6 @@ contract('DebtCache', async accounts => {
 						value: toUnit('10'),
 						from: account1,
 					});
-
-					// cause debt from WrapperFactory
-					const etherWrapper = await setupDebtIssuer();
-					const wrapperAmount = toUnit('1');
-
-					await weth.deposit({ from: account1, value: wrapperAmount });
-					await weth.approve(etherWrapper.address, wrapperAmount, { from: account1 });
-					await etherWrapper.mint(wrapperAmount, { from: account1 });
-
 					// test function
 					await debtCache.takeDebtSnapshot({ from: owner });
 				});

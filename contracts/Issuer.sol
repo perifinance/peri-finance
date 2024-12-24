@@ -89,7 +89,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
     bytes32 private constant CONTRACT_EXTOKENSTAKEMANAGER = "ExternalTokenStakeManager";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
-    bytes32 private constant CONTRACT_SYNTHREDEEMER = "PynthRedeemer";
     bytes32 private constant CONTRACT_PERIFINANCEBRIDGETOOPTIMISM = "PeriFinanceBridgeToOptimism";
 
     bytes32 private constant CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS = "ext:AggregatorIssuedPynths";
@@ -101,7 +100,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](16);
+        bytes32[] memory newAddresses = new bytes32[](15);
         newAddresses[0] = CONTRACT_PERIFINANCE;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -115,9 +114,8 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         newAddresses[10] = CONTRACT_CIRCUIT_BREAKER;
         newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
         newAddresses[12] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
-        newAddresses[13] = CONTRACT_SYNTHREDEEMER;
-        newAddresses[14] = CONTRACT_PERIFINANCEBRIDGETOOPTIMISM;
-        newAddresses[15] = CONTRACT_PERIFINANCEDEBTSHARE;
+        newAddresses[13] = CONTRACT_PERIFINANCEBRIDGETOOPTIMISM;
+        newAddresses[14] = CONTRACT_PERIFINANCEDEBTSHARE;
         // newAddresses[18] = CONTRACT_ETHERCOLLATERAL;
         // newAddresses[19] = CONTRACT_ETHERCOLLATERAL_PUSD;
         // newAddresses[20] = CONTRACT_PERIFINANCEESCROW;

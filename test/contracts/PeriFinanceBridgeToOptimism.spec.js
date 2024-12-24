@@ -158,7 +158,6 @@ contract('PeriFinanceBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					before('record balances before', async () => {
 						userBalanceBefore = await periFinance.balanceOf(owner);
-						//contractBalanceBefore = await periFinance.balanceOf(periFinanceBridgeEscrow.address);
 					});
 
 					before('perform a deposit to a separate address', async () => {
@@ -244,7 +243,7 @@ contract('PeriFinanceBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 
 					before('record balance before', async () => {
 						bridgeBalanceBefore = await periFinance.balanceOf(periFinanceBridgeToOptimism.address);
-						//escrowBalanceBefore = await periFinance.balanceOf(periFinanceBridgeEscrow.address);
+		
 					});
 
 					before('transfer amount to be distributed and distributeRewards', async () => {
@@ -267,12 +266,6 @@ contract('PeriFinanceBridgeToOptimism (spec tests) @ovm-skip', accounts => {
 						);
 					});
 
-					// it("increases the escrow's balance", async () => {
-					// 	assert.bnEqual(
-					// 		await periFinance.balanceOf(periFinanceBridgeEscrow.address),
-					// 		escrowBalanceBefore.add(amountToDistribute)
-					// 	);
-					// });
 				});
 			});
 		});

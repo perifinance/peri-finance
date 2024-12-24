@@ -48,10 +48,6 @@ library SystemSettingsLib {
 
     uint public constant MAX_SYNC_STALE_THRESHOLD = 1e18 / 10; // 10% cross chain sync threshold
 
-    int public constant MAX_WRAPPER_MINT_FEE_RATE = 1e18;
-
-    int public constant MAX_WRAPPER_BURN_FEE_RATE = 1e18;
-
     // Atomic block volume limit is encoded as uint192.
     uint public constant MAX_ATOMIC_VOLUME_PER_BLOCK = uint192(-1);
 

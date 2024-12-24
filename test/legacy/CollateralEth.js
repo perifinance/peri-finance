@@ -13,6 +13,12 @@ const { setupAllContracts, setupContract } = require('./setup');
 const { ensureOnlyExpectedMutativeFunctions, setStatus } = require('./helpers');
 
 const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
+const {
 	toBytes32,
 	constants: { ZERO_ADDRESS },
 } = require('../..');
@@ -103,6 +109,7 @@ contract('CollateralEth', async accounts => {
 			AddressResolver: addressResolver,
 			Issuer: issuer,
 			DebtCache: debtCache,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			pynths,

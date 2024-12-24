@@ -285,11 +285,7 @@ contract Pynth is Owned, IERC20, ExternStateToken, MixinResolver, IPynth {
         return
             // ordered to reduce gas for more frequent calls
             caller == resolver.getAddress("CollateralShort") ||
-            // not used frequently
-            caller == resolver.getAddress("PynthRedeemer") ||
-            caller == resolver.getAddress("WrapperFactory") || // transfer not used by users
             // legacy
-            caller == resolver.getAddress("NativeEtherWrapper") ||
             caller == resolver.getAddress("Depot");
     }
 

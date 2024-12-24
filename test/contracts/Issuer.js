@@ -6,9 +6,6 @@ const { assert, addSnapshotBeforeRestoreAfterEach } = require('./common');
 
 const { setupAllContracts, mockToken } = require('./setup');
 
-const MockEtherCollateral = artifacts.require('MockEtherCollateral');
-
-const MockEtherWrapper = artifacts.require('MockEtherWrapper');
 const MockAggregator = artifacts.require('MockAggregatorV2V3');
 
 const {
@@ -62,13 +59,12 @@ contract('Issuer via PeriFinance', async accounts => {
 		account6,
 		account7,
 		periFinanceBridgeToOptimism,
-		dynamicPynthRedeemer,
+
 	] = accounts;
 
 	let periFinance,
 		exchangeRates,
 		periFinanceProxy,
-		periFinanceState,
 		feePool,
 		// delegateApprovals,
 		systemStatus,
@@ -104,7 +100,6 @@ contract('Issuer via PeriFinance', async accounts => {
 		stables = ['USDC', 'DAI', 'PAXG'];
 		({
 			PeriFinance: periFinance,
-			PeriFinanceState: periFinanceState,
 			ProxyERC20PeriFinance: periFinanceProxy,
 			SystemStatus: systemStatus,
 			SystemSettings: systemSettings,
@@ -121,7 +116,6 @@ contract('Issuer via PeriFinance', async accounts => {
 			Issuer: issuer,
 			DelegateApprovals: delegateApprovals,
 			AddressResolver: addressResolver,
-			PynthRedeemer: pynthRedeemer,
 			PeriFinanceDebtShare: debtShares,
 			CircuitBreaker: circuitBreaker,
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
@@ -150,7 +144,6 @@ contract('Issuer via PeriFinance', async accounts => {
 				'FeePoolState',
 				'StakingState',
 				'CrossChainManager',
-				'PynthRedeemer',
 				//'PeriFinanceDebtShare',
 			],
 		}));
@@ -160,8 +153,8 @@ contract('Issuer via PeriFinance', async accounts => {
 
 		// mocks for bridge
 		await addressResolver.importAddresses(
-			['PeriFinanceBridgeToOptimism', 'DynamicPynthRedeemer'].map(toBytes32),
-			[periFinanceBridgeToOptimism, dynamicPynthRedeemer],
+			['PeriFinanceBridgeToOptimism'].map(toBytes32),
+			[periFinanceBridgeToOptimism],
 			{ from: owner }
 		);
 
@@ -211,8 +204,7 @@ contract('Issuer via PeriFinance', async accounts => {
 				'burnForRedemption',
 				'burnPynths',
 				'burnPynthsOnBehalf',
-				'burnPynthsToTarget',
-				'burnPynthsToTargetOnBehalf',
+
 				'issuePynthsWithoutDebt',
 				'burnPynthsWithoutDebt',
 				'burnAndIssuePynthsWithoutDebtCache',
@@ -259,16 +251,6 @@ contract('Issuer via PeriFinance', async accounts => {
 			});
 		});
 
-		it('burnAndIssuePynthsWithoutDebtCache() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.burnAndIssuePynthsWithoutDebtCache,
-				args: [account7, pETH, toUnit(1), toUnit(100)],
-				// full functionality of this method requires issuing pynths,
-				// so just test that its blocked here and don't include the trusted addr
-				accounts: [owner, account1],
-				reason: 'Only PynthRedeemer',
-			});
-		});
 
 		it('modifyDebtSharesForMigration() cannont be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
@@ -327,14 +309,7 @@ contract('Issuer via PeriFinance', async accounts => {
 				reason: 'Only PeriFinance',
 			});
 		});
-		it('burnPynthsToTarget() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.burnPynthsToTarget,
-				args: [account1],
-				accounts,
-				reason: 'Only PeriFinance',
-			});
-		});
+
 		it('liquidateAccount() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.liquidateAccount,
@@ -988,26 +963,15 @@ contract('Issuer via PeriFinance', async accounts => {
 									let txn;
 									beforeEach(async () => {
 										// base conditions
-										assert.equal(await pUSDContract.balanceOf(pynthRedeemer.address), '0');
-										assert.equal(await pynthRedeemer.redemptions(pynthProxy.address), '0');
-
+									
 										// now do the removal
 										txn = await issuer.removePynth(currencyKey, { from: owner });
 									});
 									it('emits an event', async () => {
 										assert.eventEqual(txn, 'PynthRemoved', [currencyKey, pynth.address]);
 									});
-									it('issues the equivalent amount of pUSD', async () => {
-										const amountOfpUSDIssued = await pUSDContract.balanceOf(pynthRedeemer.address);
-
-										// 100 units of pBTC at a rate of 2:1
-										assert.bnEqual(amountOfpUSDIssued, toUnit('200'));
-									});
-									it('it invokes deprecate on the redeemer via the proxy', async () => {
-										const redeemRate = await pynthRedeemer.redemptions(pynthProxy.address);
-
-										assert.bnEqual(redeemRate, toUnit('2'));
-									});
+						
+						
 									it('and total debt remains unchanged', async () => {
 										assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), totalIssuedPynths);
 									});
@@ -2894,50 +2858,7 @@ contract('Issuer via PeriFinance', async accounts => {
 				});
 			});
 
-			describe('when Wrapper is set', async () => {
-				it('should have zero totalIssuedPynths', async () => {
-					assert.bnEqual(
-						await periFinance.totalIssuedPynths(pUSD),
-						await periFinance.totalIssuedPynthsExcludeOtherCollateral(pUSD)
-					);
-				});
-				describe('depositing WETH on the Wrapper to issue pETH', async () => {
-					let etherWrapper;
-					beforeEach(async () => {
-						// mock etherWrapper
-						etherWrapper = await MockEtherWrapper.new({ from: owner });
-						await addressResolver.importAddresses(
-							[toBytes32('EtherWrapper')],
-							[etherWrapper.address],
-							{ from: owner }
-						);
-
-						// ensure DebtCache has the latest EtherWrapper
-						await debtCache.rebuildCache();
-					});
-
-					it('should be able to exclude pETH issued by EtherWrapper from totalIssuedPynths', async () => {
-						const totalSupplyBefore = await periFinance.totalIssuedPynths(pETH);
-
-						const amount = toUnit('10');
-
-						await etherWrapper.setTotalIssuedPynths(amount, { from: account1 });
-
-						// totalSupply of pynths should exclude Wrapper issued pETH
-						assert.bnEqual(
-							totalSupplyBefore,
-							await periFinance.totalIssuedPynthsExcludeOtherCollateral(pETH)
-						);
-
-						// totalIssuedPynths after includes amount issued
-						const { rate } = await exchangeRates.rateAndInvalid(pETH);
-						assert.bnEqual(
-							await periFinance.totalIssuedPynths(pETH),
-							totalSupplyBefore.add(divideDecimalRound(amount, rate))
-						);
-					});
-				});
-			});
+		
 
 			describe('burnForRedemption', () => {
 				it('only allowed by the pynth redeemer', async () => {
@@ -2963,10 +2884,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 					describe('when burnForRedemption is invoked on the user for 75 pETH', () => {
 						beforeEach(async () => {
-							// spoof the pynth redeemer
-							await addressResolver.importAddresses([toBytes32('PynthRedeemer')], [account6], {
-								from: owner,
-							});
+				
 							// rebuild the resolver cache in the issuer
 							await issuer.rebuildCache();
 							// now invoke the burn

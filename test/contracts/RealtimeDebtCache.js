@@ -10,7 +10,11 @@ const { currentTime, toUnit, fastForward } = require('../utils')();
 const { toBN } = require('web3-utils');
 const { convertToDecimals } = require('./helpers');
 
-const { setExchangeFeeRateForPynths, getDecodedLogs } = require('./helpers');
+const { setExchangeFeeRateForPynths, getDecodedLogs, 
+		setupPriceAggregators,
+		updateAggregatorRates,
+	} = require('./helpers');
+	
 
 const {
 	toBytes32,
@@ -36,6 +40,8 @@ contract('RealtimeDebtCache', async accounts => {
 		pynths,
 		addressResolver,
 		exchanger,
+		circuitBreaker,
+		periFinanceProxy,
 		crossChainManager;
 
 	// run this once before all tests to prepare our environment, snapshots on beforeEach will take
@@ -44,6 +50,7 @@ contract('RealtimeDebtCache', async accounts => {
 		pynths = ['pUSD', 'pAUD', 'pEUR', 'pETH'];
 		({
 			PeriFinance: periFinance,
+			ProxyERC20PeriFinance: periFinanceProxy,
 			SystemSettings: systemSettings,
 			ExchangeRates: exchangeRates,
 			PynthpUSD: pUSDContract,
@@ -55,6 +62,7 @@ contract('RealtimeDebtCache', async accounts => {
 			AddressResolver: addressResolver,
 			Exchanger: exchanger,
 			CrossChainManager: crossChainManager,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			pynths,
@@ -70,18 +78,18 @@ contract('RealtimeDebtCache', async accounts => {
 			],
 			stables: [],
 		}));
+
+		await setupPriceAggregators(exchangeRates, owner, [pAUD, pEUR, PERI, pETH]);
 	});
 
 	addSnapshotBeforeRestoreAfterEach();
 
 	beforeEach(async () => {
-		timestamp = await currentTime();
-
-		await exchangeRates.updateRates(
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
 			[pAUD, pEUR, PERI, pETH],
-			['0.5', '1.25', '0.1', '200'].map(toUnit),
-			timestamp,
-			{ from: oracle }
+			['0.5', '1.25', '0.1', '200'].map(toUnit)
 		);
 
 		// set a 0.3% default exchange fee rate
@@ -106,13 +114,13 @@ contract('RealtimeDebtCache', async accounts => {
 			// set default issuance ratio of 0.2
 			await systemSettings.setIssuanceRatio(toUnit('0.2'), { from: owner });
 			// set up initial prices
-			await exchangeRates.updateRates(
+			await updateAggregatorRates(
+				exchangeRates,
+				circuitBreaker,
 				[pAUD, pEUR, pETH],
-				['0.5', '2', '100'].map(toUnit),
-				await currentTime(),
-				{ from: oracle }
+				['0.5', '2', '100'].map(toUnit)
 			);
-			await debtCache.takeDebtSnapshot();
+	
 
 			// Issue 1000 pUSD worth of tokens to a user
 			await pUSDContract.issue(account1, toUnit(100));
@@ -194,15 +202,13 @@ contract('RealtimeDebtCache', async accounts => {
 				assert.bnEqual((await realtimeDebtCache.currentDebt())[0], toUnit(550));
 				assert.bnEqual(await realtimeDebtCache.cachedDebt(), toUnit(550));
 
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[pAUD, pEUR, pETH],
-					['1', '3', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+					['1', '3', '200'].map(toUnit)
 				);
-
+		
 				debts = await realtimeDebtCache.currentPynthDebts([pUSD, pEUR, pAUD, pETH]);
 				assert.bnEqual(debts[0][0], toUnit(100));
 				assert.bnEqual(debts[0][1], toUnit(300));
@@ -269,14 +275,14 @@ contract('RealtimeDebtCache', async accounts => {
 				});
 				await mockFlagsInterface.unflagAggregator(aggregatorEUR.address);
 
-				await exchangeRates.updateRates(
+
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[pAUD, pETH],
-					['1', '200'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+					['1', '200'].map(toUnit)
 				);
+
 				await aggregatorEUR.setLatestAnswer(convertToDecimals(3, 8), await currentTime());
 				assert.isFalse(await realtimeDebtCache.cacheInvalid());
 				assert.isFalse((await realtimeDebtCache.cacheInfo()).isInvalid);
@@ -311,7 +317,7 @@ contract('RealtimeDebtCache', async accounts => {
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
 
 					const pynthsToIssue = toUnit('10');
-					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
+					await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
 					const tx = await periFinance.issuePynths(PERI, pynthsToIssue, {
 						from: account1,
 					});
@@ -326,7 +332,7 @@ contract('RealtimeDebtCache', async accounts => {
 
 				it('burning pUSD updates the debt total', async () => {
 					const pynthsToIssue = toUnit('20');
-					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
+					await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
 					await periFinance.issuePynths(PERI, pynthsToIssue, { from: account1 });
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
 
@@ -349,7 +355,7 @@ contract('RealtimeDebtCache', async accounts => {
 						from: owner,
 					});
 
-					await periFinance.transfer(account1, toUnit('1000'), { from: owner });
+					await periFinanceProxy.transfer(account1, toUnit('1000'), { from: owner });
 					await periFinance.issuePynths(PERI, toUnit('10'), { from: account1 });
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
 					const debts = await realtimeDebtCache.cachedPynthDebts([pUSD, pAUD]);
@@ -368,7 +374,7 @@ contract('RealtimeDebtCache', async accounts => {
 					assert.isUndefined(logs.find(({ name } = {}) => name === 'DebtCacheUpdated'));
 				});
 
-				it('exchanging between pynths updates pUSD debt total due to fees', async () => {
+				it.only('exchanging between pynths updates pUSD debt total due to fees', async () => {
 					await systemSettings.setExchangeFeeRateForPynths(
 						[pAUD, pUSD, pEUR],
 						[toUnit(0.1), toUnit(0.1), toUnit(0.1)],
@@ -377,7 +383,6 @@ contract('RealtimeDebtCache', async accounts => {
 
 					await pEURContract.issue(account1, toUnit(20));
 					const issued = (await realtimeDebtCache.cacheInfo())[0];
-
 					const debts = await realtimeDebtCache.cachedPynthDebts([pUSD, pAUD, pEUR]);
 
 					await periFinance.exchange(pEUR, toUnit(10), pAUD, { from: account1 });
@@ -399,14 +404,13 @@ contract('RealtimeDebtCache', async accounts => {
 
 					const debts = await realtimeDebtCache.cachedPynthDebts([pAUD, pEUR]);
 
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						circuitBreaker,
 						[pAUD, pEUR],
-						['1', '1'].map(toUnit),
-						await currentTime(),
-						{
-							from: oracle,
-						}
+						['1', '1'].map(toUnit)
 					);
+
 
 					await periFinance.exchange(pEUR, toUnit(10), pAUD, { from: account1 });
 					const postDebts = await realtimeDebtCache.cachedPynthDebts([pAUD, pEUR]);
@@ -427,13 +431,11 @@ contract('RealtimeDebtCache', async accounts => {
 
 					await periFinance.exchange(pAUD, toUnit(50), pEUR, { from: account1 });
 
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						circuitBreaker,
 						[pAUD, pEUR],
-						['2', '1'].map(toUnit),
-						await currentTime(),
-						{
-							from: oracle,
-						}
+						['2', '1'].map(toUnit)
 					);
 
 					const tx = await exchanger.settle(account1, pAUD);

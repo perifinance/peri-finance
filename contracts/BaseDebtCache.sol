@@ -48,9 +48,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_ETHERCOLLATERAL = "EtherCollateral";
     bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
-    bytes32 private constant CONTRACT_WRAPPER_FACTORY = "WrapperFactory";
     bytes32 private constant CONTRACT_FUTURESMARKETMANAGER = "FuturesMarketManager";
-    bytes32 private constant CONTRACT_ETHER_WRAPPER = "EtherWrapper";
+
 
     constructor(address _owner, address _resolver) public Owned(_owner) MixinSystemSettings(_resolver) {}
 
@@ -58,7 +57,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](9);
+        bytes32[] memory newAddresses = new bytes32[](8);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
@@ -66,8 +65,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
         newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
         newAddresses[6] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[7] = CONTRACT_ETHER_WRAPPER;
-        newAddresses[8] = CONTRACT_FUTURESMARKETMANAGER;
+        newAddresses[7] = CONTRACT_FUTURESMARKETMANAGER;
         
         addresses = combineArrays(existingAddresses, newAddresses);
     }
@@ -276,10 +274,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         isInvalid = ratesAreInvalid || anyTotalLongRateIsInvalid || anyTotalShortRateIsInvalid;
         excludedDebt = longValue.add(shortValue);
 
-        // 2. EtherWrapper.
-        // Subtract pETH and pUSD issued by EtherWrapper.
-        //excludedDebt = excludedDebt.add(etherWrapper().totalIssuedPynths());
-
+    
         // 3. WrapperFactory.
         // Get the debt issued by the Wrappers.
         for (uint i = 0; i < currencyKeys.length; i++) {

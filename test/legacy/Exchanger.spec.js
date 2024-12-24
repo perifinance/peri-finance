@@ -26,6 +26,13 @@ const {
 	updateRatesWithDefaults,
 } = require('./helpers');
 
+
+const {
+	setupPriceAggregators,
+	updateAggregatorRates,
+} = require('./helpers');
+
+
 const {
 	toBytes32,
 	defaults: { WAITING_PERIOD_SECS, PRICE_DEVIATION_THRESHOLD_FACTOR },

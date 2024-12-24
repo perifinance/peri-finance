@@ -16,7 +16,10 @@ const {
 	setStatus,
 	onlyGivenAddressCanInvoke,
 	ensureOnlyExpectedMutativeFunctions,
+	setupPriceAggregators,
+	updateAggregatorRates,
 } = require('./helpers');
+
 
 const { toBytes32 } = require('../..');
 
@@ -146,6 +149,7 @@ contract('EtherCollateral', async accounts => {
 			AddressResolver: addressResolver,
 			ExchangeRates: exchangeRates,
 			SystemStatus: systemStatus,
+			CircuitBreaker : circuitBreaker,
 		} = await setupAllContracts({
 			accounts,
 			mocks: {

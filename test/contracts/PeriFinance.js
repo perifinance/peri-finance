@@ -80,7 +80,6 @@ contract('PeriFinance', async accounts => {
 			pynths: ['pUSD', 'pETH', 'pBTC'],
 			contracts: [
 				'PeriFinance',
-				'PeriFinanceState',
 				'SupplySchedule',
 				'AddressResolver',
 				'ExchangeRates',
