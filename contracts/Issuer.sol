@@ -1140,6 +1140,29 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         require(delegateApprovals().canBurnFor(burnForAddress, from), "Not approved to act on behalf");
     }
 
+    function getTargetRatio(address _account) external view returns (uint tRatio) {
+        (uint debtBalance, , ) = _debtBalanceOfAndTotalDebt(_debtShareBalanceOf(_account), pUSD);
+
+        (tRatio, , ) = exTokenManager().getTargetRatio(_account, debtBalance);
+    }
+
+
+    function getRatios(address _account, bool _checkRate)
+        external
+        view
+        returns (
+            uint tRatio,
+            uint cRatio,
+            uint exTRatio,
+            uint exEA,
+            uint exSR,
+            uint maxSR
+        )
+    {
+        (uint debtBalance, , uint periCol) = _debtsCollateral(_account, _checkRate);
+
+        return exTokenManager().getRatios(_account, debtBalance, periCol);
+    }
 
     function exStakingRatio(address _account)
         external

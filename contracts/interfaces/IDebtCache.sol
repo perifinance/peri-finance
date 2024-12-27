@@ -59,8 +59,6 @@ interface IDebtCache {
 
     function takeDebtSnapshot() external;
 
-    function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external;
-
     function updateCachedpUSDDebt(int amount) external;
 
     function importExcludedIssuedDebts(IDebtCache prevDebtCache, IIssuer prevIssuer) external;

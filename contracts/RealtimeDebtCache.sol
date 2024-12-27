@@ -101,16 +101,6 @@ contract RealtimeDebtCache is BaseDebtCache {
        // _updateDebtCacheValidity(currentlyInvalid);
     //}
 
-    function recordExcludedDebtChange(bytes32 currencyKey, int256 delta) external 
-        //onlyDebtIssuer 
-    {
-        // int256 newExcludedDebt = int256(_excludedIssuedDebt[currencyKey]) + delta;
-
-        // require(newExcludedDebt >= 0, "Excluded debt cannot become negative");
-
-        // _excludedIssuedDebt[currencyKey] = uint(newExcludedDebt);
-    }
-
     function updateCachedpUSDDebt(int amount) external
      //onlyIssuer
     {

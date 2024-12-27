@@ -139,17 +139,17 @@ contract PeriFinance is BasePeriFinance {
         return true;
     }
 
-    // function mint(address _user, uint _amount) external optionalProxy returns (bool) {
-    //     require(minterRole != address(0), "0 address");
-    //     require(minterRole == messageSender, "onlyMinter");
+    function mint(address _user, uint _amount) external optionalProxy returns (bool) {
+        require(minterRole != address(0), "0 address");
+        require(minterRole == messageSender, "onlyMinter");
 
-    //     // It won't change totalsupply since it is only for bridge purpose.
-    //     tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
+        // It won't change totalsupply since it is only for bridge purpose.
+        tokenState.setBalanceOf(_user, tokenState.balanceOf(_user).add(_amount));
 
-    //     emitTransfer(address(0), _user, _amount);
+        emitTransfer(address(0), _user, _amount);
 
-    //     return true;
-    // }
+        return true;
+    }
 
     function liquidateDelinquentAccount(address account, uint pusdAmount)
         external
@@ -210,6 +210,11 @@ contract PeriFinance is BasePeriFinance {
         require(_mintByProxy(account, amount), "MintFail");
 
         return true;
+    }
+
+    function setMinterRole(address _newMinter) external onlyOwner {
+        // If address is set to zero address, mint is not prohibited
+        minterRole = _newMinter;
     }
 
     function setBridgeValidator(address payable _bridgeValidator) external onlyOwner {

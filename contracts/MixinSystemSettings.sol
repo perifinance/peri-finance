@@ -214,6 +214,15 @@ contract MixinSystemSettings is MixinResolver {
         return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_SYNC_STALE_THRESHOLD);
     }
 
+
+    function getInteractionDelay(address collateral) internal view returns (uint) {
+        return
+            flexibleStorage().getUIntValue(
+                SETTING_CONTRACT_NAME,
+                keccak256(abi.encodePacked(SETTING_INTERACTION_DELAY, collateral))
+            );
+    }
+
      function getExTokenIssuanceRatio(bytes32 tokenKey) internal view returns (uint) {
         return
             flexibleStorage().getUIntValue(

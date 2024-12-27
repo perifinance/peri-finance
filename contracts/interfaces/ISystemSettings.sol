@@ -17,7 +17,6 @@ interface ISystemSettings {
 
     function liquidationRatio() external view returns (uint);
 
-    function liquidationEscrowDuration() external view returns (uint);
 
     function liquidationPenalty() external view returns (uint);
 

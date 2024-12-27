@@ -59,6 +59,8 @@ library SystemSettingsLib {
     uint public constant MIN_ATOMIC_VOLATILITY_CONSIDERATION_WINDOW = 60;
     uint public constant MAX_ATOMIC_VOLATILITY_CONSIDERATION_WINDOW = 86400;
 
+    
+
     // workaround for library not supporting public constants in sol v0.5
     function contractName() external view returns (bytes32) {
         return SETTINGS_CONTRACT_NAME;
@@ -267,9 +269,7 @@ library SystemSettingsLib {
     ) external {
         require(_flags != address(0), "Valid address must be given");
         flexibleStorage.setAddressValue(SETTINGS_CONTRACT_NAME, settingName, _flags);
-    }
-
-   
+    }  
 
     function setInteractionDelay(
         IFlexibleStorage flexibleStorage,
