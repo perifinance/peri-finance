@@ -27,7 +27,7 @@ interface IPeriFinance {
             uint totalSystemDebt
         );
 
-    function pynths(bytes32 currencyKey) external view returns (IPynth);
+    //function pynths(bytes32 currencyKey) external view returns (IPynth);
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint);
 
@@ -96,10 +96,6 @@ interface IPeriFinance {
         bytes32 destinationCurrencyKey,
         bytes32 trackingCode
     ) external returns (uint amountReceived, IVirtualPynth vPynth);
-
-    //function mint(address _user, uint _amount) external returns (bool);
-
-    //function mint() external returns (bool);
 
     function inflationalMint() external returns (bool);
 

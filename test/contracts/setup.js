@@ -2188,8 +2188,7 @@ const setupAllContracts = async ({
 			// 	from: owner,
 			// }),
 			returnObj['SystemSettings'].setLiquidationPenalty(LIQUIDATION_PENALTY, { from: owner }),
-			returnObj['SystemSettings'].setPeriLiquidationPenalty(PERI_LIQUIDATION_PENALTY, {from: owner}),
-
+		
 			// returnObj['SystemSettings'].setSelfLiquidationPenalty(SELF_LIQUIDATION_PENALTY, {
 			// 	from: owner,
 			// }),

@@ -190,6 +190,11 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit SyncStaleThresholdUpdated(_percent);
     }
 
+    function setExternalTokenQuota(uint _newQuota) external onlyOwner {
+        SystemSettingsLib.setExternalTokenQuota(flexibleStorage(), SETTING_SYNC_STALE_THRESHOLD, _newQuota);
+        emit ExternalTokenQuotaUpdated(_newQuota);
+    }
+
     // SIP-120 Atomic exchanges
     // max allowed volume per block for atomic exchanges
     function atomicMaxVolumePerBlock() external view returns (uint) {
@@ -391,6 +396,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit AggregatorWarningFlagsUpdated(_flags);
     }
 
+
+
     function setInteractionDelay(address _collateral, uint _interactionDelay) external onlyOwner {
         flexibleStorage().setInteractionDelay(SETTING_INTERACTION_DELAY, _collateral, _interactionDelay);
         emit InteractionDelayUpdated(_interactionDelay);
@@ -457,6 +464,25 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit CrossChainSynthTransferEnabledUpdated(_currencyKey, _value);
     }
 
+    function setExTokenIssuanceRatio(bytes32[] calldata tokenKeys, uint256[] calldata exTokenIssuanceRatios)
+        external
+        onlyOwner
+    {
+        require(tokenKeys.length == exTokenIssuanceRatios.length, "Array lengths dont match");
+        for (uint i = 0; i < tokenKeys.length; i++) {
+            SystemSettingsLib.setExTokenIssuanceRatio(flexibleStorage(), SETTING_LIQUIDATION_RATIOS, tokenKeys[i], exTokenIssuanceRatios[i]);
+            emit ExchangeFeeUpdated(tokenKeys[i], exTokenIssuanceRatios[i]);
+        }
+    }
+
+    function setLiquidationRatios(bytes32[] calldata _types, uint256[] calldata _liquidationRatios) external onlyOwner {
+        require(_types.length == _liquidationRatios.length, "Array lengths dont match");
+        for (uint i = 0; i < _types.length; i++) {
+            SystemSettingsLib.setLiquidationRatios(flexibleStorage(), SETTING_LIQUIDATION_RATIOS, _types[i], _liquidationRatios[i], getLiquidationPenalty(),  getIssuanceRatio());
+            emit LiquidationRatiosUpdated(_types[i], _liquidationRatios[i]);
+        }
+    }
+
     // ========== EVENTS ==========
     event CrossDomainMessageGasLimitChanged(CrossDomainMessageGasLimits gasLimitType, uint newLimit);
     event IssuanceRatioUpdated(uint newRatio);
@@ -483,12 +509,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event MinimumStakeTimeUpdated(uint minimumStakeTime);
     event DebtSnapshotStaleTimeUpdated(uint debtSnapshotStaleTime);
     event AggregatorWarningFlagsUpdated(address flags);
-    event EtherWrapperMaxETHUpdated(uint maxETH);
-    event EtherWrapperMintFeeRateUpdated(uint rate);
-    event EtherWrapperBurnFeeRateUpdated(uint rate);
-    event WrapperMaxTokenAmountUpdated(address wrapper, uint maxTokenAmount);
-    event WrapperMintFeeRateUpdated(address wrapper, int rate);
-    event WrapperBurnFeeRateUpdated(address wrapper, int rate);
+    event ExternalTokenQuotaUpdated(uint quota);
     event InteractionDelayUpdated(uint interactionDelay);
     event CollapseFeeRateUpdated(uint collapseFeeRate);
     event AtomicMaxVolumePerBlockUpdated(uint newMaxVolume);
@@ -499,4 +520,5 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event AtomicVolatilityUpdateThresholdUpdated(bytes32 synthKey, uint newVolatilityUpdateThreshold);
     event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 synthKey, bool enabled);
     event CrossChainSynthTransferEnabledUpdated(bytes32 synthKey, uint value);
+    event LiquidationRatiosUpdated(bytes32 types, uint liquidationRatio);
 }
