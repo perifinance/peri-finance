@@ -185,6 +185,10 @@ library SafeDecimalMath {
         return quotientTimesTen / 10;
     }
 
+    // Computes `a - b`, setting the value to 0 if b > a.
+    function floorsub(uint a, uint b) internal pure returns (uint) {
+        return b >= a ? 0 : a - b;
+    }
     /**
      * @dev Round down the value with given number
      */

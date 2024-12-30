@@ -21,12 +21,12 @@ contract RealtimeDebtCache is BaseDebtCache {
         return currentDebt;
     }
 
-    function cachedPynthDebt(bytes32 currencyKey) external view returns (uint) {
-        bytes32[] memory keyArray = new bytes32[](1);
-        keyArray[0] = currencyKey;
-        (uint[] memory debts, ) = _currentPynthDebts(keyArray);
-        return debts[0];
-    }
+    // function cachedPynthDebt(bytes32 currencyKey) external view returns (uint) {
+    //     bytes32[] memory keyArray = new bytes32[](1);
+    //     keyArray[0] = currencyKey;
+    //     (uint[] memory debts, ) = _currentPynthDebts(keyArray);
+    //     return debts[0];
+    // }
 
     function cacheTimestamp() external view returns (uint) {
         return block.timestamp;
@@ -41,10 +41,10 @@ contract RealtimeDebtCache is BaseDebtCache {
         return invalid;
     }
 
-    function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues) {
-        (uint[] memory debts, ) = _currentPynthDebts(currencyKeys);
-        return debts;
-    }
+    // function cachedPynthDebts(bytes32[] calldata currencyKeys) external view returns (uint[] memory debtValues) {
+    //     (uint[] memory debts, ) = _currentPynthDebts(currencyKeys);
+    //     return debts;
+    // }
 
     function cacheInfo()
         external

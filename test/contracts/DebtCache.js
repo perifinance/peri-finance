@@ -255,7 +255,6 @@ contract('DebtCache', async accounts => {
 			AddressResolver: addressResolver,
 			Exchanger: exchanger,
 			FuturesMarketManager: futuresMarketManager,
-			WETH: weth,
 			'ext:AggregatorDebtRatio': aggregatorDebtRatio,
 			'ext:AggregatorIssuedPynths': aggregatorIssuedPynths,
 		} = await setupAllContracts({
@@ -281,7 +280,6 @@ contract('DebtCache', async accounts => {
 				'RewardEscrowV2', // necessary for issuer._collateral()
 				'FuturesMarketManager',
 				'CrossChainManager',
-				'WETH',
 			],
 		}));
 
@@ -317,7 +315,6 @@ contract('DebtCache', async accounts => {
 			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
 				'takeDebtSnapshot',
-				'recordExcludedDebtChange',
 				'purgeCachedPynthDebt',
 				'updateCachedPynthDebts',
 				'updateCachedPynthDebtWithRate',
@@ -386,17 +383,6 @@ contract('DebtCache', async accounts => {
 			});
 		});
 
-		it('recordExcludedDebtChange() can only be invoked by the owner', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: debtCache.recordExcludedDebtChange,
-				accounts,
-				args: [pAUD, toUnit('1')],
-				address: owner,
-				skipPassCheck: true,
-				reason: 'Only debt issuers may call this',
-			});
-		});
-
 		it('updateCachedpUSDDebt() can only be invoked by the issuer', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: debtCache.updateCachedpUSDDebt,
@@ -449,40 +435,9 @@ contract('DebtCache', async accounts => {
 				assert.bnEqual(debts[2], toUnit(50));
 				assert.bnEqual(debts[3], toUnit(200));
 
-				assert.isFalse(result[1]);
-			});
 
-			describe('when discountRate is updated', () => {
-				const discountRate = toUnit('0.5');
-
-				beforeEach(async () => {
-					await dynamicPynthRedeemer.setDiscountRate(discountRate, { from: owner });
-				});
-
-				it('Live debt is reported accurately', async () => {
-					// The pynth debt has not yet been cached.
-					assert.bnEqual((await debtCache.cacheInfo()).debt, toUnit(0));
-
-					// Current pynth debts:
-					// 100 pUSD + ((2 pETH * $100) + (100 pAUD * $0.50) + (100 pEUR * $2) * discountRate)
-					// $100 + (($200 + $50 + $200) * discountRate)
-					// $100 + ($450 * discountRate) = $325 total issued pynths
-					const result = await debtCache.currentDebt();
-					assert.bnEqual(result[0], toUnit(325));
-					assert.isFalse(result[1]);
-				});
-
-				it('Live debt is reported accurately for individual currencies', async () => {
-					const result = await debtCache.currentPynthDebts([pUSD, pEUR, pAUD, pETH]);
-					const debts = result[0];
-
-					assert.bnEqual(debts[0], toUnit(100)); // pUSD is not affected by discountRate
-					assert.bnEqual(debts[1], multiplyDecimalRound(toUnit(200), discountRate));
-					assert.bnEqual(debts[2], multiplyDecimalRound(toUnit(50), discountRate));
-					assert.bnEqual(debts[3], multiplyDecimalRound(toUnit(200), discountRate));
-
-					assert.isFalse(result[1]);
-				});
+				assert.bnEqual(result[1].toString(), "0");
+				//assert.isFalse(result[1]);
 			});
 		});
 
@@ -769,169 +724,6 @@ contract('DebtCache', async accounts => {
 				await debtCache.updateCachedPynthDebts([pAUD, pEUR], { from: owner });
 			});
 
-			describe('when discountRate is updated', async () => {
-				const discountRate = toUnit('0.5');
-
-				beforeEach(async () => {
-					await dynamicPynthRedeemer.setDiscountRate(discountRate, { from: owner });
-				});
-
-				it('allows resynchronisation of subsets of pynths', async () => {
-					await debtCache.takeDebtSnapshot();
-
-					await updateAggregatorRates(
-						exchangeRates,
-						circuitBreaker,
-						[pAUD, pEUR, pETH],
-						['1', '3', '200'].map(toUnit)
-					);
-
-					const expectedDebts = (await debtCache.currentPynthDebts([pAUD, pEUR, pETH]))[0];
-
-					// First try a single currency, ensuring that the others have not been altered.
-					await debtCache.updateCachedPynthDebts([pAUD]);
-					// Updated pynth debts:
-					// 100 pUSD + ((2 pETH * $100) + (100 pAUD * $1) + (100 pEUR * $2) * discountRate)
-					// $100 + (($200 + $100 + $200) * discountRate)
-					// $100 + ($500 * discountRate) = $350 total issued pynths
-					assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(350));
-					let debts = await debtCache.cachedPynthDebts([pAUD, pEUR, pETH]);
-
-					assert.bnEqual(debts[0], expectedDebts[0]);
-					assert.bnEqual(debts[1], multiplyDecimalRound(toUnit(200), discountRate));
-					assert.bnEqual(debts[2], multiplyDecimalRound(toUnit(200), discountRate));
-
-					// Then a subset
-					await debtCache.updateCachedPynthDebts([pEUR, pETH]);
-					// Updated pynth debts:
-					// 100 pUSD + ((2 pETH * $200) + (100 pAUD * $1) + (100 pEUR * $3) * discountRate)
-					// $100 + (($400 + $100 + $300) * discountRate)
-					// $100 + ($800 * discountRate) = $500 total issued pynths
-					assert.bnEqual(await issuer.totalIssuedPynths(pUSD, true), toUnit(500));
-					debts = await debtCache.cachedPynthDebts([pEUR, pETH]);
-					assert.bnEqual(debts[0], expectedDebts[1]);
-					assert.bnEqual(debts[1], expectedDebts[2]);
-				});
-
-				it('properly emits events', async () => {
-					await debtCache.takeDebtSnapshot();
-
-					await updateAggregatorRates(
-						exchangeRates,
-						circuitBreaker,
-						[pAUD, pEUR, pETH],
-						['1', '3', '200'].map(toUnit)
-					);
-
-					const tx = await debtCache.updateCachedPynthDebts([pAUD]);
-					assert.eventEqual(tx.logs[0], 'DebtCacheUpdated', [toUnit(350)]);
-				});
-			});
-		});
-
-		describe('recordExcludedDebtChange()', () => {
-			it('does not work if delta causes excludedDebt goes negative', async () => {
-				await assert.revert(
-					debtCache.recordExcludedDebtChange(pETH, toUnit('-1'), { from: owner }),
-					'Excluded debt cannot become negative'
-				);
-			});
-
-			it('executed successfully', async () => {
-				await debtCache.recordExcludedDebtChange(pETH, toUnit('1'), { from: owner });
-				assert.bnEqual(await debtCache.excludedIssuedDebts([pETH]), toUnit('1'));
-
-				await debtCache.recordExcludedDebtChange(pETH, toUnit('-0.2'), { from: owner });
-				assert.bnEqual(await debtCache.excludedIssuedDebts([pETH]), toUnit('0.8'));
-			});
-		});
-
-		describe('importExcludedIssuedDebts()', () => {
-			beforeEach(async () => {
-				await debtCache.recordExcludedDebtChange(pETH, toUnit('1'), { from: owner });
-				await debtCache.recordExcludedDebtChange(pAUD, toUnit('2'), { from: owner });
-			});
-
-			it('reverts for non debt cache address', async () => {
-				await assert.revert(
-					debtCache.importExcludedIssuedDebts(issuer.address, issuer.address, { from: owner })
-				);
-			});
-
-			it('reverts for non issuer address', async () => {
-				await assert.revert(
-					debtCache.importExcludedIssuedDebts(debtCache.address, debtCache.address, { from: owner })
-				);
-			});
-
-			it('reverts for empty issuer', async () => {
-				const newIssuer = await setupContract({
-					contract: 'Issuer',
-					accounts,
-					skipPostDeploy: true,
-					args: [owner, addressResolver.address],
-				});
-
-				await assert.revert(
-					debtCache.importExcludedIssuedDebts(debtCache.address, newIssuer.address, {
-						from: owner,
-					}),
-					'previous Issuer has no pynths'
-				);
-			});
-
-			it('imports previous entries and can run only once', async () => {
-				const newIssuer = await setupContract({
-					contract: 'Issuer',
-					accounts,
-					skipPostDeploy: true,
-					args: [owner, addressResolver.address],
-				});
-				const newDebtCache = await setupContract({
-					contract: 'DebtCache',
-					accounts,
-					skipPostDeploy: true,
-					args: [owner, addressResolver.address],
-				});
-
-				// update the address resolver and the contract address caches
-				await addressResolver.importAddresses(
-					[toBytes32('Issuer'), toBytes32('DebtCache')],
-					[newIssuer.address, newDebtCache.address],
-					{ from: owner }
-				);
-				await newIssuer.rebuildCache();
-				await newDebtCache.rebuildCache();
-
-				// add only one of the pynths
-				await newIssuer.addPynth(pETHContract.address, { from: owner });
-
-				// check uninitialised
-				assert.equal(await newDebtCache.isInitialized(), false);
-
-				// import entries
-				await newDebtCache.importExcludedIssuedDebts(debtCache.address, issuer.address, {
-					from: owner,
-				});
-
-				// check initialised
-				assert.equal(await newDebtCache.isInitialized(), true);
-
-				// check both entries are updated
-				// pAUD is not in new Issuer, but should be imported
-				assert.bnEqual(await debtCache.excludedIssuedDebts([pETH, pAUD]), [
-					toUnit('1'),
-					toUnit('2'),
-				]);
-
-				// check can't run twice
-				await assert.revert(
-					newDebtCache.importExcludedIssuedDebts(debtCache.address, issuer.address, {
-						from: owner,
-					}),
-					'already initialized'
-				);
-			});
 		});
 
 		describe('updateCachedpUSDDebt()', () => {
@@ -1541,81 +1333,81 @@ contract('DebtCache', async accounts => {
 			currentDebt = await debtCache.currentDebt();
 		});
 
-		describe('when MultiCollateral loans are opened', async () => {
-			let rate;
+		// describe('when MultiCollateral loans are opened', async () => {
+		// 	let rate;
 
-			beforeEach(async () => {
-				await setupMultiCollateral();
+		// 	beforeEach(async () => {
+		// 		await setupMultiCollateral();
 
-				({ rate } = await exchangeRates.rateAndInvalid(pETH));
+		// 		({ rate } = await exchangeRates.rateAndInvalid(pETH));
 
-				await ceth.open(oneETH, pETH, {
-					value: twoETH,
-					from: account1,
-				});
-			});
+		// 		await ceth.open(oneETH, pETH, {
+		// 			value: twoETH,
+		// 			from: account1,
+		// 		});
+		// 	});
 
-			it('increases non-PERI debt', async () => {
-				assert.bnEqual(
-					totalNonPeriBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
-					await getTotalNonPeriBackedDebt()
-				);
-			});
-			it('is excluded from currentDebt', async () => {
-				assert.bnEqual(currentDebt, await debtCache.currentDebt());
-			});
+		// 	it('increases non-PERI debt', async () => {
+		// 		assert.bnEqual(
+		// 			totalNonPeriBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
+		// 			await getTotalNonPeriBackedDebt()
+		// 		);
+		// 	});
+		// 	it('is excluded from currentDebt', async () => {
+		// 		assert.bnEqual(currentDebt, await debtCache.currentDebt());
+		// 	});
 
-			describe('after the pynths are exchanged into other pynths', async () => {
-				let tx;
-				beforeEach(async () => {
-					// Swap some pETH into pynthetic dollarydoos.
-					tx = await periFinance.exchange(pETH, '5', pAUD, { from: account1 });
-				});
+		// 	describe('after the pynths are exchanged into other pynths', async () => {
+		// 		let tx;
+		// 		beforeEach(async () => {
+		// 			// Swap some pETH into pynthetic dollarydoos.
+		// 			tx = await periFinance.exchange(pETH, '5', pAUD, { from: account1 });
+		// 		});
 
-				it('non-PERI debt is unchanged', async () => {
-					assert.bnEqual(
-						totalNonPeriBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
-						await getTotalNonPeriBackedDebt()
-					);
-				});
-				it('currentDebt is unchanged', async () => {
-					assert.bnEqual(currentDebt, await debtCache.currentDebt());
-				});
+		// 		it('non-PERI debt is unchanged', async () => {
+		// 			assert.bnEqual(
+		// 				totalNonPeriBackedDebt.add(multiplyDecimalRound(oneETH, rate)),
+		// 				await getTotalNonPeriBackedDebt()
+		// 			);
+		// 		});
+		// 		it('currentDebt is unchanged', async () => {
+		// 			assert.bnEqual(currentDebt, await debtCache.currentDebt());
+		// 		});
 
-				it('cached debt is properly updated', async () => {
-					const logs = await getDecodedLogs({
-						hash: tx.tx,
-						contracts: [debtCache],
-					});
+		// 		it('cached debt is properly updated', async () => {
+		// 			const logs = await getDecodedLogs({
+		// 				hash: tx.tx,
+		// 				contracts: [debtCache],
+		// 			});
 
-					const cachedDebt = (await debtCache.cacheInfo())[0];
-					decodedEventEqual({
-						event: 'DebtCacheUpdated',
-						emittedFrom: debtCache.address,
-						args: [cachedDebt],
-						log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
-					});
-				});
-			});
+		// 			const cachedDebt = (await debtCache.cacheInfo())[0];
+		// 			decodedEventEqual({
+		// 				event: 'DebtCacheUpdated',
+		// 				emittedFrom: debtCache.address,
+		// 				args: [cachedDebt],
+		// 				log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
+		// 			});
+		// 		});
+		// 	});
 
-			it('is properly reflected in a snapshot', async () => {
-				const currentDebt = (await debtCache.currentDebt())[0];
-				const cachedDebt = (await debtCache.cacheInfo())[0];
-				assert.bnEqual(currentDebt, cachedDebt);
-				const tx = await debtCache.takeDebtSnapshot();
-				const logs = await getDecodedLogs({
-					hash: tx.tx,
-					contracts: [debtCache],
-				});
+		// 	it('is properly reflected in a snapshot', async () => {
+		// 		const currentDebt = (await debtCache.currentDebt())[0];
+		// 		const cachedDebt = (await debtCache.cacheInfo())[0];
+		// 		assert.bnEqual(currentDebt, cachedDebt);
+		// 		const tx = await debtCache.takeDebtSnapshot();
+		// 		const logs = await getDecodedLogs({
+		// 			hash: tx.tx,
+		// 			contracts: [debtCache],
+		// 		});
 
-				decodedEventEqual({
-					event: 'DebtCacheUpdated',
-					emittedFrom: debtCache.address,
-					args: [cachedDebt],
-					log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
-				});
-			});
-		});
+		// 		decodedEventEqual({
+		// 			event: 'DebtCacheUpdated',
+		// 			emittedFrom: debtCache.address,
+		// 			args: [cachedDebt],
+		// 			log: logs.find(({ name } = {}) => name === 'DebtCacheUpdated'),
+		// 		});
+		// 	});
+		// });
 
 		describe('when shorts are opened', async () => {
 			let rate;

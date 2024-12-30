@@ -33,23 +33,24 @@ contract DebtCache is BaseDebtCache {
      */
     function takeDebtSnapshot() external requireSystemActiveIfNotOwner {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
-        (uint[] memory values, bool isInvalid) = _currentPynthDebts(currencyKeys);
+        (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentPynthDebts(currencyKeys);
 
-        // Subtract the USD value of all shorts.
-        (uint shortValue, ) = collateralManager().totalShort();
-
+            // The total SNX-backed debt is the debt of futures markets plus the debt of circulating synths.
+        uint periCollateralDebt = futuresDebt;
+        _cachedPynthDebt[FUTURES_DEBT_KEY] = futuresDebt;
         uint numValues = values.length;
-        uint periCollateralDebt;
         for (uint i; i < numValues; i++) {
             uint value = values[i];
-
             periCollateralDebt = periCollateralDebt.add(value);
             _cachedPynthDebt[currencyKeys[i]] = value;
         }
 
-        _cachedDebt = periCollateralDebt.sub(shortValue);
+        // Subtract out the excluded non-SNX backed debt from our total
+        _cachedPynthDebt[EXCLUDED_DEBT_KEY] = excludedDebt;
+        uint newDebt = periCollateralDebt.floorsub(excludedDebt);
+        _cachedDebt = newDebt;
         _cacheTimestamp = block.timestamp;
-        emit DebtCacheUpdated(periCollateralDebt);
+        emit DebtCacheUpdated(newDebt);
         emit DebtCacheSnapshotTaken(block.timestamp);
 
         // (in)validate the cache if necessary

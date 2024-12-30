@@ -226,16 +226,26 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     function _currentPynthDebts(bytes32[] memory currencyKeys)
         internal
         view
-        returns (uint[] memory periIssuedDebts, bool anyRateIsInvalid)
+        returns (uint[] memory periIssuedDebts,
+            uint _futuresDebt,
+            uint _excludedDebt,
+            bool anyRateIsInvalid)
     {
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
-        return (_issuedPynthValues(currencyKeys, rates), isInvalid);
+           uint[] memory values = _issuedPynthValues(currencyKeys, rates);
+        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
+        (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
+
+        return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
     }
 
     function currentPynthDebts(bytes32[] calldata currencyKeys)
         external
         view
-        returns (uint[] memory debtValues, bool anyRateIsInvalid)
+        returns (uint[] memory debtValues,
+            uint futuresDebt,
+            uint excludedDebt, 
+            bool anyRateIsInvalid)
     {
         return _currentPynthDebts(currencyKeys);
     }
@@ -335,28 +345,27 @@ function toString(bytes memory data) public pure returns(string memory) {
 }
 
     function _currentDebt() internal view returns (uint debt, bool anyRateIsInvalid) {
-        (uint[] memory values, bool isInvalid) = _currentPynthDebts(issuer().availableCurrencyKeys());
+       bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
+        (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
+
+        // Sum all issued synth values based on their supply.
+        uint[] memory values = _issuedPynthValues(currencyKeys, rates);
+        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
+
         uint numValues = values.length;
         uint total;
         for (uint i; i < numValues; i++) {
             total = total.add(values[i]);
         }
 
-        //require(false, uint2str(values[2]));
-
-        // subtract the USD value of all shorts.
-        (uint pusdValue, bool shortInvalid) = collateralManager().totalShort();
-
-        total = total.sub(pusdValue);
-
-            // Add in the debt accounted for by futures
+        // Add in the debt accounted for by futures
         (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
         total = total.add(futuresDebt);
 
+        // Ensure that if the excluded non-SNX debt exceeds SNX-backed debt, no overflow occurs
+        total = total < excludedDebt ? 0 : total.sub(excludedDebt);
 
-        isInvalid = isInvalid || shortInvalid || futuresDebtIsInvalid;
-
-        return (total, isInvalid);
+        return (total, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
     }
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid) {

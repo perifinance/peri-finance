@@ -22,8 +22,8 @@ interface IDebtCache {
         view
         returns (
             uint[] memory debtValues,
-            // uint futuresDebt,
-            // uint excludedDebt,
+            uint futuresDebt,
+            uint excludedDebt,
             bool anyRateIsInvalid
         );
 

@@ -178,6 +178,7 @@ module.exports = ({ web3 } = {}) => {
 			throw new Error(`Error converting number ${amount} to precise unit, invalid value`);
 		}
 
+		amount = amount.toString();
 		// Split it into a whole and fractional part
 		// eslint-disable-next-line prefer-const
 		let [whole, fraction, ...rest] = amount.split('.');
