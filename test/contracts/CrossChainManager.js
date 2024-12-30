@@ -42,20 +42,21 @@ contract('CrossChainManager', async accounts => {
 		pUSDPynth,
 		pBTCPynth,
 		pETHPynth,
+		circuitBreaker,
 		systemSettings;
 
 	// Updates rates with defaults so they're not stale.
 	const updateRatesWithDefaults = async () => {
 		const timestamp = await currentTime();
-
-		await exchangeRates.updateRates(
+		
+		
+		await updateAggregatorRates(
+			exchangeRates,
+			circuitBreaker,
 			[pBTC, pETH, PERI],
-			['40000', '2000', '0.4'].map(toUnit),
-			timestamp,
-			{
-				from: oracle,
-			}
+			['40000', '2000', '0.4'].map(toUnit)
 		);
+
 		await debtCache.takeDebtSnapshot();
 	};
 
@@ -114,6 +115,8 @@ contract('CrossChainManager', async accounts => {
 			],
 		}));
 		await systemSettings.setIssuanceRatio(toUnit('0.25'), { from: owner });
+
+		await setupPriceAggregators(exchangeRates, owner, [pUSD, pETH, pBTC, PERI]);
 	});
 
 	before(async () => {
@@ -238,6 +241,7 @@ contract('CrossChainManager', async accounts => {
 				const activeDebtL = await crossChainManager.currentNetworkActiveDebt();
 				const crossIssuedDebt = await crossChainManager.crossNetworkIssuedDebtAll();
 				const curNetDebtRateL = await crossChainManager.currentNetworkDebtPercentage();
+				
 				const curNetDebtRate = divideDecimalRoundPrecise(
 					issuedDebtL,
 					crossIssuedDebt.add(issuedDebtL)
@@ -262,14 +266,11 @@ contract('CrossChainManager', async accounts => {
 				syncNetworks(true);
 
 				const timestamp = await currentTime();
-
-				await exchangeRates.updateRates(
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
 					[pBTC, pETH, PERI],
-					['4100', '2010', '0.5'].map(toUnit),
-					timestamp,
-					{
-						from: oracle,
-					}
+					['4100', '2010', '0.5'].map(toUnit)
 				);
 
 				await debtCache.takeDebtSnapshot();
@@ -378,11 +379,12 @@ contract('CrossChainManager', async accounts => {
 			});
 
 			it('ISSUED DEBTs should not be affected by price change', async () => {
-				await exchangeRates.updateRates([toBytes32('PERI')], [toUnit('4')], await currentTime(), {
-					from: oracle,
-				});
-
-				debtCache.takeDebtSnapshot();
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[PERI],
+					['4'].map(toUnit)
+				);
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
@@ -395,16 +397,12 @@ contract('CrossChainManager', async accounts => {
 				await periFinance.exchange(pUSD, toUnit('10000'), pETH, { from: account1 });
 				await periFinance.exchange(pUSD, toUnit('10000'), pBTC, { from: account2 });
 
-				await exchangeRates.updateRates(
-					['pBTC', 'pETH'].map(toBytes32),
-					['50000', '2500'].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[pBTC, pETH],
+					['50000', '2500'].map(toUnit)
 				);
-
-				debtCache.takeDebtSnapshot();
 
 				const issuedDebtBridged = await crossChainManager.currentNetworkIssuedDebt();
 				const adaptedIssuedDebtBridged = await crossChainManager.currentNetworkIssuedDebtOf(
@@ -419,30 +417,45 @@ contract('CrossChainManager', async accounts => {
 			});
 
 			it('ACTIVE DEBTs should be affected by price change', async () => {
-				await exchangeRates.updateRates([toBytes32('PERI')], [toUnit('4')], await currentTime(), {
-					from: oracle,
-				});
 
-				debtCache.takeDebtSnapshot();
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[PERI],
+					['4'].map(toUnit)
+				);
 
 				await periFinance.issueMaxPynths({ from: account1 });
 				await periFinance.issueMaxPynths({ from: account2 });
-
+				console.log((await pUSDPynth.totalSupply()).toString() + "KK");
+				
 				await periFinance.exchange(pUSD, toUnit('10000'), pETH, { from: account1 });
+
+
+				console.log((await pUSDPynth.totalSupply()).toString() + "KK");
 				await periFinance.exchange(pUSD, toUnit('10000'), pBTC, { from: account2 });
+
+				
 
 				const eTHPrice = 2100;
 				const bTCPrice = 43000;
-				await exchangeRates.updateRates(
-					['pBTC', 'pETH'].map(toBytes32),
-					[bTCPrice, eTHPrice].map(toUnit),
-					await currentTime(),
-					{
-						from: oracle,
-					}
+
+		
+				await updateAggregatorRates(
+					exchangeRates,
+					circuitBreaker,
+					[pBTC, pETH],
+					[bTCPrice, eTHPrice].map(toUnit)
 				);
 
-				debtCache.takeDebtSnapshot();
+
+				await debtCache.takeDebtSnapshot();
+
+				let adaptedDebtBridged2 = await crossChainManager.currentNetworkActiveDebtOf(
+					toBytes32('pUSD')
+				);
+				console.log(adaptedDebtBridged2.totalSystemValue.toString() + "KK");
+
 
 				const pUSDBalanceOfAcc1 = await pUSDPynth.balanceOf(account1);
 				const pETHBalanceOfAcc1 = await pETHPynth.balanceOf(account1);
@@ -466,8 +479,17 @@ contract('CrossChainManager', async accounts => {
 						.add(pUSDBalance)
 						.add(pETHTopUSDTValue)
 						.add(pBTCTopUSDTValue),
+						
 					curNetDebtRate
-				);
+				)
+
+				console.log(crossActiveDebt.toString());
+				console.log(fee.toString());
+				console.log(pUSDBalance.toString());
+				console.log(pETHTopUSDTValue.toString());
+				console.log(pBTCTopUSDTValue.toString());
+
+
 
 				assert.bnEqual(adaptedDebtBridged.totalSystemValue, totalActiveDebt);
 			});
@@ -493,18 +515,13 @@ contract('CrossChainManager', async accounts => {
 					const minStakingPeriod = await systemSettings.minimumStakeTime();
 					await fastForward(minStakingPeriod);
 
-					const timestamp = await currentTime();
-
-					await exchangeRates.updateRates(
+					await updateAggregatorRates(
+						exchangeRates,
+						circuitBreaker,
 						[pBTC, pETH, PERI],
-						['4100', '2010', '0.5'].map(toUnit),
-						timestamp,
-						{
-							from: oracle,
-						}
+						['4100', '2010', '0.5'].map(toUnit)
 					);
 
-					await debtCache.takeDebtSnapshot();
 					syncNetworks(true);
 
 					const { debt } = await debtCache.currentDebt();
@@ -626,16 +643,12 @@ contract('CrossChainManager', async accounts => {
 				});
 
 				it('Self Active debt should be calculated correctly even if total active debt is lower than total issued debt', async () => {
-					await exchangeRates.updateRates(
-						['pBTC', 'pETH'].map(toBytes32),
-						['39000', '1900'].map(toUnit),
-						await currentTime(),
-						{
-							from: oracle,
-						}
+					await updateAggregatorRates(
+						exchangeRates,
+						circuitBreaker,
+						[pBTC, pETH],
+						['39000', '1900'].map(toUnit)
 					);
-
-					debtCache.takeDebtSnapshot();
 
 					const crossActiveDebt = await crossChainManager.crossNetworkActiveDebtAll();
 					const issuedPynths = await periFinance.totalIssuedPynthsExcludeEtherCollateral(

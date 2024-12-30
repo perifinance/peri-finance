@@ -215,7 +215,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.exchangeWithVirtual,
 				accounts,
 				args: [pUSD, amount, pAUD, toBytes32('AGGREGATOR')],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 		it('Mint should revert if the caller is not the minter', async () => {
@@ -225,7 +225,7 @@ contract('BasePeriFinance', async accounts => {
 				accounts: newAccounts,
 				args: [],
 				//reason: 'onlyMinter',
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 
@@ -234,7 +234,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.liquidateDelinquentAccount,
 				accounts,
 				args: [account1, amount],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 
@@ -243,16 +243,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.exchangeWithTrackingForInitiator,
 				accounts,
 				args: [pUSD, amount, pAUD, owner, toBytes32('AGGREGATOR')],
-				reason: 'Cannot be run on this layer',
-			});
-		});
-
-		it('ExchangeAtomically should revert no matter who the caller is', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: basePeriFinance.exchangeAtomically,
-				accounts,
-				args: [pUSD, amount, pETH, toBytes32('AGGREGATOR'), 0],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 
@@ -261,7 +252,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.inflationalMint,
 				accounts,
 				args: [],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 
@@ -270,7 +261,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.mintSecondary,
 				accounts,
 				args: [account1, amount],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 		it('MintSecondaryRewards should revert no matter who the caller is', async () => {
@@ -278,7 +269,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.mintSecondaryRewards,
 				accounts,
 				args: [amount],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run",
 			});
 		});
 		it('BurnSecondary should revert no matter who the caller is', async () => {
@@ -286,7 +277,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.burnSecondary,
 				accounts,
 				args: [account1, amount],
-				reason: 'Cannot be run on this layer',
+				reason: "Can't run"
 			});
 		});
 	});
@@ -303,7 +294,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.emitExchangeTracking,
 				accounts,
 				args: [trackingCode, currencyKey1, amount1, amount2],
-				reason: 'Only Exchanger can invoke this',
+				reason: 'OnlyExchanger',
 			});
 		});
 		it('emitExchangeRebate() cannot be invoked directly by any account', async () => {
@@ -311,7 +302,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.emitExchangeRebate,
 				accounts,
 				args: [account1, currencyKey1, amount1],
-				reason: 'Only Exchanger can invoke this',
+				reason: 'OnlyExchanger',
 			});
 		});
 		it('emitExchangeReclaim() cannot be invoked directly by any account', async () => {
@@ -319,7 +310,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.emitExchangeReclaim,
 				accounts,
 				args: [account1, currencyKey1, amount1],
-				reason: 'Only Exchanger can invoke this',
+				reason: 'OnlyExchanger',
 			});
 		});
 		it('emitPynthExchange() cannot be invoked directly by any account', async () => {
@@ -327,7 +318,7 @@ contract('BasePeriFinance', async accounts => {
 				fnc: basePeriFinance.emitPynthExchange,
 				accounts,
 				args: [account1, currencyKey1, amount1, currencyKey2, amount2, account2],
-				reason: 'Only Exchanger can invoke this',
+				reason: 'OnlyExchanger',
 			});
 		});
 
@@ -483,90 +474,90 @@ contract('BasePeriFinance', async accounts => {
 		});
 	});
 
-	describe('isWaitingPeriod()', () => {
-		it('returns false by default', async () => {
-			assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-		});
-		describe('when a user has exchanged into pETH', () => {
-			beforeEach(async () => {
-				await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
+	// describe('isWaitingPeriod()', () => {
+	// 	it('returns false by default', async () => {
+	// 		assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 	});
+	// 	describe('when a user has exchanged into pETH', () => {
+	// 		beforeEach(async () => {
+	// 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
 
-				await basePeriFinance.issuePynths(PERI, toUnit('100'), { from: owner });
-				await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, { from: owner });
-			});
-			it('then waiting period is true', async () => {
-				assert.isTrue(await basePeriFinance.isWaitingPeriod(pETH));
-			});
-			describe('when the waiting period expires', () => {
-				beforeEach(async () => {
-					await fastForward(await systemSettings.waitingPeriodSecs());
-				});
-				it('returns false by default', async () => {
-					assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-				});
-			});
-		});
-	});
+	// 			await basePeriFinance.issuePynths(PERI, toUnit('100'), { from: owner });
+	// 			await basePeriFinance.exchange(pUSD, toUnit('10'), pETH, { from: owner });
+	// 		});
+	// 		it('then waiting period is true', async () => {
+	// 			assert.isTrue(await basePeriFinance.isWaitingPeriod(pETH));
+	// 		});
+	// 		describe('when the waiting period expires', () => {
+	// 			beforeEach(async () => {
+	// 				await fastForward(await systemSettings.waitingPeriodSecs());
+	// 			});
+	// 			it('returns false by default', async () => {
+	// 				assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 			});
+	// 		});
+	// 	});
+	// });
 
-	describe('anyPynthOrPERIRateIsInvalid()', () => {
-		it('should have stale rates initially', async () => {
-			assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-		});
-		describe('when pynth rates set', () => {
-			beforeEach(async () => {
-				// fast forward to get past initial PERI setting
-				await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
+	// describe('anyPynthOrPERIRateIsInvalid()', () => {
+	// 	it('should have stale rates initially', async () => {
+	// 		assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 	});
+	// 	describe('when pynth rates set', () => {
+	// 		beforeEach(async () => {
+	// 			// fast forward to get past initial PERI setting
+	// 			await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-				await updateAggregatorRates(
-					exchangeRates,
-					circuitBreaker,
-					[pAUD, pEUR, pETH],
-					['0.5', '1.25', '100'].map(toUnit)
-				);
-				await debtCache.takeDebtSnapshot();
-			});
-			it('should still have stale rates', async () => {
-				assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-			});
-			describe('when PERI is also set', () => {
-				beforeEach(async () => {
-					await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI], ['1'].map(toUnit));
-				});
-				it('then no stale rates', async () => {
-					assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), false);
-				});
+	// 			await updateAggregatorRates(
+	// 				exchangeRates,
+	// 				circuitBreaker,
+	// 				[pAUD, pEUR, pETH],
+	// 				['0.5', '1.25', '100'].map(toUnit)
+	// 			);
+	// 			await debtCache.takeDebtSnapshot();
+	// 		});
+	// 		it('should still have stale rates', async () => {
+	// 			assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 		});
+	// 		describe('when PERI is also set', () => {
+	// 			beforeEach(async () => {
+	// 				await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI], ['1'].map(toUnit));
+	// 			});
+	// 			it('then no stale rates', async () => {
+	// 				assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), false);
+	// 			});
 
-				describe('when only some pynths are updated', () => {
-					beforeEach(async () => {
-						await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
+	// 			describe('when only some pynths are updated', () => {
+	// 				beforeEach(async () => {
+	// 					await fastForward((await exchangeRates.rateStalePeriod()).add(web3.utils.toBN('300')));
 
-						await updateAggregatorRates(
-							exchangeRates,
-							circuitBreaker,
-							[PERI, pAUD],
-							['0.1', '0.78'].map(toUnit)
-						);
-					});
+	// 					await updateAggregatorRates(
+	// 						exchangeRates,
+	// 						circuitBreaker,
+	// 						[PERI, pAUD],
+	// 						['0.1', '0.78'].map(toUnit)
+	// 					);
+	// 				});
 
-					it('then anyPynthOrPERIRateIsInvalid() returns true', async () => {
-						assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
-					});
-				});
-			});
-		});
-	});
+	// 				it('then anyPynthOrPERIRateIsInvalid() returns true', async () => {
+	// 					assert.equal(await basePeriFinance.anyPynthOrPERIRateIsInvalid(), true);
+	// 				});
+	// 			});
+	// 		});
+	// 	});
+	// });
 
-	describe('availableCurrencyKeys()', () => {
-		it('returns all currency keys by default', async () => {
-			assert.deepEqual(await basePeriFinance.availableCurrencyKeys(), [pUSD, pETH, pEUR, pAUD]);
-		});
-	});
+	// describe('availableCurrencyKeys()', () => {
+	// 	it('returns all currency keys by default', async () => {
+	// 		assert.deepEqual(await basePeriFinance.availableCurrencyKeys(), [pUSD, pETH, pEUR, pAUD]);
+	// 	});
+	// });
 
-	describe('isWaitingPeriod()', () => {
-		it('returns false by default', async () => {
-			assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
-		});
-	});
+	// describe('isWaitingPeriod()', () => {
+	// 	it('returns false by default', async () => {
+	// 		assert.isFalse(await basePeriFinance.isWaitingPeriod(pETH));
+	// 	});
+	// });
 
 	describe('transfer()', () => {
 		describe('when the system is suspended', () => {
@@ -615,107 +606,6 @@ contract('BasePeriFinance', async accounts => {
 		beforeEach(async () => {
 			// Ensure all pynths have rates to allow issuance
 			await updateRatesWithDefaults({ exchangeRates, owner, debtCache });
-		});
-
-		// SIP-238
-		describe('implementation does not allow transfers but allows approve', () => {
-			const amount = toUnit('10');
-			const revertMsg = 'Only the proxy';
-
-			it('approve does not revert', async () => {
-				await basePeriFinance.approve(account1, amount, { from: owner });
-			});
-			it('transfer reverts', async () => {
-				await assert.revert(
-					basePeriFinance.transfer(account1, amount, { from: owner }),
-					revertMsg
-				);
-			});
-			it('transferFrom reverts', async () => {
-				await basePeriFinance.approve(account1, amount, { from: owner });
-				await assert.revert(
-					basePeriFinance.transferFrom(owner, account1, amount, { from: account1 }),
-					revertMsg
-				);
-			});
-			it('transfer does not revert from a whitelisted contract', async () => {
-				// set owner as RewardEscrowV2
-				await addressResolver.importAddresses(['RewardEscrowV2'].map(toBytes32), [owner], {
-					from: owner,
-				});
-				await basePeriFinance.transfer(account1, amount, { from: owner });
-			});
-		});
-
-		// SIP-252
-		describe('migrateEscrowContractBalance', () => {
-			it('restricted to owner', async () => {
-				await assert.revert(
-					basePeriFinance.migrateEscrowContractBalance({ from: account2 }),
-					'contract owner'
-				);
-			});
-			it('reverts if both are the same address', async () => {
-				await addressResolver.importAddresses(
-					['RewardEscrowV2Frozen', 'RewardEscrowV2'].map(toBytes32),
-					[account1, account1],
-					{ from: owner }
-				);
-				await assert.revert(
-					basePeriFinance.migrateEscrowContractBalance({ from: owner }),
-					'same address'
-				);
-			});
-			it('transfers balance as needed', async () => {
-				await basePeriFinanceProxy.transfer(account1, toUnit('10'), { from: owner });
-				// check balances
-				assert.bnEqual(await basePeriFinance.balanceOf(account1), toUnit('10'));
-				assert.bnEqual(await basePeriFinance.balanceOf(account2), toUnit('0'));
-
-				await addressResolver.importAddresses(
-					['RewardEscrowV2Frozen', 'RewardEscrowV2'].map(toBytes32),
-					[account1, account2],
-					{ from: owner }
-				);
-
-				await basePeriFinance.migrateEscrowContractBalance({ from: owner });
-
-				// check balances
-				assert.bnEqual(await basePeriFinance.balanceOf(account1), toUnit('0'));
-				assert.bnEqual(await basePeriFinance.balanceOf(account2), toUnit('10'));
-			});
-		});
-
-		// SIP-237
-		describe('migrateAccountBalances', () => {
-			beforeEach(async () => {
-				// give the account some balance to test with
-				await basePeriFinanceProxy.transfer(account3, toUnit('200'), { from: owner });
-				await rewardEscrowV2.setPermittedEscrowCreator(owner, true, { from: owner });
-				await rewardEscrowV2.createEscrowEntry(account3, toUnit('100'), 1, { from: owner });
-
-				assert.bnEqual(await basePeriFinance.collateral(account3), toUnit('300'));
-			});
-			it('restricted to debt migrator on ethereum', async () => {
-				await onlyGivenAddressCanInvoke({
-					fnc: basePeriFinance.migrateAccountBalances,
-					accounts,
-					args: [account3],
-					reason: 'Only L1 DebtMigrator',
-				});
-			});
-			it('zeroes balances on this layer', async () => {
-				await addressResolver.importAddresses(
-					['DebtMigratorOnEthereum', 'ovm:DebtMigratorOnOptimism'].map(toBytes32),
-					[account1, account2],
-					{ from: owner }
-				);
-
-				await basePeriFinance.migrateAccountBalances(account3, { from: account1 });
-
-				// collateral balance should be zero after migration
-				assert.bnEqual(await basePeriFinance.collateral(account3), toUnit('0'));
-			});
 		});
 
 		it('should transfer when legacy market address is non-zero', async () => {

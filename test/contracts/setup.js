@@ -488,7 +488,6 @@ const setupContract = async ({
 			debtManager,
 		],
 		VirtualPynthIssuer: [owner, tryGetAddressOf('AddressResolver')],
-		CollateralUtil: [tryGetAddressOf('AddressResolver')],
 		Collateral: [
 			tryGetAddressOf('CollateralState'),
 			owner,
@@ -1654,10 +1653,6 @@ const setupAllContracts = async ({
 			deps: [],
 		},
 		{
-			contract: 'CollateralUtil',
-			deps: ['AddressResolver', 'ExchangeRates'],
-		},
-		{
 			contract: 'CollateralManager',
 			deps: [
 				'AddressResolver',
@@ -1665,21 +1660,20 @@ const setupAllContracts = async ({
 				'Issuer',
 				'ExchangeRates',
 				'DebtCache',
-				'CollateralUtil',
 				'CollateralManagerState',
 			],
 		},
 		{
 			contract: 'Collateral',
-			deps: ['CollateralManager', 'AddressResolver', 'CollateralUtil'],
+			deps: ['CollateralManager', 'AddressResolver'],
 		},
 		{
 			contract: 'CollateralEth',
-			deps: ['Collateral', 'CollateralManager', 'AddressResolver', 'CollateralUtil'],
+			deps: ['Collateral', 'CollateralManager', 'AddressResolver'],
 		},
 		{
 			contract: 'CollateralShort',
-			deps: ['Collateral', 'CollateralManager', 'AddressResolver', 'CollateralUtil'],
+			deps: ['Collateral', 'CollateralManager', 'AddressResolver'],
 		},
 		{
 			contract: 'StakingState',

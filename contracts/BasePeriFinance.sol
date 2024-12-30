@@ -107,7 +107,7 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         totalIssued = issuer().totalIssuedPynths(currencyKey, false);
     }
 
-    function totalIssuedPynthsExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint totalIssued) {
+    function totalIssuedPynthsExcludeEtherCollateral(bytes32 currencyKey) external view returns (uint totalIssued) {
         totalIssued = issuer().totalIssuedPynths(currencyKey, true);
     }
 
@@ -348,6 +348,11 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         bytes32
     ) external returns (uint, IVirtualPynth) {
         _notImplemented();
+    }
+
+    function inflationalMint() external returns (bool){
+          _notImplemented();
+        return false;
     }
 
     function liquidateDelinquentAccount(address, uint) external returns (bool) {

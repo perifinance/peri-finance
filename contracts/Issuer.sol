@@ -296,15 +296,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
         //(totalSystemValue, anyRateIsInvalid) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
-        (totalSystemValue,) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
-
+        (totalSystemValue, anyRateIsInvalid) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
 
         // existing functionality requires for us to convert into the exchange rate specified by `currencyKey`
         (uint currencyRate, bool currencyRateInvalid) = _rateAndInvalid(currencyKey);
 
         //require(anyRateIsInvalid == false, "Rates are invalid1");
 
-        anyRateIsInvalid = currencyRateInvalid || debtInfoStale;
+        anyRateIsInvalid = currencyRateInvalid || debtInfoStale || anyRateIsInvalid;
 
 
         debtBalance = _debtForShares(debtShareBalance).divideDecimalRound(currencyRate);
@@ -668,13 +667,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint pynthSupply = IERC20(pynthToRemove).totalSupply();
 
-        if (pynthSupply > 0) {
-            (uint amountOfpUSD, uint rateToRedeem, ) =
-                exchangeRates().effectiveValueAndRates(currencyKey, pynthSupply, "pUSD");
-            require(rateToRedeem > 0, "Cannot remove without rate");
-            // ensure the debt cache is aware of the new pUSD issued
-            debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amountOfpUSD));
-        }
+        // if (pynthSupply > 0) {
+        //     (uint amountOfpUSD, uint rateToRedeem, ) =
+        //         exchangeRates().effectiveValueAndRates(currencyKey, pynthSupply, "pUSD");
+        //     require(rateToRedeem > 0, "Cannot remove without rate");
+        //     // ensure the debt cache is aware of the new pUSD issued
+        //     debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amountOfpUSD));
+        // }
 
         // Remove the pynth from the availablePynths array.
         for (uint i = 0; i < availablePynths.length; i++) {
@@ -767,7 +766,7 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         return rateInvalid;
     }
 
- function issuePynths(address _issuer, bytes32 _currencyKey, uint _issueAmount) external onlyPeriFinance {
+    function issuePynths(address _issuer, bytes32 _currencyKey, uint _issueAmount) external onlyPeriFinance {
         require(_issueAmount > 0, "cannot issue 0 pynths");
 
         _requireRatesNotInvalid(exchangeRates().rateIsInvalid(_currencyKey));
@@ -1241,7 +1240,7 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
         pynths[pUSD].issue(from, amount);
 
         // Account for the issued debt in the cache
-        debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amount));
+        debtCache().updateCachedPynthDebtWithRate(pUSD, SafeDecimalMath.unit());
 
  
         afterDebt = existingDebt.add(amount);

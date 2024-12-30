@@ -31,7 +31,7 @@ interface IPeriFinance {
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint);
 
-    function totalIssuedPynthsExcludeOtherCollateral(bytes32 currencyKey) external view returns (uint);
+    function totalIssuedPynthsExcludeEtherCollateral(bytes32 currencyKey) external view returns (uint);
 
     function transferablePeriFinance(address account) external view returns (uint transferable);
 

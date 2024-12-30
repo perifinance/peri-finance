@@ -96,7 +96,6 @@ contract('MultiCollateralPynth', accounts => {
 				'SystemStatus',
 				'Exchanger',
 				'FeePool',
-				'CollateralUtil',
 				'CollateralManager',
 				'CollateralManagerState',
 				'CollateralEth',

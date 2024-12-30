@@ -332,13 +332,13 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     /* ========== Exchange Fees Related ========== */
-    function setExchangeFeeRateForPynths(bytes32[] calldata synthKeys, uint256[] calldata exchangeFeeRates)
+    function setExchangeFeeRateForPynths(bytes32[] calldata pynthKeys, uint256[] calldata exchangeFeeRates)
         external
         onlyOwner
     {
-        flexibleStorage().setExchangeFeeRateForPynths(SETTING_EXCHANGE_FEE_RATE, synthKeys, exchangeFeeRates);
-        for (uint i = 0; i < synthKeys.length; i++) {
-            emit ExchangeFeeUpdated(synthKeys[i], exchangeFeeRates[i]);
+        flexibleStorage().setExchangeFeeRateForPynths(SETTING_EXCHANGE_FEE_RATE, pynthKeys, exchangeFeeRates);
+        for (uint i = 0; i < pynthKeys.length; i++) {
+            emit ExchangeFeeUpdated(pynthKeys[i], exchangeFeeRates[i]);
         }
     }
 
