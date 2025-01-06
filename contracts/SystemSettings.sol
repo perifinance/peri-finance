@@ -185,13 +185,18 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getSyncStaleThreshold();
     }
 
+    function liquidationRatios(bytes32 tokenKey) external view returns (uint) {
+        return getLiquidationRatios(tokenKey);
+    }
+
+
     function setSyncStaleThreshold(uint _percent) external onlyOwner {
         SystemSettingsLib.setSyncStaleThreshold(flexibleStorage(), SETTING_SYNC_STALE_THRESHOLD, _percent);
         emit SyncStaleThresholdUpdated(_percent);
     }
 
     function setExternalTokenQuota(uint _newQuota) external onlyOwner {
-        SystemSettingsLib.setExternalTokenQuota(flexibleStorage(), SETTING_SYNC_STALE_THRESHOLD, _newQuota);
+        SystemSettingsLib.setExternalTokenQuota(flexibleStorage(), SETTING_EXTERNAL_TOKEN_QUOTA, _newQuota);
         emit ExternalTokenQuotaUpdated(_newQuota);
     }
 
@@ -470,7 +475,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     {
         require(tokenKeys.length == exTokenIssuanceRatios.length, "Array lengths dont match");
         for (uint i = 0; i < tokenKeys.length; i++) {
-            SystemSettingsLib.setExTokenIssuanceRatio(flexibleStorage(), SETTING_LIQUIDATION_RATIOS, tokenKeys[i], exTokenIssuanceRatios[i]);
+            SystemSettingsLib.setExTokenIssuanceRatio(flexibleStorage(), SETTING_EXTOKEN_ISSUANCE_RATIO, tokenKeys[i], exTokenIssuanceRatios[i]);
             emit ExchangeFeeUpdated(tokenKeys[i], exTokenIssuanceRatios[i]);
         }
     }

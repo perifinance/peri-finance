@@ -71,6 +71,9 @@ interface IIssuer {
         view
         returns (uint transferable, bool anyRateIsInvalid);
 
+    function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exTokenAmountToUnstake);
+
+
     function liquidationAmounts(address account, bool isSelfLiquidation)
         external
         view

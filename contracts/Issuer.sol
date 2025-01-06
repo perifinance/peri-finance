@@ -596,6 +596,14 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         }
     }
 
+        function amountsToFitClaimable(address _account) external view returns (uint burnAmount, uint exRefundAmt) {
+        // get the account's debt balance and peri collateral value
+        (uint debtBalance, , uint periCAinUSD) = _debtsCollateral(_account, true);
+
+        // get the amount of debt to be burnt and ex-token to be unstaked to satisfy target c-ratio
+        (burnAmount, exRefundAmt, ) = exTokenManager().burnAmtToFitTR(_account, debtBalance, periCAinUSD);
+    }
+
     function getPynths(bytes32[] calldata currencyKeys) external view returns (IPynth[] memory) {
         uint numKeys = currencyKeys.length;
         IPynth[] memory addresses = new IPynth[](numKeys);
@@ -870,56 +878,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         //// For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
         // exTokenManager().requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
-
-
-function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len;
-        while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
-
-function toString(address account) public pure returns(string memory) {
-    return toString(abi.encodePacked(account));
-}
-
-function toString(uint256 value) public pure returns(string memory) {
-    return toString(abi.encodePacked(value));
-}
-
-function toString(bytes32 value) public pure returns(string memory) {
-    return toString(abi.encodePacked(value));
-}
-
-function toString(bytes memory data) public pure returns(string memory) {
-    bytes memory alphabet = "0123456789abcdef";
-
-    bytes memory str = new bytes(2 + data.length * 2);
-    str[0] = "0";
-    str[1] = "x";
-    for (uint i = 0; i < data.length; i++) {
-        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
-        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
-    }
-    return string(str);
-}
-
 
  function burnPynths(address _from, bytes32 _currencyKey, uint _burnAmount) external onlyPeriFinance {
              _requireCurrencyKeyIsNotpUSD(_currencyKey);

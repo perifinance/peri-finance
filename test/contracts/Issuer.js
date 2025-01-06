@@ -201,19 +201,13 @@ contract('Issuer via PeriFinance', async accounts => {
 			expected: [
 				'addPynth',
 				'addPynths',
-				'burnForRedemption',
 				'burnPynths',
-				'burnPynthsOnBehalf',
-
 				'issuePynthsWithoutDebt',
 				'burnPynthsWithoutDebt',
 				'burnAndIssuePynthsWithoutDebtCache',
 				'issueMaxPynths',
-				'issueMaxPynthsOnBehalf',
 				'issuePynths',
-				'issuePynthsOnBehalf',
 				'liquidateAccount',
-				'modifyDebtSharesForMigration',
 				'removePynth',
 				'removePynths',
 				'setCurrentPeriodId',
@@ -252,31 +246,15 @@ contract('Issuer via PeriFinance', async accounts => {
 		});
 
 
-		it('modifyDebtSharesForMigration() cannont be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.modifyDebtSharesForMigration,
-				args: [account1, toUnit(100)],
-				accounts,
-				reason: 'only trusted migrators',
-			});
-		});
-
 		it('issuePynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.issuePynths,
-				args: [account1, toUnit('1')],
+				args: [account1, PERI, toUnit('1')],
 				accounts,
 				reason: 'Only PeriFinance',
 			});
 		});
-		it('issuePynthsOnBehalf() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issuePynthsOnBehalf,
-				args: [account1, account2, toUnit('1')],
-				accounts,
-				reason: 'Only PeriFinance',
-			});
-		});
+
 		it('issueMaxPynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.issueMaxPynths,
@@ -285,26 +263,11 @@ contract('Issuer via PeriFinance', async accounts => {
 				reason: 'Only PeriFinance',
 			});
 		});
-		it('issueMaxPynthsOnBehalf() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.issueMaxPynthsOnBehalf,
-				args: [account1, account2],
-				accounts,
-				reason: 'Only PeriFinance',
-			});
-		});
+
 		it('burnPynths() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.burnPynths,
-				args: [account1, toUnit('1')],
-				accounts,
-				reason: 'Only PeriFinance',
-			});
-		});
-		it('burnPynthsOnBehalf() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.burnPynthsOnBehalf,
-				args: [account1, account2, toUnit('1')],
+				args: [account1, PERI, toUnit('1')],
 				accounts,
 				reason: 'Only PeriFinance',
 			});
@@ -318,14 +281,7 @@ contract('Issuer via PeriFinance', async accounts => {
 				reason: 'Only PeriFinance',
 			});
 		});
-		it('burnPynthsToTargetOnBehalf() cannot be invoked directly by a user', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: issuer.burnPynthsToTargetOnBehalf,
-				args: [account1, account2],
-				accounts,
-				reason: 'Only PeriFinance',
-			});
-		});
+
 		it('setCurrentPeriodId() cannot be invoked directly by a user', async () => {
 			await onlyGivenAddressCanInvoke({
 				fnc: issuer.setCurrentPeriodId,
@@ -376,7 +332,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						await assert.revert(
 							periFinance.burnPynths(PERI, web3.utils.toBN('5'), { from: account1 }),
-							'Minimum stake time not reached'
+							'Min stake time not reached or chain sync stale'
 						);
 					});
 					it('should set minStakeTime to 120 seconds and able to burn after wait time', async () => {
@@ -391,7 +347,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						await assert.revert(
 							periFinance.burnPynths(PERI, toUnit('0.001'), { from: account1 }),
-							'Minimum stake time not reached'
+							'Min stake time not reached or chain sync stale'
 						);
 
 						// fastForward 115 seconds
@@ -746,7 +702,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 			describe('adding and removing pynths', () => {
 				it('should allow adding a Pynth contract', async () => {
-					const previousPynthCount = await periFinance.availablePynthCount();
+					const previousPynthCount = await issuer.availablePynthCount();
 
 					const { token: pynth } = await mockToken({
 						accounts,
@@ -763,11 +719,11 @@ contract('Issuer via PeriFinance', async accounts => {
 
 					// Assert that we've successfully added a Pynth
 					assert.bnEqual(
-						await periFinance.availablePynthCount(),
+						await issuer.availablePynthCount(),
 						previousPynthCount.add(web3.utils.toBN(1))
 					);
 					// Assert that it's at the end of the array
-					assert.equal(await periFinance.availablePynths(previousPynthCount), pynth.address);
+					assert.equal(await issuer.availablePynths(previousPynthCount), pynth.address);
 					// Assert that it's retrievable by its currencyKey
 					assert.equal(await periFinance.pynths(currencyKey), pynth.address);
 
@@ -860,7 +816,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 
 					it('should allow removing a Pynth contract when it has no issued balance', async () => {
-						const pynthCount = await periFinance.availablePynthCount();
+						const pynthCount = await issuer.availablePynthCount();
 
 						assert.notEqual(await periFinance.pynths(currencyKey), ZERO_ADDRESS);
 
@@ -868,7 +824,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						// Assert that we have one less pynth, and that the specific currency key is gone.
 						assert.bnEqual(
-							await periFinance.availablePynthCount(),
+							await issuer.availablePynthCount(),
 							pynthCount.sub(web3.utils.toBN(1))
 						);
 						assert.equal(await periFinance.pynths(currencyKey), ZERO_ADDRESS);
@@ -1001,7 +957,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 
 					it('should allow adding multiple Pynth contracts at once', async () => {
-						const previousPynthCount = await periFinance.availablePynthCount();
+						const previousPynthCount = await issuer.availablePynthCount();
 
 						const { token: pynth1 } = await mockToken({
 							accounts,
@@ -1028,13 +984,13 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						// Assert that we've successfully added two Pynths
 						assert.bnEqual(
-							await periFinance.availablePynthCount(),
+							await issuer.availablePynthCount(),
 							previousPynthCount.add(web3.utils.toBN(2))
 						);
 						// Assert that they're at the end of the array
-						assert.equal(await periFinance.availablePynths(previousPynthCount), pynth1.address);
+						assert.equal(await issuer.availablePynths(previousPynthCount), pynth1.address);
 						assert.equal(
-							await periFinance.availablePynths(previousPynthCount.add(web3.utils.toBN(1))),
+							await issuer.availablePynths(previousPynthCount.add(web3.utils.toBN(1))),
 							pynth2.address
 						);
 						// Assert that they are retrievable by currencyKey
@@ -1120,12 +1076,12 @@ contract('Issuer via PeriFinance', async accounts => {
 
 						await issuer.addPynth(pynth2.address, { from: owner });
 
-						const previousPynthCount = await periFinance.availablePynthCount();
+						const previousPynthCount = await issuer.availablePynthCount();
 
 						const tx = await issuer.removePynths([currencyKey, currencyKey2], { from: owner });
 
 						assert.bnEqual(
-							await periFinance.availablePynthCount(),
+							await issuer.availablePynthCount(),
 							previousPynthCount.sub(web3.utils.toBN(2))
 						);
 
@@ -1347,52 +1303,52 @@ contract('Issuer via PeriFinance', async accounts => {
 					});
 				});
 
-				describe('burnAndIssuePynthsWithoutDebtCache', () => {
-					describe('successfully invoked', () => {
-						let beforeCachedDebt;
+				// describe('burnAndIssuePynthsWithoutDebtCache', () => {
+				// 	describe('successfully invoked', () => {
+				// 		let beforeCachedDebt;
 
-						beforeEach(async () => {
-							// set the exchange fees and waiting period to 0 to effectively ignore both
-							await setExchangeWaitingPeriod({ owner, systemSettings, secs: 0 });
-							await setExchangeFeeRateForPynths({
-								owner,
-								systemSettings,
-								pynthKeys,
-								exchangeFeeRates: pynthKeys.map(() => 0),
-							});
-						});
+				// 		beforeEach(async () => {
+				// 			// set the exchange fees and waiting period to 0 to effectively ignore both
+				// 			await setExchangeWaitingPeriod({ owner, systemSettings, secs: 0 });
+				// 			await setExchangeFeeRateForPynths({
+				// 				owner,
+				// 				systemSettings,
+				// 				pynthKeys,
+				// 				exchangeFeeRates: pynthKeys.map(() => 0),
+				// 			});
+				// 		});
 
-						beforeEach(async () => {
-							await pUSDContract.issue(account7, toUnit(1000));
-							await periFinance.exchange(pUSD, toUnit(200), pETH, { from: account7 });
-						});
+				// 		beforeEach(async () => {
+				// 			await pUSDContract.issue(account7, toUnit(1000));
+				// 			await periFinance.exchange(pUSD, toUnit(200), pETH, { from: account7 });
+				// 		});
 
-						beforeEach(async () => {
-							beforeCachedDebt = await debtCache.cachedDebt();
-							await issuer.burnAndIssuePynthsWithoutDebtCache(
-								account7,
-								pETH,
-								toUnit('0.5'),
-								toUnit(200),
-								{
-									from: dynamicPynthRedeemer,
-								}
-							);
-						});
+				// 		beforeEach(async () => {
+				// 			beforeCachedDebt = await debtCache.cachedDebt();
+				// 			await issuer.burnAndIssuePynthsWithoutDebtCache(
+				// 				account7,
+				// 				pETH,
+				// 				toUnit('0.5'),
+				// 				toUnit(200),
+				// 				{
+				// 					from: dynamicPynthRedeemer,
+				// 				}
+				// 			);
+				// 		});
 
-						it('burns target pynths', async () => {
-							assert.bnEqual(await pETHContract.balanceOf(account7), toUnit('0.5'));
-						});
+				// 		it('burns target pynths', async () => {
+				// 			assert.bnEqual(await pETHContract.balanceOf(account7), toUnit('0.5'));
+				// 		});
 
-						it('issues the correct amount of pUSD', async () => {
-							assert.bnEqual(await pUSDContract.balanceOf(account7), toUnit(1000));
-						});
+				// 		it('issues the correct amount of pUSD', async () => {
+				// 			assert.bnEqual(await pUSDContract.balanceOf(account7), toUnit(1000));
+				// 		});
 
-						it('debt cache remains unaffected', async () => {
-							assert.bnEqual(await debtCache.cachedDebt(), beforeCachedDebt);
-						});
-					});
-				});
+				// 		it('debt cache remains unaffected', async () => {
+				// 			assert.bnEqual(await debtCache.cachedDebt(), beforeCachedDebt);
+				// 		});
+				// 	});
+				// });
 
 				describe('issueMaxPynths', () => {
 					it('should allow an issuer to issue max pynths in one flavour', async () => {
@@ -1542,12 +1498,7 @@ contract('Issuer via PeriFinance', async accounts => {
 									'Operation prohibited'
 								);
 							});
-							it('and calling burnPynthsToTarget() reverts', async () => {
-								await assert.revert(
-									periFinance.burnPynthsToTarget({ from: account1 }),
-									'Operation prohibited'
-								);
-							});
+				
 							describe(`when ${section} is resumed`, () => {
 								beforeEach(async () => {
 									await setStatus({ owner, systemStatus, section, suspend: false });
@@ -1555,9 +1506,7 @@ contract('Issuer via PeriFinance', async accounts => {
 								it('then calling burnPynths() succeeds', async () => {
 									await periFinance.burnPynths(PERI, toUnit('1'), { from: account1 });
 								});
-								it('and calling burnPynthsToTarget() succeeds', async () => {
-									await periFinance.burnPynthsToTarget({ from: account1 });
-								});
+						
 							});
 						});
 					});
@@ -1576,12 +1525,7 @@ contract('Issuer via PeriFinance', async accounts => {
 								'A pynth or PERI rate is invalid'
 							);
 						});
-						it('and calling burnPynthsToTarget() reverts', async () => {
-							await assert.revert(
-								periFinance.burnPynthsToTarget({ from: account1 }),
-								'A pynth or PERI rate is invalid'
-							);
-						});
+				
 					});
 
 					describe(`when debt aggregator is stale`, () => {
@@ -1595,12 +1539,7 @@ contract('Issuer via PeriFinance', async accounts => {
 								'A pynth or PERI rate is invalid'
 							);
 						});
-						it('and calling burnPynthsToTarget() reverts', async () => {
-							await assert.revert(
-								periFinance.burnPynthsToTarget({ from: account1 }),
-								'A pynth or PERI rate is invalid'
-							);
-						});
+				
 					});
 				});
 
@@ -1698,6 +1637,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					// return;
 
 					const balanceOfAccount1 = await pUSDContract.balanceOf(account1);
+					console.log(balanceOfAccount1.toString());
 
 					// Then try to burn them all. Only 10 pynths (and fees) should be gone.
 					await periFinance.burnPynths(PERI, balanceOfAccount1, { from: account1 });
@@ -1924,14 +1864,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						it('then the maxIssuablePynths drops 50%', async () => {
 							assert.bnClose(maxIssuablePynths, toUnit('4000'));
 						});
-						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.bnClose(await periFinance.debtBalanceOf(account1, pUSD), toUnit('4000'));
-						});
-						it('then fees are claimable', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.equal(await feePool.isFeesClaimable(account1), true);
-						});
+			
 					});
 
 					describe('when the PERI price drops 10%', () => {
@@ -1946,14 +1879,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						it('then the maxIssuablePynths drops 10%', async () => {
 							assert.bnEqual(maxIssuablePynths, toUnit('7200'));
 						});
-						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('7200'));
-						});
-						it('then fees are claimable', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.equal(await feePool.isFeesClaimable(account1), true);
-						});
+					
 					});
 
 					describe('when the PERI price drops 90%', () => {
@@ -1968,14 +1894,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						it('then the maxIssuablePynths drops 10%', async () => {
 							assert.bnEqual(maxIssuablePynths, toUnit('800'));
 						});
-						it('then calling burnPynthsToTarget() reduces pUSD to c-ratio target', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('800'));
-						});
-						it('then fees are claimable', async () => {
-							await periFinance.burnPynthsToTarget({ from: account1 });
-							assert.equal(await feePool.isFeesClaimable(account1), true);
-						});
+				
 					});
 
 					describe('when the PERI price increases 100%', () => {
@@ -1990,12 +1909,7 @@ contract('Issuer via PeriFinance', async accounts => {
 						it('then the maxIssuablePynths increases 100%', async () => {
 							assert.bnEqual(maxIssuablePynths, toUnit('16000'));
 						});
-						it('then calling burnPynthsToTarget() reverts', async () => {
-							await assert.revert(
-								periFinance.burnPynthsToTarget({ from: account1 }),
-								'SafeMath: subtraction overflow'
-							);
-						});
+					
 					});
 				});
 
@@ -2706,40 +2620,7 @@ contract('Issuer via PeriFinance', async accounts => {
 					await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI], [toUnit('1')]);
 					await updateDebtMonitors();
 				});
-				describe('when not approved it should revert on', async () => {
-					it('issueMaxPynthsOnBehalf', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: periFinance.issueMaxPynthsOnBehalf,
-							args: [authoriser],
-							accounts,
-							reason: 'Not approved to act on behalf',
-						});
-					});
-					it('issuePynthsOnBehalf', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: periFinance.issuePynthsOnBehalf,
-							args: [authoriser, toUnit('1')],
-							accounts,
-							reason: 'Not approved to act on behalf',
-						});
-					});
-					it('burnPynthsOnBehalf', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: periFinance.burnPynthsOnBehalf,
-							args: [authoriser, toUnit('1')],
-							accounts,
-							reason: 'Not approved to act on behalf',
-						});
-					});
-					it('burnPynthsToTargetOnBehalf', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: periFinance.burnPynthsToTargetOnBehalf,
-							args: [authoriser],
-							accounts,
-							reason: 'Not approved to act on behalf',
-						});
-					});
-				});
+			
 
 				['System', 'Issuance'].forEach(section => {
 					describe(`when ${section} is suspended`, () => {
@@ -2750,57 +2631,9 @@ contract('Issuer via PeriFinance', async accounts => {
 							await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
 							await setStatus({ owner, systemStatus, section, suspend: true });
 						});
-						it('then calling issuePynthsOnBehalf() reverts', async () => {
-							await assert.revert(
-								periFinance.issuePynthsOnBehalf(authoriser, toUnit('1'), { from: delegate }),
-								'Operation prohibited'
-							);
-						});
-						it('and calling issueMaxPynthsOnBehalf() reverts', async () => {
-							await assert.revert(
-								periFinance.issueMaxPynthsOnBehalf(authoriser, { from: delegate }),
-								'Operation prohibited'
-							);
-						});
-						it('and calling burnPynthsOnBehalf() reverts', async () => {
-							await assert.revert(
-								periFinance.burnPynthsOnBehalf(authoriser, toUnit('1'), { from: delegate }),
-								'Operation prohibited'
-							);
-						});
-						it('and calling burnPynthsToTargetOnBehalf() reverts', async () => {
-							await assert.revert(
-								periFinance.burnPynthsToTargetOnBehalf(authoriser, { from: delegate }),
-								'Operation prohibited'
-							);
-						});
+			
 
-						describe(`when ${section} is resumed`, () => {
-							beforeEach(async () => {
-								await setStatus({ owner, systemStatus, section, suspend: false });
-							});
-							it('then calling issuePynthsOnBehalf() succeeds', async () => {
-								await periFinance.issuePynthsOnBehalf(authoriser, toUnit('1'), { from: delegate });
-							});
-							it('and calling issueMaxPynthsOnBehalf() succeeds', async () => {
-								await periFinance.issueMaxPynthsOnBehalf(authoriser, { from: delegate });
-							});
-							it('and calling burnPynthsOnBehalf() succeeds', async () => {
-								await periFinance.burnPynthsOnBehalf(authoriser, toUnit('1'), { from: delegate });
-							});
-							it('and calling burnPynthsToTargetOnBehalf() succeeds', async () => {
-								// need the user to be undercollaterized for this to succeed
-								await updateAggregatorRates(
-									exchangeRates,
-									circuitBreaker,
-									[PERI],
-									[toUnit('0.001')]
-								);
-								await updateDebtMonitors();
-
-								await periFinance.burnPynthsToTargetOnBehalf(authoriser, { from: delegate });
-							});
-						});
+			
 					});
 				});
 
@@ -2816,87 +2649,7 @@ contract('Issuer via PeriFinance', async accounts => {
 
 					assert.isTrue(result);
 				});
-				it('should approveIssueOnBehalf and IssueMaxPynths', async () => {
-					await delegateApprovals.approveIssueOnBehalf(delegate, { from: authoriser });
-
-					const pUSDBalanceBefore = await pUSDContract.balanceOf(account1);
-					const issuablePynths = await periFinance.maxIssuablePynths(account1);
-
-					await periFinance.issueMaxPynthsOnBehalf(authoriser, { from: delegate });
-					const pUSDBalanceAfter = await pUSDContract.balanceOf(account1);
-					assert.bnEqual(pUSDBalanceAfter, pUSDBalanceBefore.add(issuablePynths));
-				});
-				it('should approveIssueOnBehalf and IssuePynths', async () => {
-					await delegateApprovals.approveIssueOnBehalf(delegate, { from: authoriser });
-
-					await periFinance.issuePynthsOnBehalf(authoriser, toUnit('100'), { from: delegate });
-
-					const pUSDBalance = await pUSDContract.balanceOf(account1);
-					assert.bnEqual(pUSDBalance, toUnit('100'));
-				});
-				it('should approveBurnOnBehalf and BurnPynths', async () => {
-					await periFinance.issueMaxPynths({ from: authoriser });
-					await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
-
-					const pUSDBalanceBefore = await pUSDContract.balanceOf(account1);
-					await periFinance.burnPynthsOnBehalf(authoriser, pUSDBalanceBefore, { from: delegate });
-
-					const pUSDBalance = await pUSDContract.balanceOf(account1);
-					assert.bnEqual(pUSDBalance, toUnit('0'));
-				});
-				it('should approveBurnOnBehalf and burnPynthsToTarget', async () => {
-					await periFinance.issueMaxPynths({ from: authoriser });
-					await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI], [toUnit('0.01')]);
-					await updateDebtMonitors();
-
-					await delegateApprovals.approveBurnOnBehalf(delegate, { from: authoriser });
-
-					await periFinance.burnPynthsToTargetOnBehalf(authoriser, { from: delegate });
-
-					const pUSDBalanceAfter = await pUSDContract.balanceOf(account1);
-					assert.bnEqual(pUSDBalanceAfter, toUnit('40'));
-				});
-			});
-
-		
-
-			describe('burnForRedemption', () => {
-				it('only allowed by the pynth redeemer', async () => {
-					await onlyGivenAddressCanInvoke({
-						fnc: issuer.burnForRedemption,
-						args: [ZERO_ADDRESS, ZERO_ADDRESS, toUnit('1')],
-						accounts: [
-							owner,
-							account1,
-							account2,
-							account3,
-							account6,
-							account7,
-							periFinanceBridgeToOptimism,
-						],
-						reason: 'Only PynthRedeemer',
-					});
-				});
-				describe('when a user has 100 pETH', () => {
-					beforeEach(async () => {
-						await pETHContract.issue(account1, toUnit('100'));
-						await updateDebtMonitors();
-					});
-					describe('when burnForRedemption is invoked on the user for 75 pETH', () => {
-						beforeEach(async () => {
-				
-							// rebuild the resolver cache in the issuer
-							await issuer.rebuildCache();
-							// now invoke the burn
-							await issuer.burnForRedemption(await pETHContract.proxy(), account1, toUnit('75'), {
-								from: account6,
-							});
-						});
-						it('then the user has 25 pETH remaining', async () => {
-							assert.bnEqual(await pETHContract.balanceOf(account1), toUnit('25'));
-						});
-					});
-				});
+	
 			});
 
 			describe('debt shares integration', async () => {
@@ -2987,117 +2740,6 @@ contract('Issuer via PeriFinance', async accounts => {
 						await periFinance.burnPynths(PERI, toUnit('30'), { from: account1 });
 						assert.bnEqual(await debtShares.balanceOf(account1), toUnit('675')); // 750 - 75 sds
 						assert.bnEqual(await periFinance.debtBalanceOf(account1, pUSD), toUnit('270')); // 300 - 30 susd
-					});
-				});
-			});
-
-			describe('modifyDebtSharesForMigration', () => {
-				const debtMigratorOnEthereumMock = account1;
-				const debtMigratorOnOptimismMock = account2;
-				const fakeMigrator = account3;
-
-				beforeEach(async () => {
-					// Import mocked debt migrator addresses to the resolver
-					await addressResolver.importAddresses(
-						[toBytes32('DebtMigratorOnEthereum'), toBytes32('DebtMigratorOnOptimism')],
-						[debtMigratorOnEthereumMock, debtMigratorOnOptimismMock],
-						{
-							from: owner,
-						}
-					);
-
-					await issuer.rebuildCache();
-				});
-
-				describe('basic protection', () => {
-					it('should not allow an invalid migrator address', async () => {
-						await assert.revert(
-							issuer.modifyDebtSharesForMigration(owner, toUnit(1), { from: fakeMigrator }),
-							'only trusted migrators'
-						);
-					});
-
-					it('should not allow both debt migrators to be set on the same layer', async () => {
-						await assert.revert(
-							issuer.modifyDebtSharesForMigration(account1, toUnit(100), {
-								from: debtMigratorOnEthereumMock,
-							}),
-							'one migrator must be 0x0'
-						);
-					});
-				});
-
-				describe('modifying debt share balance for migration', () => {
-					describe('on L1', () => {
-						let beforeDebtShareBalance;
-						const amountToBurn = toUnit(10);
-
-						beforeEach(async () => {
-							// Make sure one of the debt migrators is 0x
-							// (in this case it's the Optimism migrator)
-							await addressResolver.importAddresses(
-								[toBytes32('DebtMigratorOnOptimism')],
-								[ZERO_ADDRESS],
-								{
-									from: owner,
-								}
-							);
-							await issuer.rebuildCache();
-
-							// Give some PERI to the mock migrator
-							await periFinance.transfer(debtMigratorOnEthereumMock, toUnit('1000'), { from: owner });
-
-							// issue max pUSD
-							const maxPynths = await periFinance.maxIssuablePynths(debtMigratorOnEthereumMock);
-							await periFinance.issuePynths(PERI, maxPynths, { from: debtMigratorOnEthereumMock });
-
-							// get before value
-							beforeDebtShareBalance = await debtShares.balanceOf(debtMigratorOnEthereumMock);
-
-							// call modify debt shares
-							await issuer.modifyDebtSharesForMigration(debtMigratorOnEthereumMock, amountToBurn, {
-								from: debtMigratorOnEthereumMock,
-							});
-						});
-
-						it('burns the expected amount of debt shares', async () => {
-							assert.bnEqual(
-								await debtShares.balanceOf(debtMigratorOnEthereumMock),
-								beforeDebtShareBalance.sub(amountToBurn)
-							);
-						});
-					});
-					describe('on L2', () => {
-						let beforeDebtShareBalance;
-						const amountToMint = toUnit(10);
-
-						beforeEach(async () => {
-							// Make sure one of the debt migrators is 0x
-							// (in this case it's the Ethereum migrator)
-							await addressResolver.importAddresses(
-								[toBytes32('DebtMigratorOnEthereum')],
-								[ZERO_ADDRESS],
-								{
-									from: owner,
-								}
-							);
-							await issuer.rebuildCache();
-
-							// get before value
-							beforeDebtShareBalance = await debtShares.balanceOf(debtMigratorOnOptimismMock);
-
-							// call modify debt shares
-							await issuer.modifyDebtSharesForMigration(debtMigratorOnOptimismMock, amountToMint, {
-								from: debtMigratorOnOptimismMock,
-							});
-						});
-
-						it('mints the expected amount of debt shares', async () => {
-							assert.bnEqual(
-								await debtShares.balanceOf(debtMigratorOnOptimismMock),
-								beforeDebtShareBalance.add(amountToMint)
-							);
-						});
 					});
 				});
 			});

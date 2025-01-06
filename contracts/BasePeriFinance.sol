@@ -333,6 +333,10 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
         issuer().fitToClaimable(messageSender);
     }
 
+    function amountsToFitClaimable(address account) external view returns (uint burnAmount, uint exTokenAmountToUnstake) {
+        (burnAmount, exTokenAmountToUnstake) = issuer().amountsToFitClaimable(account);
+    }
+
     function exchangeWithTrackingForInitiator(
         bytes32,
         uint,
