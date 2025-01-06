@@ -89,7 +89,7 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
     }
 
     function _exchanger() internal view returns (IExchanger) {
-        return IExchanger(requireAndGetAddress(CONTRACT_EXCHANGER));
+       return IExchanger(requireAndGetAddress(CONTRACT_EXCHANGER));
     }
 
     /*
@@ -379,13 +379,14 @@ contract FuturesMarketManager is Owned, MixinResolver, IFuturesMarketManager {
      * This function is not callable through the proxy, only underlying contracts interact;
      * it reverts if not called by a known market.
      */
-    function burnSUSD(address account, uint amount) external onlyMarketImplementations returns (uint postReclamationAmount) {
+    function burnPUSD(address account, uint amount) external onlyMarketImplementations returns (uint postReclamationAmount) {
         // We'll settle first, in order to ensure the user has sufficient balance.
         // If the settlement reduces the user's balance below the requested amount,
         // the settled remainder will be the resulting deposit.
 
         // Exchanger.settle ensures pynth is active
         IPynth pUSD = _pUSD();
+
         (uint reclaimed, , ) = _exchanger().settle(account, PUSD);
 
         uint balanceAfter = amount;

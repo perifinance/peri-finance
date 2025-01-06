@@ -102,6 +102,12 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     function debtBalanceOf(address account, bytes32 currencyKey) external view returns (uint) {
         return issuer().debtBalanceOf(account, currencyKey);
     }
+    
+    function pynths(bytes32 currencyKey) external view returns (IPynth) {
+        return issuer().pynths(currencyKey);
+    }
+
+
 
     function totalIssuedPynths(bytes32 currencyKey) external view returns (uint totalIssued) {
         totalIssued = issuer().totalIssuedPynths(currencyKey, false);

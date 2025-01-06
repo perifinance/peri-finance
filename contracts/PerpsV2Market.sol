@@ -139,7 +139,7 @@ contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
             // pUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
-            uint postReclamationAmount = _manager().burnSUSD(sender, absDelta);
+            uint postReclamationAmount = _manager().burnPUSD(sender, absDelta);
             if (postReclamationAmount != absDelta) {
                 // If balance was insufficient, the actual delta will be smaller
                 marginDelta = int(postReclamationAmount);

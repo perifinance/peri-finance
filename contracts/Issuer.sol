@@ -293,7 +293,6 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         // What was their initial debt ownership?
         //(uint initialDebtOwnership, uint debtEntryIndex) = state.issuanceData(_issuer);
 
-
         // What's the total value of the system excluding ETH backed pynths in their requested currency?
         //(totalSystemValue, anyRateIsInvalid) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
         (totalSystemValue, anyRateIsInvalid) = crossChainManager().currentNetworkActiveDebtOf(currencyKey);
@@ -667,13 +666,13 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
 
         uint pynthSupply = IERC20(pynthToRemove).totalSupply();
 
-        // if (pynthSupply > 0) {
-        //     (uint amountOfpUSD, uint rateToRedeem, ) =
-        //         exchangeRates().effectiveValueAndRates(currencyKey, pynthSupply, "pUSD");
-        //     require(rateToRedeem > 0, "Cannot remove without rate");
-        //     // ensure the debt cache is aware of the new pUSD issued
-        //     debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amountOfpUSD));
-        // }
+        if (pynthSupply > 0) {
+            (uint amountOfpUSD, uint rateToRedeem, ) =
+                exchangeRates().effectiveValueAndRates(currencyKey, pynthSupply, "pUSD");
+            require(rateToRedeem > 0, "Cannot remove without rate");
+            // ensure the debt cache is aware of the new pUSD issued
+            debtCache().updateCachedpUSDDebt(SafeCast.toInt256(amountOfpUSD));
+        }
 
         // Remove the pynth from the availablePynths array.
         for (uint i = 0; i < availablePynths.length; i++) {
@@ -871,6 +870,56 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
         //// For preventing additional gas consumption by calculating debt twice, the quota checker is placed here.
         // exTokenManager().requireNotExceedsQuotaLimit(_issuer, afterDebtBalance, 0, 0, true);
     }
+
+
+function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
+
+function toString(address account) public pure returns(string memory) {
+    return toString(abi.encodePacked(account));
+}
+
+function toString(uint256 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes32 value) public pure returns(string memory) {
+    return toString(abi.encodePacked(value));
+}
+
+function toString(bytes memory data) public pure returns(string memory) {
+    bytes memory alphabet = "0123456789abcdef";
+
+    bytes memory str = new bytes(2 + data.length * 2);
+    str[0] = "0";
+    str[1] = "x";
+    for (uint i = 0; i < data.length; i++) {
+        str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+        str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+    }
+    return string(str);
+}
+
 
  function burnPynths(address _from, bytes32 _currencyKey, uint _burnAmount) external onlyPeriFinance {
              _requireCurrencyKeyIsNotpUSD(_currencyKey);
@@ -1250,32 +1299,33 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
     function _burnPynths(
         address debtAccount,
         address burnAccount,
-        uint amountBurnt,
+        uint amount,
         uint existingDebt,
         uint totalDebtIssued
-    ) internal returns (uint) {
+    ) internal returns (uint amountBurnt) {
         // if (_verifyCircuitBreakers()) {
         //     return 0;
         // }
 
-        require(amountBurnt <= existingDebt, "Trying to burn more than debt");
+        //require(amountBurnt <= existingDebt, "Trying to burn more than debt");
+        amountBurnt = existingDebt < amount ? existingDebt : amount;
 
 
         // Remove liquidated debt from the ledger
         _removeFromDebtRegister(debtAccount, amountBurnt, existingDebt, totalDebtIssued);
 
         // get pUSD balance
-        uint deviation;
-        uint pUSDBalance = IERC20(address(pynths[pUSD])).balanceOf(burnAccount);
+        // uint deviation;
+        // uint pUSDBalance = IERC20(address(pynths[pUSD])).balanceOf(burnAccount);
 
-        // calc the deviation between pUSD balance and burnt amount
-        deviation = amountBurnt > pUSDBalance ? amountBurnt.sub(pUSDBalance) : pUSDBalance.sub(amountBurnt);
+        // // calc the deviation between pUSD balance and burnt amount
+        // deviation = amountBurnt > pUSDBalance ? amountBurnt.sub(pUSDBalance) : pUSDBalance.sub(amountBurnt);
 
-        // if deviation is less than 10, burn all pUSD
-        amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
+        // // if deviation is less than 10, burn all pUSD
+        // amountBurnt = deviation < 10 ? pUSDBalance : amountBurnt;
 
-        // check if the account has enough pUSD to burn
-        require(pUSDBalance >= amountBurnt, "Not enough pUSD to burn");
+        // // check if the account has enough pUSD to burn
+        // require(pUSDBalance >= amountBurnt, "Not enough pUSD to burn");
 
         // pynth.burn does a safe subtraction on balance (so it will revert if there are not enough pynths).
         pynths[pUSD].burn(burnAccount, amountBurnt);
@@ -1285,9 +1335,6 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
 
         // Store their debtRatio against a fee period to determine their fee/rewards % for the period
         //_appendAccountIssuanceRecord(debtAccount);
-
-        return amountBurnt;
-
     }
 
 
@@ -1319,16 +1366,18 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
             }
         }
 
-        // burn pUSD from the _from account
-        uint remainingDebt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
-        remainingDebt = existingDebt.sub(remainingDebt);
-
         uint maxIssuable;
-        (maxIssuable, tRatio) = _maxIssuablePynths(from, remainingDebt);
+        (maxIssuable, tRatio) = _maxIssuablePynths(from, existingDebt);
 
+
+        // burn pUSD from the _from account
+        uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
+        // remainingDebt = existingDebt.sub(remainingDebt);
+
+   
         // Check and remove liquidation if existingDebt after burning is <= maxIssuableSynths
         // Issuance ratio is fixed so should remove any liquidations
-        if (remainingDebt <= maxIssuable || remainingDebt.sub(maxIssuable) < 1e12) {
+        if (existingDebt.sub(amountBurnt) <= maxIssuable) {
             liquidations().removeAccountInLiquidation(from);
         }
     }

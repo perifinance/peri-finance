@@ -128,7 +128,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 					'removeMarkets',
 					'removeMarketsByKey',
 					'issueSUSD',
-					'burnSUSD',
+					'burnPUSD',
 					'payFee',
 					'payFee',
 					'updateMarketsImplementations',
@@ -520,14 +520,14 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			await market.issueSUSD(owner, toUnit('10'));
 			assert.bnEqual(await pUSD.balanceOf(owner), toUnit('10'));
 
-			await market.burnSUSD(owner, toUnit('5'));
+			await market.burnPUSD(owner, toUnit('5'));
 			assert.bnEqual(await pUSD.balanceOf(owner), toUnit('5'));
 
 			await market.issueSUSD(owner, toUnit('2'));
-			await market.burnSUSD(owner, toUnit('7'));
+			await market.burnPUSD(owner, toUnit('7'));
 
 			assert.bnEqual(await pUSD.balanceOf(owner), toUnit('0'));
-			await assert.revert(market.burnSUSD(owner, toUnit('1')), 'SafeMath: subtraction overflow');
+			await assert.revert(market.burnPUSD(owner, toUnit('1')), 'SafeMath: subtraction overflow');
 		});
 
 		it('burning respects settlement', async () => {
@@ -547,7 +547,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 			assert.bnEqual(await pUSD.balanceOf(owner), toUnit('100'));
 
 			// But burning properly deducts the reclamation amount
-			await market.burnSUSD(owner, toUnit('90'));
+			await market.burnPUSD(owner, toUnit('90'));
 			assert.bnEqual(await pUSD.balanceOf(owner), toUnit('0'));
 		});
 
@@ -560,7 +560,7 @@ contract('FuturesMarketManager (PerpsV2)', accounts => {
 				reason: 'Permitted only for market implementations',
 			});
 			await onlyGivenAddressCanInvoke({
-				fnc: futuresMarketManager.burnSUSD,
+				fnc: futuresMarketManager.burnPUSD,
 				args: [owner, toUnit('1')],
 				accounts,
 				skipPassCheck: true,

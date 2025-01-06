@@ -72,7 +72,7 @@ import "./interfaces/IERC20.sol";
 interface IFuturesMarketManagerInternal {
     function issueSUSD(address account, uint amount) external;
 
-    function burnSUSD(address account, uint amount) external returns (uint postReclamationAmount);
+    function burnPUSD(address account, uint amount) external returns (uint postReclamationAmount);
 
     function payFee(uint amount) external;
 }
@@ -756,7 +756,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
             // pUSD balance and credited to their margin account.
 
             // Ensure we handle reclamation when burning tokens.
-            uint postReclamationAmount = _manager().burnSUSD(sender, absDelta);
+            uint postReclamationAmount = _manager().burnPUSD(sender, absDelta);
             if (postReclamationAmount != absDelta) {
                 // If balance was insufficient, the actual delta will be smaller
                 marginDelta = int(postReclamationAmount);

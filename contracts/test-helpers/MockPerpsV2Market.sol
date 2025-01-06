@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 interface IPerpsV2MarketManagerInternal {
     function issueSUSD(address account, uint amount) external;
 
-    function burnSUSD(address account, uint amount) external;
+    function burnPUSD(address account, uint amount) external;
 
     function payFee(uint amount) external;
 
@@ -60,8 +60,8 @@ contract MockPerpsV2Market {
         manager.issueSUSD(account, amount);
     }
 
-    function burnSUSD(address account, uint amount) external {
-        manager.burnSUSD(account, amount);
+    function burnPUSD(address account, uint amount) external {
+        manager.burnPUSD(account, amount);
     }
 
     function payFee(uint amount) external {

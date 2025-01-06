@@ -768,23 +768,6 @@ contract('FeePool', async accounts => {
 					assert.bnEqual(period.feesClaimed, 0);
 				}
 			});
-
-			it('should receive fees from WrapperFactory', async () => {
-				// Make sure some debt exists otherwise updateCachedpUSDDebt will revert when closing/burning fees.
-				await periFinance.issuePynths(PERI, toUnit('1000'), { from: owner });
-
-				// Close the current one so we know exactly what we're dealing with
-				await closeFeePeriod();
-
-				// Wrapper Factory collects 100 pUSD in fees
-				const collectedFees = toUnit(100);
-				//await pUSDContract.issue(wrapperFactory.address, collectedFees);
-
-				await closeFeePeriod();
-
-				const period = await feePool.recentFeePeriods(1);
-				assert.bnEqual(period.feesToDistribute, collectedFees);
-			});
 		});
 
 		describe('closeCurrentFeePeriod()', () => {

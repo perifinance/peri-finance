@@ -26,7 +26,7 @@ import "./interfaces/IPerpsV2MarketState.sol";
 interface IFuturesMarketManagerInternal {
     function issueSUSD(address account, uint amount) external;
 
-    function burnSUSD(address account, uint amount) external returns (uint postReclamationAmount);
+    function burnPUSD(address account, uint amount) external returns (uint postReclamationAmount);
 
     function payFee(uint amount) external;
 

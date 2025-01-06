@@ -686,7 +686,8 @@ function toString(bytes memory data) public pure returns(string memory) {
         uint roundIdForDest
     ) internal view returns (uint feeRate, bool tooVolatile) {
         // Get the exchange fee rate as per the source currencyKey and destination currencyKey
-        uint baseRate = sourceSettings.exchangeFeeRate.add(destinationSettings.exchangeFeeRate);
+        //uint baseRate = sourceSettings.exchangeFeeRate.add(destinationSettings.exchangeFeeRate);
+        uint baseRate = _feeRateForExchange(sourceSettings.currencyKey, destinationSettings.currencyKey, sourceSettings.exchangeFeeRate, destinationSettings.exchangeFeeRate);
         uint dynamicFee;
         (dynamicFee, tooVolatile) = _dynamicFeeRateForExchangeAtRounds(
             sourceSettings,
@@ -695,6 +696,31 @@ function toString(bytes memory data) public pure returns(string memory) {
             roundIdForDest
         );
         return (baseRate.add(dynamicFee), tooVolatile);
+    }
+
+    function _feeRateForExchange(bytes32 sourceCurrencyKey, bytes32 destinationCurrencyKey, uint sourceFeeRate, uint destinationFeeRate)
+        internal
+        pure
+        returns (uint exchangeFeeRate)
+    {
+        // Get the exchange fee rate as per destination currencyKey
+        exchangeFeeRate = sourceFeeRate;
+
+        if (sourceCurrencyKey == pUSD || destinationCurrencyKey == pUSD) {
+            return exchangeFeeRate;
+        }
+
+        // Is this a swing trade? long to short or short to long skipping pUSD.
+        if (
+            (sourceCurrencyKey[0] == 0x70 && destinationCurrencyKey[0] == 0x69) ||
+            (sourceCurrencyKey[0] == 0x69 && destinationCurrencyKey[0] == 0x70)
+        ) {
+            // Double the exchange fee
+            //exchangeFeeRate = exchangeFeeRate.mul(2);
+            exchangeFeeRate = exchangeFeeRate.add(destinationFeeRate);
+        }
+
+        return exchangeFeeRate;
     }
 
     function _dynamicFeeRateForExchange(
