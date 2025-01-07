@@ -898,12 +898,11 @@ contract Issuer is Owned, MixinSystemSettings, IIssuer {
             _burnAmount = _burnAmount.sub(exTokenManager().proRataUnstake(_from, _burnAmount, pUSD));
         }
 
-        // burn pUSD, get the target ratio and check liquidation
-        debtBalance = _voluntaryBurnPynths(_from, _burnAmount, debtBalance, systemDebt, false);
-        
+        uint tRatio = _voluntaryBurnPynths(_from, _burnAmount, debtBalance, systemDebt, false);
+
         // check if the target ratio is satisfied
         require(
-            _currencyKey != PERI || debtBalance.roundDownDecimal(uint(12)) <= getExternalTokenQuota(),
+            _currencyKey != PERI || tRatio.roundDownDecimal(uint(12)) <= getExternalTokenQuota(),
             "Over max external quota"
         );
     }
@@ -1261,9 +1260,9 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
         uint existingDebt,
         uint totalDebtIssued
     ) internal returns (uint amountBurnt) {
-        // if (_verifyCircuitBreakers()) {
-        //     return 0;
-        // }
+        if (_verifyCircuitBreakers()) {
+            return 0;
+        }
 
         //require(amountBurnt <= existingDebt, "Trying to burn more than debt");
         amountBurnt = existingDebt < amount ? existingDebt : amount;
@@ -1332,7 +1331,7 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
         uint amountBurnt = _burnPynths(from, from, amount, existingDebt, totalSystemValue);
         // remainingDebt = existingDebt.sub(remainingDebt);
 
-   
+
         // Check and remove liquidation if existingDebt after burning is <= maxIssuableSynths
         // Issuance ratio is fixed so should remove any liquidations
         if (existingDebt.sub(amountBurnt) <= maxIssuable) {

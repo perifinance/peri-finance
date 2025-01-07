@@ -354,6 +354,8 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function takeDebtSnapshot() external {}
 
+    function updateCachedpUSDDebt(int amount) external {}
+
     /* ========== MODIFIERS ========== */
 
     function _requireSystemActiveIfNotOwner() internal view {

@@ -243,6 +243,10 @@ const defaults = {
 		crypto: w3utils.toWei('0.003'),
 		index: w3utils.toWei('0.003'),
 	},
+	EXCHANGE_DYNAMIC_FEE_THRESHOLD: w3utils.toWei('0.0025'),
+	EXCHANGE_DYNAMIC_FEE_WEIGHT_DECAY: w3utils.toWei('0.95'), // dynamic fee weight decay for each round
+	EXCHANGE_DYNAMIC_FEE_ROUNDS: '6', // dynamic fee rounds
+	EXCHANGE_MAX_DYNAMIC_FEE: w3utils.toWei('0.015'), // cap max dynamic fee
 	MINIMUM_STAKE_TIME: (3600 * 24).toString(), // 1 days
 	DEBT_SNAPSHOT_STALE_TIME: (43800).toString(), // 12 hour heartbeat + 10 minutes mining time
 	// DEBT_SNAPSHOT_STALE_TIME: (3600 * 25 + 600).toString(), // 25 hour heartbeat + 10 minutes mining time

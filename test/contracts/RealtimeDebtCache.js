@@ -148,7 +148,7 @@ contract('RealtimeDebtCache', async accounts => {
 				assert.bnEqual(debts[2], toUnit(50));
 				assert.bnEqual(debts[3], toUnit(200));
 
-				assert.isFalse(result[1]);
+				assert.bnEqual(result[1], 0);
 			});
 		});
 
@@ -374,7 +374,7 @@ contract('RealtimeDebtCache', async accounts => {
 					assert.isUndefined(logs.find(({ name } = {}) => name === 'DebtCacheUpdated'));
 				});
 
-				it.only('exchanging between pynths updates pUSD debt total due to fees', async () => {
+				it('exchanging between pynths updates pUSD debt total due to fees', async () => {
 					await systemSettings.setExchangeFeeRateForPynths(
 						[pAUD, pUSD, pEUR],
 						[toUnit(0.1), toUnit(0.1), toUnit(0.1)],

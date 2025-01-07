@@ -290,7 +290,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     function setTargetThreshold(uint percent) external onlyOwner {
-        uint threshold = flexibleStorage().setTargetThreshold(SETTING_TARGET_THRESHOLD, percent);
+        uint threshold = SystemSettingsLib.setTargetThreshold(flexibleStorage(), SETTING_TARGET_THRESHOLD, percent);
         emit TargetThresholdUpdated(threshold);
     }
 

@@ -129,17 +129,23 @@ contract('Liquidations', accounts => {
 
 		await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI], [rate].map(toUnit));
 
+		await debtCache.takeDebtSnapshot();
+
 	};
 
 	const updateUSDCPrice = async rate => {
 
 		await updateAggregatorRates(exchangeRates, circuitBreaker, [USDC, DAI], [rate * 1000000, toUnit(rate)]);
+
+		await debtCache.takeDebtSnapshot();
 	
 	};
 
 	const updatePrices = async (periRate, usdcRate, xautRate) => {
 
 		await updateAggregatorRates(exchangeRates, circuitBreaker, [PERI, USDC, XAUT], [toUnit(periRate), usdcRate * 1000000, toUnit(xautRate)]);
+		await debtCache.takeDebtSnapshot();
+
 	};
 
 	it('ensure only known functions are mutative', () => {
@@ -434,7 +440,7 @@ contract('Liquidations', accounts => {
 					// Alice issues additional pUSD $200 with USDC as collateral
 					// $200 + $400 = $600 pUSD
 					await periFinance.issuePynthsToMaxQuota(USDC, { from: alice });
-					//await periFinance.issuePynthsToMaxQuota(XAUT, { from: alice });
+					await periFinance.issuePynthsToMaxQuota(XAUT, { from: alice });
 
 					// const xautSA = await exTokenManager.stakedAmountOf(alice, XAUT, pUSD);
 					// const usdcSA = await exTokenManager.stakedAmountOf(alice, USDC, pUSD);
