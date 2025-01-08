@@ -50,7 +50,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         uint64 feePeriodId;
         //uint64 startingDebtIndex;
         uint64 startTime;
-        uint allNetworksSnxBackedDebt;
+        uint allNetworksPeriBackedDebt;
         uint allNetworksDebtSharesSupply;
         uint feesToDistribute;
         uint feesClaimed;
@@ -191,7 +191,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         return getTargetThreshold();
     }
 
-    function allNetworksSnxBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
+    function allNetworksPeriBackedDebt() public view returns (uint256 debt, uint256 updatedAt) {
         (, int256 rawData, , uint timestamp, ) =
             AggregatorV2V3Interface(requireAndGetAddress(CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS)).latestRoundData();
 
@@ -388,7 +388,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         require(_recentFeePeriodsStorage(0).startTime <= (now - getFeePeriodDuration()), "Too early to close fee period");
 
         // get current oracle values
-        (uint snxBackedDebt, ) = allNetworksSnxBackedDebt();
+        (uint snxBackedDebt, ) = allNetworksPeriBackedDebt();
         (uint debtSharesSupply, ) = allNetworksDebtSharesSupply();
 
         // close on this chain
@@ -403,18 +403,18 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         // ).closeFeePeriod(snxBackedDebt, debtSharesSupply);
     }
 
-    function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
-        _closeSecondary(allNetworksSnxBackedDebt, allNetworksDebtSharesSupply);
+    function closeSecondary(uint allNetworksPeriBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
+        _closeSecondary(allNetworksPeriBackedDebt, allNetworksDebtSharesSupply);
     }
 
     /**
      * @notice Close the current fee period and start a new one.
      */
-    function _closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) internal {
+    function _closeSecondary(uint allNetworksPeriBackedDebt, uint allNetworksDebtSharesSupply) internal {
 
         // before closing the current fee period, set the recorded snxBackedDebt and debtSharesSupply
         _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
-        _recentFeePeriodsStorage(0).allNetworksSnxBackedDebt = allNetworksSnxBackedDebt;
+        _recentFeePeriodsStorage(0).allNetworksPeriBackedDebt = allNetworksPeriBackedDebt;
 
         // Note:  periodClosing is the current period & periodToRollover is the last open claimable period
         FeePeriod storage periodClosing = _recentFeePeriodsStorage(0);
@@ -436,7 +436,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
         // Note: As of SIP-255, all pUSD fee are now automatically burned and are effectively shared amongst stakers in the form of reduced debt.
         if (_recentFeePeriodsStorage(0).feesToDistribute > 0) {
-            issuer().burnPynthsWithoutDebt(pUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
+            //issuer().burnPynthsWithoutDebt(pUSD, FEE_ADDRESS, _recentFeePeriodsStorage(0).feesToDistribute);
 
             // Mark the burnt fees as claimed.
             _recentFeePeriodsStorage(0).feesClaimed = _recentFeePeriodsStorage(0).feesToDistribute;
@@ -529,7 +529,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     //     // Note:  when FEE_PERIOD_LENGTH = 2, periodClosing is the current period & periodToRollover is the last open claimable period
     //     // get current oracle values
-    //     (uint periBackedDebt, ) = allNetworksSnxBackedDebt();
+    //     (uint periBackedDebt, ) = allNetworksPeriBackedDebt();
 
     //     (uint debtSharesSupply, ) = allNetworksDebtSharesSupply();
 
@@ -547,18 +547,18 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     //         .closeFeePeriod(periBackedDebt, debtSharesSupply);
     // }
 
-    // function closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
-    //     _closeSecondary(allNetworksSnxBackedDebt, allNetworksDebtSharesSupply);
+    // function closeSecondary(uint allNetworksPeriBackedDebt, uint allNetworksDebtSharesSupply) external onlyRelayer {
+    //     _closeSecondary(allNetworksPeriBackedDebt, allNetworksDebtSharesSupply);
     // }
 
     // /**
     //  * @notice Close the current fee period and start a new one.
     //  */
-    // function _closeSecondary(uint allNetworksSnxBackedDebt, uint allNetworksDebtSharesSupply) internal {
+    // function _closeSecondary(uint allNetworksPeriBackedDebt, uint allNetworksDebtSharesSupply) internal {
  
     //     // before closing the current fee period, set the recorded periBackedDebt and debtSharesSupply
     //     _recentFeePeriodsStorage(0).allNetworksDebtSharesSupply = allNetworksDebtSharesSupply;
-    //     _recentFeePeriodsStorage(0).allNetworksSnxBackedDebt = allNetworksSnxBackedDebt;
+    //     _recentFeePeriodsStorage(0).allNetworksPeriBackedDebt = allNetworksPeriBackedDebt;
 
     //     // Note:  periodClosing is the current period & periodToRollover is the last open claimable period
     //     FeePeriod storage periodClosing = _recentFeePeriodsStorage(FEE_PERIOD_LENGTH - 2);
@@ -696,7 +696,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
             feesClaimed: feesClaimed,
             rewardsToDistribute: rewardsToDistribute,
             rewardsClaimed: rewardsClaimed,
-            allNetworksSnxBackedDebt: 0,
+            allNetworksPeriBackedDebt: 0,
             allNetworksDebtSharesSupply: 0
         });
 

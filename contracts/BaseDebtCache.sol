@@ -233,10 +233,10 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     {
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
            uint[] memory values = _issuedPynthValues(currencyKeys, rates);
-        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
+        (uint excludedDebt, bool isAnyNonPeriDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
         (uint futuresDebt, bool futuresDebtIsInvalid) = futuresMarketManager().totalDebt();
 
-        return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
+        return (values, futuresDebt, excludedDebt, isInvalid || futuresDebtIsInvalid || isAnyNonPeriDebtRateInvalid);
     }
 
     function currentPynthDebts(bytes32[] calldata currencyKeys)
@@ -301,7 +301,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
         // Sum all issued synth values based on their supply.
         uint[] memory values = _issuedPynthValues(currencyKeys, rates);
-        (uint excludedDebt, bool isAnyNonSnxDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
+        (uint excludedDebt, bool isAnyNonPeriDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
 
         uint numValues = values.length;
         uint total;
@@ -316,7 +316,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         // Ensure that if the excluded non-SNX debt exceeds SNX-backed debt, no overflow occurs
         total = total < excludedDebt ? 0 : total.sub(excludedDebt);
 
-        return (total, isInvalid || futuresDebtIsInvalid || isAnyNonSnxDebtRateInvalid);
+        return (total, isInvalid || futuresDebtIsInvalid || isAnyNonPeriDebtRateInvalid);
     }
 
     function currentDebt() external view returns (uint debt, bool anyRateIsInvalid) {

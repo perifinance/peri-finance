@@ -651,24 +651,24 @@ contract('SystemSettings', async accounts => {
 			// Have to hardcode here due to public const not available in Solidity V5
 			// https://ethereum.stackexchange.com/a/102633/33908
 			const MAX_LIQUIDATION_PENALTY = toUnit('0.25');
-			const newSnxLiquidationPenalty = MAX_LIQUIDATION_PENALTY.add(toUnit('1'));
+			const newPeriLiquidationPenalty = MAX_LIQUIDATION_PENALTY.add(toUnit('1'));
 			await assert.revert(
-				systemSettings.setPeriLiquidationPenalty(newSnxLiquidationPenalty, {
+				systemSettings.setPeriLiquidationPenalty(newPeriLiquidationPenalty, {
 					from: owner,
 				}),
 				'penalty > MAX_LIQUIDATION_PENALTY'
 			);
 		});
 
-		it('owner can set SnxLiquidationPenalty to 25%', async () => {
+		it('owner can set PeriLiquidationPenalty to 25%', async () => {
 			await systemSettings.setPeriLiquidationPenalty(toUnit('.25'), { from: owner });
 			assert.bnEqual(await systemSettings.periLiquidationPenalty(), toUnit('.25'));
 		});
-		it('owner can set SnxLiquidationPenalty to 1%', async () => {
+		it('owner can set PeriLiquidationPenalty to 1%', async () => {
 			await systemSettings.setPeriLiquidationPenalty(toUnit('.01'), { from: owner });
 			assert.bnEqual(await systemSettings.periLiquidationPenalty(), toUnit('.01'));
 		});
-		it('owner can set SnxLiquidationPenalty to 0%', async () => {
+		it('owner can set PeriLiquidationPenalty to 0%', async () => {
 			await systemSettings.setPeriLiquidationPenalty(toUnit('0'), { from: owner });
 			assert.bnEqual(await systemSettings.periLiquidationPenalty(), toUnit('0'));
 		});

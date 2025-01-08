@@ -28,14 +28,14 @@ interface IIssuer {
 
     function collateralisationRatio(address issuer) external view returns (uint);
 
-    function collateralisationRatioAndAnyRatesInvalid(address _issuer)
-        external
-        view
-        returns (uint cratio, bool anyRateIsInvalid);
+    // function collateralisationRatioAndAnyRatesInvalid(address _issuer)
+    //     external
+    //     view
+    //     returns (uint cratio, bool anyRateIsInvalid);
 
     function debtBalanceOf(address issuer, bytes32 currencyKey) external view returns (uint debtBalance);
 
-    function issuanceRatio() external view returns (uint);
+    //function issuanceRatio() external view returns (uint);
 
     function lastIssueEvent(address account) external view returns (uint);
 
@@ -47,7 +47,7 @@ interface IIssuer {
             uint,
             uint
         );
-    function minimumStakeTime() external view returns (uint);
+    //function minimumStakeTime() external view returns (uint);
 
     function remainingIssuablePynths(address issuer)
         external
@@ -132,15 +132,15 @@ interface IIssuer {
 
     function getTargetRatio(address account) external view returns (uint);
 
-    function issuePynthsWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    // function issuePynthsWithoutDebt(
+    //     bytes32 currencyKey,
+    //     address to,
+    //     uint amount
+    // ) external returns (bool rateInvalid);
 
-    function burnPynthsWithoutDebt(
-        bytes32 currencyKey,
-        address to,
-        uint amount
-    ) external returns (bool rateInvalid);
+    // function burnPynthsWithoutDebt(
+    //     bytes32 currencyKey,
+    //     address to,
+    //     uint amount
+    // ) external returns (bool rateInvalid);
 }
