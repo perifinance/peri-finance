@@ -51,8 +51,6 @@ interface ISystemSettings {
 
     function interactionDelay(address collateral) external view returns (uint);
 
-    function atomicMaxVolumePerBlock() external view returns (uint);
-
     function atomicTwapWindow() external view returns (uint);
 
     function atomicEquivalentForDexPricing(bytes32 currencyKey) external view returns (address);

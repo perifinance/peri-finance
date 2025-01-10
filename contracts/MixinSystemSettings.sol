@@ -49,8 +49,6 @@ contract MixinSystemSettings is MixinResolver {
     bytes32 internal constant SETTING_CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT = "crossDomainCloseGasLimit";
     bytes32 internal constant SETTING_CROSS_DOMAIN_RELAY_GAS_LIMIT = "crossDomainRelayGasLimit";
     bytes32 internal constant SETTING_INTERACTION_DELAY = "interactionDelay";
-    bytes32 internal constant SETTING_COLLAPSE_FEE_RATE = "collapseFeeRate";
-    bytes32 internal constant SETTING_ATOMIC_MAX_VOLUME_PER_BLOCK = "atomicMaxVolumePerBlock";
     bytes32 internal constant SETTING_ATOMIC_TWAP_WINDOW = "atomicTwapWindow";
     bytes32 internal constant SETTING_ATOMIC_EQUIVALENT_FOR_DEX_PRICING = "atomicEquivalentForDexPricing";
     bytes32 internal constant SETTING_ATOMIC_EXCHANGE_FEE_RATE = "atomicExchangeFeeRate";
@@ -237,11 +235,6 @@ contract MixinSystemSettings is MixinResolver {
                 SETTING_CONTRACT_NAME,
                 keccak256(abi.encodePacked(SETTING_LIQUIDATION_RATIOS, types))
             );
-    }
-
-
-    function getAtomicMaxVolumePerBlock() internal view returns (uint) {
-        return flexibleStorage().getUIntValue(SETTING_CONTRACT_NAME, SETTING_ATOMIC_MAX_VOLUME_PER_BLOCK);
     }
 
     function getAtomicTwapWindow() internal view returns (uint) {
