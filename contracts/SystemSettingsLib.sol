@@ -274,28 +274,6 @@ library SystemSettingsLib {
         );
     }
 
-    function setCollapseFeeRate(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        address _collateral,
-        uint _collapseFeeRate
-    ) external {
-        flexibleStorage.setUIntValue(
-            SETTINGS_CONTRACT_NAME,
-            keccak256(abi.encodePacked(settingName, _collateral)),
-            _collapseFeeRate
-        );
-    }
-
-    function setAtomicMaxVolumePerBlock(
-        IFlexibleStorage flexibleStorage,
-        bytes32 settingName,
-        uint _maxVolume
-    ) external {
-        require(_maxVolume <= MAX_ATOMIC_VOLUME_PER_BLOCK, "Atomic max volume exceed maximum uint192");
-        flexibleStorage.setUIntValue(SETTINGS_CONTRACT_NAME, settingName, _maxVolume);
-    }
-
     function setAtomicTwapWindow(
         IFlexibleStorage flexibleStorage,
         bytes32 settingName,

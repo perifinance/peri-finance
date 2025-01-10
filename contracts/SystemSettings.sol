@@ -177,9 +177,6 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         return getInteractionDelay(collateral);
     }
 
-    function collapseFeeRate(address collateral) external view returns (uint) {
-        return getCollapseFeeRate(collateral);
-    }
 
     function syncStaleThreshold() external view returns (uint) {
         return getSyncStaleThreshold();
@@ -190,28 +187,11 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
 
-    function setSyncStaleThreshold(uint _percent) external onlyOwner {
-        SystemSettingsLib.setSyncStaleThreshold(flexibleStorage(), SETTING_SYNC_STALE_THRESHOLD, _percent);
-        emit SyncStaleThresholdUpdated(_percent);
-    }
+  
 
     function setExternalTokenQuota(uint _newQuota) external onlyOwner {
         SystemSettingsLib.setExternalTokenQuota(flexibleStorage(), SETTING_EXTERNAL_TOKEN_QUOTA, _newQuota);
         emit ExternalTokenQuotaUpdated(_newQuota);
-    }
-
-    // SIP-120 Atomic exchanges
-    // max allowed volume per block for atomic exchanges
-    function atomicMaxVolumePerBlock() external view returns (uint) {
-        return getAtomicMaxVolumePerBlock();
-    }
-
-     function getCollapseFeeRate(address collateral) internal view returns (uint) {
-        return
-            flexibleStorage().getUIntValue(
-                SETTING_CONTRACT_NAME,
-                keccak256(abi.encodePacked(SETTING_COLLAPSE_FEE_RATE, collateral))
-            );
     }
 
     // SIP-120 Atomic exchanges
@@ -408,16 +388,6 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
         emit InteractionDelayUpdated(_interactionDelay);
     }
 
-    function setCollapseFeeRate(address _collateral, uint _collapseFeeRate) external onlyOwner {
-        flexibleStorage().setCollapseFeeRate(SETTING_COLLAPSE_FEE_RATE, _collateral, _collapseFeeRate);
-        emit CollapseFeeRateUpdated(_collapseFeeRate);
-    }
-
-    function setAtomicMaxVolumePerBlock(uint _maxVolume) external onlyOwner {
-        flexibleStorage().setAtomicMaxVolumePerBlock(SETTING_ATOMIC_MAX_VOLUME_PER_BLOCK, _maxVolume);
-        emit AtomicMaxVolumePerBlockUpdated(_maxVolume);
-    }
-
     function setAtomicTwapWindow(uint _window) external onlyOwner {
         flexibleStorage().setAtomicTwapWindow(SETTING_ATOMIC_TWAP_WINDOW, _window);
         emit AtomicTwapWindowUpdated(_window);
@@ -516,7 +486,6 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event AggregatorWarningFlagsUpdated(address flags);
     event ExternalTokenQuotaUpdated(uint quota);
     event InteractionDelayUpdated(uint interactionDelay);
-    event CollapseFeeRateUpdated(uint collapseFeeRate);
     event AtomicMaxVolumePerBlockUpdated(uint newMaxVolume);
     event AtomicTwapWindowUpdated(uint newWindow);
     event AtomicEquivalentForDexPricingUpdated(bytes32 synthKey, address equivalent);
