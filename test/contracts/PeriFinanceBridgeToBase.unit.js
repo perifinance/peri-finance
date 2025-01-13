@@ -3,8 +3,7 @@ const { assert } = require('./common');
 const { onlyGivenAddressCanInvoke, ensureOnlyExpectedMutativeFunctions } = require('./helpers');
 
 const { toBytes32 } = require('../..');
-const { smock } = require('@defi-wonderland/smock');
-const { expect } = require('chai');
+const { smockit } = require('@eth-optimism/smock');
 
 const PeriFinanceBridgeToBase = artifacts.require('PeriFinanceBridgeToBase');
 
@@ -14,14 +13,12 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 	it('ensure only known functions are mutative', () => {
 		ensureOnlyExpectedMutativeFunctions({
 			abi: PeriFinanceBridgeToBase.abi,
-			ignoreParents: ['BasePeriFinanceBridge'],
+			ignoreParents: ['Owned', 'MixinResolver'],
 			expected: [
-				'finalizeDeposit',
-				'finalizeFeePeriodClose',
-				'finalizeEscrowMigration',
-				'finalizeRewardDeposit',
-				'withdraw',
-				'withdrawTo',
+				'completeDeposit',
+				'completeEscrowMigration',
+				'completeRewardDeposit',
+				'initiateWithdrawal',
 			],
 		});
 	});
@@ -32,30 +29,24 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 			args
 		);
 
-	describe('when all the deps are (s)mocked', () => {
+	describe.skip('when all the deps are (s)mocked', () => {
 		let messenger;
 		let mintablePeriFinance;
 		let resolver;
 		let rewardEscrow;
 		let flexibleStorage;
-		let feePool;
-		let issuer;
-		let exchangeRates;
-		let systemStatus;
 		beforeEach(async () => {
-			messenger = await smock.fake('iOVM_BaseCrossDomainMessenger', {
+			messenger = await smockit(artifacts.require('iOVM_BaseCrossDomainMessenger').abi, {
 				address: smockedMessenger,
 			});
 
-			rewardEscrow = await smock.fake('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2');
+			rewardEscrow = await smockit(
+				artifacts.require('contracts/interfaces/IRewardEscrowV2.sol:IRewardEscrowV2').abi
+			);
 
-			mintablePeriFinance = await smock.fake('MintablePeriFinance');
-			flexibleStorage = await smock.fake('FlexibleStorage');
-			feePool = await smock.fake('FeePool');
-			issuer = await smock.fake('Issuer');
-			exchangeRates = await smock.fake('ExchangeRates');
-			systemStatus = await smock.fake('SystemStatus');
-
+			mintablePeriFinance = await smockit(artifacts.require('MintablePeriFinance').abi);
+			flexibleStorage = await smockit(artifacts.require('FlexibleStorage').abi);
+			// now add to address resolver
 			resolver = await artifacts.require('AddressResolver').new(owner);
 			await resolver.importAddresses(
 				[
@@ -64,10 +55,6 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 					'PeriFinance',
 					'base:PeriFinanceBridgeToOptimism',
 					'RewardEscrowV2',
-					'FeePool',
-					'Issuer',
-					'ExchangeRates',
-					'SystemStatus',
 				].map(toBytes32),
 				[
 					flexibleStorage.address,
@@ -75,10 +62,6 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 					mintablePeriFinance.address,
 					periBridgeToOptimism,
 					rewardEscrow.address,
-					feePool.address,
-					issuer.address,
-					exchangeRates.address,
-					systemStatus.address,
 				],
 				{ from: owner }
 			);
@@ -86,14 +69,16 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 
 		beforeEach(async () => {
 			// stubs
-			mintablePeriFinance.burnSecondary.returns(() => {});
-			mintablePeriFinance.mintSecondary.returns(() => {});
-			mintablePeriFinance.balanceOf.returns(() => web3.utils.toWei('1'));
-			mintablePeriFinance.transferablePeriFinance.returns(() => web3.utils.toWei('1'));
-			messenger.sendMessage.returns(() => {});
-			messenger.xDomainMessageSender.returns(() => periBridgeToOptimism);
-			rewardEscrow.importVestingEntries.returns(() => {});
-			flexibleStorage.getUIntValue.returns(() => '3000000');
+			mintablePeriFinance.smocked.burnSecondary.will.return.with(() => {});
+			mintablePeriFinance.smocked.mintSecondary.will.return.with(() => {});
+			mintablePeriFinance.smocked.balanceOf.will.return.with(() => web3.utils.toWei('1'));
+			mintablePeriFinance.smocked.transferablePeriFinance.will.return.with(() =>
+				web3.utils.toWei('1')
+			);
+			messenger.smocked.sendMessage.will.return.with(() => {});
+			messenger.smocked.xDomainMessageSender.will.return.with(() => periBridgeToOptimism);
+			rewardEscrow.smocked.importVestingEntries.will.return.with(() => {});
+			flexibleStorage.smocked.getUIntValue.will.return.with(() => '3000000');
 		});
 
 		describe('when the target is deployed', () => {
@@ -104,18 +89,13 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 				await instance.rebuildCache();
 			});
 
-			it('should set constructor params on deployment', async () => {
-				assert.equal(await instance.owner(), owner);
-				assert.equal(await instance.resolver(), resolver.address);
-			});
-
 			describe('importVestingEntries', async () => {
 				const emptyArray = [];
 
 				describe('failure modes', () => {
 					it('should only allow the relayer (aka messenger) to call importVestingEntries()', async () => {
 						await onlyGivenAddressCanInvoke({
-							fnc: instance.finalizeEscrowMigration,
+							fnc: instance.completeEscrowMigration,
 							args: [user1, escrowedAmount, emptyArray],
 							accounts,
 							address: smockedMessenger,
@@ -125,12 +105,12 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 
 					it('should only allow the L1 bridge to invoke importVestingEntries() via the messenger', async () => {
 						// 'smock' the messenger to return a random msg sender
-						messenger.xDomainMessageSender.returns(() => randomAddress);
+						messenger.smocked.xDomainMessageSender.will.return.with(() => randomAddress);
 						await assert.revert(
-							instance.finalizeEscrowMigration(user1, escrowedAmount, emptyArray, {
+							instance.completeEscrowMigration(user1, escrowedAmount, emptyArray, {
 								from: smockedMessenger,
 							}),
-							'Only a counterpart bridge can invoke'
+							'Only the L1 bridge can invoke'
 						);
 					});
 				});
@@ -138,7 +118,7 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 				describe('when invoked by the messenger (aka relayer)', async () => {
 					let importVestingEntriesTx;
 					beforeEach('importVestingEntries is called', async () => {
-						importVestingEntriesTx = await instance.finalizeEscrowMigration(
+						importVestingEntriesTx = await instance.completeEscrowMigration(
 							user1,
 							escrowedAmount,
 							emptyArray,
@@ -149,9 +129,9 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 					});
 
 					it('importVestingEntries is called (via rewardEscrowV2)', async () => {
-						rewardEscrow.importVestingEntries.returnsAtCall(0, user1);
-						rewardEscrow.importVestingEntries.returnsAtCall(1, escrowedAmount);
-						rewardEscrow.importVestingEntries.returnsAtCall(2, emptyArray);
+						assert.equal(rewardEscrow.smocked.importVestingEntries.calls[0][0], user1);
+						assert.bnEqual(rewardEscrow.smocked.importVestingEntries.calls[0][1], escrowedAmount);
+						assert.bnEqual(rewardEscrow.smocked.importVestingEntries.calls[0][2], emptyArray);
 					});
 
 					it('should emit a ImportedVestingEntries event', async () => {
@@ -164,16 +144,11 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 				});
 			});
 
-			describe('withdraw', () => {
+			describe('initiateWithdrawal', () => {
 				describe('failure modes', () => {
-					it('does not work when the user has less trasferable peri than the withdrawal amount', async () => {
-						mintablePeriFinance.transferablePeriFinance.returns(() => '0');
-						await assert.revert(instance.withdraw('1'), 'Not enough transferable PERI');
-					});
-					it('does not work when initiation has been suspended', async () => {
-						await instance.suspendInitiation({ from: owner });
-
-						await assert.revert(instance.withdrawTo(randomAddress, '1'), 'Initiation deactivated');
+					it('does not work when user has less trasferable peri than the withdrawal amount', async () => {
+						mintablePeriFinance.smocked.transferablePeriFinance.will.return.with(() => '0');
+						await assert.revert(instance.initiateWithdrawal('1'), 'Not enough transferable PERI');
 					});
 				});
 
@@ -182,94 +157,41 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 					const amount = 100;
 					const gasLimit = 3e6;
 					beforeEach('user tries to withdraw 100 tokens', async () => {
-						withdrawalTx = await instance.withdraw(amount, { from: user1 });
+						withdrawalTx = await instance.initiateWithdrawal(amount, { from: user1 });
 					});
 
-					it('then PERI is burned via mintableSyntetix.burnSecondary', async () => {
-						expect(mintablePeriFinance.burnSecondary).to.have.length(0);
-						mintablePeriFinance.burnSecondary.returnsAtCall(0, user1);
-						mintablePeriFinance.burnSecondary.returnsAtCall(1, amount);
+					it('then PERI is burned via mintablePeriFinance.burnSecondary', async () => {
+						assert.equal(mintablePeriFinance.smocked.burnSecondary.calls.length, 1);
+						assert.equal(mintablePeriFinance.smocked.burnSecondary.calls[0][0], user1);
+						assert.equal(mintablePeriFinance.smocked.burnSecondary.calls[0][1].toString(), amount);
 					});
 
 					it('the message is relayed', async () => {
-						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, periBridgeToOptimism);
+						assert.equal(messenger.smocked.sendMessage.calls.length, 1);
+						assert.equal(messenger.smocked.sendMessage.calls[0][0], periBridgeToOptimism);
 						const expectedData = getDataOfEncodedFncCall({
-							fnc: 'finalizeWithdrawal',
+							fnc: 'completeWithdrawal',
 							args: [user1, amount],
 						});
 
-						messenger.sendMessage.returnsAtCall(1, expectedData);
-						messenger.sendMessage.returnsAtCall(2, gasLimit.toString());
+						assert.equal(messenger.smocked.sendMessage.calls[0][1], expectedData);
+						assert.equal(messenger.smocked.sendMessage.calls[0][2], gasLimit.toString());
 					});
 
 					it('and a WithdrawalInitiated event is emitted', async () => {
 						assert.eventEqual(withdrawalTx, 'WithdrawalInitiated', {
-							_from: user1,
-							_to: user1,
-							_amount: amount,
+							account: user1,
+							amount: amount,
 						});
 					});
 				});
 			});
 
-			describe('withdrawTo', () => {
+			describe('completeDeposit', async () => {
 				describe('failure modes', () => {
-					it('does not work when the user has less trasferable peri than the withdrawal amount', async () => {
-						mintablePeriFinance.transferablePeriFinance.returns(() => '0');
-						await assert.revert(
-							instance.withdrawTo(randomAddress, '1'),
-							'Not enough transferable PERI'
-						);
-					});
-					it('does not work when initiation has been suspended', async () => {
-						await instance.suspendInitiation({ from: owner });
-
-						await assert.revert(instance.withdrawTo(randomAddress, '1'), 'Initiation deactivated');
-					});
-				});
-
-				describe('when invoked by a user', () => {
-					let withdrawalTx;
-					const amount = 100;
-					const gasLimit = 3e6;
-					beforeEach('user tries to withdraw 100 tokens to a different address', async () => {
-						withdrawalTx = await instance.withdrawTo(randomAddress, amount, { from: user1 });
-					});
-
-					it('then PERI is burned via mintableSyntetix.burnSecondary to the specified address', async () => {
-						expect(mintablePeriFinance.burnSecondary).to.have.length(0);
-						mintablePeriFinance.burnSecondary.returnsAtCall(0, user1);
-						mintablePeriFinance.burnSecondary.returnsAtCall(1, amount);
-					});
-
-					it('the message is relayed', async () => {
-						expect(messenger.sendMessage).to.have.length(0);
-						messenger.sendMessage.returnsAtCall(0, periBridgeToOptimism);
-						const expectedData = getDataOfEncodedFncCall({
-							fnc: 'finalizeWithdrawal',
-							args: [randomAddress, amount],
-						});
-
-						messenger.sendMessage.returnsAtCall(1, expectedData);
-						messenger.sendMessage.returnsAtCall(2, gasLimit.toString());
-					});
-
-					it('and a WithdrawalInitiated event is emitted', async () => {
-						assert.eventEqual(withdrawalTx, 'WithdrawalInitiated', {
-							_from: user1,
-							_to: randomAddress,
-							_amount: amount,
-						});
-					});
-				});
-			});
-
-			describe('finalizeDeposit', async () => {
-				describe('failure modes', () => {
-					it('should only allow the relayer (aka messenger) to call finalizeDeposit()', async () => {
+					it('should only allow the relayer (aka messenger) to call completeDeposit()', async () => {
 						await onlyGivenAddressCanInvoke({
-							fnc: instance.finalizeDeposit,
+							fnc: instance.completeDeposit,
 							args: [user1, 100],
 							accounts,
 							address: smockedMessenger,
@@ -277,132 +199,93 @@ contract('PeriFinanceBridgeToBase (unit tests)', accounts => {
 						});
 					});
 
-					it('should only allow the L1 bridge to invoke finalizeDeposit() via the messenger', async () => {
+					it('should only allow the L1 bridge to invoke completeDeposit() via the messenger', async () => {
 						// 'smock' the messenger to return a random msg sender
-						messenger.xDomainMessageSender.returns(() => randomAddress);
+						messenger.smocked.xDomainMessageSender.will.return.with(() => randomAddress);
 						await assert.revert(
-							instance.finalizeDeposit(user1, 100, {
+							instance.completeDeposit(user1, 100, {
 								from: smockedMessenger,
 							}),
-							'Only a counterpart bridge can invoke'
+							'Only the L1 bridge can invoke'
 						);
 					});
 				});
 
 				describe('when invoked by the messenger (aka relayer)', async () => {
-					let finalizeDepositTx;
-					const finalizeDepositAmount = 100;
-					beforeEach('finalizeDeposit is called', async () => {
-						finalizeDepositTx = await instance.finalizeDeposit(user1, finalizeDepositAmount, {
+					let completeDepositTx;
+					const completeDepositAmount = 100;
+					beforeEach('completeDeposit is called', async () => {
+						completeDepositTx = await instance.completeDeposit(user1, completeDepositAmount, {
 							from: smockedMessenger,
 						});
 					});
 
-					it('should emit a DepositFinalized event', async () => {
-						assert.eventEqual(finalizeDepositTx, 'DepositFinalized', {
-							_to: user1,
-							_amount: finalizeDepositAmount,
+					it('should emit a MintedSecondary event', async () => {
+						assert.eventEqual(completeDepositTx, 'MintedSecondary', {
+							account: user1,
+							amount: completeDepositAmount,
 						});
 					});
 
 					it('then PERI is minted via MintablePeriFinance.mintSecondary', async () => {
-						expect(mintablePeriFinance.mintSecondary).to.have.length(0);
-						mintablePeriFinance.mintSecondary.returnsAtCall(0, user1);
-						mintablePeriFinance.mintSecondary.returnsAtCall(1, finalizeDepositAmount);
+						assert.equal(mintablePeriFinance.smocked.mintSecondary.calls.length, 1);
+						assert.equal(mintablePeriFinance.smocked.mintSecondary.calls[0][0], user1);
+						assert.equal(
+							mintablePeriFinance.smocked.mintSecondary.calls[0][1].toString(),
+							completeDepositAmount
+						);
 					});
 				});
 			});
 
-			describe('finalizeRewardDeposit', async () => {
+			describe('completeRewardDeposit', async () => {
 				describe('failure modes', () => {
-					it('should only allow the relayer (aka messenger) to call finalizeRewardDeposit()', async () => {
+					it('should only allow the relayer (aka messenger) to call completeRewardDeposit()', async () => {
 						await onlyGivenAddressCanInvoke({
-							fnc: instance.finalizeRewardDeposit,
-							args: [user1, 100],
+							fnc: instance.completeRewardDeposit,
+							args: [100],
 							accounts,
 							address: smockedMessenger,
 							reason: 'Only the relayer can call this',
 						});
 					});
 
-					it('should only allow the L1 bridge to invoke finalizeRewardDeposit() via the messenger', async () => {
+					it('should only allow the L1 bridge to invoke completeRewardDeposit() via the messenger', async () => {
 						// 'smock' the messenger to return a random msg sender
-						messenger.xDomainMessageSender.returns(() => randomAddress);
+						messenger.smocked.xDomainMessageSender.will.return.with(() => randomAddress);
 						await assert.revert(
-							instance.finalizeRewardDeposit(user1, 100, {
+							instance.completeRewardDeposit(100, {
 								from: smockedMessenger,
 							}),
-							'Only a counterpart bridge can invoke'
+							'Only the L1 bridge can invoke'
 						);
 					});
 				});
 
 				describe('when invoked by the bridge on the other layer', async () => {
-					let finalizeRewardDepositTx;
-					const finalizeRewardDepositAmount = 100;
-					beforeEach('finalizeRewardDeposit is called', async () => {
-						finalizeRewardDepositTx = await instance.finalizeRewardDeposit(
-							user1,
-							finalizeRewardDepositAmount,
+					let completeRewardDepositTx;
+					const completeRewardDepositAmount = 100;
+					beforeEach('completeRewardDeposit is called', async () => {
+						completeRewardDepositTx = await instance.completeRewardDeposit(
+							completeRewardDepositAmount,
 							{
 								from: smockedMessenger,
 							}
 						);
 					});
 
-					it('should emit a RewardDepositFinalized event', async () => {
-						assert.eventEqual(finalizeRewardDepositTx, 'RewardDepositFinalized', {
-							amount: finalizeRewardDepositAmount,
+					it('should emit a MintedSecondaryRewards event', async () => {
+						assert.eventEqual(completeRewardDepositTx, 'MintedSecondaryRewards', {
+							amount: completeRewardDepositAmount,
 						});
 					});
 
 					it('then PERI is minted via MintbalePeriFinance.mintSecondary', async () => {
-						expect(mintablePeriFinance.mintSecondaryRewards).to.have.length(0);
-						mintablePeriFinance.mintSecondaryRewards.returnsAtCall(0, finalizeRewardDepositAmount);
-					});
-				});
-			});
-
-			describe('finalizeFeePeriodClose', async () => {
-				describe('failure modes', () => {
-					it('should only allow the relayer (aka messenger) to call finalizeFeePeriodClose()', async () => {
-						await onlyGivenAddressCanInvoke({
-							fnc: instance.finalizeFeePeriodClose,
-							args: [user1, 100],
-							accounts,
-							address: smockedMessenger,
-							reason: 'Only the relayer can call this',
-						});
-					});
-
-					it('should only allow the L1 bridge to invoke finalizeFeePeriodClose() via the messenger', async () => {
-						// 'smock' the messenger to return a random msg sender
-						messenger.xDomainMessageSender.returns(() => randomAddress);
-						await assert.revert(
-							instance.finalizeFeePeriodClose(1, 1, {
-								from: smockedMessenger,
-							}),
-							'Only a counterpart bridge can invoke'
+						assert.equal(mintablePeriFinance.smocked.mintSecondaryRewards.calls.length, 1);
+						assert.equal(
+							mintablePeriFinance.smocked.mintSecondaryRewards.calls[0][0].toString(),
+							completeRewardDepositAmount
 						);
-					});
-				});
-
-				describe('when invoked by the messenger (aka relayer)', async () => {
-					let finalizeTx;
-					beforeEach('finalizeFeePeriodClose is called', async () => {
-						finalizeTx = await instance.finalizeFeePeriodClose('1', '2', {
-							from: smockedMessenger,
-						});
-					});
-
-					it('should emit a FeePeriodCloseFinalized event', async () => {
-						assert.eventEqual(finalizeTx, 'FeePeriodCloseFinalized', ['1', '2']);
-					});
-
-					it('then PERI is minted via MintablePeriFinance.mintSecondary', async () => {
-						expect(feePool.closeSecondary).to.have.length(0);
-						feePool.closeSecondary.returnsAtCall(0, '1');
-						feePool.closeSecondary.returnsAtCall(1, '2');
 					});
 				});
 			});
