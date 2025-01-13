@@ -57,8 +57,6 @@ contract('MintablePeriFinance (unit tests)', accounts => {
 					'Exchanger',
 					'Issuer',
 					'SupplySchedule',
-					// 'Liquidator',
-					// 'LiquidatorRewards',
 					'RewardsDistribution',
 					'RewardEscrowV2',
 					'SystemSettings',

@@ -7,6 +7,11 @@ const { gray, cyan, yellow, redBright, green } = require('chalk');
 const { table } = require('table');
 const w3utils = require('web3-utils');
 const axios = require('axios');
+const {
+	BigNumber,
+	utils: { parseUnits },
+} = require('ethers');
+
 
 const {
 	constants: {
@@ -38,6 +43,8 @@ const {
 
 const { networks } = require('../..');
 const stringify = input => JSON.stringify(input, null, '\t') + '\n';
+
+const allowZeroOrUpdateIfNonZero = param => input => param === '0' || input !== '0';
 
 const ensureNetwork = network => {
 	if (!networks.includes(network)) {
@@ -125,6 +132,13 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 		shortingRewardsFile,
 	};
 };
+
+const getExplorerLinkPrefix = ({ network, useOvm }) => {
+	return `https://${network !== 'mainnet' ? network + (useOvm ? '-' : '.') : ''}${
+		useOvm ? (network === 'sepolia' ? 'optimism.etherscan' : 'explorer.optimism') : 'etherscan'
+	}.io`;
+};
+
 
 const getEtherscanLinkPrefix = network => {
 	if (['polygon', 'mumbai', 'amoy'].includes(network)) {
@@ -626,20 +640,44 @@ function multiplyDecimal(x, y) {
 	return xBN.mul(yBN).div(unit);
 }
 
+
+const assignGasOptions = async ({ tx, provider, gasLimit, maxFeePerGas, maxPriorityFeePerGas }) => {
+	// only add EIP-1559 options if the network supports EIP-1559
+	const gasOptions = {};
+
+	let feeData = {};
+	try {
+		feeData = await provider.getFeeData();
+	} catch (_) {} // network does not support the `getFeeData` rpc call
+	if (feeData.maxFeePerGas) {
+		gasOptions.type = 2;
+		if (gasLimit) gasOptions.gasLimit = parseUnits(gasLimit.toString() || '8000000', 'wei');
+		if (maxFeePerGas)
+			gasOptions.maxFeePerGas = parseUnits(maxFeePerGas.toString() || '100', 'gwei');
+		if (maxPriorityFeePerGas)
+			gasOptions.maxPriorityFeePerGas = parseUnits(maxPriorityFeePerGas.toString(), 'gwei');
+	}
+
+	return Object.assign(gasOptions, tx);
+};
+
 module.exports = {
 	ensureNetwork,
 	ensureDeploymentPath,
 	getDeploymentPathForNetwork,
 	loadAndCheckRequiredSources,
+	getExplorerLinkPrefix,
 	getEtherscanLinkPrefix,
 	loadConnections,
 	confirmAction,
 	appendOwnerActionGenerator,
 	stringify,
+	allowZeroOrUpdateIfNonZero,
 	performTransactionalStep,
 	parameterNotice,
 	reportDeployedContracts,
 	checkGasPrice,
 	sleep,
 	multiplyDecimal,
+	assignGasOptions,
 };

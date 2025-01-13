@@ -36,7 +36,6 @@ contract('DirectIntegrationManager', async accounts => {
 		await systemSettings.setAtomicEquivalentForDexPricing(pETH, fakeAddress, { from: owner });
 		await systemSettings.setAtomicExchangeFeeRate(pETH, 100, { from: owner });
 		await systemSettings.setAtomicTwapWindow(200, { from: owner });
-		await systemSettings.setAtomicMaxVolumePerBlock(400, { from: owner });
 		await systemSettings.setAtomicVolatilityConsiderationWindow(pETH, 500, { from: owner });
 		await systemSettings.setAtomicVolatilityUpdateThreshold(pETH, 700, { from: owner });
 		await systemSettings.setExchangeFeeRateForPynths([pETH], [800], { from: owner });

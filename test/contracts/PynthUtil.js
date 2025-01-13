@@ -43,7 +43,6 @@ contract('PynthUtil', accounts => {
 				'SystemSettings',
 				'DebtCache',
 				'Issuer',
-				// 'LiquidatorRewards',
 				'CollateralManager',
 				'CircuitBreaker',
 				'RewardEscrowV2', // required for issuer._collateral to read collateral

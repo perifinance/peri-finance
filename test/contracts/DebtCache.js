@@ -271,7 +271,6 @@ contract('DebtCache', async accounts => {
 				'PeriFinanceEscrow',
 				'SystemSettings',
 				'Issuer',
-				// 'LiquidatorRewards',
 				'DebtCache',
 				'Exchanger', // necessary for burnPynths to check settlement of pUSD
 				'DelegateApprovals', // necessary for *OnBehalf functions

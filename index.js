@@ -80,6 +80,7 @@ const chainIdMapping = Object.entries({
 
 	31337: {
 		network: 'local',
+		//useOvm: true,
 	},
 	/* // OVM networks: see https://github.com/ethereum-optimism/regenesis/
 	10: {
@@ -288,6 +289,7 @@ const defaults = {
 		'base-sepolia': constants.ZERO_ADDRESS,
 		base: constants.ZERO_ADDRESS,
 		sepolia: constants.ZERO_ADDRESS,
+		local: constants.ZERO_ADDRESS,
 		// local : '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D', <-- fork
 	},
 	USDC_ERC20_ADDRESSES: {
@@ -468,6 +470,7 @@ const defaults = {
 		'base-sepolia': '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
 		base: '0x981Ca3e19AB02f758f252611bb5881AA4ECEDB3B',
 		sepolia: constants.ZERO_ADDRESS,
+		local: constants.ZERO_ADDRESS,
 	},
 	BRIDGE_ROLES: {
 		mainnet: [{ roleKey: 'Validator', address: '0xa4f99e30E0Ce73174f7CF13E8eeBA040ed10faf5' }],
@@ -583,6 +586,9 @@ const defaults = {
 	CROSS_DOMAIN_ESCROW_GAS_LIMIT: `${8e6}`,
 	CROSS_DOMAIN_REWARD_GAS_LIMIT: `${3e6}`,
 	CROSS_DOMAIN_WITHDRAWAL_GAS_LIMIT: `${3e6}`,
+	CROSS_DOMAIN_RELAY_GAS_LIMIT: `${8e6}`,
+	CROSS_DOMAIN_FEE_PERIOD_CLOSE_GAS_LIMIT: `${8e6}`,
+
 	COLLATERAL_MANAGER: {
 		PYNTHS: ['pUSD', 'pBTC', 'pETH'],
 		SHORTS: [
@@ -590,6 +596,7 @@ const defaults = {
 			{ long: 'pETH', short: 'iETH' },
 		],
 		MAX_DEBT: w3utils.toWei('50000000'), // 50 million pUSD
+		MAX_SKEW_RATE: w3utils.toWei('0.2'),
 		BASE_BORROW_RATE: Math.round((0.005 * 1e18) / 31556926).toString(), // 31556926 is CollateralManager seconds per year
 		BASE_SHORT_RATE: Math.round((0.005 * 1e18) / 31556926).toString(),
 	},

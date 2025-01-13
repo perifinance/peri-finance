@@ -57,11 +57,9 @@ contract('SystemSettings', async accounts => {
 				'setAggregatorWarningFlags',
 				'setAtomicEquivalentForDexPricing',
 				'setAtomicExchangeFeeRate',
-				'setAtomicMaxVolumePerBlock',
 				'setAtomicTwapWindow',
 				'setAtomicVolatilityConsiderationWindow',
 				'setAtomicVolatilityUpdateThreshold',
-				'setCollapseFeeRate',
 				'setCrossChainPynthTransferEnabled',
 				'setCrossDomainMessageGasLimit',
 				'setDebtSnapshotStaleTime',
@@ -370,28 +368,7 @@ contract('SystemSettings', async accounts => {
 		});
 	});
 
-	describe('setCollapseFeeRate', async () => {
-		describe('revert condtions', async () => {
-			it('should fail if not called by the owner', async () => {
-				await assert.revert(
-					systemSettings.setCollapseFeeRate(short.address, toUnit(1), { from: account1 }),
-					'Only the contract owner may perform this action'
-				);
-			});
-		});
-		describe('when it succeeds', async () => {
-			beforeEach(async () => {
-				await systemSettings.setCollapseFeeRate(short.address, toUnit(0.15), { from: owner });
-			});
-			it('should update the collapse service fee', async () => {
-				assert.bnEqual(await systemSettings.collapseFeeRate(short.address), toUnit(0.15));
-			});
-			it('should allow the collapse fee rate to be 0', async () => {
-				await systemSettings.setCollapseFeeRate(short.address, toUnit(0), { from: owner });
-				assert.bnEqual(await systemSettings.collapseFeeRate(short.address), toUnit(0));
-			});
-		});
-	});
+
 
 	describe('setInteractionDelay', async () => {
 		describe('revert condtions', async () => {
@@ -1015,52 +992,6 @@ contract('SystemSettings', async accounts => {
 		});
 	});
 
-	describe('setAtomicMaxVolumePerBlock', () => {
-		const limit = toUnit('1000000');
-		it('can only be invoked by owner', async () => {
-			await onlyGivenAddressCanInvoke({
-				fnc: systemSettings.setAtomicMaxVolumePerBlock,
-				args: [limit],
-				address: owner,
-				accounts,
-				reason: 'Only the contract owner may perform this action',
-			});
-		});
-
-		it('should revert if limit exceeds uint192', async () => {
-			const aboveUint192 = toBN('2').pow(toBN('192'));
-			await assert.revert(
-				systemSettings.setAtomicMaxVolumePerBlock(aboveUint192, { from: owner }),
-				'Atomic max volume exceed maximum uint192'
-			);
-		});
-
-		describe('when successfully invoked', () => {
-			let txn;
-			beforeEach(async () => {
-				txn = await systemSettings.setAtomicMaxVolumePerBlock(limit, { from: owner });
-			});
-
-			it('then it changes the value as expected', async () => {
-				assert.bnEqual(await systemSettings.atomicMaxVolumePerBlock(), limit);
-			});
-
-			it('and emits an AtomicMaxVolumePerBlockUpdated event', async () => {
-				assert.eventEqual(txn, 'AtomicMaxVolumePerBlockUpdated', [limit]);
-			});
-
-			it('allows to be changed', async () => {
-				const newLimit = limit.mul(toBN('2'));
-				await systemSettings.setAtomicMaxVolumePerBlock(newLimit, { from: owner });
-				assert.bnEqual(await systemSettings.atomicMaxVolumePerBlock(), newLimit);
-			});
-
-			it('allows to be reset to zero', async () => {
-				await systemSettings.setAtomicMaxVolumePerBlock(0, { from: owner });
-				assert.bnEqual(await systemSettings.atomicMaxVolumePerBlock(), 0);
-			});
-		});
-	});
 
 	describe('setAtomicTwapWindow', () => {
 		const twapWindow = toBN('3600'); // 1 hour

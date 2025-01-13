@@ -74,7 +74,6 @@ contract('BasePeriFinance', async accounts => {
 				'SystemStatus',
 				'DebtCache',
 				'Issuer',
-				// 'LiquidatorRewards',
 				'OneNetAggregatorDebtRatio',
 				'Exchanger',
 				'RewardsDistribution',

@@ -328,8 +328,7 @@ const setupContract = async ({
 		const safeDecimalMath = await artifacts.require('SafeDecimalMath').new();
 
 		if (
-			artifact._json.contractName === 'Exchanger' ||
-			artifact._json.contractName === 'ExchangerWithFeeRecAlternatives'
+			artifact._json.contractName === 'Exchanger'
 		) {
 			// SafeDecimalMath -> ExchangeSettlementLib -> Exchanger*
 			const ExchangeSettlementLib = artifacts.require('ExchangeSettlementLib');
@@ -389,7 +388,6 @@ const setupContract = async ({
 		Exchanger: [owner, tryGetAddressOf('AddressResolver')],
 		CircuitBreaker: [owner, tryGetAddressOf('AddressResolver')],
 		ExchangeCircuitBreaker: [owner, tryGetAddressOf('AddressResolver')],
-		ExchangerWithFeeRecAlternatives: [owner, tryGetAddressOf('AddressResolver')],
 		SystemSettings: [owner, tryGetAddressOf('AddressResolver')],
 		DirectIntegrationManager: [owner, tryGetAddressOf('AddressResolver')],
 		ExchangeState: [owner, tryGetAddressOf('Exchanger')],
@@ -457,10 +455,6 @@ const setupContract = async ({
 		FeePoolEternalStorage: [owner, tryGetAddressOf('FeePool')],
 		DelegateApprovals: [owner, tryGetAddressOf('EternalStorageDelegateApprovals')],
 		Liquidations: [owner, tryGetAddressOf('AddressResolver')],
-		// Liquidator: [owner, tryGetAddressOf('AddressResolver')],
-		// LiquidatorRewards: [owner, tryGetAddressOf('AddressResolver')],
-		DebtMigratorOnEthereum: [owner, tryGetAddressOf('AddressResolver')],
-		DebtMigratorOnOptimism: [owner, tryGetAddressOf('AddressResolver')],
 		CollateralManagerState: [owner, tryGetAddressOf('CollateralManager')],
 		CollateralManager: [
 			tryGetAddressOf('CollateralManagerState'),
@@ -873,19 +867,7 @@ const setupContract = async ({
 				),
 			]);
 		},
-		async ExchangerWithFeeRecAlternatives() {
-			await Promise.all([
-				cache['ExchangeState'].setAssociatedContract(instance.address, { from: owner }),
 
-				cache['SystemStatus'].updateAccessControl(
-					toBytes32('Pynth'),
-					instance.address,
-					true,
-					false,
-					{ from: owner }
-				),
-			]);
-		},
 
 		async CollateralManager() {
 			await cache['CollateralManagerState'].setAssociatedContract(instance.address, {
@@ -1378,34 +1360,6 @@ const setupAllContracts = async ({
 		{ contract: 'DelegateApprovals', deps: ['EternalStorage'] },
 		{ contract: 'EternalStorage', forContract: 'Liquidations' },
 		{ contract: 'Liquidations', deps: ['EternalStorage', 'FlexibleStorage'] },
-		// {
-		// 	contract: 'Liquidator',
-		// 	deps: ['AddressResolver', 'EternalStorage', 'FlexibleStorage', 'PeriFinanceEscrow'],
-		// },
-		// {
-		// 	contract: 'LiquidatorRewards',
-		// 	deps: ['AddressResolver', 'Liquidator', 'Issuer', 'RewardEscrowV2', 'PeriFinance'],
-		// },
-		{
-			contract: 'DebtMigratorOnEthereum',
-			deps: [
-				'AddressResolver',
-				// 'Liquidator',
-				// 'LiquidatorRewards',
-				'Issuer',
-				'RewardEscrowV2',
-				'PeriFinance',
-				'PeriFinanceDebtShare',
-				'PeriFinanceBridgeToOptimism',
-				'SystemSettings',
-			],
-			mocks: ['ext:Messenger', 'ovm:DebtMigratorOnOptimism'],
-		},
-		{
-			contract: 'DebtMigratorOnOptimism',
-			deps: ['AddressResolver', 'Issuer', 'RewardEscrowV2', 'PeriFinance'],
-			mocks: ['ext:Messenger', 'base:DebtMigratorOnEthereum'],
-		},
 		{
 			contract: 'RewardsDistribution',
 			mocks: ['PeriFinance', 'FeePool', 'RewardEscrow', 'RewardEscrowV2', 'ProxyFeePool'],
@@ -1499,29 +1453,6 @@ const setupAllContracts = async ({
 			deps: ['AddressResolver', 'DirectIntegrationManager', 'CircuitBreaker'],
 		},
 		{
-			contract: 'ExchangerWithFeeRecAlternatives',
-			resolverAlias: 'Exchanger',
-			mocks: [
-				'PeriFinance',
-				'CircuitBreaker',
-				'ExchangeRates',
-				'FeePool',
-				'DelegateApprovals',
-				'VirtualPynthMastercopy',
-			],
-			deps: [
-				'AddressResolver',
-				'DirectIntegrationManager',
-				'TradingRewards',
-				'SystemStatus',
-				'ExchangeRates',
-				'ExchangeState',
-				'FlexibleStorage',
-				'DebtCache',
-				'CircuitBreaker',
-			],
-		},
-		{
 			contract: 'Pynth',
 			mocks: ['Exchanger', 'FeePool'],
 			deps: [
@@ -1544,7 +1475,6 @@ const setupAllContracts = async ({
 				'RewardsDistribution',
 				// 'Liquidations',
 				'BridgeState',
-				// 'LiquidatorRewards',
 			],
 			deps: [
 				'Issuer',
@@ -1567,7 +1497,6 @@ const setupAllContracts = async ({
 				'PeriFinanceEscrow',
 				'RewardsDistribution',
 				// 'Liquidations',
-				// 'LiquidatorRewards',
 			],
 			deps: [
 				'Issuer',
@@ -2221,9 +2150,6 @@ const setupAllContracts = async ({
 			returnObj['SystemSettings'].setExTokenIssuanceRatio(exTokens, exTokenRatios, { from: owner }),
 
 
-			returnObj['SystemSettings'].setAtomicMaxVolumePerBlock(ATOMIC_MAX_VOLUME_PER_BLOCK, {
-				from: owner,
-			}),
 			returnObj['SystemSettings'].setAtomicTwapWindow(ATOMIC_TWAP_WINDOW, {
 				from: owner,
 			}),
