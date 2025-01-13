@@ -14,8 +14,6 @@ import "./interfaces/IIssuer.sol";
 import "./interfaces/IExchanger.sol";
 import "./interfaces/IExchangeRates.sol";
 import "./interfaces/ISystemStatus.sol";
-import "./interfaces/IEtherCollateral.sol";
-import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/IFuturesMarketManager.sol";
@@ -45,8 +43,6 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
-    bytes32 private constant CONTRACT_ETHERCOLLATERAL = "EtherCollateral";
-    bytes32 private constant CONTRACT_ETHERCOLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_FUTURESMARKETMANAGER = "FuturesMarketManager";
 
@@ -57,15 +53,15 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](8);
+        bytes32[] memory newAddresses = new bytes32[](6);
         newAddresses[0] = CONTRACT_ISSUER;
         newAddresses[1] = CONTRACT_EXCHANGER;
         newAddresses[2] = CONTRACT_EXRATES;
         newAddresses[3] = CONTRACT_SYSTEMSTATUS;
-        newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
-        newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
-        newAddresses[6] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[7] = CONTRACT_FUTURESMARKETMANAGER;
+        // newAddresses[4] = CONTRACT_ETHERCOLLATERAL;
+        // newAddresses[5] = CONTRACT_ETHERCOLLATERAL_PUSD;
+        newAddresses[4] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[5] = CONTRACT_FUTURESMARKETMANAGER;
         
         addresses = combineArrays(existingAddresses, newAddresses);
     }
@@ -84,14 +80,6 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
 
     function systemStatus() internal view returns (ISystemStatus) {
         return ISystemStatus(requireAndGetAddress(CONTRACT_SYSTEMSTATUS));
-    }
-
-    function etherCollateral() internal view returns (IEtherCollateral) {
-        return IEtherCollateral(requireAndGetAddress(CONTRACT_ETHERCOLLATERAL));
-    }
-
-    function etherCollateralpUSD() internal view returns (IEtherCollateralpUSD) {
-        return IEtherCollateralpUSD(requireAndGetAddress(CONTRACT_ETHERCOLLATERAL_PUSD));
     }
 
     function collateralManager() internal view returns (ICollateralManager) {
@@ -184,43 +172,33 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
         uint numValues = currencyKeys.length;
         uint[] memory values = new uint[](numValues);
         IPynth[] memory pynths = issuer().getPynths(currencyKeys);
- 
+
         for (uint i = 0; i < numValues; i++) {
-            bytes32 key = currencyKeys[i];
-            
             address pynthAddress = address(pynths[i]);
             require(pynthAddress != address(0), "Pynth does not exist");
             uint supply = IERC20(pynthAddress).totalSupply();
-            
+            uint value = supply.multiplyDecimalRound(rates[i]);
+            // uint multiplier = (pynths[i].currencyKey() != sUSD) ? discountRate : SafeDecimalMath.unit();
 
-            if (collateralManager().isPynthManaged(key)) {
-                uint collateralIssued = collateralManager().long(key);
-                // this is an edge case --
-                // if a pynth other than pUSD is only issued by non PERI collateral
-                // the long value will exceed the supply if there was a minting fee,
-                // so we check explicitly and 0 it out to prevent
-                // a safesub overflow.
+            // if (collateralManager().isPynthManaged(key)) {
+            //     uint collateralIssued = collateralManager().long(key);
+            //     // this is an edge case --
+            //     // if a pynth other than pUSD is only issued by non PERI collateral
+            //     // the long value will exceed the supply if there was a minting fee,
+            //     // so we check explicitly and 0 it out to prevent
+            //     // a safesub overflow.
 
-                if (collateralIssued > supply) {
-                    supply = 0;
-                } else {
-                    supply = supply.sub(collateralIssued);
-                }
-            }
-
-            bool ispUSD = key == pUSD;
-            if (ispUSD || key == pETH) {
-                IEtherCollateral etherCollateralContract =
-                    ispUSD ? IEtherCollateral(address(etherCollateralpUSD())) : etherCollateral();
-                uint etherCollateralSupply = etherCollateralContract.totalIssuedPynths();
-                supply = supply.sub(etherCollateralSupply);
-            }
-
+            //     if (collateralIssued > supply) {
+            //         supply = 0;
+            //     } else {
+            //         supply = supply.sub(collateralIssued);
+            //     }
+            // }
 
             values[i] = supply.multiplyDecimalRound(rates[i]);
-          
         }
-        return values;
+
+        return (values);
     }
 
     function _currentPynthDebts(bytes32[] memory currencyKeys)

@@ -6,8 +6,6 @@ import "./Pynth.sol";
 
 // Internal references
 import "./interfaces/ICollateralManager.sol";
-import "./interfaces/IEtherCollateralpUSD.sol";
-import "./interfaces/IEtherCollateral.sol";
 import "./interfaces/IBridgeState.sol";
 import "./interfaces/ISystemSettings.sol";
 import "./interfaces/IDebtCache.sol";
@@ -22,8 +20,6 @@ contract MultiCollateralPynth is Pynth {
     /* ========== ADDRESS RESOLVER CONFIGURATION ========== */
 
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
-    bytes32 private constant CONTRACT_ETH_COLLATERAL = "EtherCollateral";
-    bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_SYSTEMSETTINGS = "SystemSettings";
     bytes32 private constant CONTRACT_DEBTCACHE = "DebtCache";
 
@@ -55,14 +51,6 @@ contract MultiCollateralPynth is Pynth {
         return ICollateralManager(requireAndGetAddress(CONTRACT_COLLATERALMANAGER));
     }
 
-    function etherCollateral() internal view returns (IEtherCollateral) {
-        return IEtherCollateral(requireAndGetAddress(CONTRACT_ETH_COLLATERAL));
-    }
-
-    function etherCollateralpUSD() internal view returns (IEtherCollateralpUSD) {
-        return IEtherCollateralpUSD(requireAndGetAddress(CONTRACT_ETH_COLLATERAL_PUSD));
-    }
-
     function systemSettings() internal view returns (ISystemSettings) {
         return ISystemSettings(requireAndGetAddress(CONTRACT_SYSTEMSETTINGS));
     }
@@ -73,12 +61,10 @@ contract MultiCollateralPynth is Pynth {
 
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = Pynth.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](5);
+        bytes32[] memory newAddresses = new bytes32[](3);
         newAddresses[0] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[1] = CONTRACT_ETH_COLLATERAL;
-        newAddresses[2] = CONTRACT_ETH_COLLATERAL_PUSD;
-        newAddresses[3] = CONTRACT_SYSTEMSETTINGS;
-        newAddresses[4] = CONTRACT_DEBTCACHE;
+        newAddresses[1] = CONTRACT_SYSTEMSETTINGS;
+        newAddresses[2] = CONTRACT_DEBTCACHE;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -164,12 +150,10 @@ contract MultiCollateralPynth is Pynth {
         bool isFeePool = msg.sender == address(feePool());
         bool isExchanger = msg.sender == address(exchanger());
         bool isIssuer = msg.sender == address(issuer());
-        bool ipEtherCollateral = msg.sender == address(etherCollateral());
-        bool ipEtherCollateralpUSD = msg.sender == address(etherCollateralpUSD());
         bool isMultiCollateral = collateralManager().hasCollateral(msg.sender);
 
         require(
-            isFeePool || isExchanger || isIssuer || ipEtherCollateral || ipEtherCollateralpUSD || isMultiCollateral,
+            isFeePool || isExchanger || isIssuer || isMultiCollateral,
             "Only FeePool, Exchanger, Issuer or MultiCollateral contracts allowed"
         );
         _;

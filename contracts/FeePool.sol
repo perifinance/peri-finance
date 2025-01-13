@@ -26,7 +26,6 @@ import "./interfaces/IIssuer.sol";
 import "./interfaces/IRewardEscrowV2.sol";
 import "./interfaces/IDelegateApprovals.sol";
 import "./interfaces/IRewardsDistribution.sol";
-import "./interfaces/IEtherCollateralpUSD.sol";
 import "./interfaces/ICollateralManager.sol";
 import "./interfaces/ICrossChainManager.sol";
 import "./interfaces/IFuturesMarketManager.sol";
@@ -83,7 +82,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     bytes32 private constant CONTRACT_ISSUER = "Issuer";
     bytes32 private constant CONTRACT_REWARDESCROW_V2 = "RewardEscrowV2";
     bytes32 private constant CONTRACT_DELEGATEAPPROVALS = "DelegateApprovals";
-    bytes32 private constant CONTRACT_ETH_COLLATERAL_PUSD = "EtherCollateralpUSD";
     bytes32 private constant CONTRACT_COLLATERALMANAGER = "CollateralManager";
     bytes32 private constant CONTRACT_REWARDSDISTRIBUTION = "RewardsDistribution";
     bytes32 private constant CONTRACT_CROSSCHAINMANAGER = "CrossChainManager";
@@ -112,7 +110,7 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
     /* ========== VIEWS ========== */
     function resolverAddressesRequired() public view returns (bytes32[] memory addresses) {
         bytes32[] memory existingAddresses = MixinSystemSettings.resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](14);
+        bytes32[] memory newAddresses = new bytes32[](13);
         newAddresses[0] = CONTRACT_SYSTEMSTATUS;
         newAddresses[1] = CONTRACT_PERIFINANCEDEBTSHARE;
         newAddresses[2] = CONTRACT_FEEPOOLETERNALSTORAGE;
@@ -120,13 +118,12 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
         newAddresses[4] = CONTRACT_ISSUER;
         newAddresses[5] = CONTRACT_REWARDESCROW_V2;
         newAddresses[6] = CONTRACT_DELEGATEAPPROVALS;
-        newAddresses[7] = CONTRACT_ETH_COLLATERAL_PUSD;
-        newAddresses[8] = CONTRACT_REWARDSDISTRIBUTION;
-        newAddresses[9] = CONTRACT_COLLATERALMANAGER;
-        newAddresses[10] = CONTRACT_CROSSCHAINMANAGER;
-        newAddresses[11] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
-        newAddresses[12] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
-        newAddresses[13] = CONTRACT_FUTURES_MARKET_MANAGER;
+        newAddresses[7] = CONTRACT_REWARDSDISTRIBUTION;
+        newAddresses[8] = CONTRACT_COLLATERALMANAGER;
+        newAddresses[9] = CONTRACT_CROSSCHAINMANAGER;
+        newAddresses[10] = CONTRACT_EXT_AGGREGATOR_ISSUED_PYNTHS;
+        newAddresses[11] = CONTRACT_EXT_AGGREGATOR_DEBT_RATIO;
+        newAddresses[12] = CONTRACT_FUTURES_MARKET_MANAGER;
         addresses = combineArrays(existingAddresses, newAddresses);
     }
 
@@ -144,10 +141,6 @@ contract FeePool is Owned, Proxyable, LimitedSetup, MixinSystemSettings, IFeePoo
 
     function exchanger() internal view returns (IExchanger) {
         return IExchanger(requireAndGetAddress(CONTRACT_EXCHANGER));
-    }
-
-    function etherCollateralpUSD() internal view returns (IEtherCollateralpUSD) {
-        return IEtherCollateralpUSD(requireAndGetAddress(CONTRACT_ETH_COLLATERAL_PUSD));
     }
 
     function collateralManager() internal view returns (ICollateralManager) {

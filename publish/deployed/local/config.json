@@ -202,5 +202,50 @@
 	},
 	"DAI": {
 		"deploy": true
+	},
+	"SystemSettingsLib": {
+		"deploy": true
+	},
+	"ExchangeSettlementLib": {
+		"deploy": true
+	},
+	"CircuitBreaker": {
+		"deploy": true
+	},
+	"PeriFinanceDebtShare": {
+		"deploy": true
+	},
+	"RewardEscrowV2Storage": {
+		"deploy": true
+	},
+	"SignedSafeDecimalMath": {
+		"deploy": true
+	},
+	"OneNetAggregatorIssuedPynths": {
+		"deploy": true
+	},
+	"OneNetAggregatorDebtRatio": {
+		"deploy": true
+	},
+	"ExchangeCircuitBreaker": {
+		"deploy": true
+	},
+	"DirectIntegrationManager": {
+		"deploy": true
+	},
+	"FuturesMarketManager": {
+		"deploy": true
+	},
+	"PerpsV2MarketData": {
+		"deploy": true
+	},
+	"PerpsV2MarketSettings": {
+		"deploy": true
+	},
+	"PerpsV2ExchangeRate": {
+		"deploy": true
+	},
+	"ExternalTokenStakeManager":{ 
+		"deploy": true
 	}
 }
