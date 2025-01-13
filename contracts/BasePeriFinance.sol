@@ -32,7 +32,6 @@ contract BasePeriFinance is IERC20, ExternStateToken, MixinResolver, IPeriFinanc
     bytes32 public constant pUSD = "pUSD";
 
     // ========== ADDRESS RESOLVER CONFIGURATION ==========
-    bytes32 private constant CONTRACT_PERIFINANCESTATE = "PeriFinanceState";
     bytes32 private constant CONTRACT_SYSTEMSTATUS = "SystemStatus";
     bytes32 private constant CONTRACT_EXCHANGER = "Exchanger";
     bytes32 private constant CONTRACT_ISSUER = "Issuer";

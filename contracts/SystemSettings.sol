@@ -201,25 +201,25 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     // SIP-120 Atomic exchanges
-    // equivalent asset to use for a synth when considering external prices for atomic exchanges
+    // equivalent asset to use for a pynth when considering external prices for atomic exchanges
     function atomicEquivalentForDexPricing(bytes32 currencyKey) external view returns (address) {
         return getAtomicEquivalentForDexPricing(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // fee rate override for atomic exchanges into a synth
+    // fee rate override for atomic exchanges into a pynth
     function atomicExchangeFeeRate(bytes32 currencyKey) external view returns (uint) {
         return getAtomicExchangeFeeRate(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // consideration window for determining synth volatility
+    // consideration window for determining pynth volatility
     function atomicVolatilityConsiderationWindow(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityConsiderationWindow(currencyKey);
     }
 
     // SIP-120 Atomic exchanges
-    // update threshold for determining synth volatility
+    // update threshold for determining pynth volatility
     function atomicVolatilityUpdateThreshold(bytes32 currencyKey) external view returns (uint) {
         return getAtomicVolatilityUpdateThreshold(currencyKey);
     }
@@ -435,8 +435,8 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     }
 
     function setCrossChainPynthTransferEnabled(bytes32 _currencyKey, uint _value) external onlyOwner {
-        flexibleStorage().setCrossChainPynthTransferEnabled(SETTING_CROSS_SYNTH_TRANSFER_ENABLED, _currencyKey, _value);
-        emit CrossChainSynthTransferEnabledUpdated(_currencyKey, _value);
+        flexibleStorage().setCrossChainPynthTransferEnabled(SETTING_CROSS_PYNTH_TRANSFER_ENABLED, _currencyKey, _value);
+        emit CrossChainPynthTransferEnabledUpdated(_currencyKey, _value);
     }
 
     function setExTokenIssuanceRatio(bytes32[] calldata tokenKeys, uint256[] calldata exTokenIssuanceRatios)
@@ -475,7 +475,7 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event RateStalePeriodUpdated(uint rateStalePeriod);
     event SyncStaleThresholdUpdated(uint newRatio);
     /* ========== Exchange Fees Related ========== */
-    event ExchangeFeeUpdated(bytes32 synthKey, uint newExchangeFeeRate);
+    event ExchangeFeeUpdated(bytes32 pynthKey, uint newExchangeFeeRate);
     event ExchangeDynamicFeeThresholdUpdated(uint dynamicFeeThreshold);
     event ExchangeDynamicFeeWeightDecayUpdated(uint dynamicFeeWeightDecay);
     event ExchangeDynamicFeeRoundsUpdated(uint dynamicFeeRounds);
@@ -488,11 +488,11 @@ contract SystemSettings is Owned, MixinSystemSettings, ISystemSettings {
     event InteractionDelayUpdated(uint interactionDelay);
     event AtomicMaxVolumePerBlockUpdated(uint newMaxVolume);
     event AtomicTwapWindowUpdated(uint newWindow);
-    event AtomicEquivalentForDexPricingUpdated(bytes32 synthKey, address equivalent);
-    event AtomicExchangeFeeUpdated(bytes32 synthKey, uint newExchangeFeeRate);
-    event AtomicVolatilityConsiderationWindowUpdated(bytes32 synthKey, uint newVolatilityConsiderationWindow);
-    event AtomicVolatilityUpdateThresholdUpdated(bytes32 synthKey, uint newVolatilityUpdateThreshold);
-    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 synthKey, bool enabled);
-    event CrossChainSynthTransferEnabledUpdated(bytes32 synthKey, uint value);
+    event AtomicEquivalentForDexPricingUpdated(bytes32 pynthKey, address equivalent);
+    event AtomicExchangeFeeUpdated(bytes32 pynthKey, uint newExchangeFeeRate);
+    event AtomicVolatilityConsiderationWindowUpdated(bytes32 pynthKey, uint newVolatilityConsiderationWindow);
+    event AtomicVolatilityUpdateThresholdUpdated(bytes32 pynthKey, uint newVolatilityUpdateThreshold);
+    event PureChainlinkPriceForAtomicSwapsEnabledUpdated(bytes32 pynthKey, bool enabled);
+    event CrossChainPynthTransferEnabledUpdated(bytes32 pynthKey, uint value);
     event LiquidationRatiosUpdated(bytes32 types, uint liquidationRatio);
 }

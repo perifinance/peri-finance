@@ -11,7 +11,7 @@ import "./interfaces/IFuturesMarketManager.sol";
 import "./interfaces/IPerpsV2MarketViews.sol";
 import "./interfaces/IPerpsV2Market.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketSettings
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketSettings
 contract PerpsV2MarketSettings is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketSettings {
     /* ========== CONSTANTS ========== */
 

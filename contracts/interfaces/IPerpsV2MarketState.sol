@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./IPerpsV2MarketBaseTypes.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketState
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketState
 interface IPerpsV2MarketState {
     function marketKey() external view returns (bytes32);
 

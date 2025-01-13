@@ -8,7 +8,7 @@ import "./interfaces/IPerpsV2MarketBaseTypes.sol";
 import "./interfaces/IPerpsV2MarketSettings.sol";
 import "./interfaces/IAddressResolver.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketData
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketData
 // A utility contract to allow the front end to query market data in a single call.
 contract PerpsV2MarketData {
     /* ========== TYPES ========== */

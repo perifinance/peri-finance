@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./PerpsV2MarketBase.sol";
 import "./interfaces/IPerpsV2MarketViews.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketViews
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketViews
 contract PerpsV2MarketViews is PerpsV2MarketBase, IPerpsV2MarketViews {
     /* ========== CONSTRUCTOR ========== */
 

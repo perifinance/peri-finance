@@ -16,7 +16,7 @@ import "./Proxyable.sol";
  * some helper views to get the size of the route list (`getRoutesLength`), the list of routes (`getRoutesPage`),
  * and a list of all the targeted contracts.
  */
-// https://docs.synthetix.io/contracts/source/contracts/ProxyPerpsV2
+// https://docs.periFinance.io/contracts/source/contracts/ProxyPerpsV2
 contract ProxyPerpsV2 is Owned {
     /* ----- Dynamic router storage ----- */
     struct Route {

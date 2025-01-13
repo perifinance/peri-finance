@@ -299,7 +299,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
        bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory rates, bool isInvalid) = exchangeRates().ratesAndInvalidForCurrencies(currencyKeys);
 
-        // Sum all issued synth values based on their supply.
+        // Sum all issued pynth values based on their supply.
         uint[] memory values = _issuedPynthValues(currencyKeys, rates);
         (uint excludedDebt, bool isAnyNonPeriDebtRateInvalid) = _totalNonPeriBackedDebt(currencyKeys, rates, isInvalid);
 

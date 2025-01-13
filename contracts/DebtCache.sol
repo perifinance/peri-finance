@@ -35,7 +35,7 @@ contract DebtCache is BaseDebtCache {
         bytes32[] memory currencyKeys = issuer().availableCurrencyKeys();
         (uint[] memory values, uint futuresDebt, uint excludedDebt, bool isInvalid) = _currentPynthDebts(currencyKeys);
 
-            // The total SNX-backed debt is the debt of futures markets plus the debt of circulating synths.
+            // The total SNX-backed debt is the debt of futures markets plus the debt of circulating pynths.
         uint periCollateralDebt = futuresDebt;
         _cachedPynthDebt[FUTURES_DEBT_KEY] = futuresDebt;
         uint numValues = values.length;

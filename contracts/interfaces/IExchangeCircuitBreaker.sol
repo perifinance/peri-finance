@@ -2,7 +2,7 @@ pragma solidity ^0.5.16;
 
 import "./IExchangeRates.sol";
 
-// https://docs.synthetix.io/contracts/source/interfaces/IExchangeCircuitBreaker
+// https://docs.periFinance.io/contracts/source/interfaces/IExchangeCircuitBreaker
 interface IExchangeCircuitBreaker {
     // Views
 

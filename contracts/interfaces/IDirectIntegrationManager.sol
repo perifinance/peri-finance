@@ -9,7 +9,6 @@ interface IDirectIntegrationManager {
         address atomicEquivalentForDexPricing;
         uint atomicExchangeFeeRate;
         uint atomicTwapWindow;
-        uint atomicMaxVolumePerBlock;
         uint atomicVolatilityConsiderationWindow;
         uint atomicVolatilityUpdateThreshold;
         uint exchangeFeeRate;

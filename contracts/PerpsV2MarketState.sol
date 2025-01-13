@@ -10,7 +10,7 @@ import "./StateShared.sol";
 // Libraries
 import "./AddressSetLib.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketState
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketState
 // solhint-disable-next-line max-states-count
 contract PerpsV2MarketState is Owned, StateShared, IPerpsV2MarketBaseTypes {
     using AddressSetLib for AddressSetLib.AddressSet;

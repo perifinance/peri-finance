@@ -12,7 +12,7 @@ import "./interfaces/PythStructs.sol";
 // Libraries
 import "./AddressSetLib.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2ExchangeRate
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2ExchangeRate
 contract PerpsV2ExchangeRate is Owned, ReentrancyGuard, MixinSystemSettings {
     using AddressSetLib for AddressSetLib.AddressSet;
 

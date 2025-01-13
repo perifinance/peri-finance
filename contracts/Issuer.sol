@@ -1272,7 +1272,7 @@ function maxExIssuablePynths(address _issuer, bytes32 _currencyKey)
         // remainingDebt = existingDebt.sub(remainingDebt);
 
 
-        // Check and remove liquidation if existingDebt after burning is <= maxIssuableSynths
+        // Check and remove liquidation if existingDebt after burning is <= maxIssuablePynths
         // Issuance ratio is fixed so should remove any liquidations
         if (existingDebt.sub(amountBurnt) <= maxIssuable) {
             liquidations().removeAccountInLiquidation(from);

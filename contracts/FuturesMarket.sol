@@ -54,7 +54,7 @@ import "./interfaces/IFuturesMarket.sol";
  *     - the account being managed was not liquidated in the same transaction;
  */
 
-// https://docs.synthetix.io/contracts/source/contracts/FuturesMarket
+// https://docs.periFinance.io/contracts/source/contracts/FuturesMarket
 contract FuturesMarket is IFuturesMarket, FuturesMarketBase, MixinFuturesNextPriceOrders, MixinFuturesViews {
     constructor(
         address _resolver,

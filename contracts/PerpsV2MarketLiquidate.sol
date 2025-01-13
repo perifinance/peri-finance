@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./PerpsV2MarketProxyable.sol";
 import "./interfaces/IPerpsV2MarketLiquidate.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketLiquidate
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketLiquidate
 contract PerpsV2MarketLiquidate is IPerpsV2MarketLiquidate, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 

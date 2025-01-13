@@ -22,7 +22,7 @@ import "./interfaces/IPyth.sol";
  without either introducing free (or cheap) optionality to cause cancellations, and without large
  sacrifices to the UX / risk of the traders (e.g. blocking all actions, or penalizing failures too much).
  */
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketDelayedExecution
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketDelayedExecution
 contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 
@@ -201,7 +201,7 @@ contract PerpsV2MarketDelayedExecution is IPerpsV2MarketDelayedExecution, PerpsV
     }
 
     /*
-     * The current base price, reverting if it is invalid, or if system or synth is suspended.
+     * The current base price, reverting if it is invalid, or if system or pynth is suspended.
      */
     function _offchainAssetPriceRequireSystemChecks(uint maxAge) internal returns (uint price, uint publishTime) {
         // Onchain oracle asset price

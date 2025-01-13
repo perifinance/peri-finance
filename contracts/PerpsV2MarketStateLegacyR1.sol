@@ -19,7 +19,7 @@ import "./AddressSetLib.sol";
  PerpsV2MarketState ---(consumes)--> PerpsV2MarketStateLegacyR1 
  */
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketStateLegacyR1
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketStateLegacyR1
 contract PerpsV2MarketStateLegacyR1 is Owned, StateShared, IPerpsV2MarketBaseTypesLegacyR1 {
     using AddressSetLib for AddressSetLib.AddressSet;
 

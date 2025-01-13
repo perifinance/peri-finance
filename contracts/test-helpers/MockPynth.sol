@@ -84,7 +84,7 @@ contract MockPynth is ExternStateToken {
 
     /**
      * @notice _transferToFeeAddress function
-     * non-pUSD synths are exchanged into pUSD via synthInitiatedExchange
+     * non-pUSD pynths are exchanged into pUSD via pynthInitiatedExchange
      * notify feePool to record amount as fee paid to feePool */
     function _transferToFeeAddress(address to, uint value) internal returns (bool) {
         uint amountInUSD;

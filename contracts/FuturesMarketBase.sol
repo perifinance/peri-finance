@@ -77,7 +77,7 @@ interface IFuturesMarketManagerInternal {
     function payFee(uint amount) external;
 }
 
-// https://docs.synthetix.io/contracts/source/contracts/FuturesMarket
+// https://docs.periFinance.io/contracts/source/contracts/FuturesMarket
 contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseTypes {
     /* ========== LIBRARIES ========== */
 
@@ -623,7 +623,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
      */
     function assetPrice() public view returns (uint price, bool invalid) {
         (price, invalid) = _exchangeCircuitBreaker().rateWithInvalid(baseAsset);
-        // Ensure we catch uninitialised rates or suspended state / synth
+        // Ensure we catch uninitialised rates or suspended state / pynth
         invalid = invalid || price == 0 || _systemStatus().pynthSuspended(baseAsset);
         return (price, invalid);
     }
@@ -633,15 +633,15 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
     /* ---------- Market Operations ---------- */
 
     /*
-     * The current base price, reverting if it is invalid, or if system or synth is suspended.
+     * The current base price, reverting if it is invalid, or if system or pynth is suspended.
      * This is mutative because the circuit breaker stores the last price on every invocation.
      */
     function _assetPriceRequireSystemChecks() internal returns (uint) {
         // check that futures market isn't suspended, revert with appropriate message
         _systemStatus().requireFuturesMarketActive(marketKey); // asset and market may be different
-        // check that synth is active, and wasn't suspended, revert with appropriate message
+        // check that pynth is active, and wasn't suspended, revert with appropriate message
         _systemStatus().requirePynthActive(baseAsset);
-        // check if circuit breaker if price is within deviation tolerance and system & synth is active
+        // check if circuit breaker if price is within deviation tolerance and system & pynth is active
         // note: rateWithBreakCircuit (mutative) is used here instead of rateWithInvalid (view). This is
         //  despite reverting immediately after if circuit is broken, which may seem silly.
         //  This is in order to persist last-rate in exchangeCircuitBreaker in the happy case
@@ -697,7 +697,7 @@ contract FuturesMarketBase is MixinFuturesMarketSettings, IFuturesMarketBaseType
         debt. This is needed for keeping track of the _marketDebt() in an efficient manner to allow O(1) marketDebt
         calculation in _marketDebt().
 
-        Explanation of the full market debt calculation from the SIP https://sips.synthetix.io/sips/sip-80/:
+        Explanation of the full market debt calculation from the SIP https://sips.periFinance.io/sips/sip-80/:
 
         The overall market debt is the sum of the remaining margin in all positions. The intuition is that
         the debt of a single position is the value withdrawn upon closing that position.

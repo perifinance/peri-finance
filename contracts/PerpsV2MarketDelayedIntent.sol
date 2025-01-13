@@ -20,7 +20,7 @@ import "./interfaces/IPerpsV2MarketBaseTypes.sol";
  without either introducing free (or cheap) optionality to cause cancellations, and without large
  sacrifices to the UX / risk of the traders (e.g. blocking all actions, or penalizing failures too much).
  */
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketDelayedIntent
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketDelayedIntent
 contract PerpsV2MarketDelayedIntent is IPerpsV2MarketDelayedIntent, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 

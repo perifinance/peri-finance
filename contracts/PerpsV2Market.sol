@@ -92,7 +92,7 @@ import "./interfaces/IPerpsV2Market.sol";
  *     - the account being managed was not liquidated in the same transaction;
  */
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2Market
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2Market
 contract PerpsV2Market is IPerpsV2Market, PerpsV2MarketProxyable {
     /* ========== CONSTRUCTOR ========== */
 

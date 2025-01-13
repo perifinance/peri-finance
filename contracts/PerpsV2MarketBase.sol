@@ -33,7 +33,7 @@ interface IFuturesMarketManagerInternal {
     function isEndorsed(address account) external view returns (bool);
 }
 
-// https://docs.synthetix.io/contracts/source/contracts/PerpsV2MarketBase
+// https://docs.periFinance.io/contracts/source/contracts/PerpsV2MarketBase
 contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketBaseTypes {
     /* ========== LIBRARIES ========== */
 
@@ -598,7 +598,7 @@ contract PerpsV2MarketBase is Owned, MixinPerpsV2MarketSettings, IPerpsV2MarketB
      */
     function _assetPrice() internal view returns (uint price, bool invalid) {
         (price, invalid) = _exchangeRates().rateAndInvalid(_baseAsset());
-        // Ensure we catch uninitialised rates or suspended state / synth
+        // Ensure we catch uninitialised rates or suspended state / pynth
         invalid = invalid || price == 0 || _systemStatus().pynthSuspended(_baseAsset());
         return (price, invalid);
     }

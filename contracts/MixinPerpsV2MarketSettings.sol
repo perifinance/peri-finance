@@ -6,7 +6,7 @@ import "./MixinResolver.sol";
 // Internal references
 import "./interfaces/IFlexibleStorage.sol";
 
-// https://docs.synthetix.io/contracts/source/contracts/MixinPerpsV2MarketSettings
+// https://docs.periFinance.io/contracts/source/contracts/MixinPerpsV2MarketSettings
 contract MixinPerpsV2MarketSettings is MixinResolver {
     /* ========== CONSTANTS ========== */
 
