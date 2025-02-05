@@ -158,6 +158,9 @@ const constants = {
 	DEPLOYMENT_FILENAME: 'deployment.json',
 	VERSIONS_FILENAME: 'versions.json',
 	FEEDS_FILENAME: 'feeds.json',
+	OFFCHAIN_FEEDS_FILENAME: 'offchain-feeds.json',
+	FUTURES_MARKETS_FILENAME: 'futures-markets.json',
+	PERPS_V2_MARKETS_FILENAME: 'perpsv2-markets.json',
 
 	AST_FILENAME: 'asts.json',
 
@@ -782,6 +785,26 @@ const getFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) =>
 	}, {});
 };
 
+
+const getOffchainFeeds = ({ network, path, fs, deploymentPath, useOvm = false } = {}) => {
+	if (!deploymentPath && (!path || !fs)) {
+		return data[getFolderNameForNetwork({ network, useOvm })].offchainFeeds;
+	} else {
+		const pathToFeeds = deploymentPath
+			? path.join(deploymentPath, constants.OFFCHAIN_FEEDS_FILENAME)
+			: getPathToNetwork({
+					network,
+					path,
+					useOvm,
+					file: constants.OFFCHAIN_FEEDS_FILENAME,
+			  });
+		if (!fs.existsSync(pathToFeeds)) {
+			throw Error(`Cannot find off-chain feeds file.`);
+		}
+		return JSON.parse(fs.readFileSync(pathToFeeds));
+	}
+};
+
 /**
  * Retrieve ths list of pynths for the network - returning their names, assets underlying, category, sign, description, and
  * optional index and inverse properties
@@ -849,6 +872,205 @@ const getPynths = ({
 	});
 };
 
+
+const getFuturesMarkets = ({
+	network = 'mainnet',
+	useOvm = false,
+	path,
+	fs,
+	deploymentPath,
+} = {}) => {
+	let futuresMarkets;
+	if (!deploymentPath && (!path || !fs)) {
+		futuresMarkets = data[getFolderNameForNetwork({ network, useOvm })].futuresMarkets;
+	} else {
+		const pathToFuturesMarketsList = deploymentPath
+			? path.join(deploymentPath, constants.FUTURES_MARKETS_FILENAME)
+			: getPathToNetwork({
+					network,
+					path,
+					useOvm,
+					file: constants.FUTURES_MARKETS_FILENAME,
+			  });
+		if (!fs.existsSync(pathToFuturesMarketsList)) {
+			futuresMarkets = [];
+		} else {
+			futuresMarkets = JSON.parse(fs.readFileSync(pathToFuturesMarketsList)) || [];
+		}
+	}
+
+	return futuresMarkets.map(futuresMarket => {
+		/**
+		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
+		 * Unfortunately due to some historical reasons 'pBTC', 'pETH' and 'sLINK' does not follow this format
+		 * We adjust for that here.
+		 */
+		const marketsWithIncorrectAssetKey = ['pBTC', 'pETH', 'sLINK'];
+		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(futuresMarket.asset);
+		const assetKey = assetKeyNeedsAdjustment ? futuresMarket.asset.slice(1) : futuresMarket.asset;
+		// mixin the asset details
+		return Object.assign({}, assets[assetKey], futuresMarket);
+	});
+};
+
+const getPerpsMarkets = ({
+	network = 'mainnet',
+	useOvm = false,
+	path,
+	fs,
+	deploymentPath,
+} = {}) => {
+	let perpsMarkets;
+
+	if (!deploymentPath && (!path || !fs)) {
+		perpsMarkets = data[getFolderNameForNetwork({ network, useOvm })].perpsv2Markets;
+	} else {
+		const pathToPerpsMarketsList = deploymentPath
+			? path.join(deploymentPath, constants.PERPS_V2_MARKETS_FILENAME)
+			: getPathToNetwork({
+					network,
+					path,
+					useOvm,
+					file: constants.PERPS_V2_MARKETS_FILENAME,
+			  });
+
+		if (!fs.existsSync(pathToPerpsMarketsList)) {
+			perpsMarkets = [];
+		} else {
+			perpsMarkets = JSON.parse(fs.readFileSync(pathToPerpsMarketsList)) || [];
+		}
+	}
+	return perpsMarkets.map(perpsMarket => {
+		/**
+		 * We expect the asset key to not start with an 's'. ie. AVAX rather than sAVAX
+		 * Unfortunately due to some historical reasons 'pBTC' and 'pETH' does not follow this format
+		 * We adjust for that here.
+		 */
+		const marketsWithIncorrectAssetKey = ['pBTC', 'pETH'];
+		const assetKeyNeedsAdjustment = marketsWithIncorrectAssetKey.includes(perpsMarket.asset);
+		const assetKey = assetKeyNeedsAdjustment ? perpsMarket.asset.slice(1) : perpsMarket.asset;
+		// mixin the asset details
+		return Object.assign({}, assets[assetKey], perpsMarket);
+	});
+};
+
+const getPerpsV2ProxiedMarkets = ({ network = 'mainnet', fs, deploymentPath, path }) => {
+	const _analyzeAndIncludePerpsV2 = (target, targetData, sourceData, PerpsV2Proxied) => {
+		const proxyPrefix = 'PerpsV2Proxy';
+		const marketPrefix = 'PerpsV2Market';
+		const excludedContracts = ['PerpsV2MarketSettings', 'PerpsV2MarketData', 'PerpsV2ExchangeRate'];
+		const excludedLegacyContracts = ['PerpsV2DelayedOrder', 'PerpsV2OffchainDelayedOrder'];
+		const prefixes = [
+			'PerpsV2MarketViews',
+			'PerpsV2DelayedIntent',
+			'PerpsV2DelayedExecution',
+			'PerpsV2MarketLiquidate',
+		];
+
+		if (
+			excludedContracts.includes(target) ||
+			target.startsWith('PerpsV2MarketState') ||
+			excludedLegacyContracts.some(prefix => target.startsWith(prefix))
+		) {
+			// Markets helper or Market state. Do nothing
+			return;
+		}
+
+		// If is the proxy, get the address. Initialize object if not done yet
+		if (target.startsWith(proxyPrefix)) {
+			// get name
+			const marketName = target.slice(proxyPrefix.length);
+			if (!PerpsV2Proxied[marketName]) {
+				PerpsV2Proxied[marketName] = {};
+				PerpsV2Proxied[marketName].abi = [];
+			}
+			// get address
+			PerpsV2Proxied[marketName].address = targetData.address;
+		} else {
+			// Not proxy, is one of the components. First try with the long contract names because main component prefix is included in others
+			let nameFound = false;
+			let marketName;
+
+			// Identify the market name (after the prefix)
+			for (const prefix of prefixes) {
+				if (target.startsWith(prefix)) {
+					// get name
+					marketName = target.slice(prefix.length);
+					nameFound = true;
+				}
+			}
+
+			// if not found one the previous step, it should be PerpsV2MarketXXXXX
+			if (!nameFound) {
+				if (target.startsWith(marketPrefix)) {
+					// get name
+					marketName = target.slice(marketPrefix.length);
+					nameFound = true;
+				}
+			}
+
+			if (nameFound) {
+				// Initialize if not done yet
+				if (!PerpsV2Proxied[marketName]) {
+					PerpsV2Proxied[marketName] = {};
+					PerpsV2Proxied[marketName].abi = [];
+				}
+				// add fragments to abi
+				_consolidateAbi(sourceData.abi, PerpsV2Proxied[marketName].abi);
+			}
+		}
+	};
+
+	const _consolidateAbi = (currentAbi, consolidatedAbi) => {
+		for (const abiFragment of currentAbi) {
+			if (
+				!consolidatedAbi.find(
+					f =>
+						f.type === abiFragment.type && f.name && abiFragment.name && f.name === abiFragment.name
+				)
+			) {
+				if (abiFragment.type !== 'constructor') {
+					// don't push constructors to the consolidated abi
+					consolidatedAbi.push(abiFragment);
+				}
+			}
+		}
+	};
+
+	const deploymentData = loadDeploymentFile({ network, useOvm: false, path, fs, deploymentPath });
+
+	const targets = Object.keys(deploymentData.targets);
+
+	const PerpsV2Proxied = {};
+
+	for (const target of targets) {
+		if (!target.startsWith('PerpsV2')) {
+			continue;
+		}
+		const targetData = getTarget({
+			contract: target,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		const sourceData = getSource({
+			contract: targetData.source,
+			network,
+			useOvm: false,
+			path,
+			fs,
+			deploymentPath,
+		});
+
+		_analyzeAndIncludePerpsV2(target, targetData, sourceData, PerpsV2Proxied);
+	}
+
+	return PerpsV2Proxied;
+};
+
 /**
  * Retrieve the list of staking rewards for the network - returning this names, stakingToken, and rewardToken
  */
@@ -909,7 +1131,7 @@ const getShortingRewards = ({
  * Retrieve the list of system user addresses
  */
 const getUsers = ({ network = 'mainnet', user, useOvm = false } = {}) => {
-	const testnetOwner = '0x166220468aff631290b7E1Ddff7F45b052De8324';
+	const testnetOwner = '0x024ef21FbD719b52672C07DE208e157330C4E2fE';
 	const base = {
 		owner: testnetOwner,
 		deployer: testnetOwner,
@@ -1068,8 +1290,12 @@ const wrap = ({ network, deploymentPath, fs, path, useOvm = false }) =>
 		'getStakingRewards',
 		'getShortingRewards',
 		'getFeeds',
+		'getOffchainFeeds',
 		'getPynths',
 		'getTarget',
+		'getFuturesMarkets',
+		'getPerpsMarkets',
+		'getPerpsV2ProxiedMarkets',
 		'getTokens',
 		'getUsers',
 		'getVersions',
@@ -1092,7 +1318,11 @@ module.exports = {
 	getShortingRewards,
 	getSuspensionReasons,
 	getFeeds,
+	getOffchainFeeds,
 	getPynths,
+	getFuturesMarkets,
+	getPerpsMarkets,
+	getPerpsV2ProxiedMarkets,
 	getTarget,
 	getTokens,
 	getUsers,

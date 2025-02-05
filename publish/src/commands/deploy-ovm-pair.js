@@ -23,7 +23,7 @@ const deployOvmPair = async ({ l1ProviderUrl, l2ProviderUrl, dataProviderUrl }) 
 	// Private Key: 0x5b1c2653250e5c580dcb4e51c2944455e144c57ebd6a0645bd359d2e69ca0f0c
 	// Account #4: 0x640e7cc27b750144ed08ba09515f3416a988b6a3 (10000 ETH)
 	// Private Key: 0xea8b000efb33c49d819e8d6452f681eed55cdf7de47d655887fc0e318906f2e7
-	const privateKey = '0xea8b000efb33c49d819e8d6452f681eed55cdf7de47d655887fc0e318906f2e7';
+	const privateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
 	await deployInstance({ useOvm: false, privateKey, l1ProviderUrl, l2ProviderUrl });
 	await deployInstance({ useOvm: true, privateKey, l1ProviderUrl, l2ProviderUrl });

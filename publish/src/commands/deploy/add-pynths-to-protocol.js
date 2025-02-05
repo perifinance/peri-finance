@@ -14,7 +14,7 @@ module.exports = async ({ addressOf, deployer, runStep, pynthsToAdd }) => {
 	const filteredPynths = [];
 	const seen = new Set();
 	for (const pynth of pynthsToAdd) {
-		const issuerPynthAddress = await Issuer.pynths(pynth.currencyKeyInBytes);
+		const issuerPynthAddress = await Issuer.methods.pynths(pynth.currencyKeyInBytes).call();
 		const currentPynthAddress = addressOf(pynth.pynth);
 		if (issuerPynthAddress === currentPynthAddress) {
 			console.log(gray(`${currentPynthAddress} requires no action`));

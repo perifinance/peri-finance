@@ -54,9 +54,10 @@ const implementationConfigurations = [
 ];
 
 const getFunctionSignatures = (instance, excludedFunctions, contractName = '') => {
-	const contractInterface = instance.abi
-		? new ethers.utils.Interface(instance.abi)
-		: instance.interface;
+	const abi = instance.options.jsonInterface;
+	const contractInterface = abi
+		? new ethers.utils.Interface(abi)
+		: abi
 
 	const signatures = [];
 	const funcNames = Object.keys(contractInterface.functions);
@@ -66,7 +67,7 @@ const getFunctionSignatures = (instance, excludedFunctions, contractName = '') =
 			functionName: contractInterface.functions[funcName].name,
 			stateMutability: contractInterface.functions[funcName].stateMutability,
 			isView: contractInterface.functions[funcName].stateMutability === 'view',
-			contractAddress: instance.address,
+			contractAddress: instance.options.address,
 			contractName,
 		};
 		signatures.push(signature);
@@ -210,8 +211,8 @@ const deployMarketImplementations = async ({
 	marketProxy,
 	marketState,
 }) => {
-	const marketStateAddress = marketState.target.address;
-	const marketProxyAddress = marketProxy.target.address;
+	const marketStateAddress = marketState.target.options.address;
+	const marketProxyAddress = marketProxy.target.options.address;
 
 	const implementations = [];
 
@@ -257,11 +258,11 @@ const linkToPerpsExchangeRate = async ({
 	implementations,
 	removeExtraAssociatedContracts,
 }) => {
-	const currentAddresses = Array.from(await perpsV2ExchangeRate.associatedContracts()).sort();
+	const currentAddresses = Array.from(await perpsV2ExchangeRate.methods.associatedContracts()).sort();
 
 	const requiredAddresses = implementations
 		.filter(imp => imp.useExchangeRate)
-		.map(item => (item.address ? item.address : item.target.address));
+		.map(item => (item.address ? item.address : item.target.options.address));
 
 	const { toRemove, toAdd } = filteredLists(currentAddresses, requiredAddresses);
 
@@ -289,12 +290,12 @@ const linkToPerpsExchangeRate = async ({
 
 const linkToState = async ({ runStep, perpsV2MarketState, implementations }) => {
 	// get current associated contracts
-	const currentAddresses = Array.from(await perpsV2MarketState.target.associatedContracts());
+	const currentAddresses = Array.from(await perpsV2MarketState.target.methods.associatedContracts());
 
 	// get list of associated contracts from implementations
 	const requiredAddresses = implementations
 		.filter(imp => imp.updateState)
-		.map(item => item.target.address);
+		.map(item => item.target.options.address);
 
 	const { toRemove, toAdd } = filteredLists(currentAddresses, requiredAddresses);
 
@@ -336,9 +337,9 @@ const linkToProxy = async ({ runStep, perpsV2MarketProxy, implementations }) => 
 			contract: implementation.contract,
 			target: implementation.target,
 			read: 'proxy',
-			expected: input => input === perpsV2MarketProxy.target.address,
+			expected: input => input === perpsV2MarketProxy.target.options.address,
 			write: 'setProxy',
-			writeArg: [perpsV2MarketProxy.target.address],
+			writeArg: [perpsV2MarketProxy.target.options.address],
 		});
 	}
 
@@ -356,8 +357,8 @@ const linkToProxy = async ({ runStep, perpsV2MarketProxy, implementations }) => 
 
 	// Remove unknown selectors
 	const filteredFunctionSelectors = filteredFunctions.map(ff => ff.signature);
-	const routesLength = await perpsV2MarketProxy.target.getRoutesLength();
-	const routes = (await perpsV2MarketProxy.target.getRoutesPage(0, routesLength)).map(
+	const routesLength = await perpsV2MarketProxy.target.methods.getRoutesLength().call();
+	const routes = (await perpsV2MarketProxy.target.methods.getRoutesPage(0, routesLength).call()).map(
 		route => route.selector
 	);
 	const { toRemove } = filteredLists(routes, filteredFunctionSelectors);
@@ -386,7 +387,10 @@ const linkToProxy = async ({ runStep, perpsV2MarketProxy, implementations }) => 
 			)
 	);
 
+	
+
 	for (const f of toAdd) {
+
 		await runStep(
 			{
 				contract: perpsV2MarketProxy.contract,
@@ -414,11 +418,12 @@ const linkToMarketManager = async ({
 	someImplementationUpdated,
 }) => {
 	const managerKnownMarkets = Array.from(
-		await futuresMarketManager['allMarkets(bool)'](true)
+		await futuresMarketManager.methods.allMarkets(true).call()
 	).sort();
 	const { toKeep, toAdd, toRemove } = filteredLists(managerKnownMarkets, proxies);
 
 	if (!onlyRemoveUnusedProxies) {
+		console.log(toAdd);
 		if (toAdd.length > 0) {
 			await runStep({
 				contract: 'FuturesMarketManager',
@@ -463,9 +468,10 @@ const rebuildCaches = async ({ deployer, runStep, implementations }) => {
 
 	const requireCache = [];
 	for (const implementation of implementations) {
-		const isCached = await implementation.target.isResolverCached();
+		
+		const isCached = await implementation.target.methods.isResolverCached().call();
 		if (!isCached) {
-			requireCache.push(implementation.target.address);
+			requireCache.push(implementation.target.options.address);
 		}
 	}
 
@@ -510,14 +516,14 @@ const importAddresses = async ({ deployer, runStep, addressOf, limitPromise }) =
 			.filter(([, contract]) => !contract.skipResolver && !contract.library)
 			.map(([name, contract]) => {
 				return limitPromise(async () => {
-					const currentAddress = await AddressResolver.getAddress(toBytes32(name));
+					const currentAddress = await AddressResolver.methods.getAddress(toBytes32(name));
 
 					// only import ext: addresses if they have never been imported before
 					if (currentAddress !== contract.address) {
 						console.log(green(`${name} needs to be imported to the AddressResolver`));
 
 						addressArgs[0].push(toBytes32(name));
-						addressArgs[1].push(contract.address);
+						addressArgs[1].push(contract.options.address);
 					}
 				});
 			})
@@ -695,7 +701,7 @@ async function resumeMarket({
 	const { SystemStatus } = deployer.deployedContracts;
 	const marketKeyBytes = toBytes32(marketKey);
 
-	const isPaused = (await SystemStatus.futuresMarketSuspension(marketKeyBytes)).suspended;
+	const isPaused = (await SystemStatus.methods.futuresMarketSuspension(marketKeyBytes).call()).suspended;
 
 	if (isPaused) {
 		let resume;

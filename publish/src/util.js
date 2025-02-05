@@ -24,6 +24,9 @@ const {
 		SHORTING_REWARDS_FILENAME,
 		VERSIONS_FILENAME,
 		FEEDS_FILENAME,
+		OFFCHAIN_FEEDS_FILENAME,
+		FUTURES_MARKETS_FILENAME,
+		PERPS_V2_MARKETS_FILENAME,
 	},
 	wrap,
 	networkToChainId,
@@ -35,6 +38,7 @@ const {
 	getStakingRewards,
 	getVersions,
 	getFeeds,
+	getOffchainFeeds,
 	getShortingRewards,
 } = wrap({
 	path,
@@ -68,7 +72,7 @@ const ensureDeploymentPath = deploymentPath => {
 };
 
 // Load up all contracts in the flagged source, get their deployed addresses (if any) and compiled sources
-const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
+const loadAndCheckRequiredSources = ({ deploymentPath, network, freshDeploy }) => {
 	console.log(gray(`Loading the list of pynths for ${network.toUpperCase()}...`));
 	const pynthsFile = path.join(deploymentPath, PYNTHS_FILENAME);
 	const pynths = getPynths({ network, deploymentPath });
@@ -91,20 +95,39 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 	const paramsFile = path.join(deploymentPath, PARAMS_FILENAME);
 	const params = JSON.parse(fs.readFileSync(paramsFile));
 
+	console.log(gray(`Loading the list of futures markets on ${network.toUpperCase()}...`));
+	const futuresMarketsFile = path.join(deploymentPath, FUTURES_MARKETS_FILENAME);
+	const futuresMarkets = JSON.parse(fs.readFileSync(futuresMarketsFile));
+
+	console.log(gray(`Loading the list of perpsv2 markets on ${network.toUpperCase()}...`));
+	const perpsv2MarketsFile = path.join(deploymentPath, PERPS_V2_MARKETS_FILENAME);
+	const perpsv2Markets = JSON.parse(fs.readFileSync(perpsv2MarketsFile));
+
 	const versionsFile = path.join(deploymentPath, VERSIONS_FILENAME);
 	const versions = network !== 'local' ? getVersions({ network, deploymentPath }) : {};
 
 	const feedsFile = path.join(deploymentPath, FEEDS_FILENAME);
 	const feeds = getFeeds({ network, deploymentPath });
 
-	console.log(
-		gray(`Loading the list of contracts already deployed for ${network.toUpperCase()}...`)
-	);
+	const offchainFeedsFile = path.join(deploymentPath, OFFCHAIN_FEEDS_FILENAME);
+	const offchainFeeds = getOffchainFeeds({ network, deploymentPath });
+
+
 	const deploymentFile = path.join(deploymentPath, DEPLOYMENT_FILENAME);
+	console.log(
+		gray(
+			`Loading the list of contracts already deployed for ${network.toUpperCase()} in '${deploymentFile}'...`
+		)
+	);
 	if (!fs.existsSync(deploymentFile)) {
 		fs.writeFileSync(deploymentFile, stringify({ targets: {}, sources: {} }));
 	}
 	const deployment = JSON.parse(fs.readFileSync(deploymentFile));
+
+	if (freshDeploy) {
+		deployment.targets = {};
+		deployment.sources = {};
+	}
 
 	const ownerActionsFile = path.join(deploymentPath, OWNER_ACTIONS_FILENAME);
 	if (!fs.existsSync(ownerActionsFile)) {
@@ -120,6 +143,10 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 		pynthsFile,
 		stakingRewards,
 		stakingRewardsFile,
+		futuresMarkets,
+		futuresMarketsFile,
+		perpsv2Markets,
+		perpsv2MarketsFile,
 		deployment,
 		deploymentFile,
 		ownerActions,
@@ -128,6 +155,8 @@ const loadAndCheckRequiredSources = ({ deploymentPath, network }) => {
 		versionsFile,
 		feeds,
 		feedsFile,
+		offchainFeeds,
+		offchainFeedsFile,
 		shortingRewards,
 		shortingRewardsFile,
 	};
@@ -286,7 +315,7 @@ const performTransactionalStep = async ({
 	noPrompt = false,
 }) => {
 	const argumentsForWriteFunction = [].concat(writeArg).filter(entry => entry !== undefined); // reduce to array of args
-	const action = `${contract}.${write}(${argumentsForWriteFunction.map(arg =>
+	const action = `${contract}.methods.${write}(${argumentsForWriteFunction.map(arg =>
 		arg.length === 66 ? w3utils.hexToAscii(arg) : arg
 	)})`;
 
@@ -653,7 +682,7 @@ const assignGasOptions = async ({ tx, provider, gasLimit, maxFeePerGas, maxPrior
 		gasOptions.type = 2;
 		if (gasLimit) gasOptions.gasLimit = parseUnits(gasLimit.toString() || '8000000', 'wei');
 		if (maxFeePerGas)
-			gasOptions.maxFeePerGas = parseUnits(maxFeePerGas.toString() || '100', 'gwei');
+			gasOptions.maxFeePerGas = parseUnits(maxFeePerGas.toString() || '1', 'gwei');
 		if (maxPriorityFeePerGas)
 			gasOptions.maxPriorityFeePerGas = parseUnits(maxPriorityFeePerGas.toString(), 'gwei');
 	}

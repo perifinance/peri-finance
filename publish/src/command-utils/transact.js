@@ -57,7 +57,7 @@ const performTransactionalStep = async ({
 		const argumentsForReadFunction = [].concat(readArg).filter(entry => entry !== undefined); // reduce to array of args
 		let response;
 		try {
-			response = await readTarget[read](...argumentsForReadFunction);
+			response = await readTarget.methods[read](...argumentsForReadFunction).call();
 		} catch (err) {
 			if (generateSolidity || useFork) {
 				console.log(
@@ -99,8 +99,9 @@ const performTransactionalStep = async ({
 	}
 
 	// otherwise check the owner
-	const owner = await target.owner();
-	if (signer && (owner === (await signer.getAddress()) || publiclyCallable)) {
+	const owner = await readTarget.methods.owner().call();
+	if (signer && (owner === signer || (owner === (await signer.getAddress())) || publiclyCallable)) {
+
 		// perform action
 		let hash;
 		let gasUsed = 0;
@@ -111,6 +112,7 @@ const performTransactionalStep = async ({
 			const overrides = await assignGasOptions({
 				tx: {},
 				provider: target.provider,
+				//provider: readTarget.provider,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 			});
@@ -119,13 +121,18 @@ const performTransactionalStep = async ({
 				overrides.nonce = await nonceManager.getNonce();
 			}
 
-			target = target.connect(signer);
+			//readTarget = readTarget.connect(signer);
 
-			const tx = await target[write](...argumentsForWriteFunction, overrides);
-			const receipt = await tx.wait();
+			overrides['from'] = signer;
 
-			hash = receipt.transactionHash;
-			gasUsed = receipt.gasUsed;
+			const tx = await target.methods[write](...argumentsForWriteFunction).send(overrides);
+
+			//const tx = await target.methods[write](...argumentsForWriteFunction, overrides);
+			//const tx = await readTarget.methods[write](...argumentsForWriteFunction, overrides);
+			//const receipt = await tx.wait();
+
+			hash = tx.transactionHash;
+			gasUsed = tx.gasUsed;
 
 			if (nonceManager) {
 				nonceManager.incrementNonce();
@@ -156,11 +163,11 @@ const performTransactionalStep = async ({
 			explorerLinkPrefix,
 		});
 
-		data = target.interface.encodeFunctionData(write, argumentsForWriteFunction);
+		data = readTarget.methods[write](...argumentsForWriteFunction).encodeABI();
 
 		const ownerAction = {
 			key: action,
-			target: target.address,
+			target: readTarget.options.address,
 			action: `${write}(${argumentsForWriteFunction})`,
 			data: data,
 		};
@@ -176,7 +183,7 @@ const performTransactionalStep = async ({
 	} else {
 		// otherwise wait for owner in real time
 		try {
-			data = target.interface.encodeFunctionData(write, argumentsForWriteFunction);
+			data = readTarget.methods[write](...argumentsForWriteFunction).encodeABI();
 			if (encodeABI) {
 				console.log(green(`Tx payload for target address ${target.address} - ${data}`));
 				return { pending: true };
@@ -185,7 +192,7 @@ const performTransactionalStep = async ({
 			await confirmAction(
 				redBright(
 					`Confirm: Invoke ${write}(${argumentsForWriteFunction}) via https://gnosis-safe.io/app/#/safes/${owner}/transactions` +
-						`to recipient ${target.address}` +
+						`to recipient ${target.options.address}` +
 						`with data: ${data}`
 				) + '\nPlease enter Y when the transaction has been mined and not earlier. '
 			);

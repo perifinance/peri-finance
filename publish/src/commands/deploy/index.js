@@ -118,7 +118,22 @@ const deploy = async ({
 
 	const getDeployParameter = getDeployParameterFactory({ params, ignoreCustomParameters });
 
-	const addressOf = c => (c ? c.address : '');
+	const addressOf = c => {
+		if(!c){
+			return '';
+		}
+
+
+		if(c.address && c.address != undefined && c.address != ''){
+			return c.address;
+		}
+
+		if(c.options && c.options.address && c.options.address != undefined){
+			return c.options.address;
+		}
+
+		return '';
+	}
 	const sourceOf = c => (c ? c.source : '');
 
 	// Mark contracts for deployment specified via an argument
@@ -183,7 +198,7 @@ const deploy = async ({
 	// as the OVM node does not support eth_sendTransaction, which inherently relies on
 	// the unlocked accounts on the node.
 	if (network === 'local' && useOvm && !privateKey) {
-		// Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+		// Account #0: 0x640e7cc27b750144ED08bA09515F3416A988B6a3
 		privateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 	}
 
@@ -218,8 +233,8 @@ const deploy = async ({
 
 	const { account } = deployer;
 
-	if (!signer) {
-		signer = deployer.signer;
+	if (!signer || signer == undefined) {
+		signer = deployer.account;
 	}
 
 	nonceManager.provider = deployer.provider;

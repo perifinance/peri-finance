@@ -22,7 +22,8 @@ module.exports = async ({
 
 	const filterTargetsWith = ({ prop }) =>
 		Object.entries(deployer.deployedContracts).filter(([, target]) => {
-			return target.functions[prop] !== undefined;
+			return target.methods[prop] !== undefined;
+			//return target.functions[prop] !== undefined;
 		});
 
 	const contractsWithRebuildableCache = filterTargetsWith({ prop: 'rebuildCache' });
@@ -31,7 +32,7 @@ module.exports = async ({
 
 	// add deployed wrappers
 	try {
-		const wrapperCreatedLogs = await deployer.provider.getLogs({
+		const wrapperCreatedLogs = await deployer.provider.getPastLogs({
 			fromBlock: 0,
 			topics: [ethers.utils.id('WrapperCreated(address,bytes32,address)')],
 		});
@@ -138,7 +139,7 @@ module.exports = async ({
 
 	console.log(gray(`found ${yellow(wrappers.length)} wrapper addresses`));
 
-	wrappers.forEach(([label, target]) => console.log(gray(label, 'at', yellow(target.address))));
+	wrappers.forEach(([label, target]) => console.log(gray(label, 'at', yellow(target.options.address))));
 
 	contractsWithRebuildableCache.push(...wrappers);
 
@@ -147,8 +148,8 @@ module.exports = async ({
 	const resolverAddressesRequired = (
 		await Promise.all(
 			contractsWithRebuildableCache.map(([id, contract]) => {
-				return limitPromise(() => contract.resolverAddressesRequired())
-					.then(result => [contract.address, result])
+				return limitPromise(() => contract.methods.resolverAddressesRequired().call())
+					.then(result => [contract.options.address, result])
 					.catch(() => {
 						console.log(
 							yellow.bold(
@@ -179,7 +180,7 @@ module.exports = async ({
 	// check which resolver addresses are imported
 	const resolvedAddresses = await Promise.all(
 		resolverAddressesRequired.map(id => {
-			return limitPromise(() => AddressResolver.getAddress(id));
+			return limitPromise(() => AddressResolver.methods.getAddress(id).call());
 		})
 	);
 	const isResolverAddressImported = {};
@@ -219,7 +220,7 @@ module.exports = async ({
 			let isCached = true;
 
 			try {
-				isCached = await target.isResolverCached();
+				isCached = await target.methods.isResolverCached().call();
 			} catch (err) {
 				console.log(
 					yellow.bold(`⚠ WARNING: Contract ${name} did not respond to isResolverCached()`)
@@ -227,7 +228,7 @@ module.exports = async ({
 			}
 
 			if (!isCached) {
-				const requiredAddresses = await target.resolverAddressesRequired();
+				const requiredAddresses = await target.methods.resolverAddressesRequired().call();
 
 				const unknownAddress = requiredAddresses.find(id => !isResolverAddressImported[id]);
 				if (unknownAddress) {
@@ -241,7 +242,7 @@ module.exports = async ({
 						)
 					);
 				} else {
-					contractsToRebuildCache.push(target.address);
+					contractsToRebuildCache.push(target.options.address);
 				}
 			}
 		}
@@ -264,7 +265,7 @@ module.exports = async ({
 
 	console.log(gray('Double check all contracts with rebuildCache() are rebuilt...'));
 	for (const [contract, target] of contractsWithRebuildableCache) {
-		if (contractsToRebuildCache.includes(target.address)) {
+		if (contractsToRebuildCache.includes(target.options.address)) {
 			await runStep({
 				gasLimit: 500e3, // higher gas required
 				contract,

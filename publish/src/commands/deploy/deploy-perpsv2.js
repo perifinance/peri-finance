@@ -62,8 +62,10 @@ const deployPerpsV2Generics = async ({
 
 	const futuresMarketManager = await deployer.deployContract({
 		name: 'FuturesMarketManager',
-		source: useOvm ? 'FuturesMarketManager' : 'EmptyFuturesMarketManager',
-		args: useOvm ? [account, addressOf(ReadProxyAddressResolver)] : [],
+		source: 'FuturesMarketManager',
+		args: [account, addressOf(ReadProxyAddressResolver)],
+		// source: useOvm ? 'FuturesMarketManager' : 'EmptyFuturesMarketManager',
+		// args: useOvm ? [account, addressOf(ReadProxyAddressResolver)] : [],
 		deps: ['ReadProxyAddressResolver'],
 	});
 	// contractsRequiringAddressResolver.push({
@@ -131,7 +133,7 @@ const deployPerpsV2Generics = async ({
 		name: 'PerpsV2ExchangeRate',
 		target: perpsV2ExchangeRate,
 	});
-
+	
 	// rebuild caches for recently used contrats
 	await importAddresses({
 		runStep,
@@ -184,7 +186,8 @@ const deployPerpsV2Markets = async ({
 		network,
 	});
 
-	const existingMarketAddresses = await futuresMarketManager['allMarkets(bool)'](true);
+	//const existingMarketAddresses = await futuresMarketManager.methods['allMarkets(bool)'](true);
+	const existingMarketAddresses = await futuresMarketManager.methods.allMarkets(true).call();
 	const existingMarkets = [];
 	for (const marketAddress of existingMarketAddresses) {
 		const market = new ethers.Contract(
@@ -287,7 +290,7 @@ const deployPerpsV2Markets = async ({
 				});
 
 			// Initialize State
-			const stateInitialized = await deployedMarketState.target.initialized();
+			const stateInitialized = await deployedMarketState.target.methods.initialized();
 			if (!stateInitialized) {
 				await runStep({
 					contract: deployedMarketState.contract,
@@ -342,7 +345,7 @@ const deployPerpsV2Markets = async ({
 			await linkToMarketManager({
 				runStep,
 				futuresMarketManager,
-				proxies: [deployedMarketProxy.target.address],
+				proxies: [deployedMarketProxy.target.options.address],
 				someImplementationUpdated,
 			});
 
@@ -426,7 +429,7 @@ const cleanupPerpsV2 = async ({
 		const proxy = getProxyNameAndCurrentAddress({ deployer, marketKey });
 		const implementations = getImplementationNamesAndAddresses({ deployer, marketKey });
 
-		allMarketProxies.push(proxy.address);
+		allMarketProxies.push(proxy.options.address);
 		allImplementations.push(...implementations);
 	}
 

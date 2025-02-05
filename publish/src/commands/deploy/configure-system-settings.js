@@ -53,13 +53,13 @@ module.exports = async ({
 	// Note: this populates rates for new pynths regardless of the addNewPynths flag
 	pynthRates = await Promise.all(
 		pynths.map(({ name }) =>
-			(previousSystemSettings || SystemSettings).exchangeFeeRate(toBytes32(name))
+			(previousSystemSettings || SystemSettings).methods.exchangeFeeRate(toBytes32(name)).call()
 		)
 	);
 
 	const exchangeFeeRates = await getDeployParameter('EXCHANGE_FEE_RATES');
 
-	// update all pynths with 0 current rate, except sUSD
+	// update all pynths with 0 current rate, except pUSD
 	const pynthsRatesToUpdate = pynths
 		.map((pynth, i) =>
 			Object.assign(
@@ -71,7 +71,7 @@ module.exports = async ({
 			)
 		)
 		.filter(({ currentRate }) => currentRate === '0')
-		.filter(({ name }) => name !== 'sUSD'); // SCCP-190: sUSD rate is 0 despite it being in forex category
+		.filter(({ name }) => name !== 'pUSD'); // SCCP-190: pUSD rate is 0 despite it being in forex category
 
 	console.log(gray(`Found ${pynthsRatesToUpdate.length} pynths needs exchange rate pricing`));
 

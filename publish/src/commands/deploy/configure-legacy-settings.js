@@ -38,7 +38,7 @@ module.exports = async ({
 	// now configure everything
 	if (network !== 'mainnet' && SystemStatus) {
 		// On testnet, give the owner of SystemStatus the rights to update status
-		const statusOwner = await SystemStatus.owner();
+		const statusOwner = await SystemStatus.methods.owner().call();
 		await runStep({
 			contract: 'SystemStatus',
 			target: SystemStatus,
@@ -118,9 +118,9 @@ module.exports = async ({
 			contract: 'ExchangeState',
 			target: ExchangeState,
 			read: 'associatedContract',
-			expected: input => input === Exchanger.address,
+			expected: input => input === Exchanger.options.address,
 			write: 'setAssociatedContract',
-			writeArg: Exchanger.address,
+			writeArg: Exchanger.options.address,
 			comment: 'Ensure the Exchanger contract can write to its State',
 		});
 	}

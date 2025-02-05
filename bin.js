@@ -14,6 +14,8 @@ const {
 	getSource,
 	getPynths,
 	getFeeds,
+	getOffchainFeeds,
+	getPerpsV2ProxiedMarkets,
 	getTarget,
 	getTokens,
 	getUsers,
@@ -66,6 +68,65 @@ program
 	.action(async () => {
 		console.log(networks);
 	});
+
+	rogram
+	.command('offchain-feeds')
+	.description('Get the offchain price feeds')
+	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
+	.option('-z, --use-ovm', 'Target deployment for the OVM (Optimism).')
+	.action(async ({ network, useOvm }) => {
+		const offchainFeeds = getOffchainFeeds({ network, useOvm });
+		console.log(util.inspect(offchainFeeds, false, null, true));
+	});
+
+program
+	.command('perpsv2-markets-abi')
+	.description('Get the PerpsV2 consolidated markets abis')
+	.option('-n, --network <value>', 'The network to run off.', x => x.toLowerCase(), 'mainnet')
+	.option(
+		'-d, --deployment-path <value>',
+		'(optional) The deployment file path .',
+		x => x.toLowerCase(),
+		''
+	)
+	.action(async ({ network, deploymentPath }) => {
+		const proxiedMarkets = getPerpsV2ProxiedMarkets({ network, deploymentPath, path });
+		console.log(JSON.stringify(proxiedMarkets, null, 2));
+	});
+
+program
+	.command('releases')
+	.description('Get the list of releases')
+	.option('--unreleased', 'Only retrieve the unreleased ones.')
+	.option('--with-sources', 'Only retrieve ones with files.')
+	.option('--name-only', 'Whether or not to only return the name of the next release')
+	.addOption(
+		new commander.Option('-l, --layer <value>', `The layer(s) corresponding to the release`)
+			.choices(['base', 'ovm', 'both'])
+			.default('both')
+	)
+	.action(async ({ unreleased, withSources, nameOnly, layer }) => {
+		const getSip = sipNumber => releases.sips.find(({ sip }) => sip === sipNumber);
+
+		const results = releases.releases
+			.filter(({ ovm }) =>
+				layer === 'both' ? true : (ovm && layer === 'ovm') || (!ovm && layer === 'base')
+			)
+			.filter(release => release.released !== unreleased)
+			.filter(release => {
+				if (!withSources) return true;
+				return release.sips.some(s => !!getSip(s).sources);
+			});
+
+		if (results.length > 0) {
+			if (nameOnly) {
+				console.log(results[0].name);
+			} else {
+				console.log(JSON.stringify(results, null, 2));
+			}
+		}
+	});
+
 
 program
 	.command('rewards')

@@ -76,6 +76,7 @@ module.exports = async ({
 		}
 	}
 
+
 	try {
 		oldExrates = deployer.getExistingContract({ contract: 'ExchangeRates' });
 	} catch (err) {

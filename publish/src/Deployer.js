@@ -5,7 +5,7 @@ const Web3 = require('web3');
 const RLP = require('rlp');
 const { gray, green, yellow } = require('chalk');
 const fs = require('fs');
-const { stringify, getEtherscanLinkPrefix } = require('./util');
+const { stringify, getExplorerLinkPrefix, assignGasOptions } = require('./util');
 const { getVersions, getUsers } = require('../..');
 
 class Deployer {
@@ -49,6 +49,9 @@ class Deployer {
 
 		// Configure Web3 so we can sign transactions and connect to the network.
 		this.web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+		this.provider = this.web3.eth;
+
+		this.gasPrice = "1";
 
 		if (useFork || (!privateKey && network === 'local')) {
 			this.web3.eth.defaultAccount = getUsers({ network, user: 'owner' }).address; // protocolDAO
@@ -56,8 +59,9 @@ class Deployer {
 			this.web3.eth.accounts.wallet.add(privateKey);
 			this.web3.eth.defaultAccount = this.web3.eth.accounts.wallet[0].address;
 		}
-		this.account = this.web3.eth.defaultAccount;
+		this.account = this.web3.eth.defaultAccount;ß
 		this.deployedContracts = {};
+		this.replacedContracts = {};
 		this._dryRunCounter = 0;
 
 		// Updated Config (Make a copy, don't mutate original)
@@ -112,12 +116,14 @@ class Deployer {
 	async sendDummyTx() {
 		await this.web3.eth.sendTransaction({
 			from: this.account,
-			to: '0x0000000000000000000000000000000000000001',
-			data: '0x0000000000000000000000000000000000000000000000000000000000000000',
-			value: 0,
-			gas: 1000000,
-			gasPrice: this.web3.utils.toWei(this.gasPrice, 'gwei'),
-		});
+				to: '0x0000000000000000000000000000000000000001',
+				data: '0x0000000000000000000000000000000000000000000000000000000000000000',
+				value: 0,
+			},
+			provider = this.provider,
+			maxFeePerGas = this.maxFeePerGas,
+			maxPriorityFeePerGas = this.maxPriorityFeePerGas,
+		);
 
 		if (this.nonceManager) {
 			this.nonceManager.incrementNonce();
@@ -154,54 +160,62 @@ class Deployer {
 			deploy = this.config[name].deploy;
 		}
 
-		const compiled = this.compiled[source];
-
-		if (!compiled) {
-			throw new Error(
-				`No compiled source for: ${name}. The source file is set to ${source}.sol - is that correct?`
-			);
-		}
-
-		if (!this.ignoreSafetyChecks) {
-			const compilerVersion = compiled.metadata.compiler.version;
-			const compiledForOvm = compiled.metadata.compiler.version.includes('ovm');
-			const compilerMismatch = (this.useOvm && !compiledForOvm) || (!this.useOvm && compiledForOvm);
-			if (compilerMismatch) {
-				if (this.useOvm) {
-					throw new Error(
-						`You are deploying on Optimism, but the artifacts were not compiled for Optimism, using solc version ${compilerVersion} instead. Please use the correct compiler and try again.`
-					);
-				} else {
-					throw new Error(
-						`You are deploying on Ethereum, but the artifacts were compiled for Optimism, using solc version ${compilerVersion} instead. Please use the correct compiler and try again.`
-					);
-				}
-			}
-		}
-
 		const existingAddress = this.deployment.targets[name]
 			? this.deployment.targets[name].address
 			: '';
-		const existingABI = this.deployment.sources[source] ? this.deployment.sources[source].abi : '';
-
-		// Any contract after SafeDecimalMath can automatically get linked.
-		// Doing this with bytecode that doesn't require the library is a no-op.
-		let bytecode = compiled.evm.bytecode.object;
-		['SafeDecimalMath', 'Math'].forEach(contractName => {
-			if (this.deployedContracts[contractName]) {
-				bytecode = linker.linkBytecode(bytecode, {
-					[source + '.sol']: {
-						[contractName]: this.deployedContracts[contractName].options.address,
-					},
-				});
-			}
-		});
-
-		compiled.evm.bytecode.linkedObject = bytecode;
+		const existingSource = this.deployment.targets[name]
+			? this.deployment.targets[name].source
+			: '';
+		const existingABI = this.deployment.sources[existingSource]
+			? this.deployment.sources[existingSource].abi
+			: '';
 
 		let deployedContract;
 
 		if (deploy) {
+			// if deploying, do check of compiled sources
+			const compiled = this.compiled[source];
+
+			if (!compiled) {
+				throw new Error(
+					`No compiled source for: ${name}. The source file is set to ${source}.sol - is that correct?`
+				);
+			}
+
+			if (!this.ignoreSafetyChecks) {
+				const compilerVersion = compiled.metadata.compiler.version;
+				const compiledForOvm = compiled.metadata.compiler.version.includes('ovm');
+				const compilerMismatch = (this.useOvm && !compiledForOvm) || (!this.useOvm && compiledForOvm);
+				if (compilerMismatch) {
+					if (this.useOvm) {
+						throw new Error(
+							`You are deploying on Optimism, but the artifacts were not compiled for Optimism, using solc version ${compilerVersion} instead. Please use the correct compiler and try again.`
+						);
+					} else {
+						throw new Error(
+							`You are deploying on Ethereum, but the artifacts were compiled for Optimism, using solc version ${compilerVersion} instead. Please use the correct compiler and try again.`
+						);
+					}
+				}
+			}
+
+			// Any contract after SafeDecimalMath can automatically get linked.
+			// Doing this with bytecode that doesn't require the library is a no-op.
+			let bytecode = compiled.evm.bytecode.object;
+			['SafeDecimalMath', 'Math', 'SystemSettingsLib', 'ExchangeSettlementLib'].forEach(
+				contractName => {					
+					if (this.deployedContracts[contractName]) {
+						bytecode = linker.linkBytecode(bytecode, {
+							[source + '.sol']: {
+								[contractName]: this.deployedContracts[contractName].address? this.deployedContracts[contractName].address : this.deployedContracts[contractName].options.address,
+							},
+						});
+					}
+				}
+			);
+
+			compiled.evm.bytecode.linkedObject = bytecode;
+		
 			console.log(
 				gray(` - Attempting to deploy ${name}${name !== source ? ` (with source ${source})` : ''}`)
 			);
@@ -223,7 +237,7 @@ class Deployer {
 								: undefined,
 					});
 				});
-				deployedContract.options.address = '0x' + this._dryRunCounter.toString().padStart(40, '0');
+				deployedContract.address = '0x' + this._dryRunCounter.toString().padStart(40, '0');
 			} else {
 				// If the contract creation will result in an address that's unsafe for OVM,
 				// increment the tx nonce until its not.
@@ -270,12 +284,21 @@ class Deployer {
 					})
 					.send(await this.sendParameters('contract-deployment'))
 					.on('receipt', receipt => (gasUsed = receipt.gasUsed));
-
+	
 				if (this.nonceManager) {
 					this.nonceManager.incrementNonce();
 				}
 			}
-			deployedContract.options.deployed = true; // indicate a fresh deployment occurred
+			deployedContract.justDeployed = true; // indicate a fresh deployment occurred
+			
+			if (existingAddress && existingABI) {
+				// keep track of replaced contract in case required (useful when doing local )
+				this.replacedContracts[name] = this.makeContract({
+					abi: existingABI,
+					address: existingAddress,
+				});
+				this.replacedContracts[name].source = existingSource;
+			}
 
 			// Deployment in OVM could result in empty bytecode if
 			// the contract's constructor parameters are unsafe.
@@ -295,10 +318,13 @@ class Deployer {
 					} ${gasUsed ? `used ${(gasUsed / 1e6).toFixed(1)}m in gas` : ''}`
 				)
 			);
+			// track the source file for potential usage
+			deployedContract.source = source;
 		} else if (existingAddress && existingABI) {
 			// get ABI from the deployment (not the compiled ABI which may be newer)
 			deployedContract = this.makeContract({ abi: existingABI, address: existingAddress });
 			console.log(gray(` - Reusing instance of ${name} at ${existingAddress}`));
+			deployedContract.source = existingSource;
 		} else {
 			throw new Error(
 				`Settings for contract: ${name} specify an existing contract, but cannot find address or ABI.`
@@ -311,7 +337,7 @@ class Deployer {
 		return deployedContract;
 	}
 
-	async _updateResults({ name, source, deployed, address }) {
+	async _updateResults({ name, source, deployed, address, constructorArgs }) {
 		let timestamp = new Date();
 		let txn = '';
 		if (this.config[name] && !this.config[name].deploy) {
@@ -319,17 +345,19 @@ class Deployer {
 			timestamp = this.deployment.targets[name].timestamp;
 			txn = this.deployment.targets[name].txn;
 		}
+		const { network, useOvm } = this;
 		// now update the deployed contract information
 		this.deployment.targets[name] = {
 			name,
 			address,
 			source,
-			link: `${getEtherscanLinkPrefix(this.network)}/address/${
-				this.deployedContracts[name].options.address
+			link: `${getExplorerLinkPrefix({ network, useOvm })}/address/${
+				this.deployedContracts[name].address
 			}`,
 			timestamp,
 			txn,
 			network: this.network,
+			constructorArgs,
 		};
 		if (deployed) {
 			// remove the output from the metadata (don't dupe the ABI)
@@ -355,21 +383,22 @@ class Deployer {
 		// now update the flags to indicate it no longer needs deployment,
 		// ignoring this step for local, which wants a full deployment by default
 		if (this.configFile && this.network !== 'local' && !this.dryRun) {
-			this.updatedConfig[name] = { ...this.updatedConfig[name], deploy: false };
+			this.updatedConfig[name] = { deploy: false };
 			fs.writeFileSync(this.configFile, stringify(this.updatedConfig));
 		}
 	}
 
 	async deployContract({
 		name,
+		library = false,
+		skipResolver = false,
 		source = name,
 		args = [],
 		deps = [],
 		force = false,
 		dryRun = this.dryRun,
 	}) {
-		const forbiddenAddress = (this.deployedContracts['AddressResolver'] || { options: {} }).options
-			.address;
+		const forbiddenAddress = (this.deployedContracts['AddressResolver'] || {}).address;
 		for (const arg of args) {
 			if (
 				forbiddenAddress &&
@@ -377,64 +406,78 @@ class Deployer {
 				arg.toLowerCase() === forbiddenAddress.toLowerCase()
 			) {
 				throw Error(
-					`new ${name}(): Cannot use the AddressResolver as a constructor arg. Use ReadProxyForResolver instead.`
+					`new ${name}(): Cannot use the AddressResolver as a constructor arg. Use ReadProxyAddressResolver instead.`
 				);
 			}
 		}
 
 		// Deploys contract according to configuration
-		const deployedContract = await this._deploy({ name, source, args, deps, force, dryRun });
+		const deployedContract = await this._deploy({
+			name,
+			source,
+			args,
+			deps,
+			force,
+			dryRun,
+		});
 
 		if (!deployedContract) {
 			return;
 		}
 
+		deployedContract.library = library;
+		deployedContract.skipResolver = skipResolver;
+
 		// Updates `config.json` and `deployment.json`, as well as to
 		// the local variable newContractsDeployed
 		await this._updateResults({
 			name,
-			source,
-			deployed: deployedContract.options.deployed,
+			source: deployedContract.source,
+			deployed: deployedContract.justDeployed,
 			address: deployedContract.options.address,
+			constructorArgs: args,
 		});
 
 		return deployedContract;
-	}
-
-	updateMigrateDone({ name }) {
-		if (this.updatedConfig[name]) {
-			this.updatedConfig[name] = { ...this.updatedConfig[name], migrate: false };
-			fs.writeFileSync(this.configFile, stringify(this.updatedConfig));
-		}
 	}
 
 	makeContract({ abi, address }) {
 		return new this.web3.eth.Contract(abi, address);
 	}
 
-	getExistingContract({ contract }) {
+	getExistingContract({ contract, useDeployment = false }) {
 		let address;
-		try {
-			if (this.network === 'local') {
-				if (!this.deployment.targets[contract]) return undefined;
-				address = this.deployment.targets[contract].address;
-			} else {
-				const contractVersion = getVersions({
-					network: this.network,
-					useOvm: this.useOvm,
-					byContract: true,
-				})[contract];
-				const lastEntry = contractVersion.slice(-1)[0];
-				address = lastEntry.address;
-			}
-		} catch (err) {
-			console.log(gray(`Cannot find existing contract for ${contract}`));
-			return undefined;
+		if (this.network === 'local') {
+			// try find the last replaced contract
+			// Note: this stores it in memory, so only really useful for
+			// local mode as when doing a real deploy we need to handle
+			// broken and resumed deploys
+			({ address } = this.replacedContracts[contract]
+				? this.replacedContracts[contract]
+				: this.deployment.targets[contract]);
+		} else if (useDeployment === true) {
+			address = this.deployment.targets[contract].address;
+		} else {
+			const contractVersion = getVersions({
+				network: this.network,
+				useOvm: this.useOvm,
+				byContract: true,
+			})[contract];
+			const lastEntry = contractVersion.slice(-1)[0];
+			address = lastEntry.address;
 		}
 
 		const { source } = this.deployment.targets[contract];
 		const { abi } = this.deployment.sources[source];
 		return this.makeContract({ abi, address });
+	}
+
+	getExistingAddress({ name }) {
+		const existingAddress = this.deployment.targets[name]
+			? this.deployment.targets[name].address
+			: '';
+
+		return existingAddress;
 	}
 }
 

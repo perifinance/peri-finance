@@ -97,6 +97,7 @@ module.exports = async ({
 		}
 
 		const readProxyForResolver = deployer.getExistingContract({ contract: `ReadProxyAddressResolver` });
+
 		const sourceContract = subclass || 'Pynth';
 		const pynth = await deployer.deployContract({
 			name: `Pynth${currencyKey}`,

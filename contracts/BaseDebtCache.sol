@@ -178,7 +178,7 @@ contract BaseDebtCache is Owned, MixinSystemSettings, IDebtCache {
             require(pynthAddress != address(0), "Pynth does not exist");
             uint supply = IERC20(pynthAddress).totalSupply();
             uint value = supply.multiplyDecimalRound(rates[i]);
-            // uint multiplier = (pynths[i].currencyKey() != sUSD) ? discountRate : SafeDecimalMath.unit();
+            // uint multiplier = (pynths[i].currencyKey() != pUSD) ? discountRate : SafeDecimalMath.unit();
 
             // if (collateralManager().isPynthManaged(key)) {
             //     uint collateralIssued = collateralManager().long(key);

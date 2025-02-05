@@ -130,7 +130,8 @@ module.exports = async ({
 	const crossChainManager = await deployer.deployContract({
 		name: 'CrossChainManager',
 		source: 'CrossChainManager',
-		deps: ['Issuer', 'CrossChainState', 'AddressResolver'],
+		// deps: ['Issuer', 'CrossChainState', 'AddressResolver'],
+		deps: ['CrossChainState', 'AddressResolver'],
 		args: [
 			account,
 			addressOf(readProxyForResolver),

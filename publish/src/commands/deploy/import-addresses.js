@@ -39,6 +39,7 @@ module.exports = async ({
 
 	const newContractsBeingAdded = {};
 
+
 	if (AddressResolver) {
 		const addressArgs = [[], []];
 
@@ -49,14 +50,14 @@ module.exports = async ({
 				.filter(([, contract]) => !contract.skipResolver && !contract.library)
 				.map(([name, contract]) => {
 					return limitPromise(async () => {
-						const currentAddress = await AddressResolver.getAddress(toBytes32(name));
+						const currentAddress = await AddressResolver.methods.getAddress(toBytes32(name));
 
 						// only import ext: addresses if they have never been imported before
-						if (currentAddress !== contract.address) {
+						if (currentAddress !== contract.options.address) {
 							console.log(green(`${name} needs to be imported to the AddressResolver`));
 
 							addressArgs[0].push(toBytes32(name));
-							addressArgs[1].push(contract.address);
+							addressArgs[1].push(contract.options.address);
 
 							const { source, address } = contract;
 							newContractsBeingAdded[contract.address] = { name, source, address, contract };
@@ -68,13 +69,14 @@ module.exports = async ({
 		// SIP-165 For debt pool pynthesis, also add the ext:addresses, use the single network version if they exist in deployments
 		for (const debtPoolContractName of ['AggregatorIssuedPynths', 'AggregatorDebtRatio']) {
 			const resolverName = toBytes32(`ext:${debtPoolContractName}`);
-			const currentAddress = await AddressResolver.getAddress(resolverName);
+			const currentAddress = await AddressResolver.methods.getAddress(resolverName).call();
 			const contract = deployer.deployedContracts[`OneNet${debtPoolContractName}`];
+
 
 			if (currentAddress === ethers.constants.AddressZero && contract) {
 				console.log(yellow('Importing special aggregator', debtPoolContractName));
 				addressArgs[0].push(resolverName);
-				addressArgs[1].push(contract.address);
+				addressArgs[1].push(contract.options.address);
 			}
 		}
 

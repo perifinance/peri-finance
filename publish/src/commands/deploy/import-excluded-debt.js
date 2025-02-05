@@ -17,12 +17,12 @@ module.exports = async ({ deployer, freshDeploy, runStep }) => {
 	const ExistingDebtCache = deployer.getExistingContract({ contract: 'DebtCache' });
 	const ExistingIssuer = deployer.getExistingContract({ contract: 'Issuer' });
 
-	if (ExistingDebtCache.address === DebtCache.address) {
+	if (ExistingDebtCache.options.address === DebtCache.options.address) {
 		console.log(gray(`No excluded debt required to import. Skipping.`));
 		return;
 	}
 
-	const initialized = await DebtCache.isInitialized();
+	const initialized = await DebtCache.methods.isInitialized().call();
 
 	// it shouldn't be initialized, but it can be already initilized
 	// during a weird multi-part release because the "previous" contracts
@@ -48,17 +48,17 @@ module.exports = async ({ deployer, freshDeploy, runStep }) => {
 		}
 	}
 
-	console.log(gray(`Existing DebtCache (source of debts) at: ${white(ExistingDebtCache.address)}`));
+	console.log(gray(`Existing DebtCache (source of debts) at: ${white(ExistingDebtCache.options.address)}`));
 	console.log(
-		gray(`Existing Issuer (source of currencyKeys) at: ${white(ExistingIssuer.address)}`)
+		gray(`Existing Issuer (source of currencyKeys) at: ${white(ExistingIssuer.options.address)}`)
 	);
-	console.log(gray(`New DebtCache at: ${yellow(DebtCache.address)}`));
+	console.log(gray(`New DebtCache at: ${yellow(DebtCache.options.address)}`));
 
 	await runStep({
 		contract: 'DebtCache',
 		target: DebtCache,
 		write: 'importExcludedIssuedDebts',
-		writeArg: [ExistingDebtCache.address, ExistingIssuer.address],
+		writeArg: [ExistingDebtCache.options.address, ExistingIssuer.options.address],
 		comment: `Import excluded-debt records from existing DebtCache`,
 	});
 };
