@@ -672,20 +672,24 @@ function multiplyDecimal(x, y) {
 
 const assignGasOptions = async ({ tx, provider, gasLimit, maxFeePerGas, maxPriorityFeePerGas }) => {
 	// only add EIP-1559 options if the network supports EIP-1559
-	const gasOptions = {};
-
-	let feeData = {};
-	try {
-		feeData = await provider.getFeeData();
-	} catch (_) {} // network does not support the `getFeeData` rpc call
-	if (feeData.maxFeePerGas) {
-		gasOptions.type = 2;
-		if (gasLimit) gasOptions.gasLimit = parseUnits(gasLimit.toString() || '8000000', 'wei');
-		if (maxFeePerGas)
-			gasOptions.maxFeePerGas = parseUnits(maxFeePerGas.toString() || '1', 'gwei');
-		if (maxPriorityFeePerGas)
-			gasOptions.maxPriorityFeePerGas = parseUnits(maxPriorityFeePerGas.toString(), 'gwei');
-	}
+	const gasOptions = {
+		//from: this.account,
+		gas: parseUnits('8000000', 'wei'),
+		gasPrice: parseUnits('1', 'gwei')
+	};
+	// let feeData = {};
+	// try {
+	// 	feeData = await provider.getFeeData();
+	// } catch (_) {} // network does not support the `getFeeData` rpc call
+	// if (feeData.maxFeePerGas) {
+	// 	gasOptions.type = 2;
+	// 	if (gasLimit) gasOptions.gas = parseUnits(gasLimit.toString() || '8000000', 'wei');
+	// 	// if (maxFeePerGas)
+	// 	// 	gasOptions.maxFeePerGas = parseUnits(maxFeePerGas.toString() || '1', 'gwei');
+	// 	// if (maxPriorityFeePerGas)
+	// 	// 	gasOptions.maxPriorityFeePerGas = parseUnits(maxPriorityFeePerGas.toString(), 'gwei');
+	// 	gasOptions.gasPrice = parseUnits(maxFeePerGas.toString() || '1', 'gwei');
+	// }
 
 	return Object.assign(gasOptions, tx);
 };

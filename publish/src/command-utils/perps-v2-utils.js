@@ -407,6 +407,7 @@ const linkToProxy = async ({ runStep, perpsV2MarketProxy, implementations }) => 
 			},
 			overrides
 		);
+		console.log(green(`Added route to ${f.contractName}.${f.functionName}`));
 	}
 };
 
@@ -672,7 +673,7 @@ async function pauseMarket({ runStep, deployer, marketKey, generateSolidity }) {
 	const { SystemStatus } = deployer.deployedContracts;
 	const marketKeyBytes = toBytes32(marketKey);
 
-	const isPaused = (await SystemStatus.futuresMarketSuspension(marketKeyBytes)).suspended;
+	const isPaused = (await SystemStatus.methods.futuresMarketSuspension(marketKeyBytes).call()).suspended;
 
 	if (!isPaused) {
 		await runStep({

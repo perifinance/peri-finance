@@ -1,5 +1,14 @@
 {
+	"SystemSettings": {
+		"deploy": false
+	},
+	"PeriFinanceBridgeToOptimism": {
+		"deploy": false
+	},
 	"AddressResolver": {
+		"deploy": false
+	},
+	"ReadProxyAddressResolver": {
 		"deploy": false
 	},
 	"CollateralManager": {
@@ -26,28 +35,16 @@
 	"CollateralStateShort": {
 		"deploy": false
 	},
-	"ReadProxyAddressResolver": {
-		"deploy": false
-	},
-	"DelegateApprovals": {
-		"deploy": false
-	},
-	"DelegateApprovalsEternalStorage": {
-		"deploy": false
-	},
 	"DebtCache": {
 		"deploy": false
 	},
 	"Depot": {
 		"deploy": false
 	},
+	"TradingRewards": {
+		"deploy": false
+	},
 	"EscrowChecker": {
-		"deploy": false
-	},
-	"EtherCollateral": {
-		"deploy": false
-	},
-	"EtherCollateralpUSD": {
 		"deploy": false
 	},
 	"ExchangeRates": {
@@ -71,26 +68,41 @@
 	"FlexibleStorage": {
 		"deploy": false
 	},
+	"DelegateApprovals": {
+		"deploy": false
+	},
+	"DelegateApprovalsEternalStorage": {
+		"deploy": false
+	},
+	"Issuer": {
+		"deploy": false
+	},
 	"EternalStorageLiquidations": {
 		"deploy": false
 	},
 	"Liquidations": {
 		"deploy": false
 	},
-	"RewardsDistribution": {
+	"SupplySchedule": {
 		"deploy": false
 	},
-	"SupplySchedule": {
+	"PeriFinance": {
 		"deploy": false
 	},
 	"PeriFinanceEscrow": {
 		"deploy": false
 	},
-	"PeriFinanceState": {
+	"RewardEscrow": {
 		"deploy": false
 	},
-	"SystemSettings": {
+	"RewardEscrowV2": {
 		"deploy": false
+	},
+	"RewardsDistribution": {
+		"deploy": false
+	},
+	"PeriFinanceState": {
+		"deploy": true
 	},
 	"SystemStatus": {
 		"deploy": false
@@ -104,10 +116,22 @@
 	"PynthpUSD": {
 		"deploy": false
 	},
-	"ProxyERC20": {
+	"PynthpBTC": {
 		"deploy": false
 	},
+	"ProxyERC20": {
+		"deploy": true
+	},
+	"ProxyERC20pUSD": {
+		"deploy": true
+	},
+	"ProxyERC20pBTC": {
+		"deploy": true
+	},
 	"ProxyFeePool": {
+		"deploy": false
+	},
+	"ProxyPeriFinance": {
 		"deploy": false
 	},
 	"SafeDecimalMath": {
@@ -122,19 +146,16 @@
 	"TokenStatepUSD": {
 		"deploy": false
 	},
-	"TradingRewards": {
+	"TokenStatepBTC": {
 		"deploy": false
 	},
-	"RewardEscrow": {
+	"TokenStatepETH": {
 		"deploy": false
 	},
-	"RewardEscrowV2": {
-		"deploy": false
+	"ProxyERC20pETH": {
+		"deploy": true
 	},
-	"ProxyERC20pUSD": {
-		"deploy": false
-	},
-	"BlacklistManager": {
+	"PynthpETH": {
 		"deploy": false
 	},
 	"ExternalTokenStakeManager": {
@@ -143,10 +164,7 @@
 	"StakingState": {
 		"deploy": false
 	},
-	"Issuer": {
-		"deploy": false
-	},
-	"PeriFinance": {
+	"BlacklistManager": {
 		"deploy": false
 	},
 	"BridgeState": {
@@ -161,52 +179,106 @@
 	"CrossChainState": {
 		"deploy": false
 	},
-	"VirtualPynthIssuer": {
+	"MockToken": {
+		"deploy": true
+	},
+	"USDC": {
+		"deploy": true
+	},
+	"DAI": {
+		"deploy": true
+	},
+	"SystemSettingsLib": {
 		"deploy": false
 	},
-	"TokenStatepBTC": {
+	"ExchangeSettlementLib": {
 		"deploy": false
 	},
-	"ProxyERC20pBTC": {
+	"CircuitBreaker": {
 		"deploy": false
 	},
-	"PynthpBTC": {
+	"PeriFinanceDebtShare": {
 		"deploy": false
 	},
-	"TokenStatepETH": {
+	"RewardEscrowV2Storage": {
 		"deploy": false
 	},
-	"ProxyERC20pETH": {
+	"SignedSafeDecimalMath": {
 		"deploy": false
 	},
-	"PynthpETH": {
+	"OneNetAggregatorIssuedPynths": {
 		"deploy": false
 	},
-	"TokenStatepMATIC": {
+	"OneNetAggregatorDebtRatio": {
 		"deploy": false
 	},
-	"ProxyERC20pMATIC": {
+	"ExchangeCircuitBreaker": {
 		"deploy": false
 	},
-	"PynthpMATIC": {
+	"DirectIntegrationManager": {
 		"deploy": false
 	},
-	"TokenStatepLINK": {
+	"FuturesMarketManager": {
 		"deploy": false
 	},
-	"ProxyERC20pLINK": {
+	"PerpsV2MarketData": {
 		"deploy": false
 	},
-	"PynthpLINK": {
+	"PerpsV2MarketSettings": {
 		"deploy": false
 	},
-	"TokenStatepCAKE": {
+	"PerpsV2ExchangeRate": {
 		"deploy": false
 	},
-	"ProxyERC20pCAKE": {
+	"ProxypUSD": {
 		"deploy": false
 	},
-	"PynthpCAKE": {
+	"ProxypBTC": {
+		"deploy": false
+	},
+	"ProxypETH": {
+		"deploy": false
+	},
+	"PerpsV2ProxyETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketStateETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketLiquidateETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedIntentETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedExecutionETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketViewsETHPERP": {
+		"deploy": false
+	},
+	"PerpsV2ProxyBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketStateBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketLiquidateBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedIntentBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2DelayedExecutionBTCPERP": {
+		"deploy": false
+	},
+	"PerpsV2MarketViewsBTCPERP": {
 		"deploy": false
 	}
 }

@@ -189,29 +189,26 @@ const deployPerpsV2Markets = async ({
 	//const existingMarketAddresses = await futuresMarketManager.methods['allMarkets(bool)'](true);
 	const existingMarketAddresses = await futuresMarketManager.methods.allMarkets(true).call();
 	const existingMarkets = [];
-	for (const marketAddress of existingMarketAddresses) {
-		const market = new ethers.Contract(
-			marketAddress,
-			[
+	const abi = [
+		{
+			constant: true,
+			inputs: [],
+			name: 'marketKey',
+			outputs: [
 				{
-					constant: true,
-					inputs: [],
-					name: 'marketKey',
-					outputs: [
-						{
-							internalType: 'bytes32',
-							name: 'key',
-							type: 'bytes32',
-						},
-					],
-					payable: false,
-					stateMutability: 'view',
-					type: 'function',
+					internalType: 'bytes32',
+					name: 'key',
+					type: 'bytes32',
 				},
 			],
-			deployer.provider
-		);
-		existingMarkets.push(await market.marketKey());
+			payable: false,
+			stateMutability: 'view',
+			type: 'function',
+		},
+	];
+	for (const marketAddress of existingMarketAddresses) {
+		const market = new deployer.web3.eth.Contract(abi, marketAddress);
+		existingMarkets.push(await market.methods.marketKey().call());
 	}
 
 	// Grant futures pause/resume ACL to owner

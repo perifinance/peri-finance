@@ -59,7 +59,7 @@ class Deployer {
 			this.web3.eth.accounts.wallet.add(privateKey);
 			this.web3.eth.defaultAccount = this.web3.eth.accounts.wallet[0].address;
 		}
-		this.account = this.web3.eth.defaultAccount;ß
+		this.account = this.web3.eth.defaultAccount;
 		this.deployedContracts = {};
 		this.replacedContracts = {};
 		this._dryRunCounter = 0;
@@ -284,7 +284,7 @@ class Deployer {
 					})
 					.send(await this.sendParameters('contract-deployment'))
 					.on('receipt', receipt => (gasUsed = receipt.gasUsed));
-	
+
 				if (this.nonceManager) {
 					this.nonceManager.incrementNonce();
 				}

@@ -1,0 +1,14 @@
+[
+	{
+		"kind": "pyth",
+		"oracle": "0x5744Cbf430D99456a0A8771208b674F27f8EF0Fb",
+		"asset": "pETH",
+		"feedId": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
+	},
+	{
+		"kind": "pyth",
+		"oracle": "0x5744Cbf430D99456a0A8771208b674F27f8EF0Fb",
+		"asset": "pBTC",
+		"feedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
+	}
+]

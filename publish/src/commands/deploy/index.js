@@ -57,6 +57,10 @@ const { normalizeHardhatNetworkAccountsConfig } = require('hardhat/internal/core
 
 const DEFAULTS = {
 	gasLimit: '8000000',
+	methodCallGasLimit: 250e3, // 250k
+	contractDeploymentGasLimit: 6.9e6,
+//	contractDeploymentGasLimit: 6.9e6, // TODO split out into separate limits for different contracts, Proxys, Pynths, PeriFinance
+// 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot
 	priorityGasPrice: '0.0001',
 	debtSnapshotMaxDeviation: 0.01, // a 1 percent deviation will trigger a snapshot
 	network: 'sepolia',
@@ -70,6 +74,7 @@ const deploy = async ({
 	deploymentPath,
 	dryRun = false,
 	freshDeploy,
+	contractDeploymentGasLimit = DEFAULTS.contractDeploymentGasLimit,
 	gasLimit = DEFAULTS.gasLimit,
 	maxFeePerGas,
 	maxPriorityFeePerGas = DEFAULTS.priorityGasPrice,
@@ -92,6 +97,7 @@ const deploy = async ({
 	runPerpsV2Cleanup = false,
 	perpsV2Markets,
 	stepName = '',
+	methodCallGasLimit = DEFAULTS.methodCallGasLimit
 } = {}) => {
 	ensureNetwork(network);
 	deploymentPath = deploymentPath || getDeploymentPathForNetwork({ network, useOvm });
@@ -214,6 +220,8 @@ const deploy = async ({
 		account: signer ? await signer.getAddress() : null,
 		compiled,
 		config,
+		methodCallGasLimit,
+		contractDeploymentGasLimit,
 		configFile,
 		deployment,
 		deploymentFile,
@@ -237,6 +245,7 @@ const deploy = async ({
 		signer = deployer.account;
 	}
 
+	nonceManager.web3 = deployer.web3;
 	nonceManager.provider = deployer.provider;
 	nonceManager.account = account;
 
@@ -712,6 +721,7 @@ module.exports = {
 			)
 			.action(async (...args) => {
 				try {
+					console.log(args);
 					await deploy(...args);
 				} catch (err) {
 					// show pretty errors for CLI users

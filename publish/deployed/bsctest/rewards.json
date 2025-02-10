@@ -1,7 +1,7 @@
 [
 	{
-		"name": "PeriMockLP",
-		"stakingToken": "0xB28a19ec5a6f4269f47a486f467690Bd3376D203",
+		"name": "PERIUniswapV1",
+		"stakingToken": "PERIUniswapV1",
 		"rewardsToken": "ProxyERC20"
 	}
 ]

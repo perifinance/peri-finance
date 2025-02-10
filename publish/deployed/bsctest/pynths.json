@@ -13,17 +13,5 @@
 		"name": "pETH",
 		"asset": "ETH",
 		"subclass": "MultiCollateralPynth"
-	},
-	{
-		"name": "pMATIC",
-		"asset": "MATIC"
-	},
-	{
-		"name": "pLINK",
-		"asset": "LINK"
-	},
-	{
-		"name": "pCAKE",
-		"asset": "CAKE"
 	}
 ]

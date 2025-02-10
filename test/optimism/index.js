@@ -36,8 +36,8 @@ describe('Layer 2 production tests', () => {
 
 	before('set up signers', () => {
 		// See publish/src/commands/deploy-ovm-pair.js
-		this.ownerAddress = '0x640e7cc27b750144ED08bA09515F3416A988B6a3';
-		this.ownerPrivateKey = '0xea8b000efb33c49d819e8d6452f681eed55cdf7de47d655887fc0e318906f2e7';
+		this.ownerAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+		this.ownerPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 		this.user1Address = '0x5eEaBfDD0F31CeBf32f8Abf22DA451fE46eAc131';
 		this.user1PrivateKey = '0x5b1c2653250e5c580dcb4e51c2944455e144c57ebd6a0645bd359d2e69ca0f0c';
 

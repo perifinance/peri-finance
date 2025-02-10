@@ -30,81 +30,81 @@ module.exports = async ({
 
 	const wrappers = [];
 
-	// add deployed wrappers
-	try {
-		const wrapperCreatedLogs = await deployer.provider.getPastLogs({
-			fromBlock: 0,
-			topics: [ethers.utils.id('WrapperCreated(address,bytes32,address)')],
-		});
+	// // add deployed wrappers
+	// try {
+	// 	const wrapperCreatedLogs = await deployer.provider.getPastLogs({
+	// 		fromBlock: 0,
+	// 		topics: [ethers.utils.id('WrapperCreated(address,bytes32,address)')],
+	// 	});
 
-		for (const rawLog of wrapperCreatedLogs) {
-			const log = WrapperFactory.interface.parseLog(rawLog);
-			wrappers.push([
-				`Wrapper for ${yellow(
-					ethers.utils.parseBytes32String(log.args.currencyKey)
-				)} via token ${yellow(
-					await new ethers.Contract(
-						log.args.token,
-						[
-							{
-								constant: true,
-								inputs: [],
-								name: 'name',
-								outputs: [
-									{
-										type: 'string',
-									},
-								],
-								payable: false,
-								stateMutability: 'view',
-								type: 'function',
-							},
-						],
-						deployer.provider
-					).name()
-				)}`,
-				new ethers.Contract(log.args.wrapperAddress, WrapperFactory.interface, deployer.provider),
-			]); // interface doesn't matter as long as it responds to MixinResolver
-		}
-	} catch (err) {
-		if (/limited to a 10,000 blocks range/.test(err.message)) {
-			console.log(
-				yellow.bold(
-					'Warning: Cannot fetch logs on this network. Known limitation on OVM mainnet - cannot search back greater than 10k blocks'
-				)
-			);
-		} else if (/The largest supported block range is 1000/.test(err.message)) {
-			console.log(
-				yellow.bold(
-					'Warning: Cannot fetch logs on this network. Known limitation on Tenderly Fork - cannot search back greater than 1k blocks'
-				)
-			);
-		} else if (/eth_getLogs is limited to a 10,000 range/.test(err.message)) {
-			console.log(
-				yellow.bold(
-					'Warning: Cannot fetch logs on this network. Known limitation on hh fork - cannot search back greater than 10k blocks'
-				)
-			);
-		} else if (/eth_getLogs, and eth_newFilter are limited to a 10000 range/.test(err.message)) {
-			console.log(
-				yellow.bold(
-					'Warning: Cannot fetch logs on this network. Known limitation on provider - cannot search back greater than 10k blocks'
-				)
-			);
-		} else if (/block range is too wide/.test(err.message)) {
-			console.log(
-				yellow.bold(
-					'Warning: Cannot fetch logs on this network. Known limitation - cannot search back greater than 10k blocks'
-				)
-			);
-		} else if (/Internal server error/.test(err.message)) {
-			console.log(
-				yellow.bold('Warning: Cannot fetch logs on this network. Tenderly limitation...')
-			);
-		} else {
-			throw err;
-		}
-	}
+	// 	for (const rawLog of wrapperCreatedLogs) {
+	// 		const log = WrapperFactory.interface.parseLog(rawLog);
+	// 		wrappers.push([
+	// 			`Wrapper for ${yellow(
+	// 				ethers.utils.parseBytes32String(log.args.currencyKey)
+	// 			)} via token ${yellow(
+	// 				await new ethers.Contract(
+	// 					log.args.token,
+	// 					[
+	// 						{
+	// 							constant: true,
+	// 							inputs: [],
+	// 							name: 'name',
+	// 							outputs: [
+	// 								{
+	// 									type: 'string',
+	// 								},
+	// 							],
+	// 							payable: false,
+	// 							stateMutability: 'view',
+	// 							type: 'function',
+	// 						},
+	// 					],
+	// 					deployer.provider
+	// 				).name()
+	// 			)}`,
+	// 			new ethers.Contract(log.args.wrapperAddress, WrapperFactory.interface, deployer.provider),
+	// 		]); // interface doesn't matter as long as it responds to MixinResolver
+	// 	}
+	// } catch (err) {
+	// 	if (/limited to a 10,000 blocks range/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold(
+	// 				'Warning: Cannot fetch logs on this network. Known limitation on OVM mainnet - cannot search back greater than 10k blocks'
+	// 			)
+	// 		);
+	// 	} else if (/The largest supported block range is 1000/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold(
+	// 				'Warning: Cannot fetch logs on this network. Known limitation on Tenderly Fork - cannot search back greater than 1k blocks'
+	// 			)
+	// 		);
+	// 	} else if (/eth_getLogs is limited to a 10,000 range/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold(
+	// 				'Warning: Cannot fetch logs on this network. Known limitation on hh fork - cannot search back greater than 10k blocks'
+	// 			)
+	// 		);
+	// 	} else if (/eth_getLogs, and eth_newFilter are limited to a 10000 range/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold(
+	// 				'Warning: Cannot fetch logs on this network. Known limitation on provider - cannot search back greater than 10k blocks'
+	// 			)
+	// 		);
+	// 	} else if (/block range is too wide/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold(
+	// 				'Warning: Cannot fetch logs on this network. Known limitation - cannot search back greater than 10k blocks'
+	// 			)
+	// 		);
+	// 	} else if (/Internal server error/.test(err.message)) {
+	// 		console.log(
+	// 			yellow.bold('Warning: Cannot fetch logs on this network. Tenderly limitation...')
+	// 		);
+	// 	} else {
+	// 		throw err;
+	// 	}
+	// }
 
 	// OVM pre-regenesis
 	if (network === 'mainnet' && useOvm) {
