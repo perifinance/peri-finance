@@ -113,7 +113,7 @@
 		"ethers": "5.0.31",
 		"execa": "^4.1.0",
 		"fs-extra": "9.0.1",
-		"hardhat": "^2.1.2",
+		"hardhat": "2.8.3",
 		"hardhat-gas-reporter": "1.0.1",
 		"husky": "^4.3.0",
 		"is-ci": "^2.0.0",
